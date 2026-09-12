@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,7 +68,9 @@ import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.CurioDmReaction
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
@@ -160,6 +163,10 @@ fun DirectMessageScreen(
     var sending by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var loadedOnce by remember { mutableStateOf(false) }
+    // A server push bumps this, which re-runs the delta fetch below. It is a
+    // COUNTER rather than a flag so two pushes in a row are two fetches, and it
+    // is keyed on the thread so opening another conversation starts fresh.
+    var pushed by remember(otherUserId) { mutableStateOf(0) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
@@ -269,57 +276,101 @@ fun DirectMessageScreen(
         }
     }
 
-    // THE LIVE THREAD — what makes RECEIVING instant.
+    // THE THREAD'S DELTA — one small pull, shared by the push and the timer.
     //
-    // The thread used to refresh only when the screen was entered, so a
-    // message that arrived while it was open stayed invisible until the user
-    // backed out and came back. Every tick now asks for just what is NEWER
-    // than the newest message already on screen (a strict `created_at >`
-    // filter — a few hundred bytes), merges it in, keeps the device's copy
-    // current and marks the arrival read. A line the other person sends lands
-    // in front of you while you are looking at the conversation.
-    LaunchedEffect(eligible, token, myUserId, otherUserId) {
-        if (!eligible || token == null || myUserId == null) return@LaunchedEffect
-        while (true) {
-            delay(LIVE_TICK_MS)
-            // Only CONFIRMED messages anchor the window: an optimistic bubble
-            // carries the phone's own clock, and a fast phone would otherwise
-            // push the window past the very messages this poll exists to find.
-            val anchor = messages
-                .filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
-                .maxOfOrNull { it.createdAtMillis }
-                ?: continue
-            val fresh = SocialApi.messagesSince(token, otherUserId, myUserId, anchor)
-                .getOrNull()
-                .orEmpty()
-                .filter { row -> (messages + pending).none { it.id == row.id } }
-            // The receipts ride the same tick, whether or not anything new
-            // arrived: they change when the other side READS, which is a
-            // different moment from when they write.
-            SocialApi.readStamps(token, otherUserId, myUserId).onSuccess { stamps ->
-                if (stamps.isNotEmpty()) {
-                    messages = messages.map { message ->
-                        val at = stamps[message.id] ?: return@map message
-                        if (message.readAtMillis == null || message.readAtMillis < at) {
-                            message.copy(readAtMillis = at)
-                        } else {
-                            message
-                        }
+    // It asks only for what is NEWER than the newest message already on screen
+    // (a strict `created_at >` window, so a pull is a few hundred bytes),
+    // merges it in, keeps the device's copy current and stamps the receipt.
+    suspend fun pullDelta(active: String, me: String) {
+        // Only CONFIRMED messages anchor the window: an optimistic bubble
+        // carries the phone's own clock, and a fast phone would otherwise push
+        // the window past the very messages this pull exists to find.
+        val anchor = messages
+            .filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
+            .maxOfOrNull { it.createdAtMillis }
+            ?: return
+        val fresh = SocialApi.messagesSince(active, otherUserId, me, anchor)
+            .getOrNull()
+            .orEmpty()
+            .filter { row -> (messages + pending).none { it.id == row.id } }
+        // The receipts ride the same pull, whether or not anything new arrived:
+        // they change when the other side READS, which is a different moment
+        // from when they write.
+        SocialApi.readStamps(active, otherUserId, me).onSuccess { stamps ->
+            if (stamps.isNotEmpty()) {
+                messages = messages.map { message ->
+                    val at = stamps[message.id] ?: return@map message
+                    if (message.readAtMillis == null || message.readAtMillis < at) {
+                        message.copy(readAtMillis = at)
+                    } else {
+                        message
                     }
                 }
             }
-            if (fresh.isEmpty()) continue
-            val merged = (messages + fresh)
-                .distinctBy { it.id }
-                .sortedBy { it.createdAtMillis }
-            messages = merged
-            SocialMessageCache.write(context, otherUserId, merged)
-            // An arrival means the other side stopped writing.
-            peerTyping = false
-            if (fresh.any { !it.mine }) {
-                SocialApi.markRead(token, otherUserId, myUserId)
+        }
+        if (fresh.isEmpty()) return
+        val merged = (messages + fresh)
+            .distinctBy { it.id }
+            .sortedBy { it.createdAtMillis }
+        messages = merged
+        SocialMessageCache.write(context, otherUserId, merged)
+        // An arrival means the other side stopped writing.
+        peerTyping = false
+        if (fresh.any { !it.mine }) {
+            SocialApi.markRead(active, otherUserId, me)
+        }
+        SocialApi.reactions(active, merged.map { it.id }).onSuccess { reactions = it }
+    }
+
+    // REALTIME — the server tells this screen when the thread moved, instead of
+    // a timer asking. Two bindings, both SERVER-filtered: their new messages
+    // (INSERT), and my own message being read (UPDATE on a row I sent them).
+    // The subscription is released the moment the screen goes away.
+    DisposableEffect(eligible, token, myUserId, otherUserId) {
+        val active = token
+        val me = myUserId
+        val owner = "dm:$otherUserId"
+        if (eligible && active != null && me != null) {
+            SupabaseRealtime.watch(
+                owner = owner,
+                accessToken = active,
+                watches = listOf(
+                    RealtimeWatch(
+                        table = "dm_messages",
+                        filter = "sender=eq.$otherUserId",
+                        events = listOf("INSERT")
+                    ),
+                    RealtimeWatch(
+                        table = "dm_messages",
+                        filter = "recipient=eq.$otherUserId",
+                        events = listOf("UPDATE")
+                    )
+                )
+            ) {
+                // The push arrives on a socket thread; the counter is Compose
+                // state, so the bump is posted to the composition's own scope.
+                scope.launch { pushed++ }
             }
-            SocialApi.reactions(token, merged.map { it.id }).onSuccess { reactions = it }
+        }
+        onDispose { SupabaseRealtime.unwatch(owner) }
+    }
+
+    // A push means "fetch now". The very first run is skipped (pushed == 0):
+    // entry already loaded the thread, and this effect exists for arrivals.
+    LaunchedEffect(pushed, eligible, token, myUserId, otherUserId) {
+        if (!eligible || token == null || myUserId == null || pushed == 0) return@LaunchedEffect
+        pullDelta(token, myUserId)
+    }
+
+    // THE FALLBACK TIMER. With realtime linked this is only a safety net — a
+    // missed frame, a socket that dropped silently — so it stays deliberately
+    // slow. Without realtime it is the whole mechanism, at the original
+    // cadence, which is why a blocked WebSocket never freezes the thread.
+    LaunchedEffect(eligible, token, myUserId, otherUserId) {
+        if (!eligible || token == null || myUserId == null) return@LaunchedEffect
+        while (true) {
+            delay(if (SupabaseRealtime.isLinked) SAFETY_TICK_MS else LIVE_TICK_MS)
+            pullDelta(token, myUserId)
         }
     }
 
@@ -1138,6 +1189,13 @@ private fun MessageComposer(
  * receipt, so the whole exchange moves at this cadence.
  */
 private const val LIVE_TICK_MS = 1_200L
+
+/**
+ * The safety-net cadence used once realtime is linked: a missed frame or a
+ * socket that died without saying so is still picked up, but the timer is no
+ * longer the thing that makes the thread feel live.
+ */
+private const val SAFETY_TICK_MS = 20_000L
 
 /** The id prefix of a bubble that is sent but not yet confirmed. */
 private const val LOCAL_ID_PREFIX = "local-"

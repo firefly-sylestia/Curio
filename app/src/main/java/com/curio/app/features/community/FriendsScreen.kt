@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +33,9 @@ import com.curio.app.data.supabase.CurioFriend
 import com.curio.app.data.supabase.CurioFriendRequest
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
@@ -97,6 +100,9 @@ fun FriendsScreen(navController: NavController) {
     // person it is about to remove.
     var removing by remember { mutableStateOf<CurioFriend?>(null) }
     var busy by remember { mutableStateOf(false) }
+    // A server push bumps this: a new message or a request that arrived while
+    // the list is open appears immediately instead of on the next tick.
+    var pushed by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
@@ -163,19 +169,66 @@ fun FriendsScreen(navController: NavController) {
         }
     }
 
+    /**
+     * The quiet inbox refresh — shared by a realtime push and the fallback
+     * timer. It never touches the loading state: no spinner, no flicker, just a
+     * new line and a fresh unread badge where there is one.
+     */
+    suspend fun refreshInbox(active: String, me: String) {
+        SocialApi.threads(active, me).onSuccess { if (it != threads) threads = it }
+        SocialApi.requests(active, me).onSuccess { if (it != requests) requests = it }
+        SocialInboxCache.write(context, threads, requests, friends)
+    }
+
     // THE INBOX KEEPS UP WHILE YOU WATCH — the list used to be a snapshot from
     // the moment it composed, so a message (or a request) that arrived while
     // it was open only appeared after leaving the screen and coming back.
-    // This asks for the same three lists on a slow tick and swaps them in
-    // WITHOUT touching the loading state: no spinner, no flicker, just a new
-    // line and a fresh unread badge where there is one.
+    //
+    // Realtime is the mechanism now; this timer is the safety net, and it only
+    // runs at the old fast cadence while the push channel is NOT linked.
     LaunchedEffect(eligible, token, myUserId) {
         if (!eligible || token == null || myUserId == null) return@LaunchedEffect
         while (true) {
-            delay(INBOX_TICK_MS)
-            SocialApi.threads(token, myUserId).onSuccess { if (it != threads) threads = it }
-            SocialApi.requests(token, myUserId).onSuccess { if (it != requests) requests = it }
+            delay(if (SupabaseRealtime.isLinked) INBOX_SAFETY_TICK_MS else INBOX_TICK_MS)
+            refreshInbox(token, myUserId)
         }
+    }
+
+    // REALTIME — three SERVER-filtered bindings: a message addressed to me, a
+    // request waiting on me, and my own request being answered (or cancelled).
+    DisposableEffect(eligible, token, myUserId) {
+        val active = token
+        val me = myUserId
+        val owner = "inbox"
+        if (eligible && active != null && me != null) {
+            SupabaseRealtime.watch(
+                owner = owner,
+                accessToken = active,
+                watches = listOf(
+                    RealtimeWatch(table = "dm_messages", filter = "recipient=eq.$me"),
+                    RealtimeWatch(
+                        table = "friend_requests",
+                        filter = "addressee=eq.$me",
+                        events = listOf("INSERT", "UPDATE")
+                    ),
+                    RealtimeWatch(
+                        table = "friend_requests",
+                        filter = "requester=eq.$me",
+                        events = listOf("UPDATE", "DELETE")
+                    )
+                )
+            ) {
+                scope.launch { pushed++ }
+            }
+        }
+        onDispose { SupabaseRealtime.unwatch(owner) }
+    }
+
+    LaunchedEffect(pushed, eligible, token, myUserId) {
+        if (!eligible || token == null || myUserId == null || pushed == 0) return@LaunchedEffect
+        // A short settle window so a burst of events is ONE refresh.
+        delay(300)
+        refreshInbox(token, myUserId)
     }
 
     // Search runs off the typed text; [SocialApi.searchPeople] ignores anything
@@ -539,3 +592,9 @@ fun FriendsScreen(navController: NavController) {
  * the user is waiting on lives in the thread they will open anyway.
  */
 private const val INBOX_TICK_MS = 5_000L
+
+/**
+ * The safety-net cadence once realtime is linked. The inbox is a list the user
+ * glides past, so a missed frame is worth a slower backstop than the thread's.
+ */
+private const val INBOX_SAFETY_TICK_MS = 30_000L

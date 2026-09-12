@@ -42,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -97,9 +98,12 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.data.supabase.RealtimeWatch
+import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -143,6 +147,10 @@ fun CommunityScreen(navController: NavController) {
     var reporting by remember { mutableStateOf<CommunityCard?>(null) }
     var commentsFor by remember { mutableStateOf<CommunityCard?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    // A server push bumps this; the wall then refreshes QUIETLY (no spinner, no
+    // scroll reset, no offline flag) so a post landing while you read is simply
+    // there the next time you look up.
+    var pushed by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
@@ -182,6 +190,22 @@ fun CommunityScreen(navController: NavController) {
         loading = false
     }
 
+    /**
+     * The background refresh a realtime push triggers: the same read as [load],
+     * but it never touches the loading state, the error, or the offline flag —
+     * a wall that is already on screen must not flash or move because somebody
+     * posted.
+     */
+    suspend fun refreshQuietly() {
+        val active = token ?: return
+        CommunityApi.feed(active, account.session?.userId).onSuccess { fresh ->
+            cards = fresh
+            error = null
+            offlineCopy = false
+            SocialFeedCache.write(context, fresh)
+        }
+    }
+
     LaunchedEffect(eligible, token) {
         if (eligible) {
             // The device's copy FIRST — an offline open is a wall, not a blank
@@ -192,6 +216,34 @@ fun CommunityScreen(navController: NavController) {
         } else {
             cards = emptyList()
         }
+    }
+
+    // REALTIME — the wall is no longer a snapshot from the moment it composed.
+    // The server announces a new (or deleted) card and the wall quietly pulls
+    // the live page again, so a post appears while you are looking at it.
+    DisposableEffect(eligible, token) {
+        val active = token
+        val owner = "wall"
+        if (eligible && active != null) {
+            SupabaseRealtime.watch(
+                owner = owner,
+                accessToken = active,
+                watches = listOf(
+                    RealtimeWatch(table = "community_cards", events = listOf("INSERT", "DELETE"))
+                )
+            ) {
+                scope.launch { pushed++ }
+            }
+        }
+        onDispose { SupabaseRealtime.unwatch(owner) }
+    }
+
+    LaunchedEffect(pushed, eligible, token) {
+        if (!eligible || token == null || pushed == 0) return@LaunchedEffect
+        // One refresh per burst: the push is a hint, and a lively wall would
+        // otherwise rebuild all forty cards once per post.
+        delay(400)
+        refreshQuietly()
     }
 
     Box(

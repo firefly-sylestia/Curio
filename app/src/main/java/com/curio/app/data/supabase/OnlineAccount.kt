@@ -152,6 +152,9 @@ object OnlineAccount {
         // readable by whoever opens the app next, so the whole directory is
         // deleted — not just the newest account's entries.
         SocialCache.clear(context)
+        // Realtime channels are authorised by the token that just went away:
+        // they are dropped here rather than left open against a dead session.
+        SupabaseRealtime.reset()
         // The prefs blobs the older build wrote are dropped as well, so an
         // upgrade cannot leave the previous shape behind either.
         runCatching {

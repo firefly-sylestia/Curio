@@ -1019,6 +1019,49 @@ create policy dm_insert_friends on public.dm_messages
 revoke all on public.member_blocks from anon;
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 5g. realtime — which tables the app may SUBSCRIBE to
+-- ───────────────────────────────────────────────────────────────────────────
+-- Curio's live surfaces (an open conversation, the inbox, the wall) are driven
+-- by Supabase Realtime instead of a timer: the server announces a change and
+-- the screen pulls the delta through the normal REST path. Nothing is trusted
+-- from the frame itself, and postgres_changes is RLS-aware, so a subscriber
+-- still only ever hears about rows it is allowed to read.
+--
+-- A table must be a member of the `supabase_realtime` publication to be
+-- subscribable at all. This is additive and guarded, so re-pasting is safe,
+-- and a project with no realtime publication (or a database that predates it)
+-- simply reports a notice and keeps working — the app polls in that case.
+--
+-- REPLICA IDENTITY FULL on the two tables whose UPDATES matter (a read receipt,
+-- an answered request): a filtered UPDATE subscription is matched against the
+-- OLD row, which only carries the primary key unless the full row is published.
+
+alter table public.dm_messages replica identity full;
+alter table public.friend_requests replica identity full;
+
+do $$
+declare
+    t text;
+begin
+    foreach t in array array['dm_messages', 'friend_requests', 'community_cards'] loop
+        if not exists (
+            select 1 from pg_publication_tables
+             where pubname = 'supabase_realtime'
+               and schemaname = 'public'
+               and tablename = t
+        ) then
+            execute format('alter publication supabase_realtime add table public.%I', t);
+        end if;
+    end loop;
+    raise notice 'PASS  realtime publication covers dm_messages, friend_requests and community_cards';
+exception
+    when undefined_object then
+        raise notice 'PASS  no supabase_realtime publication here — the app falls back to polling';
+    when insufficient_privilege then
+        raise notice 'NOTE  add these tables to the supabase_realtime publication from the dashboard';
+end $$;
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 8. Self-check
 -- ───────────────────────────────────────────────────────────────────────────
 do $$
