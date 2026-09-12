@@ -202,16 +202,6 @@ fun CommunityScreen(navController: NavController) {
                     )
                 }
             }
-            if (!asTab) {
-                item(key = "settings-nav", contentType = "settings-nav") {
-                    SettingsNavRail(
-                        active = null,
-                        onSelect = { navigateToSettingsSection(navController, it) },
-                        navController = navController
-                    )
-                }
-            }
-
             if (!eligible) {
                 item { SettingsSectionHeading("Before you look") }
                 item {
@@ -497,6 +487,11 @@ private fun CommunityCardItem(
     onDelete: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "@${card.authorHandle.removePrefix("@").ifBlank { "curious_soul" }}",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         if (card.caption.isNotBlank()) {
             Text(
                 text = card.caption,

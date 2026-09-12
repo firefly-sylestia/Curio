@@ -17,10 +17,13 @@ import java.time.OffsetDateTime
  */
 data class CurioPerson(
     val userId: String,
-    val displayName: String
+    val displayName: String,
+    val username: String = ""
 ) {
-    /** What to show when the account has no name set. */
-    val label: String get() = displayName.ifBlank { "A curious soul" }
+    /** Stable identity shown everywhere social actions are available. */
+    val handle: String get() = username.trim().removePrefix("@").ifBlank { "curious_soul" }
+    val label: String get() = displayName.trim().takeUnless { it.isBlank() || it.equals("null", true) } ?: "A curious soul"
+    val identityLabel: String get() = "${label} @${handle}"
 }
 
 /** One accepted friendship, with the person on the other side. */
@@ -101,9 +104,9 @@ object SocialApi {
         mapped {
             val text = query.trim()
             if (text.length < 2) return@mapped emptyList()
-            val path = "$PROFILES?select=id,display_name" +
+            val path = "$PROFILES?select=id,display_name,username" +
                 "&online_mode_enabled=is.true&discoverable=is.true" +
-                "&display_name=ilike.*${encode(text)}*" +
+                "&or=(display_name.ilike.*${encode(text)}*,username.ilike.*${encode(text)}*)" +
                 (myUserId?.let { "&id=neq.$it" } ?: "") +
                 "&order=display_name.asc&limit=20"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
@@ -122,6 +125,28 @@ object SocialApi {
     ): Result<Map<String, CurioPerson>> = withContext(Dispatchers.IO) {
         mapped { namesOf(accessToken, ids.toList()) }
     }
+
+    /** Saves a normalized handle; the unique index turns duplicates into a safe failure. */
+    suspend fun updateUsername(accessToken: String, username: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val normalized = username.trim().removePrefix("@").lowercase()
+                require(normalized.matches(Regex("[a-z0-9_]{3,24}"))) {
+                    "Username must be 3–24 characters using letters, numbers, or underscores."
+                }
+                val userId = SupabaseClient.userIdFromAccessToken(accessToken)
+                val body = JSONObject().put("username", normalized)
+                val request = SupabaseClient.requestBuilder(
+                    "$PROFILES?id=eq.$userId",
+                    accessToken
+                )
+                    .patch(body.toString().toRequestBody(jsonMediaType))
+                    .header("Prefer", "return=minimal")
+                    .build()
+                SupabaseClient.executeBody(request)
+                Unit
+            }
+        }
 
     // ── friend requests ──────────────────────────────────────────────────
 
@@ -387,7 +412,11 @@ object SocialApi {
         for (index in 0 until array.length()) {
             val row = array.optJSONObject(index) ?: continue
             val id = row.optString("id").takeIf { it.isNotBlank() } ?: continue
-            people[id] = CurioPerson(id, row.optString("display_name"))
+            people[id] = CurioPerson(
+                userId = id,
+displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEmpty(),
+            username = row.optString("username", "").takeUnless { it == "null" }.orEmpty()
+            )
         }
         return people
     }
@@ -397,7 +426,7 @@ object SocialApi {
         if (ids.isEmpty()) return emptyMap()
         val wanted = ids.filter { it.isNotBlank() }.distinct()
         if (wanted.isEmpty()) return emptyMap()
-        val path = "$PROFILES?select=id,display_name&id=in.(${wanted.joinToString(",")})" +
+        val path = "$PROFILES?select=id,display_name,username&id=in.(${wanted.joinToString(",")})" +
             "&limit=${wanted.size}"
         return runCatching {
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()

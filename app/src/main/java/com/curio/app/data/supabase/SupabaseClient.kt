@@ -134,7 +134,7 @@ object SupabaseClient {
         )
     }
 
-    private fun userIdFromAccessToken(token: String): String {
+    internal fun userIdFromAccessToken(token: String): String {
         val payload = token.split('.').getOrNull(1) ?: error("Invalid Supabase access token")
         val decoded = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
         return JSONObject(String(decoded, Charsets.UTF_8)).getString("sub")

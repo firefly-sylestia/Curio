@@ -24,17 +24,22 @@ create extension if not exists pgcrypto;
 create table if not exists public.profiles (
     id                  uuid primary key references auth.users (id) on delete cascade,
     display_name        text,
+    username            text,
     online_mode_enabled boolean not null default false,
     created_at          timestamptz not null default now(),
     updated_at          timestamptz not null default now()
 );
 
 alter table public.profiles enable row level security;
+alter table public.profiles add column if not exists username text;
+create unique index if not exists profiles_username_unique
+    on public.profiles (lower(username))
+    where username is not null and length(trim(username)) between 3 and 24;
 
 drop policy if exists prof_select_own on public.profiles;
 create policy prof_select_own on public.profiles
     for select to authenticated
-    using (id = auth.uid());
+    using (id = auth.uid() or (online_mode_enabled and discoverable));
 
 drop policy if exists prof_insert_own on public.profiles;
 create policy prof_insert_own on public.profiles
@@ -312,7 +317,7 @@ create policy rep_select_own on public.community_reports
     for select to authenticated
     using (reporter = auth.uid());
 
--- ───────────────────────────────────────────────────────────────────────────
+-- ────────────────────────────────────────────────��──────────────────────────
 -- 5b. profile discoverability
 -- ───────────────────────────────────────────────────────────────────────────
 alter table public.profiles add column if not exists discoverable boolean not null default true;

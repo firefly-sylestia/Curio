@@ -206,14 +206,6 @@ fun FriendsScreen(navController: NavController) {
                     )
                 }
             }
-            item(key = "settings-nav", contentType = "settings-nav") {
-                SettingsNavRail(
-                    active = null,
-                    onSelect = { navigateToSettingsSection(navController, it) },
-                    navController = navController
-                )
-            }
-
             if (!eligible || token == null || myUserId == null) {
                 item { SettingsSectionHeading("Before you start") }
                 item {
@@ -272,7 +264,7 @@ fun FriendsScreen(navController: NavController) {
                     value = query,
                     onValueChange = { query = it },
                     singleLine = true,
-                    label = { Text("Search by name") },
+                    label = { Text("Search by name or @username") },
                     supportingText = {
                         Text(
                             if (searching) "Searching…"
@@ -521,7 +513,7 @@ private fun PersonRow(
         PersonBadge(person.label)
         Spacer(Modifier.width(12.dp))
         Text(
-            text = person.label,
+            text = person.identityLabel,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)

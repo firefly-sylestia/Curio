@@ -49,6 +49,7 @@ object AppPreferences {
 
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
+    private const val KEY_USERNAME = "username"
     private const val KEY_FAVORITE_SONG = "favorite_song"
     // v336 — per-album favorite tracks (heart picks in the album track-list
     // sheet): JSON object album name → JSON array of picked track titles in
@@ -308,6 +309,14 @@ object AppPreferences {
     fun setDisplayName(context: Context, name: String) {
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
         displayNameState = name
+    }
+
+    // ── Social username ─────────────────────────────────────────────
+    fun getUsername(context: Context): String =
+        prefs(context).getString(KEY_USERNAME, null)?.trim()?.removePrefix("@")?.lowercase().orEmpty()
+
+    fun setUsername(context: Context, username: String) {
+        prefs(context).edit().putString(KEY_USERNAME, username.trim().removePrefix("@").lowercase()).apply()
     }
 
     // ── Online Mode ──────────────────────────────────────────────────
@@ -2394,7 +2403,7 @@ object AppPreferences {
     fun isLiveNotificationsEnabled(context: Context): Boolean = true
 
     /**
-     * v23 — whether the Explore now dialog shows its "Show the explore
+     * v23 ��� whether the Explore now dialog shows its "Show the explore
      * bubble" opt-in row. Default OFF (hidden); the Notifications toggle
      * re-shows it as a single-line choice inside the dialog.
      */

@@ -207,7 +207,7 @@ object CurioRoutes {
     const val COMMUNITY = "community"
     // v3xx — the social layer: friend requests + direct messages.
     const val FRIENDS = "friends"
-    const val DIRECT_MESSAGE = "dm/{userId}?handle={handle}"
+    const val DIRECT_MESSAGE = "dm/{userId}"
     // v3xx — one card's own view: the full card, its caption, replies + share.
     const val COMMUNITY_CARD = "community/{cardId}"
     const val SETTINGS_BOOK_COVER = "settings/book-cover"
@@ -254,8 +254,8 @@ object CurioRoutes {
      * One conversation with [userId]. The handle rides along so the thread can
      * show who it is with before any message loads (the id alone is opaque).
      */
-    fun directMessage(userId: String, handle: String) =
-        "dm/$userId?handle=${Uri.encode(handle)}"
+    fun directMessage(userId: String, handle: String = "") =
+        "dm/${Uri.encode(userId)}"
     /** Edit a saved GalleryWall (mood board) entry — preloads + re-saves in place. */
     fun editMoodBoard(entryId: String) = "edit-moodboard/$entryId"
     /**

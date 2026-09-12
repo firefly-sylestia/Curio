@@ -5,6 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.curio.app.data.AppPreferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * The app's ONLINE ACCOUNT state — the single observable source for the
@@ -20,6 +24,7 @@ import com.curio.app.data.AppPreferences
  * and Online Mode stays off until the user turns it on.
  */
 object OnlineAccount {
+    private val recoveryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /** What the account UI renders. */
     data class State(
@@ -56,8 +61,22 @@ object OnlineAccount {
      */
     fun restore(context: Context) {
         if (state.session != null) return
-        val stored = SupabaseSessionStore.get(context)
-        if (stored != null) state = state.copy(session = stored)
+        val stored = SupabaseSessionStore.get(context) ?: return
+        state = state.copy(session = stored, error = null)
+        recoveryScope.launch {
+            SupabaseClient.refreshSession(stored.refreshToken).fold(
+                onSuccess = { refreshed ->
+                    SupabaseSessionStore.save(context, refreshed)
+                    AppPreferences.setOnlineModeEnabled(context, true)
+                    state = state.copy(session = refreshed, busy = false, error = null)
+                },
+                onFailure = {
+                    // Keep the cached session for offline use, but avoid trapping
+                    // the user in a dead token: the next protected call can sign in again.
+                    state = state.copy(busy = false, error = null)
+                }
+            )
+        }
     }
 
     /** Signs in and, on success, turns Online Mode on (the user asked for it). */

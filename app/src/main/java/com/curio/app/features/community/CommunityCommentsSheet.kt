@@ -39,6 +39,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
+import com.curio.app.data.supabase.SocialApi
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import kotlinx.coroutines.launch
@@ -64,7 +65,8 @@ internal fun CommunityCommentsSheet(
     onDismiss: () -> Unit,
     /** Called after a reply is added or removed, so the host can refresh its
      *  comment count. */
-    onChanged: () -> Unit = {}
+    onChanged: () -> Unit = {},
+    onAddFriend: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -147,6 +149,18 @@ internal fun CommunityCommentsSheet(
                 items(replies, key = { it.id }) { reply ->
                     CommunityReplyRow(
                         reply = reply,
+                        onAddFriend = {
+                            if (myUserId != null) {
+                                scope.launch {
+                                    SocialApi.ask(accessToken, reply.authorId, myUserId).fold(
+                                        onSuccess = { error = "Friend request sent" },
+                                        onFailure = { error = it.message ?: "Could not send request" }
+                                    )
+                                }
+                            } else {
+                                onAddFriend(reply.authorId)
+                            }
+                        },
                         onDelete = {
                             scope.launch {
                                 CommunityApi.deleteComment(accessToken, reply.id).fold(
@@ -188,7 +202,10 @@ internal fun CommunityCommentsSheet(
                                 accessToken,
                                 card.id,
                                 text,
-                                AppPreferences.getDisplayName(context)
+                                    AppPreferences.getUsername(context).ifBlank {
+                                        AppPreferences.getDisplayName(context)
+                                    }
+
                             ).fold(
                                 onSuccess = {
                                     text = ""
@@ -219,6 +236,7 @@ internal fun CommunityCommentsSheet(
 @Composable
 internal fun CommunityReplyRow(
     reply: CommunityComment,
+    onAddFriend: () -> Unit,
     onDelete: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -234,11 +252,19 @@ internal fun CommunityReplyRow(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(Modifier.weight(1f))
             if (reply.mine) {
-                Spacer(Modifier.weight(1f))
                 TextButton(onClick = onDelete) {
                     Text(
                         text = "Remove",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = curioDialogActionColor()
+                    )
+                }
+            } else if (reply.authorId.isNotBlank()) {
+                TextButton(onClick = onAddFriend) {
+                    Text(
+                        text = "Add friend",
                         style = MaterialTheme.typography.labelSmall,
                         color = curioDialogActionColor()
                     )
