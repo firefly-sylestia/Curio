@@ -603,10 +603,15 @@ create policy dm_device_keys_select_participant on public.dm_device_keys
   for select to authenticated using (
     user_id = auth.uid() or public.curio_are_friends(auth.uid(), user_id)
   );
+drop policy if exists dm_device_keys_own on public.dm_device_keys;
 create policy dm_device_keys_own on public.dm_device_keys
   for insert to authenticated with check (user_id = auth.uid());
+
+drop policy if exists dm_device_keys_update_own on public.dm_device_keys;
 create policy dm_device_keys_update_own on public.dm_device_keys
   for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists dm_device_keys_delete_own on public.dm_device_keys;
 create policy dm_device_keys_delete_own on public.dm_device_keys
   for delete to authenticated using (user_id = auth.uid());
 
@@ -633,9 +638,9 @@ create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
     or public.curio_are_friends(auth.uid(), recipient)
   );
 
--- ───────────────────────────────────────────────────────────────────────────
+-- ───────────────────────────���───────────────────────────────────────────────
 -- 5e. dm_messages — ciphertext-only writes; legacy body is read-only
--- ───────────────────────────────────────────────────────────────────────────
+-- ────────────────────────────────────���──────────────────────────────────────
 create table if not exists public.dm_messages (
     id         uuid primary key default gen_random_uuid(),
     sender     uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -804,7 +809,7 @@ create policy dm_typing_delete_own on public.dm_typing
 -- artwork), so a reaction is a single small word on the server. A second
 -- reaction from the same person replaces the first — the unique key is what
 -- makes that a guaranteed fact rather than a client convention.
--- ───────────────────────────────────────────────────────────────────────────
+-- ──────────────────────────────────────────────��────────────────────────────
 create table if not exists public.dm_reactions (
     message_id uuid not null references public.dm_messages (id) on delete cascade,
     user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
