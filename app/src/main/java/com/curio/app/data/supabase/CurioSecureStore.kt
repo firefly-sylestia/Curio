@@ -152,6 +152,22 @@ internal object CurioSecureStore {
     }
 
     /**
+     * Clears only login/session values. DM device identity and conversation
+     * keys are deliberately retained so signing out and back in on the same
+     * device does not destroy the ability to decrypt existing conversations.
+     */
+    fun clearSession(context: Context) {
+        runCatching {
+            prefs(context).edit()
+                .remove("access_token")
+                .remove("refresh_token")
+                .remove("user_id")
+                .remove("email")
+                .apply()
+        }
+    }
+
+    /**
      * Stores a device identifier and an RSA identity keypair in the Android
      * Keystore. The private key is non-exportable; only the public key leaves
      * the device.
@@ -220,9 +236,9 @@ internal object CurioSecureStore {
         return generator.generateKeyPair()
     }
 
-    /** Forgets every sealed value AND the key that opened them. */
+    /** Forgets every sealed value AND the session key. DM keys intentionally survive. */
     fun wipe(context: Context) {
-        runCatching { prefs(context).edit().clear().apply() }
+        clearSession(context)
         runCatching { KeyStore.getInstance(KEYSTORE).apply { load(null) }.deleteEntry(KEY_ALIAS) }
     }
 }
