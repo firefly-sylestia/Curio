@@ -122,7 +122,11 @@ data class CurioDirectMessage(
     val body: String,
     val createdAtMillis: Long,
     val readAtMillis: Long?,
-    val mine: Boolean
+    val mine: Boolean,
+    val ciphertext: String? = null,
+    val nonce: String? = null,
+    val encryptionVersion: String? = null,
+    val migrationState: String = "legacy"
 )
 
 /**
@@ -210,7 +214,7 @@ object SocialApi {
     private const val THREAD_LIMIT = 200
 
     /** The columns a conversation read needs — one list, both paths. */
-    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,created_at,read_at"
+    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,ciphertext,nonce,encryption_version,migration_state,created_at,read_at"
 
     /**
      * The public identity columns, in two shapes.
@@ -751,6 +755,10 @@ private const val PERSON_COLUMNS_PRIVACY =
                         id = row.optString("id"),
                         senderId = row.optString("sender"),
                         body = row.optString("body"),
+                        ciphertext = row.optString("ciphertext").takeIf { it.isNotBlank() },
+                        nonce = row.optString("nonce").takeIf { it.isNotBlank() },
+                        encryptionVersion = row.optString("encryption_version").takeIf { it.isNotBlank() },
+                        migrationState = row.optString("migration_state", "legacy"),
                         createdAtMillis = epochMillis(row.optString("created_at")),
                         readAtMillis = row.optString("read_at")
                             .takeIf { it.isNotBlank() }
@@ -762,30 +770,28 @@ private const val PERSON_COLUMNS_PRIVACY =
         }
     }
 
-    /** Sends one text message. Only an accepted friend can be messaged. */
-    suspend fun send(
+    /** Sends ciphertext only. Plaintext is intentionally not accepted by this boundary. */
+    suspend fun sendEncrypted(
         accessToken: String,
         toUserId: String,
-        body: String,
+        ciphertext: String,
+        nonce: String,
+        encryptionVersion: String,
         myUserId: String
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
-            val text = body.trim()
-            if (text.isEmpty()) throw IllegalArgumentException("Write something first.")
-            if (text.length > MAX_MESSAGE_CHARS) {
-                throw IllegalArgumentException(
-                    "Keep it under $MAX_MESSAGE_CHARS characters (it's ${text.length})."
-                )
-            }
-            // v3xx53 — a direct message is NOT filtered. Two friends having a
-            // private conversation write what they like; only the PUBLIC
-            // surfaces (parts of `CommunityApi`, plus usernames, display names
-            // and bios) pass CurioContentFilter. RLS — the two participants,
-            // friends only — is what protects a thread, not a word list.
+            require(ciphertext.isNotBlank() && nonce.isNotBlank()) { "Encrypted message is empty." }
+            require(encryptionVersion == CurioDmCrypto.VERSION) { "Unsupported message encryption version." }
             if (toUserId == myUserId) throw IllegalArgumentException("You can't message yourself.")
             id(toUserId)
             lastMessageAt = throttle(lastMessageAt, WRITE_GAP_MS, "Slow down a moment.")
-            val payload = JSONObject().put("recipient", toUserId).put("body", text)
+            val payload = JSONObject()
+                .put("recipient", toUserId)
+                .put("body", JSONObject.NULL)
+                .put("ciphertext", ciphertext)
+                .put("nonce", nonce)
+                .put("encryption_version", encryptionVersion)
+                .put("migration_state", "encrypted")
             val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
                 .header("Prefer", "return=minimal")
                 .post(payload.toString().toRequestBody(jsonMediaType))
