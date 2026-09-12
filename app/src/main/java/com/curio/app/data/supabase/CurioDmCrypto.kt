@@ -55,8 +55,12 @@ object CurioDmCrypto {
         if (envelope != null) {
             val key = unwrapConversationKey(envelope)
             check(key.size == KEY_BYTES) { "Invalid conversation key." }
-            check(CurioSecureStore.put(context, KEY_PREFIX + conversationId, b64(key))) { "Secure storage unavailable." }
-            return key
+  val stored = CurioSecureStore.put(context, KEY_PREFIX + conversationId, b64(key))
+  if (!stored) {
+  CurioSecureStore.resetDmStorage(context)
+  check(CurioSecureStore.put(context, KEY_PREFIX + conversationId, b64(key))) { "Secure storage unavailable." }
+  }
+  return key
         }
         CurioSecureStore.get(context, KEY_PREFIX + conversationId)?.let { return Base64.decode(it, Base64.NO_WRAP) }
         val key = ByteArray(KEY_BYTES).also(SecureRandom()::nextBytes)

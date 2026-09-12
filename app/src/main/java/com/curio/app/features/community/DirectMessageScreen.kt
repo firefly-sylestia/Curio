@@ -637,7 +637,7 @@ fun DirectMessageScreen(
                 }
 
                 MessageComposer(
-                    modifier = Modifier.windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)),
+                    modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
                     draft = draft,
                     title = fallback,
                     sending = sending,

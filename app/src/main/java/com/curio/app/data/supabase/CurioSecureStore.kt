@@ -41,7 +41,11 @@ internal object CurioSecureStore {
     private const val TAG = "CurioSecureStore"
     private const val KEYSTORE = "AndroidKeyStore"
     private const val KEY_ALIAS = "curio_session_vault"
+    private const val DM_KEY_ALIAS = "curio_dm_vault"
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
+    private const val DM_NAME_PREFIX = "dm-"
+
+    private fun keyFor(name: String): SecretKey = key(if (name.startsWith(DM_NAME_PREFIX)) DM_KEY_ALIAS else KEY_ALIAS)
     private const val GCM_TAG_BITS = 128
 
     /**
@@ -57,14 +61,14 @@ internal object CurioSecureStore {
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     /** The vault's key, created on first use. */
-    private fun key(): SecretKey {
+    private fun key(alias: String = KEY_ALIAS): SecretKey {
         val store = KeyStore.getInstance(KEYSTORE).apply { load(null) }
-        val existing = store.getEntry(KEY_ALIAS, null)
+        val existing = store.getEntry(alias, null)
         if (existing is KeyStore.SecretKeyEntry) return existing.secretKey
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
         generator.init(
             KeyGenParameterSpec.Builder(
-                KEY_ALIAS,
+                alias,
                 KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
             )
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -90,7 +94,7 @@ internal object CurioSecureStore {
         }
         return runCatching {
             val cipher = Cipher.getInstance(TRANSFORMATION)
-                .apply { init(Cipher.ENCRYPT_MODE, key()) }
+                .apply { init(Cipher.ENCRYPT_MODE, keyFor(name)) }
             val iv = Base64.encodeToString(cipher.iv, Base64.NO_WRAP)
             val body = Base64.encodeToString(
                 cipher.doFinal(value.toByteArray(Charsets.UTF_8)),
@@ -114,7 +118,7 @@ internal object CurioSecureStore {
             val iv = Base64.decode(sealed.substring(0, split), Base64.NO_WRAP)
             val body = Base64.decode(sealed.substring(split + 1), Base64.NO_WRAP)
             val cipher = Cipher.getInstance(TRANSFORMATION).apply {
-                init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(GCM_TAG_BITS, iv))
+                init(Cipher.DECRYPT_MODE, keyFor(name), GCMParameterSpec(GCM_TAG_BITS, iv))
             }
             String(cipher.doFinal(body), Charsets.UTF_8)
         }.getOrNull()
@@ -130,8 +134,19 @@ internal object CurioSecureStore {
     fun ensureDeviceId(context: Context): String {
         deviceId(context)?.let { return it }
         val value = java.util.UUID.randomUUID().toString()
-        check(put(context, "dm-device-id", value)) { "Secure storage unavailable." }
+        if (!put(context, "dm-device-id", value)) {
+            resetDmStorage(context)
+            check(put(context, "dm-device-id", value)) { "Secure storage unavailable." }
+        }
         return value
+    }
+
+    /** Clears only recoverable DM material when Android Keystore invalidates it. */
+    fun resetDmStorage(context: Context) {
+        runCatching { prefs(context).edit().remove("dm-device-id").apply() }
+        runCatching {
+            KeyStore.getInstance(KEYSTORE).apply { load(null) }.deleteEntry(DM_KEY_ALIAS)
+        }
     }
 
     fun identityKeyPair(): java.security.KeyPair {
