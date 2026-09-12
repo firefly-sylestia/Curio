@@ -60,6 +60,17 @@ object CurioDmCrypto {
     fun hasConversationKey(context: Context, conversationId: String): Boolean =
         CurioSecureStore.get(context, KEY_PREFIX + conversationId) != null
 
+    /**
+     * Returns the key this device already holds for a conversation.  Reading a
+     * message must never manufacture a replacement key: doing so after app
+     * data is cleared makes the real recovery envelope look stale and causes
+     * subsequent messages to be encrypted with a key the other devices never
+     * had.
+     */
+    private fun storedConversationKey(context: Context, conversationId: String): ByteArray? =
+        CurioSecureStore.get(context, KEY_PREFIX + conversationId)
+            ?.let { Base64.decode(it, Base64.NO_WRAP) }
+
     fun ensureConversationKey(context: Context, conversationId: String, envelope: CurioDmEnvelope? = null): ByteArray {
         if (envelope != null) {
             val key = unwrapConversationKey(envelope)
@@ -71,13 +82,22 @@ object CurioDmCrypto {
   }
   return key
         }
-        CurioSecureStore.get(context, KEY_PREFIX + conversationId)?.let { return Base64.decode(it, Base64.NO_WRAP) }
+        storedConversationKey(context, conversationId)?.let { return it }
         val key = ByteArray(KEY_BYTES).also(SecureRandom()::nextBytes)
         check(CurioSecureStore.put(context, KEY_PREFIX + conversationId, b64(key))) { "Secure storage unavailable." }
         return key
     }
 
     fun conversationKey(context: Context, conversationId: String): ByteArray = ensureConversationKey(context, conversationId)
+
+    /** Installs a server envelope when one exists; absent envelopes stay absent. */
+    fun restoreConversationKey(
+        context: Context,
+        conversationId: String,
+        envelope: CurioDmEnvelope?
+    ) {
+        if (envelope != null) ensureConversationKey(context, conversationId, envelope)
+    }
 
     fun encrypt(context: Context, conversationId: String, plaintext: String): CurioEncryptedMessage {
         val nonce = ByteArray(NONCE_BYTES).also(SecureRandom()::nextBytes)
@@ -91,7 +111,9 @@ object CurioDmCrypto {
         require(encrypted.version == VERSION) { "Unsupported message encryption version." }
         val nonce = Base64.decode(encrypted.nonce, Base64.NO_WRAP)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(ensureConversationKey(context, conversationId), "AES"), GCMParameterSpec(TAG_BITS, nonce))
+        val key = storedConversationKey(context, conversationId)
+            ?: throw IllegalStateException("This device does not have this conversation's key.")
+        cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), GCMParameterSpec(TAG_BITS, nonce))
         cipher.updateAAD(conversationId.toByteArray(Charsets.UTF_8))
         return String(cipher.doFinal(Base64.decode(encrypted.ciphertext, Base64.NO_WRAP)), Charsets.UTF_8)
     }
