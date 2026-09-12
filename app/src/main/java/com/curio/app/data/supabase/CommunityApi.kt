@@ -71,6 +71,7 @@ data class CommunityCardDraft(
 /** One reply under a card. Text only, and it dies with the card. */
 data class CommunityComment(
     val id: String,
+    val authorId: String,
     val authorHandle: String,
     val body: String,
     val createdAtMillis: Long,
@@ -180,6 +181,7 @@ object CommunityApi {
                     add(
                         CommunityComment(
                             id = row.optString("id"),
+                            authorId = row.optString("author"),
                             authorHandle = row.optString("author_handle")
                                 .ifBlank { "A curious soul" },
                             body = row.optString("body"),
