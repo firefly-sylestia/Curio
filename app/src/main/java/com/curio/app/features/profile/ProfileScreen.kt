@@ -1162,7 +1162,7 @@ private fun ProfileDialogs(
                             CurioAccountIdentityCard(email = account.email)
                         } else {
                             Text(
-                                "Sign in to claim a username, carry your portrait into Community and " +
+                                "Sign in to claim a username, carry your portrait into Social and " +
                                     "keep your liked topics in sync.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant

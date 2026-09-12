@@ -213,7 +213,14 @@ object CurioIcons {
     // fontTools against `material_symbols_outlined.ttf`), so no re-subset
     // was needed — never add a name here without checking it first, a
     // missing ligature renders as the literal word instead of an icon.
-    const val Hub             = "hub"                   // connected nodes — the Community wall
+    const val Hub             = "hub"                   // connected nodes — the social wall
+    // v3xx53 — the SOCIAL tab's glyph. `public` is verified present in the
+    // bundled subset (it is listed in the face's ligature table alongside the
+    // names above), and a globe reads as "a shared space" far better than
+    // `hub`'s connected dots did. `groups` / `diversity_3` / `forum` are NOT
+    // in this subset — a name that is missing renders as the literal word
+    // instead of an icon, so never add one without checking the font first.
+    const val Public          = "public"                // a globe — the Social tab
     const val Notes           = "notes"                 // stacked lines — replies / direct messages
     const val Screenshot      = "photo_camera"          // capture the screen
     const val PhotoLibrary    = "photo_library"         // add screenshots from the gallery

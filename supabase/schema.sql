@@ -12,7 +12,13 @@
 --  • Community reads and writes additionally require the AUTHOR/READER to have
 --    Online Mode enabled in their own profile row.
 --  • Community cards expire 24 hours after they are posted and are filtered
---    out of every read by `expires_at > now()`.
+--    out of every read by `expires_at > now()`; DM messages have the same
+--    24-hour window (§6c) and are swept by `curio_purge_expired_messages()`.
+--  • Public text is moderated at the DATABASE too (§5h): `curio_text_is_clean`
+--    is CHECKed on community_cards, community_comments and profiles, so a
+--    modified client cannot post a slur. `dm_messages` is DELIBERATELY EXEMPT
+--    — a private conversation between two friends is protected by RLS, not by
+--    a word list.
 --  • Nothing media-backed is ever allowed to sync: the tables only carry text.
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -775,6 +781,248 @@ revoke all on function public.curio_purge_expired_cards() from public, anon, aut
 --     'curio-purge-expired-cards',
 --     '7 * * * *',
 --     $$select public.curio_purge_expired_cards();$$
+-- );
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 6b. THE TEXT GATE — one fold, enforced by the database
+--
+-- The app refuses this text before it leaves the device
+-- (`data/CurioContentFilter.kt`); this is the SAME fold on the server, so a
+-- modified client cannot post around it either.
+--
+-- `curio_normalize_text` folds a string down to plain lowercase Latin letters:
+-- accents dropped, look-alikes mapped (0→o, 3→e, @→a, $→s, |→i …) and every
+-- remaining separator or unknown character REMOVED — so "f u c k", "f.u.c.k",
+-- "fuuuuck" and "fück" all land on the same letters. The map is APPLIED IN THE
+-- SAME ORDER as the Kotlin `CurioContentFilter.LOOKALIKES` list: the
+-- single-character `translate()` first, then the ligatures `translate` cannot
+-- express because their target is more than one letter (ß→ss, æ→ae, œ→oe,
+-- þ→th) as an explicit `replace()` chain. Keep the two in step — a fold that
+-- drifts between the layers is a hole a modified client can spell through
+-- (homophone spellings such as phuck, fvck and fack are listed EXPLICITLY in
+-- the word arrays for the same reason).
+-- ───────────────────────────────────────────────────────────────────────────
+create or replace function public.curio_normalize_text(raw text)
+returns text
+language sql
+immutable
+as $$
+    with folded as (
+        select translate(
+            lower(coalesce(raw, '')),
+            -- Sources: digits, the symbols people reach for, and the
+            -- precomposed accented Latin letters Kotlin removes by
+            -- decomposing to NFD and dropping the combining marks.
+            '013456789$@!|+£€z'
+                || 'àáâãäåāăąçćčďđðèéêëēĕėęěğģìíîïīĭįıĺļľłñńňņ'
+                || 'òóôõöøōŏőŕřśŝşšșžźżţťțùúûüūŭůűųýÿ',
+            'oieasgtbgsaiitles'
+                || 'aaaaaaaaacccdddeeeeeeeeeggiiiiiiiillllnnnnooooooooorr'
+                || 'sssssssstttuuuuuuuuuyy'
+        ) as t
+    )
+    select regexp_replace(
+        replace(
+            replace(
+                replace(
+                    replace(t, 'ß', 'ss'),
+                    'æ', 'ae'
+                ),
+                'œ', 'oe'
+            ),
+            'þ', 'th'
+        ),
+        '[^a-z]', '', 'g'
+    )
+    from folded;
+$$;
+
+create or replace function public.curio_text_is_clean(raw text)
+returns boolean
+language plpgsql
+immutable
+as $$
+declare
+    -- Words matched ANYWHERE in the folded text (profanity, explicit sexual
+    -- content, slurs and harassment). Safe to match anywhere because none of
+    -- them hides inside an ordinary word.
+    anywhere text[] := array[
+        'fuck','fucker','fuckers','fucking','fuk','fuking','fukk','fck','fuxk',
+        'fux','fuq','fook','phuck','phuk','fvck','fvk','fack','fucked',
+        'motherfucker','motherfucking',
+        'shit','shits','shyt','bullshit','dipshit','shithead',
+        'bitch','bitches','bich','biatch','cunt','cunts','kunt','kunts',
+        'dickhead','dickheads','pussy','pussies','whore','whores','slut',
+        'sluts','sloot','asshole','assholes','arsehole','arseholes',
+        'bastard','bastards','blowjob','blowjobs','handjob','handjobs',
+        'rimjob','footjob','onlyfans','hentai','nsfw','sexting','sextape',
+        'dildo','dildos','vibrator','vibrators','penis','vagina','nipple',
+        'nipples','orgasm','orgasms','cumshot','creampie','bukkake',
+        'hooker','hookers','brothel','stripper','strippers','fetish','bdsm',
+        'bondage','dominatrix','camgirl','camsex','porno','porn','pornhub',
+        'xvideos','threesome','foursome','gangbang','orgy','orgies',
+        'pedophile','pedophiles','paedophile','molester','molesters',
+        'childporn','lolicon','shotacon',
+        'nigger','niggers','nigga','niggas','nigglet','faggot','faggots',
+        'fagot','fagots','tranny','trannies','shemale','shemales','ladyboy',
+        'retard','retards','retarded','spastic','mongoloid','wetback','chink',
+        'kike','raghead','towelhead','redskin','squaw','darkie','gook','nazi',
+        'nazis','hitler','whitepower','whitepride','gaschamber','killyourself',
+        'neckyourself'
+    ];
+    -- Words that hide inside ordinary ones (ass in "class", sex in "Essex",
+    -- hoe in "shoes", cock in "cocktail", cum in "cucumber") — matched as
+    -- WHOLE words only.
+    wholeword text[] := array[
+        'ass','arse','asses','dumbass','jackass','kickass','sex','sexy',
+        'sexual','sexist','sextoy','sextoys','nude','nudes','naked','boob',
+        'boobs','tit','tits','titties','cum','anal','rape','raped','raping',
+        'rapist','rapists','dic','dick','dicks','cock','cocks','hoe','hoes',
+        'horny','wank','wanker','bugger','fag','fags','homo','escort',
+        'escorts','coon','paki','kys'
+    ];
+    folded    text;
+    squash    text;
+    collapsed text;
+    merged    text;
+    bad       text;
+    pass      integer;
+begin
+    folded := public.curio_normalize_text(raw);
+    squash := regexp_replace(folded, '[^a-z]', '', 'g');
+    if length(squash) < 3 then
+        return true;
+    end if;
+    -- Runs of the same letter squeezed, so "fuuuuck" reads as "fuck".
+    collapsed := regexp_replace(squash, '(.)\1+', '\1', 'g');
+
+    foreach bad in array anywhere loop
+        if position(bad in squash) > 0 or position(bad in collapsed) > 0 then
+            return false;
+        end if;
+    end loop;
+
+    -- Word view, with runs of SINGLE letters merged ("f u c k" -> "fuck").
+    merged := array_to_string(regexp_split_to_table(folded, '[^a-z]+'), ' ');
+    for pass in 1..12 loop
+        merged := regexp_replace(merged, '\y([a-z]) ([a-z])\y', '\1\2', 'g');
+    end loop;
+    foreach bad in array wholeword loop
+        if (' ' || merged || ' ') like ('% ' || bad || ' %') then
+            return false;
+        end if;
+    end loop;
+    return true;
+end $$;
+
+-- ── The gate itself: a CHECK on every table a person can type into. Guarded so
+--    an install whose existing rows already carry blocked text still pastes
+--    cleanly (the failure is reported as a NOTICE instead of aborting the
+--    paste — clean those rows up, then re-run this file).
+do $$
+begin
+    begin
+        alter table public.community_cards
+            add constraint community_cards_text_clean
+            check (
+                public.curio_text_is_clean(fact_text) and
+                public.curio_text_is_clean(caption)
+            );
+        raise notice 'PASS  community_cards text gate installed';
+    exception when others then
+        raise warning 'FAIL  community_cards text gate: %', sqlerrm;
+    end;
+
+    begin
+        alter table public.community_comments
+            add constraint community_comments_text_clean
+            check (public.curio_text_is_clean(body));
+        raise notice 'PASS  community_comments text gate installed';
+    exception when others then
+        raise warning 'FAIL  community_comments text gate: %', sqlerrm;
+    end;
+
+    -- dm_messages is DELIBERATELY EXEMPT from the text gate. A direct
+    -- message is a private conversation between two friends, so the words
+    -- belong to them; the filter guards the PUBLIC surfaces (the 24-hour
+    -- wall, its replies, usernames, display names and bios), where anything
+    -- written is visible to people who did not choose to read it. RLS (only
+    -- the two participants, friends only) is what protects a thread, not a
+    -- word list. The drop below removes the constraint from a project that
+    -- already pasted an earlier revision of this file.
+    begin
+        alter table public.dm_messages
+            drop constraint if exists dm_messages_text_clean;
+        raise notice 'PASS  dm_messages exempt from the text gate';
+    exception when others then
+        raise warning 'FAIL  dm_messages text gate exemption: %', sqlerrm;
+    end;
+
+    begin
+        alter table public.profiles
+            add constraint profiles_text_clean
+            check (
+                public.curio_text_is_clean(display_name) and
+                public.curio_text_is_clean(username) and
+                public.curio_text_is_clean(bio)
+            );
+        raise notice 'PASS  profiles text gate installed';
+    exception when others then
+        raise warning 'FAIL  profiles text gate: %', sqlerrm;
+    end;
+end $$;
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 6c. Messages live 24 hours, just like the cards
+--
+-- A conversation is a 24-hour thing in Curio: the server keeps a message for
+-- one day, and the DATABASE — not the client — decides that a day has passed,
+-- so an old message is unreadable even to its own participants once it expires.
+-- The device keeps its own copy of what it received (that is what makes an
+-- offline thread readable), so "gone from the server" and "gone from the app"
+-- are two different things on purpose: nothing you received is lost, and
+-- nothing you sent lives on the server for longer than a day.
+-- ───────────────────────────────────────────────────────────────────────────
+create or replace function public.curio_purge_expired_messages()
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    removed integer;
+begin
+    delete from public.dm_messages
+     where created_at <= now() - interval '24 hours';
+    get diagnostics removed = row_count;
+    return removed;
+end;
+$$;
+
+revoke all on function public.curio_purge_expired_messages() from public, anon, authenticated;
+
+-- The read window: a participant can only ever READ the last 24 hours, whether
+-- or not the sweep has run yet. The purge function is housekeeping; this policy
+-- is the actual limit.
+drop policy if exists dm_select_participants on public.dm_messages;
+create policy dm_select_participants on public.dm_messages
+    for select to authenticated
+    using (
+        (sender = auth.uid() or recipient = auth.uid())
+        and created_at > now() - interval '24 hours'
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+-- Optional: run both sweeps hourly. Requires the `pg_cron` extension
+-- (Dashboard → Database → Extensions). Uncomment and run once:
+--
+-- select cron.schedule(
+--     'curio-purge-expired',
+--     '11 * * * *',
+--     $$select public.curio_purge_expired_cards(); select public.curio_purge_expired_messages();$$
 -- );
 
 -- ───────────────────────────────────────────────────────────────────────────

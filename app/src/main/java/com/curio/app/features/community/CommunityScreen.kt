@@ -66,6 +66,7 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioContentFilter
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.supabase.CommunityApi
@@ -289,7 +290,7 @@ fun CommunityScreen(navController: NavController) {
             if (wide) {
                 item(key = "hero", contentType = "hero") {
                     SettingsHeroHeader(
-                        title = "Community",
+                        title = "Social",
                         subtitle = "Text cards — gone in 24 hours",
                         onBack = if (asTab) null else ({ navController.popBackStack() })
                     )
@@ -303,12 +304,12 @@ fun CommunityScreen(navController: NavController) {
                             !OnlineAccount.configured -> SettingsOptionInfoRow(
                                 CurioIcons.Warning,
                                 "Not set up in this build",
-                                "This build has no Curio online project, so there is no community to load."
+                                "This build has no Curio online project, so there is no social wall to load."
                             )
                             !account.signedIn -> {
                                 SettingsOptionInfoRow(
                                     CurioIcons.Info,
-                                    "Sign in to see the community",
+                                    "Sign in to see the social wall",
                                     "Cards are only shown to accounts with Online mode on."
                                 )
                                 SettingsOptionRow(
@@ -511,7 +512,7 @@ fun CommunityScreen(navController: NavController) {
 
         if (!wide) {
             SettingsHeroHeader(
-                title = "Community",
+                title = "Social",
                 subtitle = "Text cards — gone in 24 hours",
                 onBack = if (asTab) null else ({ navController.popBackStack() }),
                 glassBackdrop = glassBackdrop
@@ -915,6 +916,10 @@ internal fun CommunityComposerSheet(
         byline = if (kind == KIND_QUOTE) credit.trim() else ""
     )
     val problem = CommunityApi.draftProblem(draft)
+        // v3xx53 — the app-level filter, shown on the sheet as you write (the
+        // API refuses it again on the way out; the schema's CHECK is the third
+        // gate for a modified client).
+        ?: CurioContentFilter.problemIn(draft.factText, draft.caption, draft.byline)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

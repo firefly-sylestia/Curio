@@ -1,5 +1,87 @@
 # Prompt Log — current request
 
+## Request (2026-09-12, IN PROGRESS — the content filter, the SOCIAL tab, and
+## 24-hour messages)
+
+User (chat): "add warning about using a inappropriate name will lead you to a
+ban, and also add filters and word restrictions the bad words such as 18+ stufs
+so people cant type them even with creativity like f u c k like that. or any
+style with special character, add app level filter so it never sends when typed
+such things and also fix the community tab chnage its icon and also say social
+instead of community. and fix this [pasted CI: `inner` modifier in a standalone
+object + unresolved `clip`]. and also answer me if we can implement fully
+privacy ecrypted messenging feature. and also research what else remains and hat
+can we add in features, and also add 24 hours messages ig for delete. and keep
+the received message in curio and the messages tell me continue the previous
+task too"
+
+Then, mid-flight (2nd prompt, same session): "the message in chats should not
+have these restricted restrictions of words. also did the quotes posting and
+just notes or text posting is added? and the share card chnaged to just +. also
+how much quoeue does the supabas have in free tiers and how much does my app
+equeies and how much it can handle. finish what you were doing and dont push it
+yet"
+
+### What shipped (uncommitted at the time of writing)
+
+1. **`data/CurioContentFilter.kt` — the app-level text gate.** One object,
+   three public doors (`problem`, `problemIn`, `isClean` / `carriesBadWord`).
+   The fold normalises NFKC-ish (NFD + mark stripping), lowercases, maps
+   look-alike characters (`0→o`, `3→e`, `@→a`, `$→s`, `|→i`, `!→i`, `+→t`,
+   `ß→ss`, …) and drops every character it does not recognise, so a Cyrillic or
+   symbol substitution collapses onto the same word. Two views are matched:
+   **squash** (all separators removed — catches `f u c k`, `f.u.c.k`) and
+   **collapse** (runs squeezed — catches `fuuuuck`), plus `mergedWords()` which
+   fuses consecutive single letters. The lexicon is split into UNAMBIGUOUS /
+   SLURS (matched anywhere) and NAME_LIKE (`ass`, `sex`, `cock`, `cum`, `tit`,
+   `rape` … matched as WHOLE words only, so "class", "Essex", "cocktail",
+   "title" stay usable) with deliberate exclusions for mild words and identity
+   vocabulary. Wired into every PUBLIC write: `CommunityApi.comment`,
+   `CommunityApi.post`, `SocialApi.updateUsername`, `updateDisplayName`,
+   `updateBio`; surfaced in the three composers (send sleeps, the reason is
+   printed) and as a permanent `NAME_WARNING` in the account form.
+2. **The DB backstop (`supabase/schema.sql` §5h).** The same fold as
+   `curio_normalize_text` + `curio_text_is_clean`, with CHECKs on
+   `community_cards` (fact_text + caption), `community_comments`, `profiles`
+   (display_name + username + bio), installed idempotently with PASS/FAIL
+   notices. **`dm_messages` is deliberately EXEMPT** (see the 2nd prompt) and a
+   `drop constraint if exists dm_messages_text_clean` removes it from a project
+   that pasted an earlier revision.
+3. **Direct messages are NOT filtered (2nd prompt).** `SocialApi.send`'s filter
+   call, the composer's blocked-line + disabled send, and the `dm_messages`
+   CHECK are all gone/reverted: a private conversation between two friends is
+   protected by RLS, not a word list. The doc comment on the filter object says
+   so explicitly, so it cannot be re-wired by accident.
+4. **The tab is SOCIAL, with a new icon.** `CurioBottomNavItems.Social`, label
+   `"Social"`, glyph `CurioIcons.Public` (`"public"` — a globe). I decoded the
+   bundled font's GSUB ligature table to verify the ligature exists AND that its
+   target glyph is present in the 232-glyph subset (glyph 26), because a ligature
+   retained without its outline renders the literal word. The Settings → Online
+   mode switch, the hub row, the notification switch and the empty-state copy
+   say Social; the ROUTE (`CurioRoutes.COMMUNITY`) and the
+   `features/community/*` file names are unchanged on purpose.
+5. **Messages: 24 hours on the server, kept on the device.** `dm_messages`
+   gained a read window (`created_at > now() - interval '24 hours'`) plus
+   `curio_purge_expired_messages()` and an optional hourly `pg_cron` sweep, so
+   the server holds a line for a day and no longer. `SocialCache.TTL_THREAD_MS`
+   went 14 days → a year and `DirectMessageScreen.load()` now MERGES
+   (`distinctBy { id }`, sorted by time) instead of replacing, so a message the
+   sweep removed from the server is still on the phone that received it.
+6. **The pasted CI break was already fixed** in `0916273d` (the Realtime
+   listener's `inner` modifier and the profile's missing `clip` import) — this
+   batch sits on top of it.
+
+**Answered in the response (not code):** can we do end-to-end encrypted
+messaging (yes, technically — X25519 + AES-GCM per-conversation keys with the
+public keys on `profiles`; the trade-offs are key loss, no server-side search or
+abuse tooling, and no multi-device story, so it is a real project, not a
+switch); **Supabase free-tier sizing** (500 MB DB, 5 GB egress, 50k MAU, 200
+concurrent Realtime connections, 2M Realtime messages/month — Curio is text-only
+and now sweeps at 24 hours, so the DB is never the wall; egress and MAU are);
+and what is left to build.
+
+**Not pushed on purpose** (user: "dont push it yet").
+
 ## Request (2026-09-12, DONE — the soft avatars, the redrawn shelf art, and a
 ## saved entry that stops disappearing)
 
@@ -1183,6 +1265,18 @@ check, the three shelf scenes redrawn and made to fill the card, the saved-entry
 availability fix (no 400ms bounce, no "no longer available" race), the Keystore-
 sealed session tokens, the Realtime client with the pollers as fallback, and the
 public bio. Committed and pushed; CI validates.
+
+### Prompt (2026-09-12) — IN PROGRESS
+
+The content filter + ban warning + Social tab rename + 24-hour messages batch,
+followed by "the message in chats should not have these restricted restrictions
+of words … finish what you were doing and dont push it yet".
+
+**Status:** the whole batch is written (see the request log at the top of this
+file): `CurioContentFilter` + the SQL backstop, direct messages exempted again,
+the Social tab with the verified globe glyph, and the 24h server window with the
+device keeping what it received. Docs (changelog / README / AGENTS.md) updated.
+**Committed but NOT pushed** — the user asked to hold the push.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
 

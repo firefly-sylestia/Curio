@@ -1243,7 +1243,7 @@ fun TopicRevealScreen(
                                             communityPostKind = null
                                             android.widget.Toast.makeText(
                                                 context,
-                                                "Posted to the community.",
+                                                "Posted to the wall.",
                                                 android.widget.Toast.LENGTH_SHORT
                                             ).show()
                                         },
@@ -6880,7 +6880,7 @@ private fun RevealShareChoiceSheet(
                 RevealShareChoice(
                     glyph = CurioIcons.Notes,
                     title = "Write a note",
-                    subtitle = "Your own line about it, posted to the community",
+                    subtitle = "Your own line about it, posted to the wall",
                     onClick = onNote
                 )
                 RevealShareChoice(
