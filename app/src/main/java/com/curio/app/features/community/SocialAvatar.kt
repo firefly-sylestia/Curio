@@ -1,19 +1,19 @@
 package com.curio.app.features.community
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -25,8 +25,9 @@ import com.curio.app.ui.theme.CurioIcons
 /**
  * The 16 code-drawn social portraits.
  *
- * Everything lives in a disc of one warm ground colour with a soft inner rim,
- * so an avatar reads as a pressed paper button rather than a flat blob; the
+ * Everything lives in a disc of one warm ground colour, lit from the top-left
+ * with a soft inner rim, so an avatar reads as a pressed paper button rather
+ * than a flat blob; the
  * character on top is drawn with three tones (garment, skin, hair) plus ink
  * for the face, and each of the 16 is a DIFFERENT character — a beanie, a bob,
  * a bun with glasses, headphones, a wizard hat, an explorer's goggles, a space
@@ -87,7 +88,6 @@ internal fun SocialAvatar(
     Box(
         modifier = Modifier
             .size(avatarSize)
-            .background(art.ground, CircleShape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center
     ) {
@@ -98,17 +98,75 @@ internal fun SocialAvatar(
             val unit = size.minDimension / 100f
             fun p(x: Float, y: Float) = Offset(x * unit, y * unit)
             fun r(value: Float) = value * unit
+            val radius = size.minDimension / 2f
+            val ink = Color(0xFF2A2320)
+
+            // ── the disc ───────────────────────────────────────────────────
+            // A soft LIGHT from the top-left instead of one flat fill, with a
+            // deepened lower edge: the portrait sits in its own light rather
+            // than reading as a sticker cut out of the page.
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        lerp(art.ground, Color.White, 0.24f),
+                        art.ground,
+                        lerp(art.ground, ink, 0.22f)
+                    ),
+                    center = Offset(size.width * 0.32f, size.height * 0.28f),
+                    radius = radius * 1.4f
+                ),
+                radius = radius
+            )
+
+            drawCharacter(art, ::p, ::r)
+            drawAvatarPolish(art, ::p, ::r)
 
             if (ring) {
                 drawCircle(
                     color = Color.White.copy(alpha = 0.22f),
-                    radius = size.minDimension / 2f - r(1.5f),
+                    radius = radius - r(1.5f),
                     style = Stroke(width = r(2f))
                 )
             }
-            drawCharacter(art, ::p, ::r)
         }
     }
+}
+
+/**
+ * The finishing pass EVERY portrait gets.
+ *
+ * The 16 characters are different drawings, so what makes them one family is
+ * the light: a shadow where the head meets the shoulders, a warm blush on the
+ * cheeks, and a rim light along the side the light falls on. Without this the
+ * faces read flat and slightly stuck-on at large sizes (a profile portrait),
+ * which is exactly where a drawn avatar is judged.
+ */
+private fun DrawScope.drawAvatarPolish(
+    art: AvatarArt,
+    p: (Float, Float) -> Offset,
+    r: (Float) -> Float
+) {
+    val ink = Color(0xFF2A2320)
+    // The head is ON the shoulders: one soft oval of shade under the chin.
+    drawOval(
+        color = ink.copy(alpha = 0.15f),
+        topLeft = p(33f, 57f),
+        size = Size(r(34f), r(11f))
+    )
+    // Cheeks — a quiet warmth, never a painted-on dot.
+    val blush = Color(0xFFDE6E52).copy(alpha = 0.20f)
+    drawCircle(blush, r(5.5f), p(36.5f, 52.5f))
+    drawCircle(blush, r(5.5f), p(63.5f, 52.5f))
+    // Rim light, upper-left, exactly where the disc's own light comes from.
+    drawArc(
+        color = Color.White.copy(alpha = 0.28f),
+        startAngle = 198f,
+        sweepAngle = 74f,
+        useCenter = false,
+        topLeft = p(29f, 23f),
+        size = Size(r(42f), r(42f)),
+        style = Stroke(width = r(2.4f), cap = StrokeCap.Round)
+    )
 }
 
 /**

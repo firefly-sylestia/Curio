@@ -781,21 +781,30 @@ internal fun CommunityAction(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CommunityComposerSheet(
+internal fun CommunityComposerSheet(
     onDismiss: () -> Unit,
-    onPost: (CommunityCardDraft) -> Unit
+    onPost: (CommunityCardDraft) -> Unit,
+    /**
+     * What this composer opens AS. The wall's floating button opens a plain
+     * topic card; the reveal page's note/quote doors open straight into their
+     * own kind, which is what keeps those two flows out of the card editor.
+     */
+    seedKind: String = KIND_CARD,
+    seedTopic: CurioTopic? = null,
+    seedFact: String = "",
+    seedCredit: String = ""
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // CARD / NOTE / QUOTE — what is being posted. Card is the default because
     // it is what the wall is known for; the other two exist so a thought that
     // is NOT about a topic never has to borrow one.
-    var kind by remember { mutableStateOf(KIND_CARD) }
-    var picked by remember { mutableStateOf<CurioTopic?>(null) }
+    var kind by remember { mutableStateOf(seedKind) }
+    var picked by remember { mutableStateOf(seedTopic) }
     var query by remember { mutableStateOf("") }
     var caption by remember { mutableStateOf("") }
-    var fact by remember { mutableStateOf("") }
+    var fact by remember { mutableStateOf(seedFact) }
     // Who said it — the QUOTE's credit, stored in the card's byline.
-    var credit by remember { mutableStateOf("") }
+    var credit by remember { mutableStateOf(seedCredit) }
     var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
     // The whole-catalog index, loaded once. It is the prebuilt lightweight
     // index (name/byline keys only), so searching never parses a lane.

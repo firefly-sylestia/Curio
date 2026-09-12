@@ -346,6 +346,13 @@ fun TopicRevealScreen(
     // be visible to BOTH blocks (declaring them inside the floating-pill
     // block scoped them out of the notes sheet's reach).
     var showShareSheet by remember { mutableStateOf(false) }
+    // v3xx54 — SHARING, SPLIT BY WHAT IS BEING SHARED. The share action opens a
+    // small choice sheet first: the card editor for the topic's ART, and — for
+    // anyone who can post — a note (your own line about it) and a quote (the
+    // topic's own words, credited). The last two go straight to the community
+    // and never open the card editor.
+    var showShareChoice by remember { mutableStateOf(false) }
+    var communityPostKind by remember { mutableStateOf<String?>(null) }
     // v375 — chapter → review text + its rich runs (spans) for the one-shot
     // share-card seed.
     var pendingChapterShare by remember { mutableStateOf<Triple<Int, String, List<TextSpan>>?>(null) }
@@ -1110,7 +1117,7 @@ fun TopicRevealScreen(
                             accent = cat.themedAccent(),
                             ink = cat.onAccent(),
                             container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
-                            onShare = { showShareSheet = true },
+                            onShare = { showShareChoice = true },
                             onFavorite = {
                                 AppPreferences.setTopicSentiment(
                                     context, cat.id, floatingTopic.id,
@@ -1173,6 +1180,83 @@ fun TopicRevealScreen(
                     onDismiss = {
                         pendingChapterShare = null
                         showShareSheet = false
+                    }
+                )
+            }
+            // The three doors. "Share a card" is the editor that was always
+            // here; the other two are their own flows into the community.
+            if (showShareChoice) {
+                RevealShareChoiceSheet(
+                    canPost = com.curio.app.data.supabase.OnlineAccount.state.signedIn &&
+                        AppPreferences.onlineModeEnabledState,
+                    onCard = {
+                        showShareChoice = false
+                        showShareSheet = true
+                    },
+                    onNote = {
+                        showShareChoice = false
+                        communityPostKind = com.curio.app.data.supabase.KIND_NOTE
+                    },
+                    onQuote = {
+                        showShareChoice = false
+                        communityPostKind = com.curio.app.data.supabase.KIND_QUOTE
+                    },
+                    onDismiss = { showShareChoice = false }
+                )
+            }
+            // The community composer, seeded with the kind that was chosen: a
+            // NOTE opens empty (the words are the writer's), a QUOTE opens with
+            // the topic's own line and its credit already in place.
+            val postKind = communityPostKind
+            if (postKind != null) {
+                val activeToken = com.curio.app.data.supabase.OnlineAccount
+                    .state.session?.accessToken
+                com.curio.app.features.community.CommunityComposerSheet(
+                    seedKind = postKind,
+                    seedFact = if (postKind == com.curio.app.data.supabase.KIND_QUOTE) {
+                        floatingTopic.teaser
+                    } else {
+                        ""
+                    },
+                    seedCredit = if (postKind == com.curio.app.data.supabase.KIND_QUOTE) {
+                        floatingTopic.byline.orEmpty()
+                    } else {
+                        ""
+                    },
+                    onDismiss = { communityPostKind = null },
+                    onPost = { draft ->
+                        if (activeToken == null) {
+                            android.widget.Toast.makeText(
+                                context,
+                                "Sign in with Online mode on to post.",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            val handle = AppPreferences.getUsername(context).ifBlank {
+                                AppPreferences.getDisplayName(context)
+                            }
+                            revealScope.launch {
+                                com.curio.app.data.supabase.CommunityApi
+                                    .post(activeToken, draft, handle)
+                                    .fold(
+                                        onSuccess = {
+                                            communityPostKind = null
+                                            android.widget.Toast.makeText(
+                                                context,
+                                                "Posted to the community.",
+                                                android.widget.Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+                                        onFailure = { failure ->
+                                            android.widget.Toast.makeText(
+                                                context,
+                                                failure.message ?: "That didn't post.",
+                                                android.widget.Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                            }
+                        }
                     }
                 )
             }
@@ -6741,6 +6825,115 @@ private fun FileToCollectionSheet(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * SHARING, SPLIT BY WHAT IS BEING SHARED.
+ *
+ * A topic can leave Curio in three ways and they are not the same act: a CARD
+ * is the topic's art (the share editor's job — its words, style and cover are
+ * all editable there), a NOTE is your own line ABOUT it, and a QUOTE is the
+ * topic's own words credited to whoever said them.
+ *
+ * Burying the last two inside the card editor made them read as settings of a
+ * card, so each one gets its own door here. The community doors appear only
+ * when the account could actually post — signed in with Online Mode on —
+ * because the server refuses anything else.
+ */
+@Composable
+private fun RevealShareChoiceSheet(
+    canPost: Boolean,
+    onCard: () -> Unit,
+    onNote: () -> Unit,
+    onQuote: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 26.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Share this topic",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            RevealShareChoice(
+                glyph = CurioIcons.Share,
+                title = "Share a card",
+                subtitle = "The topic's card — words, style and art, yours to edit",
+                onClick = onCard
+            )
+            if (canPost) {
+                RevealShareChoice(
+                    glyph = CurioIcons.Notes,
+                    title = "Write a note",
+                    subtitle = "Your own line about it, posted to the community",
+                    onClick = onNote
+                )
+                RevealShareChoice(
+                    glyph = CurioIcons.FormatQuote,
+                    title = "Share a quote",
+                    subtitle = "The topic's own words, credited to whoever said them",
+                    onClick = onQuote
+                )
+            }
+        }
+    }
+}
+
+/** One door in [RevealShareChoiceSheet]. */
+@Composable
+private fun RevealShareChoice(
+    glyph: String,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+        ) {
+            CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = curioDialogActionColor(),
+                size = 20.dp
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

@@ -1629,9 +1629,11 @@ private val settingsDesignGroups = listOf(
     )),
     SettingsDesignGroup("Your data & privacy", "\u25C8", listOf(
         SettingsDesignCard("backup", "Backup & restore", "Keep captures and settings safe", CurioIcons.Backup, SettingsDesignTone.SLATE, SettingsDesignVisual.CLOUD, CurioRoutes.SETTINGS_DATA),
-        SettingsDesignCard("bookcovers", "Book covers", "Cover-art fetching and providers", CurioIcons.Image, SettingsDesignTone.STEEL, SettingsDesignVisual.IMAGE, CurioRoutes.SETTINGS_BOOK_COVER),
-        // v3xx — the account + Online Mode page (sign in, then sync).
-        SettingsDesignCard("online", "Online mode", "Sign in and keep your account in sync", CurioIcons.Refresh, SettingsDesignTone.BLUE, SettingsDesignVisual.REFRESH, CurioRoutes.SETTINGS_ONLINE)
+        SettingsDesignCard("bookcovers", "Book covers", "Cover-art fetching and providers", CurioIcons.Image, SettingsDesignTone.STEEL, SettingsDesignVisual.IMAGE, CurioRoutes.SETTINGS_BOOK_COVER)
+        // v3xx54 — Online mode is NOT a big square card any more: the account
+        // row moved down to the secondary rows (see
+        // [settingsSecondaryCards]) so it reads at the same size as Recycle
+        // bin, which is what its one job — sign in, then a switch — deserves.
     ))
 )
 
@@ -1650,6 +1652,9 @@ private data class SettingsSecondaryCard(
 )
 
 private val settingsSecondaryCards = listOf(
+    // v3xx54 — the account + Online Mode page: a secondary row, the same size
+    // as Recycle bin, instead of a big square card.
+    SettingsSecondaryCard("online", "Online mode", "Sign in and keep your account in sync", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE, SettingsDesignTone.BLUE, SettingsDesignVisual.REFRESH),
     SettingsSecondaryCard("recycle", "Recycle bin", "Restore recently deleted captures", CurioIcons.Delete, CurioRoutes.RECYCLE_BIN, SettingsDesignTone.STEEL, SettingsDesignVisual.TRASH),
     SettingsSecondaryCard("updates", "Updates", "Your build, release notes & update checker", CurioIcons.Download, CurioRoutes.UPDATES, SettingsDesignTone.SAGE, SettingsDesignVisual.REFRESH),
     SettingsSecondaryCard("support", "Help & feedback", "Get support or suggest a feature", CurioIcons.SupportAgent, CurioRoutes.SUPPORT, SettingsDesignTone.LAVENDER, SettingsDesignVisual.CHAT)

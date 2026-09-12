@@ -289,6 +289,21 @@ fun DirectMessageScreen(
                 .getOrNull()
                 .orEmpty()
                 .filter { row -> (messages + pending).none { it.id == row.id } }
+            // The receipts ride the same tick, whether or not anything new
+            // arrived: they change when the other side READS, which is a
+            // different moment from when they write.
+            SocialApi.readStamps(token, otherUserId, myUserId).onSuccess { stamps ->
+                if (stamps.isNotEmpty()) {
+                    messages = messages.map { message ->
+                        val at = stamps[message.id] ?: return@map message
+                        if (message.readAtMillis == null || message.readAtMillis < at) {
+                            message.copy(readAtMillis = at)
+                        } else {
+                            message
+                        }
+                    }
+                }
+            }
             if (fresh.isEmpty()) continue
             val merged = (messages + fresh)
                 .distinctBy { it.id }
@@ -344,9 +359,11 @@ fun DirectMessageScreen(
         ?.let { "@${it.handle}" }
         ?: fallback
 
-    // Who was the last to say something, from this account — the only message
-    // that may wear a read receipt.
-    val myLastIndex = thread.indexOfLast { it.mine }
+    // "Seen" belongs on the newest of MY messages the other person actually
+    // READ — not simply on my newest one. Stamping the latest line whatever
+    // the receipt said is how a thread ends up claiming a message was seen
+    // when it never was; a message with no receipt shows no receipt.
+    val seenIndex = thread.indexOfLast { it.mine && it.readAtMillis != null }
 
     Box(
         modifier = Modifier
@@ -467,7 +484,7 @@ fun DirectMessageScreen(
                                 // Only the newest of MY messages can be seen:
                                 // an older receipt would be a lie if a newer
                                 // message was still unread.
-                                receipt = if (index == myLastIndex) message.readAtMillis else null,
+                                receipt = if (index == seenIndex) message.readAtMillis else null,
                                 accent = reactionTarget == message.id,
                                 reactions = reactions[message.id].orEmpty(),
                                 myUserId = activeUserId,

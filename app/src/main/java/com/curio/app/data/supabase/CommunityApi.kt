@@ -544,13 +544,17 @@ internal fun communityMessage(failure: Throwable): String {
         failure is IllegalStateException && raw.isNotBlank() -> raw
         raw.contains("rate limit", true) || raw.contains("too many", true) ->
             "Too much just now — try again in a minute."
-        // The username handle has a case-insensitive unique index, so a
-        // collision arrives as a 23505 duplicate-key error. Saying so is the
-        // whole difference between a user knowing the name is taken and a
-        // Save button that appears to do nothing.
-        raw.contains("duplicate key", true) && raw.contains("username", true) ->
+        // A unique-index collision arrives as a 23505 duplicate-key error, and
+        // whether the server names the column, the index or neither depends on
+        // how the constraint was created — so the identity-shaped answer is
+        // chosen whenever the duplicate could only BE an identity, and the
+        // plain "already done that" is kept for everything else.
+        (raw.contains("duplicate key", true) || raw.contains("23505", true)) &&
+            (raw.contains("username", true) || raw.contains("profiles", true) ||
+                raw.contains("already exists", true)) ->
             "That username is already taken. Try another one."
-        raw.contains("duplicate key", true) -> "You've already done that."
+        raw.contains("duplicate key", true) || raw.contains("23505", true) ->
+            "You've already done that."
         raw.contains("row-level security", true) ->
             "Turn Online mode on (Settings → Online mode) and try again."
         raw.contains("unable to resolve host", true) ||

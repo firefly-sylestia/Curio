@@ -148,6 +148,9 @@ object SocialApi {
     /** How many NEW messages one live tick asks for. */
     private const val LIVE_TICK_LIMIT = 100
 
+    /** How many of my own messages a receipt refresh looks back over. */
+    private const val RECEIPT_LIMIT = 12
+
     /** How many recent messages the inbox groups into conversations. */
     private const val INBOX_SCAN = 200
 
@@ -210,7 +213,28 @@ object SocialApi {
                     .patch(body.toString().toRequestBody(jsonMediaType))
                     .header("Prefer", "return=minimal")
                     .build()
-                SupabaseClient.executeBody(request)
+                try {
+                    SupabaseClient.executeBody(request)
+                } catch (failure: Throwable) {
+                    // A unique-index collision is THE expected failure on this
+                    // call, and the constraint's NAME is an implementation
+                    // detail of how the schema was created — so the collision
+                    // is recognised by its shape here and answered with the
+                    // one thing the person needs to hear. (It used to fall
+                    // through to "You've already done that.", which told the
+                    // user nothing about the name they were claiming.)
+                    val raw = failure.message.orEmpty()
+                    if (raw.contains("duplicate key", true) ||
+                        raw.contains("23505", true) ||
+                        raw.contains("already exists", true) ||
+                        raw.contains("unique constraint", true)
+                    ) {
+                        throw IllegalStateException(
+                            "That username is already taken. Try another one."
+                        )
+                    }
+                    throw failure
+                }
                 Unit
             }
         }
@@ -508,6 +532,39 @@ object SocialApi {
         }
     }
 
+    /**
+     * The read stamps on MY last messages to [otherUserId] — what a "Seen"
+     * line is actually made of.
+     *
+     * A receipt lives on the RECIPIENT's copy of a row (`read_at`), so a
+     * thread that only refreshed when it was entered showed a receipt that was
+     * stale or missing entirely: the other person read the message, and the
+     * sender's screen never learned. This asks for a handful of ids and stamps
+     * on the same live tick as the messages themselves, so "Seen" is true when
+     * it is shown and absent when it is not.
+     */
+    suspend fun readStamps(
+        accessToken: String,
+        otherUserId: String,
+        myUserId: String
+    ): Result<Map<String, Long>> = withContext(Dispatchers.IO) {
+        mapped {
+            val path = "$MESSAGES?select=id,read_at" +
+                "&sender=eq.${id(myUserId)}&recipient=eq.${id(otherUserId)}" +
+                "&read_at=not.is.null&order=created_at.desc&limit=$RECEIPT_LIMIT"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            val rows = JSONArray(SupabaseClient.executeBody(request))
+            buildMap {
+                for (index in 0 until rows.length()) {
+                    val row = rows.optJSONObject(index) ?: continue
+                    val messageId = row.optString("id").takeIf { it.isNotBlank() } ?: continue
+                    val at = epochMillis(row.optString("read_at"))
+                    if (at > 0L) put(messageId, at)
+                }
+            }
+        }
+    }
+
     /** Deletes one of your own messages. */
     suspend fun deleteMessage(accessToken: String, messageId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
@@ -684,7 +741,12 @@ displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEm
     /** Names for [ids], best-effort: an unreadable profile stays unnamed. */
     private fun namesOf(accessToken: String, ids: List<String>): Map<String, CurioPerson> {
         if (ids.isEmpty()) return emptyMap()
-        val wanted = ids.filter { it.isNotBlank() }.distinct()
+        // Every id is VALIDATED before it is pasted into the query, exactly
+        // like `id()` does for a single one: some of these ids come back off
+        // the server (a card's owner, a message's sender), so a response that
+        // had been tampered with must not be able to rewrite the request that
+        // follows it. An unexpected id is dropped, not trusted.
+        val wanted = ids.filter { it.matches(ID_PATTERN) }.distinct()
         if (wanted.isEmpty()) return emptyMap()
         val path = "$PROFILES?select=id,display_name,username,avatar_style&id=in.(${wanted.joinToString(",")})" +
             "&limit=${wanted.size}"

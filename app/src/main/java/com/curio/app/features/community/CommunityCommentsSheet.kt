@@ -103,6 +103,13 @@ internal fun CommunityCommentsSheet(
 
     LaunchedEffect(card.id) { load() }
 
+    // BRANCH ORDER, derived once per reply list — and HERE, in the composable
+    // scope: a `LazyColumn`'s content lambda is a LazyListScope, not a
+    // composable context, so `remember` cannot live inside it. Each top-level
+    // reply is followed by the replies that answer it, so a branch reads under
+    // the line it belongs to instead of at the bottom of the sheet.
+    val branch = remember(replies) { branchOrder(replies) }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -158,11 +165,6 @@ internal fun CommunityCommentsSheet(
                         )
                     }
                 }
-                // The thread is FLATTENED into branch order (each top-level
-                // reply followed by the replies that answer it), so a branch
-                // reads under the line it belongs to instead of at the bottom
-                // of the sheet where it would mean nothing.
-                val branch = remember(replies) { branchOrder(replies) }
                 items(branch, key = { it.first.id }) { (reply, depth) ->
                     CommunityReplyRow(
                         reply = reply,

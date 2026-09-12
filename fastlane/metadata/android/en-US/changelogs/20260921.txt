@@ -1,3 +1,17 @@
+ADD: Messages — an open conversation now updates while you watch: a reply appears the moment it arrives instead of after you leave the screen and come back, and the Messages list refreshes itself too.
+ADD: Messages — the header names who you are talking to on the very first frame (Curio remembers the people it has met), so a conversation never opens with a placeholder.
+CHANGE: Messages — reactions are proper emoji now (tap a bubble for ❤️ 😂 😮 😢 👍 🙏) instead of the app's own icons; your old reactions still show.
+FIX: Messages — the typing box sits exactly on the keyboard. It used to be lifted a navigation bar too high and left a strip of empty page under it.
+ADD: Messages — the standing privacy paragraph inside a conversation is gone; the header keeps the name and the live "Typing…" line and nothing else.
+FIX: Signing out forgets the device's cached conversations and remembered names.
+ADD: Notifications — a new "Messages and community" switch (Settings → Notifications, on by default). Tapping a message notification opens that conversation; tapping a post notification opens the community wall.
+ADD: Community — the wall's cards are full width, and the actions are pills that respond to your touch (like / reply / share / report) instead of bare text buttons.
+ADD: Community — three kinds of post: a TOPIC CARD (seeded with the topic's own quick fact), a tweet-style NOTE, and a credited QUOTE. Notes and quotes render as text — never as a card for a topic they are not about.
+ADD: Community — replies BRANCH now: reply to a reply and it sits under the line it answers, with a "Replying to @name" chip above the composer.
+ADD: Community — the wall keeps a copy on the device, so opening it with no connection shows the last 24 hours instead of nothing (with a quiet offline line).
+ADD: Topic Reveal — sharing is split by what is being shared: the card editor for the topic's art, plus "Write a note" and "Share a quote" that post straight to the community.
+FIX: Community — a card's own page no longer drags the settings rail along (the community is not a settings page), and taking your own card down asks first.
+ADD: Friends and Community — adding someone is an icon button now, matching Remove.
 ADD: Settings → Online mode — signing out asks first: the dialog says Online mode turns off and that your captures, recordings and conversations stay on this device.
 ADD: Friends — removing a friend asks first, naming the person, and says neither of you can message the other until you add each other again.
 ADD: Friends — every person is a box card now: their portrait, their live name and @username, and the actions that match where you actually stand — Message for a friend, Accept or Decline for a request waiting on you, Cancel for one you sent, Add friend for a stranger. Adding someone you are already friends with is impossible now.
