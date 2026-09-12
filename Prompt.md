@@ -1,5 +1,35 @@
 # Prompt Log — current request
 
+## Request (2026-09-12, in progress — social hub revamp + security audit)
+
+User asked for a complete nostalgic-pixel visual revamp of the independent
+Community, Friends and Direct Messages surfaces; a Profile entry point for
+account login; a Settings-only Community toggle; correct friend names; richer
+social actions; and an exploit/security audit.
+
+**Plan:** (1) audit the existing Supabase RLS and client identity handling,
+(2) replace settings-family social chrome with a dedicated, solid-fill pixel
+social shell, (3) surface online account/community entry points in Profile,
+(4) fix identity fallbacks so routes never display a generic exploration label,
+(5) statically validate only (Gradle is prohibited here), update release notes,
+then commit/push and open a PR.
+
+**Completed:** The Community, Friends and DM screens now use a dedicated solid
+arcade/pixel social header rather than the Settings hero. Profile restores the
+online session and gives the account a Community entry point: signed-out users
+land at sign-in; signed-in users enter the independent hub when Community is
+enabled. Identity fallback now uses the username before generic copy, fixing
+the incorrect explorer-style friend labels. The security audit found two
+defence-in-depth gaps: a modified client could forge community author handles,
+and social read policies did not enforce the Online Mode consent gate. The
+schema now stamps handles from the authenticated profile on card/comment insert
+and requires Online Mode for friend/DM reads. The handle trigger has no public
+execute grant. Static checks passed; Android Gradle validation is prohibited in
+this environment. The SQL still needs to be re-pasted in the Supabase SQL
+Editor to apply the server-side protections.
+
+**Status:** ready to commit, push and open a PR.
+
 ## Request (2026-09-11, in progress — Cabinet loading skeleton + settings rail label + collections redraw)
 
 User (queued prompt): "the cabinet loading is still kinda bugged the saved

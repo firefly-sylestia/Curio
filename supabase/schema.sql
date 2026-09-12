@@ -146,6 +146,29 @@ create index if not exists community_cards_expiry_idx
 
 alter table public.community_cards enable row level security;
 
+-- The display handle is presentation data, but it must still come from the
+-- authenticated profile. Without this trigger a modified client could post a
+-- card claiming another member's username.
+create or replace function public.curio_stamp_author_handle()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    select coalesce(nullif(trim(username), ''), nullif(trim(display_name), ''), 'A curious soul')
+      into new.author_handle
+      from public.profiles
+     where id = auth.uid();
+    new.author_handle := coalesce(new.author_handle, 'A curious soul');
+    return new;
+end $$;
+
+drop trigger if exists community_cards_stamp_author_handle on public.community_cards;
+create trigger community_cards_stamp_author_handle
+    before insert on public.community_cards
+    for each row execute function public.curio_stamp_author_handle();
+
 drop policy if exists comm_select_live on public.community_cards;
 create policy comm_select_live on public.community_cards
     for select to authenticated
@@ -249,6 +272,11 @@ create index if not exists community_comments_card_idx
     on public.community_comments (card_id, created_at);
 
 alter table public.community_comments enable row level security;
+
+drop trigger if exists community_comments_stamp_author_handle on public.community_comments;
+create trigger community_comments_stamp_author_handle
+    before insert on public.community_comments
+    for each row execute function public.curio_stamp_author_handle();
 
 drop policy if exists cmt_select_visible on public.community_comments;
 create policy cmt_select_visible on public.community_comments
@@ -378,7 +406,13 @@ alter table public.friend_requests enable row level security;
 drop policy if exists fr_select_own on public.friend_requests;
 create policy fr_select_own on public.friend_requests
     for select to authenticated
-    using (requester = auth.uid() or addressee = auth.uid());
+    using (
+        (requester = auth.uid() or addressee = auth.uid())
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
 
 drop policy if exists fr_insert_own on public.friend_requests;
 create policy fr_insert_own on public.friend_requests
@@ -466,7 +500,13 @@ alter table public.dm_messages enable row level security;
 drop policy if exists dm_select_participants on public.dm_messages;
 create policy dm_select_participants on public.dm_messages
     for select to authenticated
-    using (sender = auth.uid() or recipient = auth.uid());
+    using (
+        (sender = auth.uid() or recipient = auth.uid())
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
 
 drop policy if exists dm_insert_friends on public.dm_messages;
 create policy dm_insert_friends on public.dm_messages
@@ -541,6 +581,7 @@ revoke all on function public.curio_are_friends(uuid, uuid) from public, anon;
 grant execute on function public.curio_are_friends(uuid, uuid) to authenticated;
 revoke all on function public.curio_pin_request_parties() from public, anon, authenticated;
 revoke all on function public.curio_pin_message_parties() from public, anon, authenticated;
+revoke all on function public.curio_stamp_author_handle() from public, anon, authenticated;
 
 revoke all on public.profiles from anon;
 revoke all on public.cloud_captures from anon;

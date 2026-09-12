@@ -22,7 +22,13 @@ data class CurioPerson(
 ) {
     /** Stable identity shown everywhere social actions are available. */
     val handle: String get() = username.trim().removePrefix("@").ifBlank { "curious_soul" }
-    val label: String get() = displayName.trim().takeUnless { it.isBlank() || it.equals("null", true) } ?: "A curious soul"
+    // A profile may intentionally omit a display name. In that case its
+    // username is still a real, stable identity — never replace it with a
+    // product label or a generic "explorer" placeholder in Friends/DMs.
+    val label: String get() = displayName.trim()
+        .takeUnless { it.isBlank() || it.equals("null", true) }
+        ?: username.trim().removePrefix("@").takeIf { it.isNotBlank() }
+        ?: "A curious soul"
     val identityLabel: String get() = "${label} @${handle}"
 }
 

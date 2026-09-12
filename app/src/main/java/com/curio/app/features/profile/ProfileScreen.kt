@@ -97,6 +97,7 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.StreakTracker
+import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingCabinetFilter
@@ -215,6 +216,7 @@ private data class ProfileHeroPair(
 @Composable
 fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
+    val onlineAccount = OnlineAccount.state
     val lifecycleOwner = LocalLifecycleOwner.current
     // v311 — debounce back-tap: two quick taps on the back pill would pop
     // Profile AND the screen behind it, leaving a blank screen. A short
@@ -321,6 +323,7 @@ fun ProfileScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         refreshStats()
+        OnlineAccount.restore(context)
         // Feed the quests system — visiting Profile completes the journey quest.
         CurioQuests.onProfileVisited(context)
     }
@@ -552,6 +555,28 @@ fun ProfileScreen(navController: NavController) {
                     CurioSettingsCard(shadowElevation = 0.dp) {
                         SettingsNavCard(
                             onOpenSettings = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } }
+                        )
+                    }
+                }
+            }
+            item {
+                Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
+                        CurioSettingsRow(
+                            icon = CurioIcons.Hub,
+                            title = if (onlineAccount.signedIn) "Community" else "Join Community",
+                            subtitle = if (onlineAccount.signedIn) {
+                                "Friends, messages and today's discoveries"
+                            } else {
+                                "Sign in to connect your Curio profile"
+                            },
+                            onClick = {
+                                navController.navigate(
+                                    if (onlineAccount.signedIn && AppPreferences.onlineModeEnabledState) {
+                                        CurioRoutes.COMMUNITY
+                                    } else CurioRoutes.SETTINGS_ONLINE
+                                )
+                            }
                         )
                     }
                 }
