@@ -18,7 +18,8 @@ import java.time.OffsetDateTime
 data class CurioPerson(
     val userId: String,
     val displayName: String,
-    val username: String = ""
+    val username: String = "",
+    val avatarStyle: Int = 0
 ) {
     /** Stable identity shown everywhere social actions are available. */
     val handle: String get() = username.trim().removePrefix("@").ifBlank { "curious_soul" }
@@ -110,7 +111,7 @@ object SocialApi {
         mapped {
             val text = query.trim()
             if (text.length < 2) return@mapped emptyList()
-            val path = "$PROFILES?select=id,display_name,username" +
+            val path = "$PROFILES?select=id,display_name,username,avatar_style" +
                 "&online_mode_enabled=is.true&discoverable=is.true" +
                 "&or=(display_name.ilike.*${encode(text)}*,username.ilike.*${encode(text)}*)" +
                 (myUserId?.let { "&id=neq.$it" } ?: "") +
@@ -153,6 +154,19 @@ object SocialApi {
                 Unit
             }
         }
+
+    suspend fun updateAvatarStyle(accessToken: String, style: Int): Result<Unit> = withContext(Dispatchers.IO) {
+        mapped {
+            require(style in 0..15) { "Choose a valid avatar." }
+            val userId = SupabaseClient.userIdFromAccessToken(accessToken)
+            val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
+                .patch(JSONObject().put("avatar_style", style).toString().toRequestBody(jsonMediaType))
+                .header("Prefer", "return=minimal")
+                .build()
+            SupabaseClient.executeBody(request)
+            Unit
+        }
+    }
 
     // ── friend requests ──────────────────────────────────────────────────
 
@@ -421,7 +435,8 @@ object SocialApi {
             people[id] = CurioPerson(
                 userId = id,
 displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEmpty(),
-            username = row.optString("username", "").takeUnless { it == "null" }.orEmpty()
+            username = row.optString("username", "").takeUnless { it == "null" }.orEmpty(),
+            avatarStyle = row.optInt("avatar_style", 0).coerceIn(0, 15)
             )
         }
         return people
@@ -432,7 +447,7 @@ displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEm
         if (ids.isEmpty()) return emptyMap()
         val wanted = ids.filter { it.isNotBlank() }.distinct()
         if (wanted.isEmpty()) return emptyMap()
-        val path = "$PROFILES?select=id,display_name,username&id=in.(${wanted.joinToString(",")})" +
+        val path = "$PROFILES?select=id,display_name,username,avatar_style&id=in.(${wanted.joinToString(",")})" +
             "&limit=${wanted.size}"
         return runCatching {
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()

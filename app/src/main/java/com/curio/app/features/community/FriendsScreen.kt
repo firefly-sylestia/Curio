@@ -470,26 +470,12 @@ internal fun SocialNote(message: String, isError: Boolean) {
 }
 
 /**
- * The person disc every social row leads with: first letter on the theme's
- * muted container. No avatars are uploaded anywhere in the online layer, so a
- * letter is the honest identity mark rather than a placeholder photo.
+ * The person disc every social row leads with a code-drawn style from the
+ * public profile. No avatars are uploaded anywhere in the online layer.
  */
 @Composable
-internal fun PersonBadge(name: String, size: androidx.compose.ui.unit.Dp = 38.dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondaryContainer),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = name.trim().firstOrNull()?.uppercase() ?: "?",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onSecondaryContainer
-        )
-    }
-}
+internal fun PersonBadge(name: String, avatarStyle: Int = 0, size: androidx.compose.ui.unit.Dp = 38.dp) =
+    SocialAvatar(avatarStyle, size)
 
 /**
  * One person as a settings-style row: disc, name, and the row's action.
@@ -510,7 +496,7 @@ private fun PersonRow(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        PersonBadge(person.label)
+        PersonBadge(person.label, person.avatarStyle)
         Spacer(Modifier.width(12.dp))
         Text(
             text = person.identityLabel,
@@ -553,7 +539,7 @@ private fun ThreadRow(
             .clickable(onClick = onOpen)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        PersonBadge(thread.person.label)
+        PersonBadge(thread.person.label, thread.person.avatarStyle)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -611,7 +597,7 @@ private fun RequestRow(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)
         ) {
-            PersonBadge(request.person.label)
+            PersonBadge(request.person.label, request.person.avatarStyle)
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

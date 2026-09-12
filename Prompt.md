@@ -1,5 +1,20 @@
 # Prompt Log — current request
 
+## Request (2026-09-12, in progress — social composer and code-only identity)
+
+User requested a floating Community composer that chooses message or card,
+direct quote/note posting from Topic Reveal, sorting, openable social profiles,
+notification/mute controls, long-press reactions, improved comments/replies,
+and a choice of 10–20 code-only social avatars with no photo uploads.
+
+**Completed in this slice:** the account page now offers 16 code-drawn social
+avatar styles. The chosen style is persisted locally and saved to `profiles`,
+and Friends/DM person badges render the style returned from the public profile
+instead of a generic letter disc. `profiles.avatar_style` is constrained to
+0–15 in the idempotent schema. No image column, upload path, or user photo is
+introduced. The remaining Community composer, topic-reveal posting, sorting,
+profile, notification/mute, and reaction work is queued for the next slice.
+
 ## Request (2026-09-12, in progress — restore Curio social headers + social reliability)
 
 User rejected the pixel header change. Keep the established Curio headers and

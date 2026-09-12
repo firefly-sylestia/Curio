@@ -25,6 +25,7 @@ create table if not exists public.profiles (
     id                  uuid primary key references auth.users (id) on delete cascade,
     display_name        text,
     username            text,
+    avatar_style        smallint not null default 0 check (avatar_style between 0 and 15),
     online_mode_enabled boolean not null default false,
     created_at          timestamptz not null default now(),
     updated_at          timestamptz not null default now()
@@ -32,6 +33,14 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 alter table public.profiles add column if not exists username text;
+alter table public.profiles add column if not exists avatar_style smallint not null default 0;
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'profiles_avatar_style_range') then
+        alter table public.profiles add constraint profiles_avatar_style_range
+            check (avatar_style between 0 and 15);
+    end if;
+end $$;
 create unique index if not exists profiles_username_unique
     on public.profiles (lower(username))
     where username is not null and length(trim(username)) between 3 and 24;

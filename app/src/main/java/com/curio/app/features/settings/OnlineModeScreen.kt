@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +53,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.features.community.AvatarPickerIcon
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -83,6 +86,7 @@ fun OnlineModeScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val account = OnlineAccount.state
     var username by rememberSaveable { mutableStateOf(AppPreferences.getUsername(context)) }
+    var avatarStyle by rememberSaveable { mutableStateOf(AppPreferences.getSocialAvatarStyle(context)) }
     val wide = windowWidthSizeClass().isWide
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
@@ -181,6 +185,26 @@ fun OnlineModeScreen(navController: NavController) {
                                 ),
                                 modifier = Modifier.padding(start = 12.dp, bottom = 4.dp)
                             ) { Text("Save username") }
+                            SettingsOptionDivider()
+                            Text(
+                                "Profile icon",
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.padding(start = 16.dp, top = 10.dp)
+                            )
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                items((0..15).toList()) { style ->
+                                    AvatarPickerIcon(style, style == avatarStyle) {
+                                        avatarStyle = style
+                                        AppPreferences.setSocialAvatarStyle(context, style)
+                                        account.session?.accessToken?.let { token ->
+                                            scope.launch { SocialApi.updateAvatarStyle(token, style) }
+                                        }
+                                    }
+                                }
+                            }
                             SettingsOptionDivider()
                             SettingsOptionRow(
                                 icon = CurioIcons.Close,
