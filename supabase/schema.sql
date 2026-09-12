@@ -638,7 +638,7 @@ create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
     or public.curio_are_friends(auth.uid(), recipient)
   );
 
--- ───────────────────────────���───────────────────────────────────────────────
+-- ───────────────────────────���─────────────────────────────────���─────────────
 -- 5e. dm_messages — ciphertext-only writes; legacy body is read-only
 -- ────────────────────────────────────���──────────────────────────────────────
 create table if not exists public.dm_messages (
@@ -1079,7 +1079,7 @@ begin
     end;
 end $$;
 
--- ───────────────────────────────────────────────────────────────────────────
+-- ─────────────────────────────────────────────────────────────────────────��─
 -- 6c. Messages live 24 hours, just like the cards
 --
 -- A conversation is a 24-hour thing in Curio: the server keeps a message for
@@ -1139,7 +1139,7 @@ grant usage on schema public to authenticated;
 grant select, insert, update, delete on public.profiles to authenticated;
 grant select, insert, update, delete on public.cloud_captures to authenticated;
 grant select, insert, delete on public.community_cards to authenticated;
-grant select, insert, delete on public.community_reactions to authenticated;
+grant select, insert, update, delete on public.community_reactions to authenticated;
 grant select, insert, delete on public.community_comments to authenticated;
 grant select, insert on public.community_reports to authenticated;
 grant select, insert, update, delete on public.friend_requests to authenticated;

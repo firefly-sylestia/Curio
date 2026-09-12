@@ -543,6 +543,8 @@ object CommunityApi {
                 expiresAtMillis = epochMillis(row.optString("expires_at")),
                 likeCount = likes,
                 likedByMe = likedByMe,
+                dislikeCount = dislikes,
+                dislikedByMe = dislikedByMe,
                 commentCount = row.optJSONArray("community_comments")?.length() ?: 0,
                 mine = myUserId != null && owner == myUserId
             )

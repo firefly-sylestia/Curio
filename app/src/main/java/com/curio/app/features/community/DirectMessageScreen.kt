@@ -184,9 +184,15 @@ fun DirectMessageScreen(
                 // envelope was published; keeping it would make every message
                 // fail AES-GCM authentication on that phone.
                 val envelope = SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()
-                if (envelope != null) {
-                    CurioDmCrypto.ensureConversationKey(context, conversationId, envelope)
-                } else {
+                runCatching {
+                    if (envelope != null) {
+                        CurioDmCrypto.ensureConversationKey(context, conversationId, envelope)
+                    } else {
+                        CurioDmCrypto.ensureConversationKey(context, conversationId)
+                    }
+                }.getOrElse {
+                    // A stale or damaged device envelope must not crash the screen.
+                    // Keep the local key and let the next send publish a fresh envelope.
                     CurioDmCrypto.ensureConversationKey(context, conversationId)
                 }
                 val fresh = raw.map { message ->
@@ -271,7 +277,10 @@ fun DirectMessageScreen(
         val encrypted = runCatching {
             val mine = CurioDmCrypto.identity(context)
             SocialApi.publishDmIdentity(active, mine, me)
-            val key = CurioDmCrypto.conversationKey(context, conversationId)
+            val key = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
+                .getOrNull()
+                ?.let { envelope -> runCatching { CurioDmCrypto.ensureConversationKey(context, conversationId, envelope) }.getOrNull() }
+                ?: CurioDmCrypto.conversationKey(context, conversationId)
             SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow().forEach { peer ->
                 SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer)).getOrThrow()
             }
@@ -510,15 +519,6 @@ fun DirectMessageScreen(
             modifier = Modifier
                 .layerBackdrop(glassBackdrop)
                 .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
-                // ONE inset consumer for the whole screen, and it is the
-                // UNION rather than a sum: the bottom inset is
-                // max(navigation bar, keyboard). Chaining
-                // `.windowInsetsPadding(navigationBars).imePadding()` CONSUMES
-                // the bar but does not shrink the IME inset — the keyboard's
-                // inset already spans the bar — so the composer ended up a
-                // bar's height ABOVE the keyboard with an empty strip under
-                // it. The union says exactly what the layout means.
 
         ) {
             if (eligible && token != null && myUserId != null) {
@@ -637,6 +637,7 @@ fun DirectMessageScreen(
                 }
 
                 MessageComposer(
+                    modifier = Modifier.windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)),
                     draft = draft,
                     title = fallback,
                     sending = sending,
@@ -1157,7 +1158,8 @@ private fun TypingDot(delayMillis: Long) {
  */
 @Composable
 private fun MessageComposer(
-    draft: String,
+  modifier: Modifier = Modifier,
+  draft: String,
     title: String,
     sending: Boolean,
     onDraftChange: (String) -> Unit,
@@ -1175,8 +1177,8 @@ private fun MessageComposer(
     )
     val nearLimit = draft.length > SocialApi.MAX_MESSAGE_CHARS * 8 / 10
 
-    Column(
-        modifier = Modifier
+  Column(
+  modifier = modifier
   .fillMaxWidth()
   .padding(
                 start = wideContentEdgePadding(),
