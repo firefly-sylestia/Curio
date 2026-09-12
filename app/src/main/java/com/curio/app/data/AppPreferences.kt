@@ -307,6 +307,8 @@ object AppPreferences {
     // Off by default: Online Mode alone is about sync, this is the louder
     // "I want the community in my nav" choice.
     private const val KEY_COMMUNITY_TAB_ENABLED = "community_tab_enabled"
+    private const val KEY_TERMS_ACCEPTED_VERSION = "terms_accepted_version"
+    const val CURRENT_TERMS_VERSION = 1
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -349,9 +351,17 @@ object AppPreferences {
         onlineModeEnabledState = enabled
     }
 
-    // ── Community tab (opt-in bottom-nav entry) ───────────────────────
-    fun isCommunityTabEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, false)
+  // ── Terms acceptance ──────────────────────────────────────────────
+  fun hasAcceptedCurrentTerms(context: Context): Boolean =
+  prefs(context).getInt(KEY_TERMS_ACCEPTED_VERSION, 0) >= CURRENT_TERMS_VERSION
+
+  fun acceptCurrentTerms(context: Context) {
+  prefs(context).edit().putInt(KEY_TERMS_ACCEPTED_VERSION, CURRENT_TERMS_VERSION).apply()
+  }
+
+  // ── Community tab (opt-in bottom-nav entry) ───────────────────────
+  fun isCommunityTabEnabled(context: Context): Boolean =
+  prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, false)
 
     fun setCommunityTabEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_COMMUNITY_TAB_ENABLED, enabled).apply()
