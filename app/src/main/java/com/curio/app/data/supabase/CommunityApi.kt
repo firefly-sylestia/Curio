@@ -27,6 +27,12 @@ data class CommunityCard(
      *  (blank when their profile is not readable — they turned Online Mode
      *  off, or the lookup failed). */
     val authorName: String = "",
+    /**
+     * The author's DISPLAY NAME, resolved the same way. The display name LEADS
+     * on the wall and the `@username` reads underneath it — a name and a
+     * handle are two different things, and a member's card should carry both.
+     */
+    val authorDisplayName: String = "",
     /** The author's chosen portrait (0–15). */
     val authorAvatar: Int = 0,
     /** CARD (a topic share card), NOTE (a text-only post) or QUOTE. */
@@ -58,13 +64,29 @@ data class CommunityCard(
             ?: 0L
 
     /**
-     * What to PRINT for the author: the live username first, the post-time
-     * snapshot second. Never a product label — a member's card must always
-     * carry a real human identity.
+     * What to PRINT for the author: the display name first, then the live
+     * username, then the post-time snapshot. Never a product label — a
+     * member's card must always carry a real human identity.
      */
     val authorLabel: String
-        get() = authorName.trim().removePrefix("@").ifBlank {
-            authorHandle.trim().removePrefix("@").ifBlank { "a curious soul" }
+        get() {
+            val name = authorDisplayName.trim().removePrefix("@")
+            if (name.isNotBlank() && !name.equals("null", true)) return name
+            val live = authorName.trim().removePrefix("@")
+            return live.ifBlank { authorHandle.trim().removePrefix("@") }
+                .ifBlank { "a curious soul" }
+        }
+
+    /**
+     * The handle as it is printed on the SECOND line, `@` included. The live
+     * username wins over the post-time snapshot, and the snapshot is what a
+     * member keeps when their profile stops being readable.
+     */
+    val authorHandleLabel: String
+        get() {
+            val live = authorName.trim().removePrefix("@")
+            val snapshot = authorHandle.trim().removePrefix("@")
+            return "@" + live.ifBlank { snapshot }.ifBlank { "a curious soul" }
         }
 }
 
@@ -113,6 +135,8 @@ data class CommunityComment(
     /** The author's CURRENT username (blank when unreadable) — see
      *  [CommunityCard.authorName]. */
     val authorName: String = "",
+    /** The author's display name (blank when unreadable or unset). */
+    val authorDisplayName: String = "",
     /** The author's chosen portrait (0–15). */
     val authorAvatar: Int = 0,
     val body: String,
@@ -121,10 +145,22 @@ data class CommunityComment(
     val createdAtMillis: Long,
     val mine: Boolean
 ) {
-    /** Live username first, post-time snapshot second. */
+    /** Display name first, live username second, post-time snapshot last. */
     val authorLabel: String
-        get() = authorName.trim().removePrefix("@").ifBlank {
-            authorHandle.trim().removePrefix("@").ifBlank { "a curious soul" }
+        get() {
+            val name = authorDisplayName.trim().removePrefix("@")
+            if (name.isNotBlank() && !name.equals("null", true)) return name
+            val live = authorName.trim().removePrefix("@")
+            return live.ifBlank { authorHandle.trim().removePrefix("@") }
+                .ifBlank { "a curious soul" }
+        }
+
+    /** The handle printed on the reply's second line, `@` included. */
+    val authorHandleLabel: String
+        get() {
+            val live = authorName.trim().removePrefix("@")
+            val snapshot = authorHandle.trim().removePrefix("@")
+            return "@" + live.ifBlank { snapshot }.ifBlank { "a curious soul" }
         }
 }
 
@@ -506,7 +542,11 @@ object CommunityApi {
         if (authors.isEmpty()) return cards
         return cards.map { card ->
             val person = authors[card.authorId] ?: return@map card
-            card.copy(authorName = person.username, authorAvatar = person.avatarStyle)
+            card.copy(
+                authorName = person.username,
+                authorDisplayName = person.displayName,
+                authorAvatar = person.avatarStyle
+            )
         }
     }
 
@@ -521,7 +561,11 @@ object CommunityApi {
         if (authors.isEmpty()) return replies
         return replies.map { reply ->
             val person = authors[reply.authorId] ?: return@map reply
-            reply.copy(authorName = person.username, authorAvatar = person.avatarStyle)
+            reply.copy(
+                authorName = person.username,
+                authorDisplayName = person.displayName,
+                authorAvatar = person.avatarStyle
+            )
         }
     }
 

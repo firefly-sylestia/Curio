@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -72,6 +73,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -100,6 +102,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.SocialApi
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingCabinetFilter
@@ -355,6 +358,12 @@ fun ProfileScreen(navController: NavController) {
     val heroTagline = remember(taglineRevision, displayStreak) {
         AppPreferences.getCustomStreakTagline(context).ifBlank { taglineForStreak(displayStreak) }
     }
+    // The member's OWN words, for the Bio row below the hero. Empty means
+    // "not written yet" rather than the automatic streak line, which has its
+    // own row right beside it.
+    val bioText = remember(taglineRevision) {
+        AppPreferences.getCustomStreakTagline(context).takeIf { it.isNotBlank() }
+    }
 
     // The hero wears the Home quest family's rose torn banner — the LAST
     // explored category personalizes the page (v7.101): its family's
@@ -387,6 +396,14 @@ fun ProfileScreen(navController: NavController) {
         onCropDismiss = { cropSource = null },
         taglineInput = taglineInput,
         onTaglineInputChange = { taglineInput = it },
+        onOpenPrivacy = {
+            // The dialog closes first: Privacy is a full page in the settings
+            // family, and leaving the edit dialog behind it would stack two
+            // modals over the profile.
+            showNameDialog = false
+            cropSource = null
+            navController.navigate(CurioRoutes.SETTINGS_PRIVACY) { launchSingleTop = true }
+        },
         onDismiss = {
             showNameDialog = false
             cropSource = null
@@ -394,6 +411,13 @@ fun ProfileScreen(navController: NavController) {
         onSave = {
             displayName = nameInput.trim().ifBlank { "Curious Explorer" }
             AppPreferences.setDisplayName(context, displayName)
+            // The account's DISPLAY name travels too: the wall, the replies and
+            // every profile now LEAD with it, with the @username underneath.
+            // Local first (so the hero moves at once), mirrored best-effort —
+            // an offline save is never blocked by a failed push.
+            OnlineAccount.state.session?.accessToken?.let { active ->
+                scope.launch { SocialApi.updateDisplayName(active, displayName) }
+            }
             // v97 — the tagline (the Bio) saves with the same Edit profile
             // dialog; an empty value keeps the automatic streak line.
             AppPreferences.setCustomStreakTagline(context, taglineInput)
@@ -528,6 +552,30 @@ fun ProfileScreen(navController: NavController) {
                             },
                             onOpenStats = {
                                 navController.navigate(CurioRoutes.STATS) { launchSingleTop = true }
+                            }
+                        )
+                    }
+                }
+            }
+            // Bio + streak in one card: the two facts the hero cannot show in
+            // full (its tagline is a single ellipsized line, and the streak
+            // rides a pill). Both are VIEWS here — editing still happens in
+            // Edit profile, which is the one place identity is written.
+            item {
+                Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
+                        ProfileFactRow(
+                            icon = CurioIcons.Note,
+                            label = "Bio",
+                            value = bioText ?: "No bio yet — add one from Edit profile."
+                        )
+                        ProfileFactRow(
+                            icon = CurioIcons.LocalFire,
+                            label = "Streak",
+                            value = if (displayStreak <= 0) {
+                                "No streak yet — explore something today to start one."
+                            } else {
+                                "$displayStreak day${if (displayStreak == 1) "" else "s"} in a row"
                             }
                         )
                     }
@@ -969,6 +1017,8 @@ private fun ProfileDialogs(
     // tagline" button + helper texts are gone).
     taglineInput: String,
     onTaglineInputChange: (String) -> Unit,
+    /** Opens Settings → Privacy from inside the dialog. */
+    onOpenPrivacy: () -> Unit,
     onDismiss: () -> Unit,
     onSave: () -> Unit
 ) {
@@ -976,6 +1026,16 @@ private fun ProfileDialogs(
         AlertDialog(
             containerColor = curioDialogContainerColor(),
             shape = CurioDialogShape,
+            // v3xx55 — the dialog is WIDER than the platform default: it holds
+            // the photo picker, both identity fields and the whole Curio
+            // account section (sign in / create account when signed out), and
+            // the default width squeezed all of that into a column of wrapped
+            // labels. 94% of the window, capped at 520dp so it still reads as
+            // a dialog and never as a full-screen page.
+            modifier = Modifier
+                .fillMaxWidth(0.94f)
+                .widthIn(max = 520.dp),
+            properties = DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = onDismiss,
             title = { Text("Edit profile", fontWeight = FontWeight.ExtraBold) },
             text = {
@@ -1104,6 +1164,26 @@ private fun ProfileDialogs(
                             CurioAuthCard()
                         }
                     }
+
+                    // ── Privacy ──
+                    // One door to the member's own rules (who sees the
+                    // profile, whether activity is drawn, who is blocked).
+                    // The page itself lives in the settings family, so this is
+                    // a button rather than a third copy of the switches.
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EditSectionLabel(icon = CurioIcons.VisibilityOff, text = "Privacy")
+                        Text(
+                            "Who can open your profile, whether your activity is shown, and " +
+                                "who you have blocked.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        DialogPillAction(
+                            label = "Open privacy settings",
+                            accent = true,
+                            onClick = onOpenPrivacy
+                        )
+                    }
                 }
             },
             confirmButton = {
@@ -1123,6 +1203,40 @@ private fun ProfileDialogs(
             onConfirm = onCropApply,
             onDismiss = onCropDismiss
         )
+    }
+}
+
+/**
+ * One profile FACT on its own row — a glyph, a small label and the value.
+ *
+ * Deliberately not [CurioSettingsInfoRow]: that row ellipsizes its subtitle to
+ * a single line, and a bio is prose. The value wraps here instead, so the
+ * whole thing is actually readable on the page.
+ */
+@Composable
+private fun ProfileFactRow(icon: String, label: String, value: String) {
+    Row(
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        CurioIcon(
+            name = icon,
+            contentDescription = null,
+            tint = settingsCardAccentInk(),
+            size = 21.dp
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 

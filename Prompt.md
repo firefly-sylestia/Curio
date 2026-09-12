@@ -1,6 +1,91 @@
 # Prompt Log — current request
 
-## Request (2026-09-12, IN PROGRESS — community, messages and account: fix the broken flows, harden the social layer, redesign the wall)
+## Request (2026-09-12, DONE — privacy, names, cache and speed)
+
+User (chat, in their words): the read receipt is inaccurate, and a duplicate
+username says "you've already done that" instead of "that username is taken" —
+what else remains? Settings' Online mode option is too square — make it the size
+of Recycle bin. In Edit profile, offer create-account / sign-in when there is no
+account, and make the dialog box wider. On Profile add a bio view and a streak
+view. Add privacy features, with a Privacy button in Edit profile. Make the
+username and the shown name different. Add a better cache system. Fix the pasted
+CI failure and do a security audit. Follow-up: "also better chats cache etc,
+better loading and faster syncing within milliseconds".
+
+Instruction: research and decide everything yourself, ask no questions.
+
+### What shipped (this commit)
+
+1. **CI repair.** `CommunityCommentsSheet.kt:165` called `remember` inside a
+   `LazyColumn` content lambda (a `LazyListScope`, not a composable context) —
+   the branch order is derived in the composable scope now. Both compile tasks
+   pass.
+
+2. **Chats: a real cache, real expiries, and much faster ticks.** All three
+   social caches moved off `SharedPreferences` onto a new
+   `data/supabase/SocialCache.kt`: one JSON file per entry under
+   `filesDir/curio_social_cache/`, a warm in-memory layer in front of it, a TTL
+   per kind (threads 14d, people 30d, wall 3h, inbox 12h, replies 60m) and
+   oldest-first eviction past each kind's ceiling. Two NEW caches: the inbox
+   (`SocialInboxCache` — threads + requests + friends, so Friends opens with
+   its list and its unread badges already right) and replies
+   (`SocialCommentsCache`). Sign-out deletes the whole directory
+   (`OnlineAccount.signOut` → `SocialCache.clear`) plus the legacy prefs blob.
+   Ticks: thread 2.5s → **1.2s**, typing 3s → **1.5s**, inbox 12s → **5s**,
+   watcher 15s/60s → **8s/30s**. `mine` is still recomputed on read, never
+   stored.
+
+3. **Privacy (§5f), enforced on the server.** `profiles.profile_visibility`
+   (`public` | `friends`) narrows the discoverable SELECT policy through
+   `curio_are_friends`; `profiles.hide_activity` + `last_active_at` — hiding
+   CLEARS the stamp in the same write, so a hidden member has nothing on the
+   server to read; `member_blocks` + a security-definer `curio_is_blocked`, and
+   a block is enforced in SIX policies (profiles, cards, replies, reactions,
+   friend_requests, dm_messages), both directions. New `PrivacyScreen`
+   (`SETTINGS_PRIVACY`, on the settings rail + hub + search), a Privacy button
+   in Edit profile, blocking on a member's profile page, and a presence line
+   (`CurioPerson.presenceLabel`) that is null when hidden/unknown/stale.
+   The privacy columns are a SECOND opt-in select (`SocialApi.profile`) that
+   falls back to `PERSON_COLUMNS`, so an un-re-pasted project never breaks.
+
+4. **A name and a @username are different things.** `curioPerson`/`CommunityCard`/
+   `CommunityComment` gained a display name and a `handleLabel`;
+   `SocialApi.updateDisplayName` mirrors the local name on sign-in and on every
+   Edit-profile save. The wall, replies, the member profile, Friends and the
+   conversation header all LEAD with the display name and print the handle on
+   the line beneath it.
+
+5. **Profile + Settings polish.** A Bio and a Streak row under the hero (the
+   bio wraps, so it is actually readable); the Edit-profile dialog is 94% wide
+   (capped 520dp) instead of the cramped platform default; Online mode is a
+   Recycle-bin-sized secondary row instead of a big square card. The
+   taken-username verdict now recognises the collision BY SHAPE
+   (`duplicate key` / `23505` / `unique constraint`) rather than by index name,
+   so it can no longer fall through to "You've already done that"; "Seen" is
+   stamped on the newest of MY messages that was actually READ.
+
+### Security audit (this pass)
+
+Verified: RLS on every table (the new `member_blocks` included, anon revoked,
+self-check lists updated); every id validated (`SocialApi.id`) before it is
+pasted into a PostgREST query, and server-returned ids filtered again in
+`namesOf`; search text URL-encoded; failures mapped to safe copy so no raw
+response body reaches the UI; write throttles intact (1s message, 2s social
+write, 3s rename); presence written ONLY while activity is visible and cleared
+when it is hidden; the device's social cache deleted on sign-out; blocking and
+visibility enforced in the policies, not the client.
+
+**Known gap (not silently dropped):** `SupabaseSessionStore` keeps the access
+and refresh tokens in plain `SharedPreferences`. It needs
+`EncryptedSharedPreferences` (or a keystore-wrapped DataStore); that is a new
+dependency and a migration, so it is recorded here as the next security item
+rather than half-shipped.
+
+**Status:** DONE. Needs `supabase/schema.sql` re-pasted for §5f (visibility,
+presence, blocks); until then those reads/writes degrade quietly (blocks empty,
+presence absent) and nothing else changes.
+
+## Request (2026-09-12, ARCHIVED — community, messages and account: fix the broken flows, harden the social layer, redesign the wall)
 
 User (rephrased, in their words): tapping a card opens its own page but that
 page is wired into the settings family, which is wrong — fix the card tap flow.
@@ -1006,16 +1091,18 @@ file on 2026-09-10 to keep it short. They live in git history
 
 ## User prompts
 
-### Current prompt (2026-09-12) — DONE
+### Prompt (2026-09-12) — DONE
 
-User (chat): fix the pasted CI failure, push it, and check Prompt.md — the
-in-progress request was left half done, analyse it and say what remains.
-The log named five unresolved references in `FriendsScreen` and
-`OnlineModeScreen` from `df4b6d57`.
+Two prompts landed back to back: (a) fix the pasted CI failure, push it, and
+audit what the in-progress request still had left; (b) the privacy / names /
+cache / speed batch, then "also better chats cache etc, better loading and
+faster syncing within milliseconds".
 
-**Status:** DONE — both compile breaks fixed (see the audit at the top of
-this file), the remaining work for the in-progress request is itemised there,
-and the commit is pushed. CI validates.
+**Status:** DONE — the CI break is repaired, the audit itemised what remained,
+and the whole batch (chats cache + expiries, faster ticks, §5f privacy,
+display-name/handle split, Profile bio + streak rows, wider Edit profile,
+Online-mode row size, security audit) is in the request log at the top of this
+file. Pushed; CI validates.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
 

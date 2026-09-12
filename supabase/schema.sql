@@ -801,6 +801,224 @@ revoke all on public.dm_typing from anon;
 revoke all on public.dm_reactions from anon;
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 5f. social privacy — profile visibility, presence, blocks
+-- ───────────────────────────────────────────────────────────────────────────
+-- Three member-owned decisions, all enforced HERE. The client mirrors them so
+-- the UI can explain itself; it is never the guard.
+--
+--   * profile_visibility — 'public' exposes the public identity row to every
+--     discoverable member; 'friends' exposes it only to accepted friends (and
+--     to the owner, via prof_select_own). The discoverable SELECT policy is
+--     recreated below with that extra test.
+--   * hide_activity — a member who hides activity has NO stamp stored at all:
+--     the client clears `last_active_at` the moment the switch goes on, so
+--     there is nothing to read whether a policy is consulted or not. Presence
+--     is a courtesy line, never a record.
+--   * member_blocks — one row per block. A blocked pair is removed from every
+--     reachable surface: cards, replies, likes, requests, messages and each
+--     other's profiles. The client also filters its own in-memory lists so a
+--     block takes effect on the screen it was made from; these policies are
+--     the real guard.
+--
+-- Privacy NARROWS access, it never widens it: every test below still requires
+-- Online Mode on the account whose row is being read.
+
+alter table public.profiles add column if not exists profile_visibility text not null default 'public';
+alter table public.profiles add column if not exists hide_activity boolean not null default false;
+alter table public.profiles add column if not exists last_active_at timestamptz;
+
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'profiles_visibility_values') then
+        alter table public.profiles add constraint profiles_visibility_values
+            check (profile_visibility in ('public', 'friends'));
+    end if;
+end $$;
+
+create table if not exists public.member_blocks (
+    blocker    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    blocked    uuid not null references auth.users (id) on delete cascade,
+    created_at timestamptz not null default now(),
+    primary key (blocker, blocked),
+    constraint member_blocks_not_self check (blocker <> blocked)
+);
+
+create index if not exists member_blocks_blocked_idx on public.member_blocks (blocked);
+
+alter table public.member_blocks enable row level security;
+
+drop policy if exists blk_select_own on public.member_blocks;
+create policy blk_select_own on public.member_blocks
+    for select to authenticated
+    using (blocker = auth.uid());
+
+drop policy if exists blk_insert_own on public.member_blocks;
+create policy blk_insert_own on public.member_blocks
+    for insert to authenticated
+    with check (blocker = auth.uid());
+
+drop policy if exists blk_delete_own on public.member_blocks;
+create policy blk_delete_own on public.member_blocks
+    for delete to authenticated
+    using (blocker = auth.uid());
+
+-- "Is this pair blocked, in either direction?" — security definer so a policy
+-- can ask it without read access to the other member's rows.
+create or replace function public.curio_is_blocked(a uuid, b uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select exists (
+        select 1 from public.member_blocks m
+         where (m.blocker = a and m.blocked = b)
+            or (m.blocker = b and m.blocked = a)
+    );
+$$;
+
+grant execute on function public.curio_is_blocked(uuid, uuid) to authenticated;
+
+-- ── profiles: discovery honors visibility AND blocks ─────────────────────
+drop policy if exists prof_select_discoverable on public.profiles;
+create policy prof_select_discoverable on public.profiles
+    for select to authenticated
+    using (
+        id <> auth.uid()
+        and online_mode_enabled
+        and discoverable
+        and (profile_visibility = 'public' or public.curio_are_friends(auth.uid(), id))
+        and not public.curio_is_blocked(auth.uid(), id)
+    );
+
+-- ── community_cards: a blocked member is not in your wall ────────────────
+drop policy if exists comm_select_live on public.community_cards;
+create policy comm_select_live on public.community_cards
+    for select to authenticated
+    using (
+        expires_at > now()
+        and not public.curio_is_blocked(auth.uid(), owner)
+        and exists (
+            select 1 from public.profiles p
+            where p.id = community_cards.owner and p.online_mode_enabled
+        )
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+-- ── community_comments: nor are their replies ────────────────────────────
+drop policy if exists cmt_select_visible on public.community_comments;
+create policy cmt_select_visible on public.community_comments
+    for select to authenticated
+    using (
+        not public.curio_is_blocked(auth.uid(), community_comments.author)
+        and exists (
+            select 1 from public.community_cards c
+            where c.id = community_comments.card_id
+              and c.expires_at > now()
+              and exists (
+                  select 1 from public.profiles p
+                  where p.id = c.owner and p.online_mode_enabled
+              )
+        )
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+-- ── community_reactions: nor their likes ────────────────────────────────
+drop policy if exists reac_select_visible on public.community_reactions;
+create policy reac_select_visible on public.community_reactions
+    for select to authenticated
+    using (
+        not public.curio_is_blocked(auth.uid(), community_reactions.user_id)
+        and exists (
+            select 1 from public.community_cards c
+            where c.id = community_reactions.card_id
+              and c.expires_at > now()
+              and exists (
+                  select 1 from public.profiles p
+                  where p.id = c.owner and p.online_mode_enabled
+              )
+        )
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+-- ── friend_requests: a blocked member cannot ask, and cannot be read ─────
+drop policy if exists fr_select_own on public.friend_requests;
+create policy fr_select_own on public.friend_requests
+    for select to authenticated
+    using (
+        (requester = auth.uid() or addressee = auth.uid())
+        and not public.curio_is_blocked(
+            requester,
+            addressee
+        )
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+drop policy if exists fr_insert_own on public.friend_requests;
+create policy fr_insert_own on public.friend_requests
+    for insert to authenticated
+    with check (
+        requester = auth.uid()
+        and not public.curio_is_blocked(auth.uid(), addressee)
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+        and exists (
+            select 1 from public.profiles them
+            where them.id = friend_requests.addressee
+              and them.online_mode_enabled
+              and them.discoverable
+        )
+        and (select profile_visibility from public.profiles where id = friend_requests.addressee) <> 'friends'
+    );
+
+-- ── dm_messages: a block ends the conversation in both directions ────────
+drop policy if exists dm_select_participants on public.dm_messages;
+create policy dm_select_participants on public.dm_messages
+    for select to authenticated
+    using (
+        (sender = auth.uid() or recipient = auth.uid())
+        and not public.curio_is_blocked(sender, recipient)
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+drop policy if exists dm_insert_friends on public.dm_messages;
+create policy dm_insert_friends on public.dm_messages
+    for insert to authenticated
+    with check (
+        sender = auth.uid()
+        and not public.curio_is_blocked(auth.uid(), recipient)
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+        and exists (
+            select 1 from public.profiles them
+            where them.id = dm_messages.recipient and them.online_mode_enabled
+        )
+        and public.curio_are_friends(auth.uid(), dm_messages.recipient)
+    );
+
+revoke all on public.member_blocks from anon;
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 8. Self-check
 -- ───────────────────────────────────────────────────────────────────────────
 do $$
@@ -815,9 +1033,10 @@ begin
       join pg_namespace n on n.oid = c.relnamespace
      where n.nspname = 'public'
        and c.relname in ('profiles','cloud_captures','community_cards',
+                         'member_blocks',
                          'community_reactions','community_comments',
                          'community_reports','friend_requests','dm_messages',
-                         'dm_typing','dm_reactions')
+                         'dm_typing','dm_reactions','member_blocks')
        and c.relrowsecurity = false;
     if rls_off is null then
         raise notice 'PASS  RLS enabled on every Curio table';
@@ -833,7 +1052,7 @@ begin
        and tablename in ('profiles','cloud_captures','community_cards',
                          'community_reactions','community_comments',
                          'community_reports','friend_requests','dm_messages',
-                         'dm_typing','dm_reactions');
+                         'dm_typing','dm_reactions','member_blocks');
     if anon_open is null then
         raise notice 'PASS  no anon policies on Curio tables';
     else
@@ -845,7 +1064,7 @@ begin
       from unnest(array['profiles','cloud_captures','community_cards',
                         'community_reactions','community_comments',
                         'community_reports','friend_requests','dm_messages',
-                        'dm_typing','dm_reactions']) as t
+                        'dm_typing','dm_reactions','member_blocks']) as t
      where not exists (
         select 1 from pg_class c
           join pg_namespace n on n.oid = c.relnamespace

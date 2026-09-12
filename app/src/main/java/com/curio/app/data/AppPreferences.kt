@@ -351,6 +351,41 @@ object AppPreferences {
         communityTabEnabledState = enabled
     }
 
+    // ── Social privacy (v3xx55) ───────────────────────────────────────
+    // These three decisions belong to the member, not the build: they are
+    // stored locally (so they hold offline, where the account layer cannot
+    // answer) and mirrored onto the profile row so the server enforces the
+    // same thing. See `supabase/schema.sql` §5e.
+    private const val KEY_PROFILE_VISIBILITY = "social_profile_visibility"
+    private const val KEY_HIDE_ACTIVITY = "social_hide_activity"
+
+    /**
+     * Who may see this account's profile: "public" (any discoverable member)
+     * or "friends" (accepted friends only). The local value is authoritative
+     * so the choice survives offline; [SocialApi.updatePrivacy] mirrors it.
+     */
+    fun getProfileVisibility(context: Context): String =
+        prefs(context).getString(KEY_PROFILE_VISIBILITY, "public") ?: "public"
+
+    fun setProfileVisibility(context: Context, visibility: String) {
+        val clean = if (visibility == "friends") "friends" else "public"
+        prefs(context).edit().putString(KEY_PROFILE_VISIBILITY, clean).apply()
+        profileVisibilityState = clean
+    }
+
+    /**
+     * When on, this account never publishes a last-active stamp, so no
+     * presence line can be drawn about it — and the switch clears any stamp
+     * that was already stored the moment it is turned on.
+     */
+    fun isActivityHidden(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HIDE_ACTIVITY, false)
+
+    fun setActivityHidden(context: Context, hidden: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HIDE_ACTIVITY, hidden).apply()
+        hideActivityState = hidden
+    }
+
     // ── Favorite song (v... — Vinyl share card) ───────────────────────
     // The user's own favorite song, shown as a small corner element on the
     // Vinyl share card. Empty = a gentle default line.
@@ -1215,6 +1250,12 @@ object AppPreferences {
     /** Mirrors [isCommunityTabEnabled] — the opt-in Community nav tab. */
     var communityTabEnabledState by mutableStateOf(false)
         private set
+    /** Mirrors [getProfileVisibility] — "public" or "friends". */
+    var profileVisibilityState by mutableStateOf("public")
+        private set
+    /** Mirrors [isActivityHidden] — no last-active stamp is ever published. */
+    var hideActivityState by mutableStateOf(false)
+        private set
 
     /**
      * Whether the Community tab belongs on the bottom nav right now.
@@ -1719,6 +1760,8 @@ object AppPreferences {
         autoBackupFrequencyDaysState = getAutoBackupFrequencyDays(context)
         onlineModeEnabledState = isOnlineModeEnabled(context)
         communityTabEnabledState = isCommunityTabEnabled(context)
+        profileVisibilityState = getProfileVisibility(context)
+        hideActivityState = isActivityHidden(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────

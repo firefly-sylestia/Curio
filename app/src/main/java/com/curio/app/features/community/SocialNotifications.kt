@@ -21,6 +21,7 @@ import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.data.supabase.SocialPresence
 import com.curio.app.navigation.PendingCommunityOpen
 import com.curio.app.navigation.PendingDirectMessageOpen
 import kotlinx.coroutines.delay
@@ -154,9 +155,11 @@ internal object SocialNotifications {
  *     already waiting).
  *  2. **the wall**, every [WALL_MS] — cards that are newer than the newest one
  *     seen before, and not written by this account, are announced once.
+ *  3. **presence**, every [PRESENCE_MS] — the member's own last-active stamp.
+ *     Not a notification and not gated on the switch.
  *
- * Both are gated on `Online mode + signed in + the Notifications switch`, so
- * with any of the three off the app makes no extra request at all.
+ * The first two are gated on `Online mode + signed in + the Notifications
+ * switch`, so with any of the three off the app makes no extra request at all.
  */
 @Composable
 internal fun SocialNotificationWatcher() {
@@ -225,6 +228,20 @@ internal fun SocialNotificationWatcher() {
             delay(WALL_MS)
         }
     }
+
+    // ── presence ────────────────────────────────────────────────────────
+    // NOT a notification: this publishes the member's OWN last-active stamp,
+    // the courtesy line a profile can draw. Gated on Online Mode + a session
+    // alone (the notifications switch has nothing to do with it), and skipped
+    // entirely when the member hid activity — SocialPresence checks that, and
+    // turning hiding ON clears the stamp through SocialApi.updatePrivacy.
+    LaunchedEffect(token, onlineMode) {
+        if (!onlineMode || token == null) return@LaunchedEffect
+        while (true) {
+            SocialPresence.publish(context)
+            delay(PRESENCE_MS)
+        }
+    }
 }
 
 /**
@@ -233,5 +250,8 @@ internal fun SocialNotificationWatcher() {
  * in the open thread instantly (the thread polls itself), so these only cover
  * "the phone is in your pocket and the app is still warm".
  */
-private const val INBOX_MS = 15_000L
-private const val WALL_MS = 60_000L
+private const val INBOX_MS = 8_000L
+private const val WALL_MS = 30_000L
+
+/** How often the presence tick runs — the write itself backs off further. */
+private const val PRESENCE_MS = 5L * 60 * 1000

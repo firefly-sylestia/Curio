@@ -297,6 +297,16 @@ internal fun CurioAccountIdentityCard(
             )
         }
 
+        // A NAME and a HANDLE are different things, and this is the one place
+        // the handle is chosen — so it is said here, once, instead of leaving
+        // the two fields to look like duplicates of each other.
+        Text(
+            text = "Your name (above) is what people read first. This handle is how they find " +
+                "and mention you — it must be unique.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         AccountField(
             placeholder = "Username",
             value = username,

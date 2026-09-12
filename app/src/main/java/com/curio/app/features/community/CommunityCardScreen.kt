@@ -268,16 +268,19 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                     }
                                 }
                         ) {
-                            // The portrait and the LIVE username: renaming
-                            // yourself updates every card you ever posted.
+                            // The portrait, the DISPLAY name and the LIVE
+                            // username: renaming either updates every card you
+                            // ever posted.
                             SocialAvatar(style = current.authorAvatar, avatarSize = 38.dp)
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(start = 10.dp)
                             ) {
+                                // The display name LEADS; the @username opens
+                                // the meta line beneath it.
                                 Text(
-                                    text = "@${current.authorLabel}",
+                                    text = current.authorLabel,
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontWeight = FontWeight.SemiBold
                                     ),
@@ -286,6 +289,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 )
                                 Text(
                                     text = listOfNotNull(
+                                        current.authorHandleLabel,
                                         current.categoryName.takeIf { it.isNotBlank() },
                                         agoLabel(current.createdAtMillis),
                                         if (current.hoursLeft <= 0L) "expiring"

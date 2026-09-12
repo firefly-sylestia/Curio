@@ -266,6 +266,9 @@ object CurioRoutes {
     const val SETTINGS_DATA = "settings/data"
     // v3xx — the account + Online Mode page (sign-in and sync).
     const val SETTINGS_ONLINE = "settings/online"
+    // v3xx55 — the member's own privacy rules (profile visibility, activity,
+    // blocked people). Also reached from the Edit profile dialog.
+    const val SETTINGS_PRIVACY = "settings/privacy"
     // v3xx — the 24-hour community wall of text share cards. Also the app's
     // ONLY optional bottom-nav tab: it joins [bottomNavRoutePrefixes] while
     // the user's opt-in tab is showing (see [liveTabPrefixes]).

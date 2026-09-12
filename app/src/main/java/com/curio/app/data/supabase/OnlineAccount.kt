@@ -92,6 +92,7 @@ object OnlineAccount {
                 SupabaseSessionStore.save(context, session)
                 AppPreferences.setOnlineModeEnabled(context, true)
                 state = State(session = session)
+                publishDisplayName(context, session.accessToken)
                 true
             },
             onFailure = { failure ->
@@ -126,6 +127,7 @@ object OnlineAccount {
                     SupabaseSessionStore.save(context, session)
                     AppPreferences.setOnlineModeEnabled(context, true)
                     state = State(session = session)
+                    publishDisplayName(context, session.accessToken)
                     true
                 }
             },
@@ -143,11 +145,15 @@ object OnlineAccount {
         if (token != null) SupabaseClient.signOut(token)
         SupabaseSessionStore.clear(context)
         AppPreferences.setOnlineModeEnabled(context, false)
-        // The device's social copy goes too: every cached conversation and
-        // every remembered person lives in this one prefs file (see
-        // SocialMessageCache / SocialPeopleCache in features/community).
-        // Signing out must not leave the previous account's threads readable
-        // by whoever opens the app next.
+        // The device's social copy goes too: every cached conversation, wall
+        // page, inbox, reply set and remembered person lives in
+        // [SocialCache] (see the caches in features/community). Signing out
+        // must not leave the previous account's threads, names or cards
+        // readable by whoever opens the app next, so the whole directory is
+        // deleted — not just the newest account's entries.
+        SocialCache.clear(context)
+        // The prefs blobs the older build wrote are dropped as well, so an
+        // upgrade cannot leave the previous shape behind either.
         runCatching {
             context.applicationContext
                 .getSharedPreferences(SOCIAL_CACHE_PREFS, Context.MODE_PRIVATE)
@@ -176,12 +182,28 @@ object OnlineAccount {
     fun clearMessage() {
         state = state.copy(error = null, notice = null)
     }
+
+    /**
+     * Carries the display name this device already has onto the account.
+     *
+     * A name and a handle are two different things: the handle is how people
+     * find you, the display name is what they READ first. A brand-new account
+     * would otherwise reach the wall with only a handle to its name, so this
+     * pushes the local one the moment a session exists. Best-effort — a failed
+     * push is a blank second line, never a blocked sign-in.
+     */
+    private fun publishDisplayName(context: Context, accessToken: String) {
+        val name = AppPreferences.getDisplayName(context)
+        if (name.isBlank()) return
+        recoveryScope.launch { SocialApi.updateDisplayName(accessToken, name) }
+    }
 }
 
 /**
- * The prefs file the social caches share (messages + remembered people).
- * Owned here as well as in `features/community/SocialComponents.kt` so
- * signing out can forget it without the data layer reaching into the UI.
+ * The prefs file the PREVIOUS build's social caches shared (messages +
+ * remembered people). The caches live in [SocialCache] on disk now, but
+ * signing out still clears this file so an upgraded device cannot keep
+ * answering from the old shape.
  */
 internal const val SOCIAL_CACHE_PREFS = "curio_social_cache"
 

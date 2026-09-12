@@ -131,11 +131,30 @@ fun FriendsScreen(navController: NavController) {
                 requests.map { it.person } +
                 threads.map { it.person }
         )
+        // The inbox itself is REMEMBERED: the conversations, their unread
+        // badges, the pending requests and the friends list all draw on the
+        // next entry — including an offline one — instead of on a spinner.
+        SocialInboxCache.write(context, threads, requests, friends)
         loading = false
     }
 
     LaunchedEffect(eligible, token, myUserId) {
         if (eligible && token != null && myUserId != null) {
+            // The device's copy FIRST — the list, the requests and the unread
+            // badges are on screen before the network is asked anything. The
+            // empty guards keep a re-entry from clobbering state the live tick
+            // has already refreshed.
+            SocialInboxCache.read(context)?.let { cached ->
+                if (friends.isEmpty()) friends = cached.friends
+                if (threads.isEmpty()) threads = cached.threads
+                if (requests.isEmpty()) requests = cached.requests
+                SocialPeopleCache.remember(
+                    context,
+                    cached.friends.map { it.person } +
+                        cached.requests.map { it.person } +
+                        cached.threads.map { it.person }
+                )
+            }
             load(token, myUserId)
         } else {
             friends = emptyList()
@@ -519,4 +538,4 @@ fun FriendsScreen(navController: NavController) {
  * tick on purpose: the list is a directory, not a conversation, and a reply
  * the user is waiting on lives in the thread they will open anyway.
  */
-private const val INBOX_TICK_MS = 12_000L
+private const val INBOX_TICK_MS = 5_000L

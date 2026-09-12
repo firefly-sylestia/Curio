@@ -633,8 +633,11 @@ private fun CommunityCardItem(
                         .weight(1f)
                         .padding(start = 10.dp)
                 ) {
+                    // The DISPLAY name leads and the @username rides the line
+                    // beneath it, beside the card's age: a name and a handle
+                    // are two different things, and a card wears both.
                     Text(
-                        text = "@${card.authorLabel}",
+                        text = card.authorLabel,
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
@@ -642,10 +645,14 @@ private fun CommunityCardItem(
                         maxLines = 1
                     )
                     Text(
-                        text = if (card.hoursLeft <= 0L) "Expiring now"
-                        else "${card.hoursLeft}h left",
+                        text = if (card.hoursLeft <= 0L) {
+                            "${card.authorHandleLabel} · expiring now"
+                        } else {
+                            "${card.authorHandleLabel} · ${card.hoursLeft}h left"
+                        },
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
                 CurioIcon(

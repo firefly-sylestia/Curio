@@ -190,8 +190,11 @@ fun DirectMessageScreen(
     // Who this conversation is with — resolved here so the header shows a
     // portrait and the LIVE username rather than the name the route carried.
     suspend fun loadPerson(active: String) {
-        SocialApi.people(active, listOf(otherUserId)).onSuccess { found ->
-            found[otherUserId]?.let { fresh ->
+        // `profile` rather than `people`: the peer card also draws the presence
+        // line, which only the wider privacy read carries — and it falls back
+        // to the base identity read on a project that has not been re-pasted.
+        SocialApi.profile(active, otherUserId).onSuccess { fresh ->
+            if (fresh != null) {
                 person = fresh
                 // Remembered so the NEXT open draws the real name instantly.
                 SocialPeopleCache.remember(context, fresh)
@@ -255,13 +258,14 @@ fun DirectMessageScreen(
     }
 
     // "is typing…" — polled, not pushed (Curio's online layer has no realtime
-    // socket by design). Three seconds is fast enough to feel live and slow
-    // enough to be invisible on battery and data.
+    // socket by design). A second and a half: the row is one tiny read of a
+    // single server-stamped timestamp, and a typing indicator that arrives
+    // after the message it was announcing is worse than none.
     LaunchedEffect(eligible, token, myUserId) {
         if (!eligible || token == null || myUserId == null) return@LaunchedEffect
         while (true) {
             peerTyping = SocialApi.isTyping(token, myUserId, otherUserId)
-            delay(3_000)
+            delay(1_500)
         }
     }
 
@@ -350,14 +354,15 @@ fun DirectMessageScreen(
         listState.animateScrollToItem(newest)
     }
 
-    // The live username wins over the name the route carried, so a rename shows
+    // The DISPLAY name wins over the name the route carried, so a rename shows
     // up in the conversation too. A locally remembered or route-carried person
-    // has no @username yet — it shows their name rather than a made-up handle.
+    // has no @username yet — the peer card then shows their name alone rather
+    // than a made-up handle.
     val fallback = person?.label?.takeIf { it.isNotBlank() }
         ?: handle.ifBlank { "Message" }
-    val title = person?.takeIf { it.username.isNotBlank() }
-        ?.let { "@${it.handle}" }
-        ?: fallback
+    // The hero (and the collapsed bar) carry the display name; the @username
+    // and the presence line sit on the peer card beneath it.
+    val title = fallback
 
     // "Seen" belongs on the newest of MY messages the other person actually
     // READ — not simply on my newest one. Stamping the latest line whatever
@@ -671,8 +676,12 @@ private fun MessagePeerHeader(
                         color = curioDialogActionColor()
                     )
                 } else {
+                    // The @username, and — only when the other member left
+                    // activity visible — a quiet presence line beside it.
                     Text(
-                        text = person?.let { "@${it.handle}" } ?: "Open profile",
+                        text = listOfNotNull(person?.handleLabel, person?.presenceLabel)
+                            .joinToString(" · ")
+                            .ifBlank { "Open profile" },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1119,12 +1128,16 @@ private fun MessageComposer(
 }
 
 /**
- * How often an OPEN conversation asks whether anything new arrived. Short
- * enough that a reply feels like it lands while you watch; long enough that
- * the tick is invisible on battery and data (each one is a few hundred bytes,
- * because it asks only for messages newer than the newest on screen).
+ * How often an OPEN conversation asks whether anything new arrived.
+ *
+ * 1.2s is deliberately tighter than a "poll every few seconds" cadence: each
+ * tick asks only for messages newer than the newest one on screen, so it is a
+ * few hundred bytes, and the point of the live thread is that a reply lands
+ * while you are looking at it rather than a beat later. The very first tick
+ * after an arrival is also what turns the typing row off and stamps the read
+ * receipt, so the whole exchange moves at this cadence.
  */
-private const val LIVE_TICK_MS = 2_500L
+private const val LIVE_TICK_MS = 1_200L
 
 /** The id prefix of a bubble that is sent but not yet confirmed. */
 private const val LOCAL_ID_PREFIX = "local-"

@@ -36,12 +36,16 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.supabase.CommunityCard
+import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.data.supabase.CurioDmThread
+import com.curio.app.data.supabase.CurioFriend
+import com.curio.app.data.supabase.CurioFriendRequest
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.SOCIAL_CACHE_PREFS
+import com.curio.app.data.supabase.SocialCache
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -784,25 +788,21 @@ internal object SocialReactions {
  * Why it exists: a thread used to be empty until the network answered, so
  * opening a conversation you had just had showed a blank screen, and losing
  * signal lost the conversation. This keeps the last [CAP] messages of each
- * conversation in the app's own storage, so a thread renders instantly from
- * the device and the network only confirms or extends it.
+ * conversation on the device, so a thread renders instantly and the network
+ * only confirms or extends it.
  *
- * It is a CACHE, not a store of record: the server owns the messages, a clear
- * forgets everything, and writing the same conversation again replaces its
- * copy (no growth, no duplicates).
+ * ONE FILE PER CONVERSATION ([SocialCache], `thread` kind): writing a thread
+ * touches that one small file instead of re-serializing every cached
+ * conversation, entries expire after [SocialCache.TTL_THREAD_MS], and the
+ * oldest threads are evicted past the kind's ceiling.
  *
- * Only text is ever kept — the same rule as the online layer itself.
+ * It is a CACHE, not a store of record: the server owns the messages, and
+ * writing the same conversation again replaces its copy (no growth, no
+ * duplicates). Only text is ever kept — the same rule as the online layer.
  */
 internal object SocialMessageCache {
+    private const val KIND = "thread"
     private const val CAP = 200
-    private const val VERSION_KEY = "cache_version"
-
-    /** Bump when the stored shape changes, so stale blobs are dropped once. */
-    private const val VERSION = 2
-
-    private fun prefs(context: Context) = socialCachePrefs(context)
-
-    private fun key(otherUserId: String) = "thread_$otherUserId"
 
     /**
      * The cached conversation with [otherUserId], oldest first. [myUserId] is
@@ -815,17 +815,18 @@ internal object SocialMessageCache {
         myUserId: String
     ): List<CurioDirectMessage> {
         if (otherUserId.isBlank()) return emptyList()
-        val cooked = runCatching { decode(context, otherUserId, myUserId) }
-        return cooked.getOrDefault(emptyList())
+        val entry = SocialCache
+            .read(context, KIND, otherUserId, SocialCache.TTL_THREAD_MS)
+            ?: return emptyList()
+        return decode(entry.data, myUserId)
     }
 
-    private fun decode(
-        context: Context,
-        otherUserId: String,
-        myUserId: String
-    ): List<CurioDirectMessage> {
-        val raw = prefs(context).getString(key(otherUserId), null) ?: return emptyList()
-        val array = JSONArray(raw)
+    /** When this conversation was last written (0 when nothing is cached). */
+    fun cachedAt(context: Context, otherUserId: String): Long =
+        if (otherUserId.isBlank()) 0L
+        else SocialCache.read(context, KIND, otherUserId, SocialCache.TTL_THREAD_MS)?.atMillis ?: 0L
+
+    private fun decode(array: JSONArray, myUserId: String): List<CurioDirectMessage> {
         val out = ArrayList<CurioDirectMessage>(array.length())
         for (index in 0 until array.length()) {
             val row = array.optJSONObject(index) ?: continue
@@ -851,40 +852,38 @@ internal object SocialMessageCache {
         messages: List<CurioDirectMessage>
     ) {
         if (otherUserId.isBlank()) return
-        runCatching {
-            val kept = messages.takeLast(CAP)
-            val array = JSONArray()
-            kept.forEach { message ->
-                array.put(
-                    JSONObject()
-                        .put("i", message.id)
-                        .put("s", message.senderId)
-                        .put("b", message.body)
-                        .put("t", message.createdAtMillis)
-                        .put("r", message.readAtMillis ?: 0L)
-                )
-            }
-            prefs(context)
-                .edit()
-                .putString(key(otherUserId), array.toString())
-                .putInt(VERSION_KEY, VERSION)
-                .apply()
+        val array = JSONArray()
+        messages.takeLast(CAP).forEach { message ->
+            array.put(
+                JSONObject()
+                    .put("i", message.id)
+                    .put("s", message.senderId)
+                    .put("b", message.body)
+                    .put("t", message.createdAtMillis)
+                    .put("r", message.readAtMillis ?: 0L)
+            )
         }
+        SocialCache.write(context, KIND, otherUserId, array, SocialCache.TTL_THREAD_MS)
     }
 
     /**
-     * Drops everything when the stored shape is from an older build. Called
-     * once per screen entry — it is a single integer read.
+     * Forgets the prefs blobs the older build wrote. Called once per screen
+     * entry and answered by a single key lookup, so a user who upgrades never
+     * pays for the previous shape sitting in storage.
      */
     fun migrateIfNeeded(context: Context) {
-        val store = prefs(context)
-        if (store.getInt(VERSION_KEY, VERSION) == VERSION) return
-        runCatching { store.edit().clear().putInt(VERSION_KEY, VERSION).apply() }
+        runCatching {
+            val legacy = context.applicationContext
+                .getSharedPreferences(SOCIAL_CACHE_PREFS, Context.MODE_PRIVATE)
+            if (legacy.contains("cache_version") || legacy.contains("feed_cards")) {
+                legacy.edit().clear().apply()
+            }
+        }
     }
 
     /** Forgets every cached conversation (used when signing out). */
     fun clear(context: Context) {
-        runCatching { prefs(context).edit().clear().apply() }
+        SocialCache.clear(context)
     }
 }
 
@@ -898,81 +897,48 @@ internal object SocialMessageCache {
  * @username, portrait) so a row, a conversation header or a profile can draw
  * the real person on the first frame, and the network only ever REFINES it.
  *
- * It holds identity and nothing else — no message, no card, no email — and it
- * is cleared with the message cache when the account signs out.
+ * One entry per account ([SocialCache], `person` kind) — a warm one is a map
+ * lookup, so the first frame after the first open costs nothing. It holds
+ * identity and nothing else — no message, no card, no email — and it is
+ * cleared with the message cache when the account signs out.
  */
-/**
- * The ONE prefs file the social caches share — messages and remembered
- * people. Signing out clears the file, so both are forgotten together.
- */
-private fun socialCachePrefs(context: Context) =
-    context.applicationContext
-        .getSharedPreferences(SOCIAL_CACHE_PREFS, Context.MODE_PRIVATE)
-
 internal object SocialPeopleCache {
-    private const val KEY_PREFIX = "person_"
-    private const val ORDER_KEY = "person_order"
-
-    /** How many accounts are remembered; beyond this the oldest are dropped. */
-    private const val CAP = 300
+    private const val KIND = "person"
 
     fun read(context: Context, userId: String): CurioPerson? {
         if (userId.isBlank()) return null
-        return runCatching {
-            val raw = socialCachePrefs(context).getString(KEY_PREFIX + userId, null) ?: return null
-            val row = JSONObject(raw)
-            CurioPerson(
-                userId = userId,
-                displayName = row.optString("n"),
-                username = row.optString("u"),
-                avatarStyle = row.optInt("a", 0).coerceIn(0, 15)
-            )
-        }.getOrNull()
+        val entry = SocialCache.read(context, KIND, userId, SocialCache.TTL_PERSON_MS)
+            ?: return null
+        val row = entry.data.optJSONObject(0) ?: return null
+        return CurioPerson(
+            userId = row.optString("id").takeIf { it.isNotBlank() } ?: userId,
+            displayName = row.optString("n"),
+            username = row.optString("u"),
+            avatarStyle = row.optInt("a", 0).coerceIn(0, 15)
+        )
     }
 
     /** Remembers one identity (best-effort — a cache write never fails a screen). */
     fun remember(context: Context, person: CurioPerson) {
         if (person.userId.isBlank()) return
-        runCatching {
-            val store = socialCachePrefs(context)
-            val row = JSONObject()
+        val array = JSONArray().put(
+            JSONObject()
+                .put("id", person.userId)
                 .put("n", person.displayName)
                 .put("u", person.username)
                 .put("a", person.avatarStyle)
-            val order = order(store).filterNot { it == person.userId } + person.userId
-            val kept = order.takeLast(CAP)
-            val editor = store.edit().putString(KEY_PREFIX + person.userId, row.toString())
-            (order - kept.toSet()).forEach { editor.remove(KEY_PREFIX + it) }
-            editor.putString(ORDER_KEY, JSONArray(kept).toString())
-            editor.apply()
-        }
+        )
+        SocialCache.write(context, KIND, person.userId, array, SocialCache.TTL_PERSON_MS)
     }
 
-    /** Remembers a whole page of identities in one write. */
+    /** Remembers a whole page of identities in one pass. */
     fun remember(context: Context, people: Collection<CurioPerson>) {
         people.forEach { remember(context, it) }
     }
 
-    private fun order(store: android.content.SharedPreferences): List<String> {
-        // `return@runCatching` (not `return`): a non-local return out of an
-        // expression body is not legal Kotlin.
-        return runCatching {
-            val raw = store.getString(ORDER_KEY, null) ?: return@runCatching emptyList()
-            val array = JSONArray(raw)
-            (0 until array.length()).mapNotNull { index ->
-                array.optString(index).takeIf { it.isNotBlank() }
-            }
-        }.getOrDefault(emptyList())
-    }
-
     /** Forgets every remembered identity (used when signing out). */
     fun clear(context: Context) {
-        runCatching {
-            val store = socialCachePrefs(context)
-            val editor = store.edit()
-            order(store).forEach { editor.remove(KEY_PREFIX + it) }
-            editor.remove(ORDER_KEY).apply()
-        }
+        SocialCache.clear(context)
     }
 }
 
@@ -991,43 +957,35 @@ internal object SocialPeopleCache {
  * expired copy is dropped on read rather than shown past its 24 hours.
  */
 internal object SocialFeedCache {
-    private const val KEY = "feed_cards"
-    private const val KEY_AT = "feed_at"
+    private const val KIND = "wall"
+    private const val KEY = "wall"
     private const val CAP = 40
 
     /** The last page of cards, minus anything that has already expired. */
     fun read(context: Context): List<CommunityCard> {
-        return runCatching {
-            val raw = socialCachePrefs(context).getString(KEY, null)
-                ?: return@runCatching emptyList()
-            val array = JSONArray(raw)
-            val now = System.currentTimeMillis()
-            buildList(array.length()) {
-                for (index in 0 until array.length()) {
-                    val row = array.optJSONObject(index) ?: continue
-                    val card = fromJson(row)
-                    // A cached card is only shown while the server would still
-                    // serve it: the 24-hour promise holds offline too.
-                    if (card.expiresAtMillis > now) add(card)
-                }
+        val entry = SocialCache.read(context, KIND, KEY, SocialCache.TTL_WALL_MS)
+            ?: return emptyList()
+        val array = entry.data
+        val now = System.currentTimeMillis()
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                val card = fromJson(row)
+                // A cached card is only shown while the server would still
+                // serve it: the 24-hour promise holds offline too.
+                if (card.expiresAtMillis > now) add(card)
             }
-        }.getOrDefault(emptyList())
+        }
     }
 
     /** When the cached page was written (0 when there is nothing cached). */
     fun cachedAt(context: Context): Long =
-        runCatching { socialCachePrefs(context).getLong(KEY_AT, 0L) }.getOrDefault(0L)
+        SocialCache.read(context, KIND, KEY, SocialCache.TTL_WALL_MS)?.atMillis ?: 0L
 
     fun write(context: Context, cards: List<CommunityCard>) {
-        runCatching {
-            val array = JSONArray()
-            cards.take(CAP).forEach { array.put(toJson(it)) }
-            socialCachePrefs(context)
-                .edit()
-                .putString(KEY, array.toString())
-                .putLong(KEY_AT, System.currentTimeMillis())
-                .apply()
-        }
+        val array = JSONArray()
+        cards.take(CAP).forEach { array.put(toJson(it)) }
+        SocialCache.write(context, KIND, KEY, array, SocialCache.TTL_WALL_MS)
     }
 
     private fun toJson(card: CommunityCard): JSONObject = JSONObject()
@@ -1035,6 +993,7 @@ internal object SocialFeedCache {
         .put("author", card.authorId)
         .put("handle", card.authorHandle)
         .put("name", card.authorName)
+        .put("dname", card.authorDisplayName)
         .put("avatar", card.authorAvatar)
         .put("kind", card.kind)
         .put("topic", card.topicName)
@@ -1059,6 +1018,7 @@ internal object SocialFeedCache {
         authorId = row.optString("author"),
         authorHandle = row.optString("handle"),
         authorName = row.optString("name"),
+        authorDisplayName = row.optString("dname"),
         authorAvatar = row.optInt("avatar", 0),
         kind = row.optString("kind").ifBlank { KIND_CARD },
         topicName = row.optString("topic"),
@@ -1078,4 +1038,226 @@ internal object SocialFeedCache {
         commentCount = row.optInt("comments"),
         mine = row.optBoolean("mine")
     )
+}
+
+/**
+ * THE ON-DEVICE INBOX CACHE — the thread list and the pending requests.
+ *
+ * Why it exists: Friends opened on a spinner. The inbox is two network reads
+ * (conversations + requests) plus one identity resolution per counterpart, so
+ * the list and its unread badges always landed a beat after the screen did.
+ * The last inbox the device actually saw now draws the first frame, and the
+ * network only refines it — including the unread counts, so a message that
+ * arrived while the app was closed is already badged when Friends opens.
+ *
+ * One entry (`inbox` kind), 12-hour lifetime: friend state changes far more
+ * slowly than a conversation does, and the live tick still replaces it.
+ */
+internal object SocialInboxCache {
+    private const val KIND = "inbox"
+    private const val KEY = "inbox"
+    private const val CAP = 60
+
+    /**
+     * One cached inbox: the conversations, the pending requests and the
+     * friends list, plus the moment it was written.
+     */
+    class Snapshot(
+        val threads: List<CurioDmThread>,
+        val requests: List<CurioFriendRequest>,
+        val friends: List<CurioFriend>,
+        val atMillis: Long
+    )
+
+    fun read(context: Context): Snapshot? {
+        val entry = SocialCache.read(context, KIND, KEY, SocialCache.TTL_INBOX_MS) ?: return null
+        val row = entry.data.optJSONObject(0) ?: return null
+        return Snapshot(
+            threads = threadsOf(row.optJSONArray("t")),
+            requests = requestsOf(row.optJSONArray("r")),
+            friends = friendsOf(row.optJSONArray("f")),
+            atMillis = entry.atMillis
+        )
+    }
+
+    fun write(
+        context: Context,
+        threads: List<CurioDmThread>,
+        requests: List<CurioFriendRequest>,
+        friends: List<CurioFriend>
+    ) {
+        val threadRows = JSONArray()
+        threads.take(CAP).forEach { thread ->
+            threadRows.put(
+                JSONObject()
+                    .put("p", personJson(thread.person))
+                    .put("v", thread.preview)
+                    .put("a", thread.lastAtMillis)
+                    .put("u", thread.unread)
+            )
+        }
+        val requestRows = JSONArray()
+        requests.take(CAP).forEach { request ->
+            requestRows.put(
+                JSONObject()
+                    .put("i", request.id)
+                    .put("p", personJson(request.person))
+                    .put("in", request.incoming)
+                    .put("a", request.createdAtMillis)
+            )
+        }
+        val friendRows = JSONArray()
+        friends.take(CAP).forEach { friend ->
+            friendRows.put(
+                JSONObject()
+                    .put("i", friend.requestId)
+                    .put("p", personJson(friend.person))
+                    .put("a", friend.sinceMillis)
+            )
+        }
+        val payload = JSONArray().put(
+            JSONObject()
+                .put("t", threadRows)
+                .put("r", requestRows)
+                .put("f", friendRows)
+        )
+        SocialCache.write(context, KIND, KEY, payload, SocialCache.TTL_INBOX_MS)
+    }
+
+    private fun friendsOf(array: JSONArray?): List<CurioFriend> {
+        if (array == null) return emptyList()
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                val person = personOf(row.optJSONObject("p")) ?: continue
+                add(
+                    CurioFriend(
+                        requestId = row.optString("i"),
+                        person = person,
+                        sinceMillis = row.optLong("a")
+                    )
+                )
+            }
+        }
+    }
+
+    private fun threadsOf(array: JSONArray?): List<CurioDmThread> {
+        if (array == null) return emptyList()
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                val person = personOf(row.optJSONObject("p")) ?: continue
+                add(
+                    CurioDmThread(
+                        person = person,
+                        preview = row.optString("v"),
+                        lastAtMillis = row.optLong("a"),
+                        unread = row.optInt("u")
+                    )
+                )
+            }
+        }
+    }
+
+    private fun requestsOf(array: JSONArray?): List<CurioFriendRequest> {
+        if (array == null) return emptyList()
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                val person = personOf(row.optJSONObject("p")) ?: continue
+                add(
+                    CurioFriendRequest(
+                        id = row.optString("i"),
+                        person = person,
+                        incoming = row.optBoolean("in"),
+                        createdAtMillis = row.optLong("a")
+                    )
+                )
+            }
+        }
+    }
+
+    private fun personJson(person: CurioPerson): JSONObject = JSONObject()
+        .put("id", person.userId)
+        .put("n", person.displayName)
+        .put("u", person.username)
+        .put("a", person.avatarStyle)
+
+    private fun personOf(row: JSONObject?): CurioPerson? {
+        if (row == null) return null
+        val id = row.optString("id")
+        if (id.isBlank()) return null
+        return CurioPerson(
+            userId = id,
+            displayName = row.optString("n"),
+            username = row.optString("u"),
+            avatarStyle = row.optInt("a", 0).coerceIn(0, 15)
+        )
+    }
+}
+
+/**
+ * THE ON-DEVICE REPLIES CACHE — one card's replies.
+ *
+ * Why it exists: the replies sheet opened empty and filled in a beat later,
+ * so a card you had already opened looked like it had lost its replies. One
+ * entry per card (`comments` kind, 60-minute lifetime — the shortest of the
+ * caches, because replies are the part of the wall that actually moves).
+ *
+ * Like a thread's copy, "mine" is never stored: it is recomputed from the
+ * signed-in id on read, so switching accounts can never offer you a delete
+ * pill on somebody else's reply.
+ */
+internal object SocialCommentsCache {
+    private const val KIND = "comments"
+    private const val CAP = 60
+
+    fun read(context: Context, cardId: String, myUserId: String?): List<CommunityComment> {
+        if (cardId.isBlank()) return emptyList()
+        val entry = SocialCache.read(context, KIND, cardId, SocialCache.TTL_COMMENTS_MS)
+            ?: return emptyList()
+        val array = entry.data
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                val body = row.optString("b")
+                if (body.isBlank()) continue
+                val authorId = row.optString("aid")
+                add(
+                    CommunityComment(
+                        id = row.optString("id"),
+                        authorId = authorId,
+                        authorHandle = row.optString("h"),
+                        authorName = row.optString("n"),
+                        authorDisplayName = row.optString("dn"),
+                        authorAvatar = row.optInt("av", 0).coerceIn(0, 15),
+                        body = body,
+                        parentId = row.optString("p").takeIf { it.isNotBlank() },
+                        createdAtMillis = row.optLong("t"),
+                        mine = myUserId != null && authorId == myUserId
+                    )
+                )
+            }
+        }
+    }
+
+    fun write(context: Context, cardId: String, comments: List<CommunityComment>) {
+        if (cardId.isBlank()) return
+        val array = JSONArray()
+        comments.takeLast(CAP).forEach { comment ->
+            array.put(
+                JSONObject()
+                    .put("id", comment.id)
+                    .put("aid", comment.authorId)
+                    .put("h", comment.authorHandle)
+                    .put("n", comment.authorName)
+                    .put("dn", comment.authorDisplayName)
+                    .put("av", comment.authorAvatar)
+                    .put("b", comment.body)
+                    .put("p", comment.parentId ?: "")
+                    .put("t", comment.createdAtMillis)
+            )
+        }
+        SocialCache.write(context, KIND, cardId, array, SocialCache.TTL_COMMENTS_MS)
+    }
 }

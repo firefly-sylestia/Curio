@@ -9,20 +9,43 @@ import org.json.JSONObject
 import java.time.Instant
 import java.time.OffsetDateTime
 
+/** Who may see a profile. Mirrors the schema's own check constraint (§5f). */
+const val PROFILE_VISIBILITY_PUBLIC = "public"
+const val PROFILE_VISIBILITY_FRIENDS = "friends"
+
 /**
  * Someone else's PUBLIC identity — the only thing another account can ever see
  * about you in the social layer. There is no email, no capture, no card and no
- * message in here: the profile row the app may read holds display identity and
- * nothing else (see `supabase/schema.sql` §5b).
+ * message in here: the profile row the app may read holds display identity,
+ * the privacy choices that narrow who may read it, and (when the member left
+ * activity visible) a last-active stamp.
  */
 data class CurioPerson(
     val userId: String,
     val displayName: String,
     val username: String = "",
-    val avatarStyle: Int = 0
+    val avatarStyle: Int = 0,
+    /** [PROFILE_VISIBILITY_PUBLIC] or [PROFILE_VISIBILITY_FRIENDS]. */
+    val visibility: String = PROFILE_VISIBILITY_PUBLIC,
+    /** True when this member publishes no last-active stamp at all. */
+    val hideActivity: Boolean = false,
+    /** Last-active stamp, 0 when unknown — or when activity is hidden. */
+    val lastActiveMillis: Long = 0L
 ) {
     /** Stable identity shown everywhere social actions are available. */
     val handle: String get() = username.trim().removePrefix("@").ifBlank { "curious_soul" }
+
+    /** The handle as it is printed, so no caller re-invents the `@`. */
+    val handleLabel: String get() = "@$handle"
+
+    /**
+     * True when this member chose a display name. The display name LEADS
+     * everywhere and the handle reads underneath it; without one, the handle
+     * is the whole identity — never a product label or a generic "explorer".
+     */
+    val hasDisplayName: Boolean
+        get() = displayName.trim().let { it.isNotBlank() && !it.equals("null", true) }
+
     // A profile may intentionally omit a display name. In that case its
     // username is still a real, stable identity — never replace it with a
     // product label or a generic "explorer" placeholder in Friends/DMs.
@@ -31,6 +54,25 @@ data class CurioPerson(
         ?: username.trim().removePrefix("@").takeIf { it.isNotBlank() }
         ?: "A curious soul"
     val identityLabel: String get() = "${label} @${handle}"
+
+    /**
+     * The presence line, or null when there is nothing honest to say: a member
+     * who hid activity, one whose stamp is unknown, and one who is not
+     * currently online all answer null rather than a claim.
+     */
+    val presenceLabel: String?
+        get() {
+            if (hideActivity) return null
+            val at = lastActiveMillis
+            if (at <= 0L) return null
+            val minutes = (System.currentTimeMillis() - at).coerceAtLeast(0L) / 60_000L
+            return when {
+                minutes < 5L -> "Active now"
+                minutes < 60L -> "Active ${minutes}m ago"
+                minutes < 60L * 24L -> "Active ${minutes / 60L}h ago"
+                else -> null
+            }
+        }
 }
 
 /** One accepted friendship, with the person on the other side. */
@@ -95,6 +137,7 @@ object SocialApi {
 
     private const val PROFILES = "/rest/v1/profiles"
     private const val REQUESTS = "/rest/v1/friend_requests"
+    private const val BLOCKS = "/rest/v1/member_blocks"
     private const val MESSAGES = "/rest/v1/dm_messages"
     private const val TYPING = "/rest/v1/dm_typing"
     private const val REACTIONS = "/rest/v1/dm_reactions"
@@ -145,6 +188,20 @@ object SocialApi {
     /** The columns a conversation read needs — one list, both paths. */
     private const val MESSAGE_COLUMNS = "id,sender,recipient,body,created_at,read_at"
 
+    /**
+     * The public identity columns, in two shapes.
+     *
+     * [PERSON_COLUMNS] is what EVERY identity read asks for, and it is the
+     * shape every project has: adding a column to it would make a project that
+     * has not been re-pasted since §5f answer 400 to every profile read, which
+     * would blank the wall's author names and every friend row. The privacy
+     * columns are therefore a SECOND, opt-in shape that only the profile page
+     * asks for — and it falls back to the base read when they are missing.
+     */
+    private const val PERSON_COLUMNS = "id,display_name,username,avatar_style"
+    private const val PERSON_COLUMNS_PRIVACY =
+        "$PERSON_COLUMNS,profile_visibility,hide_activity,last_active_at"
+
     /** How many NEW messages one live tick asks for. */
     private const val LIVE_TICK_LIMIT = 100
 
@@ -169,7 +226,7 @@ object SocialApi {
         mapped {
             val text = query.trim()
             if (text.length < 2) return@mapped emptyList()
-            val path = "$PROFILES?select=id,display_name,username,avatar_style" +
+            val path = "$PROFILES?select=$PERSON_COLUMNS" +
                 "&online_mode_enabled=is.true&discoverable=is.true" +
                 "&or=(display_name.ilike.*${encode(text)}*,username.ilike.*${encode(text)}*)" +
                 (myUserId?.let { "&id=neq.$it" } ?: "") +
@@ -251,6 +308,159 @@ object SocialApi {
             Unit
         }
     }
+
+    /**
+     * ONE member's profile, with the privacy columns when the project has
+     * them. A project that has not been re-pasted since §5f answers 400 to the
+     * wider select, so this falls back to the base identity read rather than
+     * blanking the page — a missing column must never hide a person.
+     */
+    suspend fun profile(accessToken: String, userId: String): Result<CurioPerson?> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                if (!userId.matches(ID_PATTERN)) return@mapped null
+                val wide = runCatching {
+                    val path = "$PROFILES?select=$PERSON_COLUMNS_PRIVACY" +
+                        "&id=eq.$userId&limit=1"
+                    val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+                    parsePeople(SupabaseClient.executeBody(request)).values.firstOrNull()
+                }.getOrNull()
+                wide ?: namesOf(accessToken, listOf(userId))[userId]
+            }
+        }
+
+    /**
+     * Saves the display name — the name a member is SEEN by. The username is a
+     * separate thing (the stable handle other people find you by), which is why
+     * this never touches it.
+     */
+    suspend fun updateDisplayName(accessToken: String, displayName: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val clean = displayName.trim().take(40)
+                val userId = SupabaseClient.userIdFromAccessToken(accessToken)
+                val body = JSONObject().put(
+                    "display_name",
+                    if (clean.isEmpty()) JSONObject.NULL else clean
+                )
+                val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
+                    .patch(body.toString().toRequestBody(jsonMediaType))
+                    .header("Prefer", "return=minimal")
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    /**
+     * Mirrors the member's privacy choices onto the profile row.
+     *
+     * Turning activity hiding ON clears any stamp already stored in the same
+     * write, so a member who hid activity has nothing on the server for anyone
+     * to read — the promise is kept by absence, not by a flag.
+     */
+    suspend fun updatePrivacy(
+        accessToken: String,
+        visibility: String,
+        hideActivity: Boolean
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val clean = if (visibility == PROFILE_VISIBILITY_FRIENDS) {
+                PROFILE_VISIBILITY_FRIENDS
+            } else {
+                PROFILE_VISIBILITY_PUBLIC
+            }
+            val userId = SupabaseClient.userIdFromAccessToken(accessToken)
+            val body = JSONObject()
+                .put("profile_visibility", clean)
+                .put("hide_activity", hideActivity)
+            if (hideActivity) body.put("last_active_at", JSONObject.NULL)
+            val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
+                .patch(body.toString().toRequestBody(jsonMediaType))
+                .header("Prefer", "return=minimal")
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /**
+     * Publishes this account's last-active stamp, or clears it.
+     *
+     * Best-effort and quiet: presence is a courtesy line, so a failed write
+     * must never surface as an error, and it is only ever called while the
+     * member has NOT hidden activity.
+     */
+    suspend fun setPresence(accessToken: String, atMillis: Long?): Unit =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val userId = SupabaseClient.userIdFromAccessToken(accessToken)
+                val body = JSONObject().put(
+                    "last_active_at",
+                    atMillis?.let { Instant.ofEpochMilli(it).toString() } ?: JSONObject.NULL
+                )
+                val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
+                    .patch(body.toString().toRequestBody(jsonMediaType))
+                    .header("Prefer", "return=minimal")
+                    .build()
+                SupabaseClient.executeBody(request)
+                Unit
+            }
+        }
+
+    // ── blocks ───────────────────────────────────────────────────────────
+
+    /**
+     * Everyone this account has blocked.
+     *
+     * Best-effort, like the typing and reaction tables: a project that has not
+     * been re-pasted since §5f has no `member_blocks`, and that answers an
+     * empty list rather than failing the screen that asked.
+     */
+    suspend fun blocks(accessToken: String): Result<List<CurioPerson>> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val path = "$BLOCKS?select=blocked&order=created_at.desc&limit=200"
+                val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+                val rows = JSONArray(SupabaseClient.executeBody(request))
+                val ids = ArrayList<String>(rows.length())
+                for (index in 0 until rows.length()) {
+                    val row = rows.optJSONObject(index) ?: continue
+                    val blocked = row.optString("blocked")
+                    if (blocked.isNotBlank()) ids += blocked
+                }
+                val names = namesOf(accessToken, ids)
+                ids.distinct().map { id -> names[id] ?: CurioPerson(id, "") }
+            }
+        }
+
+    /**
+     * Blocks [userId]: no messages, no requests, no cards, no replies, no
+     * profile, in either direction. The policy set in §5f is what actually
+     * enforces it; this only records the decision.
+     */
+    suspend fun block(accessToken: String, userId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                id(userId)
+                val payload = JSONObject().put("blocked", userId)
+                val request = SupabaseClient.requestBuilder(BLOCKS, accessToken)
+                    .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    /** Lifts a block. Nothing else changes — a friendship must be re-made. */
+    suspend fun unblock(accessToken: String, userId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                id(userId)
+                val request = SupabaseClient.requestBuilder("$BLOCKS?blocked=eq.$userId", accessToken)
+                    .delete()
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
 
     // ── friend requests ──────────────────────────────────────────────────
 
@@ -730,9 +940,18 @@ object SocialApi {
             val id = row.optString("id").takeIf { it.isNotBlank() } ?: continue
             people[id] = CurioPerson(
                 userId = id,
-displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEmpty(),
-            username = row.optString("username", "").takeUnless { it == "null" }.orEmpty(),
-            avatarStyle = row.optInt("avatar_style", 0).coerceIn(0, 15)
+                displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEmpty(),
+                username = row.optString("username", "").takeUnless { it == "null" }.orEmpty(),
+                avatarStyle = row.optInt("avatar_style", 0).coerceIn(0, 15),
+                // Absent for a project that has not been re-pasted since §5f —
+                // visibility then reads as the schema's own default and a
+                // presence line simply never gets enough information to draw.
+                visibility = row.optString("profile_visibility", "")
+                    .takeUnless { it == "null" }
+                    .orEmpty()
+                    .ifBlank { PROFILE_VISIBILITY_PUBLIC },
+                hideActivity = row.optBoolean("hide_activity", false),
+                lastActiveMillis = epochMillis(row.optString("last_active_at"))
             )
         }
         return people
@@ -748,7 +967,7 @@ displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEm
         // follows it. An unexpected id is dropped, not trusted.
         val wanted = ids.filter { it.matches(ID_PATTERN) }.distinct()
         if (wanted.isEmpty()) return emptyMap()
-        val path = "$PROFILES?select=id,display_name,username,avatar_style&id=in.(${wanted.joinToString(",")})" +
+        val path = "$PROFILES?select=$PERSON_COLUMNS&id=in.(${wanted.joinToString(",")})" +
             "&limit=${wanted.size}"
         return runCatching {
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()

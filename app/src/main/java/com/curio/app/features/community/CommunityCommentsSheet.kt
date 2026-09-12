@@ -94,6 +94,9 @@ internal fun CommunityCommentsSheet(
         CommunityApi.comments(accessToken, card.id, myUserId).fold(
             onSuccess = {
                 replies = it
+                // Remembered per card, so opening the same sheet again draws
+                // its replies on the first frame instead of on a spinner.
+                SocialCommentsCache.write(context, card.id, it)
                 error = null
             },
             onFailure = { error = it.message }
@@ -101,7 +104,16 @@ internal fun CommunityCommentsSheet(
         loading = false
     }
 
-    LaunchedEffect(card.id) { load() }
+    LaunchedEffect(card.id) {
+        // The device's copy FIRST — the replies, their branches and the reply
+        // pills are on screen before the network is asked. The network then
+        // replaces it, and only an empty list is ever filled from the cache.
+        if (replies.isEmpty()) {
+            val cached = SocialCommentsCache.read(context, card.id, myUserId)
+            if (cached.isNotEmpty()) replies = cached
+        }
+        load()
+    }
 
     // BRANCH ORDER, derived once per reply list — and HERE, in the composable
     // scope: a `LazyColumn`'s content lambda is a LazyListScope, not a
@@ -336,21 +348,23 @@ internal fun CommunityReplyRow(
                     .padding(start = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
+                // The DISPLAY name leads; the @username rides the meta line
+                // beneath it, beside the age and the reply's own actions.
+                Text(
+                    text = reply.authorLabel,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.clickable(onClick = onAuthor)
+                )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "@${reply.authorLabel}",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        modifier = Modifier.clickable(onClick = onAuthor)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = agoLabel(reply.createdAtMillis),
+                        text = "${reply.authorHandleLabel} · ${agoLabel(reply.createdAtMillis)}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                     Spacer(Modifier.weight(1f))
                     if (reply.mine) {

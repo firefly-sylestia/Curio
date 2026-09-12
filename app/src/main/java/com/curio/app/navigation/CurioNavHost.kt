@@ -112,6 +112,7 @@ import com.curio.app.features.community.DirectMessageScreen
 import com.curio.app.features.community.FriendsScreen
 import com.curio.app.features.community.SocialProfileScreen
 import com.curio.app.features.settings.OnlineModeScreen
+import com.curio.app.features.settings.PrivacyScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
@@ -1052,6 +1053,11 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_ONLINE) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     OnlineModeScreen(navController = navController)
+                }
+            }
+            composable(CurioRoutes.SETTINGS_PRIVACY) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    PrivacyScreen(navController = navController)
                 }
             }
             composable(CurioRoutes.COMMUNITY) {

@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.CategoryId
@@ -89,6 +90,8 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
     var asked by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var confirmBlock by remember { mutableStateOf(false) }
+    var blocking by remember { mutableStateOf(false) }
 
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
@@ -100,13 +103,16 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
         val active = token ?: return
         loading = true
         // The profile first — everything on the page hangs off who this is.
-        SocialApi.people(active, listOf(userId)).fold(
-            onSuccess = { people ->
-                person = people[userId]
-                // A missing row means they are not readable (Online Mode off or
-                // hidden). That is not an error the user caused, so it is shown
-                // as an empty profile rather than a failure.
-                if (people[userId] == null) error = null
+        // `profile` (not `people`) also carries the privacy columns, so a
+        // presence line can be drawn and a friends-only profile is explained
+        // the same way by every door into it.
+        SocialApi.profile(active, userId).fold(
+            onSuccess = { found ->
+                person = found
+                // A missing row means they are not readable (Online Mode off,
+                // hidden, blocked or friends-only). That is not an error the
+                // user caused, so it is shown as an empty profile.
+                if (found == null) error = null
             },
             onFailure = { error = it.message }
         )
@@ -186,6 +192,7 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                     loading = loading,
                     friendRequestId = friendRequestId,
                     asked = asked,
+                    onBlock = { confirmBlock = true },
                     onAsk = {
                         if (myUserId != null) {
                             scope.launch {
@@ -252,6 +259,33 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             )
         }
     }
+
+    if (confirmBlock) {
+        SocialConfirmDialog(
+            title = "Block ${person?.label ?: "this member"}?",
+            body = "Neither of you can message, send requests or see each other's cards, and " +
+                "their profile closes to you. You can lift it any time in Settings → Privacy.",
+            confirmLabel = "Block",
+            busy = blocking,
+            onDismiss = { if (!blocking) confirmBlock = false },
+            onConfirm = {
+                val active = token
+                if (active == null) {
+                    confirmBlock = false
+                    return@SocialConfirmDialog
+                }
+                blocking = true
+                scope.launch {
+                    SocialApi.block(active, userId).fold(
+                        onSuccess = { navController.popBackStack() },
+                        onFailure = { error = it.message }
+                    )
+                    blocking = false
+                    confirmBlock = false
+                }
+            }
+        )
+    }
 }
 
 /**
@@ -268,7 +302,9 @@ private fun SocialProfileHeader(
     friendRequestId: String?,
     asked: Boolean,
     onAsk: () -> Unit,
-    onMessage: () -> Unit
+    onMessage: () -> Unit,
+    /** Blocks this member — the one destructive move a profile offers. */
+    onBlock: () -> Unit = {}
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -292,16 +328,23 @@ private fun SocialProfileHeader(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
+                    // The DISPLAY name LEADS; the @username reads beneath it,
+                    // with a quiet presence line beside it when the member left
+                    // activity visible.
                     Text(
-                        text = person?.let { "@${it.handle}" } ?: "@…",
+                        text = person?.label
+                            ?: if (loading) "Loading…" else "This profile isn't visible",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = person?.let { it.label }
-                            ?: if (loading) "Loading…" else "This profile isn't visible",
+                        text = listOfNotNull(person?.handleLabel, person?.presenceLabel)
+                            .joinToString(" · ")
+                            .ifBlank { "@…" },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -365,9 +408,23 @@ private fun SocialProfileHeader(
                 }
             }
 
+            if (!isMe) {
+                // Blocking lives HERE, where you are looking at the person it is
+                // about — the Privacy page lists who is blocked and lifts it.
+                Text(
+                    text = "Block",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(onClick = onBlock)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
+
             Text(
-                text = "A profile shows only your username and portrait. Your email, saved entries, " +
-                    "cards and messages are never part of it.",
+                text = "A profile shows only your name, portrait and whether you were recently " +
+                    "around. Your email, saved entries, cards and messages are never part of it.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
