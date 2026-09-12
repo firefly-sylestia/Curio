@@ -480,7 +480,7 @@ fun DirectMessageScreen(
                                 .filterNot { it.userId == activeUserId } +
                                 CurioDmReaction(messageId, activeUserId, kind)
                         }
-                        reactions = reactions - messageId + optimistic
+                        reactions = reactions + (messageId to optimistic)
                         val result = if (mine?.kind == kind) {
                             SocialApi.clearReaction(activeToken, messageId)
                         } else {
@@ -489,10 +489,10 @@ fun DirectMessageScreen(
                         result.fold(
                             onSuccess = {
                                 SocialApi.reactions(activeToken, listOf(messageId))
-                                    .onSuccess { fresh -> reactions = reactions - messageId + fresh }
+                                    .onSuccess { fresh -> reactions = reactions + (messageId to fresh) }
                             },
                             onFailure = {
-                                reactions = reactions - messageId + (mine?.let { listOf(it) } ?: emptyList())
+                                reactions = reactions + (messageId to (mine?.let { listOf(it) } ?: emptyList()))
                                 error = it.message
                             }
                         )
