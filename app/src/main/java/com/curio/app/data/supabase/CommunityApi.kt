@@ -181,8 +181,11 @@ object CommunityApi {
                 parseCards(SupabaseClient.executeBody(request), myUserId)
             }
             // Identity is resolved after the parse (one extra request for
-            // every author on screen) — see [withAuthors].
-            parsed.map { withAuthors(accessToken, it) }
+            // every author on screen) — see [withAuthors]. The parsed result
+            // is unwrapped by hand so the suspend resolution call is
+            // unambiguous at the call site.
+            val cards = parsed.getOrNull() ?: return@withContext parsed.asFailure()
+            Result.success(withAuthors(accessToken, cards))
         }
 
     /**
@@ -203,7 +206,8 @@ object CommunityApi {
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             parseCards(SupabaseClient.executeBody(request), myUserId)
         }
-        parsed.map { withAuthors(accessToken, it) }
+        val cards = parsed.getOrNull() ?: return@withContext parsed.asFailure()
+        Result.success(withAuthors(accessToken, cards))
     }
 
     /**
@@ -219,7 +223,8 @@ object CommunityApi {
                 parseCards(SupabaseClient.executeBody(request), myUserId).firstOrNull()
                     ?: throw IllegalStateException("That card has expired — cards only last 24 hours.")
             }
-            parsed.map { withAuthors(accessToken, listOf(it)).first() }
+            val one = parsed.getOrNull() ?: return@withContext parsed.asFailure()
+            Result.success(withAuthors(accessToken, listOf(one)).first())
         }
 
     // ── replies ──────────────────────────────────────────────────────────
@@ -254,7 +259,8 @@ object CommunityApi {
         }
         // A reply shows the author's CURRENT name and portrait too, so a
         // rename never leaves an old handle stranded in a thread.
-        parsed.map { withCommentAuthors(accessToken, it) }
+        val replies = parsed.getOrNull() ?: return@withContext parsed.asFailure()
+        Result.success(withCommentAuthors(accessToken, replies))
     }
 
     suspend fun comment(
@@ -388,6 +394,15 @@ object CommunityApi {
      * the call's declared `Result<Unit>`).
      */
     private fun mappedUnit(block: () -> Unit): Result<Unit> = mapped(block)
+
+    /**
+     * A failed result re-cast to the requested type. Needed because a failed
+     * parse has to be returned from a suspend block that never produced its
+     * own value, and unwrapping by hand keeps the suspend identity resolution
+     * unambiguous at each call site.
+     */
+    private fun <T> Result<*>.asFailure(): Result<T> =
+        Result.failure(exceptionOrNull() ?: CommunityError("Unavailable"))
 
     private fun parseCards(body: String, myUserId: String?): List<CommunityCard> {
         val array = JSONArray(body)

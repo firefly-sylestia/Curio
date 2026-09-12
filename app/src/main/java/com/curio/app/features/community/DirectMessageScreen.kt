@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -105,7 +104,9 @@ fun DirectMessageScreen(
     var draft by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }                    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
 
     val token = account.session?.accessToken
@@ -196,9 +197,14 @@ fun DirectMessageScreen(
                 // the list AND the composer (which is what the old layout did)
                 // lifted the composer twice as far as the keyboard and left a
                 // gap of empty page underneath it.
-                .windowInsetsPadding(
-                    WindowInsets.navigationBars.union(WindowInsets.ime)
-                )
+                //
+                // Two chained consumers rather than a union: the outer one
+                // takes the navigation bar and CONSUMES it, so the inner IME
+                // pad only adds what the keyboard covers beyond the bar — the
+                // bottom inset is max(bar, keyboard), exactly, without the
+                // experimental union API.
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .imePadding()
         ) {
             if (eligible && token != null && myUserId != null) {
                 val activeToken = token
