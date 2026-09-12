@@ -953,13 +953,17 @@ internal object SocialPeopleCache {
         people.forEach { remember(context, it) }
     }
 
-    private fun order(store: android.content.SharedPreferences): List<String> = runCatching {
-        val raw = store.getString(ORDER_KEY, null) ?: return emptyList()
-        val array = JSONArray(raw)
-        (0 until array.length()).mapNotNull { index ->
-            array.optString(index).takeIf { it.isNotBlank() }
-        }
-    }.getOrDefault(emptyList())
+    private fun order(store: android.content.SharedPreferences): List<String> {
+        // `return@runCatching` (not `return`): a non-local return out of an
+        // expression body is not legal Kotlin.
+        return runCatching {
+            val raw = store.getString(ORDER_KEY, null) ?: return@runCatching emptyList()
+            val array = JSONArray(raw)
+            (0 until array.length()).mapNotNull { index ->
+                array.optString(index).takeIf { it.isNotBlank() }
+            }
+        }.getOrDefault(emptyList())
+    }
 
     /** Forgets every remembered identity (used when signing out). */
     fun clear(context: Context) {
@@ -992,20 +996,23 @@ internal object SocialFeedCache {
     private const val CAP = 40
 
     /** The last page of cards, minus anything that has already expired. */
-    fun read(context: Context): List<CommunityCard> = runCatching {
-        val raw = socialCachePrefs(context).getString(KEY, null) ?: return emptyList()
-        val array = JSONArray(raw)
-        val now = System.currentTimeMillis()
-        buildList(array.length()) {
-            for (index in 0 until array.length()) {
-                val row = array.optJSONObject(index) ?: continue
-                val card = fromJson(row)
-                // A cached card is only shown while the server would still
-                // serve it: the 24-hour promise holds offline too.
-                if (card.expiresAtMillis > now) add(card)
+    fun read(context: Context): List<CommunityCard> {
+        return runCatching {
+            val raw = socialCachePrefs(context).getString(KEY, null)
+                ?: return@runCatching emptyList()
+            val array = JSONArray(raw)
+            val now = System.currentTimeMillis()
+            buildList(array.length()) {
+                for (index in 0 until array.length()) {
+                    val row = array.optJSONObject(index) ?: continue
+                    val card = fromJson(row)
+                    // A cached card is only shown while the server would still
+                    // serve it: the 24-hour promise holds offline too.
+                    if (card.expiresAtMillis > now) add(card)
+                }
             }
-        }
-    }.getOrDefault(emptyList())
+        }.getOrDefault(emptyList())
+    }
 
     /** When the cached page was written (0 when there is nothing cached). */
     fun cachedAt(context: Context): Long =
