@@ -318,10 +318,16 @@ create policy reac_insert_own on public.community_reactions
         )
     );
 
+drop policy if exists reac_update_own on public.community_reactions;
+create policy reac_update_own on public.community_reactions
+  for update to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
 drop policy if exists reac_delete_own on public.community_reactions;
 create policy reac_delete_own on public.community_reactions
-    for delete to authenticated
-    using (user_id = auth.uid());
+  for delete to authenticated
+  using (user_id = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 4b. community_comments — the replies under a card
@@ -610,10 +616,22 @@ create policy dm_key_envelopes_recipient on public.dm_key_envelopes
 
 drop policy if exists dm_key_envelopes_write_participant on public.dm_key_envelopes;
 create policy dm_key_envelopes_write_participant on public.dm_key_envelopes
-    for insert to authenticated with check (
-        recipient = auth.uid()
-        or public.curio_are_friends(auth.uid(), recipient)
-    );
+  for insert to authenticated with check (
+  recipient = auth.uid()
+  or public.curio_are_friends(auth.uid(), recipient)
+  );
+
+drop policy if exists dm_key_envelopes_update_participant on public.dm_key_envelopes;
+create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
+  for update to authenticated
+  using (
+    recipient = auth.uid()
+    or public.curio_are_friends(auth.uid(), recipient)
+  )
+  with check (
+    recipient = auth.uid()
+    or public.curio_are_friends(auth.uid(), recipient)
+  );
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5e. dm_messages — ciphertext-only writes; legacy body is read-only

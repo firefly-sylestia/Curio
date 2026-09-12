@@ -179,10 +179,15 @@ fun DirectMessageScreen(
                 val conversationId = dmConversationId(me, otherUserId)
                 val identity = CurioDmCrypto.identity(context)
                 SocialApi.publishDmIdentity(active, identity, me)
-                if (!CurioDmCrypto.hasConversationKey(context, conversationId)) {
-                    SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()?.let {
-                        CurioDmCrypto.ensureConversationKey(context, conversationId, it)
-                    }
+                // The server envelope is authoritative. A phone may already have
+                // a stale device-local key from before the other participant's
+                // envelope was published; keeping it would make every message
+                // fail AES-GCM authentication on that phone.
+                val envelope = SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()
+                if (envelope != null) {
+                    CurioDmCrypto.ensureConversationKey(context, conversationId, envelope)
+                } else {
+                    CurioDmCrypto.ensureConversationKey(context, conversationId)
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
