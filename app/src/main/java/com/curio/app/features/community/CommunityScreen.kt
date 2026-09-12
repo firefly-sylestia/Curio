@@ -517,7 +517,7 @@ fun CommunityScreen(navController: NavController) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Share a topic",
+                    "Post a topic",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     )
@@ -960,8 +960,8 @@ internal fun CommunityComposerSheet(
             Text(
                 text = when (kind) {
                     KIND_NOTE -> "Write a note"
-                    KIND_QUOTE -> "Share a quote"
-                    else -> "Share a topic"
+                    KIND_QUOTE -> "Post a quote"
+                    else -> "Post a topic"
                 },
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
             )
