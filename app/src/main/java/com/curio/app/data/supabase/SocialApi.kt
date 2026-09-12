@@ -825,7 +825,9 @@ private const val PERSON_COLUMNS_PRIVACY =
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             require(ciphertext.isNotBlank() && nonce.isNotBlank()) { "Encrypted message is empty." }
-            require(encryptionVersion == CurioDmCrypto.VERSION) { "Unsupported message encryption version." }
+            require(encryptionVersion == CurioDmCrypto.VERSION || encryptionVersion.startsWith("${CurioDmCrypto.VERSION}:")) {
+                "Unsupported message encryption version."
+            }
             if (toUserId == myUserId) throw IllegalArgumentException("You can't message yourself.")
             id(toUserId)
             lastMessageAt = throttle(lastMessageAt, WRITE_GAP_MS, "Slow down a moment.")

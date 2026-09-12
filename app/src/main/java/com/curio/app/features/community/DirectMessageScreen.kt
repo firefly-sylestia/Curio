@@ -181,7 +181,7 @@ fun DirectMessageScreen(
                 // fail AES-GCM authentication on that phone.
                 val envelope = SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()
                 runCatching {
-                    CurioDmCrypto.restoreConversationKey(context, conversationId, envelope)
+                    envelope?.let { CurioDmCrypto.installEnvelope(context, conversationId, it) }
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
@@ -265,15 +265,21 @@ fun DirectMessageScreen(
         val encrypted = runCatching {
             val mine = CurioDmCrypto.identity(context)
             SocialApi.publishDmIdentity(active, mine, me).getOrThrow()
-            val key = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
+            val ownEnvelope = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
                 .getOrNull()
-                ?.let { envelope -> runCatching { CurioDmCrypto.ensureConversationKey(context, conversationId, envelope) }.getOrNull() }
-                ?: CurioDmCrypto.conversationKey(context, conversationId)
+            val keyVersion = ownEnvelope?.keyVersion
+                ?: ((System.currentTimeMillis() / 1_000L) + (System.nanoTime() and 0x3ffL))
+                    .coerceAtMost(Int.MAX_VALUE.toLong())
+                    .toInt()
+            val key = ownEnvelope
+                ?.let { envelope -> CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
+                ?: CurioDmCrypto.existingKey(context, conversationId, keyVersion)
+                ?: CurioDmCrypto.newKey(context, conversationId, keyVersion)
             SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow().forEach { peer ->
-                SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer)).getOrThrow()
+                SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)).getOrThrow()
             }
-            SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine)).getOrThrow()
-            CurioDmCrypto.encrypt(context, conversationId, text)
+            SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine, keyVersion)).getOrThrow()
+            CurioDmCrypto.encrypt(context, conversationId, key, keyVersion, text)
         }.getOrElse { failure ->
             pending = pending.filterNot { it.id == optimistic.id }
             draft = text
