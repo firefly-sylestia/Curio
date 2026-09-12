@@ -416,7 +416,13 @@ fun ProfileScreen(navController: NavController) {
             // Local first (so the hero moves at once), mirrored best-effort —
             // an offline save is never blocked by a failed push.
             OnlineAccount.state.session?.accessToken?.let { active ->
-                scope.launch { SocialApi.updateDisplayName(active, displayName) }
+                scope.launch {
+                    SocialApi.updateDisplayName(active, displayName)
+                    // The bio is the account's PUBLIC line too, not only the
+                    // hero's tagline: a profile shows it to other members, so
+                    // it travels with the name.
+                    SocialApi.updateBio(active, taglineInput)
+                }
             }
             // v97 — the tagline (the Bio) saves with the same Edit profile
             // dialog; an empty value keeps the automatic streak line.

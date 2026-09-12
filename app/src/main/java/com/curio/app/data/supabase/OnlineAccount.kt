@@ -92,7 +92,7 @@ object OnlineAccount {
                 SupabaseSessionStore.save(context, session)
                 AppPreferences.setOnlineModeEnabled(context, true)
                 state = State(session = session)
-                publishDisplayName(context, session.accessToken)
+                publishIdentity(context, session.accessToken)
                 true
             },
             onFailure = { failure ->
@@ -127,7 +127,7 @@ object OnlineAccount {
                     SupabaseSessionStore.save(context, session)
                     AppPreferences.setOnlineModeEnabled(context, true)
                     state = State(session = session)
-                    publishDisplayName(context, session.accessToken)
+                    publishIdentity(context, session.accessToken)
                     true
                 }
             },
@@ -187,18 +187,22 @@ object OnlineAccount {
     }
 
     /**
-     * Carries the display name this device already has onto the account.
+     * Carries the identity this device already has onto the account.
      *
      * A name and a handle are two different things: the handle is how people
-     * find you, the display name is what they READ first. A brand-new account
-     * would otherwise reach the wall with only a handle to its name, so this
-     * pushes the local one the moment a session exists. Best-effort — a failed
-     * push is a blank second line, never a blocked sign-in.
+     * find you, the display name is what they READ first, and the bio is the
+     * line under it. A brand-new account would otherwise reach the wall with
+     * only a handle to its name, so the local name and bio are pushed the
+     * moment a session exists. Best-effort — a failed push is a blank second
+     * line or an absent bio, never a blocked sign-in.
      */
-    private fun publishDisplayName(context: Context, accessToken: String) {
+    private fun publishIdentity(context: Context, accessToken: String) {
         val name = AppPreferences.getDisplayName(context)
-        if (name.isBlank()) return
-        recoveryScope.launch { SocialApi.updateDisplayName(accessToken, name) }
+        val bio = AppPreferences.getCustomStreakTagline(context)
+        recoveryScope.launch {
+            if (name.isNotBlank()) SocialApi.updateDisplayName(accessToken, name)
+            if (bio.isNotBlank()) SocialApi.updateBio(accessToken, bio)
+        }
     }
 }
 

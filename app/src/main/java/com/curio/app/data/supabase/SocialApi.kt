@@ -29,6 +29,8 @@ data class CurioPerson(
     val visibility: String = PROFILE_VISIBILITY_PUBLIC,
     /** True when this member publishes no last-active stamp at all. */
     val hideActivity: Boolean = false,
+    /** Their own line, shown on the profile. Blank when they wrote none. */
+    val bio: String = "",
     /** Last-active stamp, 0 when unknown — or when activity is hidden. */
     val lastActiveMillis: Long = 0L
 ) {
@@ -146,6 +148,9 @@ object SocialApi {
     /** The server's own ceiling for one message (also a DB check constraint). */
     const val MAX_MESSAGE_CHARS = 2000
 
+    /** The profile bio's ceiling — mirrors the `profiles_bio_len` constraint. */
+    const val MAX_BIO_CHARS = 160
+
     /**
      * Every id that is pasted into a PostgREST query string must look like an
      * id. Without this a value carrying `&`, `,` or `.` could rewrite the
@@ -200,7 +205,7 @@ object SocialApi {
      */
     private const val PERSON_COLUMNS = "id,display_name,username,avatar_style"
     private const val PERSON_COLUMNS_PRIVACY =
-        "$PERSON_COLUMNS,profile_visibility,hide_activity,last_active_at"
+        "$PERSON_COLUMNS,profile_visibility,hide_activity,last_active_at,bio"
 
     /** How many NEW messages one live tick asks for. */
     private const val LIVE_TICK_LIMIT = 100
@@ -341,6 +346,31 @@ object SocialApi {
                 val userId = SupabaseClient.userIdFromAccessToken(accessToken)
                 val body = JSONObject().put(
                     "display_name",
+                    if (clean.isEmpty()) JSONObject.NULL else clean
+                )
+                val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
+                    .patch(body.toString().toRequestBody(jsonMediaType))
+                    .header("Prefer", "return=minimal")
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    /**
+     * Saves the member's public bio — their own line on their own profile.
+     *
+     * Mirrors the local value (the Edit-profile Bio field) onto the profile row
+     * so other members read it, not only this device. A blank value clears the
+     * column rather than storing an empty string, so "no bio" is one thing
+     * everywhere.
+     */
+    suspend fun updateBio(accessToken: String, bio: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val clean = bio.trim().take(MAX_BIO_CHARS)
+                val userId = SupabaseClient.userIdFromAccessToken(accessToken)
+                val body = JSONObject().put(
+                    "bio",
                     if (clean.isEmpty()) JSONObject.NULL else clean
                 )
                 val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
@@ -951,6 +981,7 @@ object SocialApi {
                     .orEmpty()
                     .ifBlank { PROFILE_VISIBILITY_PUBLIC },
                 hideActivity = row.optBoolean("hide_activity", false),
+                bio = row.optString("bio", "").takeUnless { it == "null" }.orEmpty(),
                 lastActiveMillis = epochMillis(row.optString("last_active_at"))
             )
         }

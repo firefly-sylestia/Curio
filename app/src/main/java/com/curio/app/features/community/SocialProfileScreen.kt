@@ -357,6 +357,16 @@ private fun SocialProfileHeader(
                 }
             }
 
+            // Their own words, and NOTHING when they wrote none — a profile
+            // must never pad itself with a placeholder line.
+            person?.bio?.trim()?.takeIf { it.isNotEmpty() }?.let { bio ->
+                Text(
+                    text = bio,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
             when {
                 isMe -> Text(
                     text = "This is your own profile. You can change your name and portrait in Edit profile.",

@@ -827,6 +827,20 @@ alter table public.profiles add column if not exists profile_visibility text not
 alter table public.profiles add column if not exists hide_activity boolean not null default false;
 alter table public.profiles add column if not exists last_active_at timestamptz;
 
+-- The member's own words — the line a profile shows under their name. TEXT
+-- ONLY, like everything else in the online layer, and short by design: it is a
+-- line on a profile, not a blog. Null (or blank) means "not written", which the
+-- app renders as nothing at all rather than a placeholder.
+alter table public.profiles add column if not exists bio text;
+
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'profiles_bio_len') then
+        alter table public.profiles add constraint profiles_bio_len
+            check (bio is null or char_length(bio) <= 160);
+    end if;
+end $$;
+
 do $$
 begin
     if not exists (select 1 from pg_constraint where conname = 'profiles_visibility_values') then

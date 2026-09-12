@@ -914,7 +914,8 @@ internal object SocialPeopleCache {
             userId = row.optString("id").takeIf { it.isNotBlank() } ?: userId,
             displayName = row.optString("n"),
             username = row.optString("u"),
-            avatarStyle = row.optInt("a", 0).coerceIn(0, 15)
+            avatarStyle = row.optInt("a", 0).coerceIn(0, 15),
+            bio = row.optString("b")
         )
     }
 
@@ -927,6 +928,7 @@ internal object SocialPeopleCache {
                 .put("n", person.displayName)
                 .put("u", person.username)
                 .put("a", person.avatarStyle)
+                .put("b", person.bio)
         )
         SocialCache.write(context, KIND, person.userId, array, SocialCache.TTL_PERSON_MS)
     }
@@ -1182,6 +1184,7 @@ internal object SocialInboxCache {
         .put("n", person.displayName)
         .put("u", person.username)
         .put("a", person.avatarStyle)
+        .put("b", person.bio)
 
     private fun personOf(row: JSONObject?): CurioPerson? {
         if (row == null) return null
@@ -1191,7 +1194,8 @@ internal object SocialInboxCache {
             userId = id,
             displayName = row.optString("n"),
             username = row.optString("u"),
-            avatarStyle = row.optInt("a", 0).coerceIn(0, 15)
+            avatarStyle = row.optInt("a", 0).coerceIn(0, 15),
+            bio = row.optString("b")
         )
     }
 }
