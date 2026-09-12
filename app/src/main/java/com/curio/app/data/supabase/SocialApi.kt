@@ -144,6 +144,7 @@ object SocialApi {
                     .header("Prefer", "return=minimal")
                     .build()
                 SupabaseClient.executeBody(request)
+                Unit
             }
         }
 
