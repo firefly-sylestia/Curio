@@ -30,6 +30,21 @@ class CaptureRepository(
     // topic lookups either).
     private val lightDecodeCache = HashMap<String, Pair<String, CurioEntry>>()
 
+    // v3xx43 — the LAST light list this repository emitted, kept so a screen
+    // can paint its FIRST frame with the real archive instead of an empty
+    // list (the Cabinet used to show a loading/empty flash on every open).
+    // Written only from the light flow's own collector.
+    @Volatile
+    private var lightSnapshot: List<CurioEntry> = emptyList()
+
+    /**
+     * v3xx43 — synchronous peek at the most recent light emission ([observeLight]).
+     * Empty before the first emission of the process; a screen uses it as its
+     * `produceState` initial value so revisiting the Cabinet renders the saved
+     * captures on the very first frame (no loading state).
+     */
+    fun peekLight(): List<CurioEntry> = lightSnapshot
+
     /** Observe all captures as [CurioEntry] flow for reactive UI updates. */
     fun observeAll(): Flow<List<CurioEntry>> =
         // Entity → domain conversion includes Gson decoding and topic lookup;
@@ -83,7 +98,7 @@ class CaptureRepository(
                         lightDecodeCache[row.id] = sig to entry
                         entry
                     }
-                }
+                }.also { lightSnapshot = it }
             }
             .flowOn(Dispatchers.Default)
 

@@ -74,6 +74,20 @@ val spotifySecretEscaped: String = envSpotifyClientSecret
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// Supabase Android client configuration. The URL and publishable/anon key are
+// safe for a public client; the service-role key must never be shipped here.
+val envSupabaseUrl: String? = System.getenv("SUPABASE_URL")?.trim()?.takeIf { it.isNotEmpty() }
+val supabaseUrlEscaped: String = envSupabaseUrl
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+val envSupabasePublishableKey: String? = (System.getenv("SUPABASE_PUBLISHABLE_KEY")
+    ?: System.getenv("SUPABASE_ANON_KEY"))?.trim()?.takeIf { it.isNotEmpty() }
+val supabasePublishableKeyEscaped: String = envSupabasePublishableKey
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Only create release signing if ALL four secrets are present and non-empty.
 // GitHub Actions exports missing secrets as empty strings, so .takeIf { it.isNotEmpty() }
 // converts them back to null. Without this guard, AGP would create a signing config
@@ -114,6 +128,8 @@ android {
         // flow); empty strings keep the search links.
         buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"$spotifyIdEscaped\"")
         buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"$spotifySecretEscaped\"")
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrlEscaped\"")
+        buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKeyEscaped\"")
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.
@@ -269,6 +285,7 @@ dependencies {
 
     // Gson for JSON serialization (CaptureData -> Room blob)
     implementation(libs.com.google.code.gson.gson)
+    implementation(libs.com.squareup.okhttp3.okhttp)
 
     // Vosk — on-device speech-to-text for pre-recorded sound bites (offline
     // transcription in the entry detail page; model downloaded in Settings).

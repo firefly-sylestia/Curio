@@ -49,6 +49,8 @@ object AppPreferences {
 
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
+    private const val KEY_USERNAME = "username"
+    private const val KEY_SOCIAL_AVATAR_STYLE = "social_avatar_style"
     private const val KEY_FAVORITE_SONG = "favorite_song"
     // v336 — per-album favorite tracks (heart picks in the album track-list
     // sheet): JSON object album name → JSON array of picked track titles in
@@ -65,8 +67,8 @@ object AppPreferences {
     // v350 — per-category cover-fetch consent: ALBUMS and SERIES get their
     // own toggles alongside books (opt-OUT by default like books), so the
     // user can switch fetching on for each category in Settings.
-    private const val KEY_ALBUM_FETCH_ENABLED = "album_fetch_enabled"    // bool — opt-out, default false
-    private const val KEY_SERIES_FETCH_ENABLED = "series_fetch_enabled"  // bool — opt-out, default false
+    private const val KEY_ALBUM_FETCH_ENABLED = "album_fetch_enabled"    // legacy — superseded by KEY_COVER_FETCH_ENABLED
+    private const val KEY_SERIES_FETCH_ENABLED = "series_fetch_enabled"  // legacy — superseded by KEY_COVER_FETCH_ENABLED
     private const val KEY_SERIES_FAVORITES = "series_favorites"
     // v3xx — when a book / album / series was LIKED ("kind|name" → epoch
     // ms). Feeds the Cabinet Everything "Recent" rail with recently liked
@@ -118,6 +120,9 @@ object AppPreferences {
     private const val KEY_3D_BUTTON_GRADIENT = "3d_button_gradient"
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"
     private const val KEY_REMINDER_HOUR = "reminder_hour"
+    // v3xx51 — the reminder's MINUTE (the clock picker can set any time, not
+    // just the preset hours). Defaults to 0 = on the hour.
+    private const val KEY_REMINDER_MINUTE = "reminder_minute"
     private const val KEY_TINT_WASH_ENABLED = "tint_wash_enabled"
     private const val KEY_SHARE_AUTO_FIT = "share_auto_fit"
     private const val KEY_ENTRY_META_ENABLED = "entry_meta_enabled"
@@ -196,6 +201,9 @@ object AppPreferences {
     //   deleting every mix doesn't resurrect them.
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
     private const val KEY_CABINET_COLLECTIONS = "cabinet_collections" // JSON array of CurioCollection
+    // v3xx50 — the last known saved-entry count, so a cold Cabinet open can
+    // paint a skeleton of EXACTLY that many cards (see getCabinetEntryCount).
+    private const val KEY_CABINET_ENTRY_COUNT = "cabinet_entry_count"   // int
     private const val KEY_LAST_MIX_NAME = "last_mix_name"          // String? — the applied deck's mix name
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
     // v3xx — picker page default + curated suggestions (add/remove):
@@ -217,7 +225,9 @@ object AppPreferences {
     // surprise data usage), which provider the bulk fetch uses, the books
     // whose covers failed (survive restarts so "Retry failed" works), and
     // the keyless-fetched average ratings (book name → Google Books rating).
-    private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // bool — opt-out, default false
+    private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // legacy — superseded by KEY_COVER_FETCH_ENABLED
+    // v3xx51 — the MERGED cover-fetch consent (books + albums + series).
+    private const val KEY_COVER_FETCH_ENABLED = "cover_fetch_enabled"  // bool — opt-out, default false
     private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
     private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
     // v360 — book names whose covers VERIFIED as real images (not Open
@@ -287,6 +297,11 @@ object AppPreferences {
     // on share/save so they restore next time the same topic is shared.
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
     private const val KEY_SHARED_CARDS = "shared_cards"            // JSON array of shared card records
+    private const val KEY_ONLINE_MODE_ENABLED = "online_mode_enabled"
+    // The opt-in that puts the Community wall on the bottom navigation bar.
+    // Off by default: Online Mode alone is about sync, this is the louder
+    // "I want the community in my nav" choice.
+    private const val KEY_COMMUNITY_TAB_ENABLED = "community_tab_enabled"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -295,6 +310,41 @@ object AppPreferences {
     fun setDisplayName(context: Context, name: String) {
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
         displayNameState = name
+    }
+
+    // ── Social username ─────────────────────────────────────────────
+    fun getUsername(context: Context): String =
+        prefs(context).getString(KEY_USERNAME, null)?.trim()?.removePrefix("@")?.lowercase().orEmpty()
+
+    fun setUsername(context: Context, username: String) {
+        prefs(context).edit().putString(KEY_USERNAME, username.trim().removePrefix("@").lowercase()).apply()
+    }
+
+    fun getSocialAvatarStyle(context: Context): Int =
+        prefs(context).getInt(KEY_SOCIAL_AVATAR_STYLE, 0).coerceIn(0, 15)
+
+    fun setSocialAvatarStyle(context: Context, style: Int) {
+        prefs(context).edit().putInt(KEY_SOCIAL_AVATAR_STYLE, style.coerceIn(0, 15)).apply()
+    }
+
+    // ── Online Mode ──────────────────────────────────────────────────
+    fun isOnlineModeEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_ONLINE_MODE_ENABLED, false)
+
+    fun setOnlineModeEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_ONLINE_MODE_ENABLED, enabled).apply()
+        // Sign-in/sign-out move this switch too (OnlineAccount), and the nav
+        // bar's Community tab hangs off it — keep the Compose mirror in step.
+        onlineModeEnabledState = enabled
+    }
+
+    // ── Community tab (opt-in bottom-nav entry) ───────────────────────
+    fun isCommunityTabEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, false)
+
+    fun setCommunityTabEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_COMMUNITY_TAB_ENABLED, enabled).apply()
+        communityTabEnabledState = enabled
     }
 
     // ── Favorite song (v... — Vinyl share card) ───────────────────────
@@ -1007,6 +1057,17 @@ object AppPreferences {
     // Save shortcut repoints into it. When the experiment settles the toggle
     // is removed and the winning view ships always-on.
     var cabinetV2EnabledState by mutableStateOf(false)
+    // v3xx45 — SCREEN REVEAL experiment (Settings → Dev page, default OFF):
+    // opening a screen plays the SAME circular iris as the light/dark flip —
+    // the current screen is frozen and peels away from where you tapped, a
+    // touch faster than the theme wipe. Off = today's plain transitions.
+    var screenRevealEnabledState by mutableStateOf(false)
+    // v3xx52 — CAPTURE STUDIO experiment (Settings ▸ Experiments, default OFF):
+    // the Save-your-take page gets a redesigned workspace shell — tinted topic
+    // hero, a take rail riding the bottom tray, pickers moved into a tools
+    // bottom sheet, a live recording pulse and springy take switching. The
+    // paper notes themselves are untouched; OFF = today's capture page.
+    var captureStudioState by mutableStateOf(false)
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -1138,6 +1199,27 @@ object AppPreferences {
         internal set
     var profileAvatarPathState by mutableStateOf("")
         internal set
+
+    // ── Online Mode + the Community tab (observable mirrors) ──────────
+    // Both are read from COMPOSITION (the bottom nav bar decides whether the
+    // Community tab exists, and every online surface tests the gate), so the
+    // stored prefs are mirrored into Compose state here. Without this the nav
+    // bar would keep a stale tab list until the next app launch.
+    /** Mirrors [isOnlineModeEnabled] so the nav chrome reacts to the switch. */
+    var onlineModeEnabledState by mutableStateOf(false)
+        private set
+    /** Mirrors [isCommunityTabEnabled] — the opt-in Community nav tab. */
+    var communityTabEnabledState by mutableStateOf(false)
+        private set
+
+    /**
+     * Whether the Community tab belongs on the bottom nav right now.
+     * Requires BOTH switches: Online Mode (the account layer is live) and the
+     * explicit "show it in the nav" opt-in. The gate is a getter so every
+     * caller — nav bar, rail, glass tab bar — reads the same answer.
+     */
+    val communityTabVisible: Boolean
+        get() = communityTabEnabledState && onlineModeEnabledState
 
     // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
     // OFF): the three floating nav-style capsules (bottom tab bar, Topic
@@ -1418,9 +1500,12 @@ object AppPreferences {
      */
     var bookFetchEnabledState by mutableStateOf(false)
         private set
-    // v350 — per-category cover-fetch consent states (album + series toggles
-    // beside the book one) so each category's poster fetch can be switched on
-    // and off independently.
+    // v3xx51 — the MERGED cover-fetch consent (books + albums + series). The
+    // per-category mirrors below stay in lockstep with it so existing readers
+    // need no changes.
+    var coverFetchEnabledState by mutableStateOf(false)
+        private set
+    // v350 — per-category cover-fetch consent mirrors (album + series).
     var albumFetchEnabledState by mutableStateOf(false)
         private set
     var seriesFetchEnabledState by mutableStateOf(false)
@@ -1552,6 +1637,8 @@ object AppPreferences {
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
+        screenRevealEnabledState = isScreenRevealEnabled(context)
+        captureStudioState = isCaptureStudioEnabled(context)
         cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -1588,9 +1675,12 @@ object AppPreferences {
         collectionsState = getCabinetCollections(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
-        bookFetchEnabledState = isBookFetchEnabled(context)
-        albumFetchEnabledState = isAlbumFetchEnabled(context)
-        seriesFetchEnabledState = isSeriesFetchEnabled(context)
+        // v3xx51 — one merged consent feeds all three mirrors (see
+        // [isCoverFetchEnabled], which migrates any legacy per-category on).
+        coverFetchEnabledState = isCoverFetchEnabled(context)
+        bookFetchEnabledState = coverFetchEnabledState
+        albumFetchEnabledState = coverFetchEnabledState
+        seriesFetchEnabledState = coverFetchEnabledState
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
         bookCoverDoneState = getBookCoverDone(context)
@@ -1617,6 +1707,8 @@ object AppPreferences {
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
         autoBackupEnabledState = isAutoBackupEnabled(context)
         autoBackupFrequencyDaysState = getAutoBackupFrequencyDays(context)
+        onlineModeEnabledState = isOnlineModeEnabled(context)
+        communityTabEnabledState = isCommunityTabEnabled(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────
@@ -1883,6 +1975,8 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
+    private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
+    private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
@@ -1998,6 +2092,26 @@ object AppPreferences {
     fun setCabinetV2Enabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_CABINET_V2, enabled).apply()
         cabinetV2EnabledState = enabled
+    }
+
+    /** Whether the screen-reveal transition experiment is on (default OFF;
+     *  see the state comment above). */
+    fun isScreenRevealEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SCREEN_REVEAL, false)
+
+    fun setScreenRevealEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SCREEN_REVEAL, enabled).apply()
+        screenRevealEnabledState = enabled
+    }
+
+    /** Whether the Capture studio experiment is on (default OFF; see the
+     *  state comment above). */
+    fun isCaptureStudioEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, false)
+
+    fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
+        captureStudioState = enabled
     }
 
     // v3xx — the "Subtle pill glow" experiment concluded: subtle is the
@@ -2315,7 +2429,7 @@ object AppPreferences {
     fun isLiveNotificationsEnabled(context: Context): Boolean = true
 
     /**
-     * v23 — whether the Explore now dialog shows its "Show the explore
+     * v23 ��� whether the Explore now dialog shows its "Show the explore
      * bubble" opt-in row. Default OFF (hidden); the Notifications toggle
      * re-shows it as a single-line choice inside the dialog.
      */
@@ -2747,7 +2861,11 @@ object AppPreferences {
         reminderEnabledState = enabled
         prefs(context).edit().putBoolean(KEY_REMINDER_ENABLED, enabled).apply()
         if (enabled) {
-            DailyReminderScheduler.schedule(context, getReminderHour(context))
+            DailyReminderScheduler.schedule(
+                context,
+                getReminderHour(context),
+                getReminderMinute(context)
+            )
         } else {
             DailyReminderScheduler.cancel(context)
         }
@@ -2756,11 +2874,26 @@ object AppPreferences {
     fun getReminderHour(context: Context): Int =
         prefs(context).getInt(KEY_REMINDER_HOUR, 18)   // default 6 PM
 
-    fun setReminderHour(context: Context, hour: Int) {
+    /** v3xx51 — the reminder's minute (0 by default = the preset hours). */
+    fun getReminderMinute(context: Context): Int =
+        prefs(context).getInt(KEY_REMINDER_MINUTE, 0).coerceIn(0, 59)
+
+    /** Preset hour pick — snaps back to the top of the hour. */
+    fun setReminderHour(context: Context, hour: Int) = setReminderTime(context, hour, 0)
+
+    /**
+     * v3xx51 — the EXACT reminder time from the clock picker (hour + minute).
+     * Writes both keys and re-arms the alarm in one go.
+     */
+    fun setReminderTime(context: Context, hour: Int, minute: Int) {
         val safeHour = hour.coerceIn(0, 23)
-        prefs(context).edit().putInt(KEY_REMINDER_HOUR, safeHour).apply()
+        val safeMinute = minute.coerceIn(0, 59)
+        prefs(context).edit()
+            .putInt(KEY_REMINDER_HOUR, safeHour)
+            .putInt(KEY_REMINDER_MINUTE, safeMinute)
+            .apply()
         if (isReminderEnabled(context)) {
-            DailyReminderScheduler.schedule(context, safeHour)
+            DailyReminderScheduler.schedule(context, safeHour, safeMinute)
         }
     }
 
@@ -2987,6 +3120,22 @@ object AppPreferences {
     }
 
     /**
+     * v3xx50 — the LAST number of saved entries this install had, persisted
+     * across launches. The Cabinet's loading state paints a skeleton of
+     * exactly this many cards, so a cold open matches the archive that is
+     * arriving instead of showing a generic couple of boxes.
+     */
+    fun getCabinetEntryCount(context: Context): Int =
+        prefs(context).getInt(KEY_CABINET_ENTRY_COUNT, 0)
+
+    /** Records the saved-entry count for the next cold open's skeleton. */
+    fun setCabinetEntryCount(context: Context, count: Int) {
+        if (count < 0) return
+        if (prefs(context).getInt(KEY_CABINET_ENTRY_COUNT, 0) == count) return
+        prefs(context).edit().putInt(KEY_CABINET_ENTRY_COUNT, count).apply()
+    }
+
+    /**
      * Toggle a topic in/out of a seeded shelf (Curiying now / Want to
      * read / Completed / Personal). Creates the shelf on the fly if it
      * hasn't been seeded yet (a reveal sheet can toggle before the Cabinet
@@ -3124,38 +3273,50 @@ object AppPreferences {
         lastMixNameState = name
     }
 
-    // ── Book-cover hub (v320 / v320b) ────────────────────────────────
+    // ── Cover fetching consent (v320 → v3xx51 MERGED) ────────────────
     /**
-     * Whether bulk book-cover + rating fetching is ENABLED. Opt-OUT by
-     * default (false) — the user flips it on in the hub, so the app never
-     * bulk-downloads covers (or hits Google Books) without explicit consent.
+     * v3xx51 — ONE consent for ALL cover fetching. Books, albums and series
+     * used to have separate toggles, which the user merged into a single
+     * "Cover fetching" switch. This is the canonical gate: every reader
+     * (the hub's bulk pass, the reveal's on-demand resolvers, the Cabinet
+     * cover cache and the share cards) checks it, and nothing reaches the
+     * network while it is OFF.
+     *
+     * Opt-OUT by default (false) — nothing downloads without explicit
+     * consent. The legacy per-category keys are still honoured ONCE on read
+     * (an install that had any of them on migrates to the merged key), then
+     * never written again.
      */
-    fun isBookFetchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_BOOK_FETCH_ENABLED, false)
+    fun isCoverFetchEnabled(context: Context): Boolean {
+        val p = prefs(context)
+        if (p.contains(KEY_COVER_FETCH_ENABLED)) {
+            return p.getBoolean(KEY_COVER_FETCH_ENABLED, false)
+        }
+        val legacy = p.getBoolean(KEY_BOOK_FETCH_ENABLED, false) ||
+            p.getBoolean(KEY_ALBUM_FETCH_ENABLED, false) ||
+            p.getBoolean(KEY_SERIES_FETCH_ENABLED, false)
+        if (legacy) p.edit().putBoolean(KEY_COVER_FETCH_ENABLED, true).apply()
+        return legacy
+    }
 
-    fun setBookFetchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_BOOK_FETCH_ENABLED, enabled).apply()
+    fun setCoverFetchEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_COVER_FETCH_ENABLED, enabled).apply()
+        // All three mirrors move together — every existing reader keeps
+        // working unchanged off its own state field.
+        coverFetchEnabledState = enabled
         bookFetchEnabledState = enabled
-    }
-
-    // v350 — per-category consent toggles for album + series poster fetching.
-    // Same opt-OUT-by-default semantics as the book toggle; the READER of a
-    // topic checks its own category's toggle before touching the network.
-    fun isAlbumFetchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_ALBUM_FETCH_ENABLED, false)
-
-    fun setAlbumFetchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_ALBUM_FETCH_ENABLED, enabled).apply()
         albumFetchEnabledState = enabled
-    }
-
-    fun isSeriesFetchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SERIES_FETCH_ENABLED, false)
-
-    fun setSeriesFetchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SERIES_FETCH_ENABLED, enabled).apply()
         seriesFetchEnabledState = enabled
     }
+
+    // Legacy per-category accessors — thin aliases of the merged consent (so
+    // the ~15 existing call sites keep compiling AND behave identically).
+    fun isBookFetchEnabled(context: Context): Boolean = isCoverFetchEnabled(context)
+    fun setBookFetchEnabled(context: Context, enabled: Boolean) = setCoverFetchEnabled(context, enabled)
+    fun isAlbumFetchEnabled(context: Context): Boolean = isCoverFetchEnabled(context)
+    fun setAlbumFetchEnabled(context: Context, enabled: Boolean) = setCoverFetchEnabled(context, enabled)
+    fun isSeriesFetchEnabled(context: Context): Boolean = isCoverFetchEnabled(context)
+    fun setSeriesFetchEnabled(context: Context, enabled: Boolean) = setCoverFetchEnabled(context, enabled)
 
     /** The selected cover provider (a BookCoverProvider enum name). v356 —
      *  defaults to ITUNES (the keyless first-choice source). v361 — when the

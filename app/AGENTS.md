@@ -90,6 +90,18 @@ app/src/main/java/com/curio/app/
 - **Book covers — bulk one-by-one fetch (v314):** Settings → Safety & support → "Book covers" row (`features/settings/BookCoverFetch.kt`, `BookCoverFetchRow` — an INLINE action row special-cased off `BookCoverFetch.ROUTE` in the hub's grid/search/two-pane renderers so it can never navigate) tap-fetches every unique cover URL (authored `imageUrl`, else the reveal's exact Open Library `-M.jpg` fallback — same URL = same cache key) sequentially into the shared disk cache, `memoryCachePolicy DISABLED` on the bulk pass, ~150ms politeness gap, live "Fetching 12 / 301…" counter + progress bar, completion "✓ N covers cached · M failed". Reveal posters then render instantly/offline.
 - **Haptics:** satisfying haptics are localized per-screen (`val haptics = LocalHapticFeedback.current` hoisted in composition — never read inside click lambdas). Confirm on completions (save capture, share-card Save/Share, spin landing, quest complete); KeyboardTap on action buttons (Start exploring, Express yourself, opening Cabinet entries); TextHandleMove ticks on toggles (pin, reveal favourite, share-card Reset/Done). The wheel's escalating ratchet lives in SpinScreen.
 
+### Online layer (Supabase) — account + Online Mode
+- **Package:** `data/supabase/` owns the whole online layer — `SupabaseClient` (a hand-rolled OkHttp REST/Auth client; **no supabase-kt dependency**), `SupabaseSessionStore` (stored session) and `OnlineAccount` (the observable state the UI reads). Its child AGENTS.md carries the local contract.
+- **Credentials:** `BuildConfig.SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` (falls back to `SUPABASE_ANON_KEY`) come from the build environment, and both `android.yml` and `release.yml` export either key name. The **service-role key is never read, stored or exported** — only public client credentials ship in the APK.
+- **Offline-first:** Room stays the source of truth for captures and Online Mode is a local preference (`AppPreferences.isOnlineModeEnabled`, default OFF) that flips off on sign-out and gates every online action. Only text metadata may ever sync — images, audio and screenshots never upload.
+- **UI:** the account page is `features/settings/OnlineModeScreen` (route `CurioRoutes.SETTINGS_ONLINE`), reached from the hub's *Your data & privacy* group, the settings nav rail ("Online") and the hub search. It wears the settings-family design language (torn hero + `SettingsHeroHeader`, frosted `SettingsOptionCard`s, Playfair `SettingsSectionHeading`s) like every other sub-page.
+- **Errors:** account failures render through `onlineAuthMessage` — rate limits, unconfirmed emails and bad credentials stay actionable; anything unrecognised collapses to one generic line so a raw response body can never reach the UI.
+- **Community (24-hour text cards):** `data/supabase/CommunityApi.kt` is the only door to `community_cards` / `community_reactions` / `community_reports`, and `features/community/CommunityScreen.kt` (route `CurioRoutes.COMMUNITY`, reached from the Online mode page's *Community* row) is the wall: cards are rebuilt with the app's own `TopicShareCard` from stored text/topic/style data, so nothing media-backed can ever be posted or shown. A card carries a poster caption (≤180 chars, shown above the card) and can be opened in its own view (`CommunityCardScreen`, route `community/{cardId}`) where the full card, its remaining life, its share-as-image action. Replies (`CommunityCommentsSheet` + `CommunityApi.comments/comment/deleteComment`) open in one shared bottom sheet from the wall or the card view — drag handle, swipe/back to close, no close cross, composer above the keyboard — because a weighted scrollable inside a sheet is measured with an infinite maximum height and crashes, the sheet caps its list with `heightIn`. A reply is capped at 400 chars and cascades off the card, so none can outlive it. A card expires 24 hours after posting (`expires_at` defaults server-side, reads filter `expires_at > now()`), entry requires a signed-in account with Online Mode on — and the same gate is enforced by RLS in [`supabase/schema.sql`](../supabase/schema.sql), which is the security boundary (public key only, policies for `authenticated` only, no `anon` policy, no service-role key anywhere). Identity columns default to `auth.uid()` server-side, so the client never sends one.
+- **Social identity is resolved LIVE, never read off the row:** `community_cards.author_handle` / `community_comments.author_handle` are stamped at INSERT time by a DB trigger (a modified client must not be able to forge a handle), so the stored handle FREEZES the poster's name at post time. Every read therefore enriches the rows through `CommunityApi.withAuthors` / `withCommentAuthors`, which call `SocialApi.people(token, ids)` once per screen and fill `authorName` + `authorAvatar`. The UI always renders `card.authorLabel` (live username, then the snapshot) and `card.authorAvatar` — never `authorHandle` directly. A profile that is no longer readable (Online Mode off) leaves the snapshot in place rather than failing the feed.
+- **Member profiles:** `features/community/SocialProfileScreen.kt` (route `CurioRoutes.SOCIAL_PROFILE`, `person/{userId}`) is every social identity's destination — a card's author row, a reply's author, a friend row and the conversation header all open it. It reads only the public half of `profiles` (username, avatar style) plus the member's live cards (`CommunityApi.cardsByAuthor`), and offers Add friend / Message / nothing when it is your own page. It is wrapped in `SettingsSharedScope` like the card view.
+- **Sharing into the community:** the wall's posting door is the floating "Share a topic" button (there is no header button), and the composer PICKS the topic from the catalog (`TopicJsonLoader.loadIndex()`, falling back to the warm lane pools) instead of taking a typed name — the lane, glyph and accent come from the chosen topic, so a card can never disagree with the topic it is about. The lane chips went away with the free-text field.
+- **Social avatars:** Community identity uses only `profiles.avatar_style` (0–15) and the code-drawn `features/community/SocialAvatar.kt` renderer. Users choose from 16 local vector/canvas styles in Online Mode; no avatar bitmap, URI, upload API, or media column belongs in the online layer. The 16 are deliberately DISTINCT characters (beanie, bob, glasses, curls, headphones, wizard hat, leaf crown, goggles, beret, pigtails, top bun, freckles, hood, helmet), all drawn on a shared 100×100 design grid so one avatar looks the same at 24dp in a chip and at 96dp on a profile.
+
 ### UI
 - **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
 - **No close buttons in bottom sheets (user):** bottom sheets dismiss by
@@ -106,6 +118,7 @@ app/src/main/java/com/curio/app/
 - **3D shuffle button (v24):** always on by default — its toggle was removed from Settings → Experiments → Deck & controls (the `threeDButtonState` pref API stays, default true; SpinScreen reads it unchanged).
 - **Closed experiments (v24) — hardcoded OFF:** dual-accent hero gradient (ugly golden blend), deck card shadows (weird look while cards animate), tail-fade peek motion, and Smart Spin layout (always natural deck sizing) had their toggles removed from Experiments and their reads in SpinScreen/TopicRevealScreen hardcoded to false. The Layout & input section was removed from Experiments (Voice-to-text still lives in Settings → Recording; Smart density keeps its stored pref but has no UI).
 - **Version five-tap (v24):** the Version row in Support & diagnostics opens the **Experiments** screen (kept open) — it no longer toggles promo mode. Promo mode stays OFF by default and is reached from Settings → Experiments → Promo mode; PromoModeScreen's own toggle is the one control.
+- **Capture studio (v3xx52, Settings → Experiments → Capture → "Take studio", default OFF):** the Save-your-take page's second SHELL, in `features/capture/CaptureStudio.kt`. It is presentation only — `SaveCaptureScreen` keeps the state, the save pipeline and every dialog, and composes either the classic chrome or the studio (`AppPreferences.captureStudioState`): the studio draws its own top bar, a tinted topic hero (medallion + topic + session duration + an inline `MoodChipsRow`), a canvas that hosts the SAME `FormatBodyForCategory` / `TagEditorRow` / `SessionNoteFloatingPill` the classic page uses, a take rail + tools/save dock on the bottom tray, and a `CaptureToolsSheet` (format grid + mood + tags). The recording pulse reads the take's existing `CaptureSectionState.busy`. Never fork the save rules into the studio — pass the classic page's own guards as callbacks (that is why the studio's params are a callback list, not a second implementation), and keep the paper notes untouched.
 - **Passed experiments (v25) — hardcoded ON:** the **Enhanced main gradient** and **Pastel crown depth** experiments PASSED — always ON. Their toggles were removed from Experiments (Spin visuals → Main card / the Deck & controls card is gone entirely) and the reads are hardcoded `true` in SpinScreen (hero gradient + pastel top crown), TopicRevealScreen (hero gradient) and CurioColors (pastel card crown). The `heroGradientState` / `pastelCrownDepthState` pref APIs stay dormant, default true.
 - **Settings declutter (v25):** all card HEADER lines in Settings were removed per request — the hub cards ("How Curio feels", "Experiments", "Your data": `headerIcon/Title/Subtitle = null` in `SettingsSections`) and the sub-page `CurioCardHeader(...)` lines (Visual language / Notifications / Recording / Backup & restore / FieldMind archive / Main card / Deck peek cards / Promo mode). Rows render directly under their `CurioSectionLabel`; that shared label component was also bumped labelMedium → titleSmall so section labels read larger everywhere (Settings, Support, Experiments).
 - **Deck round-trip pin (v25):** tapping the front card on Spin now pins that topic as the landed topic (`landedTopicName`), so returning from Topic Reveal re-deals the hand centered on the SAME card — previously the NavHost disposed Spin while Reveal was open and the idle deck (no landed topic) re-dealt a different random front card on back.
@@ -7284,6 +7297,275 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx51 — the control tick reaches every switch.** `rememberCurioControlTick()`
+  (CurioPressFeedback) now also wraps the switches outside the settings family
+  — Bug report's crash-log toggle, Onboarding's reminder / explore-bubble /
+  pastel toggles, the Pet designer's element + face/reaction toggles, the
+  reveal dialog's bubble opt-in, and the share sheet's four (polaroid-on-card
+  ×2, long-fact auto-fit, include-a-link). The helper is a `@Composable`
+  factory, so it must be hoisted to the enclosing composable body and used
+  INSIDE the non-composable `onCheckedChange` lambda (`{ tick { … } }`) —
+  never called from within that lambda (root AGENTS.md rule 3).
+- **v3xx50 — the Cabinet's SKELETON system + the settings rail's vanishing
+  active label.** (1) **Skeleton system** (`ui/components/CurioSkeleton.kt`):
+  `CurioEntrySkeletonCard` is a 20dp-radius / 96dp-header placeholder that
+  matches `CurioEntryCard`'s shape, with a shimmer sweep whose animated value
+  is read in the DRAW phase (a sweeping skeleton never recomposes);
+  `CabinetEntrySkeletonGrid(count, topInset, wide)` lays `count` of them out
+  in the SAME grid the real cards use (2 columns on phones, adaptive on wide,
+  the grid's own paddings/gaps). The count is the LAST KNOWN saved-entry
+  count, persisted by the new `AppPreferences.getCabinetEntryCount` /
+  `setCabinetEntryCount` (key `cabinet_entry_count`) — so a cold open paints
+  exactly as many placeholders as the archive it is about to show, capped at
+  12 so a huge archive can't compose hundreds of cards for one frame. (2)
+  **No more empty flash on a cold open:** `CabinetV2Content` tracks
+  `archiveReady` (false until the first `observeLight()` emission), gates its
+  `showSuggestions` on it, and holds the home's Saved-entries slot (and the
+  Saved entries / Notes shelves) with `v2SkeletonItems` until then; the
+  classic `CabinetScreen` swaps its four wide boxes for
+  `CabinetEntrySkeletonGrid`. Both screens remember the count for the next
+  launch. (3) **Settings rail:** the active chip now paints its OWN fill the
+  instant it becomes active (`SettingsRailAccent`, shared with the gliding
+  shared-element pill) — the shared element only exists in the transition
+  overlay (the arriving chip's own instance is hidden while the glide runs),
+  so with a transparent chip the active label sat cream-on-near-white until
+  the pill landed ("the text disappears for a moment for the active
+  indicator"). The bounds spring is critically damped (1.0 / 420) so the
+  highlight lands and STOPS instead of visibly settling.
+- **v3xx49 — the collapse clock runs the header's real collapsible distance
+  (Home + Profile).** A fixed 90dp clock (`StickyBarThreshold` /
+  `ProfilePillThreshold`) drove a header that gives back ~122dp (Home) / ~186dp
+  (Profile) of reserved space, so the page slid up faster than the finger for
+  the first 90dp and then snapped back to 1:1 — the reported "jump/flicker at
+  the collapse point". Progress is now `scroll / (fullReserve − compact − inset)`
+  in GLASS mode, so `d(reserve)/d(scroll) = −1` and the content below the
+  header stays exactly under the finger while the header collapses in place,
+  reaching the compact floor precisely when the clock hits 1. Torn-paper mode
+  keeps the 90dp clock: there it only drives the floating pills' pop/frost
+  morph.
+- **v3xx48 — the glass header really collapses, the reveal is faster +
+  tappable, the Cupboard regains its size ladder and its switch animation,
+  the text-history CURRENT pill is fixed (user 2026-09-11).**
+  (1) **`CurioGlassToolbarMorph` — CLIP BEFORE the size-reporting layout.**
+  `.layout { layout(w, lerp(full, compact + inset, eased)) }` reports the
+  animated height but measures its child at the CONTENT's natural height, so
+  a `clipToBounds()` placed INSIDE it clipped against the full hero and did
+  nothing: the glass kept painting its whole expanded area ("the glass
+  extended area stays in its initial size where the stats was") while only the
+  reservation shrank. The clip now WRAPS the layout node, so it is exactly
+  the animated height from y=0 (the status-bar strip stays covered) and the
+  full content is trimmed as the bar collapses.
+  (2) **Screen reveal (`CurioRevealNav` + `ThemeTransition`).** 440ms → 300ms
+  and the settle beat 32 → 20ms ("make it more faster"), and the frozen frame
+  NO LONGER swallows input: the overlay's consuming `pointerInput` is gone, so
+  the overlay draws above the destination without claiming a hit and quick
+  taps land on the screen that is really there ("mid transition i cant tap
+  anything").
+  (3) **Cupboard wall (`buildCupboardShelves`).** The size ladder is back as
+  SHELF HEIGHTS — 0.50 / 0.28 / 0.34 / 0.21 of the wall width, cycling, so the
+  smallest shelf is ~0.34x the feature one and the wall keeps the big/small
+  contrast the old 3x…0.5x tiers had ("it doesnt have that 3x sizes or smaller
+  one like .5x") while each shelf still fills the width exactly. A filter
+  switch also FADES the wall into its new arrangement again (`wallSwap`
+  Animatable, 0.25 → 1 over 280ms, per-shelf alpha + a whisper of scale) —
+  packed shelves can't slide covers to new slots the way the old grid's
+  per-cover lazy items did, so the swap needed its own motion.
+  (4) **`HistoryCurrentPill` + the list-view meta row.** The pill wears the
+  theme accent (primary wash + 28% rim, extra-bold tracked label) instead of
+  two hardcoded browns, and refuses to wrap; the row's TIME is flexible
+  (`weight(1f, fill = false)`) so the fixed delta + pill can never be pushed
+  past the row's rounded clip and cut off ("the current pill is broken and
+  looks off").
+- **v3xx47 — the app-wide TOUCH feedback is a pressed LOOK, not a ripple
+  (`ui/theme/CurioPressIndication.kt`, NEW; wired in `CurioTheme`).** The user
+  meant the TOUCH highlight, not the selected state: "remove weird selection
+  highlights … the touch highlight, for all around the app … maybe with
+  animation or a pressed look" — Material's expanding ripple reads as a
+  foreign blob on this app's rounded cards, pills and rows. `CurioPressIndication`
+  is an `IndicationNodeFactory` whose node paints the element into an offscreen
+  layer and tints it with `BlendMode.SrcAtop` (press in 90ms, out 260ms,
+  `onSurface` at 0.14 alpha), so the wash lands ONLY on pixels the element
+  already drew and therefore follows its own shape — no ripple geometry to size
+  against, nothing bleeding past a card's corners. Provided once at the theme
+  root via `LocalIndication`, so every `clickable` / `selectable` / Material
+  surface / indication-reading control wears it, bottom sheets included.
+  KNOWN TRADE-OFF: an element that paints NO background (a bare `TextButton`
+  label) only tints its glyphs — Material's ripple used to add a circle there.
+  At rest the node draws straight through (no layer, no cost).
+- **v3xx46 — the shared PRESS FEEDBACK + haptics primitive
+  (`ui/components/CurioPressFeedback.kt`, NEW; user 2026-09-11: "Press
+  feedback … and more haptics all over the over").** `Modifier
+  .curioPressClickable(...)` is a drop-in for `Modifier.clickable(onClick)`:
+  it owns a `MutableInteractionSource`, reads `collectIsPressedAsState()`,
+  scales the surface on `CurioMotion.Springs.Press` (quick snap-back, no
+  rubbery overshoot) and fires ONE light haptic on the DOWN edge only
+  (`LaunchedEffect(pressed)`, `HapticFeedbackType.TextHandleMove` — the same
+  tick the nav pills use). The ripple is carried over from
+  `LocalIndication.current`, so no surface loses its press wash, and
+  `Modifier.scale` is a draw-only transform — neighbours never reflow while
+  a surface squishes. Scale is a parameter because the same 0.94 reads as a
+  press on a chip and a jump on a full-width card: chips 0.96, settings rows
+  0.975, Home's saved/pinned rows 0.975, secondary cards 0.98, the big hub
+  cards 0.985. Applied to `SettingsOptionRow` (so EVERY settings-family row
+  ticks), the hub's `SettingsDesignCardView` / `SettingsSecondaryCardView`,
+  `SettingsQuickTools` chips, and Home's `SavedEntryRow` / `PinnedTopicRow`.
+  Surfaces that already own a haptic or their own press handling were left
+  alone (the nav pills, the v244 settings search pill's `indication = null`
+  interaction source).
+  **Extended the same cycle:** `rememberCurioPressSource()` is the press half
+  for surfaces that OWN their gesture — Material3's clickable `Surface` and
+  `combinedClickable` cards that only accept an `interactionSource`; hand the
+  returned source to that parameter and the returned modifier to the surface's
+  chain (both halves are required — the surface must observe the SAME source).
+  Used by `V2ShelfCard` (CabinetShelves, `combinedClickable`) and Profile's
+  `SettingsNavCard` (clickable `Surface`). `rememberCurioControlTick()` wraps
+  an ON/OFF control's callback with the one tick — wired into
+  `SettingsOptionSwitchRow` (which every settings + Experiments switch is
+  built on, so it covers the whole family), Book covers' fetch switch and
+  Manage categories' per-lane visibility switch. NOTE: sheets do NOT tick on
+  open — that needs a shared sheet wrapper (there are ~60 `ModalBottomSheet`
+  call sites), and ticking only the handful that were edited would read as
+  inconsistent.
+- **v3xx45 — SCREEN REVEAL experiment, packed Cupboard shelves, the .jsx
+  Text-history tree, plain caption box + cover-true album sheet (user
+  2026-09-11: "similar to the dark mode and light mode transition cant we
+  use that for like settings or profile open … make it a toggle and also
+  make it faster a little", "the album colors are fully different", "the
+  text history doesnt match the concept .jsx", "the changes view is bad the
+  compare is the better one", "the add a caption field is note paper style
+  change it to just a text box").**
+  (1) **Screen reveal (`navigation/CurioRevealNav.kt`, NEW).** The
+  light/dark flip's feathered circular iris now also opens SCREENS, gated by
+  a Settings ▸ Experiments toggle (`AppPreferences.screenRevealEnabledState`,
+  default OFF). It CANNOT wrap the ~120 `navigate()` call sites, so the
+  frame is captured optimistically on pointer-DOWN
+  (`Modifier.trackRevealTaps()` on the NavHost root Box, Initial pass only —
+  no hit-test change) and stashed in `CurioRevealNav`;
+  `NavController.addOnDestinationChangedListener` then plays it via
+  `CurioThemeTransitionState.startTransitionWithFrame(frame, center)` — a
+  non-suspend arm of the SAME transition machinery the theme flip uses
+  (`captureFrameNow()` is the new grab-only snapshot). No fresh frame
+  (back/pin/deep-link/experiment off/failed capture) = the normal page
+  transitions run untouched, so it can never wedge navigation. Shared-
+  element routes (`reveal`, `pet-designer`) opt out entirely — their
+  hand-tuned morph is better than an iris. While the reveal owns a
+  navigation `CurioRevealHost.suppressDefaultTransition` makes the NavHost
+  return `EnterTransition.None`/`ExitTransition.None` so the iris is the
+  ONLY motion. Faster than the flip: `revealDurationMs` 440 (vs 680) and
+  `revealSettleDelayMs` 32 (vs 80), both restored in
+  `finishTransition()` so the next theme flip keeps its own timings.
+  Frames are reused within 700ms and recycled aggressively.
+  (2) **Cupboard wall = packed SHELVES (`CabinetV2Content.kt`).** No span
+  tweak can fix a grid line: it shares ONE height, so a tall book beside
+  two small albums always left a hole (the reported "space left below
+  those 2"). The wall is now `BoxWithConstraints` → `buildCupboardShelves()`
+  packing covers into rows at a COMMON height (each cover's width = height x
+  its own aspect, so widths + gaps sum to exactly the measured width), one
+  `LazyColumn` item per shelf. The old 8-column `LazyVerticalGrid` span
+  cycle + `mediaTierIndex` are gone.
+  (3) **Text history = the .jsx tree (`ui/components/TextHistory.kt`).**
+  New `LineageRail`: one continuous rail, every version its own NODE CARD,
+  sessions + versions rendered NEWEST FIRST (the CURRENT version leads with
+  its badge), and each node's tap opens the word-level COMPARE against the
+  snapshot chronologically before it (`onComparePair`, resolved from a
+  `prevOf` map built across session boundaries). The inline "changes" diff
+  list + its +/− word counts are GONE — compare IS the changes view.
+  (4) **Caption + album/book sheets.** `PaperLineField(paper = false)` is a
+  genuinely plain box now (theme `surface` + 1dp `outlineVariant` hairline,
+  not the papery `surfaceVariant` wash); `ChapterNoteField`'s placeholder
+  drops its 0.85-alpha fade; `AlbumNotesSheet` keys its palette off the
+  AUTHORED cover (`topic.imageUrl`) first — the same art `AlbumCoverPoster`
+  shows — so the sheet can no longer be tinted from a different image.
+- **v3xx44 — settings rail highlight lands with the tap + text-history
+  tree badges (user test feedback: "the active indicator in settings top
+  rail too slow and feels broken").** (1) **`SettingsRailBoundsTransform`
+  (SettingsHubScreen.kt) 0.8/140 → 0.9/320** (~350ms → ~200ms settle):
+  the highlight arrives with the tap and still visibly travels instead of
+  snapping. (2) **The rail no longer moves AFTER composition:** the old
+  `LaunchedEffect(active)` + `scrollToItem` centring correction snapped
+  the whole header sideways one frame after every section switch, right
+  under the gliding pill — that is the "feels broken". The row now
+  composes ALREADY centred: the rail geometry is fixed (82dp chip +
+  7dp gap), so `railInitialOffset` is computed from
+  `LocalConfiguration.screenWidthDp` and handed in as
+  `initialFirstVisibleItemScrollOffset`. (3) **TextHistory.kt tree:** each
+  version node's +/− badge now compares against the FIELD's previous
+  snapshot walked ACROSS session boundaries (a running `prevEntry` in
+  `HistoryFieldCard`) — a session's first node used to report its whole
+  text as "+N"; the version connector Box is a fixed `height(18.dp)`
+  instead of `fillMaxHeight()` (which measured 0 in an unbounded
+  LazyColumn item, so the stub/dot drew outside their own bounds).
+- **v3xx43 — Favorites = liked TOPICS, Everything → CUPBOARD, stable
+  wall sizes, instant Cabinet, glass headers to the status bar + a real
+  collapse (user 2026-09-10).**
+  (1) **Duplicate shelf labels gone** — `V2DetailHeader` (CabinetV2Content)
+  dropped its name/count block (the pinned hero already prints the
+  collection's name + item count) and lost its `name`/`count` params; it
+  is now the actions strip (Add + kebab) with `Arrangement.End`.
+  `v2VirtualShelfItems` lost its `v-head` section header entirely (same
+  duplicate on Saved entries / Notes) and its unused `onAdd` param.
+  (2) **Favorites is the LIKED-TOPIC shelf** — new `likedTopics` in
+  `CabinetV2Content` reads `AppPreferences.topicSentimentsState`
+  (SENTIMENT_LIKE, key `CATEGORY:topicId`) and resolves each id against
+  the warm lane pools (`TopicJsonLoader.cached`, guarded by a
+  `catalogReady` poll with a 3s cap), deduped + name-sorted. The level
+  renders through the new `v2LikedTopicItems` / `V2LikedTopicRow` — a
+  category-tinted glyph tile + name/byline/lane row that opens the
+  topic's real reveal (skeleton rows while the pools warm, doodle empty
+  state after). `shelfCounts[FAVORITES]` and the hero subtitle now count
+  liked topics; `V2ShelfId.FAVORITES` no longer shares the media wall.
+  (3) **Everything → CUPBOARD** — hero title + subtitle, the home card's
+  title/subtitle/count (liked media only, no captures), its empty rail
+  copy, the no-match state and the open-everything content description
+  all say Cupboard now; `heroSubtitle` reads "Books · albums · series"
+  and the home fallback line reads "Collections · Cupboard · your
+  keepsakes". The internal level key stays `"everything"` (no state
+  churn); its copy and card count are media-only.
+  (4) **Stable wall sizes** — `mediaTierIndex` maps every liked item
+  (`KIND|NAME`) to its position in the FULL name-sorted media list, and
+  `v2EverythingMasonryItems` takes that map so a cover's size tier comes
+  from its stable position, never its rank in the filtered list:
+  filtering the wall re-flows it without any cover changing size.
+  (5) **Cupboard Add = catalog search** — new `V2CupboardAddSheet`
+  (`showCupboardAdd`): a search field over the BOOKS / ALBUMS / SERIES
+  lane pools (sync, warm cache), rows via the existing
+  `AddTopicPickRow`, tapping toggles the item's media favorite via
+  `toggleLikedFavorite` — so pinning IS liking and the wall updates
+  live (an empty query lists what is on the wall, doubling as the
+  manager). The old Add-to-Favorites sheet mode (`AddTarget.Favorites`)
+  is now unreachable — liking topics happens on the reveal.
+  (6) **Instant Cabinet** — `CaptureRepository` keeps
+  `lightSnapshot` (`@Volatile`, written by `observeLight`) and exposes
+  `peekLight()`; `CabinetScreen` + `CabinetV2Content` seed their
+  `produceState` from it, and `CabinetScreen` gains `entriesReady`
+  (flipped by the first real DB emission) so a cold first frame shows
+  quiet card skeletons instead of the "Your Cabinet is empty" doodle.
+  (7) **Glass headers reach the status bar** —
+  `CurioGlassToolbar` / `CurioGlassToolbarMorph`
+  (ui/components/CurioGlassToolbar.kt) moved `statusBarsPadding()` from
+  the bar to its CONTENT (the leading Row / the full Column / the
+  compact Row), so the capsule fills the status-bar strip; the morph
+  bar's collapsed height is now `compactH + WindowInsets.statusBars`
+  (`getTop`), so the compact row is never clipped. Home + Profile
+  reserve `compact + inset` at full collapse.
+  (8) **The morph bar really collapses** — the reservation spacer was
+  static (Home 200dp / Profile 264dp), which left the page looking
+  permanently expanded. `HomeScreen` hoists
+  `homeStickyProgress` above the scroll content and reserves
+  `lerp(HomeGlassToolbarFullHeight, HomeCompactHeaderHeight + inset,
+  ease)`; `ProfileScreen` hoists `profileStickyProgress` the same way
+  and passes `reserveHeight` into `ProfileHero` (new param, default
+  `ProfileHeroTotalHeight`), so the list rises as the bar shrinks.
+  (9) **Queued polish** — the GalleryWall caption is a PLAIN text box
+  (`PaperLineField(paper = false)`; the per-field style/color values
+  still feed the board's new quote cards + the saved payload),
+  `ChapterNoteField` (book sheet's add-note box) takes the sheet's
+  `surfaceHigh` / `onSurface` / `onSurfaceVariant` and wears a 1dp
+  hairline instead of ink-alpha washes (the dark-mode gray-smudge fix),
+  and `AlbumCoverPoster` gained `resolvedUrl` — the album notes sheet
+  seeds the poster with its palette's own artwork URL, so the poster
+  and the sheet colors can never disagree (the "album colors are fully
+  different" bug).
 - **v3xx42 — Shelf-art final pass + nav rail highlight GLIDE + back
   mid-animation fix (user 2026-09-10: "curying now the book itself is
   bad just the book… saved entries properly redesign… completed keep it
@@ -8234,4 +8516,5 @@ These patterns and anti-patterns were learned the hard way (CI compile failures,
 - [`src/main/assets/topics/SCHEMA.md`](src/main/assets/topics/SCHEMA.md) — Quick-reference schema doc for topic JSON files. Lives next to `music.json` so authors have the schema at their fingertips without opening the larger `CURIO_DATA_PLAN.md`. Points back to the full source-of-truth for anything not covered.
 - (Future) `app/src/main/java/com/curio/app/features/{home,spin,cabinet,capture}/AGENTS.md` — per-screen feature contracts, added when each screen gets real implementation in Phase 3+.
 - (Future) `app/src/main/java/com/curio/app/ui/theme/AGENTS.md` — design system primitive contracts, added when the theme system grows (Phase 3+ when dark-mode polish, motion tokens, etc. land).
+- [`src/main/java/com/curio/app/data/supabase/AGENTS.md`](src/main/java/com/curio/app/data/supabase/AGENTS.md) — the online layer's contract: Supabase client, session store, Online Mode state and the credential rules (public keys only).
 - (Future) `app/src/main/java/com/curio/app/data/AGENTS.md` — data-model contracts, added when Room + repositories land in Phase 4.

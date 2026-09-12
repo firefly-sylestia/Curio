@@ -174,36 +174,41 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // Cover fetching — per-category consent, v350. Each category
-            // (books / albums / series) gets its own toggle so the user can
-            // switch poster fetching on per category; they all stay OFF by
-            // default (nothing downloads without explicit consent).
+            // Cover fetching — v3xx51 MERGED: the separate Books / Albums /
+            // Series toggles (v350) collapse into ONE consent. Every reader
+            // (reveal resolvers, the Cabinet cover cache, share cards) now
+            // checks this single switch, and with it OFF nothing reaches the
+            // network — the old per-category split meant fetching kept
+            // happening on the paths that only checked one of the keys.
             item { SettingsSectionHeading("Cover fetching") }
             item {
                 SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ExperimentSwitchRow(
-                            "Books",
-                            "Fetch book covers + ratings from the keyless providers",
-                            AppPreferences.bookFetchEnabledState
+                            "Cover fetching",
+                            "Download book covers + ratings, album artwork and series posters (keyless providers)",
+                            AppPreferences.coverFetchEnabledState
                         ) {
-                            AppPreferences.setBookFetchEnabled(context, it)
+                            AppPreferences.setCoverFetchEnabled(context, it)
                         }
-                        CurioSettingsDivider()
+                    }
+                }
+            }
+
+            // v3xx52 — CAPTURE STUDIO: the Save-your-take page becomes a
+            // designed workspace (tinted hero, take rail on the bottom tray,
+            // pickers in one tools sheet, live recording pulse). OFF = the
+            // capture page exactly as it is today.
+            item { SettingsSectionHeading("Capture") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         ExperimentSwitchRow(
-                            "Albums",
-                            "Fetch album artwork (iTunes / MusicBrainz, keyless)",
-                            AppPreferences.albumFetchEnabledState
+                            "Take studio",
+                            "A redesigned Save-your-take workspace: tinted topic hero, a take rail on the bottom tray, format + mood + tags in one tools sheet, and a live recording pulse",
+                            AppPreferences.captureStudioState
                         ) {
-                            AppPreferences.setAlbumFetchEnabled(context, it)
-                        }
-                        CurioSettingsDivider()
-                        ExperimentSwitchRow(
-                            "Series",
-                            "Fetch series posters (TVMaze / iTunes, keyless)",
-                            AppPreferences.seriesFetchEnabledState
-                        ) {
-                            AppPreferences.setSeriesFetchEnabled(context, it)
+                            AppPreferences.setCaptureStudioEnabled(context, it)
                         }
                     }
                 }

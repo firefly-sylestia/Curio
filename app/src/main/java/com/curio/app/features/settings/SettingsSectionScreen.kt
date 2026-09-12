@@ -28,11 +28,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -94,6 +99,7 @@ import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.theme.switchVisualThemeWithReveal
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.launch
 
 /** Settings destination selected from the compact hub. */
 enum class SettingsPage(val title: String, val subtitle: String) {
@@ -325,48 +331,24 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         SettingsOptionDivider()
-        // v223 — one more Material option: the torn shared heroes
-        // follow the Material theme (primaryContainer + its ink)
-        // instead of the app-default rose/azure. Only meaningful while
-        // Material theme is on — the row greys out otherwise.
-        SettingsRowPulse(highlightKey == "appearance-material-hero-tears") {
-            val heroTearTransition = LocalCurioThemeTransition.current
-            val heroTearScope = rememberCoroutineScope()
-            var heroTearRowBounds by remember { mutableStateOf(Rect.Zero) }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned { heroTearRowBounds = it.boundsInWindow() }
-            ) {
-                CompactSwitchRow(
-                    CurioIcons.FoldedCorner,
-                    "Material hero tears",
-                    "Torn heroes wear the theme's container color, not rose",
-                    AppPreferences.materialHeroTearsState,
-                    enabled = AppPreferences.materialThemeState
-                ) {
-                    val center = if (heroTearRowBounds == Rect.Zero) Offset.Zero
-                        else Offset(heroTearRowBounds.right, heroTearRowBounds.center.y)
-                    switchVisualThemeWithReveal(
-                        heroTearTransition, heroTearScope, center
-                    ) {
-                        AppPreferences.setMaterialHeroTearsEnabled(context, it)
-                    }
-                }
-            }
-        }
-        SettingsOptionDivider()
+        // v3xx51 — the "Material hero tears" option was REMOVED per request:
+        // torn heroes now ALWAYS wear the theme's container colour while
+        // Material theme is on (see [materialHeroTearsOn], which just reads
+        // the Material theme now) — the row and its toggle are gone (the
+        // dormant `materialHeroTearsState` pref API stays for compatibility).
         // v42 — the hero picker is a two-option control (Rose hero / Azure
         // hero), both fully selectable — azure is back and now the DEFAULT.
         // The whole control greys out while Adaptive Hero (below) is active,
-        // since the lane then owns the hero color.
+        // since the lane then owns the hero color — AND while Material theme
+        // is on, because the hero then always wears the Material container
+        // colour (the pick has nothing left to change).
         SettingsRowPulse(highlightKey == "appearance-hero") {
             CompactSegmentedRow(
                 CurioIcons.Image,
                 "Hero",
                 listOf("Rose hero", "Azure hero"),
                 if (AppPreferences.heroBlueState) 1 else 0,
-                enabled = !AppPreferences.heroFollowLaneState
+                enabled = !AppPreferences.heroFollowLaneState && !AppPreferences.materialThemeState
             ) { index ->
                 AppPreferences.setHeroBlueEnabled(context, index == 1)
             }
@@ -375,9 +357,17 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // v30 — the shared hero AND its page background follow the category
         // last picked on Spin (the Cabinet's language) instead of the
         // rose/azure. Off by default — rose stays. v31 — renamed
-        // "Adaptive Hero".
+        // "Adaptive Hero". v3xx51 — also greys out under Material theme:
+        // the lane no longer owns the hero colour there, so the switch had
+        // nothing to act on while still looking live.
         SettingsRowPulse(highlightKey == "appearance-hero-lane") {
-            CompactSwitchRow(CurioIcons.Refresh, "Adaptive Hero", "Shared hero and page take the category you last picked on Spin", AppPreferences.heroFollowLaneState) {
+            CompactSwitchRow(
+                CurioIcons.Refresh,
+                "Adaptive Hero",
+                "Shared hero and page take the category you last picked on Spin",
+                AppPreferences.heroFollowLaneState,
+                enabled = !AppPreferences.materialThemeState
+            ) {
                 AppPreferences.setHeroFollowLaneEnabled(context, it)
             }
         }
@@ -423,8 +413,12 @@ private fun PreferencesSection(highlightKey: String? = null) {
     // on, no toggle (the local state + row were removed).
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
     // v27 — the daily shuffle reminder + its hour chips moved in from the
-    // removed Notifications section.
+    // removed Notifications section. v3xx51 — the reminder now carries a
+    // MINUTE too, set from a real clock picker (the chips stay as quick
+    // hour presets).
     var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
+    var reminderMinute by remember { mutableStateOf(AppPreferences.getReminderMinute(context)) }
+    var showReminderTimePicker by remember { mutableStateOf(false) }
     var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
     // v19 — the explore search-engine picker (which engine the "Explore in
     // browser" button opens).
@@ -442,6 +436,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 overlayUsable = AppPreferences.overlayActuallyUsable(context)
                 exploreSessionsEnabled = AppPreferences.isExploreSessionsEnabled(context)
                 reminderHour = AppPreferences.getReminderHour(context)
+                reminderMinute = AppPreferences.getReminderMinute(context)
                 showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
                 // v8.1 — returning from the system overlay-settings page: a
                 // grant re-enables the bubble and clears the declined flag;
@@ -576,14 +571,20 @@ private fun PreferencesSection(highlightKey: String? = null) {
         // removed Notifications section: Preferences is now the one home for
         // notification controls.
         SettingsRowPulse(highlightKey == "pref-reminder") {
-            CompactSwitchRow(CurioIcons.Notifications, "Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatHour(AppPreferences.getReminderHour(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
+            CompactSwitchRow(CurioIcons.Notifications, "Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatReminderTime(AppPreferences.getReminderHour(context), AppPreferences.getReminderMinute(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
                 if (enabled) enableNotifications { AppPreferences.setReminderEnabled(context, true) } else AppPreferences.setReminderEnabled(context, false)
             }
         }
         if (AppPreferences.reminderEnabledState) {
+            // v3xx51 — the hour presets stay as one-tap picks (they snap the
+            // minute back to the top of the hour), followed by the CLOCK chip:
+            // it shows the reminder's real time and opens a proper time
+            // picker, so any hour AND minute can be chosen.
+            val presetHours = listOf(9, 12, 15, 18, 21)
+            val customTime = reminderMinute != 0 || reminderHour !in presetHours
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 6.dp)) {
-                items(listOf(9, 12, 15, 18, 21)) { hour ->
-                    val selected = hour == reminderHour
+                items(presetHours) { hour ->
+                    val selected = hour == reminderHour && reminderMinute == 0
                     // AMOLED: the selected chip swaps to pitch-black glass
                     // (white text + hairline rim) to match the switches and
                     // the app's AMOLED control language.
@@ -592,6 +593,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                     Surface(
                         onClick = {
                             reminderHour = hour
+                            reminderMinute = 0
                             AppPreferences.setReminderHour(context, hour)
                         },
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
@@ -611,6 +613,36 @@ private fun PreferencesSection(highlightKey: String? = null) {
                         )
                     }
                 }
+                item {
+                    Surface(
+                        onClick = { showReminderTimePicker = true },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                        color = if (customTime) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = if (customTime) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onSurface,
+                        shadowElevation = 2.dp,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Schedule,
+                                contentDescription = null,
+                                tint = if (customTime) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurface,
+                                size = 15.dp
+                            )
+                            Text(
+                                formatReminderTime(reminderHour, reminderMinute),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
+                    }
+                }
             }
         }
         SettingsOptionDivider()
@@ -628,26 +660,116 @@ private fun PreferencesSection(highlightKey: String? = null) {
             }
         }
     }
+    // v3xx51 — both pickers are BOTTOM SHEETS now. The sheet runs its own
+    // swipe-down close after a pick, so `onSelected` only writes the pref and
+    // lets the sheet animate itself away (dismissing here would yank it out
+    // of composition mid-gesture).
     if (showSearchEngineDialog) {
         SearchEngineDialog(
             current = SearchEngine.fromId(AppPreferences.searchEngineState),
             onDismiss = { showSearchEngineDialog = false },
-            onSelected = { engine ->
-                AppPreferences.setSearchEngine(context, engine)
-                showSearchEngineDialog = false
-            }
+            onSelected = { engine -> AppPreferences.setSearchEngine(context, engine) }
         )
     }
     if (showMusicServiceDialog) {
         MusicServiceDialog(
             current = MusicService.fromId(AppPreferences.musicServiceState),
             onDismiss = { showMusicServiceDialog = false },
-            onSelected = { service ->
-                AppPreferences.setMusicService(context, service)
-                showMusicServiceDialog = false
+            onSelected = { service -> AppPreferences.setMusicService(context, service) }
+        )
+    }
+    // v3xx51 — the reminder's clock picker (any hour + minute).
+    if (showReminderTimePicker) {
+        ReminderTimeSheet(
+            hour = reminderHour,
+            minute = reminderMinute,
+            onDismiss = { showReminderTimePicker = false },
+            onTimeSelected = { h, m ->
+                reminderHour = h
+                reminderMinute = m
+                AppPreferences.setReminderTime(context, h, m)
             }
         )
     }
+}
+
+/**
+ * v3xx51 — the daily-reminder CLOCK picker: a settings-styled bottom sheet
+ * with a real Material time picker (dial) so the nudge can sit at any minute,
+ * not only the preset hours. "Set time" applies + glides the sheet away.
+ */
+@Composable
+private fun ReminderTimeSheet(
+    hour: Int,
+    minute: Int,
+    onDismiss: () -> Unit,
+    onTimeSelected: (hour: Int, minute: Int) -> Unit
+) {
+    val pickerState = rememberTimePickerState(
+        initialHour = hour.coerceIn(0, 23),
+        initialMinute = minute.coerceIn(0, 59),
+        is24Hour = false
+    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Reminder time",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 2.dp)
+            )
+            Text(
+                "The daily shuffle nudge fires at this exact time.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)
+            )
+            TimePicker(state = pickerState, modifier = Modifier.padding(vertical = 8.dp))
+            Surface(
+                onClick = {
+                    onTimeSelected(pickerState.hour, pickerState.minute)
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) onDismiss()
+                    }
+                },
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 20.dp)
+            ) {
+                Text(
+                    "Set time",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 13.dp)
+                )
+            }
+        }
+    }
+}
+
+/** "6:30 PM" — the reminder's exact time (the bare-hour formatter for the
+ *  preset chips stays [formatHour]). */
+private fun formatReminderTime(hour: Int, minute: Int): String {
+    if (minute <= 0) return formatHour(hour)
+    val h = hour.coerceIn(0, 23)
+    val suffix = if (h < 12) "AM" else "PM"
+    val display = when (val n = h % 12) { 0 -> 12 else -> n }
+    return "$display:${minute.coerceIn(0, 59).toString().padStart(2, '0')} $suffix"
 }
 
 @Composable

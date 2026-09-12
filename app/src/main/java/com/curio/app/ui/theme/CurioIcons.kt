@@ -208,6 +208,13 @@ object CurioIcons {
     // subset: edit_note + photo_camera + photo_library ship in the hero
     // watermark family lists).
     const val Note            = "edit_note"             // shared session note
+    // v3xx — the community / social layer. Both glyphs were ALREADY in the
+    // bundled Material Symbols subset's ligature table (verified with
+    // fontTools against `material_symbols_outlined.ttf`), so no re-subset
+    // was needed — never add a name here without checking it first, a
+    // missing ligature renders as the literal word instead of an icon.
+    const val Hub             = "hub"                   // connected nodes — the Community wall
+    const val Notes           = "notes"                 // stacked lines — replies / direct messages
     const val Screenshot      = "photo_camera"          // capture the screen
     const val PhotoLibrary    = "photo_library"         // add screenshots from the gallery
 

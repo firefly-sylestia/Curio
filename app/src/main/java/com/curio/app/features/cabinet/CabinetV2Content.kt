@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -35,9 +37,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -84,6 +90,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -112,6 +119,7 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDoodleEmptyState
+import com.curio.app.ui.components.CurioEntrySkeletonCard
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.CurioHoldPill
@@ -170,12 +178,34 @@ fun CabinetV2Content(navController: NavController) {
     // lag with a large saved-entries archive. Detail pages still use the
     // full [observeById]; ReelNotes reviews keep their payload via the
     // light query's ReelNotes-only formatDataJson column.
-    val entries by androidx.compose.runtime.produceState<List<CurioEntry>>(initialValue = emptyList()) {
+    // v3xx43 — INSTANT: start from the repository's last light emission so the
+    // shelves paint on the first frame instead of flashing a loading state.
+    // v3xx50 — ARCHIVE-READY: the page may only claim "empty" once the first
+    // real emission has arrived. Before that it holds a skeleton the size of
+    // the archive this install last had (the reported "cabinet opening is
+    // bad" was the empty/suggestions state flashing before the read landed).
+    var archiveReady by rememberSaveable {
+        mutableStateOf(CurioRepositoryHolder.repo.peekLight().isNotEmpty())
+    }
+    val entries by androidx.compose.runtime.produceState<List<CurioEntry>>(
+        initialValue = CurioRepositoryHolder.repo.peekLight()
+    ) {
         try {
-            CurioRepositoryHolder.repo.observeLight().collect { value = it }
+            CurioRepositoryHolder.repo.observeLight().collect {
+                value = it
+                if (!archiveReady) archiveReady = true
+            }
         } catch (_: Exception) {
             value = emptyList()
         }
+    }
+    // v3xx50 — the skeleton's size = the last known saved-entry count (capped
+    // so a big archive can't compose hundreds of placeholder cards).
+    val skeletonCount = remember {
+        AppPreferences.getCabinetEntryCount(context).coerceIn(4, 12)
+    }
+    LaunchedEffect(entries.size, archiveReady) {
+        if (archiveReady) AppPreferences.setCabinetEntryCount(context, entries.size)
     }
     val entriesById = remember(entries) { entries.associateBy { it.id } }
     val books = remember(AppPreferences.bookFavoritesState, AppPreferences.bookCoverUrlsState) {
@@ -195,6 +225,45 @@ fun CabinetV2Content(navController: NavController) {
             .sortedBy { it.name.lowercase() }
     }
     val collections = AppPreferences.collectionsState
+
+    // ── v3xx43 — FAVORITES IS THE LIKED-TOPIC SHELF. The topic LIKE heart on
+    // a reveal (AppPreferences.topicSentimentsState, keyed "CATEGORY:topicId")
+    // feeds it, so it lists the TOPICS the user liked across every lane —
+    // while liked MEDIA (books / series / albums) is the Cupboard's wall. The
+    // two shelves used to show the same covers ("Favorites vs Everything are
+    // basically the same"); now each has its own content, and neither mixes
+    // in saved captures.
+    var catalogReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        // TopicRepository pre-warms every lane pool from Room at app init; if
+        // the Cabinet is the first surface opened, wait for them so the saved
+        // sentiment ids can resolve to real topics.
+        var guard = 0
+        while (!catalogReady && guard < 120) {
+            if (CategoryId.values().any { it != CategoryId.WILDCARD && TopicJsonLoader.cached(it) != null }) {
+                catalogReady = true
+            } else {
+                guard++
+                kotlinx.coroutines.delay(25)
+            }
+        }
+        // Never hold the shelf on skeletons forever: if the lanes never warm
+        // (a broken install), fall through to the real, truthful empty state.
+        if (!catalogReady) catalogReady = true
+    }
+    val likedTopics: List<V2Liked> = remember(AppPreferences.topicSentimentsState, catalogReady) {
+        AppPreferences.topicSentimentsState
+            .filterValues { it == AppPreferences.SENTIMENT_LIKE }
+            .mapNotNull { (key, _) ->
+                val cat = runCatching { CategoryId.valueOf(key.substringBefore(':')) }.getOrNull()
+                    ?: return@mapNotNull null
+                val id = key.substringAfter(':', "")
+                TopicJsonLoader.cached(cat)?.firstOrNull { it.id == id }
+                    ?.let { V2Liked(it.name, topicKind(it), it) }
+            }
+            .distinctBy { "${it.topic?.categoryId?.name}|${it.name}" }
+            .sortedBy { it.name.lowercase() }
+    }
 
     // ── Seed the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) once — they become ordinary, editable
@@ -227,11 +296,14 @@ fun CabinetV2Content(navController: NavController) {
     }
 
     // v3xx — the COVER CACHE warmer: liked books / albums / series resolve
-    // their cover art ALWAYS (not gated on the Settings fetch toggles — the
-    // cache is the point: URL persisted + image bytes on disk), so the
-    // Cabinet grid fills with real covers on first open and loads them
-    // INSTANTLY from the local file on every later visit. Throttled per
-    // recomposition to a small batch so a big shelf never bursts the pipe.
+    // their cover art and keep the bytes on disk, so the Cabinet grid fills
+    // with real covers on first open and loads them INSTANTLY from the local
+    // file on every later visit. Throttled per recomposition to a small batch
+    // so a big shelf never bursts the pipe.
+    // v3xx51 — it is gated on the MERGED cover-fetch consent now (it used to
+    // download regardless of the Settings toggles), so with fetching OFF the
+    // warmer only pre-warms dominant colours from bytes ALREADY on disk and
+    // never reaches the network.
     val unwarmedLikes = remember(allLikes) {
         allLikes.filter {
             CabinetCoverCache.persistedUrl(
@@ -247,7 +319,8 @@ fun CabinetV2Content(navController: NavController) {
     // downloads up to 30 missing covers WITHOUT per-download version bumps
     // and bumps the version ONCE after the batch — the old per-save bump
     // recomposed every version-keyed tile per download.
-    LaunchedEffect(allLikes.size, unwarmedLikes.size) {
+    val coverFetchConsent = AppPreferences.coverFetchEnabledState
+    LaunchedEffect(allLikes.size, unwarmedLikes.size, coverFetchConsent) {
         var newCovers = 0
         withContext(kotlinx.coroutines.Dispatchers.IO) {
             allLikes.forEach { item ->
@@ -257,6 +330,7 @@ fun CabinetV2Content(navController: NavController) {
                     item.name
                 )
             }
+            if (!coverFetchConsent) return@withContext
             for (item in unwarmedLikes) {
                 if (newCovers >= 30) break
                 if (CabinetCoverCache.localCoverFile(
@@ -285,9 +359,9 @@ fun CabinetV2Content(navController: NavController) {
         }
         if (newCovers > 0) CabinetCoverCache.version.intValue++
     }
-    val shelfCounts = remember(allLikes.size, entries.size, noteEntries.size, seededById) {
+    val shelfCounts = remember(allLikes.size, likedTopics.size, entries.size, noteEntries.size, seededById) {
         mapOf(
-            V2ShelfId.FAVORITES to allLikes.size,
+            V2ShelfId.FAVORITES to likedTopics.size,
             V2ShelfId.CURRENTLY_READING to (seededById["shelf:currently-reading"]?.members?.size ?: 0),
             V2ShelfId.WANT_TO_READ to (seededById["shelf:want-to-read"]?.members?.size ?: 0),
             V2ShelfId.SAVED to entries.size,
@@ -451,6 +525,8 @@ fun CabinetV2Content(navController: NavController) {
 
     // ── Collection edit state.
     var showCreateSheet by rememberSaveable { mutableStateOf(false) }
+    // v3xx43 — the Cupboard's catalog search sheet (Add on the wall).
+    var showCupboardAdd by rememberSaveable { mutableStateOf(false) }
     var renameTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var deleteTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var addTarget by rememberSaveable { mutableStateOf<AddTarget?>(null) }
@@ -466,17 +542,17 @@ fun CabinetV2Content(navController: NavController) {
         openLevel == SHELF_LEVEL_FAVORITES -> "Favorites"
         openLevel == SHELF_LEVEL_SAVED -> "Saved entries"
         openLevel == SHELF_LEVEL_NOTES -> "Notes"
-        openLevel == "everything" -> "Everything"
+        openLevel == "everything" -> "Cupboard"
         else -> "The Cabinet"
     }
     val heroSubtitle = when {
         selectionMode -> "Long-press cards to select"
         openCollection != null -> "${openCollection.members.size} item${if (openCollection.members.size == 1) "" else "s"}"
-        openLevel == SHELF_LEVEL_FAVORITES -> "${allLikes.size} liked books, series & albums"
+        openLevel == SHELF_LEVEL_FAVORITES -> "${likedTopics.size} liked topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
         openLevel == SHELF_LEVEL_NOTES -> "${noteEntries.size} notes & voice captures"
-        openLevel == "everything" -> "Books · albums · saved captures"
-        else -> "Collections · Everything · your keepsakes"
+        openLevel == "everything" -> "Books · albums · series"
+        else -> "Collections · Cupboard · your keepsakes"
     }
     val compactBannerHeight = if (wide) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
     val heroTotal = compactBannerHeight + CabinetHeroSheetExtent
@@ -535,67 +611,94 @@ fun CabinetV2Content(navController: NavController) {
         }
 
         key(openLevel) {
-        // ── EVERYTHING / FAVORITES — the JSX masonry gallery: a dense
-        // STAGGERED grid of covers-only posters (books tall jackets, albums
-        // squares, series posters — no cards, no titles, no boxes, just the
-        // art with a whisper of rounded corners) with filter chips that
-        // smoothly reflow the gallery — every cover animates to its new spot
-        // when the category changes (the CurioEverythingGallery concept).
-        // Favorites stores ONLY liked media, so it wears the same gallery.
-        if (openLevel == "everything" || openLevel == SHELF_LEVEL_FAVORITES) {
-            // v3xx42 — the Everything wall on a PLAIN 8-column LazyVerticalGrid:
-            // this foundation's StaggeredGridItemSpan(Int) constructor is
-            // private (CI), so a staggered masonry with custom spans can't
-            // compile here — instead every cover keeps its own shape and is
-            // scaled UNIFORMLY by a SPAN (3x = 6 of 8 columns, 2x = 4,
-            // 1.5x = 3, 1x = 2, 0.5x = 1). The tier cycle is chosen so
-            // consecutive spans sum to the line (6+1+1, 4+4, 3+3+2), so rows
-            // pack without holes; no seam plate — the page's own surface
-            // shows between covers.
-            LazyVerticalGrid(
-                state = rememberLazyGridState(),
-                columns = GridCells.Fixed(8),
-                contentPadding = PaddingValues(
-                    start = 10.dp,
-                    end = 10.dp,
-                    top = contentTop,
-                    bottom = 24.dp + 84.dp +
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                ),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    // v3xx42 — NO seam plate: the wall sits on the page's own
-                    // surface, so the gaps read as clean whitespace between
-                    // covers instead of a boxed border plate.
-                    .then(if (glassOn && glassBackdrop != null)
-                        Modifier.layerBackdrop(glassBackdrop) else Modifier)
-            ) {
-                if (wide) {
-                    item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
-                        wideHero()
-                    }
+        // ── THE CUPBOARD — the JSX masonry wall: a dense STAGGERED grid of
+        // covers-only posters (books tall jackets, albums squares, series
+        // posters — no cards, no titles, no boxes, just the art with a
+        // whisper of rounded corners) with filter chips that smoothly reflow
+        // the wall — every cover animates to its new spot when the filter
+        // changes, and (v3xx43) keeps its OWN size while it moves.
+        // Favorites is the LIKED-TOPIC shelf now, so it renders in the
+        // regular grid below instead of wearing this media wall.
+        if (openLevel == "everything") {
+            // v3xx45 — THE CUPBOARD WALL IS A PACKED SHELF MOSAIC.
+            //
+            // The wall used to be an 8-column LazyVerticalGrid with a span
+            // cycle (6+1+1, 4+4, 3+3+2). Spans fill a LINE horizontally, but a
+            // grid line shares ONE height — so a tall book beside two small
+            // albums always left a hole under the albums (the reported "space
+            // left below those 2"). No span tweak can fix that.
+            //
+            // Instead the covers are packed into SHELVES: each shelf is a row
+            // laid out at a single height, with every cover's width derived
+            // from its OWN aspect, so the widths plus the gaps sum to exactly
+            // the available width. Covers keep their shape, nothing stretches,
+            // and no shelf leaves a gap.
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val wallWidth = (maxWidth - 20.dp).coerceAtLeast(1.dp)
+                // v3xx48 — SWITCHING A FILTER ANIMATES AGAIN. The packed
+                // shelves can't slide covers to new slots (they aren't lazy
+                // items any more), so a chip tap now FADES the wall into its
+                // new arrangement: the covers dip and ease back while the
+                // shelves re-pack underneath, instead of the covers snapping
+                // (user: "why the animation isnt there anymore when switching
+                // between category").
+                val wallSwap = remember { Animatable(1f) }
+                var lastFilter by remember { mutableStateOf(typeFilter) }
+                LaunchedEffect(typeFilter) {
+                    if (lastFilter == typeFilter) return@LaunchedEffect
+                    lastFilter = typeFilter
+                    wallSwap.snapTo(0.25f)
+                    wallSwap.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(280, easing = FastOutSlowInEasing)
+                    )
                 }
-                v2EverythingMasonryItems(
-                    shownBooks = shownBooks,
-                    shownAlbums = shownAlbums,
-                    shownSeries = shownSeries,
-                    railAvailable = railAvailable,
-                    typeFilter = typeFilter,
-                    onTypeFilter = { typeFilter = it },
-                    likedAtFor = { likedAtFor(it) },
-                    onOpenLiked = { item -> item.open(navController) },
-                    onCoverSource = { coverSourceItem = it },
-                    // Everything's add-new dives into Spin; Favorites opens
-                    // the add-to-favorites sheet (same as its old Add pill).
-                    onAddNew = if (openLevel == SHELF_LEVEL_FAVORITES) {
-                        { addTarget = AddTarget.Favorites }
-                    } else {
-                        { navController.navigateToTab(CurioRoutes.SPIN) }
-                    },
-                    pageAccent = pageAccent
-                )
+                val shelves = remember(shownBooks, shownAlbums, shownSeries, wallWidth) {
+                    buildCupboardShelves(
+                        items = (shownBooks + shownAlbums + shownSeries)
+                            .sortedByDescending { likedAtFor(it) },
+                        availableWidth = wallWidth
+                    )
+                }
+                LazyColumn(
+                    state = rememberLazyListState(),
+                    contentPadding = PaddingValues(
+                        start = 10.dp,
+                        end = 10.dp,
+                        top = contentTop,
+                        bottom = 24.dp + 84.dp +
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // v3xx42 — NO seam plate: the wall sits on the page's
+                        // own surface, so the gaps read as clean whitespace
+                        // between covers instead of a boxed border plate.
+                        .then(if (glassOn && glassBackdrop != null)
+                            Modifier.layerBackdrop(glassBackdrop) else Modifier)
+                ) {
+                    if (wide) {
+                        item(key = "hero", contentType = "hero") {
+                            wideHero()
+                        }
+                    }
+                    v2EverythingMasonryItems(
+                        shelves = shelves,
+                        railAvailable = railAvailable,
+                        typeFilter = typeFilter,
+                        onTypeFilter = { typeFilter = it },
+                        onOpenLiked = { item -> item.open(navController) },
+                        onCoverSource = { coverSourceItem = it },
+                        // v3xx43 — the Cupboard's Add searches the CATALOG
+                        // (books / series / albums) and pins the picked media
+                        // onto the wall, so adding never dumps the user out to
+                        // another screen.
+                        onAddNew = { showCupboardAdd = true },
+                        pageAccent = pageAccent,
+                        wallSwap = { wallSwap.value }
+                    )
+                }
             }
         } else {
         LazyVerticalGrid(
@@ -645,6 +748,25 @@ fun CabinetV2Content(navController: NavController) {
                     onRename = { renameTarget = openCollection.id },
                     onDelete = { deleteTarget = openCollection.id }
                 )
+                // v3xx43 — FAVORITES = the topics you liked (the reveal
+                // heart), listed as topic rows; the media covers live in the
+                // Cupboard, so the two shelves are no longer identical.
+                openLevel == SHELF_LEVEL_FAVORITES -> v2LikedTopicItems(
+                    likes = likedTopics,
+                    searchQuery = searchQuery,
+                    catalogReady = catalogReady,
+                    onOpenTopic = { item ->
+                        val slug = item.topic?.categoryId?.routeSlug
+                            ?: CategoryId.WILDCARD.routeSlug
+                        navController.navigate(
+                            CurioRoutes.revealFor(slug, item.topic?.name ?: item.name)
+                        ) { launchSingleTop = true }
+                    }
+                )
+                // v3xx50 — the saved/notes shelves hold the same archive, so
+                // they hold the same skeleton instead of an empty verdict.
+                (openLevel == SHELF_LEVEL_SAVED || openLevel == SHELF_LEVEL_NOTES) && !archiveReady ->
+                    v2SkeletonItems(count = skeletonCount)
                 openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
                     title = "Saved entries",
                     likes = emptyList(),
@@ -692,7 +814,7 @@ fun CabinetV2Content(navController: NavController) {
                 )
                 else -> v2HomeItems(
                     everythingLikes = allLikes,
-                    everythingCount = entries.size + allLikes.size,
+                    everythingCount = allLikes.size,
                     savedEntries = entries.sortedByDescending { it.capturedAtMillis },
                     visibleShelves = visibleShelves,
                     userCollections = shownUserCollections,
@@ -728,7 +850,10 @@ fun CabinetV2Content(navController: NavController) {
                             CurioRoutes.revealFor(t.categoryId.routeSlug, t.name)
                         ) { launchSingleTop = true }
                     },
-                    showSuggestions = !rawContent,
+                    // v3xx50 — only claim "empty" once the archive has
+                    // actually been read (see [archiveReady]).
+                    showSuggestions = archiveReady && !rawContent,
+                    savedSkeletonCount = if (archiveReady) 0 else skeletonCount,
                     onEntryLongClick = { id ->
                         selectionMode = true
                         selectedEntryIds = selectedEntryIds + id
@@ -910,6 +1035,19 @@ fun CabinetV2Content(navController: NavController) {
         }
     }
 
+    // ── Cupboard add — search the CATALOG (books / series / albums) and
+    // pin the picked media onto the wall (v3xx43).
+    if (showCupboardAdd) {
+        V2CupboardAddSheet(
+            likes = allLikes,
+            onToggle = { liked ->
+                toggleLikedFavorite(liked, context)
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            },
+            onDismiss = { showCupboardAdd = false }
+        )
+    }
+
     // ── Delete-collection confirm.
     if (deleteTarget != null) {
         val c = collections.firstOrNull { it.id == deleteTarget }
@@ -991,6 +1129,9 @@ private fun LazyGridScope.v2HomeItems(
     onShuffle: () -> Unit,
     onOpenSuggestion: (CurioTopic) -> Unit,
     showSuggestions: Boolean,
+    /** v3xx50 — when > 0 the archive has not been read yet: paint this many
+     *  entry-card placeholders in the Saved-entries slot. */
+    savedSkeletonCount: Int,
     onEntryLongClick: (String) -> Unit,
     onEntryClick: (String) -> Unit,
     onClearSearch: () -> Unit
@@ -1000,7 +1141,7 @@ private fun LazyGridScope.v2HomeItems(
             CurioEmptyState(
                 glyph = CurioIcons.SearchOff,
                 headline = "No collections match",
-                subtext = "Try a different name, or open Everything to search your captures.",
+                subtext = "Try a different name, or open the Cupboard to search your media.",
                 tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                 ctaLabel = "Clear search",
                 onCtaClick = onClearSearch
@@ -1044,6 +1185,18 @@ private fun LazyGridScope.v2HomeItems(
                 onEntryLongClick = onEntryLongClick,
                 onEntryClick = onEntryClick
             )
+        } else if (savedSkeletonCount > 0) {
+            // v3xx50 — the archive is still arriving: hold the exact slot the
+            // real cards will occupy (same header, same 2-column grid) with
+            // as many placeholders as there are saved entries to come.
+            item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+                V2PageSectionHeader(
+                    title = "Saved entries",
+                    subtitle = "Your latest additions",
+                    trailing = null
+                )
+            }
+            v2SkeletonItems(count = savedSkeletonCount)
         }
     }
 
@@ -1098,6 +1251,16 @@ private fun LazyGridScope.v2HomeItems(
     }
 }
 
+/** v3xx50 — entry-card placeholders for a level whose archive has not been
+ *  read yet (the Cabinet home's Saved-entries slot, the Saved entries and
+ *  Notes shelves). They use the SAME grid cells the real cards do, so the
+ *  page keeps its shape when the data lands. */
+private fun LazyGridScope.v2SkeletonItems(count: Int) {
+    items(count, key = { index -> "skel|$index" }, contentType = { "skeleton" }) { _ ->
+        CurioEntrySkeletonCard(modifier = Modifier.fillMaxWidth())
+    }
+}
+
 /** COLLECTION DETAIL — header + members (topic rows / entry cards). */
 private fun LazyGridScope.v2DetailItems(
     collection: CurioCollection,
@@ -1111,14 +1274,11 @@ private fun LazyGridScope.v2DetailItems(
     onRename: () -> Unit,
     onDelete: () -> Unit
 ) {
+    // v3xx43 — the hero owns the collection's name + count; this strip keeps
+    // only the ACTIONS (Add + kebab), so a shelf name is never printed twice
+    // on the page (the reported "Want to read" duplication).
     item(key = "d-head", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-        V2DetailHeader(
-            name = collection.name,
-            count = collection.members.size,
-            onAdd = onAdd,
-            onRename = onRename,
-            onDelete = onDelete
-        )
+        V2DetailHeader(onAdd = onAdd, onRename = onRename, onDelete = onDelete)
     }
     if (collection.members.isEmpty()) {
         // v3xx — the JSX "Nothing here yet" scene (stacked books + leaf
@@ -1180,46 +1340,106 @@ private fun LazyGridScope.v2DetailItems(
             )
         }
     }
-}/** EVERYTHING — the JSX dense wall (the CurioEverythingGallery concept,
- *  now COVERS ONLY): a span-based masonry on an 8-column grid. The liked
- *  media merge into ONE recency stream (no category grouping). Each cover
- *  keeps its OWN aspect shape (books tall, albums square, series posters)
- *  and scales UNIFORMLY — the width multiplier spans that many grid
- *  columns (3x / 2x / 1.5x / 1x / 0.5x), so a cover NEVER changes shape,
- *  only size. The most recent cover runs the biggest tier, then the rest
- *  cycle down the wall in a PACKING order (6+1+1, 4+4, 3+3+2 per line) so
- *  rows never leave holes. The wall's background is the page's own surface
- *  (no plate behind the covers). The filter chips + the corner Add pill
- *  ride the top full-line, and every cover animates to its new spot on
- *  reflow. */
+}/**
+ * One packed shelf of the Cupboard wall — a row of covers at a shared height,
+ * with widths derived from each cover's own aspect so the line always fills
+ * the available width exactly.
+ */
+private data class CupboardShelf(val items: List<V2Liked>, val height: Dp)
+
+/** Every cover's own aspect (width / height): books are portrait jackets,
+ *  albums square sleeves, series posters. */
+private fun cupboardAspect(liked: V2Liked): Float = when (liked.kind) {
+    V2Kind.BOOK -> 0.667f
+    V2Kind.ALBUM -> 1f
+    V2Kind.SERIES -> 0.72f
+}
+
+/** Horizontal gap between the wall's covers (also the row gap). */
+private const val CUPBOARD_GAP_DP = 10f
+
+/**
+ * v3xx45 — packs [items] (display order) into SHELVES with no leftover space.
+ *
+ * A grid line shares ONE height, so a tall book beside two small albums always
+ * leaves a hole under the albums — the reported "space left below those 2".
+ * Here each shelf is a row of covers at a COMMON height: every cover's width
+ * is `height x its aspect`, so the widths plus the gaps sum to exactly
+ * [availableWidth]. Nothing is stretched and nothing is left empty. Shelf
+ * heights alternate feature / tight so the wall keeps its dense, varied look.
+ * The final (possibly short) shelf is capped at its target height so a lone
+ * leftover cover can't blow up to full width.
+ */
+private fun buildCupboardShelves(
+    items: List<V2Liked>,
+    availableWidth: Dp
+): List<CupboardShelf> {
+    if (items.isEmpty()) return emptyList()
+    val width = availableWidth.value
+    if (width <= 0f) return emptyList()
+    val gap = CUPBOARD_GAP_DP
+    // v3xx48 — the SIZE LADDER is back, as SHELF heights. The old grid gave
+    // every cover a tier (3x … 0.5x) and packed lines by spans, which is what
+    // left holes; here each shelf has ONE height so it always fills the
+    // width, and the heights cycle a feature → small → medium → smallest
+    // rhythm. The smallest shelf is ~0.34x the feature one, so the wall reads
+    // with the same big/small contrast the tiers had (user: "it doesnt have
+    // that 3x sizes or smaller one like .5x").
+    val targets = floatArrayOf(
+        width * 0.50f,
+        width * 0.28f,
+        width * 0.34f,
+        width * 0.21f
+    )
+    // A shelf is closed once its projected height would drop under 80% of its
+    // target, so it stays close to (never far under) the intended size.
+    val minFactor = 0.8f
+    val shelves = mutableListOf<CupboardShelf>()
+    var i = 0
+    var shelfIndex = 0
+    while (i < items.size) {
+        val target = targets[shelfIndex % targets.size]
+        val shelf = mutableListOf<V2Liked>()
+        var aspectSum = 0f
+        while (i < items.size) {
+            val nextSum = aspectSum + cupboardAspect(items[i])
+            val projected = (width - gap * shelf.size) / nextSum
+            if (shelf.isNotEmpty() && projected < target * minFactor) break
+            shelf.add(items[i])
+            aspectSum = nextSum
+            i++
+        }
+        val isLast = i >= items.size
+        val raw = (width - gap * (shelf.size - 1)) / aspectSum
+        val height = (if (isLast) minOf(raw, target) else raw).coerceAtLeast(1f)
+        shelves.add(CupboardShelf(shelf, height.dp))
+        shelfIndex++
+    }
+    return shelves
+}
+
+/** EVERYTHING (the Cupboard) — the dense covers-only wall. The liked media
+ *  merge into ONE recency stream (no category grouping) and are packed into
+ *  tightly-filled shelves by [buildCupboardShelves], so no cover ever leaves
+ *  a gap. The wall's background is the page's own surface (no plate behind
+ *  the covers); the filter chips + the corner Add pill ride the top line. */
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyGridScope.v2EverythingMasonryItems(
-    shownBooks: List<V2Liked>,
-    shownAlbums: List<V2Liked>,
-    shownSeries: List<V2Liked>,
+private fun LazyListScope.v2EverythingMasonryItems(
+    shelves: List<CupboardShelf>,
     railAvailable: Set<String>,
     typeFilter: String?,
     onTypeFilter: (String?) -> Unit,
-    likedAtFor: (V2Liked) -> Long,
     onOpenLiked: (V2Liked) -> Unit,
     onCoverSource: (V2Liked) -> Unit,
     onAddNew: () -> Unit,
-    pageAccent: Color
+    pageAccent: Color,
+    // v3xx48 — the wall's filter-swap fade (see the caller); read inside the
+    // item lambdas so the covers dip and ease back when the chips change.
+    wallSwap: () -> Float
 ) {
-    val allMedia = (shownBooks + shownAlbums + shownSeries)
-        .sortedByDescending { likedAtFor(it) }
-    val totalShown = allMedia.size
-    // v3xx42 — UNIFORM-SIZE tiers as SPANS on the 8-column grid (1x = 2
-    // spans): every cover keeps its own aspect and the tier scales BOTH
-    // dimensions together (3x = 6 columns, 2x = 4, 1.5x = 3, 1x = 2,
-    // 0.5x = 1). The cycle PACKS perfectly — 3x+0.5x+0.5x = 8, 2x+2x = 8,
-    // 1.5x+1.5x+1x = 8 — so rows never leave holes.
-    val tiers = floatArrayOf(3f, 0.5f, 0.5f, 2f, 2f, 1.5f, 1.5f, 1f)
-
-    // Top full-line: the filter chips + the corner ADD pill (the app-wide
-    // labeled Add, anchored TOP-RIGHT of the wall instead of a bottom
-    // button).
-    item(key = "everything-head", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
+    // Top line: the filter chips + the corner ADD pill (the app-wide labeled
+    // Add, anchored TOP-RIGHT of the wall instead of a bottom button).
+    item(key = "everything-head", contentType = "head") {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1238,65 +1458,67 @@ private fun LazyGridScope.v2EverythingMasonryItems(
         }
     }
 
-    if (totalShown == 0) {
-        item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+    if (shelves.isEmpty()) {
+        item(key = "e-empty", contentType = "empty") {
             CurioDoodleEmptyState(
-                headline = "Nothing saved yet",
-                subtext = "Like a book, series or album and its cover shows up here."
+                headline = "Your Cupboard is empty",
+                subtext = "Add a book, series or album and its cover shows up on this wall."
             )
         }
         return
     }
 
-    allMedia.forEachIndexed { rank, liked ->
-        // The cover's OWN shape — the base aspect per kind, scaled
-        // UNIFORMLY by the size tier (never stretched in one direction).
-        val aspect = when (liked.kind) {
-            V2Kind.BOOK -> 0.667f   // portrait jacket
-            V2Kind.ALBUM -> 1f      // square sleeve
-            V2Kind.SERIES -> 0.72f  // poster
-        }
-        val tier = tiers[rank % tiers.size]
-        // The tier as a SPAN on the 8-column grid: 1x = 2 spans (a quarter
-        // of the line), 2x = 4, 3x = 6 and 0.5x = 1 — a real half-size
-        // cover; the multiplier widens the tile the same amount it tallens
-        // it (both from the aspect ratio), so shapes are never stretched.
-        val spanCount = (tier * 2).toInt().coerceIn(1, 8)
-        item(
-            key = "l|${liked.kind.name}|${liked.name}",
-            span = { GridItemSpan(spanCount) },
-            contentType = "media"
-        ) {
-            // The fallback accent resolves INSIDE the item's composable
-            // lambda (the wall builder itself is not @Composable).
-            val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
-                ?.themedAccent() ?: MaterialTheme.colorScheme.primary
-            // Rounded cover tile: the art CROPS to fill the whole tile, so
-            // no cover ever leaves space below or beside it. No plate, no
-            // seam — the page's own surface shows between covers.
-            Box(
+    shelves.forEachIndexed { index, shelf ->
+        item(key = "shelf|$index", contentType = "shelf") {
+            val swap = wallSwap()
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(aspect)
-                    .clip(RoundedCornerShape(10.dp))
+                    .height(shelf.height)
+                    .graphicsLayer {
+                        alpha = swap
+                        // A whisper of scale rides the fade so the swap reads as
+                        // the wall settling rather than a blink.
+                        scaleX = 0.985f + swap * 0.015f
+                        scaleY = 0.985f + swap * 0.015f
+                    }
                     .then(
                         Modifier.animateItem(
                             fadeInSpec = tween(220),
                             fadeOutSpec = tween(150),
                             placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
                         )
-                    )
-                    .combinedClickable(
-                        onClick = { onOpenLiked(liked) },
-                        onLongClick = { onCoverSource(liked) }
-                    )
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(CUPBOARD_GAP_DP.dp)
             ) {
-                V2JacketArt(
-                    item = liked,
-                    accent = fallbackAccent,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                shelf.items.forEach { liked ->
+                    // The fallback accent resolves INSIDE the item's composable
+                    // lambda (the wall builder itself is not @Composable).
+                    val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
+                        ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                    // Every cover is sized to the shelf height by its OWN
+                    // aspect, so the row fills the width exactly and no cover
+                    // ever leaves space beside or below it.
+                    Box(
+                        modifier = Modifier
+                            .size(
+                                width = (shelf.height.value * cupboardAspect(liked)).dp,
+                                height = shelf.height
+                            )
+                            .clip(RoundedCornerShape(10.dp))
+                            .combinedClickable(
+                                onClick = { onOpenLiked(liked) },
+                                onLongClick = { onCoverSource(liked) }
+                            )
+                    ) {
+                        V2JacketArt(
+                            item = liked,
+                            accent = fallbackAccent,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
             }
         }
     }
@@ -1549,9 +1771,11 @@ private fun V2PageSectionHeader(
     }
 }
 
-/** The JSX "Everything" card — frosted icon tile + title + circular arrow,
- *  a media rail of REAL saved jacket art (books/albums/series) + a "+" slot,
- *  and the running item count. Tap opens the Everything library. */
+/** The CUPBOARD card — frosted icon tile + title + circular arrow, a media
+ *  rail of REAL cover art (books / albums / series) and the running item
+ *  count. Tap opens the Cupboard wall. v3xx43 — renamed from "Everything"
+ *  and its copy/count now describe liked MEDIA only (the saved captures and
+ *  the liked topics live on their own shelves). */
 @Composable
 private fun V2EverythingCard(
     likes: List<V2Liked>,
@@ -1593,7 +1817,7 @@ private fun V2EverythingCard(
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Everything",
+                        text = "Cupboard",
                         style = MaterialTheme.typography.headlineSmall.copy(
                             fontWeight = FontWeight.ExtraBold,
                             lineHeight = 24.sp
@@ -1602,7 +1826,7 @@ private fun V2EverythingCard(
                         maxLines = 1
                     )
                     Text(
-                        text = "All your books, notes, media and more",
+                        text = "Every book, album and series you keep",
                         style = MaterialTheme.typography.bodySmall,
                         color = muted,
                         maxLines = 1,
@@ -1619,7 +1843,7 @@ private fun V2EverythingCard(
                 ) {
                     CurioIcon(
                         name = CurioIcons.ChevronRight,
-                        contentDescription = "Open everything",
+                        contentDescription = "Open the Cupboard",
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         size = 19.dp
                     )
@@ -1639,7 +1863,7 @@ private fun V2EverythingCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Covers of your liked books, albums and series appear here",
+                        text = "The covers of your books, albums and series appear here",
                         style = MaterialTheme.typography.labelMedium,
                         color = muted
                     )
@@ -2173,8 +2397,153 @@ private fun LazyGridScope.v2LikedItems(
     }
 }
 
-/** A VIRTUAL shelf detail (Favorites / Saved entries / Notes) — header +
- *  liked rows + saved cards, search-filtered like the other levels. */
+/** FAVORITES (v3xx43) — the topics the user LIKED on a reveal, listed as
+ *  full-width topic rows. The Cupboard owns the media covers, so this shelf
+ *  never renders a book/album/series jacket and no longer mirrors the
+ *  Cupboard wall. */
+private fun LazyGridScope.v2LikedTopicItems(
+    likes: List<V2Liked>,
+    searchQuery: String,
+    catalogReady: Boolean,
+    onOpenTopic: (V2Liked) -> Unit
+) {
+    if (likes.isEmpty() && !catalogReady) {
+        // The lane pools are still warming — hold the frame with quiet
+        // skeleton rows instead of flashing an "empty" verdict the shelf
+        // cannot know yet.
+        repeat(3) {
+            item(key = "f-skel-$it", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(72.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f))
+                )
+            }
+        }
+        return
+    }
+    val q = searchQuery.trim()
+    fun shown(text: String): Boolean = q.isEmpty() || text.contains(q, ignoreCase = true)
+    val rows = likes.filter { item ->
+        shown(item.name) || item.topic?.byline?.let { b -> shown(b) } == true ||
+            item.topic?.categoryId?.let { c -> shown(CurioCategories.byId(c).displayName) } == true
+    }
+    if (rows.isEmpty()) {
+        item(key = "f-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+            CurioDoodleEmptyState(
+                headline = if (likes.isEmpty()) "No liked topics yet" else "Nothing matches",
+                subtext = if (likes.isEmpty())
+                    "Like a topic from its reveal page and it lands here."
+                else "Try a different search."
+            )
+        }
+        return
+    }
+    rows.forEach { item ->
+        item(
+            key = "f|${item.topic?.categoryId?.name}|${item.name}",
+            span = { GridItemSpan(maxLineSpan) },
+            contentType = "member"
+        ) {
+            V2LikedTopicRow(item = item, onClick = { onOpenTopic(item) })
+        }
+    }
+}
+
+/** One LIKED TOPIC row (Favorites): a category-tinted glyph tile + the topic
+ *  name / byline / lane label, opening that topic's reveal (where the like
+ *  heart lives). Flat page surface with NO cover art, so a Favorites row can
+ *  never be mistaken for one of the Cupboard's media tiles. */
+@Composable
+private fun V2LikedTopicRow(
+    item: V2Liked,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
+    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp),
+        color = androidx.compose.ui.graphics.lerp(
+            cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+            accent,
+            if (isCurioDarkTheme()) 0.10f else 0.16f
+        ),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(accent.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = cat?.iconGlyph ?: CurioIcons.AutoAwesome,
+                    contentDescription = null,
+                    tint = cat?.categoryInk() ?: accent,
+                    size = 22.dp
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                val byline = item.topic?.byline
+                if (!byline.isNullOrBlank()) {
+                    Text(
+                        text = byline,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(Modifier.height(5.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(accent.copy(alpha = 0.85f))
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text(
+                        text = cat?.displayName ?: "Topic",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = cat?.categoryInk() ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            CurioIcon(
+                name = CurioIcons.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                size = 20.dp
+            )
+        }
+    }
+}
+
+/** A VIRTUAL shelf detail (Saved entries / Notes) — liked rows + saved cards,
+ *  search-filtered like the other levels. The hero carries the shelf name and
+ *  count, so the list starts directly under it (v3xx43). */
 private fun LazyGridScope.v2VirtualShelfItems(
     title: String,
     likes: List<V2Liked>,
@@ -2186,10 +2555,7 @@ private fun LazyGridScope.v2VirtualShelfItems(
     onEntryLongClick: (String) -> Unit,
     onEntryClick: (String) -> Unit,
     // v3xx33 — the liked-row ⋮ (shelf toggles + cover source sheet).
-    onLikedMore: (V2Liked) -> Unit = {},
-    // v3xx34 — an Add pill in the header (Favorites opens the add sheet in
-    // favorites mode).
-    onAdd: (() -> Unit)? = null
+    onLikedMore: (V2Liked) -> Unit = {}
 ) {
     val q = searchQuery.trim()
     fun shown(text: String): Boolean = q.isEmpty() || text.contains(q, ignoreCase = true)
@@ -2199,64 +2565,9 @@ private fun LazyGridScope.v2VirtualShelfItems(
     }
     val total = shownLikes.size + shownEntries.size
 
-    item(key = "v-head", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-        if (onAdd != null) {
-            // v3xx34 — Favorites wears the collection-detail header language:
-            // title + count + an emphasized Add pill.
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 2.dp)
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = "$total item${if (total == 1) "" else "s"}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-                // v3xx — the app-wide labeled Add pill ("+ Add").
-                Surface(
-                    onClick = onAdd,
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
-                    modifier = Modifier.height(46.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.Add,
-                            contentDescription = "Add to favorites",
-                            tint = MaterialTheme.colorScheme.primary,
-                            size = 22.dp
-                        )
-                        Text(
-                            text = "Add",
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-        } else {
-            V2PageSectionHeader(
-                title = title,
-                subtitle = null,
-                trailing = "$total item${if (total == 1) "" else "s"}"
-            )
-        }
-    }
+    // v3xx43 — NO in-page section header: the pinned hero already carries the
+    // shelf name and its count, so the old title + "N items" row below it was
+    // a straight duplicate. The list starts right under the hero now.
     if (total == 0) {
         item(key = "v-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioDoodleEmptyState(
@@ -2265,8 +2576,6 @@ private fun LazyGridScope.v2VirtualShelfItems(
                     else -> "Nothing matches"
                 },
                 subtext = when {
-                    likes.isEmpty() && entries.isEmpty() && title == "Favorites" ->
-                        "Like a book, series or album from its page and it lands here."
                     likes.isEmpty() && entries.isEmpty() && title == "Notes" ->
                         "Save a voice note, journal or field note and it lands here."
                     likes.isEmpty() && entries.isEmpty() && title == "Saved entries" ->
@@ -2296,11 +2605,12 @@ private fun LazyGridScope.v2VirtualShelfItems(
     )
 }
 
-/** The collection-detail header strip: name + count + Add pill + kebab. */
+/** The collection-detail action strip: the "+ Add" pill + the kebab.
+ *  v3xx43 — the name/count block is GONE: the pinned hero already shows the
+ *  collection's name and item count, so printing them again here duplicated
+ *  the page title on every shelf ("Want to read" etc.). */
 @Composable
 private fun V2DetailHeader(
-    name: String,
-    count: Int,
     onAdd: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit
@@ -2308,23 +2618,9 @@ private fun V2DetailHeader(
     var moreOpen by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End,
         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "$count item${if (count == 1) "" else "s"}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
-        }
         // v3xx — the Add action is a LARGER labeled pill ("+ Add") — the
         // style that will expand app-wide; the ⋮ sits in a slightly bigger
         // circular button next to it (still an ANCHORED dropdown below).
@@ -3387,6 +3683,102 @@ private fun AddEntryPickRow(
     }
 }
 
+/** v3xx43 — the CUPBOARD's Add sheet: search the CATALOG (books / albums /
+ *  series) and pin the picked media onto the wall. The wall IS the liked-media
+ *  set, so pinning turns the item's cover heart on, and tapping something
+ *  that is already on the wall takes it back off. With an empty query the
+ *  sheet lists what is on the wall, so it doubles as the wall's manager. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun V2CupboardAddSheet(
+    likes: List<V2Liked>,
+    onToggle: (V2Liked) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var query by rememberSaveable { mutableStateOf("") }
+    val q = query.trim()
+    val onWall = remember(likes) { likes.map { "${it.kind.name}|${it.name}" }.toSet() }
+    // Catalog hits come straight from the warm lane pools (sync — no
+    // coroutine, no disk), so typing filters instantly.
+    val results: List<V2Liked> = remember(q, likes) {
+        if (q.isEmpty()) {
+            likes.sortedWith(compareBy({ it.kind.name }, { it.name.lowercase() }))
+        } else {
+            listOf(CategoryId.BOOKS, CategoryId.ALBUMS, CategoryId.SERIES)
+                .flatMap { lane ->
+                    TopicJsonLoader.cached(lane).orEmpty()
+                        .filter { t ->
+                            t.name.contains(q, ignoreCase = true) ||
+                                t.byline?.contains(q, ignoreCase = true) == true
+                        }
+                        .map { V2Liked(it.name, topicKind(it), it) }
+                }
+                .distinctBy { "${it.kind.name}|${it.name}" }
+                .sortedBy { it.name.lowercase() }
+                .take(40)
+        }
+    }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 620.dp)
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 26.dp)
+        ) {
+            item(key = "cp-title") {
+                Text(
+                    text = "Add to the Cupboard",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 2.dp, bottom = 10.dp)
+                )
+            }
+            item(key = "cp-search") {
+                AddSearchField(
+                    query = query,
+                    onQueryChange = { query = it },
+                    placeholder = "Search books, albums & series…"
+                )
+            }
+            item(key = "cp-label") {
+                AddSectionLabel(if (q.isEmpty()) "On your wall" else "Results")
+            }
+            if (results.isEmpty()) {
+                item(key = "cp-empty") {
+                    Text(
+                        text = if (q.isEmpty()) "Nothing on the wall yet."
+                        else "Nothing matches — try a different search.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 14.dp)
+                    )
+                }
+            } else {
+                items(
+                    count = results.size,
+                    key = { i -> "cp-${results[i].kind.name}-${results[i].name}" }
+                ) { index ->
+                    val liked = results[index]
+                    AddTopicPickRow(
+                        liked = liked,
+                        added = "${liked.kind.name}|${liked.name}" in onWall,
+                        favoritesMode = false,
+                        onClick = { onToggle(liked) }
+                    )
+                }
+            }
+        }
+    }
+}
+
 // ────────────────────────────────────────────────────────────────────────
 // Member / liked helpers
 // ────────────────────────────────────────────────────────────────────────
@@ -3761,15 +4153,17 @@ private fun V2JacketArt(
     var coverIndex by remember(item.name, candidates) { mutableIntStateOf(0) }
     var resolved by remember(item.name) { mutableStateOf<String?>(null) }
     var liveDone by remember(item.name) { mutableStateOf(false) }
-    // v3xx — the per-tile live resolve is ALWAYS armed (no Settings consent
-    // gate): the cover cache is always-on by design, so an item liked mid-
-    // session resolves here even before the warmer's next pass. Albums /
-    // series cascade BOTH providers (iTunes then MusicBrainz / TVMaze then
-    // iTunes) — if provider 0 misses, provider 1 fills the gap instead of
-    // leaving a bare gradient plate. The winner is persisted to the same
-    // sheetArt store the reveal reads, so every surface agrees instantly.
-    LaunchedEffect(item.name, item.kind, coverIndex, liveDone) {
-        if (!liveDone && item.kind != V2Kind.BOOK && coverIndex >= candidates.size) {
+    // v3xx51 — the per-tile live resolve now honours the MERGED cover-fetch
+    // consent. It used to be ALWAYS armed ("the cover cache is always-on by
+    // design"), which is exactly why artwork downloaded even with every
+    // Settings fetch toggle OFF. With consent ON the behaviour is unchanged:
+    // albums / series cascade BOTH providers (iTunes then MusicBrainz /
+    // TVMaze then iTunes) and the winner is persisted to the same sheetArt
+    // store the reveal reads. With consent OFF nothing here touches the
+    // network (the tile serves only bytes already on disk).
+    val fetchConsent = AppPreferences.coverFetchEnabledState
+    LaunchedEffect(item.name, item.kind, coverIndex, liveDone, fetchConsent) {
+        if (fetchConsent && !liveDone && item.kind != V2Kind.BOOK && coverIndex >= candidates.size) {
             var found: String? = null
             when (item.kind) {
                 V2Kind.ALBUM -> {
@@ -3805,7 +4199,10 @@ private fun V2JacketArt(
         }
     }
     val local = cached?.toURI()?.toString()
-    val url = resolved ?: candidates.getOrNull(coverIndex)
+    // v3xx51 — with the cover-fetch consent OFF the URL cascade is skipped
+    // entirely (every candidate is a network fetch, including Coil's own
+    // load), so the tile shows the cached file or its plate and nothing else.
+    val url = if (fetchConsent) resolved ?: candidates.getOrNull(coverIndex) else null
     val corner = if (item.kind == V2Kind.ALBUM) 10.dp else 8.dp
     val plate = Brush.verticalGradient(
         listOf(

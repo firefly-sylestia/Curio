@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 
 /**
  * Centralized route names for the Curio NavHost — see Curio navigation contract.
@@ -198,6 +199,21 @@ object CurioRoutes {
     const val SETTINGS_PREFERENCES = "settings/preferences"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
+    // v3xx — the account + Online Mode page (sign-in and sync).
+    const val SETTINGS_ONLINE = "settings/online"
+    // v3xx — the 24-hour community wall of text share cards. Also the app's
+    // ONLY optional bottom-nav tab: it joins [bottomNavRoutePrefixes] while
+    // the user's opt-in tab is showing (see [liveTabPrefixes]).
+    const val COMMUNITY = "community"
+    // v3xx — the social layer: friend requests + direct messages.
+    const val FRIENDS = "friends"
+    const val DIRECT_MESSAGE = "dm/{userId}"
+    // v3xx — one card's own view: the full card, its caption, replies + share.
+    const val COMMUNITY_CARD = "community/{cardId}"
+    // v3xx53 — a member's public profile: reaching it from a card, a reply, a
+    // friend row or a conversation is what makes the social layer feel like
+    // people instead of handles.
+    const val SOCIAL_PROFILE = "person/{userId}"
     const val SETTINGS_BOOK_COVER = "settings/book-cover"
     // v3xx — the Book browser: every book as a scrollable line-by-line list
     // (covers, ratings, years) — moved out of the Book covers hub's strip.
@@ -236,6 +252,16 @@ object CurioRoutes {
     fun captureFor(categorySlug: String, topicName: String) =
         "capture/$categorySlug/${Uri.encode(topicName)}"
     fun entryDetail(entryId: String) = "detail/$entryId"
+    /** One community card's own view. */
+    fun communityCard(cardId: String) = "community/$cardId"
+    /** A member's public profile (their portrait, handle and live cards). */
+    fun socialProfile(userId: String) = "person/${Uri.encode(userId)}"
+    /**
+     * One conversation with [userId]. The handle rides along so the thread can
+     * show who it is with before any message loads (the id alone is opaque).
+     */
+    fun directMessage(userId: String, handle: String = "") =
+        "dm/${Uri.encode(userId)}"
     /** Edit a saved GalleryWall (mood board) entry — preloads + re-saves in place. */
     fun editMoodBoard(entryId: String) = "edit-moodboard/$entryId"
     /**
@@ -268,6 +294,21 @@ object CurioRoutes {
      * exactly the user-visible splash-nav bug.
      */
     val bottomNavRoutePrefixes: Set<String> = setOf(HOME, SPIN, CABINET, REVEAL)
+
+    /**
+     * The bottom-nav prefixes that are live RIGHT NOW — the fixed tab set plus
+     * Community while its opt-in tab is showing.
+     *
+     * One getter for every consumer (the NavHost's bar visibility, the tab
+     * switch transition, and Community's own chrome) so the app can never
+     * disagree with itself about whether the wall is a tab. Reading
+     * [AppPreferences.communityTabVisible] here works because every caller
+     * runs in composition: the bar appears the instant the user flips the
+     * opt-in and drops the moment either switch turns off.
+     */
+    fun liveTabPrefixes(): Set<String> =
+        if (AppPreferences.communityTabVisible) bottomNavRoutePrefixes + COMMUNITY
+        else bottomNavRoutePrefixes
 
     /**
      * Route PREFIXES that own navigation during app boot (splash → home /

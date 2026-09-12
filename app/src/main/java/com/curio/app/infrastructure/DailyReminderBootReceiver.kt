@@ -12,7 +12,8 @@ class DailyReminderBootReceiver : BroadcastReceiver() {
         if (AppPreferences.isReminderEnabled(context)) {
             DailyReminderScheduler.schedule(
                 context,
-                AppPreferences.getReminderHour(context)
+                AppPreferences.getReminderHour(context),
+                AppPreferences.getReminderMinute(context)
             )
         }
     }

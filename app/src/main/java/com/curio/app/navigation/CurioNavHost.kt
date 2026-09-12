@@ -2,6 +2,8 @@ package com.curio.app.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -15,6 +17,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -103,6 +106,12 @@ import com.curio.app.features.settings.BackupToolsScreen
 import com.curio.app.features.settings.BookCoverHubScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
+import com.curio.app.features.community.CommunityCardScreen
+import com.curio.app.features.community.CommunityScreen
+import com.curio.app.features.community.DirectMessageScreen
+import com.curio.app.features.community.FriendsScreen
+import com.curio.app.features.community.SocialProfileScreen
+import com.curio.app.features.settings.OnlineModeScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
@@ -140,6 +149,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.CurioRevealHost
 
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
@@ -244,8 +254,8 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     // Browse-mode Reveal is a pushed read-only page, not a tab — it never
     // crossfades like a tab switch.
     !isBrowseRevealRoute(targetState) && !isBrowseRevealRoute(initialState) &&
-        initialState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes &&
-        targetState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes
+        initialState.destination.route?.substringBefore("/") in CurioRoutes.liveTabPrefixes() &&
+        targetState.destination.route?.substringBefore("/") in CurioRoutes.liveTabPrefixes()
 
 /**
  * The Curio NavHost — single-NavHost scaffold for the active app.
@@ -301,6 +311,34 @@ private fun SettingsSharedScope(
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
 ) {
+    // v3xx45 — SCREEN REVEAL experiment (Settings ▸ Experiments, default OFF).
+    // Every destination change tries to peel the frozen pre-tap frame away in
+    // the same feathered iris as the light/dark flip; when no frame is armed
+    // (pin/back/deep-link navigation, experiment off, failed capture) the
+    // normal page transitions run untouched — see CurioRevealNav.
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { controller, destination, _ ->
+            // Navigations whose motion is hand-tuned elsewhere keep it: the
+            // shared-element hero morphs (Reveal / Pet Designer, either side
+            // of the hand-off) and SWITCHES INSIDE the settings family, where
+            // the nav-rail pill morph IS the transition. Opening Settings (or
+            // Profile) FROM another screen still gets the iris — only the
+            // internal rail switches opt out.
+            val targetPrefix = destination.route?.substringBefore("/")
+            val sourcePrefix = controller.previousBackStackEntry
+                ?.destination?.route?.substringBefore("/")
+            val heroNav =
+                targetPrefix == CurioRoutes.REVEAL.substringBefore("/") ||
+                    sourcePrefix == CurioRoutes.REVEAL.substringBefore("/") ||
+                    targetPrefix == CurioRoutes.PET_DESIGNER ||
+                    sourcePrefix == CurioRoutes.PET_DESIGNER
+            val settingsInternal = targetPrefix in settingsFamilyRoutePrefixes &&
+                sourcePrefix in settingsFamilyRoutePrefixes
+            CurioRevealNav.onDestinationChanged(skipReveal = heroNav || settingsInternal)
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose { navController.removeOnDestinationChangedListener(listener) }
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val routePrefix = remember(currentRoute) {
@@ -334,8 +372,12 @@ fun CurioNavHost(
     // (it floats its own Like/Dislike pill instead, see
     // TopicRevealScreen).
     val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
+    // v3xx — [CurioRoutes.liveTabPrefixes] (not the static set) so the bar
+    // shows on the Community wall only while its opt-in tab is on; with the
+    // opt-in off the wall is a plain pushed page reached from Settings and
+    // keeps the old chromeless look.
     val showBottomBar =
-        routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
+        routePrefix in CurioRoutes.liveTabPrefixes() && !isRevealRoutePrefix
     // v193 — the floating pill bar stays composed briefly after the route
     // leaves the tab set so the previously-selected pill COLLAPSES with the
     // same spring it expands with. The old `showBottomBar` gate unmounted
@@ -533,6 +575,7 @@ fun CurioNavHost(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .then(PetPointer.trackerModifier())
+            .trackRevealTaps()
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             if (wide && showBottomBar) {
@@ -598,7 +641,10 @@ fun CurioNavHost(
             // glitchy — this was promised in the header doc but never
             // implemented).
             enterTransition = {
-                when {
+                // Screen reveal owns the motion for this navigation — the old
+                // frame is already frozen over the destination.
+                if (CurioRevealHost.suppressDefaultTransition) EnterTransition.None
+                else when {
                     // Settings-internal switches (hub ⇄ sections ⇄ drill-in
                     // tools): the rail's active pill MORPHS between chips
                     // (shared element) while the pages crossfade with a
@@ -670,7 +716,8 @@ fun CurioNavHost(
                 }
             },
             exitTransition = {
-                when {
+                if (CurioRevealHost.suppressDefaultTransition) ExitTransition.None
+                else when {
                     // Settings-internal switches mirror the calm fade: the
                     // outgoing page's text + lower content fades out under
                     // the incoming page's fade-in (the shared chrome reads
@@ -716,7 +763,8 @@ fun CurioNavHost(
                 }
             },
             popEnterTransition = {
-                when {
+                if (CurioRevealHost.suppressDefaultTransition) EnterTransition.None
+                else when {
                     // Popping back inside settings (section → hub, drill-in
                     // → section): the page underneath fades back in the same
                     // gentle crossfade as the forward switch.
@@ -757,7 +805,8 @@ fun CurioNavHost(
                 }
             },
             popExitTransition = {
-                when {
+                if (CurioRevealHost.suppressDefaultTransition) ExitTransition.None
+                else when {
                     // Popping back inside settings: the outgoing page fades
                     // out over the same crossfade.
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
@@ -956,6 +1005,55 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_DATA) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     BackupToolsScreen(navController = navController)
+                }
+            }
+            composable(CurioRoutes.SETTINGS_ONLINE) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    OnlineModeScreen(navController = navController)
+                }
+            }
+            composable(CurioRoutes.COMMUNITY) {
+                CommunityScreen(navController = navController)
+            }
+            composable(
+                route = CurioRoutes.COMMUNITY_CARD,
+                arguments = listOf(navArgument("cardId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    CommunityCardScreen(
+                        navController = navController,
+                        cardId = backStackEntry.arguments?.getString("cardId").orEmpty()
+                    )
+                }
+            }
+            // v3xx53 — a member's public profile, reached from a card, a reply,
+            // a friend row or a conversation.
+            composable(
+                route = CurioRoutes.SOCIAL_PROFILE,
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SocialProfileScreen(
+                        navController = navController,
+                        userId = backStackEntry.arguments?.getString("userId").orEmpty()
+                    )
+                }
+            }
+            composable(CurioRoutes.FRIENDS) {
+                FriendsScreen(navController = navController)
+            }
+            composable(
+                route = CurioRoutes.DIRECT_MESSAGE,
+                arguments = listOf(
+                    navArgument("userId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    DirectMessageScreen(
+                        navController = navController,
+                        otherUserId = backStackEntry.arguments?.getString("userId").orEmpty(),
+                        handle = ""
+                    )
                 }
             }
             composable(CurioRoutes.SETTINGS_BOOK_COVER) {

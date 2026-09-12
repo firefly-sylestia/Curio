@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -149,6 +150,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioGlassToolbarMorph
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
@@ -429,6 +431,46 @@ fun HomeScreen(navController: NavController) {
             // Hoisted scroll state — read by the sticky-bar block below
             // (a sibling of the v241 capture wrapper).
             val homeScroll = rememberScrollState()
+            // v3xx43 — the collapse clock is hoisted ABOVE the scroll content:
+            // it drives the pinned morph bar AND the space the page reserves
+            // for it, so the header genuinely collapses (the old static 200dp
+            // reservation kept the page looking permanently expanded after
+            // scrolling — the reported "doesn't collapse" bug).
+            // The collapsed bar still owns the status-bar strip (the glass
+            // fills it now), so the reservation floors at compact + inset.
+            val statusTopDp = with(LocalDensity.current) {
+                WindowInsets.statusBars.getTop(this).toDp()
+            }
+            // v3xx49 — the collapse clock runs the DISTANCE THE HEADER CAN
+            // ACTUALLY GIVE BACK (full reservation − the compact floor), not a
+            // fixed 90dp. A 90dp clock against a ~120dp space reclaim meant
+            // the page slid up ~1.3× faster than the finger for 90dp and then
+            // snapped back to 1:1 — the reported "jump/flicker at the collapse
+            // point". Matching the two makes the header track the scroll
+            // exactly: whatever the finger takes, the header gives back.
+            val homeCollapsePx = with(LocalDensity.current) {
+                if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+                    (HomeGlassToolbarFullHeight - (HomeCompactHeaderHeight + statusTopDp))
+                        .coerceAtLeast(1.dp)
+                        .toPx()
+                } else {
+                    // Torn-paper style: the clock still only drives the floating
+                    // pills' frost morph, which is tuned to 90dp.
+                    StickyBarThreshold.toPx()
+                }
+            }
+            val homeStickyProgress by remember {
+                derivedStateOf { (homeScroll.value / homeCollapsePx).coerceIn(0f, 1f) }
+            }
+            val glassHeaderReserve = if (
+                AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
+            ) {
+                androidx.compose.ui.unit.lerp(
+                    HomeGlassToolbarFullHeight,
+                    HomeCompactHeaderHeight + statusTopDp,
+                    FastOutSlowInEasing.transform(homeStickyProgress)
+                )
+            } else HomeGlassToolbarFullHeight
             // v241 — LOCAL GLASS CAPTURE: everything BEHIND the floating
             // top-bar pills records into its own layer; pills are a SIBLING
             // overlay outside this wrapper (the bottom-nav architecture —
@@ -500,7 +542,7 @@ fun HomeScreen(navController: NavController) {
             // pinned bar never covers the first real card (v3xx22 — the
             // user asked for the morph collapse on Home again).
             if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
-                Spacer(Modifier.height(HomeGlassToolbarFullHeight))
+                Spacer(Modifier.height(glassHeaderReserve))
             } else {
             Box(
                 modifier = Modifier
@@ -1244,10 +1286,8 @@ fun HomeScreen(navController: NavController) {
             // scrolls away they continuously fade into solid floating
             // frosted pills. The scale is tied directly to the same eased
             // progress, so there is no post-pop bounce or rotation wobble.
-            val stickyThresholdPx = with(LocalDensity.current) { StickyBarThreshold.toPx() }
-            val stickyProgress by remember {
-                derivedStateOf { (homeScroll.value / stickyThresholdPx).coerceIn(0f, 1f) }
-            }
+            // v3xx43 — the raw scroll progress is hoisted above the scroll
+            // content now (it also drives the glass header's reservation).
             // One scroll-linked clock drives color, scale, lift and shadow.
             // FastOutSlowIn gives the fade a gentle start and finish while
             // keeping it perfectly scrubable with the user's finger.
@@ -1258,7 +1298,7 @@ fun HomeScreen(navController: NavController) {
             // collapse on Home again). The torn style keeps the classic
             // always-floating menu/avatar pills below.
             val homeGlassOn = AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
-            val frostShift = FastOutSlowInEasing.transform(stickyProgress)
+            val frostShift = FastOutSlowInEasing.transform(homeStickyProgress)
             val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
             // v27v — the resting pills follow the HERO TINT (hoisted at the
             // top of the screen): when "Hero tint too" is on, the menu +
@@ -1350,7 +1390,7 @@ fun HomeScreen(navController: NavController) {
             }
             if (homeGlassOn) {
                 CurioGlassToolbarMorph(
-                    progress = stickyProgress,
+                    progress = homeStickyProgress,
                     compactHeight = HomeCompactHeaderHeight,
                     title = greetingWordForNow(),
                     subtitle = displayName,
@@ -1880,7 +1920,8 @@ private fun SavedQuoteRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            // v3xx46 — the shared press language (squish + one light tick).
+            .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1932,7 +1973,8 @@ private fun PinnedTopicRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            // v3xx46 — same press feedback as the Saved row beside it.
+            .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

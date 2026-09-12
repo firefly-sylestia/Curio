@@ -486,6 +486,16 @@ fun SaveCaptureScreen(
             // in dark (deep accents look muddy on dark).
             .background(cat.categoryBackgroundWash())
     ) {
+        // v3xx52 — CAPTURE STUDIO (Settings ▸ Experiments → Capture): when
+        // the experiment is on, the studio shell draws its OWN top bar, hero,
+        // canvas, take rail and dock — so the classic chrome bands (top bar,
+        // topic strip, format chips, take tabs) and the classic body + CTA are
+        // skipped and only the studio renders. Every piece of STATE below is
+        // shared verbatim by both shells (same [sections], same save
+        // pipeline, same dialogs) — only the presentation differs, so the
+        // experiment can never change what gets saved.
+        val studioOn = AppPreferences.captureStudioState
+        if (!studioOn) {
         // ── Premium top bar ──────────────────────────────────────────────
         Row(
             modifier = Modifier
@@ -509,6 +519,7 @@ fun SaveCaptureScreen(
             )
             Spacer(Modifier.width(40.dp)) // balance the back button
         }
+        } // !studioOn — the studio draws its own bar
 
         // ── Topic reminder strip with gradient ───────────────────────────
         // Wears the category tint with the tint setting on; with it off it
@@ -674,6 +685,9 @@ fun SaveCaptureScreen(
         // The strip's mood pill toggles the shared mood selector pinned
         // under the strip (see the capture header below).
         var moodSelectorOpen by remember { mutableStateOf(false) }
+        // Classic chrome: the topic strip + the pinned format/take header.
+        // The studio folds all of this into its hero + tray + tools sheet.
+        if (!studioOn) {
         Surface(
             color = stripColor,
             shape = RoundedCornerShape(20.dp),
@@ -873,6 +887,96 @@ fun SaveCaptureScreen(
                 )
             }
         }
+        } // !studioOn — classic chrome ends here
+
+        if (studioOn) {
+            // ── The studio workspace ─────────────────────────────────────
+            // Composed from the SAME state the classic shell uses; the
+            // callbacks below are the classic page's own rules, expressed
+            // once so the two shells can never drift apart.
+            CaptureStudio(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                cat = cat,
+                topicName = localTopic?.name,
+                editMode = editEntryId != null,
+                sessionMillis = displaySessionMillis,
+                tintWash = tintWash,
+                sections = sections,
+                activeIndex = activeIndex,
+                activeMood = sections.getOrNull(activeIndex)?.mood,
+                // A live recording is the take's own `busy` flag — the same
+                // signal the format-switch / remove guards key on.
+                recording = sections.getOrNull(activeIndex)?.busy == true,
+                boardSeed = editEntryId?.hashCode(),
+                waitingForEntry = editEntryId != null && editingEntry == null,
+                canSave = canSave,
+                saveInProgress = saveInProgress,
+                saveError = saveError,
+                hasNote = hasSessionAttachments,
+                noteExpanded = showNoteEditor,
+                note = sessionNote,
+                tags = tags,
+                tagInput = tagInput,
+                onBack = { if (!saveInProgress) showDiscardDialog = true },
+                onSave = {
+                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                    performSave()
+                },
+                onSelectTake = { i -> snapshotActive(); activeIndex = i },
+                onAddTake = {
+                    snapshotActive()
+                    sections.add(CaptureSectionState(nextId++, defaultFormat))
+                    activeIndex = sections.lastIndex
+                },
+                onRequestRemoveTake = { i ->
+                    val section = sections.getOrNull(i)
+                    if (section != null && (section.data != null || section.busy)) {
+                        pendingRemoveIndex = i
+                    } else {
+                        removeSection(i)
+                    }
+                },
+                onPickFormat = { fmt ->
+                    val section = sections.getOrNull(activeIndex)
+                    // A filled take confirms first (same guard as the chips).
+                    if (section != null && (section.data != null || section.busy)) {
+                        pendingFormatSwitch = fmt
+                    } else {
+                        section?.let { applyFormat(it, fmt) }
+                    }
+                },
+                onPickMood = { picked ->
+                    sections.getOrNull(activeIndex)?.let { section ->
+                        section.mood = picked
+                        // Stamp into the live data so the saved entry + its
+                        // meta card see the mood even before the editor
+                        // re-emits.
+                        section.data = section.data?.withMood(picked)
+                    }
+                },
+                onToggleNote = { showNoteEditor = !showNoteEditor },
+                onNoteChange = { updated ->
+                    sessionNote = updated
+                    if (editEntryId == null) {
+                        ExploreSessionStore.setPendingNote(
+                            context, cat.id, topic?.name.orEmpty(), updated
+                        )
+                    }
+                },
+                onTagInputChange = { tagInput = it },
+                onAddTag = { raw ->
+                    val clean = raw.trim().trimStart('#').trim()
+                    if (clean.isNotBlank() && clean.length <= 24 && tags.size < 12) {
+                        tags = (tags + clean).distinct()
+                    }
+                    tagInput = ""
+                },
+                onRemoveTag = { tag -> tags = tags.filterNot { it == tag } },
+                onImageTap = openLightbox
+            )
+        } else {
 
         // ── Scrollable format body ───────────────────────────────────────
         // v27k — wrapped in a Box so the shared session-note pill can float
@@ -1062,6 +1166,8 @@ fun SaveCaptureScreen(
                 }
             }
         }
+        } // studioOn / classic body
+
         // ── Confirm before removing a take with drafted content ─────────
         pendingRemoveIndex?.let { removeIdx ->
             AlertDialog(
@@ -1304,7 +1410,7 @@ fun SaveCaptureScreen(
  * 24 chars each, deduped, trimmed of leading '#'s.
  */
 @Composable
-private fun TagEditorRow(
+internal fun TagEditorRow(
     tags: List<String>,
     tagInput: String,
     onTagInputChange: (String) -> Unit,
@@ -1313,10 +1419,13 @@ private fun TagEditorRow(
     accent: Color,
     tint: Color,
     ink: Color,
-    onAccentContent: Color
+    onAccentContent: Color,
+    // v3xx52 — the studio mounts the tag field in its own scroll/canvas and
+    // in the tools sheet, so the root modifier is a parameter now.
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
@@ -1411,7 +1520,7 @@ private fun TagEditorRow(
  * right above, which rides the IME so typing never hides it.
  */
 @Composable
-private fun SessionNoteFloatingPill(
+internal fun SessionNoteFloatingPill(
     cat: CurioCategory,
     note: String,
     expanded: Boolean,
@@ -1563,7 +1672,7 @@ private fun SessionNoteFloatingPill(
  * continuously and the screen aggregates + re-emits canSave / draft state.
  */
 @Composable
-private fun FormatBodyForCategory(
+internal fun FormatBodyForCategory(
     category: CurioCategory,
     sections: SnapshotStateList<CaptureSectionState>,
     activeIndex: Int,
@@ -1783,7 +1892,7 @@ private fun FormatChip(
     }
 }
 
-private class CaptureSectionState(val id: Int, initialFormat: CaptureFormat) {
+internal class CaptureSectionState(val id: Int, initialFormat: CaptureFormat) {
     var format by mutableStateOf(initialFormat)
     var canSave by mutableStateOf(false)
     var data by mutableStateOf<CaptureData?>(null)
@@ -1798,7 +1907,7 @@ private class CaptureSectionState(val id: Int, initialFormat: CaptureFormat) {
 }
 
 /** The 5 concrete format chips offered by the universal picker. */
-private val CAPTURE_FORMATS = listOf(
+internal val CAPTURE_FORMATS = listOf(
     CaptureFormat.SoundBite,
     CaptureFormat.ReelNotes,
     CaptureFormat.Marginalia,

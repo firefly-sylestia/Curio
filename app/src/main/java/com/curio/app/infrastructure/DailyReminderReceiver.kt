@@ -21,7 +21,11 @@ import com.curio.app.navigation.PendingSpinOpen
 class DailyReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (AppPreferences.isReminderEnabled(context)) {
-            DailyReminderScheduler.schedule(context, AppPreferences.getReminderHour(context))
+            DailyReminderScheduler.schedule(
+                context,
+                AppPreferences.getReminderHour(context),
+                AppPreferences.getReminderMinute(context)
+            )
         }
         createChannel(context)
         if (android.os.Build.VERSION.SDK_INT >= 33 &&

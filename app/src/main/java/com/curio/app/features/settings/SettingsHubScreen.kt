@@ -101,6 +101,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
@@ -138,6 +139,7 @@ import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -200,7 +202,11 @@ private data class SettingsHeroPair(
 fun SettingsHeroHeader(
     title: String,
     subtitle: String,
-    onBack: () -> Unit,
+    // v3xx — NULLABLE: a tab root has nothing to go back to (the Community
+    // wall's opt-in bottom-nav entry), so it omits the back pill entirely
+    // instead of showing a dead one. Every other caller still passes a
+    // lambda, so the pill renders exactly as before.
+    onBack: (() -> Unit)? = null,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
     compact: Boolean = false,
@@ -350,6 +356,7 @@ fun SettingsHeroHeader(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         val backInteraction = remember { MutableInteractionSource() }
+                        if (onBack != null) {
                         CurioBackButton(
                             onClick = onBack,
                             modifier = Modifier.then(
@@ -392,6 +399,12 @@ fun SettingsHeroHeader(
                             disableRipple = true,
                             pillInteraction = backInteraction
                         )
+                        } else {
+                            // No back pill (a tab root): keep any trailing
+                            // pills pinned to the trailing edge instead of
+                            // letting SpaceBetween slide them to the start.
+                            Spacer(Modifier.weight(1f))
+                        }
                         if (searchActive) {
                             // v294 — Cancel pill removed; back button handles closing search.
                         } else if (trailing != null) {
@@ -698,12 +711,13 @@ fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): C
     heroLaneCategory()?.categoryBackgroundWash() ?: default
 
 /**
- * v223 — whether the torn shared heroes wear the Material theme's
- * primaryContainer ("Material hero tears" Appearance option). Needs the
- * Material theme itself on — the Appearance row greys out otherwise.
+ * v223/v3xx51 — whether the torn shared heroes wear the Material theme's
+ * primaryContainer. The "Material hero tears" Appearance option was removed
+ * per user request: the Material container hero is now PART of the Material
+ * theme (on whenever the theme is on), so this simply reads that theme.
+ * The dormant `materialHeroTearsState` pref API stays for compatibility.
  */
-fun materialHeroTearsOn(): Boolean =
-    AppPreferences.materialThemeState && AppPreferences.materialHeroTearsState
+fun materialHeroTearsOn(): Boolean = AppPreferences.materialThemeState
 
 /** The settings hero's rose-wood fill — the SAME treatment as Home/Profile
  *  (the muted rose-wood base, its airy pastel twin in pastel mode) so
@@ -962,6 +976,7 @@ fun SettingsHubScreen(navController: NavController) {
                         }
                         group.cards.forEach { card ->
                             item(key = "card|${card.id}") {
+                                val cardEnabled = settingsNavEntryEnabled(card.id)
                                 if (card.id == "appearance") {
                                     // v8.xx — the Appearance card stays a pet
                                     // landmark: the pet pokes it, and the
@@ -974,13 +989,15 @@ fun SettingsHubScreen(navController: NavController) {
                                         SettingsDesignCardView(
                                             card = card,
                                             onClick = { navController.navigate(card.route) { launchSingleTop = true } },
-                                            modifier = lm
+                                            modifier = lm,
+                                            enabled = cardEnabled
                                         )
                                     }
                                 } else {
                                     SettingsDesignCardView(
                                         card = card,
-                                        onClick = { navController.navigate(card.route) { launchSingleTop = true } }
+                                        onClick = { navController.navigate(card.route) { launchSingleTop = true } },
+                                        enabled = cardEnabled
                                     )
                                 }
                             }
@@ -1120,7 +1137,8 @@ private fun SettingsTwoPaneHub(
                                             icon = result.row.icon,
                                             title = result.row.title,
                                             subtitle = result.row.subtitle,
-                                            selected = sectionPageFor(result.row.route)?.name == selectedPageName
+                                            selected = sectionPageFor(result.row.route)?.name == selectedPageName,
+                                            enabled = settingsNavEntryEnabled(rowIdForRoute(result.row.route))
                                         ) { handleRow(result.row, result.deep) }
                                     }
                                 }
@@ -1146,7 +1164,8 @@ private fun SettingsTwoPaneHub(
                                                         icon = row.icon,
                                                         title = row.title,
                                                         subtitle = row.subtitle,
-                                                        selected = sectionPageFor(row.route)?.name == selectedPageName
+                                                        selected = sectionPageFor(row.route)?.name == selectedPageName,
+                                                        enabled = settingsNavEntryEnabled(rowIdForRoute(row.route))
                                                     ) { handleRow(row) }
                                                 }
                                             }
@@ -1155,7 +1174,8 @@ private fun SettingsTwoPaneHub(
                                                 icon = row.icon,
                                                 title = row.title,
                                                 subtitle = row.subtitle,
-                                                selected = sectionPageFor(row.route)?.name == selectedPageName
+                                                selected = sectionPageFor(row.route)?.name == selectedPageName,
+                                                enabled = settingsNavEntryEnabled(rowIdForRoute(row.route))
                                             ) { handleRow(row) }
                                         }
                                     }
@@ -1201,6 +1221,11 @@ private fun sectionPageFor(route: String): SettingsPage? = when (route) {
     else -> null
 }
 
+/** v3xx51 — the gate id for a settings row route: only the Pet designer is
+ *  conditioned (see [settingsNavEntryEnabled]). */
+private fun rowIdForRoute(route: String): String =
+    if (route == CurioRoutes.PET_DESIGNER) "pet" else ""
+
 /** A nav-list row for the two-pane hub: icon + label, with the selected
  *  page's row wearing a soft action tint so the active section reads at a
  *  glance. */
@@ -1210,13 +1235,19 @@ private fun SettingsNavRow(
     title: String,
     subtitle: String,
     selected: Boolean,
+    /** v3xx51 — greyed + un-tappable when its screen is gated (Pet designer
+     *  while Curie is off). */
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Surface(
-        onClick = onClick,
+        onClick = { if (enabled) onClick() },
+        enabled = enabled,
         color = if (selected) curioDialogActionColor().copy(alpha = 0.14f) else Color.Transparent,
         shape = RoundedCornerShape(18.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.42f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -1333,6 +1364,8 @@ private val SettingsSections = listOf(
                 headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
+                    // v3xx — the account + Online Mode page.
+                    SettingsRowEntry(CurioIcons.Refresh, "Online mode", "Sign in and keep your account in sync", CurioRoutes.SETTINGS_ONLINE),
                     // v26 — recycle bin for soft-deleted captures.
                     SettingsRowEntry(CurioIcons.Delete, "Recycle bin", "Restore recently deleted captures", CurioRoutes.RECYCLE_BIN),
                     // v112 — the dedicated Updates sub-page (its own UI,
@@ -1400,6 +1433,8 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     // ── Backup & restore (own screen — no row pulse) ─────────────────
     SettingsDeepRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data", CurioRoutes.SETTINGS_DATA),
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),
+    // ── Online mode (own screen — no row pulse) ──────────────────────
+    SettingsDeepRow(CurioIcons.Refresh, "Online mode", "Sign in to sync your account", CurioRoutes.SETTINGS_ONLINE),
     // ── Updates (v112 — dedicated sub-page) ─────────────────────────
     SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.UPDATES),
     SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.UPDATES),
@@ -1562,8 +1597,16 @@ private val settingsNavRail = listOf(
     SettingsNavEntry("share", "Share hub", CurioIcons.Share, CurioRoutes.SHARE_HUB),
     SettingsNavEntry("experiments", "Experiments", CurioIcons.AutoAwesome, CurioRoutes.USER_EXPERIMENTS),
     SettingsNavEntry("backup", "Backup", CurioIcons.Backup, CurioRoutes.SETTINGS_DATA),
+    SettingsNavEntry("online", "Online", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE),
     SettingsNavEntry("support", "Support", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
 )
+
+/** Whether a settings entry is tappable right now. Only the Pet designer
+ *  has a live gate: it edits the companion, so with Curie switched off the
+ *  hub card / rail chip / two-pane row grey out and do nothing. */
+@Composable
+private fun settingsNavEntryEnabled(id: String): Boolean =
+    if (id == "pet") AppPreferences.petEnabledState else true
 
 /** The four JSX groups (plus the data & privacy group the user asked to
  *  slot the book-fetching etc. into) — every card maps to a real screen. */
@@ -1586,7 +1629,9 @@ private val settingsDesignGroups = listOf(
     )),
     SettingsDesignGroup("Your data & privacy", "\u25C8", listOf(
         SettingsDesignCard("backup", "Backup & restore", "Keep captures and settings safe", CurioIcons.Backup, SettingsDesignTone.SLATE, SettingsDesignVisual.CLOUD, CurioRoutes.SETTINGS_DATA),
-        SettingsDesignCard("bookcovers", "Book covers", "Cover-art fetching and providers", CurioIcons.Image, SettingsDesignTone.STEEL, SettingsDesignVisual.IMAGE, CurioRoutes.SETTINGS_BOOK_COVER)
+        SettingsDesignCard("bookcovers", "Book covers", "Cover-art fetching and providers", CurioIcons.Image, SettingsDesignTone.STEEL, SettingsDesignVisual.IMAGE, CurioRoutes.SETTINGS_BOOK_COVER),
+        // v3xx — the account + Online Mode page (sign in, then sync).
+        SettingsDesignCard("online", "Online mode", "Sign in and keep your account in sync", CurioIcons.Refresh, SettingsDesignTone.BLUE, SettingsDesignVisual.REFRESH, CurioRoutes.SETTINGS_ONLINE)
     ))
 )
 
@@ -2346,7 +2391,10 @@ private class SettingsCardTexture(seed: String) {
 private fun SettingsDesignCardView(
     card: SettingsDesignCard,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** v3xx51 — a live gate (the Pet designer card greys out while Curie is
+     *  off): the card dims and its press/click is swallowed. */
+    enabled: Boolean = true
 ) {
     val dark = isCurioDarkTheme()
     val (start, end) = settingsToneGradient(card.tone, dark)
@@ -2361,7 +2409,10 @@ private fun SettingsDesignCardView(
             .height(204.dp)
             .clip(RoundedCornerShape(26.dp))
             .background(Brush.linearGradient(listOf(start, end)))
-            .clickable(onClick = onClick)
+            // v3xx46 — the hub cards squish + tick on press (a big surface
+            // gets a gentler scale so it reads as a press, not a jump).
+            .curioPressClickable(pressedScale = 0.985f, onClick = { if (enabled) onClick() })
+            .alpha(if (enabled) 1f else 0.45f)
     ) {
         // ── Blobs + texture (the JSX ::before/::after + cardTexture) —
         //    the big corner blobs stay, the bubbles + speckle are the
@@ -2484,7 +2535,8 @@ private fun SettingsSecondaryCardView(
             .height(104.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.linearGradient(listOf(start, end)))
-            .clickable(onClick = onClick)
+            // v3xx46 — the secondary cards share the press language.
+            .curioPressClickable(pressedScale = 0.98f, onClick = onClick)
     ) {
         // The small decorative visual, bottom-right, behind the text.
         SettingsCardVisual(
@@ -2554,13 +2606,20 @@ private fun SettingsSecondaryCardView(
  *  the new screen's chip across the page transition. */
 private const val SettingsRailActiveKey = "settings-rail-active"
 
-/** Bounds animation for the rail morph — a CALM spring so the pill is
- *  actually SEEN gliding between chips (v3xx42: the old stiffness-500
- *  spring settled in ~150ms — under half the 450ms page fade — so the
- *  tap read as the chip snapping to a solid colour, no moving highlight).
- *  0.8 / 140 settles in ~350ms, pacing the glide to the page crossfade. */
+/** The active rail chip's pill colour — painted in the chip's own layer AND
+ *  by the shared element that glides between chips (see [SettingsNavRail]). */
+private val SettingsRailAccent = Color(0xFF815947)
+
+/** Bounds animation for the rail morph — a snappy, VISIBLE glide. v3xx44:
+ *  0.9 / 320 settles in ~200ms, so the highlight lands with the tap instead
+ *  of lagging behind it (v3xx42's 0.8 / 140 took ~350ms and read as "too
+ *  slow"), while still being a real travel rather than the old stiffness-500
+ *  instant snap (~150ms, no moving highlight).
+ *  v3xx50 — CRITICALLY damped (1.0 / 420): the old 0.9 overshoot left the
+ *  pill visibly "coming to rest" after it had already arrived, which the
+ *  user read as the rail being slow. No overshoot, so it lands and STOPS. */
 private val SettingsRailBoundsTransform = BoundsTransform { _, _ ->
-    spring(dampingRatio = 0.8f, stiffness = 140f)
+    spring(dampingRatio = 1f, stiffness = 420f)
 }
 
 /**
@@ -2592,41 +2651,30 @@ internal fun SettingsNavRail(
     // on composition — the header never glides. (The old animateScrollToItem
     // re-animated from index 0 on every page open: the rail visibly jumped
     // on top of the page transition.)
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = active?.let { id ->
-            settingsNavRail.indexOfFirst { it.id == id }.takeIf { it >= 0 }
-        } ?: 0
-    )
-    // v3xx40 — CENTER the active chip (user: "keep the active scroll in
-    // middle, not always on the left side"): after the initial index lands
-    // the active chip at the row's LEFT edge, glide the row so the chip
-    // sits mid-viewport. The correction is small (≤ half the rail's width)
-    // and animates once per active change — the header stays put. Chips
-    // near either end (All Settings, Support) clamp naturally.
-    LaunchedEffect(active) {
-        if (active == null) return@LaunchedEffect
-        val idx = settingsNavRail.indexOfFirst { it.id == active }
-        if (idx < 0) return@LaunchedEffect
-        // Give the row a frame to lay out at the initial index, then SNAP the
-        // row to centre the active chip in ONE frame (v3xx42 — the old
-        // animateScrollBy glided the row for ~300ms DURING the page
-        // transition, dragging the shared-element pill's target bounds as it
-        // morphed — that's the jitter that read as "goes solid colour").
-        // scrollToItem positions the chip so its centre lands mid-viewport
-        // instantly (no LazyListState.scrollBy in this foundation), so the
-        // pill morph has stable start/end bounds; end chips clamp naturally.
-        withFrameNanos { }
-        val info = listState.layoutInfo
-        val item = info.visibleItemsInfo.firstOrNull { it.index == idx } ?: return@LaunchedEffect
-        val viewportCenter = info.viewportEndOffset / 2
-        // Only move when the chip is meaningfully off-centre (>10% of the
-        // viewport) so near-centred chips don't twitch.
-        if (kotlin.math.abs(item.offset + item.size / 2 - viewportCenter) > info.viewportEndOffset * 0.10f) {
-            // The item's top offset that puts its centre at the viewport
-            // center (scrollToItem clamps out-of-range offsets itself).
-            listState.scrollToItem(idx, (viewportCenter - item.size / 2).coerceAtLeast(0))
-        }
+    // v3xx44 — the row composes ALREADY SCROLLED to centre the active chip
+    // (v3xx40 asked for the active chip mid-viewport). The rail's geometry is
+    // fixed (82dp chips on a 7dp rhythm), so the offset can be computed up
+    // front and handed to the list as its INITIAL scroll — nothing scrolls
+    // after composition. The old post-composition `scrollToItem` correction
+    // snapped the whole header sideways one frame AFTER every section switch,
+    // right underneath the gliding highlight — that is what read as broken.
+    val railChipWidth = 82.dp
+    val railChipPitch = 89.dp
+    val railViewport = (LocalConfiguration.current.screenWidthDp.dp - 40.dp)
+        .coerceAtLeast(railChipPitch)
+    val railActiveIndex = active?.let { id -> settingsNavRail.indexOfFirst { it.id == id } } ?: -1
+    val railInitialOffset = with(LocalDensity.current) {
+        if (railActiveIndex <= 0) 0
+        // Dp arithmetic: the pitch must be the receiver (Int * Dp has no
+        // operator — Dp.times(Int) does).
+        else (railChipPitch * railActiveIndex - (railViewport - railChipWidth) / 2)
+            .coerceAtLeast(0.dp)
+            .roundToPx()
     }
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = 0,
+        initialFirstVisibleItemScrollOffset = railInitialOffset
+    )
     Column(modifier = modifier.fillMaxWidth()) {
         LazyRow(
             state = listState,
@@ -2635,50 +2683,40 @@ internal fun SettingsNavRail(
         ) {
             items(settingsNavRail, key = { it.id }) { entry ->
                 val selected = active != null && active == entry.id
+                // v3xx51 — the Pet designer chip greys out while Curie is off
+                // (the designer edits the companion, so there is nothing to
+                // design) — the whole entry is un-tappable, not just hidden.
+                val entryEnabled = settingsNavEntryEnabled(entry.id)
                 // v3xx — the ACTIVE chip's pill is a SHARED ELEMENT: every
                 // settings-family screen marks its active chip with the same
                 // key, so switching sections morphs the highlight from the
                 // old screen's chip to the new screen's chip while the pages
                 // crossfade (the iOS-style rail glide). Falls back to a plain
                 // pill when the shared scopes are absent.
+                // v3xx50 — the chip ALSO paints its own fill the instant it
+                // becomes active. The shared element is only drawn in the
+                // transition overlay (the arriving chip's own instance is
+                // hidden while the glide runs), so with a transparent chip
+                // the active label sat on the pale frosted tile — cream on
+                // near-white — until the pill landed: the reported "the text
+                // disappears for a moment on the active indicator". The
+                // layer below and the overlay are the same colour and shape,
+                // so once the glide lands they are indistinguishable.
                 val sharedScope = LocalRevealSharedScope.current
                 val visScope = LocalRevealVisibilityScope.current
                 val activeState = if (selected && sharedScope != null && visScope != null)
                     sharedScope.rememberSharedContentState(SettingsRailActiveKey)
                 else null
-                Box(
-                    modifier = Modifier
-                        .width(82.dp)
-                        .heightIn(min = 60.dp)
-                        .clip(RoundedCornerShape(17.dp))
-                        // Unselected chips keep their frosted tile; the
-                        // selected chip's pill is the shared element above.
-                        .background(
-                            if (selected) Color.Transparent
-                            else if (dark) Color.White.copy(alpha = 0.07f)
-                            else Color.White.copy(alpha = 0.62f)
-                        )
-                        .clickable { onSelect(entry) }
-                ) {
-                    if (selected) {
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .then(
-                                    if (activeState != null && sharedScope != null && visScope != null)
-                                        sharedScope.run {
-                                            Modifier.sharedElement(
-                                                activeState,
-                                                visScope,
-                                                boundsTransform = SettingsRailBoundsTransform
-                                            )
-                                        }
-                                    else Modifier
-                                )
-                                .clip(RoundedCornerShape(17.dp))
-                                .background(Color(0xFF815947))
-                        )
-                    }
+                // v3xx51 — THE FIX for "the active pill's text doesn't show
+                // while it moves": the shared element used to carry ONLY the
+                // accent fill, so while it glided (and through the settle)
+                // the opaque overlay paint sat ON TOP of the arriving chip's
+                // icon + label — the text was hidden for the whole flight.
+                // The shared element now carries the chip's COMPLETE look
+                // (fill + icon + label), so the label travels WITH the pill
+                // and is readable the entire time; it lands pixel-identical
+                // over the chip's own copy.
+                val chipContent: @Composable BoxScope.(Boolean) -> Unit = { isSelected ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -2689,20 +2727,58 @@ internal fun SettingsNavRail(
                         CurioIcon(
                             name = entry.icon,
                             contentDescription = null,
-                            tint = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isSelected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
                             size = 19.dp
                         )
                         Text(
                             text = entry.label,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                 fontSize = 10.sp
                             ),
-                            color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isSelected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center
                         )
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .width(82.dp)
+                        .heightIn(min = 60.dp)
+                        .clip(RoundedCornerShape(17.dp))
+                        // Unselected chips keep their frosted tile; the
+                        // selected chip paints the pill in its own layer (see
+                        // above) with the shared element gliding on top.
+                        .background(
+                            when {
+                                selected -> SettingsRailAccent
+                                dark -> Color.White.copy(alpha = 0.07f)
+                                else -> Color.White.copy(alpha = 0.62f)
+                            }
+                        )
+                        .clickable(enabled = entryEnabled) { onSelect(entry) }
+                        .alpha(if (entryEnabled) 1f else 0.42f)
+                ) {
+                    if (selected && activeState != null && sharedScope != null && visScope != null) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .then(
+                                    sharedScope.run {
+                                        Modifier.sharedElement(
+                                            activeState,
+                                            visScope,
+                                            boundsTransform = SettingsRailBoundsTransform
+                                        )
+                                    }
+                                )
+                                .clip(RoundedCornerShape(17.dp))
+                                .background(SettingsRailAccent)
+                        ) { chipContent(true) }
+                    } else {
+                        chipContent(selected)
                     }
                 }
             }
@@ -2801,7 +2877,8 @@ private fun SettingsQuickTools(
                             if (dark) Color.White.copy(alpha = 0.07f)
                             else Color.White.copy(alpha = 0.62f)
                         )
-                        .clickable {
+                        // v3xx46 — the quick-tool chips squish + tick too.
+                        .curioPressClickable(pressedScale = 0.96f) {
                             if (tool.page != null && tool.rowKey != null) {
                                 SettingsHighlightTarget.page = tool.page
                                 SettingsHighlightTarget.rowKey = tool.rowKey

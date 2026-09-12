@@ -8908,6 +8908,8 @@ fun TopicShareSheet(
     // Per-share state — plain remember (not Bundle-saveable): the modal
     // resets these each time it opens, and enums/ImageBitmap aren't Bundle-
     // saveable by default (crash on onSaveInstanceState).
+    // v3xx51 — the shared one-tick haptic for this sheet's switches.
+    val tick = rememberCurioControlTick()
     // v3xx — 3:4 (CLASSIC) is the default aspect; the aspect tool toggles.
     var aspect by remember { mutableStateOf(ShareCardAspect.CLASSIC) }
     var selectedId by remember { mutableStateOf<String?>(null) }
@@ -11200,7 +11202,7 @@ fun TopicShareSheet(
                                                     Text("Show on card", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
                                                     Switch(
                                                         checked = move.polaroidOnCard,
-                                                        onCheckedChange = { on -> updateMove(move.copy(polaroidOnCard = on)) }
+                                                        onCheckedChange = { on -> tick { updateMove(move.copy(polaroidOnCard = on)) } }
                                                     )
                                                 }
                                                 Spacer(Modifier.height(12.dp))
@@ -11471,17 +11473,19 @@ fun TopicShareSheet(
                                 Switch(
                                     checked = AppPreferences.shareAutoFitState,
                                     onCheckedChange = { on ->
-                                        AppPreferences.setShareAutoFitEnabled(context, on)
-                                        // v379e — switching ON again re-fits the
-                                        // box: clear any manual box + fit-seed so
-                                        // the render-time fit re-engages ("it
-                                        // fixes the box"). Manual position stays.
-                                        if (on) updateMove(move.copy(
-                                            factWidthFrac = 1f,
-                                            factHeightFrac = 1f,
-                                            factScale = 1f,
-                                            factBoxScale = 1f
-                                        ))
+                                        tick {
+                                            AppPreferences.setShareAutoFitEnabled(context, on)
+                                            // v379e — switching ON again re-fits the
+                                            // box: clear any manual box + fit-seed so
+                                            // the render-time fit re-engages ("it
+                                            // fixes the box"). Manual position stays.
+                                            if (on) updateMove(move.copy(
+                                                factWidthFrac = 1f,
+                                                factHeightFrac = 1f,
+                                                factScale = 1f,
+                                                factBoxScale = 1f
+                                            ))
+                                        }
                                     }
                                 )
                             }
@@ -11951,7 +11955,7 @@ fun TopicShareSheet(
                                     Text("Show on card", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
                                     Switch(
                                         checked = move.polaroidOnCard,
-                                        onCheckedChange = { on -> updateMove(move.copy(polaroidOnCard = on)) }
+                                        onCheckedChange = { on -> tick { updateMove(move.copy(polaroidOnCard = on)) } }
                                     )
                                 }
                             }
@@ -12189,7 +12193,7 @@ fun TopicShareSheet(
                                     }
                                     Switch(
                                         checked = includeLink,
-                                        onCheckedChange = { includeLink = it }
+                                        onCheckedChange = { tick { includeLink = it } }
                                     )
                                 }
                                 if (includeLink) {

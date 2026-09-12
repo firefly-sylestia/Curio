@@ -32,7 +32,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -141,9 +143,13 @@ fun AudioQualityDialog(
 }
 
 /**
- * v19 — single-choice picker for the explore search engine (Settings →
- * Notifications → Search engine). Mirrors [AudioQualityDialog]'s styling so
- * the picker feels native to the settings section.
+ * v19/v3xx51 — single-choice picker for the explore search engine
+ * (Preferences → Search engine). v3xx51 — it is a BOTTOM SHEET now, matching
+ * the settings sheet language ([OfflineModelDialog]): rounded 28dp top, the
+ * settings dialog container, a drag handle, the title + explanation in the
+ * section's own type scale, and the same solid-fill selection rows. The
+ * sheet dismisses by swipe / back / a pick (never a close cross, per the
+ * app-wide bottom-sheet rule).
  */
 @Composable
 fun SearchEngineDialog(
@@ -151,72 +157,28 @@ fun SearchEngineDialog(
     onDismiss: () -> Unit,
     onSelected: (SearchEngine) -> Unit
 ) {
-    AlertDialog(
-        containerColor = curioDialogContainerColor(),
-        shape = CurioDialogShape,
-        onDismissRequest = onDismiss,
-        title = { Text("Search engine", fontWeight = FontWeight.ExtraBold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    "Which search engine the \"Explore in browser\" button searches with.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+    SettingsChoiceSheet(
+        title = "Search engine",
+        subtitle = "Which engine the \"Explore in browser\" button searches with.",
+        onDismiss = onDismiss,
+        content = { pick ->
+            SearchEngine.entries.forEach { engine ->
+                val selected = engine == current
+                SettingsChoiceRow(
+                    selected = selected,
+                    title = engine.displayName,
+                    subtitle = engine.description,
+                    onClick = { pick { onSelected(engine) } }
                 )
-                SearchEngine.entries.forEach { engine ->
-                    val selected = engine == current
-                    Surface(
-                        onClick = { onSelected(engine) },
-                        shape = RoundedCornerShape(16.dp),
-                        // v27q — see the audio-quality rows above: solid
-                        // action fill, flat 2dp shadow behind every row.
-                        color = if (selected) curioDialogActionColor()
-                                else MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = if (selected) dialogRowSelectedInk()
-                                       else MaterialTheme.colorScheme.onSurface,
-                        shadowElevation = 2.dp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            // v28 — dark mode elevation visibility.
-                            .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            RadioButton(
-                                selected = selected,
-                                onClick = null,
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = if (selected) dialogRowSelectedInk()
-                                                   else curioDialogActionColor()
-                                )
-                            )
-                            Column {
-                                Text(engine.displayName, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
-                                Text(
-                                    engine.description,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (selected) dialogRowSelectedInk().copy(alpha = 0.8f)
-                                           else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close", fontWeight = FontWeight.Bold) }
         }
     )
 }
 
 /**
- * v27s — single-choice picker for the explore music service (Settings →
- * Notifications → Music service). Mirrors [SearchEngineDialog]'s styling so
- * the picker feels native to the settings section.
+ * v27s/v3xx51 — single-choice picker for the explore music service
+ * (Preferences → Music service), now the same bottom sheet as the search
+ * engine picker above.
  */
 @Composable
 fun MusicServiceDialog(
@@ -224,70 +186,147 @@ fun MusicServiceDialog(
     onDismiss: () -> Unit,
     onSelected: (MusicService) -> Unit
 ) {
-    AlertDialog(
-        containerColor = curioDialogContainerColor(),
-        shape = CurioDialogShape,
-        onDismissRequest = onDismiss,
-        title = { Text("Music service", fontWeight = FontWeight.ExtraBold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    // v109 — the pill says "Listen in" for audio services
-                    // (Apple Music / Spotify / YouTube Music) and "Watch in"
-                    // for YouTube, so the subtitle stays neutral.
-                    "Which streaming service opens albums, artists and songs from the explore dialog.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+    SettingsChoiceSheet(
+        title = "Music service",
+        // v109 — the pill says "Listen in" for audio services (Apple Music /
+        // Spotify / YouTube Music) and "Watch in" for YouTube, so the
+        // subtitle stays neutral.
+        subtitle = "Which streaming service opens albums, artists and songs from the explore dialog.",
+        onDismiss = onDismiss,
+        content = { pick ->
+            MusicService.entries.forEach { service ->
+                val selected = service == current
+                SettingsChoiceRow(
+                    selected = selected,
+                    title = service.displayName,
+                    subtitle = service.description,
+                    // v106 — the service's brand logo (keeps its own brand
+                    // colors; never tinted).
+                    leading = {
+                        Image(
+                            painter = painterResource(service.brandRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    },
+                    onClick = { pick { onSelected(service) } }
                 )
-                MusicService.entries.forEach { service ->
-                    val selected = service == current
-                    Surface(
-                        onClick = { onSelected(service) },
-                        shape = RoundedCornerShape(16.dp),
-                        // v27q — see the audio-quality rows above: solid
-                        // action fill, flat 2dp shadow behind every row.
-                        color = if (selected) curioDialogActionColor()
-                                else MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = if (selected) dialogRowSelectedInk()
-                                       else MaterialTheme.colorScheme.onSurface,
-                        shadowElevation = 2.dp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            // v28 — dark mode elevation visibility.
-                            .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            // v106 — the service's brand logo (keeps its own
-                            // brand colors; never tinted).
-                            Image(
-                                painter = painterResource(service.brandRes),
-                                contentDescription = null,
-                                modifier = Modifier.size(26.dp)
-                            )
-                            // v109 — no radio indicator: selection reads
-                            // through the row's solid fill (v27q) alone.
-                            Column {
-                                Text(service.displayName, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
-                                Text(
-                                    service.description,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (selected) dialogRowSelectedInk().copy(alpha = 0.8f)
-                                           else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close", fontWeight = FontWeight.Bold) }
         }
     )
+}
+
+/**
+ * v3xx51 — the shared settings CHOICE SHEET shell: a settings-styled
+ * ModalBottomSheet (same container / handle / 28dp top corners as the offline
+ * model picker, and the same content max width so tablets don't stretch it).
+ * [content] receives a `pick` function that swaps the sheet's OWN
+ * `onDismiss` for a swipe-down-animated close, so tapping a choice glides the
+ * sheet away instead of popping it out of composition.
+ */
+@Composable
+private fun SettingsChoiceSheet(
+    title: String,
+    subtitle: String,
+    onDismiss: () -> Unit,
+    content: @Composable (pick: (action: () -> Unit) -> Unit) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    val pick: (action: () -> Unit) -> Unit = { action ->
+        action()
+        scope.launch { sheetState.hide() }.invokeOnCompletion {
+            if (!sheetState.isVisible) onDismiss()
+        }
+    }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = curioDialogContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = CurioContentMaxWidth)
+                .padding(bottom = 18.dp)
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 2.dp)
+            )
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                content(pick)
+            }
+        }
+    }
+}
+
+/** One row of a [SettingsChoiceSheet] — the settings selection language:
+ *  solid action fill when chosen, opaque surface otherwise, flat 2dp lift. */
+@Composable
+private fun SettingsChoiceRow(
+    selected: Boolean,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    leading: (@Composable () -> Unit)? = null
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) curioDialogActionColor()
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = if (selected) dialogRowSelectedInk()
+                       else MaterialTheme.colorScheme.onSurface,
+        shadowElevation = 2.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            // v28 — dark mode elevation visibility.
+            .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            if (leading != null) {
+                leading()
+            } else {
+                RadioButton(
+                    selected = selected,
+                    onClick = null,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = if (selected) dialogRowSelectedInk()
+                                       else curioDialogActionColor()
+                    )
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (selected) dialogRowSelectedInk().copy(alpha = 0.8f)
+                           else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
 }
 
 /**

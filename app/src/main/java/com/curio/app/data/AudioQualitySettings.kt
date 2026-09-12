@@ -6,7 +6,8 @@ import android.content.SharedPreferences
 /**
  * Audio recording quality level — controls sampling rate and bitrate.
  *
- * Stored in SharedPreferences. Default: MEDIUM.
+ * Stored in SharedPreferences. Default: HIGH (v3xx51 — voice notes record at
+ * the best quality out of the box; the picker still offers Low/Medium).
  */
 enum class AudioQuality(
     val label: String,
@@ -49,10 +50,10 @@ object AudioQualitySettings {
     private fun prefs(context: Context): SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    /** Returns the stored quality level (default: MEDIUM). */
+    /** Returns the stored quality level (default: HIGH). */
     fun get(context: Context): AudioQuality {
-        val ordinal = prefs(context).getInt(KEY_QUALITY, AudioQuality.MEDIUM.ordinal)
-        return AudioQuality.entries.getOrElse(ordinal) { AudioQuality.MEDIUM }
+        val ordinal = prefs(context).getInt(KEY_QUALITY, AudioQuality.HIGH.ordinal)
+        return AudioQuality.entries.getOrElse(ordinal) { AudioQuality.HIGH }
     }
 
     /** Persist a new quality level. */

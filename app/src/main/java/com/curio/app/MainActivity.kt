@@ -208,7 +208,8 @@ class MainActivity : ComponentActivity() {
         if (AppPreferences.isReminderEnabled(this)) {
             com.curio.app.data.DailyReminderScheduler.schedule(
                 this,
-                AppPreferences.getReminderHour(this)
+                AppPreferences.getReminderHour(this),
+                AppPreferences.getReminderMinute(this)
             )
         }
         setContent {

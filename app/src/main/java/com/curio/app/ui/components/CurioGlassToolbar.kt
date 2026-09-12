@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -126,14 +128,18 @@ fun CurioGlassToolbar(
             .background(container.copy(alpha = 0.96f))
     }
 
+    // v3xx43 — the glass runs all the way to the TOP: the status-bar inset is
+    // applied to the BAR'S CONTENT instead of to the bar itself, so the
+    // capsule fills the status-bar strip rather than starting below it (the
+    // reported gap above the header).
     Column(
         modifier = glassMod
             .fillMaxWidth()
-            .statusBarsPadding()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -325,6 +331,10 @@ fun CurioGlassToolbarMorph(
     val ink = MaterialTheme.colorScheme.onSurface
     val eased = FastOutSlowInEasing.transform(progress.coerceIn(0f, 1f))
     val compactH = with(LocalDensity.current) { compactHeight.toPx() }
+    // v3xx43 — the status-bar strip belongs to the BAR (it fills it), so the
+    // collapsed height is the compact row PLUS that inset. Without this the
+    // collapsed bar would clip its own compact row out of view.
+    val statusTopPx = WindowInsets.statusBars.getTop(LocalDensity.current).toFloat()
     // Measured once from the full column's natural height (reported through
     // [Modifier.layout] below) — drives the fade-out rise so the full
     // content lifts as it collapses instead of just clipping.
@@ -414,16 +424,30 @@ fun CurioGlassToolbarMorph(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .statusBarsPadding()
             // Measure the content once at its natural height, then REPORT
             // the animated (collapsed) height — the clip below trims the
-            // overflow so the bar visibly shrinks with the scroll.
+            // overflow so the bar visibly shrinks with the scroll. The
+            // status-bar strip lives INSIDE the measured height (the rows pad
+            // themselves), so the glass fills it (v3xx43).
+            // v3xx48 — CLIP FIRST, then report the animated height. The clip
+            // has to wrap the size-reporting layout node: placed inside it,
+            // the clip measured against the CONTENT's natural height and did
+            // nothing, so the glass kept painting its full hero height while
+            // only the reported height shrank — the reported "the glass
+            // extended area stays in its initial size where the stats were".
+            // Outside it, the clip is exactly the animated height (from y=0,
+            // so the status-bar strip stays covered), which is what trims the
+            // full content out of view as the bar collapses.
+            .clipToBounds()
             .layout { measurable, constraints ->
                 val full = measurable.measure(constraints)
-                val targetH = androidx.compose.ui.util.lerp(full.height.toFloat(), compactH, eased).toInt().coerceAtLeast(1)
+                val targetH = androidx.compose.ui.util.lerp(
+                    full.height.toFloat(),
+                    compactH + statusTopPx,
+                    eased
+                ).toInt().coerceAtLeast(1)
                 layout(full.width, targetH) { full.place(0, 0) }
             }
-            .clipToBounds()
             .then(glassMod)
     ) {
         // ── FULL state — fades out + rises as the bar collapses. More
@@ -439,6 +463,7 @@ fun CurioGlassToolbarMorph(
                     alpha = 1f - eased
                     translationY = -eased * ((fullH - compactH).coerceAtLeast(0f)) * 0.4f
                 }
+                .statusBarsPadding()
         ) {
             Row(
                 modifier = Modifier
@@ -517,6 +542,7 @@ fun CurioGlassToolbarMorph(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .height(compactHeight)
                 .padding(start = 12.dp, end = 12.dp)
                 .graphicsLayer { alpha = eased },
