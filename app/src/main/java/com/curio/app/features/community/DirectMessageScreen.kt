@@ -177,6 +177,13 @@ fun DirectMessageScreen(
         SocialApi.messages(active, otherUserId, me).fold(
             onSuccess = { raw ->
                 val conversationId = dmConversationId(me, otherUserId)
+                val identity = CurioDmCrypto.identity(context)
+                SocialApi.publishDmIdentity(active, identity, me)
+                if (!CurioDmCrypto.hasConversationKey(context, conversationId)) {
+                    SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()?.let {
+                        CurioDmCrypto.ensureConversationKey(context, conversationId, it)
+                    }
+                }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
                     else runCatching {
@@ -255,8 +262,16 @@ fun DirectMessageScreen(
         pending = pending + optimistic
         draft = ""
 
+        val conversationId = dmConversationId(me, otherUserId)
         val encrypted = runCatching {
-            CurioDmCrypto.encrypt(context, dmConversationId(me, otherUserId), text)
+            val mine = CurioDmCrypto.identity(context)
+            SocialApi.publishDmIdentity(active, mine, me)
+            val key = CurioDmCrypto.conversationKey(context, conversationId)
+            SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow().forEach { peer ->
+                SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer)).getOrThrow()
+            }
+            SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine)).getOrThrow()
+            CurioDmCrypto.encrypt(context, conversationId, text)
         }.getOrElse {
             pending = pending.filterNot { it.id == optimistic.id }
             draft = text

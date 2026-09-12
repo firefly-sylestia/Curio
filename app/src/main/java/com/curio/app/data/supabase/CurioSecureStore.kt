@@ -120,6 +120,41 @@ internal object CurioSecureStore {
         }.getOrNull()
     }
 
+    /**
+     * Stores a device identifier and an RSA identity keypair in the Android
+     * Keystore. The private key is non-exportable; only the public key leaves
+     * the device.
+     */
+    fun deviceId(context: Context): String? = get(context, "dm-device-id")
+
+    fun ensureDeviceId(context: Context): String {
+        deviceId(context)?.let { return it }
+        val value = java.util.UUID.randomUUID().toString()
+        check(put(context, "dm-device-id", value)) { "Secure storage unavailable." }
+        return value
+    }
+
+    fun identityKeyPair(): java.security.KeyPair {
+        val alias = "curio_dm_identity"
+        val store = KeyStore.getInstance(KEYSTORE).apply { load(null) }
+        val existing = store.getEntry(alias, null)
+        if (existing is KeyStore.PrivateKeyEntry) {
+            return java.security.KeyPair(existing.certificate.publicKey, existing.privateKey)
+        }
+        val generator = java.security.KeyPairGenerator.getInstance("RSA", KEYSTORE)
+        generator.initialize(
+            android.security.keystore.KeyGenParameterSpec.Builder(
+                alias,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            )
+                .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+                .setUserAuthenticationRequired(false)
+                .build()
+        )
+        return generator.generateKeyPair()
+    }
+
     /** Forgets every sealed value AND the key that opened them. */
     fun wipe(context: Context) {
         runCatching { prefs(context).edit().clear().apply() }
