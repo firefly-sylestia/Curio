@@ -744,10 +744,13 @@ create policy dm_update_receipt on public.dm_messages
     using (recipient = auth.uid())
     with check (recipient = auth.uid());
 
+-- A direct-message deletion is a recall for the two participants, not a
+-- sender-only local hide. The participant check keeps unrelated accounts out.
 drop policy if exists dm_delete_own on public.dm_messages;
-create policy dm_delete_own on public.dm_messages
+drop policy if exists dm_delete_participant on public.dm_messages;
+create policy dm_delete_participant on public.dm_messages
     for delete to authenticated
-    using (sender = auth.uid());
+    using (sender = auth.uid() or recipient = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5e. dm_typing — "is typing…", one row per (sender, recipient) pair

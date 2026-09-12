@@ -901,7 +901,7 @@ private const val PERSON_COLUMNS_PRIVACY =
         }
     }
 
-    /** Deletes one of your own messages. */
+    /** Recalls one message for both participants. Server RLS verifies membership. */
     suspend fun deleteMessage(accessToken: String, messageId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
@@ -912,6 +912,21 @@ private const val PERSON_COLUMNS_PRIVACY =
                 SupabaseClient.executeBody(request)
             }
         }
+
+    /** Deletes every message in this two-person thread for both participants. */
+    suspend fun clearConversation(
+        accessToken: String,
+        otherUserId: String,
+        myUserId: String
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val other = id(otherUserId)
+            val mine = id(myUserId)
+            val path = "$MESSAGES?or=(and(sender.eq.$mine,recipient.eq.$other),and(sender.eq.$other,recipient.eq.$mine))"
+            val request = SupabaseClient.requestBuilder(path, accessToken).delete().build()
+            SupabaseClient.executeBody(request)
+        }
+    }
 
     // ── typing ───────────────────────────────────────────────────────────
 
