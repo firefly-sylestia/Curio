@@ -126,6 +126,27 @@ object SocialApi {
         mapped { namesOf(accessToken, ids.toList()) }
     }
 
+    /** Saves a normalized handle; the unique index turns duplicates into a safe failure. */
+    suspend fun updateUsername(accessToken: String, username: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val normalized = username.trim().removePrefix("@").lowercase()
+                require(normalized.matches(Regex("[a-z0-9_]{3,24}"))) {
+                    "Username must be 3–24 characters using letters, numbers, or underscores."
+                }
+                val userId = SupabaseClient.userIdFromAccessToken(accessToken)
+                val body = JSONObject().put("username", normalized)
+                val request = SupabaseClient.requestBuilder(
+                    "$PROFILES?id=eq.$userId",
+                    accessToken
+                )
+                    .patch(body.toString().toRequestBody(jsonMediaType))
+                    .header("Prefer", "return=minimal")
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
     // ── friend requests ──────────────────────────────────────────────────
 
     /** Every pending request, incoming and outgoing, newest first. */
