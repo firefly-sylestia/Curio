@@ -41,7 +41,15 @@ internal object CurioSecureStore {
     private const val TAG = "CurioSecureStore"
     private const val KEYSTORE = "AndroidKeyStore"
     private const val KEY_ALIAS = "curio_session_vault"
+    // v2 intentionally bypasses aliases left invalid by older app builds or restores.
+    private const val DM_KEY_ALIAS = "curio_dm_vault_v2"
+    private const val DM_IDENTITY_ALIAS = "curio_dm_identity_v2"
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
+    private const val DM_NAME_PREFIX = "dm-"
+
+    private fun keyFor(name: String): SecretKey = key(
+        if (name.startsWith(DM_NAME_PREFIX) || name == "dm-device-id") DM_KEY_ALIAS else KEY_ALIAS
+    )
     private const val GCM_TAG_BITS = 128
 
     /**
@@ -57,14 +65,28 @@ internal object CurioSecureStore {
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     /** The vault's key, created on first use. */
-    private fun key(): SecretKey {
+    private fun key(alias: String = KEY_ALIAS): SecretKey {
         val store = KeyStore.getInstance(KEYSTORE).apply { load(null) }
-        val existing = store.getEntry(KEY_ALIAS, null)
-        if (existing is KeyStore.SecretKeyEntry) return existing.secretKey
+        val existing = try {
+            store.getEntry(alias, null)
+        } catch (_: Exception) {
+            runCatching { store.deleteEntry(alias) }
+            null
+        }
+        if (existing is KeyStore.SecretKeyEntry) {
+            return runCatching { existing.secretKey }.getOrElse {
+                runCatching { store.deleteEntry(alias) }
+                generateKey(alias)
+            }
+        }
+        return generateKey(alias)
+    }
+
+    private fun generateKey(alias: String): SecretKey {
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
         generator.init(
             KeyGenParameterSpec.Builder(
-                KEY_ALIAS,
+                alias,
                 KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
             )
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -88,21 +110,30 @@ internal object CurioSecureStore {
             runCatching { prefs(context).edit().remove(name).apply() }
             return true
         }
-        return runCatching {
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-                .apply { init(Cipher.ENCRYPT_MODE, key()) }
-            val iv = Base64.encodeToString(cipher.iv, Base64.NO_WRAP)
-            val body = Base64.encodeToString(
-                cipher.doFinal(value.toByteArray(Charsets.UTF_8)),
-                Base64.NO_WRAP
-            )
-            prefs(context).edit().putString(name, "$iv:$body").apply()
-            true
-        }.getOrElse { failure ->
+        val sealed = runCatching { seal(context, name, value) }.recoverCatching { failure ->
+            if (!name.startsWith(DM_NAME_PREFIX) && name != "dm-device-id") throw failure
+            runCatching {
+                KeyStore.getInstance(KEYSTORE).apply { load(null) }.deleteEntry(DM_KEY_ALIAS)
+            }
+            seal(context, name, value)
+        }
+        return sealed.getOrElse { failure ->
             // Never log the value; the failure itself is what matters.
             Log.w(TAG, "Could not seal a stored value", failure)
             false
         }
+    }
+
+    private fun seal(context: Context, name: String, value: String): Boolean {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+            .apply { init(Cipher.ENCRYPT_MODE, keyFor(name)) }
+        val iv = Base64.encodeToString(cipher.iv, Base64.NO_WRAP)
+        val body = Base64.encodeToString(
+            cipher.doFinal(value.toByteArray(Charsets.UTF_8)),
+            Base64.NO_WRAP
+        )
+        prefs(context).edit().putString(name, "$iv:$body").apply()
+        return true
     }
 
     /** The sealed value, or null when it is absent, expired or tampered with. */
@@ -114,7 +145,7 @@ internal object CurioSecureStore {
             val iv = Base64.decode(sealed.substring(0, split), Base64.NO_WRAP)
             val body = Base64.decode(sealed.substring(split + 1), Base64.NO_WRAP)
             val cipher = Cipher.getInstance(TRANSFORMATION).apply {
-                init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(GCM_TAG_BITS, iv))
+                init(Cipher.DECRYPT_MODE, keyFor(name), GCMParameterSpec(GCM_TAG_BITS, iv))
             }
             String(cipher.doFinal(body), Charsets.UTF_8)
         }.getOrNull()
@@ -130,17 +161,51 @@ internal object CurioSecureStore {
     fun ensureDeviceId(context: Context): String {
         deviceId(context)?.let { return it }
         val value = java.util.UUID.randomUUID().toString()
-        check(put(context, "dm-device-id", value)) { "Secure storage unavailable." }
+        if (!put(context, "dm-device-id", value)) {
+            resetDmStorage(context)
+            check(put(context, "dm-device-id", value)) { "Secure storage unavailable." }
+        }
         return value
     }
 
-    fun identityKeyPair(): java.security.KeyPair {
-        val alias = "curio_dm_identity"
-        val store = KeyStore.getInstance(KEYSTORE).apply { load(null) }
-        val existing = store.getEntry(alias, null)
-        if (existing is KeyStore.PrivateKeyEntry) {
-            return java.security.KeyPair(existing.certificate.publicKey, existing.privateKey)
+    /** Clears only recoverable DM material when Android Keystore invalidates it. */
+    fun resetDmStorage(context: Context) {
+        runCatching {
+            prefs(context).edit()
+                .remove("dm-device-id")
+                .apply()
         }
+        runCatching {
+            KeyStore.getInstance(KEYSTORE).apply { load(null) }.also { store ->
+                runCatching { store.deleteEntry(DM_KEY_ALIAS) }
+                runCatching { store.deleteEntry(DM_IDENTITY_ALIAS) }
+                runCatching { store.deleteEntry("curio_dm_vault") }
+                runCatching { store.deleteEntry("curio_dm_identity") }
+            }
+        }
+    }
+
+    fun identityKeyPair(): java.security.KeyPair {
+        val alias = DM_IDENTITY_ALIAS
+        val store = KeyStore.getInstance(KEYSTORE).apply { load(null) }
+        val existing = try {
+            store.getEntry(alias, null)
+        } catch (_: Exception) {
+            runCatching { store.deleteEntry(alias) }
+            null
+        }
+        if (existing is KeyStore.PrivateKeyEntry) {
+            return runCatching {
+                java.security.KeyPair(existing.certificate.publicKey, existing.privateKey)
+            }.getOrElse {
+                runCatching { store.deleteEntry(alias) }
+                return generateIdentityKeyPair(alias)
+            }
+        }
+        return generateIdentityKeyPair(alias)
+    }
+
+    private fun generateIdentityKeyPair(alias: String): java.security.KeyPair {
         val generator = java.security.KeyPairGenerator.getInstance("RSA", KEYSTORE)
         generator.initialize(
             android.security.keystore.KeyGenParameterSpec.Builder(

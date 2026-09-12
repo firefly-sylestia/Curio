@@ -449,7 +449,7 @@ fun CommunityScreen(navController: NavController) {
                                 val call = if (card.likedByMe && userId != null) {
                                     CommunityApi.unlike(active, card.id, userId)
                                 } else {
-                                    CommunityApi.like(active, card.id)
+                                    CommunityApi.like(active, card.id, userId ?: return@launch)
                                 }
                                 call.fold(
                                     onSuccess = { load() },
@@ -464,7 +464,7 @@ fun CommunityScreen(navController: NavController) {
                                 val call = if (card.dislikedByMe && userId != null) {
                                     CommunityApi.undislike(active, card.id, userId)
                                 } else {
-                                    CommunityApi.dislike(active, card.id)
+                                    CommunityApi.dislike(active, card.id, userId ?: return@launch)
                                 }
                                 call.fold(
                                     onSuccess = { load() },

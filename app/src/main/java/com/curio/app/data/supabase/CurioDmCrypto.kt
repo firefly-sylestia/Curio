@@ -25,11 +25,20 @@ object CurioDmCrypto {
     private const val TAG_BITS = 128
 
     fun identity(context: Context): CurioDmIdentity {
-        val pair = CurioSecureStore.identityKeyPair()
-        return CurioDmIdentity(
-            CurioSecureStore.ensureDeviceId(context),
-            b64(pair.public.encoded)
-        )
+        return runCatching {
+            val pair = CurioSecureStore.identityKeyPair()
+            CurioDmIdentity(
+                CurioSecureStore.ensureDeviceId(context),
+                b64(pair.public.encoded)
+            )
+        }.getOrElse {
+            CurioSecureStore.resetDmStorage(context)
+            val pair = CurioSecureStore.identityKeyPair()
+            CurioDmIdentity(
+                CurioSecureStore.ensureDeviceId(context),
+                b64(pair.public.encoded)
+            )
+        }
     }
 
     fun wrapConversationKey(conversationKey: ByteArray, recipient: CurioDmIdentity, keyVersion: Int = 1): CurioDmEnvelope {
@@ -55,8 +64,12 @@ object CurioDmCrypto {
         if (envelope != null) {
             val key = unwrapConversationKey(envelope)
             check(key.size == KEY_BYTES) { "Invalid conversation key." }
-            check(CurioSecureStore.put(context, KEY_PREFIX + conversationId, b64(key))) { "Secure storage unavailable." }
-            return key
+  val stored = CurioSecureStore.put(context, KEY_PREFIX + conversationId, b64(key))
+  if (!stored) {
+  CurioSecureStore.resetDmStorage(context)
+  check(CurioSecureStore.put(context, KEY_PREFIX + conversationId, b64(key))) { "Secure storage unavailable." }
+  }
+  return key
         }
         CurioSecureStore.get(context, KEY_PREFIX + conversationId)?.let { return Base64.decode(it, Base64.NO_WRAP) }
         val key = ByteArray(KEY_BYTES).also(SecureRandom()::nextBytes)

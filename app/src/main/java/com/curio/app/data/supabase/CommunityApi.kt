@@ -194,7 +194,7 @@ object CommunityApi {
     private const val CARD_COLUMNS =
         "id,owner,author_handle,kind,topic_name,category_name,category_glyph,accent_hex," +
             "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at," +
-            "community_reactions(user_id),community_comments(id)"
+            "community_reactions(user_id,kind),community_comments(id)"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     /** The server's own ceiling for a card's text (also a DB check constraint). */
@@ -412,11 +412,14 @@ object CommunityApi {
     }
 
     /** Idempotent like — reacting twice leaves one reaction. */
-    suspend fun like(accessToken: String, cardId: String): Result<Unit> =
+    suspend fun like(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
-                val payload = JSONObject().put("card_id", cardId).put("kind", "like")
-                val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
+                val payload = JSONObject()
+                    .put("card_id", cardId)
+                    .put("user_id", myUserId)
+                    .put("kind", "like")
+                val request = SupabaseClient.requestBuilder("$REACTIONS?on_conflict=card_id%2Cuser_id", accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
                     .post(payload.toString().toRequestBody(jsonMediaType))
                     .build()
@@ -435,11 +438,14 @@ object CommunityApi {
             }
         }
 
-    suspend fun dislike(accessToken: String, cardId: String): Result<Unit> =
+    suspend fun dislike(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
-                val payload = JSONObject().put("card_id", cardId).put("kind", "dislike")
-                val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
+                val payload = JSONObject()
+                    .put("card_id", cardId)
+                    .put("user_id", myUserId)
+                    .put("kind", "dislike")
+                val request = SupabaseClient.requestBuilder("$REACTIONS?on_conflict=card_id%2Cuser_id", accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
                     .post(payload.toString().toRequestBody(jsonMediaType))
                     .build()
@@ -543,6 +549,8 @@ object CommunityApi {
                 expiresAtMillis = epochMillis(row.optString("expires_at")),
                 likeCount = likes,
                 likedByMe = likedByMe,
+                dislikeCount = dislikes,
+                dislikedByMe = dislikedByMe,
                 commentCount = row.optJSONArray("community_comments")?.length() ?: 0,
                 mine = myUserId != null && owner == myUserId
             )

@@ -21,9 +21,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -102,6 +104,7 @@ internal fun CurioAuthCard(
     var localProblem by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
     var termsAccepted by remember { mutableStateOf(AppPreferences.hasAcceptedCurrentTerms(context)) }
+    var showTerms by remember { mutableStateOf(false) }
 
     // A mode switch is a fresh start: clear the local problem and the second
     // password so a stale complaint never sits under a different form.
@@ -179,27 +182,20 @@ internal fun CurioAuthCard(
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { termsAccepted = !termsAccepted },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = termsAccepted,
-                onCheckedChange = { termsAccepted = it }
-            )
-            Text(
-                text = "I agree to Curio's Terms and understand the data disclosures",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+        TermsAcceptanceRow(
+            accepted = termsAccepted,
+            onRequest = { showTerms = true }
+        )
+        if (showTerms) {
+            CurioTermsDialog(
+                onDismiss = { showTerms = false },
+                onAccept = {
+                    termsAccepted = true
+                    AppPreferences.acceptCurrentTerms(context)
+                    showTerms = false
+                }
             )
         }
-        Text(
-            text = "Direct messages are encrypted on your devices. Only encrypted message data and metadata are stored online; community posts and comments are not end-to-end encrypted.",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
 
         // ── One primary action, labelled by the mode ─────────────────────
         Button(
@@ -301,6 +297,7 @@ internal fun CurioAccountIdentityCard(
     var nameAnswer by remember { mutableStateOf<String?>(null) }
     var nameFailed by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(AppPreferences.hasAcceptedCurrentTerms(context)) }
+    var showTerms by remember { mutableStateOf(false) }
 
     // What the field would accept right now — the SAME rule the server
     // enforces, stated before the user presses anything.
@@ -332,8 +329,7 @@ internal fun CurioAccountIdentityCard(
         // the handle is chosen — so it is said here, once, instead of leaving
         // the two fields to look like duplicates of each other.
         Text(
-            text = "Your name (above) is what people read first. This handle is how they find " +
-                "and mention you — it must be unique.",
+            text = "Choose a unique username so friends can find and mention you.",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -350,7 +346,7 @@ internal fun CurioAccountIdentityCard(
             }
         )
 
-        // ── ALWAYS an answer. ────────────────────────────────────────────
+        // ── ALWAYS an answer. ───────────────────────────────────────────��
         // The old field could sit there with a dead Save button and no reason
         // given, which is exactly how "saving does nothing" feels. There is
         // now one line under the field in every state: the rule being broken,
@@ -374,20 +370,18 @@ internal fun CurioAccountIdentityCard(
             color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
         )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { termsAccepted = !termsAccepted },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = termsAccepted,
-                onCheckedChange = { termsAccepted = it }
-            )
-            Text(
-                text = "I agree to Curio's Terms and data disclosures",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+        TermsAcceptanceRow(
+            accepted = termsAccepted,
+            onRequest = { showTerms = true }
+        )
+        if (showTerms) {
+            CurioTermsDialog(
+                onDismiss = { showTerms = false },
+                onAccept = {
+                    termsAccepted = true
+                    AppPreferences.acceptCurrentTerms(context)
+                    showTerms = false
+                }
             )
         }
 
@@ -497,6 +491,56 @@ internal fun CurioAccountIdentityCard(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+@Composable
+private fun TermsAcceptanceRow(
+    accepted: Boolean,
+    onRequest: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onRequest),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (!accepted) {
+            Checkbox(
+                checked = false,
+                onCheckedChange = { if (it) onRequest() }
+            )
+        }
+        Text(
+            text = if (accepted) "Terms and data disclosures accepted · View" else "Review Curio's Terms and data disclosures",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+private fun CurioTermsDialog(
+    onDismiss: () -> Unit,
+    onAccept: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Curio terms and disclosures") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("Curio stores your account details, profile information, posts, comments and reactions to provide the service.")
+                Text("Direct messages are encrypted on your devices. Message plaintext and private keys are not uploaded; encrypted message data and delivery metadata are stored so messages can sync between your devices.")
+                Text("Community posts and comments are not end-to-end encrypted. Do not share sensitive information there.")
+                Text("You can review these disclosures again from this screen at any time.")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onAccept) { Text("Accept") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Not now") }
+        }
+    )
 }
 
 /** One of the two auth modes — a filled pill for the active one. */

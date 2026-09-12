@@ -318,10 +318,16 @@ create policy reac_insert_own on public.community_reactions
         )
     );
 
+drop policy if exists reac_update_own on public.community_reactions;
+create policy reac_update_own on public.community_reactions
+  for update to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
 drop policy if exists reac_delete_own on public.community_reactions;
 create policy reac_delete_own on public.community_reactions
-    for delete to authenticated
-    using (user_id = auth.uid());
+  for delete to authenticated
+  using (user_id = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 4b. community_comments — the replies under a card
@@ -597,10 +603,15 @@ create policy dm_device_keys_select_participant on public.dm_device_keys
   for select to authenticated using (
     user_id = auth.uid() or public.curio_are_friends(auth.uid(), user_id)
   );
+drop policy if exists dm_device_keys_own on public.dm_device_keys;
 create policy dm_device_keys_own on public.dm_device_keys
   for insert to authenticated with check (user_id = auth.uid());
+
+drop policy if exists dm_device_keys_update_own on public.dm_device_keys;
 create policy dm_device_keys_update_own on public.dm_device_keys
   for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists dm_device_keys_delete_own on public.dm_device_keys;
 create policy dm_device_keys_delete_own on public.dm_device_keys
   for delete to authenticated using (user_id = auth.uid());
 
@@ -610,14 +621,26 @@ create policy dm_key_envelopes_recipient on public.dm_key_envelopes
 
 drop policy if exists dm_key_envelopes_write_participant on public.dm_key_envelopes;
 create policy dm_key_envelopes_write_participant on public.dm_key_envelopes
-    for insert to authenticated with check (
-        recipient = auth.uid()
-        or public.curio_are_friends(auth.uid(), recipient)
-    );
+  for insert to authenticated with check (
+  recipient = auth.uid()
+  or public.curio_are_friends(auth.uid(), recipient)
+  );
 
--- ───────────────────────────────────────────────────────────────────────────
+drop policy if exists dm_key_envelopes_update_participant on public.dm_key_envelopes;
+create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
+  for update to authenticated
+  using (
+    recipient = auth.uid()
+    or public.curio_are_friends(auth.uid(), recipient)
+  )
+  with check (
+    recipient = auth.uid()
+    or public.curio_are_friends(auth.uid(), recipient)
+  );
+
+-- ───────────────────────────���─────────────────────────────────���─────────────
 -- 5e. dm_messages — ciphertext-only writes; legacy body is read-only
--- ───────────────────────────────────────────────────────────────────────────
+-- ────────────────────────────────────���──────────────────────────────────────
 create table if not exists public.dm_messages (
     id         uuid primary key default gen_random_uuid(),
     sender     uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -786,7 +809,7 @@ create policy dm_typing_delete_own on public.dm_typing
 -- artwork), so a reaction is a single small word on the server. A second
 -- reaction from the same person replaces the first — the unique key is what
 -- makes that a guaranteed fact rather than a client convention.
--- ───────────────────────────────────────────────────────────────────────────
+-- ──────────────────────────────────────────────��────────────────────────────
 create table if not exists public.dm_reactions (
     message_id uuid not null references public.dm_messages (id) on delete cascade,
     user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -1056,7 +1079,7 @@ begin
     end;
 end $$;
 
--- ───────────────────────────────────────────────────────────────────────────
+-- ─────────────────────────────────────────────────────────────────────────��─
 -- 6c. Messages live 24 hours, just like the cards
 --
 -- A conversation is a 24-hour thing in Curio: the server keeps a message for
@@ -1116,7 +1139,7 @@ grant usage on schema public to authenticated;
 grant select, insert, update, delete on public.profiles to authenticated;
 grant select, insert, update, delete on public.cloud_captures to authenticated;
 grant select, insert, delete on public.community_cards to authenticated;
-grant select, insert, delete on public.community_reactions to authenticated;
+grant select, insert, update, delete on public.community_reactions to authenticated;
 grant select, insert, delete on public.community_comments to authenticated;
 grant select, insert on public.community_reports to authenticated;
 grant select, insert, update, delete on public.friend_requests to authenticated;
