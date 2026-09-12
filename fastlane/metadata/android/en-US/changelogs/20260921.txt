@@ -1,4 +1,4 @@
-ADD: Community — independent pixel social chrome, a Profile entry point, and safer identity handling.
+ADD: Community — Profile entry point, editable usernames, and safer identity handling.
 ADD: Settings → Online mode — a new "Community tab" switch (off by default): flip it on and Community joins the bottom bar next to Home, Shuffle and Cabinet. It needs Online mode on, and turning Online mode off takes the tab away again — nothing about the community is ever on by default.
 ADD: Friends — the social half of the community: search people by name, send a request, accept or decline the ones waiting on you, and cancel one you sent. Only accounts with Online mode on can be found, and only people you are actually friends with can be messaged.
 ADD: Messages — private text conversations with your friends: your Messages list shows the last line and an unread badge per person, the thread opens where you left off, and reading it quietly marks it as read. Text only, and no stranger can reach your inbox.

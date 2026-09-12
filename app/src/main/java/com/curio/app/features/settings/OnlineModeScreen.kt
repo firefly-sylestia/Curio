@@ -50,6 +50,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.SocialApi
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -81,6 +82,7 @@ fun OnlineModeScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val account = OnlineAccount.state
+    var username by rememberSaveable { mutableStateOf(AppPreferences.getUsername(context)) }
     val wide = windowWidthSizeClass().isWide
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
@@ -154,6 +156,31 @@ fun OnlineModeScreen(navController: NavController) {
                                 account.email ?: "Signed in",
                                 "Curio account"
                             )
+                            SettingsOptionDivider()
+                            OnlineAuthField(
+                                placeholder = "Username (friends see this)",
+                                value = username,
+                                enabled = !account.busy,
+                                isPassword = false,
+                                revealed = false,
+                                onValueChange = { username = it.removePrefix("@") }
+                            )
+                            TextButton(
+                                onClick = {
+                                    val token = account.session?.accessToken ?: return@TextButton
+                                    scope.launch {
+                                        SocialApi.updateUsername(token, username).fold(
+                                            onSuccess = { AppPreferences.setUsername(context, username) },
+                                            onFailure = { /* Online account owns safe auth messaging. */ }
+                                        )
+                                    }
+                                },
+                                enabled = !account.busy && username.trim().length in 3..24,
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = curioDialogActionColor()
+                                ),
+                                modifier = Modifier.padding(start = 12.dp, bottom = 4.dp)
+                            ) { Text("Save username") }
                             SettingsOptionDivider()
                             SettingsOptionRow(
                                 icon = CurioIcons.Close,

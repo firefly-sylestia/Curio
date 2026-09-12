@@ -1,5 +1,21 @@
 # Prompt Log — current request
 
+## Request (2026-09-12, in progress — restore Curio social headers + social reliability)
+
+User rejected the pixel header change. Keep the established Curio headers and
+redesign the Community/Friends/DM content itself instead. They also requested
+direct posting from Topic Reveal's share-card sheet, cached social page loads,
+message notifications and muting, long-press reactions, improved comments and
+reply UI, proper add-friend icons, and correctly updating usernames.
+
+**This commit:** restores the original Curio headers exactly and adds a signed-in
+account username editor. Existing friendships resolve profile identity on each
+load, so no friend needs to be removed/re-added: save the username, then reopen
+or refresh Friends after the server schema has been re-pasted. The larger social
+content/UI, notifications, mute, reaction and direct-posting work remains the
+next implementation slice; it needs coordinated API/schema and UI work rather
+than a header-only substitution.
+
 ## Request (2026-09-12, in progress — social hub revamp + security audit)
 
 User asked for a complete nostalgic-pixel visual revamp of the independent

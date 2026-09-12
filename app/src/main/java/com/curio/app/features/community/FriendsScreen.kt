@@ -53,6 +53,8 @@ import com.curio.app.data.supabase.CurioFriendRequest
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionDivider
@@ -189,7 +191,7 @@ fun FriendsScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = if (wide) 0.dp else 142.dp,
+                top = if (wide) 0.dp else SettingsHeroTotalHeight,
                 bottom = 24.dp +
                     WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             ),
@@ -197,7 +199,7 @@ fun FriendsScreen(navController: NavController) {
         ) {
             if (wide) {
                 item(key = "hero", contentType = "hero") {
-                    SocialPixelHeader(
+                    SettingsHeroHeader(
                         title = "Friends",
                         subtitle = "Requests and messages",
                         onBack = { navController.popBackStack() }
@@ -429,10 +431,11 @@ fun FriendsScreen(navController: NavController) {
         }
 
         if (!wide) {
-            SocialPixelHeader(
+            SettingsHeroHeader(
                 title = "Friends",
                 subtitle = "Requests and messages",
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
             )
         }
     }

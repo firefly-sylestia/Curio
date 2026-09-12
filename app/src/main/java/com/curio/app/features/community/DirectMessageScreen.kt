@@ -49,6 +49,8 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
 import com.curio.app.features.settings.SettingsOptionRow
@@ -182,14 +184,14 @@ fun DirectMessageScreen(
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                            top = if (wide) 0.dp else 142.dp,
+                        top = if (wide) 0.dp else SettingsHeroTotalHeight,
                         bottom = 12.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (wide) {
                         item(key = "hero", contentType = "hero") {
-                    SocialPixelHeader(
+                            SettingsHeroHeader(
                                 title = title,
                                 subtitle = "Private messages",
                                 onBack = { navController.popBackStack() }
@@ -277,14 +279,14 @@ fun DirectMessageScreen(
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = if (wide) 0.dp else 142.dp,
+                        top = if (wide) 0.dp else SettingsHeroTotalHeight,
                         bottom = 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     if (wide) {
                         item(key = "hero", contentType = "hero") {
-                            SocialPixelHeader(
+                            SettingsHeroHeader(
                                 title = title,
                                 subtitle = "Private messages",
                                 onBack = { navController.popBackStack() }
@@ -334,10 +336,11 @@ fun DirectMessageScreen(
         }
 
         if (!wide) {
-            SocialPixelHeader(
+            SettingsHeroHeader(
                 title = title,
                 subtitle = "Private messages",
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
             )
         }
     }

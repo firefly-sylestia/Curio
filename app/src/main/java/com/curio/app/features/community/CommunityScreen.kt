@@ -65,6 +65,8 @@ import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
@@ -179,7 +181,7 @@ fun CommunityScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = if (wide) 0.dp else 142.dp,
+                top = if (wide) 0.dp else SettingsHeroTotalHeight,
                 // As a tab root the last card has to clear the floating pill
                 // bar (the NavHost drops the system nav inset on tab routes
                 // because the bar carries it) — same 84dp the Cabinet uses.
@@ -193,7 +195,7 @@ fun CommunityScreen(navController: NavController) {
         ) {
             if (wide) {
                 item(key = "hero", contentType = "hero") {
-                    SocialPixelHeader(
+                    SettingsHeroHeader(
                         title = "Community",
                         subtitle = "Text cards — gone in 24 hours",
                         onBack = if (asTab) null else ({ navController.popBackStack() })
@@ -355,10 +357,11 @@ fun CommunityScreen(navController: NavController) {
         }
 
         if (!wide) {
-            SocialPixelHeader(
+            SettingsHeroHeader(
                 title = "Community",
                 subtitle = "Text cards — gone in 24 hours",
-                onBack = if (asTab) null else ({ navController.popBackStack() })
+                onBack = if (asTab) null else ({ navController.popBackStack() }),
+                glassBackdrop = glassBackdrop
             )
         }
     }
