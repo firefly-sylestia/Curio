@@ -50,6 +50,7 @@ object AppPreferences {
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
     private const val KEY_USERNAME = "username"
+    private const val KEY_SOCIAL_AVATAR_STYLE = "social_avatar_style"
     private const val KEY_FAVORITE_SONG = "favorite_song"
     // v336 — per-album favorite tracks (heart picks in the album track-list
     // sheet): JSON object album name → JSON array of picked track titles in
@@ -317,6 +318,13 @@ object AppPreferences {
 
     fun setUsername(context: Context, username: String) {
         prefs(context).edit().putString(KEY_USERNAME, username.trim().removePrefix("@").lowercase()).apply()
+    }
+
+    fun getSocialAvatarStyle(context: Context): Int =
+        prefs(context).getInt(KEY_SOCIAL_AVATAR_STYLE, 0).coerceIn(0, 15)
+
+    fun setSocialAvatarStyle(context: Context, style: Int) {
+        prefs(context).edit().putInt(KEY_SOCIAL_AVATAR_STYLE, style.coerceIn(0, 15)).apply()
     }
 
     // ── Online Mode ──────────────────────────────────────────────────
