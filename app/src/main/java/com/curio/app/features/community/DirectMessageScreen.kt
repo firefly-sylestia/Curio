@@ -459,9 +459,7 @@ fun DirectMessageScreen(
                 // inset already spans the bar — so the composer ended up a
                 // bar's height ABOVE the keyboard with an empty strip under
                 // it. The union says exactly what the layout means.
-                .windowInsetsPadding(
-                    WindowInsets.navigationBars.union(WindowInsets.ime)
-                )
+
         ) {
             if (eligible && token != null && myUserId != null) {
                 val activeToken = token
@@ -475,6 +473,14 @@ fun DirectMessageScreen(
                     val mine = reactions[messageId]?.firstOrNull { it.userId == activeUserId }
                     reactionTarget = null
                     scope.launch {
+                        val optimistic = if (mine?.kind == kind) {
+                            reactions[messageId].orEmpty().filterNot { it.userId == activeUserId }
+                        } else {
+                            reactions[messageId].orEmpty()
+                                .filterNot { it.userId == activeUserId } +
+                                CurioDmReaction(messageId, activeUserId, kind)
+                        }
+                        reactions = reactions - messageId + optimistic
                         val result = if (mine?.kind == kind) {
                             SocialApi.clearReaction(activeToken, messageId)
                         } else {
@@ -483,11 +489,12 @@ fun DirectMessageScreen(
                         result.fold(
                             onSuccess = {
                                 SocialApi.reactions(activeToken, listOf(messageId))
-                                    .onSuccess { fresh ->
-                                        reactions = reactions - messageId + fresh
-                                    }
+                                    .onSuccess { fresh -> reactions = reactions - messageId + fresh }
                             },
-                            onFailure = { error = it.message }
+                            onFailure = {
+                                reactions = reactions - messageId + (mine?.let { listOf(it) } ?: emptyList())
+                                error = it.message
+                            }
                         )
                     }
                 }
@@ -1098,6 +1105,7 @@ private fun MessageComposer(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
             .padding(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),

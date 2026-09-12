@@ -343,8 +343,11 @@ private fun SocialProfileHeader(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = listOfNotNull(person?.handleLabel, person?.presenceLabel)
-                            .joinToString(" · ")
+text = listOfNotNull(
+                            person?.handleLabel,
+                            person?.presenceLabel,
+                            person?.presenceExactLabel?.let { "($it)" }
+                        ).joinToString(" · ")
                             .ifBlank { "@…" },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant

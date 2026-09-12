@@ -86,6 +86,13 @@ data class CurioPerson(
                 else -> null
             }
         }
+
+    val presenceExactLabel: String?
+        get() = if (hideActivity || lastActiveMillis <= 0L) null else
+            java.text.DateFormat.getDateTimeInstance(
+                java.text.DateFormat.MEDIUM,
+                java.text.DateFormat.SHORT
+            ).format(java.util.Date(lastActiveMillis))
 }
 
 /** One accepted friendship, with the person on the other side. */
@@ -591,6 +598,15 @@ object SocialApi {
                     SOCIAL_WRITE_GAP_MS,
                     "One at a time — try again in a moment."
                 )
+                // Treat the action as idempotent: the unique pair constraint
+                // is expected to reject a second tap, so check both directions
+                // before inserting and return a useful state instead of a raw
+                // Postgres duplicate-key error.
+                val existingPath = "$REQUESTS?select=id,status&or=(and(requester.eq.${id(myUserId)},addressee.eq.${id(userId)}),and(requester.eq.${id(userId)},addressee.eq.${id(myUserId)}))&status=in.(pending,accepted)&limit=1"
+                val existingRequest = SupabaseClient.requestBuilder(existingPath, accessToken).get().build()
+                if (JSONArray(SupabaseClient.executeBody(existingRequest)).length() > 0) {
+                    throw IllegalStateException("You are already friends or a request is already waiting.")
+                }
                 val payload = JSONObject().put("addressee", userId)
                 val request = SupabaseClient.requestBuilder(REQUESTS, accessToken)
                     .header("Prefer", "return=minimal")
