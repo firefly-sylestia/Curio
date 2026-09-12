@@ -269,9 +269,15 @@ create policy comm_delete_own on public.community_cards
 create table if not exists public.community_reactions (
     card_id    uuid not null references public.community_cards (id) on delete cascade,
     user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    kind       text not null default 'like',
     created_at timestamptz not null default now(),
-    primary key (card_id, user_id)
+    primary key (card_id, user_id),
+    constraint community_reactions_kind_check check (kind in ('like', 'dislike'))
 );
+
+alter table public.community_reactions add column if not exists kind text not null default 'like';
+alter table public.community_reactions drop constraint if exists community_reactions_kind_check;
+alter table public.community_reactions add constraint community_reactions_kind_check check (kind in ('like', 'dislike'));
 
 create index if not exists community_reactions_card_idx
     on public.community_reactions (card_id);

@@ -457,10 +457,16 @@ fun DirectMessageScreen(
 
     // Keep the newest line in view — on open, after every send, and when the
     // other side starts typing under us.
+    var hasPresentedThread by remember(otherUserId) { mutableStateOf(false) }
     LaunchedEffect(thread.size, peerTyping, headerRows) {
         if (thread.isEmpty()) return@LaunchedEffect
         val newest = headerRows + thread.lastIndex + if (peerTyping) 1 else 0
-        listState.animateScrollToItem(newest)
+        if (!hasPresentedThread) {
+            listState.scrollToItem(newest)
+            hasPresentedThread = true
+        } else {
+            listState.animateScrollToItem(newest)
+        }
     }
 
     // The DISPLAY name wins over the name the route carried, so a rename shows
