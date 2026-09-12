@@ -66,7 +66,9 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.CurioDmReaction
+import com.curio.app.data.supabase.CurioDmCrypto
 import com.curio.app.data.supabase.CurioPerson
+import com.curio.app.data.supabase.dmConversationId
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SocialApi
@@ -173,7 +175,22 @@ fun DirectMessageScreen(
     suspend fun load(active: String, me: String) {
         loading = true
         SocialApi.messages(active, otherUserId, me).fold(
-            onSuccess = { fresh ->
+            onSuccess = { raw ->
+                val conversationId = dmConversationId(me, otherUserId)
+                val fresh = raw.map { message ->
+                    if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
+                    else runCatching {
+                        message.copy(body = CurioDmCrypto.decrypt(
+                            context,
+                            conversationId,
+                            com.curio.app.data.supabase.CurioEncryptedMessage(
+                                message.ciphertext.orEmpty(),
+                                message.nonce.orEmpty(),
+                                message.encryptionVersion.orEmpty()
+                            )
+                        ))
+                    }.getOrElse { message.copy(body = "Unable to decrypt this message") }
+                }
                 // v3xx53 — the SERVER keeps 24 hours; the DEVICE keeps what it
                 // received. Merging (rather than replacing) is what makes "gone
                 // from the server" and "gone from Curio" two different things:
@@ -238,7 +255,23 @@ fun DirectMessageScreen(
         pending = pending + optimistic
         draft = ""
 
-        SocialApi.send(active, otherUserId, text, me).fold(
+        val encrypted = runCatching {
+            CurioDmCrypto.encrypt(context, dmConversationId(me, otherUserId), text)
+        }.getOrElse {
+            pending = pending.filterNot { it.id == optimistic.id }
+            draft = text
+            error = "Secure storage is unavailable. Message was not sent."
+            sending = false
+            return
+        }
+        SocialApi.sendEncrypted(
+            active,
+            otherUserId,
+            encrypted.ciphertext,
+            encrypted.nonce,
+            encrypted.version,
+            me
+        ).fold(
             onSuccess = {
                 SocialApi.setTyping(active, otherUserId, false)
                 pending = pending.filterNot { it.id == optimistic.id }
@@ -490,7 +523,7 @@ fun DirectMessageScreen(
                             onSuccess = {
                                 SocialApi.reactions(activeToken, listOf(messageId))
                                     .onSuccess { fresh ->
-                                        reactions = reactions + (messageId to fresh[messageId].orEmpty())
+                                        reactions = reactions + (messageId to fresh.getOrElse(messageId) { emptyList<CurioDmReaction>() })
                                     }
                             },
                             onFailure = {
