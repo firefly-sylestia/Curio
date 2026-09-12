@@ -489,7 +489,9 @@ fun DirectMessageScreen(
                         result.fold(
                             onSuccess = {
                                 SocialApi.reactions(activeToken, listOf(messageId))
-                                    .onSuccess { fresh -> reactions = reactions + (messageId to fresh) }
+                                    .onSuccess { fresh ->
+                                        reactions = reactions + (messageId to fresh[messageId].orEmpty())
+                                    }
                             },
                             onFailure = {
                                 reactions = reactions + (messageId to (mine?.let { listOf(it) } ?: emptyList()))

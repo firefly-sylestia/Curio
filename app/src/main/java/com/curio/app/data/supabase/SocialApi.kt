@@ -949,17 +949,19 @@ private const val PERSON_COLUMNS_PRIVACY =
                 "&message_id=in.(${wanted.joinToString(",")})&limit=500"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             val rows = JSONArray(SupabaseClient.executeBody(request))
-            buildMap<String, MutableList<CurioDmReaction>> {
+            buildMap<String, List<CurioDmReaction>> {
+                val grouped = linkedMapOf<String, MutableList<CurioDmReaction>>()
                 for (index in 0 until rows.length()) {
                     val row = rows.optJSONObject(index) ?: continue
                     val messageId = row.optString("message_id").takeIf { it.isNotBlank() } ?: continue
                     val kind = row.optString("kind").trim().takeIf { it.isNotBlank() } ?: continue
-                    getOrPut(messageId) { mutableListOf() } += CurioDmReaction(
+                    grouped.getOrPut(messageId) { mutableListOf() } += CurioDmReaction(
                         messageId = messageId,
                         userId = row.optString("user_id"),
                         kind = kind
                     )
                 }
+                grouped.forEach { (messageId, values) -> put(messageId, values.toList()) }
             }
         }
     }

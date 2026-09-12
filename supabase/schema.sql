@@ -559,18 +559,84 @@ as $$
 $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 5d. dm_messages — direct messages, text only, friends only
+-- 5d. DM encryption identities and conversation-key envelopes
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.dm_device_keys (
+    user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    device_id text not null,
+    public_key text not null,
+    key_version integer not null default 1 check (key_version > 0),
+    created_at timestamptz not null default now(),
+    retired_at timestamptz,
+    primary key (user_id, device_id)
+);
+
+create table if not exists public.dm_key_envelopes (
+    conversation_id text not null,
+    recipient uuid not null references auth.users (id) on delete cascade,
+    device_id text not null,
+    key_version integer not null check (key_version > 0),
+    encrypted_key text not null,
+    encryption_version text not null default 'curio-dm-v1',
+    created_at timestamptz not null default now(),
+    primary key (conversation_id, recipient, device_id, key_version)
+);
+
+alter table public.dm_device_keys enable row level security;
+alter table public.dm_key_envelopes enable row level security;
+
+drop policy if exists dm_device_keys_own on public.dm_device_keys;
+create policy dm_device_keys_own on public.dm_device_keys
+    for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists dm_key_envelopes_recipient on public.dm_key_envelopes;
+create policy dm_key_envelopes_recipient on public.dm_key_envelopes
+    for select to authenticated using (recipient = auth.uid());
+
+drop policy if exists dm_key_envelopes_write_participant on public.dm_key_envelopes;
+create policy dm_key_envelopes_write_participant on public.dm_key_envelopes
+    for insert to authenticated with check (
+        recipient = auth.uid()
+        or public.curio_are_friends(auth.uid(), recipient)
+    );
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 5e. dm_messages — ciphertext-only writes; legacy body is read-only
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.dm_messages (
     id         uuid primary key default gen_random_uuid(),
     sender     uuid not null default auth.uid() references auth.users (id) on delete cascade,
     recipient  uuid not null references auth.users (id) on delete cascade,
-    body       text not null,
+    body       text,
+    ciphertext text,
+    nonce      text,
+    encryption_version text,
+    migration_state text not null default 'legacy' check (migration_state in ('legacy','encrypted','pending_reencrypt')),
     created_at timestamptz not null default now(),
     read_at    timestamptz,
     constraint dm_messages_not_self check (sender <> recipient),
-    constraint dm_messages_body_len check (char_length(body) between 1 and 2000)
+    constraint dm_messages_ciphertext_shape check (
+        (migration_state = 'legacy' and body is not null and ciphertext is null)
+        or (migration_state in ('encrypted','pending_reencrypt') and ciphertext is not null and nonce is not null and encryption_version is not null)
+    )
 );
+
+alter table public.dm_messages add column if not exists ciphertext text;
+alter table public.dm_messages add column if not exists nonce text;
+alter table public.dm_messages add column if not exists encryption_version text;
+alter table public.dm_messages add column if not exists migration_state text not null default 'legacy';
+alter table public.dm_messages alter column body drop not null;
+
+-- Existing plaintext rows remain explicitly legacy/read-only during migration.
+drop policy if exists dm_insert_friends on public.dm_messages;
+create policy dm_insert_friends on public.dm_messages
+    for insert to authenticated with check (
+        sender = auth.uid() and migration_state = 'encrypted'
+        and body is null and ciphertext is not null and nonce is not null
+        and exists (select 1 from public.profiles me where me.id = auth.uid() and me.online_mode_enabled)
+        and exists (select 1 from public.profiles them where them.id = dm_messages.recipient and them.online_mode_enabled)
+        and public.curio_are_friends(auth.uid(), dm_messages.recipient)
+    );
 
 create index if not exists dm_messages_thread_idx
     on public.dm_messages (sender, recipient, created_at desc);
@@ -640,7 +706,7 @@ create policy dm_delete_own on public.dm_messages
 -- the composer has text, and every read ignores rows older than a few
 -- seconds, so a crashed app leaves nothing behind that anyone would see.
 -- A row is not a message and carries no content — only WHO is typing to WHOM.
--- ───────────────────────────────────────────────────────────────────────────
+-- ──────────────────────────���────────────────────────────────────────────────
 create table if not exists public.dm_typing (
     sender     uuid not null default auth.uid() references auth.users (id) on delete cascade,
     recipient  uuid not null references auth.users (id) on delete cascade,
@@ -985,7 +1051,7 @@ end $$;
 -- offline thread readable), so "gone from the server" and "gone from the app"
 -- are two different things on purpose: nothing you received is lost, and
 -- nothing you sent lives on the server for longer than a day.
--- ───────────────────────────────────────────────────────────────────────────
+-- ──────────────────────────────────────────────��────────────────────────────
 create or replace function public.curio_purge_expired_messages()
 returns integer
 language plpgsql
@@ -1337,7 +1403,7 @@ exception
         raise notice 'NOTE  add these tables to the supabase_realtime publication from the dashboard';
 end $$;
 
--- ─────────────────────────────────────────────────────────────────���─────────
+-- ─────────────────────────────────────────────────────────────────�����────────
 -- 8. Self-check
 -- ───────────────────────────────────────────────────────────────────────────
 do $$
