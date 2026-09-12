@@ -29,6 +29,8 @@ data class CommunityCard(
     val authorName: String = "",
     /** The author's chosen portrait (0–15). */
     val authorAvatar: Int = 0,
+    /** CARD (a topic share card), NOTE (a text-only post) or QUOTE. */
+    val kind: String = "CARD",
     val topicName: String,
     val categoryName: String,
     val categoryGlyph: String,
@@ -83,11 +85,25 @@ data class CommunityCardDraft(
     val factText: String,
     /** The poster's own line above the card — optional, never media. */
     val caption: String = "",
+    /** CARD, NOTE or QUOTE — the renderer a card is rebuilt with. */
+    val kind: String = KIND_CARD,
     val style: String = "PAPER",
     val aspect: String = "CLASSIC",
     val bodyScale: Float = 1f,
     val byline: String = ""
-)
+) {
+    /** True for the text-only posts that carry no topic and no card art. */
+    val isTextOnly: Boolean get() = kind == KIND_NOTE || kind == KIND_QUOTE
+}
+
+/** A topic share card. */
+const val KIND_CARD = "CARD"
+
+/** A tweet-style text post — words and nothing else. */
+const val KIND_NOTE = "NOTE"
+
+/** A line someone else said, credited to them. */
+const val KIND_QUOTE = "QUOTE"
 
 /** One reply under a card. Text only, and it dies with the card. */
 data class CommunityComment(
@@ -100,6 +116,8 @@ data class CommunityComment(
     /** The author's chosen portrait (0–15). */
     val authorAvatar: Int = 0,
     val body: String,
+    /** The reply this one answers — null at the top level. */
+    val parentId: String? = null,
     val createdAtMillis: Long,
     val mine: Boolean
 ) {
@@ -135,7 +153,7 @@ object CommunityApi {
      * single-card fetch can never drift apart.
      */
     private const val CARD_COLUMNS =
-        "id,owner,author_handle,topic_name,category_name,category_glyph,accent_hex," +
+        "id,owner,author_handle,kind,topic_name,category_name,category_glyph,accent_hex," +
             "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at," +
             "community_reactions(user_id),community_comments(id)"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
@@ -161,8 +179,14 @@ object CommunityApi {
      * carry it, which is the whole point of the draft shape.
      */
     fun draftProblem(draft: CommunityCardDraft): String? = when {
-        draft.topicName.isBlank() -> "What is your card about?"
-        draft.factText.isBlank() -> "Add the words you want on the card."
+        // A text-only post has no topic BY DESIGN (that is the point of it),
+        // so the topic requirement applies to topic cards alone.
+        draft.kind == KIND_CARD && draft.topicName.isBlank() -> "What is your card about?"
+        draft.factText.isBlank() -> when (draft.kind) {
+            KIND_QUOTE -> "Write the quote first."
+            KIND_NOTE -> "Write something first."
+            else -> "Add the words you want on the card."
+        }
         draft.factText.length > MAX_FACT_CHARS ->
             "Keep the card under $MAX_FACT_CHARS characters (it's ${draft.factText.length})."
         draft.caption.length > MAX_CAPTION_CHARS ->
@@ -236,7 +260,7 @@ object CommunityApi {
         myUserId: String?
     ): Result<List<CommunityComment>> = withContext(Dispatchers.IO) {
         val parsed = mapped {
-            val path = "$COMMENTS?select=id,author,author_handle,body,created_at" +
+            val path = "$COMMENTS?select=id,author,author_handle,body,parent_id,created_at" +
                 "&card_id=eq.$cardId&order=created_at.asc&limit=200"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             val array = JSONArray(SupabaseClient.executeBody(request))
@@ -250,6 +274,8 @@ object CommunityApi {
                             authorHandle = row.optString("author_handle")
                                 .ifBlank { "A curious soul" },
                             body = row.optString("body"),
+                            parentId = row.optString("parent_id")
+                                .takeIf { it.isNotBlank() && it != "null" },
                             createdAtMillis = epochMillis(row.optString("created_at")),
                             mine = myUserId != null && row.optString("author") == myUserId
                         )
@@ -267,7 +293,9 @@ object CommunityApi {
         accessToken: String,
         cardId: String,
         body: String,
-        handle: String
+        handle: String,
+        /** The reply this answers, for a branched thread — null at the top. */
+        parentId: String? = null
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             val text = body.trim()
@@ -281,6 +309,10 @@ object CommunityApi {
                 .put("card_id", cardId)
                 .put("body", text)
                 .put("author_handle", handle.trim().ifBlank { "A curious soul" })
+            // Absent rather than null: PostgREST treats a JSON null as an
+            // explicit NULL only if the column is nullable, and omitting it
+            // keeps a top-level reply from touching the branch column at all.
+            parentId?.takeIf { it.isNotBlank() }?.let { payload.put("parent_id", it) }
             val request = SupabaseClient.requestBuilder(COMMENTS, accessToken)
                 .header("Prefer", "return=minimal")
                 .post(payload.toString().toRequestBody(jsonMediaType))
@@ -311,6 +343,7 @@ object CommunityApi {
             draftProblem(draft)?.let { throw IllegalArgumentException(it) }
             val payload = JSONObject()
                 .put("author_handle", handle.trim().ifBlank { "A curious soul" })
+                .put("kind", draft.kind)
                 .put("topic_name", draft.topicName.trim())
                 .put("category_slug", draft.categorySlug)
                 .put("category_name", draft.categoryName)
@@ -424,6 +457,10 @@ object CommunityApi {
                 id = row.optString("id"),
                 authorId = owner,
                 authorHandle = row.optString("author_handle").ifBlank { "A curious soul" },
+                kind = row.optString("kind")
+                    .takeIf { it.isNotBlank() && it != "null" }
+                    ?.uppercase()
+                    ?: KIND_CARD,
                 topicName = row.optString("topic_name"),
                 categoryName = row.optString("category_name"),
                 categoryGlyph = row.optString("category_glyph"),
@@ -504,8 +541,15 @@ internal fun communityMessage(failure: Throwable): String {
     val raw = failure.message.orEmpty()
     return when {
         failure is IllegalArgumentException && raw.isNotBlank() -> raw
+        failure is IllegalStateException && raw.isNotBlank() -> raw
         raw.contains("rate limit", true) || raw.contains("too many", true) ->
             "Too much just now — try again in a minute."
+        // The username handle has a case-insensitive unique index, so a
+        // collision arrives as a 23505 duplicate-key error. Saying so is the
+        // whole difference between a user knowing the name is taken and a
+        // Save button that appears to do nothing.
+        raw.contains("duplicate key", true) && raw.contains("username", true) ->
+            "That username is already taken. Try another one."
         raw.contains("duplicate key", true) -> "You've already done that."
         raw.contains("row-level security", true) ->
             "Turn Online mode on (Settings → Online mode) and try again."

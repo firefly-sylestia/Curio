@@ -103,6 +103,42 @@ object SocialApi {
     /** The server's own ceiling for one message (also a DB check constraint). */
     const val MAX_MESSAGE_CHARS = 2000
 
+    /**
+     * Every id that is pasted into a PostgREST query string must look like an
+     * id. Without this a value carrying `&`, `,` or `.` could rewrite the
+     * query it is dropped into (a hand-modified client, or a route argument),
+     * so an id is validated before it is used rather than trusted.
+     */
+    private val ID_PATTERN = Regex("[A-Za-z0-9_-]{1,64}")
+
+    private fun id(value: String): String {
+        require(value.matches(ID_PATTERN)) { "That reference is not valid." }
+        return value
+    }
+
+    /**
+     * A local cooldown between writes.
+     *
+     * PostgREST cannot rate limit a signed-in user by itself, and a chat that
+     * fires a request per keystroke or a bot that posts in a loop is a real
+     * cost and abuse vector. This is the client half of the guard (the server
+     * half is Supabase's own rate limiting): one message per second, one
+     * request/report per two seconds, one username change per three seconds.
+     * It never blocks a legitimate user — a human cannot type faster than it.
+     */
+    private const val WRITE_GAP_MS = 1_000L
+    private const val SOCIAL_WRITE_GAP_MS = 2_000L
+    private const val RENAME_GAP_MS = 3_000L
+    private var lastMessageAt = 0L
+    private var lastSocialWriteAt = 0L
+    private var lastRenameAt = 0L
+
+    private fun throttle(lastAt: Long, gap: Long, message: String): Long {
+        val now = System.currentTimeMillis()
+        if (now - lastAt < gap) throw IllegalStateException(message)
+        return now
+    }
+
     /** How many messages one thread load asks for. */
     private const val THREAD_LIMIT = 200
 
@@ -152,8 +188,13 @@ object SocialApi {
             mapped {
                 val normalized = username.trim().removePrefix("@").lowercase()
                 require(normalized.matches(Regex("[a-z0-9_]{3,24}"))) {
-                    "Username must be 3–24 characters using letters, numbers, or underscores."
+                    "Usernames use 3 to 24 letters, numbers or underscores."
                 }
+                lastRenameAt = throttle(
+                    lastRenameAt,
+                    RENAME_GAP_MS,
+                    "Give it a moment before changing your username again."
+                )
                 val userId = SupabaseClient.userIdFromAccessToken(accessToken)
                 val body = JSONObject().put("username", normalized)
                 val request = SupabaseClient.requestBuilder(
@@ -191,7 +232,7 @@ object SocialApi {
         mapped {
             val path = "$REQUESTS?select=id,requester,addressee,created_at" +
                 "&status=eq.pending" +
-                "&or=(requester.eq.$myUserId,addressee.eq.$myUserId)" +
+                "&or=(requester.eq.${id(myUserId)},addressee.eq.${id(myUserId)})" +
                 "&order=created_at.desc&limit=100"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             val rows = JSONArray(SupabaseClient.executeBody(request))
@@ -224,7 +265,7 @@ object SocialApi {
             mapped {
                 val path = "$REQUESTS?select=id,requester,addressee,responded_at,created_at" +
                     "&status=eq.accepted" +
-                    "&or=(requester.eq.$myUserId,addressee.eq.$myUserId)" +
+                    "&or=(requester.eq.${id(myUserId)},addressee.eq.${id(myUserId)})" +
                     "&order=responded_at.desc.nullslast&limit=200"
                 val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
                 val rows = JSONArray(SupabaseClient.executeBody(request))
@@ -256,6 +297,12 @@ object SocialApi {
         withContext(Dispatchers.IO) {
             mappedUnit {
                 if (userId == myUserId) throw IllegalArgumentException("That's you.")
+                id(userId)
+                lastSocialWriteAt = throttle(
+                    lastSocialWriteAt,
+                    SOCIAL_WRITE_GAP_MS,
+                    "One at a time — try again in a moment."
+                )
                 val payload = JSONObject().put("addressee", userId)
                 val request = SupabaseClient.requestBuilder(REQUESTS, accessToken)
                     .header("Prefer", "return=minimal")
@@ -272,6 +319,7 @@ object SocialApi {
     suspend fun respond(accessToken: String, requestId: String, accept: Boolean): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
+                id(requestId)
                 val payload = JSONObject().put("status", if (accept) "accepted" else "declined")
                 val request = SupabaseClient
                     .requestBuilder("$REQUESTS?id=eq.$requestId", accessToken)
@@ -286,6 +334,7 @@ object SocialApi {
     suspend fun remove(accessToken: String, requestId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
+                id(requestId)
                 val request = SupabaseClient
                     .requestBuilder("$REQUESTS?id=eq.$requestId", accessToken)
                     .delete()
@@ -306,7 +355,7 @@ object SocialApi {
         withContext(Dispatchers.IO) {
             mapped {
                 val path = "$MESSAGES?select=id,sender,recipient,body,created_at,read_at" +
-                    "&or=(sender.eq.$myUserId,recipient.eq.$myUserId)" +
+                    "&or=(sender.eq.${id(myUserId)},recipient.eq.${id(myUserId)})" +
                     "&order=created_at.desc&limit=$INBOX_SCAN"
                 val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
                 val rows = JSONArray(SupabaseClient.executeBody(request))
@@ -345,8 +394,8 @@ object SocialApi {
     ): Result<List<CurioDirectMessage>> = withContext(Dispatchers.IO) {
         mapped {
             val path = "$MESSAGES?select=id,sender,recipient,body,created_at,read_at" +
-                "&or=(and(sender.eq.$myUserId,recipient.eq.$otherUserId)," +
-                "and(sender.eq.$otherUserId,recipient.eq.$myUserId))" +
+                "&or=(and(sender.eq.${id(myUserId)},recipient.eq.${id(otherUserId)})," +
+                "and(sender.eq.${id(otherUserId)},recipient.eq.${id(myUserId)}))" +
                 "&order=created_at.asc&limit=$THREAD_LIMIT"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             val rows = JSONArray(SupabaseClient.executeBody(request))
@@ -386,6 +435,8 @@ object SocialApi {
                 )
             }
             if (toUserId == myUserId) throw IllegalArgumentException("You can't message yourself.")
+            id(toUserId)
+            lastMessageAt = throttle(lastMessageAt, WRITE_GAP_MS, "Slow down a moment.")
             val payload = JSONObject().put("recipient", toUserId).put("body", text)
             val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
                 .header("Prefer", "return=minimal")
@@ -407,7 +458,8 @@ object SocialApi {
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             val payload = JSONObject().put("read_at", Instant.now().toString())
-            val path = "$MESSAGES?recipient=eq.$myUserId&sender=eq.$otherUserId&read_at=is.null"
+            val path = "$MESSAGES?recipient=eq.${id(myUserId)}" +
+                "&sender=eq.${id(otherUserId)}&read_at=is.null"
             val request = SupabaseClient.requestBuilder(path, accessToken)
                 .header("Prefer", "return=minimal")
                 .patch(payload.toString().toRequestBody(jsonMediaType))
@@ -421,7 +473,7 @@ object SocialApi {
         withContext(Dispatchers.IO) {
             mappedUnit {
                 val request = SupabaseClient
-                    .requestBuilder("$MESSAGES?id=eq.$messageId", accessToken)
+                    .requestBuilder("$MESSAGES?id=eq.${id(messageId)}", accessToken)
                     .delete()
                     .build()
                 SupabaseClient.executeBody(request)
@@ -451,6 +503,7 @@ object SocialApi {
         typing: Boolean
     ): Unit = withContext(Dispatchers.IO) {
         runCatching {
+            if (!toUserId.matches(ID_PATTERN)) return@runCatching
             if (typing) {
                 val payload = JSONObject().put("recipient", toUserId)
                 val request = SupabaseClient.requestBuilder(TYPING, accessToken)
@@ -481,6 +534,9 @@ object SocialApi {
         otherUserId: String
     ): Boolean = withContext(Dispatchers.IO) {
         runCatching {
+            if (!otherUserId.matches(ID_PATTERN) || !myUserId.matches(ID_PATTERN)) {
+                return@runCatching false
+            }
             val path = "$TYPING?select=updated_at&sender=eq.$otherUserId" +
                 "&recipient=eq.$myUserId&limit=1"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
@@ -505,7 +561,7 @@ object SocialApi {
         messageIds: Collection<String>
     ): Result<Map<String, List<CurioDmReaction>>> = withContext(Dispatchers.IO) {
         mapped {
-            val wanted = messageIds.filter { it.isNotBlank() }.distinct()
+            val wanted = messageIds.filter { it.matches(ID_PATTERN) }.distinct()
             if (wanted.isEmpty()) return@mapped emptyMap()
             val path = "$REACTIONS?select=message_id,user_id,kind" +
                 "&message_id=in.(${wanted.joinToString(",")})&limit=500"
@@ -534,6 +590,8 @@ object SocialApi {
     suspend fun react(accessToken: String, messageId: String, kind: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
+                id(messageId)
+                require(kind.length in 1..32) { "Choose a reaction." }
                 val payload = JSONObject().put("message_id", messageId).put("kind", kind)
                 val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
@@ -548,7 +606,7 @@ object SocialApi {
         withContext(Dispatchers.IO) {
             mappedUnit {
                 val request = SupabaseClient
-                    .requestBuilder("$REACTIONS?message_id=eq.$messageId", accessToken)
+                    .requestBuilder("$REACTIONS?message_id=eq.${id(messageId)}", accessToken)
                     .delete()
                     .build()
                 SupabaseClient.executeBody(request)

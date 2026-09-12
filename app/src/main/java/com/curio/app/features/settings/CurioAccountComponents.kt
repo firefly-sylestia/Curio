@@ -264,7 +264,11 @@ internal fun CurioAccountIdentityCard(
     val account = OnlineAccount.state
     val token = account.session?.accessToken
 
-    var username by remember { mutableStateOf(AppPreferences.getUsername(context)) }
+    // The claimed name as the SERVER last confirmed it, so "is this a change?"
+    // is answered against what is actually stored rather than against whatever
+    // happens to be in the field.
+    var savedName by remember { mutableStateOf(AppPreferences.getUsername(context)) }
+    var username by remember { mutableStateOf(savedName) }
     var avatarStyle by remember { mutableStateOf(AppPreferences.getSocialAvatarStyle(context)) }
     var savingName by remember { mutableStateOf(false) }
     var nameAnswer by remember { mutableStateOf<String?>(null) }
@@ -279,7 +283,7 @@ internal fun CurioAccountIdentityCard(
             "Usernames use 3 to 24 letters, numbers or underscores."
         else -> null
     }
-    val canSaveName = clean.isNotEmpty() && nameProblem == null && !savingName && token != null
+    val changed = clean.isNotEmpty() && clean != savedName.trim().removePrefix("@").lowercase()
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -305,10 +309,20 @@ internal fun CurioAccountIdentityCard(
             }
         )
 
-        // Validation first, then the server's verdict. Never silent.
-        (nameProblem ?: nameAnswer)?.let { message ->
-            AccountMessage(text = message, isError = nameProblem != null || nameFailed)
+        // ── ALWAYS an answer. ────────────────────────────────────────────
+        // The old field could sit there with a dead Save button and no reason
+        // given, which is exactly how "saving does nothing" feels. There is
+        // now one line under the field in every state: the rule being broken,
+        // the server's verdict, or — when the button is off — why it is off.
+        val status = when {
+            nameProblem != null -> nameProblem to true
+            nameAnswer != null -> nameAnswer!! to nameFailed
+            token == null -> "Sign in to claim a username." to false
+            clean.isEmpty() -> "Choose a username: 3 to 24 letters, numbers or underscores." to false
+            !changed -> "That is already your username." to false
+            else -> "Free to claim — save it and it is yours." to false
         }
+        AccountMessage(text = status.first, isError = status.second)
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -317,7 +331,23 @@ internal fun CurioAccountIdentityCard(
         ) {
             Button(
                 onClick = {
-                    val active = token ?: return@Button
+                    // A click always answers: an invalid name is reported here
+                    // too, not only as a rule line under the field.
+                    if (!clean.matches(Regex("[a-z0-9_]{3,24}"))) {
+                        nameAnswer = if (clean.isEmpty()) {
+                            "Choose a username first."
+                        } else {
+                            "Usernames use 3 to 24 letters, numbers or underscores."
+                        }
+                        nameFailed = true
+                        return@Button
+                    }
+                    val active = token
+                    if (active == null) {
+                        nameAnswer = "Sign in to claim a username."
+                        nameFailed = true
+                        return@Button
+                    }
                     savingName = true
                     nameAnswer = null
                     nameFailed = false
@@ -325,6 +355,7 @@ internal fun CurioAccountIdentityCard(
                         SocialApi.updateUsername(active, clean).fold(
                             onSuccess = {
                                 AppPreferences.setUsername(context, clean)
+                                savedName = clean
                                 nameAnswer = "Saved. Your friends will see @$clean."
                                 nameFailed = false
                             },
@@ -337,7 +368,7 @@ internal fun CurioAccountIdentityCard(
                         savingName = false
                     }
                 },
-                enabled = canSaveName,
+                enabled = !savingName && token != null,
                 shape = RoundedCornerShape(50),
                 colors = curioDialogActionButtonColors()
             ) {

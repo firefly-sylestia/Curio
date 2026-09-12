@@ -14,7 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +57,10 @@ fun OnlineModeScreen(navController: NavController) {
     val wide = windowWidthSizeClass().isWide
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
+    // Signing out drops the session and takes Online mode with it, so it asks
+    // first instead of firing on the tap.
+    var confirmingSignOut by remember { mutableStateOf(false) }
+    var signingOut by remember { mutableStateOf(false) }
     // The switch reads the OBSERVABLE mirror (seeded in AppPreferences
     // .initThemeMode), so signing in / out — which flips the same pref through
     // OnlineAccount — moves it here too. Before it was a local copy synced off
@@ -122,7 +130,7 @@ fun OnlineModeScreen(navController: NavController) {
                                 icon = CurioIcons.Close,
                                 title = "Sign out",
                                 subtitle = "Your captures stay on this device",
-                                onClick = { scope.launch { OnlineAccount.signOut(context) } }
+                                onClick = { confirmingSignOut = true }
                             )
                         } else {
                             Column(modifier = Modifier.padding(14.dp)) {
@@ -199,5 +207,24 @@ fun OnlineModeScreen(navController: NavController) {
                 glassBackdrop = glassBackdrop
             )
         }
+    }
+
+    if (confirmingSignOut) {
+        SocialConfirmDialog(
+            title = "Sign out of Curio?",
+            body = "Online mode turns off and nothing online loads until you sign in again. " +
+                "Your captures, recordings and conversations stay on this device.",
+            confirmLabel = "Sign out",
+            busy = signingOut,
+            onDismiss = { if (!signingOut) confirmingSignOut = false },
+            onConfirm = {
+                signingOut = true
+                scope.launch {
+                    OnlineAccount.signOut(context)
+                    signingOut = false
+                    confirmingSignOut = false
+                }
+            }
+        )
     }
 }

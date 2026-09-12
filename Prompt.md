@@ -1,6 +1,28 @@
 # Prompt Log — current request
 
-## Request (2026-09-12, IN PROGRESS — social layer: identity, profiles, the community wall and messages)
+## Request (2026-09-12, IN PROGRESS — community, messages and account: fix the broken flows, harden the social layer, redesign the wall)
+
+User (rephrased, in their words): tapping a card opens its own page but that
+page is wired into the settings family, which is wrong — fix the card tap flow.
+Add more security and go looking for vulnerabilities and exploits. The
+community wall is still poor: the posted share cards are too SMALL now, and the
+like / comment / report actions are bad — make them better. The avatars are bad
+— redesign and refine them properly. Saving a username STILL gives no feedback:
+nothing for an invalid name and nothing when it is already taken. Signing out
+happens instantly with no confirmation. Opening the community page reloads it
+and shows nothing at all without a connection. Delete the huge privacy hint
+inside the conversation. The message box still climbs far too high up the
+screen while typing. There is no confirmation before removing a friend, and the
+add / remove actions should be ICONS. Add branched (nested) replies to comments.
+Send notifications for messages, and for posts when notifications are on.
+Delete the manual "share a topic" typing step — topics must come from the real
+catalog with their quick facts, and there must also be a tweet-style text-only
+post instead of always posting a card. Separate quote sharing and note sharing
+out of the card flow.
+
+Instruction: research and decide everything yourself, ask no questions, go fast.
+
+## Previous request (2026-09-12, SHIPPED — social layer: identity, profiles, the community wall and messages)
 
 User (rephrased, in their words): the drawn profile avatar is not good and the
 community page does not show an avatar at all; there is no way to open a

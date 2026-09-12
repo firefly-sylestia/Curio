@@ -92,6 +92,10 @@ fun FriendsScreen(navController: NavController) {
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    // Removal is the one destructive move here, so it asks first — naming the
+    // person it is about to remove.
+    var removing by remember { mutableStateOf<CurioFriend?>(null) }
+    var busy by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
@@ -437,20 +441,36 @@ fun FriendsScreen(navController: NavController) {
                                 )
                             )
                         },
-                        onRemove = {
-                            scope.launch {
-                                SocialApi.remove(activeToken, friend.requestId).fold(
-                                    onSuccess = {
-                                        notice = "Removed ${friend.person.label}."
-                                        load(activeToken, activeUserId)
-                                    },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        }
+                        onRemove = { removing = friend }
                     )
                 }
             }
+        }
+
+        removing?.let { friend ->
+            SocialConfirmDialog(
+                title = "Remove ${friend.person.label}?",
+                body = "They stop being a friend and neither of you can message the other " +
+                    "until you add each other again. Your conversation stays on this " +
+                    "device.",
+                confirmLabel = "Remove",
+                busy = busy,
+                onDismiss = { if (!busy) removing = null },
+                onConfirm = {
+                    busy = true
+                    scope.launch {
+                        SocialApi.remove(activeToken, friend.requestId).fold(
+                            onSuccess = {
+                                notice = "Removed ${friend.person.label}."
+                                removing = null
+                                load(activeToken, activeUserId)
+                            },
+                            onFailure = { error = it.message }
+                        )
+                        busy = false
+                    }
+                }
+            )
         }
 
         if (!wide) {

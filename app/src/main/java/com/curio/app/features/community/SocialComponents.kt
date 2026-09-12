@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,10 +38,13 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.CurioDmThread
 import com.curio.app.data.supabase.CurioPerson
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import org.json.JSONArray
 import org.json.JSONObject
@@ -439,6 +444,69 @@ internal fun SocialThreadCard(
             }
         }
     }
+}
+
+/**
+ * THE SOCIAL CONFIRMATION — one dialog for every irreversible action in the
+ * social layer (removing a friend, taking down a card, deleting a reply,
+ * signing out).
+ *
+ * It exists because the destructive action used to be a single tap on a pill:
+ * a remove button that fires on touch is a remove button that eventually fires
+ * by accident. The dialog names the actual person or thing in [body] so nobody
+ * confirms the wrong thing.
+ */
+@Composable
+internal fun SocialConfirmDialog(
+    title: String,
+    body: String,
+    confirmLabel: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    destructive: Boolean = true,
+    busy: Boolean = false
+) {
+    AlertDialog(
+        onDismissRequest = { if (!busy) onDismiss() },
+        containerColor = curioDialogContainerColor(),
+        shape = CurioDialogShape,
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { if (!busy) onConfirm() },
+                colors = if (destructive) {
+                    androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    curioDialogActionButtonColors()
+                }
+            ) {
+                Text(
+                    text = if (busy) "Working…" else confirmLabel,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) {
+                Text("Cancel", style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    )
 }
 
 /** An empty surface that says what the screen is FOR, not just that it is empty. */

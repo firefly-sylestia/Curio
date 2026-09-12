@@ -112,7 +112,12 @@ create table if not exists public.community_cards (
     id             uuid primary key default gen_random_uuid(),
     owner          uuid not null default auth.uid() references auth.users (id) on delete cascade,
     author_handle  text not null default 'A curious soul',
-    topic_name     text not null,
+    -- What kind of post this is. A CARD is a topic share card, a NOTE is a
+    -- tweet-style text post (no topic, no card art), and a QUOTE is a line
+    -- someone else said. All three are still TEXT ONLY — the column chooses a
+    -- renderer, it cannot carry media.
+    kind           text not null default 'CARD',
+    topic_name     text not null default '',
     category_slug  text not null default '',
     category_name  text not null default '',
     category_glyph text not null default '',
@@ -125,7 +130,13 @@ create table if not exists public.community_cards (
     byline         text not null default '',
     created_at     timestamptz not null default now(),
     expires_at     timestamptz not null default (now() + interval '24 hours'),
-    constraint community_cards_fact_len check (char_length(fact_text) between 1 and 600),
+    -- A topic CARD must say something (it renders the question and its quick
+    -- fact); a NOTE or QUOTE may be short but never empty either — the same 1
+    -- character floor, just phrased so an upgrade can drop the old constraint.
+    constraint community_cards_fact_len_v2 check (
+        char_length(fact_text) <= 600 and char_length(fact_text) >= 1
+    ),
+    constraint community_cards_kind check (kind in ('CARD', 'NOTE', 'QUOTE')),
     constraint community_cards_scale check (body_scale between 0.5 and 2.0),
     constraint community_cards_style check (style in
         ('PAPER','VINYL','COLLAGE','NEUMORPHIC','EDITORIAL','MINIMAL','SIGNATURE')),
@@ -133,12 +144,34 @@ create table if not exists public.community_cards (
 );
 
 alter table public.community_cards add column if not exists caption text not null default '';
+alter table public.community_cards add column if not exists kind text not null default 'CARD';
+alter table public.community_cards alter column topic_name set default '';
 
+-- Upgrade path for a project that already ran an earlier version of this
+-- file: the original fact constraint demanded at least one character of a
+-- topic card's body and knew nothing about `kind`, so it is replaced by the
+-- kind-aware one (a CARD still has to say something; a NOTE may be a line).
 do $$
 begin
     if not exists (select 1 from pg_constraint where conname = 'community_cards_caption_len') then
         alter table public.community_cards
             add constraint community_cards_caption_len check (char_length(caption) <= 180);
+    end if;
+
+    if exists (select 1 from pg_constraint where conname = 'community_cards_fact_len') then
+        alter table public.community_cards drop constraint community_cards_fact_len;
+    end if;
+
+    if not exists (select 1 from pg_constraint where conname = 'community_cards_fact_len_v2') then
+        alter table public.community_cards
+            add constraint community_cards_fact_len_v2 check (
+                char_length(fact_text) <= 600 and char_length(fact_text) >= 1
+            );
+    end if;
+
+    if not exists (select 1 from pg_constraint where conname = 'community_cards_kind') then
+        alter table public.community_cards
+            add constraint community_cards_kind check (kind in ('CARD', 'NOTE', 'QUOTE'));
     end if;
 end $$;
 
@@ -273,12 +306,48 @@ create table if not exists public.community_comments (
     author        uuid not null default auth.uid() references auth.users (id) on delete cascade,
     author_handle text not null default 'A curious soul',
     body          text not null,
+    -- The reply this one answers, for BRANCHED threads. Null is a top-level
+    -- reply. A trigger below refuses a parent that lives on another card, so a
+    -- branch can never be grafted onto somebody else's post.
+    parent_id     uuid references public.community_comments (id) on delete cascade,
     created_at    timestamptz not null default now(),
     constraint community_comments_body_len check (char_length(body) between 1 and 400)
 );
 
+alter table public.community_comments
+    add column if not exists parent_id uuid references public.community_comments (id) on delete cascade;
+
 create index if not exists community_comments_card_idx
     on public.community_comments (card_id, created_at);
+create index if not exists community_comments_parent_idx
+    on public.community_comments (parent_id);
+
+create or replace function public.curio_pin_comment_parent()
+returns trigger
+language plpgsql
+as $$
+declare
+    parent_card uuid;
+begin
+    if new.parent_id is null then
+        return new;
+    end if;
+    if new.parent_id = new.id then
+        raise exception 'curio: a reply cannot answer itself';
+    end if;
+    select card_id into parent_card
+      from public.community_comments
+     where id = new.parent_id;
+    if parent_card is null or parent_card <> new.card_id then
+        raise exception 'curio: a reply can only answer a reply on its own card';
+    end if;
+    return new;
+end $$;
+
+drop trigger if exists community_comments_pin_parent on public.community_comments;
+create trigger community_comments_pin_parent
+    before insert or update on public.community_comments
+    for each row execute function public.curio_pin_comment_parent();
 
 alter table public.community_comments enable row level security;
 
@@ -717,6 +786,7 @@ grant execute on function public.curio_are_friends(uuid, uuid) to authenticated;
 revoke all on function public.curio_pin_request_parties() from public, anon, authenticated;
 revoke all on function public.curio_pin_message_parties() from public, anon, authenticated;
 revoke all on function public.curio_stamp_typing() from public, anon, authenticated;
+revoke all on function public.curio_pin_comment_parent() from public, anon, authenticated;
 revoke all on function public.curio_stamp_author_handle() from public, anon, authenticated;
 
 revoke all on public.profiles from anon;
