@@ -331,7 +331,7 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
-    // v3xx — the episode an EPISODES chip opens the series sheet at (null =
+    // v3xx ��� the episode an EPISODES chip opens the series sheet at (null =
     // opened from the poster card, list starts at the top). Mirrors the
     // album sheet's [selectedAlbumTrack].
     var selectedSeriesEpisode by remember { mutableStateOf<com.curio.app.data.SeriesEpisode?>(null) }
@@ -346,13 +346,7 @@ fun TopicRevealScreen(
     // be visible to BOTH blocks (declaring them inside the floating-pill
     // block scoped them out of the notes sheet's reach).
     var showShareSheet by remember { mutableStateOf(false) }
-    // v3xx54 — SHARING, SPLIT BY WHAT IS BEING SHARED. The share action opens a
-    // small choice sheet first: the card editor for the topic's ART, and — for
-    // anyone who can post — a note (your own line about it) and a quote (the
-    // topic's own words, credited). The last two go straight to the community
-    // and never open the card editor.
-    var showShareChoice by remember { mutableStateOf(false) }
-    var communityPostKind by remember { mutableStateOf<String?>(null) }
+    // The share action opens the original card editor sheet directly.
     // v375 — chapter → review text + its rich runs (spans) for the one-shot
     // share-card seed.
     var pendingChapterShare by remember { mutableStateOf<Triple<Int, String, List<TextSpan>>?>(null) }
@@ -1117,7 +1111,7 @@ fun TopicRevealScreen(
                             accent = cat.themedAccent(),
                             ink = cat.onAccent(),
                             container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
-                            onShare = { showShareChoice = true },
+                            onShare = { showShareSheet = true },
                             onFavorite = {
                                 AppPreferences.setTopicSentiment(
                                     context, cat.id, floatingTopic.id,
@@ -1180,83 +1174,6 @@ fun TopicRevealScreen(
                     onDismiss = {
                         pendingChapterShare = null
                         showShareSheet = false
-                    }
-                )
-            }
-            // The three doors. "Share a card" is the editor that was always
-            // here; the other two are their own flows into the community.
-            if (showShareChoice) {
-                RevealShareChoiceSheet(
-                    canPost = com.curio.app.data.supabase.OnlineAccount.state.signedIn &&
-                        AppPreferences.onlineModeEnabledState,
-                    onCard = {
-                        showShareChoice = false
-                        showShareSheet = true
-                    },
-                    onNote = {
-                        showShareChoice = false
-                        communityPostKind = com.curio.app.data.supabase.KIND_NOTE
-                    },
-                    onQuote = {
-                        showShareChoice = false
-                        communityPostKind = com.curio.app.data.supabase.KIND_QUOTE
-                    },
-                    onDismiss = { showShareChoice = false }
-                )
-            }
-            // The community composer, seeded with the kind that was chosen: a
-            // NOTE opens empty (the words are the writer's), a QUOTE opens with
-            // the topic's own line and its credit already in place.
-            val postKind = communityPostKind
-            if (postKind != null) {
-                val activeToken = com.curio.app.data.supabase.OnlineAccount
-                    .state.session?.accessToken
-                com.curio.app.features.community.CommunityComposerSheet(
-                    seedKind = postKind,
-                    seedFact = if (postKind == com.curio.app.data.supabase.KIND_QUOTE) {
-                        floatingTopic.teaser
-                    } else {
-                        ""
-                    },
-                    seedCredit = if (postKind == com.curio.app.data.supabase.KIND_QUOTE) {
-                        floatingTopic.byline.orEmpty()
-                    } else {
-                        ""
-                    },
-                    onDismiss = { communityPostKind = null },
-                    onPost = { draft ->
-                        if (activeToken == null) {
-                            android.widget.Toast.makeText(
-                                context,
-                                "Sign in with Online mode on to post.",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            val handle = AppPreferences.getUsername(context).ifBlank {
-                                AppPreferences.getDisplayName(context)
-                            }
-                            revealScope.launch {
-                                com.curio.app.data.supabase.CommunityApi
-                                    .post(activeToken, draft, handle)
-                                    .fold(
-                                        onSuccess = {
-                                            communityPostKind = null
-                                            android.widget.Toast.makeText(
-                                                context,
-                                                "Posted to the wall.",
-                                                android.widget.Toast.LENGTH_SHORT
-                                            ).show()
-                                        },
-                                        onFailure = { failure ->
-                                            android.widget.Toast.makeText(
-                                                context,
-                                                failure.message ?: "That didn't post.",
-                                                android.widget.Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                    )
-                            }
-                        }
                     }
                 )
             }
@@ -6162,7 +6079,7 @@ private fun TeaserCard(
 
 // ═════════════════���═════════════════════════════════════════════════════════
 // Action prompt card ("{verb} {target}" + instruction)
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════���══════════════════════════════════════════════════════════════
 
 @Composable
 private fun ActionPromptCard(
