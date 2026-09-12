@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.curio.app.data.supabase.SOCIAL_AVATAR_STYLE_COUNT
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -324,11 +325,17 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_USERNAME, username.trim().removePrefix("@").lowercase()).apply()
     }
 
+    // The pick is an index into the app's drawn portrait list, so both ends
+    // clamp against SOCIAL_AVATAR_STYLE_COUNT — a hardcoded 0..15 here silently
+    // reverted every style added after the first sixteen.
     fun getSocialAvatarStyle(context: Context): Int =
-        prefs(context).getInt(KEY_SOCIAL_AVATAR_STYLE, 0).coerceIn(0, 15)
+        prefs(context).getInt(KEY_SOCIAL_AVATAR_STYLE, 0)
+            .coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1)
 
     fun setSocialAvatarStyle(context: Context, style: Int) {
-        prefs(context).edit().putInt(KEY_SOCIAL_AVATAR_STYLE, style.coerceIn(0, 15)).apply()
+        prefs(context).edit()
+            .putInt(KEY_SOCIAL_AVATAR_STYLE, style.coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1))
+            .apply()
     }
 
     // ── Online Mode ──────────────────────────────────────────────────

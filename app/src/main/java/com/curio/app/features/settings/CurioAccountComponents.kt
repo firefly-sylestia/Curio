@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.SOCIAL_AVATAR_STYLE_COUNT
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.community.AvatarPickerIcon
 import com.curio.app.ui.theme.CurioIcon
@@ -411,7 +412,7 @@ internal fun CurioAccountIdentityCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items((0..15).toList()) { style ->
+            items((0 until SOCIAL_AVATAR_STYLE_COUNT).toList()) { style ->
                 AvatarPickerIcon(style, style == avatarStyle) {
                     avatarStyle = style
                     AppPreferences.setSocialAvatarStyle(context, style)
@@ -427,8 +428,8 @@ internal fun CurioAccountIdentityCard(
             }
         }
         Text(
-            text = "Sixteen hand-drawn icons. Nothing is uploaded: the icon is a single number on " +
-                "your profile.",
+            text = "Twenty-eight hand-drawn icons. Nothing is uploaded: the icon is a single " +
+                "number on your profile.",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

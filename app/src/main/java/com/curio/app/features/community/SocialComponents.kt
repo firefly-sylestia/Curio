@@ -39,6 +39,7 @@ import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.KIND_QUOTE
+import com.curio.app.data.supabase.SOCIAL_AVATAR_STYLE_COUNT
 import com.curio.app.data.supabase.CurioDmThread
 import com.curio.app.data.supabase.CurioFriend
 import com.curio.app.data.supabase.CurioFriendRequest
@@ -914,7 +915,7 @@ internal object SocialPeopleCache {
             userId = row.optString("id").takeIf { it.isNotBlank() } ?: userId,
             displayName = row.optString("n"),
             username = row.optString("u"),
-            avatarStyle = row.optInt("a", 0).coerceIn(0, 15),
+            avatarStyle = row.optInt("a", 0).coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1),
             bio = row.optString("b")
         )
     }
@@ -1194,7 +1195,7 @@ internal object SocialInboxCache {
             userId = id,
             displayName = row.optString("n"),
             username = row.optString("u"),
-            avatarStyle = row.optInt("a", 0).coerceIn(0, 15),
+            avatarStyle = row.optInt("a", 0).coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1),
             bio = row.optString("b")
         )
     }
@@ -1234,7 +1235,8 @@ internal object SocialCommentsCache {
                         authorHandle = row.optString("h"),
                         authorName = row.optString("n"),
                         authorDisplayName = row.optString("dn"),
-                        authorAvatar = row.optInt("av", 0).coerceIn(0, 15),
+                        authorAvatar = row.optInt("av", 0)
+                            .coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1),
                         body = body,
                         parentId = row.optString("p").takeIf { it.isNotBlank() },
                         createdAtMillis = row.optLong("t"),

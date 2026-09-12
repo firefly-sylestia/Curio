@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
@@ -411,13 +412,20 @@ fun V2ShelfArt(
  *  [ox]/[oy] are the box's offset inside the real canvas. */
 private data class ShelfScene(val ox: Float, val oy: Float, val w: Float, val h: Float)
 
-/** The design aspect all scenes are composed for (a comfortable landscape
- *  plate — close to the phone strip, still readable in the portrait tile). */
-private const val SHELF_SCENE_ASPECT = 1.25f
+/** The comfortable aspect RANGE every scene is composed for. v3xx52 — the
+ *  scene box now takes the SURFACE's own aspect (clamped to this range)
+ *  instead of one fixed plate: the old fixed 1.25 letterboxed a wide phone
+ *  strip down to about two thirds of its width, which is what kept the shelf
+ *  art small and hard to read. The clamp keeps a near-portrait preview tile
+ *  from stretching the drawing. */
+private const val SHELF_SCENE_MIN_ASPECT = 1.15f
+private const val SHELF_SCENE_MAX_ASPECT = 1.65f
 
 private fun shelfScene(canvasW: Float, canvasH: Float): ShelfScene {
-    val w = minOf(canvasW, canvasH * SHELF_SCENE_ASPECT)
-    val h = w / SHELF_SCENE_ASPECT
+    if (canvasW <= 0f || canvasH <= 0f) return ShelfScene(0f, 0f, canvasW, canvasH)
+    val aspect = (canvasW / canvasH).coerceIn(SHELF_SCENE_MIN_ASPECT, SHELF_SCENE_MAX_ASPECT)
+    val w = minOf(canvasW, canvasH * aspect)
+    val h = w / aspect
     return ShelfScene((canvasW - w) / 2f, (canvasH - h) / 2f, w, h)
 }
 
@@ -535,257 +543,320 @@ private fun BoxScope.StarArt(dark: Boolean) = ShelfSceneCanvas { s ->
     drawCircle(Color.White.copy(alpha = 0.8f), radius = r * 0.055f, center = Offset(cx - r * 0.98f, cy - r * 1.12f))
 }
 
-/** FAVORITES (redrawn v3xx51) — a HEART drawn from the real heart curve and
- *  rendered as a constellation: a soft glowing body, evenly spaced star dots
- *  along the outline joined by hairline chords, a solid gold star at the
- *  right lobe and a shooting star sweeping in from the top-left. */
+/** FAVORITES (redrawn again v3xx52) — ONE glossy heart drawn from the real
+ *  heart curve: a rose gradient body with a deeper lower lobe, a crisp white
+ *  outline, a highlight swoosh over the left lobe and a whisper-thin inner
+ *  echo. The old "heart constellation" (a dot net joined by hairline chords)
+ *  read as noise at strip size — one confident shape reads at every size. A
+ *  gold star sits ON the right lobe and two small white hearts float beside it
+ *  so the shelf keeps its sparkle. */
 @Composable
 private fun BoxScope.ConstellationArt(dark: Boolean) = ShelfSceneCanvas { s ->
     val w = s.w; val h = s.h
     val stroke = 1.8.dp.toPx()
-    val rose = if (dark) Color(0xFFC95E7E) else Color(0xFFE86A8C)
+    val rose = if (dark) Color(0xFFC9577A) else Color(0xFFEC6A90)
+    val roseDeep = if (dark) Color(0xFF8B3A56) else Color(0xFFC24A72)
     val gold = if (dark) Color(0xFFE8C27A) else Color(0xFFF2B45C)
-    // The classic heart curve, sampled — accurate lobes and a real point.
-    val k = h * 0.0215f
-    val cx = w * 0.50f; val cy = h * 0.50f
-    fun heartAt(t: Float): Offset {
-        val x = 16f * sin(t) * sin(t) * sin(t)
-        val y = 13f * cos(t) - 5f * cos(2f * t) - 2f * cos(3f * t) - cos(4f * t)
-        return Offset(cx + x * k, cy - y * k)
-    }
-    val samples = 72
-    val fill = Path().apply {
+
+    // The classic heart curve, sampled — accurate lobes and a real point. `k`
+    // sizes it to the box: the curve spans ±16k wide and ~22.6k tall, so
+    // k = 0.038h fills ~90% of the height, with cy placed so the shape sits
+    // centred (its vertical span runs from cy−5.6k to cy+17k).
+    val k = h * 0.038f
+    val cx = w * 0.47f
+    val cy = h * 0.28f
+    fun heartPath(scale: Float, ox: Float, oy: Float): Path = Path().apply {
+        val samples = 84
         for (i in 0..samples) {
-            val p = heartAt(i.toFloat() / samples * 2f * Math.PI.toFloat())
-            if (i == 0) moveTo(p.x, p.y) else lineTo(p.x, p.y)
+            val t = i.toFloat() / samples * 2f * Math.PI.toFloat()
+            val x = 16f * sin(t) * sin(t) * sin(t)
+            val y = 13f * cos(t) - 5f * cos(2f * t) - 2f * cos(3f * t) - cos(4f * t)
+            val px = cx + ox + x * k * scale
+            val py = cy + oy - y * k * scale
+            if (i == 0) moveTo(px, py) else lineTo(px, py)
         }
         close()
     }
-    drawPath(fill, rose.copy(alpha = 0.26f))
-    // Outline + the constellation net (every 6th sample = a star node).
-    var prev: Offset? = null
-    val nodes = mutableListOf<Offset>()
-    for (i in 0..samples) {
-        val p = heartAt(i.toFloat() / samples * 2f * Math.PI.toFloat())
-        if (prev != null) drawLine(Color.White.copy(alpha = 0.32f), prev!!, p, strokeWidth = stroke * 0.3f)
-        prev = p
-        if (i % 6 == 0) nodes.add(p)
-    }
-    nodes.forEach { p ->
-        drawCircle(Color.White.copy(alpha = 0.95f), radius = h * 0.017f, center = p)
-        drawCircle(rose.copy(alpha = 0.55f), radius = h * 0.028f, center = p, style = Stroke(width = stroke * 0.3f))
-    }
-    // The bright north star on the right lobe.
-    val node = nodes.getOrNull(nodes.size / 5)
-    val starC = node ?: Offset(cx + w * 0.18f, cy - h * 0.16f)
-    val outer = fiveStar(starC.x, starC.y, h * 0.085f)
-    drawPath(outer, gold.copy(alpha = 0.95f))
-    drawPath(outer, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.4f))
-    // Shooting star — a tapered trail with a bright head, top-left.
-    val trail = Path().apply {
-        moveTo(w * 0.06f, h * 0.30f)
-        quadraticTo(w * 0.20f, h * 0.06f, w * 0.42f, h * 0.14f)
-    }
-    drawPath(trail, Color.White.copy(alpha = 0.45f), style = Stroke(width = stroke * 0.35f, cap = StrokeCap.Round))
-    drawCircle(Color.White.copy(alpha = 0.95f), radius = h * 0.026f, center = Offset(w * 0.42f, h * 0.14f))
-    sparkle(w * 0.86f, h * 0.24f, h * 0.05f, alpha = 0.7f)
+
+    groundShadow(cx, cy + h * 0.67f, h * 0.30f, h * 0.045f, dark)
+
+    val body = heartPath(1f, 0f, 0f)
+    drawPath(
+        path = body,
+        brush = Brush.linearGradient(
+            colors = listOf(lerp(rose, Color.White, 0.34f), rose, roseDeep),
+            start = Offset(cx - h * 0.40f, cy - h * 0.14f),
+            end = Offset(cx + h * 0.36f, cy + h * 0.58f)
+        )
+    )
+    drawPath(body, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.75f))
+    // The inner echo — a second heart, a whisper of light.
+    drawPath(heartPath(0.60f, 0f, h * 0.052f), Color.White.copy(alpha = 0.15f))
+    // Highlight swoosh across the left lobe.
+    drawArc(
+        color = Color.White.copy(alpha = 0.5f),
+        startAngle = 200f, sweepAngle = 76f, useCenter = false,
+        topLeft = Offset(cx - h * 0.62f, cy - h * 0.04f),
+        size = Size(h * 0.26f, h * 0.22f),
+        style = Stroke(width = stroke * 1.2f, cap = StrokeCap.Round)
+    )
+    // The gold star on the right lobe + two small hearts floating above-left.
+    val star = fiveStar(cx + h * 0.34f, cy + h * 0.02f, h * 0.085f)
+    drawPath(star, gold.copy(alpha = 0.96f))
+    drawPath(star, Color.White.copy(alpha = 0.92f), style = Stroke(width = stroke * 0.45f))
+    drawPath(heartPath(0.24f, -h * 0.52f, -h * 0.20f), Color.White.copy(alpha = 0.70f))
+    drawPath(heartPath(0.15f, -h * 0.62f, h * 0.04f), Color.White.copy(alpha = 0.45f))
+    sparkle(cx - h * 0.24f, cy + h * 0.60f, h * 0.045f, alpha = 0.5f)
 }
 
-/** CURIYING NOW (redrawn v3xx51) — a real OPEN BOOK from the front: a cover
- *  slab with rounded corners and a bottom lip, three stepped page sheets per
- *  side (so each page block shows its own thickness at the outer edge AND
- *  the foot), a shaded gutter, ruled text with a paragraph indent, a
- *  bookmark ribbon and a page-corner curl. Grounded by a soft shadow. */
+/** CURIYING NOW (redrawn again v3xx52) — a clean OPEN BOOK from the front —
+ *  a cover slab with a bottom lip, two stepped page sheets per side (so the
+ *  block shows its thickness at the outer edge AND the foot), a shaded gutter,
+ *  three ragged ruled lines per page and a ribbon bookmark — with a STEAMING
+ *  MUG resting beside it (the shelf is the Curio verb: reading while the
+ *  kettle is still warm). The previous pass stacked three page sheets, double
+ *  edge hairlines, a page curl AND no mug; at strip size that read as a
+ *  scribble, so this pass keeps one idea per element. */
 @Composable
 private fun BoxScope.ReadingArt(dark: Boolean) = ShelfSceneCanvas { s ->
     val w = s.w; val h = s.h
     val stroke = 1.8.dp.toPx()
-    val page = if (dark) Color(0xFFE8DCC8) else Color(0xFFFCF6EB)
-    val pageShade = if (dark) Color(0xFFD0BFA3) else Color(0xFFE7D8BE)
+    val page = if (dark) Color(0xFFE9DFCB) else Color(0xFFFDF8EE)
+    val pageShade = if (dark) Color(0xFFCFBFA2) else Color(0xFFE6D7BC)
     val cover = if (dark) Color(0xFF6E4A3C) else Color(0xFFA9785C)
-    val coverDim = if (dark) Color(0xFF5A3C31) else Color(0xFF95674D)
-    val line = if (dark) Color(0xFF9DB58F) else Color(0xFF7B9074)
+    val coverDim = if (dark) Color(0xFF59392E) else Color(0xFF8E6247)
+    val rule = if (dark) Color(0xFF9DB58F) else Color(0xFF7B9074)
     val ribbon = if (dark) Color(0xFFC98A6D) else Color(0xFFC8604F)
+    val mug = if (dark) Color(0xFFB3766A) else Color(0xFFE08C7A)
+    val mugDim = if (dark) Color(0xFF8E5A50) else Color(0xFFC06D5C)
 
-    val gx = w * 0.50f              // the gutter (spine)
-    val top = h * 0.28f
-    val bot = h * 0.82f
-    val outL = w * 0.06f
-    val outR = w * 0.94f
+    val gx = w * 0.36f              // the gutter (spine)
+    val top = h * 0.30f
+    val bot = h * 0.84f
+    val outL = w * 0.03f
+    val outR = w * 0.70f
 
     // One page sheet: pinched at the gutter, sagging out to its outer edge.
+    // `liftX` widens it (the sheets behind peek out at the sides), `liftY`
+    // drops it (they peek out at the foot too).
     fun pagePath(side: Float, outer: Float, liftX: Float, liftY: Float): Path = Path().apply {
         val ox = if (side < 0f) outer - liftX else outer + liftX
-        moveTo(gx, top)
-        cubicTo(gx + side * w * 0.17f, top + h * 0.035f, ox - side * w * 0.12f, top + h * 0.012f, ox, top + h * 0.085f + liftY)
+        moveTo(gx, top + liftY)
+        cubicTo(
+            gx + side * w * 0.12f, top + liftY + h * 0.030f,
+            ox - side * w * 0.10f, top + liftY + h * 0.006f,
+            ox, top + liftY + h * 0.072f
+        )
         lineTo(ox, bot + liftY)
-        cubicTo(ox - side * w * 0.13f, bot + h * 0.05f, gx + side * w * 0.15f, bot + h * 0.055f, gx, bot - h * 0.02f)
+        cubicTo(
+            ox - side * w * 0.11f, bot + liftY + h * 0.046f,
+            gx + side * w * 0.10f, bot + liftY + h * 0.050f,
+            gx, bot + liftY - h * 0.018f
+        )
         close()
     }
 
-    groundShadow(gx, bot + h * 0.085f, w * 0.42f, h * 0.045f, dark)
-    // ── The cover slab, a whisper wider than the pages, with its own crease.
+    groundShadow(w * 0.46f, bot + h * 0.118f, w * 0.45f, h * 0.042f, dark)
+
+    // ── The cover slab, a whisper wider than the pages.
     drawRoundRect(
         cover.copy(alpha = 0.95f),
-        topLeft = Offset(outL - w * 0.022f, top + h * 0.055f),
-        size = Size((outR - outL) + w * 0.044f, (bot + h * 0.055f) - (top + h * 0.055f)),
-        cornerRadius = CornerRadius(w * 0.022f)
+        topLeft = Offset(outL - w * 0.010f, top + h * 0.048f),
+        size = Size((outR - outL) + w * 0.020f, (bot + h * 0.052f) - (top + h * 0.048f)),
+        cornerRadius = CornerRadius(w * 0.012f)
     )
     drawRoundRect(
-        Color.White.copy(alpha = 0.88f),
-        topLeft = Offset(outL - w * 0.022f, top + h * 0.055f),
-        size = Size((outR - outL) + w * 0.044f, (bot + h * 0.055f) - (top + h * 0.055f)),
-        cornerRadius = CornerRadius(w * 0.022f),
-        style = Stroke(width = stroke * 0.5f)
+        Color.White.copy(alpha = 0.90f),
+        topLeft = Offset(outL - w * 0.010f, top + h * 0.048f),
+        size = Size((outR - outL) + w * 0.020f, (bot + h * 0.052f) - (top + h * 0.048f)),
+        cornerRadius = CornerRadius(w * 0.012f),
+        style = Stroke(width = stroke * 0.55f)
     )
-    // Cover foot shading — the block's thickness below the pages.
-    drawLine(coverDim.copy(alpha = 0.8f), Offset(outL - w * 0.018f, bot + h * 0.038f), Offset(outR + w * 0.018f, bot + h * 0.038f), strokeWidth = stroke * 0.5f)
-    // ── Three page sheets per side: bottom (furthest out + lowest) to top.
+    // The block's thickness below the pages.
+    drawLine(
+        coverDim.copy(alpha = 0.85f),
+        Offset(outL - w * 0.008f, bot + h * 0.036f),
+        Offset(outR + w * 0.008f, bot + h * 0.036f),
+        strokeWidth = stroke * 0.5f
+    )
+    // ── Two page sheets per side: the lower one carries the block's thickness.
     listOf(
-        Triple(0.030f, h * 0.026f, pageShade.copy(alpha = 0.95f)),
-        Triple(0.015f, h * 0.013f, page.copy(alpha = 0.95f)),
+        Triple(0.016f, h * 0.022f, pageShade.copy(alpha = 0.95f)),
         Triple(0f, 0f, page)
-    ).forEach { (lx, ly, fill) ->
+    ).forEach { (offset, lift, fill) ->
         listOf(-1f, 1f).forEach { side ->
-            val p = pagePath(side, if (side < 0f) outL else outR, w * lx, ly)
-            drawPath(p, fill)
-            drawPath(p, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.45f))
+            val sheet = pagePath(side, if (side < 0f) outL else outR, w * offset, lift)
+            drawPath(sheet, fill)
+            drawPath(sheet, Color.White.copy(alpha = 0.88f), style = Stroke(width = stroke * 0.45f))
+            // The sheet's own foot line — the page edge, one hairline only.
+            if (lift > 0f) {
+                val edge = if (side < 0f) outL - w * offset else outR + w * offset
+                drawLine(
+                    pageShade.copy(alpha = 0.8f),
+                    Offset(edge, top + h * 0.10f),
+                    Offset(edge, bot + lift),
+                    strokeWidth = stroke * 0.35f
+                )
+            }
         }
     }
-    // ── Page block edges: two hairlines just inside each outer edge.
-    listOf(-1f, 1f).forEach { side ->
-        val edge = if (side < 0f) outL else outR
-        listOf(0.012f, 0.024f).forEach { dx ->
-            drawLine(
-                pageShade.copy(alpha = 0.75f),
-                Offset(edge - side * w * dx, top + h * 0.10f),
-                Offset(edge - side * w * dx, bot - h * 0.02f),
-                strokeWidth = stroke * 0.3f
+    // ── Ruled text: three lines per page, ragged at the outer edge.
+    for (i in 0 until 3) {
+        val ly = top + h * (0.30f + i * 0.155f)
+        drawLine(rule.copy(alpha = 0.5f), Offset(gx - w * 0.28f, ly), Offset(gx - w * 0.045f, ly), strokeWidth = 1.0f)
+        drawLine(
+            rule.copy(alpha = 0.5f),
+            Offset(gx + w * 0.045f, ly),
+            Offset(gx + w * 0.28f - (if (i == 2) w * 0.10f else 0f), ly),
+            strokeWidth = 1.0f
+        )
+    }
+    // ── The gutter: a white join with a soft crease each side.
+    drawLine(Color.White.copy(alpha = 0.92f), Offset(gx, top + h * 0.01f), Offset(gx, bot - h * 0.02f), strokeWidth = 1.8f)
+    drawLine(rule.copy(alpha = 0.25f), Offset(gx + w * 0.008f, top + h * 0.06f), Offset(gx + w * 0.008f, bot - h * 0.05f), strokeWidth = stroke * 0.4f)
+    drawLine(rule.copy(alpha = 0.25f), Offset(gx - w * 0.008f, top + h * 0.06f), Offset(gx - w * 0.008f, bot - h * 0.05f), strokeWidth = stroke * 0.4f)
+    // ── A ribbon bookmark over the right page, V-notched tail.
+    val rb = Path().apply {
+        moveTo(gx + w * 0.014f, top + h * 0.015f)
+        lineTo(gx + w * 0.058f, top + h * 0.015f)
+        lineTo(gx + w * 0.058f, top + h * 0.42f)
+        lineTo(gx + w * 0.036f, top + h * 0.35f)
+        lineTo(gx + w * 0.014f, top + h * 0.42f)
+        close()
+    }
+    drawPath(rb, ribbon.copy(alpha = 0.95f))
+    drawPath(rb, Color.White.copy(alpha = 0.88f), style = Stroke(width = stroke * 0.45f))
+
+    // ── The mug beside the book: rim, handle, a shade band and two wisps.
+    val mw = w * 0.17f
+    val mx = w * 0.74f
+    val mTop = bot - h * 0.30f
+    val mBot = bot + h * 0.052f
+    drawRoundRect(
+        color = mug.copy(alpha = 0.95f),
+        topLeft = Offset(mx, mTop),
+        size = Size(mw, mBot - mTop),
+        cornerRadius = CornerRadius(w * 0.014f)
+    )
+    drawRoundRect(
+        color = Color.White.copy(alpha = 0.90f),
+        topLeft = Offset(mx, mTop),
+        size = Size(mw, mBot - mTop),
+        cornerRadius = CornerRadius(w * 0.014f),
+        style = Stroke(width = stroke * 0.55f)
+    )
+    drawArc(
+        color = mugDim.copy(alpha = 0.95f),
+        startAngle = 280f, sweepAngle = 160f, useCenter = false,
+        topLeft = Offset(mx + mw * 0.72f, mTop + h * 0.055f),
+        size = Size(mw * 0.50f, h * 0.13f),
+        style = Stroke(width = stroke * 1.6f, cap = StrokeCap.Round)
+    )
+    drawOval(
+        color = Color.White.copy(alpha = 0.55f),
+        topLeft = Offset(mx + w * 0.012f, mTop + h * 0.014f),
+        size = Size(mw - w * 0.024f, h * 0.030f)
+    )
+    drawLine(
+        mugDim.copy(alpha = 0.6f),
+        Offset(mx + w * 0.010f, mBot - h * 0.035f),
+        Offset(mx + mw - w * 0.010f, mBot - h * 0.035f),
+        strokeWidth = stroke * 0.4f
+    )
+    listOf(0.36f, 0.62f).forEach { fx ->
+        val sx = mx + mw * fx
+        val wisps = Path().apply {
+            moveTo(sx, mTop - h * 0.05f)
+            cubicTo(
+                sx + w * 0.035f, mTop - h * 0.12f,
+                sx - w * 0.035f, mTop - h * 0.19f,
+                sx + w * 0.010f, mTop - h * 0.28f
             )
         }
+        drawPath(wisps, Color.White.copy(alpha = 0.55f), style = Stroke(width = stroke * 0.7f, cap = StrokeCap.Round))
     }
-    // ── Ruled text: two paragraphs, indented first lines, ragged last lines.
-    for (i in 0 until 4) {
-        val ly = top + h * (0.19f + i * 0.115f)
-        val leftStart = gx - w * 0.365f + (if (i == 0) w * 0.035f else 0f)
-        val leftEnd = gx - w * 0.055f - (if (i == 3) w * 0.10f else 0f)
-        drawLine(line.copy(alpha = 0.55f), Offset(leftStart, ly), Offset(leftEnd, ly), strokeWidth = 1.0f)
-        val rightStart = gx + w * 0.055f + (if (i == 0) w * 0.035f else 0f)
-        val rightEnd = gx + w * 0.365f - (if (i == 3) w * 0.13f else 0f)
-        drawLine(line.copy(alpha = 0.55f), Offset(rightStart, ly), Offset(rightEnd, ly), strokeWidth = 1.0f)
-    }
-    // ── Gutter: a white join plus a soft inner crease shadow each side.
-    drawLine(Color.White.copy(alpha = 0.9f), Offset(gx, top + h * 0.01f), Offset(gx, bot - h * 0.03f), strokeWidth = 1.6f)
-    drawLine(line.copy(alpha = 0.28f), Offset(gx + w * 0.010f, top + h * 0.06f), Offset(gx + w * 0.010f, bot - h * 0.06f), strokeWidth = stroke * 0.4f)
-    drawLine(line.copy(alpha = 0.28f), Offset(gx - w * 0.010f, top + h * 0.06f), Offset(gx - w * 0.010f, bot - h * 0.06f), strokeWidth = stroke * 0.4f)
-    // ── Bookmark ribbon over the right page, V-notched tail.
-    val rb = Path().apply {
-        moveTo(gx + w * 0.012f, top + h * 0.02f)
-        lineTo(gx + w * 0.062f, top + h * 0.02f)
-        lineTo(gx + w * 0.062f, top + h * 0.40f)
-        lineTo(gx + w * 0.037f, top + h * 0.33f)
-        lineTo(gx + w * 0.012f, top + h * 0.40f)
-        close()
-    }
-    drawPath(rb, ribbon.copy(alpha = 0.94f))
-    drawPath(rb, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.4f))
-    // ── Page-corner curl at the left page's outer bottom — a small lift.
-    val curl = Path().apply {
-        moveTo(outL, bot - h * 0.12f)
-        quadraticTo(outL + w * 0.045f, bot - h * 0.09f, outL + w * 0.030f, bot - h * 0.02f)
-        close()
-    }
-    drawPath(curl, Color.White.copy(alpha = 0.55f))
-    drawPath(curl, Color.White.copy(alpha = 0.8f), style = Stroke(width = stroke * 0.35f))
-    sparkle(w * 0.13f, h * 0.16f, h * 0.045f, alpha = 0.55f)
+    sparkle(w * 0.09f, h * 0.16f, h * 0.045f, alpha = 0.55f)
 }
 
-/** WANT TO READ (redrawn v3xx51) — three upright spines of different heights
- *  with title bands, a crest and a peek-out ribbon, plus a book lying FLAT
- *  across the front so the shelf reads as a real row of books rather than
- *  three bars. Pastel fills + white outlines (doodle family). */
+/** WANT TO READ (redrawn again v3xx52) — ONE hero hardcover standing front-on
+ *  (cover, deeper spine strip, a cream fore-edge of pages, a title band with
+ *  two subtitle ticks, a gold star seal and a hanging ribbon bookmark) with
+ *  two thinner books LEANING behind it, so the shelf still reads as a real
+ *  row. The old pass drew three upright spines of different heights plus a
+ *  book lying flat — five competing silhouettes at strip size. One confident
+ *  book, two quiet neighbours. */
 @Composable
 private fun BoxScope.BooksArt(dark: Boolean) = ShelfSceneCanvas { s ->
     val w = s.w; val h = s.h
     val stroke = 1.8.dp.toPx()
-    val tones = if (dark) listOf(0xFF7A5C4C, 0xFF9A7560, 0xFFC09379)
-    else listOf(0xFF9C7562, 0xFFB98D79, 0xFFD39F91)
-    val flatTone = if (dark) Color(0xFF8A6A58) else Color(0xFFB1866F)
-    val base = h * 0.85f
+    val backTone = if (dark) Color(0xFF6E5748) else Color(0xFFB49A85)
+    val backTone2 = if (dark) Color(0xFF7E6650) else Color(0xFFCBAE94)
+    val heroTone = if (dark) Color(0xFF8E5A62) else Color(0xFFC77E8A)
+    val heroSpine = if (dark) Color(0xFF6C444C) else Color(0xFFA85E6C)
+    val paper = if (dark) Color(0xFFE9DFCB) else Color(0xFFFDF8EE)
+    val gold = if (dark) Color(0xFFE8C27A) else Color(0xFFF2B45C)
+    val ribbon = if (dark) Color(0xFFC98A6D) else Color(0xFFC8604F)
+    val base = h * 0.90f
 
-    groundShadow(w * 0.48f, base + h * 0.095f, w * 0.42f, h * 0.038f, dark)
+    groundShadow(w * 0.48f, base + h * 0.020f, w * 0.40f, h * 0.038f, dark)
 
-    // ── Upright spines — tall, medium, short.
-    val centers = listOf(0.20f, 0.45f, 0.69f)
-    val widths = listOf(0.155f, 0.175f, 0.135f)
-    val heights = listOf(0.52f, 0.64f, 0.44f)
-    centers.forEachIndexed { i, c ->
-        val bwid = w * widths[i]
-        val bhei = h * heights[i]
-        val x = w * c - bwid / 2f
-        val y = base - bhei
-        val spine = Path().apply {
-            moveTo(x, base)
-            lineTo(x, y)
-            lineTo(x + bwid, y)
-            lineTo(x + bwid, base)
-            close()
-        }
-        drawPath(spine, Color(tones[i]).copy(alpha = 0.94f))
-        drawPath(spine, Color.White.copy(alpha = 0.92f), style = Stroke(width = stroke * 0.55f))
-        // Title band + author ticks near the top.
-        val bandY = y + bhei * 0.24f
-        drawLine(Color.White.copy(alpha = 0.88f), Offset(x + bwid * 0.22f, bandY), Offset(x + bwid * 0.78f, bandY), strokeWidth = 1.1f)
-        drawLine(Color.White.copy(alpha = 0.55f), Offset(x + bwid * 0.22f, bandY - bhei * 0.075f), Offset(x + bwid * 0.58f, bandY - bhei * 0.075f), strokeWidth = 1.0f)
-        // Publisher's foot band.
-        drawLine(Color.White.copy(alpha = 0.5f), Offset(x + bwid * 0.14f, base - bhei * 0.085f), Offset(x + bwid * 0.86f, base - bhei * 0.085f), strokeWidth = stroke * 0.3f)
-        if (i == 1) {
-            // A crest + a ribbon peeking over the tallest spine.
-            drawCircle(Color.White.copy(alpha = 0.30f), radius = bwid * 0.19f, center = Offset(x + bwid * 0.5f, y + bhei * 0.47f))
-            drawCircle(Color.White.copy(alpha = 0.85f), radius = bwid * 0.19f, center = Offset(x + bwid * 0.5f, y + bhei * 0.47f), style = Stroke(width = stroke * 0.35f))
-            val rib = Path().apply {
-                moveTo(x + bwid * 0.30f, y)
-                lineTo(x + bwid * 0.42f, y)
-                lineTo(x + bwid * 0.42f, y - h * 0.075f)
-                lineTo(x + bwid * 0.36f, y - h * 0.052f)
-                lineTo(x + bwid * 0.30f, y - h * 0.075f)
-                close()
-            }
-            drawPath(rib, Color(if (dark) 0xFFC98A6D else 0xFFC8604F).copy(alpha = 0.92f))
-            drawPath(rib, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.35f))
-        }
-    }
+    // ── Two books leaning behind, with a quiet title band each.
+    val leftBook = rotRect(w * 0.17f, h * 0.30f, w * 0.19f, h * 0.60f, -0.15f)
+    drawPath(leftBook, backTone.copy(alpha = 0.94f))
+    drawPath(leftBook, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.5f))
+    drawPath(rotRect(w * 0.205f, h * 0.400f, w * 0.12f, h * 0.022f, -0.15f), Color.White.copy(alpha = 0.72f))
+    val rightBook = rotRect(w * 0.67f, h * 0.34f, w * 0.17f, h * 0.56f, 0.13f)
+    drawPath(rightBook, backTone2.copy(alpha = 0.94f))
+    drawPath(rightBook, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.5f))
+    drawPath(rotRect(w * 0.705f, h * 0.440f, w * 0.10f, h * 0.020f, 0.13f), Color.White.copy(alpha = 0.72f))
 
-    // ── A book LYING FLAT across the front — its cover block + page edges.
-    val fx = w * 0.13f
-    val fw = w * 0.74f
-    val ftop = base - h * 0.075f
-    val fbot = base + h * 0.055f
-    val flat = Path().apply {
-        moveTo(fx, ftop + h * 0.012f)
-        lineTo(fx + fw, ftop - h * 0.006f)
-        lineTo(fx + fw - w * 0.014f, fbot - h * 0.006f)
-        lineTo(fx + w * 0.014f, fbot + h * 0.006f)
-        close()
-    }
-    drawPath(flat, flatTone.copy(alpha = 0.96f))
-    drawPath(flat, Color.White.copy(alpha = 0.92f), style = Stroke(width = stroke * 0.55f))
-    // The page block sitting on the flat cover.
-    val pages = Path().apply {
-        moveTo(fx + w * 0.016f, ftop + h * 0.026f)
-        lineTo(fx + fw - w * 0.016f, ftop + h * 0.008f)
-        lineTo(fx + fw - w * 0.022f, ftop + h * 0.040f)
-        lineTo(fx + w * 0.022f, ftop + h * 0.056f)
-        close()
-    }
-    drawPath(pages, Color.White.copy(alpha = 0.9f))
-    drawPath(pages, Color.White.copy(alpha = 0.7f), style = Stroke(width = stroke * 0.35f))
-    drawLine(
-        Color.White.copy(alpha = 0.55f),
-        Offset(fx + w * 0.05f, ftop + h * 0.003f),
-        Offset(fx + fw - w * 0.05f, ftop - h * 0.012f),
-        strokeWidth = stroke * 0.35f
+    // ── The hero hardcover, front-on.
+    val hx = w * 0.30f
+    val hw = w * 0.44f
+    val hy = h * 0.16f
+    val hh = h * 0.74f
+    drawRoundRect(heroTone.copy(alpha = 0.97f), Offset(hx, hy), Size(hw, hh), CornerRadius(w * 0.014f))
+    drawRoundRect(
+        Color.White.copy(alpha = 0.92f), Offset(hx, hy), Size(hw, hh),
+        CornerRadius(w * 0.014f), style = Stroke(width = stroke * 0.6f)
     )
+    // The spine strip down the left edge.
+    drawRoundRect(heroSpine.copy(alpha = 0.95f), Offset(hx, hy), Size(hw * 0.14f, hh), CornerRadius(w * 0.014f))
+    // The fore-edge — the page block along the right.
+    drawRoundRect(
+        paper.copy(alpha = 0.95f),
+        Offset(hx + hw - w * 0.030f, hy + h * 0.020f),
+        Size(w * 0.026f, hh - h * 0.040f),
+        CornerRadius(w * 0.008f)
+    )
+    // The title band + its two subtitle ticks.
+    drawRoundRect(
+        Color.White.copy(alpha = 0.86f),
+        Offset(hx + hw * 0.30f, hy + h * 0.115f),
+        Size(hw * 0.52f, h * 0.042f),
+        CornerRadius(w * 0.010f)
+    )
+    drawLine(Color.White.copy(alpha = 0.5f), Offset(hx + hw * 0.34f, hy + h * 0.195f), Offset(hx + hw * 0.72f, hy + h * 0.195f), strokeWidth = 1.1f)
+    drawLine(Color.White.copy(alpha = 0.35f), Offset(hx + hw * 0.34f, hy + h * 0.235f), Offset(hx + hw * 0.62f, hy + h * 0.235f), strokeWidth = 1.1f)
+    // A gold star seal near the foot.
+    val seal = Offset(hx + hw * 0.56f, hy + hh * 0.74f)
+    drawCircle(Color.White.copy(alpha = 0.22f), h * 0.055f, seal)
+    drawCircle(Color.White.copy(alpha = 0.75f), h * 0.055f, seal, style = Stroke(width = stroke * 0.4f))
+    val sealStar = fiveStar(seal.x, seal.y, h * 0.042f)
+    drawPath(sealStar, gold.copy(alpha = 0.95f))
+    drawPath(sealStar, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.3f))
+    // The ribbon bookmark hanging over the cover.
+    val rib = Path().apply {
+        moveTo(hx + hw * 0.62f, hy)
+        lineTo(hx + hw * 0.74f, hy)
+        lineTo(hx + hw * 0.74f, hy + h * 0.20f)
+        lineTo(hx + hw * 0.68f, hy + h * 0.155f)
+        lineTo(hx + hw * 0.62f, hy + h * 0.20f)
+        close()
+    }
+    drawPath(rib, ribbon.copy(alpha = 0.95f))
+    drawPath(rib, Color.White.copy(alpha = 0.88f), style = Stroke(width = stroke * 0.4f))
+    sparkle(w * 0.11f, h * 0.20f, h * 0.04f, alpha = 0.5f)
 }
 
 /** CUSTOM — hand-drawn layered mountains with soft CURVED peaks, a

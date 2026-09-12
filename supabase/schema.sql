@@ -25,7 +25,10 @@ create table if not exists public.profiles (
     id                  uuid primary key references auth.users (id) on delete cascade,
     display_name        text,
     username            text,
-    avatar_style        smallint not null default 0 check (avatar_style between 0 and 15),
+    -- 0..27 = the 28 code-drawn portraits (SOCIAL_AVATAR_STYLE_COUNT in the
+    -- app's SocialApi.kt). Widen this bound in the SAME commit that adds a
+    -- style to the app's AVATARS list, or the new pick is rejected on write.
+    avatar_style        smallint not null default 0 check (avatar_style between 0 and 27),
     online_mode_enabled boolean not null default false,
     created_at          timestamptz not null default now(),
     updated_at          timestamptz not null default now()
@@ -34,11 +37,19 @@ create table if not exists public.profiles (
 alter table public.profiles enable row level security;
 alter table public.profiles add column if not exists username text;
 alter table public.profiles add column if not exists avatar_style smallint not null default 0;
+-- v3xx52 — the portrait count grew from 16 to 28 (the soft set), so the range
+-- check is REPLACED rather than merely created: an install that already
+-- carries the old 0..15 constraint must be widened, or picking a new style
+-- fails the write. Idempotent — re-pasting with the new bound is a no-op.
 do $$
 begin
     if not exists (select 1 from pg_constraint where conname = 'profiles_avatar_style_range') then
         alter table public.profiles add constraint profiles_avatar_style_range
-            check (avatar_style between 0 and 15);
+            check (avatar_style between 0 and 27);
+    else
+        alter table public.profiles drop constraint profiles_avatar_style_range;
+        alter table public.profiles add constraint profiles_avatar_style_range
+            check (avatar_style between 0 and 27);
     end if;
 end $$;
 create unique index if not exists profiles_username_unique

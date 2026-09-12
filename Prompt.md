@@ -1,5 +1,69 @@
 # Prompt Log — current request
 
+## Request (2026-09-12, DONE — the soft avatars, the redrawn shelf art, and a
+## saved entry that stops disappearing)
+
+User (chat): "add more girly avatar and also make the avatar more better also fix
+these [pasted CI: lint `MissingPermission` on the notify call] and also redraw
+the collcetions favorite, curying now and want to read, also still the cabinet
+saved entry doesnt stays available always."
+
+Three companion requests landed in the same stretch (each its own commit, all
+pushed): **seal the stored session tokens** (`1273ca67` — `CurioSecureStore` on
+the Android Keystore + AES/GCM, with a one-way migration off the plain prefs blob
+and both backup XMLs excluding the sealed file), **drive the social surfaces with
+Supabase Realtime** (`69cb6426` — a hand-rolled phoenix-protocol client over the
+project's existing OkHttp, no new dependency, wired into the wall / threads /
+inbox with the pollers kept as the fallback when the socket is down), and **put a
+member's bio on their public page** (`b357f363` — bio pushed to the profile row,
+read back by every social identity read).
+
+### What shipped (this commit)
+
+1. **CI repair.** `SocialNotifications.kt`'s `notify` was flagged
+   `MissingPermission` — the call is now wrapped in an explicit
+   `POST_NOTIFICATIONS` grant check (and the platform-notification toggle check)
+   so lint's flow analysis is satisfied without a `@Suppress`.
+
+2. **28 portraits, and better faces.** `SocialAvatar.kt` gained twelve soft
+   feminine silhouettes (long waves, high ponytail, twin braids, hime cut, bob
+   with a headband bow, half-up bun, flower crown, star clips, pixie with a
+   heart clip, waves with glasses, afro puff with a bow, braided crown) across a
+   wider spread of skin and hair tones, plus a redrawn face that every style
+   shares: a warm iris inside a white almond with a lash line and a catch-light,
+   soft brows, a tiny nose, a hair sheen on every non-hat style, and temple arms
+   on the round glasses. The style count is now ONE constant
+   (`SOCIAL_AVATAR_STYLE_COUNT`, `SocialApi.kt`) that the three cache/API reads
+   and the picker's range all clamp to, and `supabase/schema.sql`'s
+   `avatar_style` check was widened from `0..15` to `0..27` (the constraint is
+   dropped + re-added so an already-pasted install upgrades).
+
+3. **The shelf art fills the card and is redrawn again.** `shelfScene`'s fixed
+   1.25 plate — which letterboxed a wide phone strip down to about two thirds of
+   its width, keeping every scene small — is replaced by the surface's OWN
+   aspect clamped to `1.15…1.65`. Inside it: **Favorites** is one glossy rose
+   heart from the real heart curve (gradient body, white outline, highlight
+   swoosh, inner echo, a gold star on the lobe, two floating hearts) instead of
+   the dot-net constellation that read as noise; **Curiying now** is a clean open
+   book (two page sheets per side, one hairline per edge, three ragged ruled
+   lines, a ribbon) with a **steaming mug** beside it; **Want to Read** is one
+   hero hardcover (cover, deeper spine strip, cream fore-edge, title band, gold
+   star seal, hanging ribbon) with two thinner books leaning behind it.
+
+4. **A saved entry never "disappears" any more.** Two real causes of the
+   repeated "the cabinet saved entry doesn't stay available always":
+   `EntryDetailScreen` popped the page back to the Cabinet after a flat **400ms**
+   whenever its row had not arrived yet — a cold Room open or a slow read on a
+   big archive bounced the user straight out of an entry that was in the Cabinet
+   all along; and `SaveCaptureScreen`'s edit mode aborted with "This entry is no
+   longer available" when its **async prefill** had not landed before the save.
+   The detail page now waits for the FIRST REAL emission (tracked with a
+   `rowRead` flag) with a 6-second stall guard before it may decide the entry is
+   gone, and the edit save re-reads the row on its own coroutine, only giving up
+   when it is genuinely absent.
+
+**Status:** committed + pushed; CI validates.
+
 ## Request (2026-09-12, DONE — privacy, names, cache and speed)
 
 User (chat, in their words): the read receipt is inaccurate, and a duplicate
@@ -1103,6 +1167,22 @@ and the whole batch (chats cache + expiries, faster ticks, §5f privacy,
 display-name/handle split, Profile bio + streak rows, wider Edit profile,
 Online-mode row size, security audit) is in the request log at the top of this
 file. Pushed; CI validates.
+
+### Prompt (2026-09-12) — DONE
+
+Three prompts landed in a row: (a) the CI lint failure + "add more girly avatar
+and make the avatar more better, redraw the collections Favorites / Curiying now
+/ Want to Read, and the cabinet saved entry doesn't stay available always";
+(b) "encrypt the stored Supabase session tokens"; (c) "drive the wall and
+messages with Supabase Realtime" and "let members write a bio on their public
+profile".
+
+**Status:** DONE — all four shipped (see the request log at the top of this
+file): the lint fix, 28 portraits with redrawn faces and the widened schema
+check, the three shelf scenes redrawn and made to fill the card, the saved-entry
+availability fix (no 400ms bounce, no "no longer available" race), the Keystore-
+sealed session tokens, the Realtime client with the pollers as fallback, and the
+public bio. Committed and pushed; CI validates.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
 

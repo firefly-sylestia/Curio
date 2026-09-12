@@ -23,18 +23,20 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
 /**
- * The 16 code-drawn social portraits.
+ * The 28 code-drawn social portraits.
  *
  * Everything lives in a disc of one warm ground colour, lit from the top-left
  * with a soft inner rim, so an avatar reads as a pressed paper button rather
  * than a flat blob; the
  * character on top is drawn with three tones (garment, skin, hair) plus ink
- * for the face, and each of the 16 is a DIFFERENT character — a beanie, a bob,
+ * for the face, and each of the 28 is a DIFFERENT character — a beanie, a bob,
  * a bun with glasses, headphones, a wizard hat, an explorer's goggles, a space
- * helmet. Nothing is uploaded and nothing is stored: `avatar_style` is a single
- * small integer on the profile row.
+ * helmet, plus the twelve soft, feminine silhouettes added in v3xx52 (long
+ * waves, a high ponytail, twin braids, a hime cut, a puff with a bow, a flower
+ * crown …). Nothing is uploaded and nothing is stored: `avatar_style` is a
+ * single small integer on the profile row.
  *
- * Drawn rather than shipped as assets on purpose: 16 styles cost no download,
+ * Drawn rather than shipped as assets on purpose: 28 styles cost no download,
  * scale to any size, and can never carry a photo.
  */
 private class AvatarArt(
@@ -64,8 +66,28 @@ private val AVATARS: List<AvatarArt> = listOf(
     AvatarArt(Color(0xFFEFA785), Color(0xFF4F7F72), Color(0xFFF7DEC6), Color(0xFF6B3F26), 12), // top bun + bow
     AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFFC98A3E), 13), // short + freckles
     AvatarArt(Color(0xFFAE8FBC), Color(0xFF3E4A5C), Color(0xFFEEF0F4), Color(0xFF2B3038), 14), // hood
-    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15)  // space helmet
+    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15), // space helmet
+    // ── v3xx52 — the SOFT SET: twelve feminine silhouettes (waves,
+    // ponytails, braids, puffs, flower crowns, bows) in the same pastel
+    // family, with a wider spread of skin and hair tones so every member can
+    // pick something that looks like them.
+    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16), // waves + flower
+    AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17), // high ponytail
+    AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF3E2E28), 18), // twin braids
+    AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF241E1C), 19), // hime cut
+    AvatarArt(Color(0xFFF6D5C0), Color(0xFF9ED0B8), Color(0xFFEFC8A4), Color(0xFF8A4E2E), 20), // bob + bow
+    AvatarArt(Color(0xFFE6E0F5), Color(0xFFC98FA8), Color(0xFFF5D8BE), Color(0xFF4A3A32), 21), // half-up bun
+    AvatarArt(Color(0xFFD6E7C6), Color(0xFFE9A5BE), Color(0xFFF7DCC0), Color(0xFF7A4A2C), 22), // flower crown
+    AvatarArt(Color(0xFFF0C4D8), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF2E2622), 23), // waves + star clips
+    AvatarArt(Color(0xFFCCE3E8), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFFC98A3E), 24), // pixie + heart clip
+    AvatarArt(Color(0xFFF3D9B0), Color(0xFF5E8C7A), Color(0xFFE9BE97), Color(0xFF3A2B24), 25), // waves + glasses
+    AvatarArt(Color(0xFFE2D2F0), Color(0xFFF0A88C), Color(0xFF8C5A3C), Color(0xFF2A211D), 26), // puff + bow
+    AvatarArt(Color(0xFFF7CFA8), Color(0xFF7E5AA0), Color(0xFFF2D3B8), Color(0xFF5B3A24), 27)  // braided crown
 )
+
+// The style count lives in the data layer (SocialApi.SOCIAL_AVATAR_STYLE_COUNT)
+// because every read and write clamps against it AND because it must stay in
+// step with the `avatar_style between 0 and …` check in supabase/schema.sql.
 
 /**
  * The code-drawn social portrait for [style] (0–15).
@@ -169,6 +191,75 @@ private fun DrawScope.drawAvatarPolish(
     )
 }
 
+/** v3xx52 — a five-petal flower (a soft-set accessory: the hair flower, the
+ *  flower crown). Petals ring a warm core, all in the design grid's units. */
+private fun DrawScope.avatarFlower(center: Offset, petal: Float, petalColor: Color, coreColor: Color) {
+    for (i in 0 until 5) {
+        val a = -Math.PI / 2.0 + i * 2.0 * Math.PI / 5.0
+        drawCircle(
+            color = petalColor,
+            radius = petal,
+            center = Offset(
+                center.x + (petal * 0.92f * kotlin.math.cos(a)).toFloat(),
+                center.y + (petal * 0.92f * kotlin.math.sin(a)).toFloat()
+            )
+        )
+    }
+    drawCircle(coreColor, petal * 0.62f, center)
+}
+
+/** v3xx52 — a small ribbon bow: two loops either side of a knot. */
+private fun DrawScope.avatarBow(center: Offset, half: Float, color: Color) {
+    val left = Path().apply {
+        moveTo(center.x, center.y)
+        lineTo(center.x - half * 1.5f, center.y - half * 0.85f)
+        lineTo(center.x - half * 1.5f, center.y + half * 0.85f)
+        close()
+    }
+    val right = Path().apply {
+        moveTo(center.x, center.y)
+        lineTo(center.x + half * 1.5f, center.y - half * 0.85f)
+        lineTo(center.x + half * 1.5f, center.y + half * 0.85f)
+        close()
+    }
+    drawPath(left, color)
+    drawPath(right, color)
+    drawPath(left, Color.White.copy(alpha = 0.55f), style = Stroke(width = half * 0.22f))
+    drawPath(right, Color.White.copy(alpha = 0.55f), style = Stroke(width = half * 0.22f))
+    drawCircle(color, half * 0.42f, center)
+}
+
+/** v3xx52 — a five-point star path centred at [center] (the hair clips). */
+private fun fivePointStarPath(center: Offset, outer: Float): Path {
+    val inner = outer * 0.44f
+    return Path().apply {
+        for (i in 0 until 10) {
+            val radius = if (i % 2 == 0) outer else inner
+            val a = -Math.PI / 2.0 + i * Math.PI / 5.0
+            val x = center.x + (radius * kotlin.math.cos(a)).toFloat()
+            val y = center.y + (radius * kotlin.math.sin(a)).toFloat()
+            if (i == 0) moveTo(x, y) else lineTo(x, y)
+        }
+        close()
+    }
+}
+
+/** v3xx52 — a small heart path centred at [center] (the heart hair clip). */
+private fun heartClipPath(center: Offset, half: Float): Path = Path().apply {
+    moveTo(center.x, center.y + half * 0.78f)
+    cubicTo(
+        center.x - half * 1.22f, center.y - half * 0.14f,
+        center.x - half * 0.60f, center.y - half * 1.06f,
+        center.x, center.y - half * 0.34f
+    )
+    cubicTo(
+        center.x + half * 0.60f, center.y - half * 1.06f,
+        center.x + half * 1.22f, center.y - half * 0.14f,
+        center.x, center.y + half * 0.78f
+    )
+    close()
+}
+
 /**
  * The character itself. [p] maps the 100×100 design grid to the canvas and [r]
  * scales a design radius, so each style reads the same at 24dp and at 120dp.
@@ -218,6 +309,70 @@ private fun DrawScope.drawCharacter(
             radius = r(38f),
             center = p(50f, 46f)
         )
+        // ── v3xx52 — the soft set's silhouettes, drawn BEHIND the head so
+        //    they frame the face instead of sitting on top of it. ─────────
+        16, 23, 25, 27 -> {     // long waves past the shoulders, curled at the foot
+            drawRoundRect(
+                color = hair,
+                topLeft = p(21f, 17f),
+                size = Size(r(58f), r(70f)),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(r(29f), r(29f))
+            )
+            drawCircle(hair, r(13f), p(27f, 84f))
+            drawCircle(hair, r(13f), p(73f, 84f))
+        }
+        17 -> {                 // high ponytail sweeping down the right
+            drawRoundRect(
+                color = hair,
+                topLeft = p(24f, 18f),
+                size = Size(r(52f), r(58f)),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(r(26f), r(26f))
+            )
+            drawCircle(hair, r(11f), p(76f, 32f))
+            drawCircle(hair, r(10f), p(82f, 47f))
+            drawCircle(hair, r(9f), p(84f, 63f))
+            drawCircle(hair, r(7f), p(82f, 77f))
+        }
+        18 -> {                 // twin braids — five plaits each side
+            drawRoundRect(
+                color = hair,
+                topLeft = p(25f, 18f),
+                size = Size(r(50f), r(52f)),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(r(25f), r(25f))
+            )
+            for (i in 0 until 5) {
+                val plait = 7.5f - i * 0.9f
+                drawCircle(hair, r(plait), p(23f - i * 0.8f, 62f + i * 10f))
+                drawCircle(hair, r(plait), p(77f + i * 0.8f, 62f + i * 10f))
+            }
+        }
+        19 -> drawRoundRect(    // hime cut: straight sheets past the jaw
+            color = hair,
+            topLeft = p(22f, 18f),
+            size = Size(r(56f), r(74f)),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(r(24f), r(24f))
+        )
+        20 -> drawRoundRect(    // bob
+            color = hair,
+            topLeft = p(23f, 19f),
+            size = Size(r(54f), r(58f)),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(r(27f), r(27f))
+        )
+        21 -> drawRoundRect(    // half-up: the loose hair behind the shoulders
+            color = hair,
+            topLeft = p(24f, 19f),
+            size = Size(r(52f), r(56f)),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(r(26f), r(26f))
+        )
+        22 -> {                 // curls behind the flower crown
+            for ((x, y, radius) in listOf(
+                Triple(33f, 26f, 11f), Triple(50f, 19f, 12f), Triple(67f, 26f, 11f),
+                Triple(26f, 40f, 9f), Triple(74f, 40f, 9f)
+            )) {
+                drawCircle(hair, r(radius), p(x, y))
+            }
+        }
+        26 -> drawCircle(hair, r(34f), p(50f, 38f))   // afro puff
     }
 
     // ── head ──────────────────────────────────────────────────────────────
@@ -386,6 +541,110 @@ private fun DrawScope.drawCharacter(
                 style = Stroke(width = r(3f))
             )
         }
+        // ── v3xx52 — the soft set's front hair + accessories ─────────────
+        16 -> {                 // side-swept waves + a flower above the ear
+            drawArc(
+                color = hair, startAngle = 190f, sweepAngle = 165f, useCenter = true,
+                topLeft = p(27f, 21f), size = Size(r(46f), r(38f))
+            )
+            avatarFlower(p(31f, 30f), r(5f), Color(0xFFF7B7CE), Color(0xFFF6D27A))
+        }
+        17 -> {                 // smooth crown + a scrunchie
+            drawArc(
+                color = hair, startAngle = 200f, sweepAngle = 150f, useCenter = true,
+                topLeft = p(29f, 22f), size = Size(r(42f), r(30f))
+            )
+            drawArc(
+                color = art.garment, startAngle = 118f, sweepAngle = 120f, useCenter = false,
+                topLeft = p(66f, 20f), size = Size(r(16f), r(14f)),
+                style = Stroke(width = r(3.4f), cap = StrokeCap.Round)
+            )
+        }
+        18 -> drawArc(          // centre-parted fringe
+            color = hair, startAngle = 178f, sweepAngle = 184f, useCenter = true,
+            topLeft = p(28f, 21f), size = Size(r(44f), r(36f))
+        )
+        19 -> {                 // blunt bangs over the straight sheets
+            drawRoundRect(
+                color = hair,
+                topLeft = p(26f, 21f), size = Size(r(48f), r(15f)),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(r(6f), r(6f))
+            )
+        }
+        20 -> {                 // bob fringe + a headband bow
+            drawArc(
+                color = hair, startAngle = 190f, sweepAngle = 160f, useCenter = true,
+                topLeft = p(27f, 21f), size = Size(r(46f), r(38f))
+            )
+            avatarBow(p(50f, 16f), r(8f), art.garment)
+        }
+        21 -> {                 // fringe + the top bun with its tie
+            drawArc(
+                color = hair, startAngle = 190f, sweepAngle = 160f, useCenter = true,
+                topLeft = p(27f, 21f), size = Size(r(46f), r(38f))
+            )
+            drawCircle(hair, r(10f), p(50f, 12f))
+            drawCircle(art.garment, r(3.4f), p(50f, 12f))
+        }
+        22 -> {                 // a crown of five petals along the hairline
+            drawArc(
+                color = hair, startAngle = 190f, sweepAngle = 165f, useCenter = true,
+                topLeft = p(27f, 21f), size = Size(r(46f), r(36f))
+            )
+            for ((x, y) in listOf(31f to 26f, 40f to 21f, 50f to 19f, 60f to 21f, 69f to 26f)) {
+                avatarFlower(p(x, y), r(4.6f), Color(0xFFF7B7CE), Color(0xFFFBE9A8))
+            }
+        }
+        23 -> {                 // waves + two star clips
+            drawArc(
+                color = hair, startAngle = 195f, sweepAngle = 155f, useCenter = true,
+                topLeft = p(27f, 22f), size = Size(r(46f), r(36f))
+            )
+            drawPath(fivePointStarPath(p(33f, 28f), r(4.6f)), Color(0xFFF6D27A))
+            drawPath(fivePointStarPath(p(45f, 24f), r(3.6f)), Color(0xFFF6D27A))
+        }
+        24 -> {                 // short crop + a heart clip
+            drawArc(
+                color = hair, startAngle = 188f, sweepAngle = 168f, useCenter = true,
+                topLeft = p(28f, 23f), size = Size(r(44f), r(30f))
+            )
+            drawPath(heartClipPath(p(62f, 25f), r(5.4f)), Color(0xFFE86A8C))
+        }
+        25 -> drawArc(          // centre split (the glasses come with the face)
+            color = hair, startAngle = 195f, sweepAngle = 150f, useCenter = true,
+            topLeft = p(27f, 22f), size = Size(r(46f), r(36f))
+        )
+        26 -> {                 // a smooth crown + a bow
+            drawArc(
+                color = hair, startAngle = 196f, sweepAngle = 160f, useCenter = true,
+                topLeft = p(28f, 22f), size = Size(r(44f), r(32f))
+            )
+            avatarBow(p(68f, 24f), r(7f), art.garment)
+        }
+        27 -> {                 // a braided crown band across the hairline
+            drawArc(
+                color = hair, startAngle = 190f, sweepAngle = 165f, useCenter = true,
+                topLeft = p(27f, 21f), size = Size(r(46f), r(38f))
+            )
+            for (i in 0 until 5) {
+                drawCircle(
+                    lerp(hair, Color.White, 0.18f), r(3.6f),
+                    p(31f + i * 9.5f, 25f - i * 1.4f)
+                )
+            }
+        }
+    }
+
+    // ── hair sheen ────────────────────────────────────────────────────────
+    // A soft light across the top-left of the hair keeps a dark mass from
+    // reading as flat ink (the goggles and the helmet carry their own).
+    if (art.kind != 10 && art.kind != 15) {
+        drawArc(
+            color = Color.White.copy(alpha = 0.18f),
+            startAngle = 205f, sweepAngle = 85f, useCenter = false,
+            topLeft = p(30f, 19f), size = Size(r(40f), r(32f)),
+            style = Stroke(width = r(3.6f), cap = StrokeCap.Round)
+        )
     }
 
     // ── face ──────────────────────────────────────────────────────────────
@@ -404,15 +663,42 @@ private fun DrawScope.drawCharacter(
         drawCircle(ink, r(2.6f), p(42f, 46f))
         drawCircle(ink, r(2.6f), p(58f, 46f))
     } else {
-        drawCircle(ink, r(2.6f), p(42f, 46f))
-        drawCircle(ink, r(2.6f), p(58f, 46f))
+        // v3xx52 — EXPRESSIVE EYES. The old two ink dots read blank at any
+        // size; each eye is now a warm iris inside a white almond with a lash
+        // line and a catch-light, with a soft brow above — the face finally
+        // carries an expression instead of two specks.
+        val iris = lerp(hair, ink, 0.45f)
+        listOf(42f to -1f, 58f to 1f).forEach { (ex, side) ->
+            drawOval(
+                color = Color.White.copy(alpha = 0.94f),
+                topLeft = p(ex - 5.4f, 42f),
+                size = Size(r(10.8f), r(9.2f))
+            )
+            drawCircle(iris, r(4.4f), p(ex + side * 0.4f, 46.6f))
+            drawCircle(ink, r(2.3f), p(ex + side * 0.4f, 46.6f))
+            drawCircle(Color.White.copy(alpha = 0.95f), r(1.35f), p(ex - 1.6f, 44.9f))
+            drawArc(
+                color = ink.copy(alpha = 0.9f),
+                startAngle = 196f, sweepAngle = 148f, useCenter = false,
+                topLeft = p(ex - 5.6f, 41.4f), size = Size(r(11.2f), r(9f)),
+                style = Stroke(width = r(1.5f), cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = ink.copy(alpha = 0.42f),
+                startAngle = 205f, sweepAngle = 130f, useCenter = false,
+                topLeft = p(ex - 6.4f, 33.6f), size = Size(r(12.8f), r(7f)),
+                style = Stroke(width = r(1.5f), cap = StrokeCap.Round)
+            )
+        }
+        drawCircle(ink.copy(alpha = 0.20f), r(1.5f), p(50f, 51.5f))
     }
 
     when (art.kind) {
-        2 -> {                  // round glasses
-            drawCircle(ink, r(8.5f), p(42f, 46f), style = Stroke(width = r(1.6f)))
-            drawCircle(ink, r(8.5f), p(58f, 46f), style = Stroke(width = r(1.6f)))
-            drawLine(ink, p(50f, 46f), p(50f, 46f), strokeWidth = r(1.6f))
+        2, 25 -> {              // round glasses, with their temple arms
+            drawCircle(ink, r(8.6f), p(41.5f, 46f), style = Stroke(width = r(1.6f)))
+            drawCircle(ink, r(8.6f), p(58.5f, 46f), style = Stroke(width = r(1.6f)))
+            drawLine(ink.copy(alpha = 0.7f), p(33f, 44f), p(28f, 42f), strokeWidth = r(1.5f), cap = StrokeCap.Round)
+            drawLine(ink.copy(alpha = 0.7f), p(67f, 44f), p(72f, 42f), strokeWidth = r(1.5f), cap = StrokeCap.Round)
         }
         5 -> {                  // earring
             drawCircle(Color(0xFFF2C14E), r(2.4f), p(26f, 53f))

@@ -14,6 +14,16 @@ const val PROFILE_VISIBILITY_PUBLIC = "public"
 const val PROFILE_VISIBILITY_FRIENDS = "friends"
 
 /**
+ * How many code-drawn social portraits exist (the `AVATARS` list in
+ * `features/community/SocialAvatar.kt`). `profiles.avatar_style` is an index
+ * into that list, so EVERY read and write clamps against this constant — a
+ * style added later must never be truncated by a stale `coerceIn(0, 15)` at a
+ * cache or API boundary. `supabase/schema.sql`'s `avatar_style` check must be
+ * widened in the same commit (currently `between 0 and 27`).
+ */
+const val SOCIAL_AVATAR_STYLE_COUNT = 28
+
+/**
  * Someone else's PUBLIC identity — the only thing another account can ever see
  * about you in the social layer. There is no email, no capture, no card and no
  * message in here: the profile row the app may read holds display identity,
@@ -303,7 +313,7 @@ object SocialApi {
 
     suspend fun updateAvatarStyle(accessToken: String, style: Int): Result<Unit> = withContext(Dispatchers.IO) {
         mapped {
-            require(style in 0..15) { "Choose a valid avatar." }
+            require(style in 0 until SOCIAL_AVATAR_STYLE_COUNT) { "Choose a valid avatar." }
             val userId = SupabaseClient.userIdFromAccessToken(accessToken)
             val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
                 .patch(JSONObject().put("avatar_style", style).toString().toRequestBody(jsonMediaType))
@@ -972,7 +982,8 @@ object SocialApi {
                 userId = id,
                 displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEmpty(),
                 username = row.optString("username", "").takeUnless { it == "null" }.orEmpty(),
-                avatarStyle = row.optInt("avatar_style", 0).coerceIn(0, 15),
+                avatarStyle = row.optInt("avatar_style", 0)
+                    .coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1),
                 // Absent for a project that has not been re-pasted since §5f —
                 // visibility then reads as the schema's own default and a
                 // presence line simply never gets enough information to draw.
