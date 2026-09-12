@@ -39,6 +39,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
+import com.curio.app.data.supabase.SocialApi
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import kotlinx.coroutines.launch
@@ -148,7 +149,18 @@ internal fun CommunityCommentsSheet(
                 items(replies, key = { it.id }) { reply ->
                     CommunityReplyRow(
                         reply = reply,
-                        onAddFriend = { onAddFriend(reply.authorId) },
+                        onAddFriend = {
+                            if (myUserId != null) {
+                                scope.launch {
+                                    SocialApi.ask(accessToken, reply.authorId, myUserId).fold(
+                                        onSuccess = { error = "Friend request sent" },
+                                        onFailure = { error = it.message ?: "Could not send request" }
+                                    )
+                                }
+                            } else {
+                                onAddFriend(reply.authorId)
+                            }
+                        },
                         onDelete = {
                             scope.launch {
                                 CommunityApi.deleteComment(accessToken, reply.id).fold(
