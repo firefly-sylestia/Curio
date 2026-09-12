@@ -202,16 +202,6 @@ fun CommunityScreen(navController: NavController) {
                     )
                 }
             }
-            if (!asTab) {
-                item(key = "settings-nav", contentType = "settings-nav") {
-                    SettingsNavRail(
-                        active = null,
-                        onSelect = { navigateToSettingsSection(navController, it) },
-                        navController = navController
-                    )
-                }
-            }
-
             if (!eligible) {
                 item { SettingsSectionHeading("Before you look") }
                 item {

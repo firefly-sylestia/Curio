@@ -1012,9 +1012,7 @@ fun CurioNavHost(
                 }
             }
             composable(CurioRoutes.COMMUNITY) {
-                SettingsSharedScope(sharedTransitionScope, this) {
-                    CommunityScreen(navController = navController)
-                }
+                CommunityScreen(navController = navController)
             }
             composable(
                 route = CurioRoutes.COMMUNITY_CARD,
@@ -1028,25 +1026,19 @@ fun CurioNavHost(
                 }
             }
             composable(CurioRoutes.FRIENDS) {
-                SettingsSharedScope(sharedTransitionScope, this) {
-                    FriendsScreen(navController = navController)
-                }
+                FriendsScreen(navController = navController)
             }
             composable(
                 route = CurioRoutes.DIRECT_MESSAGE,
                 arguments = listOf(
-                    navArgument("userId") { type = NavType.StringType },
-                    navArgument("handle") {
-                        type = NavType.StringType
-                        defaultValue = ""
-                    }
+                    navArgument("userId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
                 SettingsSharedScope(sharedTransitionScope, this) {
                     DirectMessageScreen(
                         navController = navController,
                         otherUserId = backStackEntry.arguments?.getString("userId").orEmpty(),
-                        handle = backStackEntry.arguments?.getString("handle").orEmpty()
+                        handle = ""
                     )
                 }
             }

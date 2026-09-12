@@ -22,7 +22,7 @@ data class CurioPerson(
 ) {
     /** Stable identity shown everywhere social actions are available. */
     val handle: String get() = username.trim().removePrefix("@").ifBlank { "curious_soul" }
-    val label: String get() = displayName.ifBlank { "A curious soul" }
+    val label: String get() = displayName.trim().takeUnless { it.isBlank() || it.equals("null", true) } ?: "A curious soul"
     val identityLabel: String get() = "${label} @${handle}"
 }
 
@@ -414,8 +414,8 @@ object SocialApi {
             val id = row.optString("id").takeIf { it.isNotBlank() } ?: continue
             people[id] = CurioPerson(
                 userId = id,
-                displayName = row.optString("display_name"),
-                username = row.optString("username")
+displayName = row.optString("display_name", "").takeUnless { it == "null" }.orEmpty(),
+            username = row.optString("username", "").takeUnless { it == "null" }.orEmpty()
             )
         }
         return people

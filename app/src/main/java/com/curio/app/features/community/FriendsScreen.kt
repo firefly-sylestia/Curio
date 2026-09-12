@@ -206,14 +206,6 @@ fun FriendsScreen(navController: NavController) {
                     )
                 }
             }
-            item(key = "settings-nav", contentType = "settings-nav") {
-                SettingsNavRail(
-                    active = null,
-                    onSelect = { navigateToSettingsSection(navController, it) },
-                    navController = navController
-                )
-            }
-
             if (!eligible || token == null || myUserId == null) {
                 item { SettingsSectionHeading("Before you start") }
                 item {

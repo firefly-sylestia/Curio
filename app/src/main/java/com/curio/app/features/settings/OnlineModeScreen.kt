@@ -249,31 +249,16 @@ fun OnlineModeScreen(navController: NavController) {
             item { SettingsSectionHeading("Community") }
             item {
                 SettingsOptionCard {
-                    SettingsOptionRow(
-                        icon = CurioIcons.Hub,
-                        title = "Community",
-                        subtitle = "Text cards from the last 24 hours",
-                        onClick = { navController.navigate(CurioRoutes.COMMUNITY) }
-                    )
-                    SettingsOptionDivider()
-                    SettingsOptionRow(
-                        icon = CurioIcons.Notes,
-                        title = "Friends & messages",
-                        subtitle = "Friend requests and private messages",
-                        onClick = { navController.navigate(CurioRoutes.FRIENDS) }
-                    )
-                    SettingsOptionDivider()
-                    // The nav tab is strictly opt-in, and only meaningful with
-                    // an account: the row shows the EFFECTIVE state (tab on
-                    // AND Online Mode on), so it never reads "on" while the
-                    // tab is actually hidden.
+                    // The tab is strictly opt-in and is the only Community control
+                    // kept in Settings; the full Community and Friends experiences
+                    // are available from the app navigation.
                     SettingsOptionSwitchRow(
                         icon = CurioIcons.Hub,
                         title = "Community tab",
                         subtitle = if (onlineMode && account.signedIn) {
-                            "Puts Community on the bottom bar next to Home, Shuffle and Cabinet. Off by default."
+                            "Show Community in the app navigation."
                         } else {
-                            "Needs Online mode on — then Community joins the bottom bar. Off by default."
+                            "Turn on Online mode and sign in to show Community."
                         },
                         checked = AppPreferences.communityTabVisible,
                         enabled = onlineMode && account.signedIn,
