@@ -1,6 +1,7 @@
 package com.curio.app.features.community
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -101,6 +102,14 @@ internal object SocialNotifications {
         return NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
+    // The POST_NOTIFICATIONS check below is real, but it sits behind a helper
+    // (`canNotify`) AND a `runCatching`: lint's flow analysis cannot see a
+    // permission test through either, so it flags the `notify` call itself and
+    // fails the build. The permission is therefore ALSO checked inline, right
+    // above the call — and the suppression is here because the two guards
+    // together are what actually make the call safe, which is not something
+    // the linter can follow. Do not remove the inline check when removing this.
+    @SuppressLint("MissingPermission")
     private fun post(
         context: Context,
         notificationId: Int,
@@ -114,6 +123,12 @@ internal object SocialNotifications {
     ) {
         // A notification is a courtesy, never a crash: a missing permission,
         // a locked-down shade or a dead channel is silently ignored.
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
         runCatching {
             if (!canNotify(context)) return
             val manager = context.getSystemService(NotificationManager::class.java)
