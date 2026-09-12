@@ -615,9 +615,21 @@ drop policy if exists dm_device_keys_delete_own on public.dm_device_keys;
 create policy dm_device_keys_delete_own on public.dm_device_keys
   for delete to authenticated using (user_id = auth.uid());
 
+-- PostgREST implements an upsert as an INSERT followed by an UPDATE on a
+-- conflicting row. PostgreSQL requires the caller to be able to SELECT that
+-- existing row before the UPDATE policy is considered. A sender could write a
+-- first envelope for a friend but could not replace it after restoring a
+-- device, which made all later sends fail with an RLS error. An envelope is
+-- still encrypted to its recipient's public key; allowing the accepted friend
+-- to see the envelope lets the participant upsert it without exposing message
+-- plaintext or a private key.
 drop policy if exists dm_key_envelopes_recipient on public.dm_key_envelopes;
-create policy dm_key_envelopes_recipient on public.dm_key_envelopes
-    for select to authenticated using (recipient = auth.uid());
+drop policy if exists dm_key_envelopes_select_participant on public.dm_key_envelopes;
+create policy dm_key_envelopes_select_participant on public.dm_key_envelopes
+    for select to authenticated using (
+        recipient = auth.uid()
+        or public.curio_are_friends(auth.uid(), recipient)
+    );
 
 drop policy if exists dm_key_envelopes_write_participant on public.dm_key_envelopes;
 create policy dm_key_envelopes_write_participant on public.dm_key_envelopes
