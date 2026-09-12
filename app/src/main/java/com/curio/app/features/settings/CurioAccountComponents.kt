@@ -100,6 +100,7 @@ internal fun CurioAuthCard(
     // own answer. Shown in one place so the user always sees the outcome.
     var localProblem by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    var termsAccepted by remember { mutableStateOf(AppPreferences.hasAcceptedCurrentTerms(context)) }
 
     // A mode switch is a fresh start: clear the local problem and the second
     // password so a stale complaint never sits under a different form.
