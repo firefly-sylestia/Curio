@@ -174,7 +174,7 @@ fun DirectMessageScreen(
 
     suspend fun load(active: String, me: String) {
         loading = true
-            SocialApi.messages(active, otherUserId, me).fold(
+        SocialApi.messages(active, otherUserId, me).fold(
             onSuccess = { raw ->
                 val conversationId = dmConversationId(me, otherUserId)
                 val fresh = raw.map { message ->
