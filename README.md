@@ -2,7 +2,7 @@
 
 > **Explore something. Notice more. Keep the discovery.**
 
-A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand-written topics across 38 categories, then capture what you notice in a beautiful, personal offline library. Share your discoveries as stunning, topic-specific cards. No accounts. No feed. No ads. Just you, a topic, and the world.
+A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand-written topics across 38 categories, then capture what you notice in a beautiful, personal offline library. Share your discoveries as stunning, topic-specific cards. No feed. No ads. Just you, a topic, and the world — plus an **optional** community layer (friends, messages, a 24-hour wall) that stays completely off until you switch it on.
 
 ![Release](https://img.shields.io/github/v/release/firefly-sylestia/Curio?label=Release&logo=github)
 ![Downloads](https://img.shields.io/github/downloads/firefly-sylestia/Curio/total?label=Downloads&logo=github)
@@ -51,13 +51,18 @@ Whatever you discover, there's a format waiting: **SoundBite** (voice notes) · 
 Start a timed session and a persistent floating bubble follows you over other apps (like Messenger) — so you can open the browser, dig in, and always see how much time you planned. Sessions survive reboots and queue for later.
 
 ### 🗄️ The Cabinet — Your Personal Museum
-Browse by category, search your collection, zoom images in a lightbox, and explore rich entry pages. Streaks, levels, and lane stats make the habit rewarding.
+Browse by category, search your collection, zoom images in a lightbox, and explore rich entry pages. Your keepsakes pack into **shelves** — Favorites, Curiying now, Want to Read, Completed, Notes, Personal, your own collections — with the **Cupboard** holding every book, album and series you keep. Streaks, levels, and lane stats make the habit rewarding.
+
+### 👥 Community, Friends & Messages — optional, off by default
+Switch on **Online mode** and Curio grows a social half: a 24-hour wall of share cards, replies that branch, a friends list, and private conversations. Every member picks one of **28 hand-drawn portraits**; a display name and a `@username` are separate things; profiles carry a bio. Friends can see your shelf of liked topics; strangers can't message you. This layer is the *only* part of Curio that ever talks to a server, it is **off unless you turn it on**, and turning it off again (or signing out) takes the tab and the cached conversations with it.
 
 ### 🎨 Design Identity
 A **Material-inspired custom design language** — not a hand-invented look, but one assembled from the established design language of the modern web. Material 3's open design system is the foundation; on top sits a warm-cream paper world drawn from the editorial, tactile aesthetic of today's best apps: torn-paper heroes, category colors, custom typography, and motion throughout. Three theme styles (Curio, AMOLED, Material You).
 
 ### 🔒 Privacy First
-Everything lives on your device. No accounts. No analytics. No tracking. Open source.
+Everything lives on your device. No analytics. No tracking. No ads. Open source. Your captures, recordings, photos and screenshots never leave the phone — the online layer carries text only (a card's topic, its words, a reply, your name, your portrait number). Turn Online mode off and nothing about you is sent anywhere. Signing out forgets the device's cached conversations, and the stored session token is sealed with the Android Keystore rather than kept in readable preferences.
+
+> **Read this before switching Online mode on:** messages, replies and cards are **private by policy, not end-to-end encrypted**. They are stored on Curio's server so they can be delivered to the other person, and access is enforced by row-level security (only the people in a conversation, or the friends a card is visible to, can read it). The server itself holds the plain text. If you need content that no server can read, don't put it in a message.
 
 ---
 
@@ -112,8 +117,8 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 | **Target OS** | Android 17 (API 37) |
 | **Permissions** | Microphone (voice notes + dictation) · Notifications (reminders) · "Display over other apps" (optional floating explore bubble) · Background service (explore timer) |
 | **Language** | English |
-| **Accounts** | None — Curio works completely offline |
-| **Network** | Optional. All your data is fully local; images load from the web when available |
+| **Accounts** | None for the app itself — an optional Curio account is needed only for the online layer |
+| **Network** | Optional. Your library is fully local; images load from the web when available and the online layer needs a connection |
 
 ---
 
@@ -182,6 +187,8 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 
 ### Settings & Customization
 - **Appearance** — Curio, AMOLED, or Material You theme; Light/Dark/System; pastel color mode
+- **Online mode** — sign in, claim a username, pick your portrait, and switch the community tab on or off
+- **Privacy** — profile visibility, hidden activity, and who you have blocked
 - **Notifications** — daily shuffle reminders, reminder time, explore controls
 - **Recording** — voice quality, dictation settings
 - **Experiments** — toggle 30+ optional UI tweaks (deck styling, layouts, smart density, voice-to-text)
@@ -197,12 +204,25 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 - Daily reminders and explore sessions rebuild after reboot
 - CI-validated release builds
 
+### The Online Layer (optional, off by default)
+- **Community wall** — post a topic card, a text-only note, or a credited quote; captions, replies that **branch**, likes, reporting, and your own posts taken down by you. Cards expire 24 hours after they are posted
+- **Friends** — search people, send and answer requests, remove a friend (it asks first and names them)
+- **Messages** — private conversations with friends, day rules, grouped bubbles, reactions, a live typing line, read receipts and unread badges
+- **Live delivery** — a Supabase Realtime socket pushes replies, messages and new posts the moment they happen, with the polling refresh kept as a fallback when the connection drops
+- **Profiles** — a display name, a separate `@username`, a bio, a streak and one of **28 hand-drawn portraits** (no photo upload anywhere)
+- **Privacy controls** — make your profile friends-only, hide your activity so nothing is ever shown about when you were last around, and block people (a block stops messages, requests and each other's cards, both ways)
+- **Notifications** — one "Messages and community" switch; tapping a notification opens the conversation or the wall
+- **Offline tolerance** — conversations, the message list with its badges, friends, the last wall page and each card's replies are cached on device with expiries, so the social screens still open with no connection
+- **No card can carry media** — every post is rebuilt with Curio's own text renderer, so a photo, recording or screenshot can never be attached to a card
+
 ### Design & Privacy
 - Material-inspired custom design language — Material 3 foundation extended with a web-drawn editorial aesthetic
 - Torn-paper heroes, watermark backdrops, custom typography
 - Custom Material Symbols and motion
-- **100% local data** — Room database, offline-first
-- No accounts, no analytics, no tracking, no ads
+- **Local by default** — Room database, offline-first; the online layer is the only thing that ever talks to a server and it is off unless you switch it on
+- **Session tokens sealed with the Android Keystore** (AES-GCM), not stored as readable preferences; signing out clears them and the cached social data
+- **Private by policy, not end-to-end encrypted** — server-side messages and cards are readable by the service, and row-level security decides who else may read them
+- No analytics, no tracking, no ads
 - Open source on GitHub
 
 ---
@@ -262,7 +282,8 @@ Curio is **free and open source** under the [MIT License](LICENSE). See LICENSE 
 
 ### Not in v1.0
 - **iOS** — Android only for now
-- **Cloud sync** — all data is local. Use Backup & Restore (Settings) to export and keep your library safe
+- **Cloud sync of your library** — your captures stay on the device; use Backup & Restore (Settings) to export and keep them safe
+- **End-to-end encryption** — messages, replies and cards are private by policy (row-level security, friends-only visibility, 24-hour expiry) but the server holds the plain text, so a server operator can read them. Content that must stay unreadable to a server doesn't belong in a message yet
 - **Localization** — English only in v1.0
 - **Google Play** — distributed via GitHub Releases; Play Store support coming next
 - **Content depth grows** — every lane ships 500+ topics today, and the catalog keeps growing

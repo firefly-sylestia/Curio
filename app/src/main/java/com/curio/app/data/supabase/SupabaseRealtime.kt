@@ -171,7 +171,35 @@ object SupabaseRealtime {
         if (socket != null || refused || subscriptions.isEmpty()) return
         val url = socketUrl() ?: return
         runCatching {
-            socket = http.newWebSocket(Request.Builder().url(url).build(), Listener())
+            socket = http.newWebSocket(
+                Request.Builder().url(url).build(),
+                // An ANONYMOUS listener, created here inside the object's own
+                // body: that is what keeps the object's private protocol
+                // helpers (join / handle / lost / refuse) in scope. A named
+                // class nested in a `object` cannot be `inner` (the compiler
+                // rejects the modifier) and would not see them.
+                object : WebSocketListener() {
+                    override fun onOpen(webSocket: WebSocket, response: Response) {
+                        runCatching { join(webSocket) }
+                            .onFailure { refuse("Could not join the realtime channel") }
+                    }
+
+                    override fun onMessage(webSocket: WebSocket, text: String) {
+                        runCatching { handle(text) }
+                            .onFailure { Log.w(TAG, "Bad realtime frame", it) }
+                    }
+
+                    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                        if (subscriptions.isEmpty()) return
+                        lost("closed ($code)")
+                    }
+
+                    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                        if (subscriptions.isEmpty()) return
+                        lost(t.message ?: "socket failure")
+                    }
+                }
+            )
         }.onFailure {
             Log.w(TAG, "Could not open the realtime socket", it)
             lastProblem = "No realtime connection"
@@ -243,28 +271,6 @@ object SupabaseRealtime {
                 backoff = (backoff * 2).coerceAtMost(MAX_BACKOFF_MS)
                 delay(2_000L)
             }
-        }
-    }
-
-    private inner class Listener : WebSocketListener() {
-        override fun onOpen(webSocket: WebSocket, response: Response) {
-            runCatching { join(webSocket) }
-                .onFailure { refuse("Could not join the realtime channel") }
-        }
-
-        override fun onMessage(webSocket: WebSocket, text: String) {
-            runCatching { handle(text) }
-                .onFailure { Log.w(TAG, "Bad realtime frame", it) }
-        }
-
-        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            if (subscriptions.isEmpty()) return
-            lost("closed ($code)")
-        }
-
-        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            if (subscriptions.isEmpty()) return
-            lost(t.message ?: "socket failure")
         }
     }
 

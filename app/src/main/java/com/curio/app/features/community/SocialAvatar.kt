@@ -1,13 +1,17 @@
 package com.curio.app.features.community
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -19,8 +23,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.CurioIcons
 
 /**
  * The 28 code-drawn social portraits.
@@ -728,11 +730,43 @@ private fun DrawScope.drawCharacter(
     )
 }
 
-/** The avatar picker's tile: the portrait, with a check when it is the chosen one. */
+/**
+ * The avatar picker's tile.
+ *
+ * v3xx52 — the chosen portrait is marked by a ROUNDED SELECTION RING (a soft
+ * accent halo plus a 2dp circular outline, with the portrait stepping up a
+ * little), not by a tick badge laid over the face: the face is the point of
+ * the tile, and a check covering its chin read as an error mark on a picker
+ * where every option is valid. The ring hugs the disc exactly like the app's
+ * other selected chips (RoundedCornerShape(50) = a circle here), so the picker
+ * speaks the same language as the rails and filter pills.
+ */
 @Composable
 internal fun AvatarPickerIcon(style: Int, selected: Boolean, onClick: () -> Unit) {
-    SocialAvatar(style, 38.dp, onClick, ring = !selected)
-    if (selected) {
-        CurioIcon(CurioIcons.Check, null, tint = MaterialTheme.colorScheme.onSurface, size = 12.dp)
+    val accent = MaterialTheme.colorScheme.primary
+    Box(
+        modifier = Modifier
+            .size(if (selected) 48.dp else 44.dp)
+            .clip(RoundedCornerShape(50))
+            .then(
+                if (selected) {
+                    Modifier
+                        .background(accent.copy(alpha = 0.14f))
+                        .border(2.dp, accent, RoundedCornerShape(50))
+                } else {
+                    Modifier
+                }
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        // The click lives on the tile (above), so the portrait itself is not
+        // also clickable — one tap target, one haptic, no double ripple.
+        SocialAvatar(
+            style = style,
+            avatarSize = if (selected) 38.dp else 36.dp,
+            onClick = null,
+            ring = !selected
+        )
     }
 }
