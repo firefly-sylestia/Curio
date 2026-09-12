@@ -195,7 +195,10 @@ internal fun CommunityCommentsSheet(
                             if (myUserId != null) {
                                 scope.launch {
                                     SocialApi.ask(accessToken, reply.authorId, myUserId).fold(
-                                        onSuccess = { error = "Friend request sent" },
+                                        onSuccess = {
+                                            friendIds = friendIds + reply.authorId
+                                            error = "Friend request sent"
+                                        },
                                         onFailure = { error = it.message ?: "Could not send request" }
                                     )
                                 }
