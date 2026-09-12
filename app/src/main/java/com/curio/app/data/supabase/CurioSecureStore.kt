@@ -45,7 +45,9 @@ internal object CurioSecureStore {
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
     private const val DM_NAME_PREFIX = "dm-"
 
-    private fun keyFor(name: String): SecretKey = key(if (name.startsWith(DM_NAME_PREFIX)) DM_KEY_ALIAS else KEY_ALIAS)
+    private fun keyFor(name: String): SecretKey = key(
+        if (name.startsWith(DM_NAME_PREFIX) || name == "dm-device-id") DM_KEY_ALIAS else KEY_ALIAS
+    )
     private const val GCM_TAG_BITS = 128
 
     /**
@@ -143,9 +145,16 @@ internal object CurioSecureStore {
 
     /** Clears only recoverable DM material when Android Keystore invalidates it. */
     fun resetDmStorage(context: Context) {
-        runCatching { prefs(context).edit().remove("dm-device-id").apply() }
         runCatching {
-            KeyStore.getInstance(KEYSTORE).apply { load(null) }.deleteEntry(DM_KEY_ALIAS)
+            prefs(context).edit()
+                .remove("dm-device-id")
+                .apply()
+        }
+        runCatching {
+            KeyStore.getInstance(KEYSTORE).apply { load(null) }.also { store ->
+                store.deleteEntry(DM_KEY_ALIAS)
+                store.deleteEntry("curio_dm_identity")
+            }
         }
     }
 

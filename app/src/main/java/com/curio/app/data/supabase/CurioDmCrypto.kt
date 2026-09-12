@@ -25,11 +25,20 @@ object CurioDmCrypto {
     private const val TAG_BITS = 128
 
     fun identity(context: Context): CurioDmIdentity {
-        val pair = CurioSecureStore.identityKeyPair()
-        return CurioDmIdentity(
-            CurioSecureStore.ensureDeviceId(context),
-            b64(pair.public.encoded)
-        )
+        return runCatching {
+            val pair = CurioSecureStore.identityKeyPair()
+            CurioDmIdentity(
+                CurioSecureStore.ensureDeviceId(context),
+                b64(pair.public.encoded)
+            )
+        }.getOrElse {
+            CurioSecureStore.resetDmStorage(context)
+            val pair = CurioSecureStore.identityKeyPair()
+            CurioDmIdentity(
+                CurioSecureStore.ensureDeviceId(context),
+                b64(pair.public.encoded)
+            )
+        }
     }
 
     fun wrapConversationKey(conversationKey: ByteArray, recipient: CurioDmIdentity, keyVersion: Int = 1): CurioDmEnvelope {

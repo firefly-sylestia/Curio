@@ -637,7 +637,9 @@ fun DirectMessageScreen(
                 }
 
                 MessageComposer(
-                    modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
+                    modifier = Modifier.windowInsetsPadding(
+                        WindowInsets.navigationBars.union(WindowInsets.ime)
+                    ),
                     draft = draft,
                     title = fallback,
                     sending = sending,
@@ -1215,8 +1217,9 @@ private fun MessageComposer(
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface
                     ),
-                    cursorBrush = SolidColor(curioDialogActionColor()),
-                    // A message is a sentence, not a word: capitals and
+cursorBrush = SolidColor(curioDialogActionColor()),
+                singleLine = true,
+                // A message is a sentence, not a word: capitals and
                     // sentence punctuation are the default here (the field is
                     // unlabelled, so this is the only cue it needs).
                     keyboardOptions = KeyboardOptions(

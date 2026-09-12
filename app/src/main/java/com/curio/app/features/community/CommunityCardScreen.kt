@@ -328,7 +328,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                         val call = if (current.likedByMe && myUserId != null) {
                                             CommunityApi.unlike(token, current.id, myUserId)
                                         } else {
-                                            CommunityApi.like(token, current.id)
+                                            CommunityApi.like(token, current.id, myUserId ?: return@launch)
                                         }
                                         call.fold(
                                             onSuccess = { load() },

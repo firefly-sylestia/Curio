@@ -412,10 +412,13 @@ object CommunityApi {
     }
 
     /** Idempotent like — reacting twice leaves one reaction. */
-    suspend fun like(accessToken: String, cardId: String): Result<Unit> =
+    suspend fun like(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
-                val payload = JSONObject().put("card_id", cardId).put("kind", "like")
+                val payload = JSONObject()
+                    .put("card_id", cardId)
+                    .put("user_id", myUserId)
+                    .put("kind", "like")
                 val request = SupabaseClient.requestBuilder("$REACTIONS?on_conflict=card_id%2Cuser_id", accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
                     .post(payload.toString().toRequestBody(jsonMediaType))
@@ -435,10 +438,13 @@ object CommunityApi {
             }
         }
 
-    suspend fun dislike(accessToken: String, cardId: String): Result<Unit> =
+    suspend fun dislike(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
-                val payload = JSONObject().put("card_id", cardId).put("kind", "dislike")
+                val payload = JSONObject()
+                    .put("card_id", cardId)
+                    .put("user_id", myUserId)
+                    .put("kind", "dislike")
                 val request = SupabaseClient.requestBuilder("$REACTIONS?on_conflict=card_id%2Cuser_id", accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
                     .post(payload.toString().toRequestBody(jsonMediaType))
