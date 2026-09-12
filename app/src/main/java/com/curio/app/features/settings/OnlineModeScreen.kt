@@ -196,7 +196,7 @@ fun OnlineModeScreen(navController: NavController) {
                                             }
                                         }
                                     },
-                                    enabled = !account.busy,
+                                    enabled = !account.busy && email.trim().isNotEmpty() && password.isNotEmpty(),
                                     shape = RoundedCornerShape(50),
                                     colors = curioDialogActionButtonColors(),
                                     modifier = Modifier.weight(1f)
@@ -212,7 +212,7 @@ fun OnlineModeScreen(navController: NavController) {
                                     onClick = {
                                         scope.launch { OnlineAccount.signUp(context, email, password) }
                                     },
-                                    enabled = !account.busy,
+                                    enabled = !account.busy && email.trim().isNotEmpty() && password.isNotEmpty(),
                                     colors = ButtonDefaults.textButtonColors(
                                         contentColor = curioDialogActionColor()
                                     )
