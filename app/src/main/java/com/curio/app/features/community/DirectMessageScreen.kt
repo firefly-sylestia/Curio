@@ -177,6 +177,13 @@ fun DirectMessageScreen(
         SocialApi.messages(active, otherUserId, me).fold(
             onSuccess = { raw ->
                 val conversationId = dmConversationId(me, otherUserId)
+                val identity = CurioDmCrypto.identity(context)
+                SocialApi.publishDmIdentity(active, identity, me)
+                if (!CurioDmCrypto.hasConversationKey(context, conversationId)) {
+                    SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()?.let {
+                        CurioDmCrypto.ensureConversationKey(context, conversationId, it)
+                    }
+                }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
                     else runCatching {
@@ -255,8 +262,16 @@ fun DirectMessageScreen(
         pending = pending + optimistic
         draft = ""
 
+        val conversationId = dmConversationId(me, otherUserId)
         val encrypted = runCatching {
-            CurioDmCrypto.encrypt(context, dmConversationId(me, otherUserId), text)
+            val mine = CurioDmCrypto.identity(context)
+            SocialApi.publishDmIdentity(active, mine, me)
+            val key = CurioDmCrypto.conversationKey(context, conversationId)
+            SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow().forEach { peer ->
+                SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer)).getOrThrow()
+            }
+            SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine)).getOrThrow()
+            CurioDmCrypto.encrypt(context, conversationId, text)
         }.getOrElse {
             pending = pending.filterNot { it.id == optimistic.id }
             draft = text
@@ -442,10 +457,16 @@ fun DirectMessageScreen(
 
     // Keep the newest line in view — on open, after every send, and when the
     // other side starts typing under us.
+    var hasPresentedThread by remember(otherUserId) { mutableStateOf(false) }
     LaunchedEffect(thread.size, peerTyping, headerRows) {
         if (thread.isEmpty()) return@LaunchedEffect
         val newest = headerRows + thread.lastIndex + if (peerTyping) 1 else 0
-        listState.animateScrollToItem(newest)
+        if (!hasPresentedThread) {
+            listState.scrollToItem(newest)
+            hasPresentedThread = true
+        } else {
+            listState.animateScrollToItem(newest)
+        }
     }
 
     // The DISPLAY name wins over the name the route carried, so a rename shows
@@ -484,6 +505,7 @@ fun DirectMessageScreen(
             modifier = Modifier
                 .layerBackdrop(glassBackdrop)
                 .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
                 // ONE inset consumer for the whole screen, and it is the
                 // UNION rather than a sum: the bottom inset is
                 // max(navigation bar, keyboard). Chaining
@@ -1150,9 +1172,8 @@ private fun MessageComposer(
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.ime)
-            .padding(
+  .fillMaxWidth()
+  .padding(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
                 bottom = 10.dp

@@ -89,7 +89,9 @@ internal fun CommunityCommentsSheet(
     // the chip above the composer names the person, so a branch is never
     // posted at the wrong place by accident.
     var replyTo by remember { mutableStateOf<CommunityComment?>(null) }
-    var friendIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var friendIds by remember {
+        mutableStateOf(AppPreferences.getLocalFriendIds(context))
+    }
 
     suspend fun load() {
         loading = true
@@ -195,7 +197,11 @@ internal fun CommunityCommentsSheet(
                             if (myUserId != null) {
                                 scope.launch {
                                     SocialApi.ask(accessToken, reply.authorId, myUserId).fold(
-                                        onSuccess = { error = "Friend request sent" },
+  onSuccess = {
+  friendIds = friendIds + reply.authorId
+  AppPreferences.rememberLocalFriend(context, reply.authorId)
+  error = "Friend request sent"
+                                        },
                                         onFailure = { error = it.message ?: "Could not send request" }
                                     )
                                 }

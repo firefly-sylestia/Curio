@@ -269,9 +269,15 @@ create policy comm_delete_own on public.community_cards
 create table if not exists public.community_reactions (
     card_id    uuid not null references public.community_cards (id) on delete cascade,
     user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    kind       text not null default 'like',
     created_at timestamptz not null default now(),
-    primary key (card_id, user_id)
+    primary key (card_id, user_id),
+    constraint community_reactions_kind_check check (kind in ('like', 'dislike'))
 );
+
+alter table public.community_reactions add column if not exists kind text not null default 'like';
+alter table public.community_reactions drop constraint if exists community_reactions_kind_check;
+alter table public.community_reactions add constraint community_reactions_kind_check check (kind in ('like', 'dislike'));
 
 create index if not exists community_reactions_card_idx
     on public.community_reactions (card_id);
@@ -586,8 +592,17 @@ alter table public.dm_device_keys enable row level security;
 alter table public.dm_key_envelopes enable row level security;
 
 drop policy if exists dm_device_keys_own on public.dm_device_keys;
+drop policy if exists dm_device_keys_select_participant on public.dm_device_keys;
+create policy dm_device_keys_select_participant on public.dm_device_keys
+  for select to authenticated using (
+    user_id = auth.uid() or public.curio_are_friends(auth.uid(), user_id)
+  );
 create policy dm_device_keys_own on public.dm_device_keys
-    for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+  for insert to authenticated with check (user_id = auth.uid());
+create policy dm_device_keys_update_own on public.dm_device_keys
+  for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy dm_device_keys_delete_own on public.dm_device_keys
+  for delete to authenticated using (user_id = auth.uid());
 
 drop policy if exists dm_key_envelopes_recipient on public.dm_key_envelopes;
 create policy dm_key_envelopes_recipient on public.dm_key_envelopes
@@ -1362,7 +1377,7 @@ revoke all on public.member_blocks from anon;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5g. realtime — which tables the app may SUBSCRIBE to
--- ───────────────────────────────────────────────────────────────────────────
+-- ─────��─────────────────────────────────────────────────────────────────────
 -- Curio's live surfaces (an open conversation, the inbox, the wall) are driven
 -- by Supabase Realtime instead of a timer: the server announces a change and
 -- the screen pulls the delta through the normal REST path. Nothing is trusted

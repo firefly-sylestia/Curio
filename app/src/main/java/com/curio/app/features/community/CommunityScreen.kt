@@ -457,6 +457,21 @@ fun CommunityScreen(navController: NavController) {
                                 )
                             }
                         },
+                        onDislike = {
+                            val active = token ?: return@CommunityCardItem
+                            val userId = account.session?.userId
+                            scope.launch {
+                                val call = if (card.dislikedByMe && userId != null) {
+                                    CommunityApi.undislike(active, card.id, userId)
+                                } else {
+                                    CommunityApi.dislike(active, card.id)
+                                }
+                                call.fold(
+                                    onSuccess = { load() },
+                                    onFailure = { error = it.message }
+                                )
+                            }
+                        },
                         onReport = { reporting = card },
                         onDelete = {
                             val active = token ?: return@CommunityCardItem
@@ -657,9 +672,10 @@ private fun CommunityCardItem(
     card: CommunityCard,
     onOpen: () -> Unit,
     onAuthor: () -> Unit,
-    onComments: () -> Unit,
-    onLike: () -> Unit,
-    onReport: () -> Unit,
+  onComments: () -> Unit,
+  onLike: () -> Unit,
+  onDislike: () -> Unit,
+  onReport: () -> Unit,
     onDelete: () -> Unit
 ) {
     Surface(
@@ -746,13 +762,19 @@ private fun CommunityCardItem(
             ) {
                 CommunityAction(
                     glyph = CurioIcons.ThumbUp,
-                    label = if (card.likeCount > 0) card.likeCount.toString() else "Like",
+                    label = if (card.likeCount > 0) card.likeCount.toString() else "",
                     tinted = card.likedByMe,
                     onClick = onLike
                 )
                 CommunityAction(
+                    glyph = CurioIcons.ThumbDown,
+                    label = if (card.dislikeCount > 0) card.dislikeCount.toString() else "",
+                    tinted = card.dislikedByMe,
+                    onClick = onDislike
+                )
+                CommunityAction(
                     glyph = CurioIcons.FormatQuote,
-                    label = if (card.commentCount > 0) card.commentCount.toString() else "Reply",
+                    label = if (card.commentCount > 0) card.commentCount.toString() else "",
                     tinted = false,
                     onClick = onComments
                 )
@@ -804,18 +826,18 @@ internal fun CommunityAction(
             onClick = onClick
         )
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
-        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(if (label.isBlank()) 0.dp else 5.dp),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
+            ) {
             CurioIcon(
                 name = glyph,
-                contentDescription = null,
+                contentDescription = label.ifBlank { "Community action" },
                 tint = ink,
-                size = 15.dp
+                size = 18.dp
             )
-            Text(
+            if (label.isNotBlank()) Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = if (tinted) FontWeight.Bold else FontWeight.Medium

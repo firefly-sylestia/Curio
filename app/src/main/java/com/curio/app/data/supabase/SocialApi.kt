@@ -770,8 +770,52 @@ private const val PERSON_COLUMNS_PRIVACY =
         }
     }
 
-    /** Sends ciphertext only. Plaintext is intentionally not accepted by this boundary. */
-    suspend fun sendEncrypted(
+  /** Publishes this device's public identity; the private key never enters this API. */
+  suspend fun publishDmIdentity(accessToken: String, identity: CurioDmIdentity, userId: String): Result<Unit> = withContext(Dispatchers.IO) {
+    mappedUnit {
+      val payload = JSONObject().put("user_id", userId).put("device_id", identity.deviceId)
+        .put("public_key", identity.publicKey).put("key_version", 1)
+      val request = SupabaseClient.requestBuilder("/rest/v1/dm_device_keys?on_conflict=user_id,device_id", accessToken)
+        .header("Prefer", "resolution=merge-duplicates,return=minimal")
+        .post(payload.toString().toRequestBody(jsonMediaType)).build()
+      SupabaseClient.executeBody(request)
+    }
+  }
+
+  suspend fun dmIdentities(accessToken: String, userIds: Collection<String>): Result<List<CurioDmIdentity>> = withContext(Dispatchers.IO) {
+    mapped {
+      val ids = userIds.joinToString(",") { id(it) }
+      val request = SupabaseClient.requestBuilder("/rest/v1/dm_device_keys?select=device_id,public_key&user_id=in.($ids)&retired_at=is.null", accessToken).get().build()
+      val rows = JSONArray(SupabaseClient.executeBody(request))
+      buildList {
+        for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { add(CurioDmIdentity(it.optString("device_id"), it.optString("public_key"))) }
+      }
+    }
+  }
+
+  suspend fun saveDmEnvelope(accessToken: String, conversationId: String, recipient: String, envelope: CurioDmEnvelope): Result<Unit> = withContext(Dispatchers.IO) {
+    mappedUnit {
+      val payload = JSONObject().put("conversation_id", conversationId).put("recipient", recipient)
+        .put("device_id", envelope.deviceId).put("key_version", envelope.keyVersion)
+        .put("encrypted_key", envelope.encryptedKey).put("encryption_version", envelope.version)
+      val request = SupabaseClient.requestBuilder("/rest/v1/dm_key_envelopes?on_conflict=conversation_id,recipient,device_id,key_version", accessToken)
+        .header("Prefer", "resolution=merge-duplicates,return=minimal")
+        .post(payload.toString().toRequestBody(jsonMediaType)).build()
+      SupabaseClient.executeBody(request)
+    }
+  }
+
+  suspend fun dmEnvelope(accessToken: String, conversationId: String, deviceId: String): Result<CurioDmEnvelope?> = withContext(Dispatchers.IO) {
+    mapped {
+      val path = "/rest/v1/dm_key_envelopes?select=device_id,key_version,encrypted_key,encryption_version&conversation_id=eq.${encode(conversationId)}&device_id=eq.${encode(deviceId)}&order=key_version.desc&limit=1"
+      val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+      val rows = JSONArray(SupabaseClient.executeBody(request))
+      rows.optJSONObject(0)?.let { CurioDmEnvelope(it.optString("device_id"), it.optInt("key_version"), it.optString("encrypted_key"), it.optString("encryption_version")) }
+    }
+  }
+
+  /** Sends ciphertext only. Plaintext is intentionally not accepted by this boundary. */
+  suspend fun sendEncrypted(
         accessToken: String,
         toUserId: String,
         ciphertext: String,

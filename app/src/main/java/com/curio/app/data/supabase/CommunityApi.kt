@@ -51,9 +51,11 @@ data class CommunityCard(
     val byline: String,
     val createdAtMillis: Long,
     val expiresAtMillis: Long,
-    val likeCount: Int,
-    val likedByMe: Boolean,
-    /** How many replies hang under the card. */
+  val likeCount: Int,
+  val likedByMe: Boolean,
+  val dislikeCount: Int = 0,
+  val dislikedByMe: Boolean = false,
+  /** How many replies hang under the card. */
     val commentCount: Int,
     /** True when this device's account posted the card. */
     val mine: Boolean
@@ -413,7 +415,7 @@ object CommunityApi {
     suspend fun like(accessToken: String, cardId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
-                val payload = JSONObject().put("card_id", cardId)
+                val payload = JSONObject().put("card_id", cardId).put("kind", "like")
                 val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
                     .post(payload.toString().toRequestBody(jsonMediaType))
@@ -432,6 +434,21 @@ object CommunityApi {
                 SupabaseClient.executeBody(request)
             }
         }
+
+    suspend fun dislike(accessToken: String, cardId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val payload = JSONObject().put("card_id", cardId).put("kind", "dislike")
+                val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
+                    .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    suspend fun undislike(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
+        unlike(accessToken, cardId, myUserId)
 
     /** Files a report. One per card per user (the DB's unique constraint). */
     suspend fun report(accessToken: String, cardId: String, reason: String): Result<Unit> =
@@ -490,15 +507,20 @@ object CommunityApi {
             val row = array.optJSONObject(index) ?: continue
             val owner = row.optString("owner")
             val reactions = row.optJSONArray("community_reactions")
-            var likes = 0
-            var likedByMe = false
-            if (reactions != null) {
-                for (r in 0 until reactions.length()) {
-                    val reaction = reactions.optJSONObject(r) ?: continue
-                    likes++
-                    if (myUserId != null && reaction.optString("user_id") == myUserId) likedByMe = true
-                }
-            }
+  var likes = 0
+  var dislikes = 0
+  var likedByMe = false
+  var dislikedByMe = false
+  if (reactions != null) {
+  for (r in 0 until reactions.length()) {
+  val reaction = reactions.optJSONObject(r) ?: continue
+  val kind = reaction.optString("kind", "like")
+  if (kind == "dislike") dislikes++ else likes++
+  if (myUserId != null && reaction.optString("user_id") == myUserId) {
+  if (kind == "dislike") dislikedByMe = true else likedByMe = true
+  }
+  }
+  }
             cards += CommunityCard(
                 id = row.optString("id"),
                 authorId = owner,

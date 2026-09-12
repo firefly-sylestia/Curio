@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -100,6 +101,7 @@ internal fun CurioAuthCard(
     // own answer. Shown in one place so the user always sees the outcome.
     var localProblem by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    var termsAccepted by remember { mutableStateOf(AppPreferences.hasAcceptedCurrentTerms(context)) }
 
     // A mode switch is a fresh start: clear the local problem and the second
     // password so a stale complaint never sits under a different form.
@@ -112,7 +114,7 @@ internal fun CurioAuthCard(
     }
 
     val address = email.trim()
-    val canSubmit = !account.busy && address.isNotEmpty() && password.isNotEmpty()
+    val canSubmit = !account.busy && address.isNotEmpty() && password.isNotEmpty() && termsAccepted
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -177,6 +179,28 @@ internal fun CurioAuthCard(
             )
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { termsAccepted = !termsAccepted },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = termsAccepted,
+                onCheckedChange = { termsAccepted = it }
+            )
+            Text(
+                text = "I agree to Curio's Terms and understand the data disclosures",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        Text(
+            text = "Direct messages are encrypted on your devices. Only encrypted message data and metadata are stored online; community posts and comments are not end-to-end encrypted.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         // ── One primary action, labelled by the mode ─────────────────────
         Button(
             onClick = {
@@ -201,6 +225,7 @@ internal fun CurioAuthCard(
                         OnlineAccount.signUp(context, address, password)
                     }
                     if (ok) {
+                        AppPreferences.acceptCurrentTerms(context)
                         password = ""
                         confirm = ""
                         notice = "Signed in. Your Curio account is connected."
@@ -275,6 +300,7 @@ internal fun CurioAccountIdentityCard(
     var savingName by remember { mutableStateOf(false) }
     var nameAnswer by remember { mutableStateOf<String?>(null) }
     var nameFailed by remember { mutableStateOf(false) }
+    var termsAccepted by remember { mutableStateOf(AppPreferences.hasAcceptedCurrentTerms(context)) }
 
     // What the field would accept right now — the SAME rule the server
     // enforces, stated before the user presses anything.
@@ -349,12 +375,36 @@ internal fun CurioAccountIdentityCard(
         )
 
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { termsAccepted = !termsAccepted },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = termsAccepted,
+                onCheckedChange = { termsAccepted = it }
+            )
+            Text(
+                text = "I agree to Curio's Terms and data disclosures",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(
                 onClick = {
+                    if (!termsAccepted) {
+                        nameAnswer = "Please accept Curio's Terms and data disclosures first."
+                        nameFailed = true
+                        return@Button
+                    }
+                    AppPreferences.acceptCurrentTerms(context)
+
                     // A click always answers: an invalid name is reported here
                     // too, not only as a rule line under the field.
                     if (!clean.matches(Regex("[a-z0-9_]{3,24}"))) {
