@@ -1062,6 +1062,12 @@ object AppPreferences {
     // the current screen is frozen and peels away from where you tapped, a
     // touch faster than the theme wipe. Off = today's plain transitions.
     var screenRevealEnabledState by mutableStateOf(false)
+    // v3xx52 — CAPTURE STUDIO experiment (Settings ▸ Experiments, default OFF):
+    // the Save-your-take page gets a redesigned workspace shell — tinted topic
+    // hero, a take rail riding the bottom tray, pickers moved into a tools
+    // bottom sheet, a live recording pulse and springy take switching. The
+    // paper notes themselves are untouched; OFF = today's capture page.
+    var captureStudioState by mutableStateOf(false)
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -1632,6 +1638,7 @@ object AppPreferences {
         glassClarityState = isGlassClarityEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
+        captureStudioState = isCaptureStudioEnabled(context)
         cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -1969,6 +1976,7 @@ object AppPreferences {
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
+    private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
@@ -2094,6 +2102,16 @@ object AppPreferences {
     fun setScreenRevealEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SCREEN_REVEAL, enabled).apply()
         screenRevealEnabledState = enabled
+    }
+
+    /** Whether the Capture studio experiment is on (default OFF; see the
+     *  state comment above). */
+    fun isCaptureStudioEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, false)
+
+    fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
+        captureStudioState = enabled
     }
 
     // v3xx — the "Subtle pill glow" experiment concluded: subtle is the

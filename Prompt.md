@@ -1,5 +1,97 @@
 # Prompt Log — current request
 
+## Request (2026-09-12, in progress — CAPTURE STUDIO: Save your take revamp)
+
+User (verbatim intent, rephrased): *revamp "save your take" and ship it as an
+Experiments option — make it fluid and greater, with good animations while
+recording, a redesigned tools-bar picker (format colour etc.), a proper view
+and a proper layout change — a full redesign of Save your take. Keep the core
+feature (any take type in any topic) and do NOT touch the note-paper style of
+the notes; everything else is mine to redesign better — better flow, UI, UX
+and functionality, no confusion, and do not remove things. It is an experiment
+toggle, so it must not affect the current flow; it should look nothing like
+the current one. Add this prompt to Prompt.md (rephrased) as progress, and add
+the next-prompt space too.*
+
+**Read first:** `master.md`, root `AGENTS.md`, `app/AGENTS.md`,
+`features/capture/*` (SaveCaptureScreen's state + save pipeline, the six
+formats, the shared components), `AppPreferences` experiment plumbing and
+`UserExperimentsScreen`.
+
+**Design decision (why this shape).** The classic page stacks four chrome
+bands (topic strip → format chips → take tabs → body) over the take. The
+studio instead splits the page into **hero → canvas → tray**: the topic,
+lane, session duration and mood move into a tinted hero; the canvas holds the
+paper note and nothing else; the takes, the tools door and Save move to a
+bottom tray (thumb reach). Format + mood + tags — three chrome bands —
+collapse into ONE tools bottom sheet with a two-up format grid that describes
+what each note actually captures.
+
+**CRITICAL constraint honoured:** the studio is a SHELL, not a fork. It takes
+the classic page's state and hands the classic page's own guards back as
+callbacks (`onPickFormat` → the fill-then-confirm rule, `onRequestRemoveTake`,
+`onAddTake`, `onSave` → the real `performSave`), renders the SAME
+`FormatBodyForCategory` / `TagEditorRow` / `SessionNoteFloatingPill`, and the
+classic page keeps every dialog. So the experiment cannot change what gets
+saved, and the paper notes are byte-identical.
+
+**Shipped (3 code files + docs, this commit):**
+
+1. **`data/AppPreferences.kt`** — `captureStudioState` + `KEY_CAPTURE_STUDIO`
+   + `is/setCaptureStudioEnabled` (default OFF, loaded at startup).
+2. **`features/settings/UserExperimentsScreen.kt`** — a new **Capture**
+   section with the *Take studio* switch.
+3. **`features/capture/CaptureStudio.kt` (NEW)** — the workspace:
+   - **Top bar** — back + title + one tools door (no competing bands).
+   - **Hero** — lane medallion, topic, lane · session duration, and a mood
+     chip that expands the shared `MoodChipsRow` INSIDE the card; while the
+     active take is recording the chip is replaced by a pulsing "Recording"
+     badge (`CaptureSectionState.busy`, so it is never a lie). One-shot rise +
+     fade entrance.
+   - **Canvas** — the untouched format body, the take's tags under it, and the
+     floating session-note pill. Switching takes plays a fast scale/alpha flip
+     driven by ONE `Animatable` (never composing two heavy boards at once).
+   - **Tray** — the take RAIL (active pill springs larger and wears the
+     accent; a recording take's pill swaps its glyph for a pulsing dot) plus
+     the dock: the current format pill (opens the tools sheet) and the Save
+     button, which pops once on `CurioMotion.Springs.Bouncy` when the take
+     becomes savable.
+   - **`CaptureToolsSheet`** — one settings-styled sheet (drag handle only, no
+     close cross): the two-up format grid with per-card animated selection
+     (accent fill + border + scale), the mood row and the tag editor. Every
+     choice CLOSES the sheet before it acts, so a confirmation dialog can
+     never animate in behind a leaving sheet.
+4. **`features/capture/SaveCaptureScreen.kt`** — `if (!studioOn)` wrappers
+   around the classic top bar and the classic strip/header (their declarations
+   stay unconditional so the shared state keeps one home), and one branch at
+   the body: `CaptureStudio(...)` (every callback expressed once, from the
+   classic page's own rules) or the classic body + CTA. `TagEditorRow` gained
+   a `modifier` parameter; the shared capture helpers are `internal` so the
+   studio file can use them rather than duplicating them.
+
+**Verification (Gradle is prohibited in this workspace):** delimiter-balance
+check on both Kotlin files, an import sweep, and a symbol audit of every
+shared component the studio calls (`Surface(onClick, interactionSource)`,
+`MoodChipsRow`, `TagEditorRow`, `SessionNoteFloatingPill`,
+`FormatBodyForCategory`, `rememberCurioPressSource`, `curioDarkGlow`,
+`JournalMood.glyph`, `formatGlyph`, `shortName`, `formatSessionShort`) plus a
+scope audit proving nothing in the classic body uses a variable declared
+inside the wrapped chrome blocks. CI is the compile check.
+
+**Scope:** Android app only (web/ + desktop/ untouched).
+
+**Status:** committing + pushing now; CI validates. The experiment is OFF by
+default, so the classic page is what every user sees until it is flipped on.
+
+## Request (2026-09-12, in progress — settings rail label, appearance gates, pickers, reminder clock, fetch consent, Cabinet collections)
+
+The previous queued prompt (settings rail active-pill label, material-hero-tears
+removal, hero/adaptive gating under Material, pet-designer greying, search +
+music pickers as settings-styled sheets, the daily-shuffle clock, recordings
+defaulting to High, the merged cover-fetch consent, and the Cabinet collection
+art redraw) was completed and **pushed by the user manually** before this
+request landed, so it is no longer open here.
+
 ## Request (2026-09-12, in progress — social composer and code-only identity)
 
 User requested a floating Community composer that chooses message or card,

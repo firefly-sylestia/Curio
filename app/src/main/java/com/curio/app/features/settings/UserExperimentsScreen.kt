@@ -195,6 +195,25 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // v3xx52 — CAPTURE STUDIO: the Save-your-take page becomes a
+            // designed workspace (tinted hero, take rail on the bottom tray,
+            // pickers in one tools sheet, live recording pulse). OFF = the
+            // capture page exactly as it is today.
+            item { SettingsSectionHeading("Capture") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Take studio",
+                            "A redesigned Save-your-take workspace: tinted topic hero, a take rail on the bottom tray, format + mood + tags in one tools sheet, and a live recording pulse",
+                            AppPreferences.captureStudioState
+                        ) {
+                            AppPreferences.setCaptureStudioEnabled(context, it)
+                        }
+                    }
+                }
+            }
+
             // Content tools — non-toggle experiments
             item { SettingsSectionHeading("Content tools") }
             item {
