@@ -395,16 +395,6 @@ internal fun SocialPersonCard(
 }
 
 /**
- * A TEXT POST — the body of a NOTE or a QUOTE.
- *
- * A topic card is art plus words; a note is WORDS, and a quote is words plus
- * who said them. Drawing those through the share-card renderer would put a
- * topic they are not about behind them, so they get this instead: the app's
- * own text surface, sized by what was written, with the credit on its own
- * line for a quote.
- */
-@Composable
-/**
  * A card with this device's like MOVED, without waiting for the server.
  *
  * The row holds ONE reaction per person (`community_reactions` is keyed by
@@ -436,6 +426,16 @@ internal fun CommunityCard.toggleDislike(): CommunityCard {
     )
 }
 
+/**
+ * A TEXT POST — the body of a NOTE or a QUOTE.
+ *
+ * A topic card is art plus words; a note is WORDS, and a quote is words plus
+ * who said them. Drawing those through the share-card renderer would put a
+ * topic they are not about behind them, so they get this instead: the app's
+ * own text surface, sized by what was written, with the credit on its own
+ * line for a quote.
+ */
+@Composable
 internal fun SocialTextPost(
     card: CommunityCard,
     onClick: () -> Unit,
