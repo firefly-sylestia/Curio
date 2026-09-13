@@ -220,6 +220,35 @@ brace) are recorded below in Verification status.
 - `docs/REALTIME_SETUP.md` + the `supabase/AGENTS.md` pointer remain LOCAL
   (unpushed) by the user's explicit request.
 
+## Shipped in this batch (2026-09-13, latest)
+
+Encrypted sends: the server is the bookkeeper now — a new RPC
+`curio_dm_missing_envelopes(conversation, version)` returns the devices still
+missing an envelope WITH their public keys (same rules as the insert trigger,
+grace window included), so the client wraps exactly what the server demands
+instead of guessing from a friend-key read that RLS may have emptied. Publish
+RPC now also retires the account's other devices, keeping one-identity-per-
+account an invariant instead of a hope.
+
+Feature opt-in: "Encrypted messages" switch in Settings → Online mode gates
+the per-chat pill (hidden unless opted in; a chat already ON keeps its pill).
+
+Gestures: messages act on HOLD (Copy / Edit for my plaintext / Remove); the
+old always-visible Delete-for-me + Unsend pills are gone from the reading
+flow. Replies gain Edit ("edited" mark, server-stamped). Branches: answers
+render under their root, long branches fold behind "show N more".
+
+Surfaces: community profile header wears the app's stat style (rose numbers
+over labels), shows the bio, adds the streak (flame + days) on your own page.
+Post previews fill their square tile completely (requiredSize + cover scale —
+the old `size` was coerced into the tile constraints and then scaled down,
+which is where quarter-size previews and the wall's dead space came from).
+The card page gains the dislike pill; likes and dislikes POP (spring).
+
+USER ACTION REQUIRED: re-paste supabase/schema.sql — the new publish +
+missing-envelopes RPCs, comment edit column/trigger/policy, dm_messages
+edited_at + edit guard/policy are all in the file but NOT live until pasted.
+
 ## User prompts
 
 ### Prompt (2026-09-13, latest) — identity publish RLS failure + door tile captions

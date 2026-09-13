@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -719,7 +720,13 @@ internal fun CommunityCardCanvas(
         ) {
             Box(
                 modifier = Modifier
-                    .size(cardWidth, cardHeight)
+                    // REQUIRED size, not `size`: a measured size is coerced
+                    // into the incoming constraints, and inside a square tile
+                    // that coerced box was then scaled DOWN again — the card
+                    // shrank to roughly a quarter of the tile. requiredSize
+                    // keeps the nominal card geometry, the graphicsLayer does
+                    // the shrinking, and the crop clips the overflow.
+                    .requiredSize(cardWidth, cardHeight)
                     .graphicsLayer(
                         scaleX = scale,
                         scaleY = scale,
@@ -849,12 +856,14 @@ private fun CommunityCardItem(
                     glyph = CurioIcons.ThumbUp,
                     label = if (card.likeCount > 0) card.likeCount.toString() else "",
                     tinted = card.likedByMe,
+                    animate = true,
                     onClick = onLike
                 )
                 CommunityAction(
                     glyph = CurioIcons.ThumbDown,
                     label = if (card.dislikeCount > 0) card.dislikeCount.toString() else "",
                     tinted = card.dislikedByMe,
+                    animate = true,
                     onClick = onDislike
                 )
                 CommunityAction(
@@ -898,9 +907,27 @@ internal fun CommunityAction(
     glyph: String,
     label: String,
     tinted: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    /** When true, a state change (a like landing) pops the icon. */
+    animate: Boolean = false
 ) {
     val ink = if (tinted) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
+    // The POP: whenever `tinted` flips (a like or dislike landing), the icon
+    // springs past its resting size and settles — the tactile answer to "did
+    // that count?". Driven by one Animatable so repeats restart cleanly.
+    val pop = remember { androidx.compose.animation.core.Animatable(1f) }
+    LaunchedEffect(tinted) {
+        if (animate) {
+            pop.snapTo(1.35f)
+            pop.animateTo(
+                1f,
+                androidx.compose.animation.core.spring(
+                    dampingRatio = 0.45f,
+                    stiffness = 700f
+                )
+            )
+        }
+    }
     Surface(
         shape = RoundedCornerShape(50),
         color = if (tinted) {
@@ -908,12 +935,14 @@ internal fun CommunityAction(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
         },
-        modifier = Modifier.curioPressClickable(
-            pressedScale = 0.94f,
-            hapticOnPress = false,
-            onClickLabel = label.ifBlank { glyph },
-            onClick = onClick
-        )
+        modifier = Modifier
+            .graphicsLayer(scaleX = pop.value, scaleY = pop.value)
+            .curioPressClickable(
+                pressedScale = 0.94f,
+                hapticOnPress = false,
+                onClickLabel = label.ifBlank { glyph },
+                onClick = onClick
+            )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

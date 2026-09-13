@@ -1,5 +1,6 @@
 package com.curio.app.features.community
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
@@ -11,6 +12,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -83,10 +86,12 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -174,6 +179,10 @@ fun DirectMessageScreen(
     // COUNTER rather than a flag so two pushes in a row are two fetches, and it
     // is keyed on the thread so opening another conversation starts fresh.
     var pushed by remember(otherUserId) { mutableStateOf(0) }
+    // Set by a realtime UPDATE/DELETE push: the next delta pull re-reads the
+    // whole page once, so a peer's edit or recall is reflected even though it
+    // happened to a row OLDER than the newest one on screen.
+    var pendingRealtimeRevisions by remember(otherUserId) { mutableStateOf(false) }
 
     // An ENCRYPTED send that failed raises this instead of a dead error line:
     // the dialog states the reason and offers the one-tap way out (turn the
@@ -360,7 +369,37 @@ fun DirectMessageScreen(
     // one-tap fallback can send the very words the member already typed.
     var failedDraft by remember(otherUserId) { mutableStateOf("") }
 
+    // Long-press actions. A tap still opens reactions; a HOLD is the decided
+    // gesture: it alone reveals Remove (mine) and Edit (mine, plaintext) —
+    // nothing action-like sits under a message a finger is only reading.
+    var actionTarget by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
+    // The message being EDITED: its words load into the composer and the
+    // send button becomes Save until the edit is done or dropped.
+    var editing by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
+
+    /** Applies an edit from the composer; plaintext rows only. */
+    suspend fun commitEdit(active: String, message: CurioDirectMessage) {
+        val text = draft.trim()
+        if (text.isEmpty() || sending) return
+        sending = true
+        SocialApi.editMessage(active, message.id, text).fold(
+            onSuccess = {
+                editing = null
+                draft = ""
+                load(active, message.senderId)
+            },
+            onFailure = { failure -> error = failure.message ?: "Couldn't edit that message." }
+        )
+        sending = false
+    }
+
     suspend fun send(active: String, me: String, forcePlaintext: Boolean = false) {
+        // An edit in flight takes the composer over: Send IS Save until the
+        // edit is committed or dropped.
+        editing?.let { target ->
+            commitEdit(active, target)
+            return
+        }
         val text = draft.trim()
         if (text.isEmpty() || sending) return
         sending = true
@@ -445,9 +484,43 @@ fun DirectMessageScreen(
             val key = restoredKey
                 ?: CurioDmCrypto.existingKey(context, conversationId, keyVersion)
                 ?: CurioDmCrypto.newKey(context, conversationId, keyVersion)
-            val peers = SocialApi.dmIdentities(active, listOf(otherUserId, me)).getOrThrow()
-                .filter(CurioDmCrypto::canWrapFor)
-            check(peers.any { it.userId == otherUserId }) { "This friend needs to open Curio once before encrypted messages can reach them." }
+            // The server is the bookkeeper: it names the devices that still
+            // lack an envelope for this version (its own trigger re-checks the
+            // same list on insert). The client could not compute this list —
+            // row-level security hides the friend's device rows from the
+            // sender on purpose, and an empty read once made every send look
+            // like a friend who never opened the app.
+            val missing = SocialApi.dmMissingEnvelopes(active, conversationId, keyVersion)
+                .getOrNull()
+            val peers: List<CurioDmIdentity> = when {
+                missing != null -> {
+                    // The authoritative path: every row the server named comes
+                    // WITH its public key, so the wrap list is built directly
+                    // from it — no second read that row-level security could
+                    // empty. Rows without a usable key are skipped; if that
+                    // leaves the friend uncovered, the send fails with the
+                    // clear message below rather than a rejected insert.
+                    missing.mapNotNull { it.toIdentity() }.ifEmpty {
+                        // The server named devices but none carried a usable
+                        // key: fall back to the identity read for whatever it
+                        // can still see.
+                        SocialApi.dmIdentities(active, listOf(otherUserId, me))
+                            .getOrDefault(emptyList())
+                            .filter(CurioDmCrypto::canWrapFor)
+                    }
+                }
+                else -> {
+                    // The RPC is not installed on this project yet: wrap for
+                    // every device the (possibly empty) identity read sees.
+                    // A stale row that should have been retired is healed by
+                    // the publish above; the rest is the server's grace.
+                    SocialApi.dmIdentities(active, listOf(otherUserId, me)).getOrDefault(emptyList())
+                        .filter(CurioDmCrypto::canWrapFor)
+                }
+            }
+            check(peers.any { it.userId == otherUserId }) {
+                "This friend needs to open Curio once before encrypted messages can reach them."
+            }
             // Envelope writes are independent. Send them together instead of
             // making the composer wait one network round trip per device.
             coroutineScope {
@@ -559,6 +632,26 @@ fun DirectMessageScreen(
             .getOrNull()
             .orEmpty()
             .filter { row -> (messages + pending).none { it.id == row.id } }
+        // A realtime push can also be an EDIT or a DELETE on an OLDER row,
+        // which the created_at window above never sees. Edits are re-read in
+        // full at most once per push (cheap: one page read); deletes of rows
+        // we still hold are pruned locally.
+        if (pendingRealtimeRevisions) {
+            pendingRealtimeRevisions = false
+            SocialApi.messages(active, otherUserId, me).getOrNull()?.let { server ->
+                val hidden = SocialMessageCache.hiddenIds(context, otherUserId)
+                messages = messages.mapNotNull { held ->
+                    when {
+                        held.id in hidden -> null
+                        // Gone from the server: they recalled it.
+                        server.none { it.id == held.id } && !held.id.startsWith(LOCAL_ID_PREFIX) -> null
+                        // Changed on the server: their edit wins.
+                        else -> server.firstOrNull { it.id == held.id } ?: held
+                    }
+                }
+                SocialMessageCache.write(context, otherUserId, messages)
+            }
+        }
         // The receipts ride the same pull, whether or not anything new arrived:
         // they change when the other side READS, which is a different moment
         // from when they write.
@@ -619,8 +712,11 @@ fun DirectMessageScreen(
                 watches = listOf(
                     RealtimeWatch(
                         table = "dm_messages",
+                        // INSERT is their new message; UPDATE catches their
+                        // edit; DELETE their recall. The delta fetch then
+                        // re-reads the touched rows.
                         filter = "sender=eq.$otherUserId",
-                        events = listOf("INSERT")
+                        events = listOf("INSERT", "UPDATE", "DELETE")
                     ),
                     RealtimeWatch(
                         table = "dm_messages",
@@ -639,8 +735,12 @@ fun DirectMessageScreen(
                     )
                 )
             ) {
-                // The push arrives on a socket thread; the counter is Compose
-                // state, so the bump is posted to the composition's own scope.
+                // The push may be an INSERT, or an UPDATE/DELETE on an older
+                // row (their edit, their recall). The next delta pull asks for
+                // the whole page once when any revision flag is set, so both
+                // shapes land. Compose state is written on the composition's
+                // own scope, never from the socket thread.
+                scope.launch { pendingRealtimeRevisions = true }
                 scope.launch { pushed++ }
                 // The live bits that are not part of the message delta — the
                 // typing row and their reactions — are re-read right away.
@@ -820,29 +920,38 @@ fun DirectMessageScreen(
                             }
                         )
                     }
-                    item(key = "delivery-mode") {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            SocialPill(
-                                label = if (encryptionEnabled) "Encrypted" else "Encryption off",
-                                icon = CurioIcons.Warning,
-                                tone = if (encryptionEnabled) SocialPillTone.ACCENT else SocialPillTone.NEUTRAL,
-                                enabled = !sending,
-                                onClick = {
-                                    scope.launch {
-                                        val conversationId = dmConversationId(activeUserId, otherUserId)
-                                        SocialApi.setDmEncryption(
-                                            activeToken, conversationId, activeUserId, otherUserId,
-                                            !encryptionEnabled
-                                        ).fold(
-                                            onSuccess = { encryptionEnabled = it.encryptionEnabled },
-                                            onFailure = { error = it.message ?: "Couldn't change message encryption." }
-                                        )
+                    // The per-chat encryption toggle is EXPERIMENTAL and
+                    // opt-in at the device level: it only exists when the
+                    // member asked for it in Settings → Online mode. A
+                    // conversation whose shared mode is already ON keeps its
+                    // pill (and its encrypted behaviour) either way — the gate
+                    // hides the door, it never slams one that is open.
+                    val encryptionExposed = AppPreferences.dmEncryptionEnabledState || encryptionEnabled
+                    if (encryptionExposed) {
+                        item(key = "delivery-mode") {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                SocialPill(
+                                    label = if (encryptionEnabled) "Encrypted" else "Encryption off",
+                                    icon = if (encryptionEnabled) CurioIcons.Lock else CurioIcons.Warning,
+                                    tone = if (encryptionEnabled) SocialPillTone.ACCENT else SocialPillTone.NEUTRAL,
+                                    enabled = !sending,
+                                    onClick = {
+                                        scope.launch {
+                                            val conversationId = dmConversationId(activeUserId, otherUserId)
+                                            SocialApi.setDmEncryption(
+                                                activeToken, conversationId, activeUserId, otherUserId,
+                                                !encryptionEnabled
+                                            ).fold(
+                                                onSuccess = { encryptionEnabled = it.encryptionEnabled },
+                                                onFailure = { error = it.message ?: "Couldn't change message encryption." }
+                                            )
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
 
@@ -873,6 +982,7 @@ fun DirectMessageScreen(
                                 reactions = reactions[message.id].orEmpty(),
                                 myUserId = activeUserId,
                                 onTap = { openReactions(message.id) },
+                                onLongPress = { actionTarget = message },
                                 onPick = { kind -> pickReaction(message.id, kind) },
                                 onDeleteLocal = {
                                     SocialMessageCache.hide(context, otherUserId, message.id)
@@ -906,6 +1016,11 @@ fun DirectMessageScreen(
                     draft = draft,
                     title = fallback,
                     sending = sending,
+                    editTarget = editing,
+                    onDropEdit = {
+                        editing = null
+                        draft = ""
+                    },
                     onDraftChange = { if (it.length <= SocialApi.MAX_MESSAGE_CHARS) draft = it },
                     onSend = { scope.launch { send(activeToken, activeUserId) } }
                 )
@@ -969,6 +1084,79 @@ fun DirectMessageScreen(
                     }
                 }
             }
+        }
+
+        // The HOLD menu for one message. Copy (any message), Edit (mine,
+        // plaintext only — an encrypted row is bound to its key version),
+        // Remove (mine). Nothing else: a menu is a decision, not a page.
+        actionTarget?.let { target ->
+            val canEdit = target.mine && target.migrationState == "plaintext" &&
+                !target.id.startsWith(LOCAL_ID_PREFIX)
+            val canRemove = target.mine && !target.id.startsWith(LOCAL_ID_PREFIX)
+            AlertDialog(
+                onDismissRequest = { actionTarget = null },
+                containerColor = curioDialogContainerColor(),
+                shape = CurioDialogShape,
+                title = {
+                    Text(
+                        text = "Message",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                text = {
+                    Text(
+                        text = target.body.take(160) + if (target.body.length > 160) "…" else "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                dismissButton = {
+                    TextButton(onClick = { actionTarget = null }) { Text("Close") }
+                },
+                confirmButton = {
+                    Row {
+                        TextButton(onClick = {
+                            val clip = context.getSystemService(Context.CLIPBOARD_SERVICE)
+                                as? android.content.ClipboardManager
+                            clip?.setPrimaryClip(
+                                android.content.ClipData.newPlainText("message", target.body)
+                            )
+                            actionTarget = null
+                        }) { Text("Copy") }
+                        if (canEdit) {
+                            TextButton(onClick = {
+                                editing = target
+                                draft = target.body
+                                actionTarget = null
+                            }) { Text("Edit") }
+                        }
+                        if (canRemove) {
+                            TextButton(onClick = {
+                                actionTarget = null
+                                val active = token
+                                if (active != null) {
+                                    scope.launch {
+                                        SocialApi.deleteMessage(active, target.id).fold(
+                                            onSuccess = {
+                                                messages = messages.filterNot { it.id == target.id }
+                                                SocialMessageCache.write(context, otherUserId, messages)
+                                            },
+                                            onFailure = { error = it.message ?: "Couldn't remove that message." }
+                                        )
+                                    }
+                                }
+                            }) {
+                                Text(
+                                    "Remove",
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+            )
         }
 
         // An encrypted send that could not be delivered raises THIS instead of
@@ -1162,6 +1350,7 @@ private fun MessageEntry(
     reactions: List<CurioDmReaction>,
     myUserId: String,
     onTap: () -> Unit,
+    onLongPress: () -> Unit,
     onPick: (String) -> Unit,
     onDeleteLocal: () -> Unit,
     onUnsend: (() -> Unit)?,
@@ -1190,23 +1379,18 @@ private fun MessageEntry(
                 receipt = receipt,
                 reactions = reactions,
                 myUserId = myUserId,
-                onTap = onTap
+                onTap = onTap,
+                onLongPress = onLongPress
             )
+            // The action row under a message is GONE: actions are decided on
+            // a HOLD now, so nothing crowds the message a finger is only
+            // reading. (Reactions still open on a tap.)
             if (accent) {
                 ReactionBar(
                     current = reactions.firstOrNull { it.userId == myUserId }?.kind,
                     mine = message.mine,
                     onPick = onPick
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = if (message.mine) Arrangement.End else Arrangement.Start
-                ) {
-                    SocialPill(label = "Delete for me", onClick = onDeleteLocal, tone = SocialPillTone.NEUTRAL)
-                    onUnsend?.let { unsend ->
-                        SocialPill(label = "Unsend", onClick = unsend, tone = SocialPillTone.DESTRUCTIVE)
-                    }
-                }
             }
         }
     }
@@ -1226,7 +1410,8 @@ private fun MessageBubble(
     receipt: Long?,
     reactions: List<CurioDmReaction>,
     myUserId: String,
-    onTap: () -> Unit
+    onTap: () -> Unit,
+    onLongPress: () -> Unit
 ) {
     val mine = message.mine
     val shape = if (mine) {
@@ -1284,7 +1469,13 @@ private fun MessageBubble(
                         if (mine) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.surfaceContainerHigh
                     )
-                    .clickable(onClick = onTap)
+                    .combinedClickable(
+                        onClick = onTap,
+                        // The HOLD is the message's decision point: it opens
+                        // the action menu (remove, edit). A plain tap keeps
+                        // opening reactions.
+                        onLongClick = onLongPress
+                    )
                     .padding(horizontal = 14.dp, vertical = 9.dp)
             ) {
                 Text(
@@ -1293,6 +1484,14 @@ private fun MessageBubble(
                     color = if (mine) MaterialTheme.colorScheme.onPrimaryContainer
                     else MaterialTheme.colorScheme.onSurface
                 )
+                if (message.editedAtMillis != null) {
+                    Text(
+                        text = "edited",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (mine) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
             }
 
             // The reaction chips sit OUTSIDE the bubble, on its tail corner, so
@@ -1480,6 +1679,9 @@ private fun MessageComposer(
   draft: String,
     title: String,
     sending: Boolean,
+    /** When set, the composer is EDITING this message: Save replaces Send. */
+    editTarget: CurioDirectMessage?,
+    onDropEdit: () -> Unit,
     onDraftChange: (String) -> Unit,
     onSend: () -> Unit
 ) {
@@ -1511,6 +1713,44 @@ private fun MessageComposer(
             ),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+        // The edit banner: what is being changed, and the way out. It sits
+        // above the field so the composer's own height never jumps.
+        androidx.compose.animation.AnimatedVisibility(visible = editTarget != null) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 7.dp)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Edit,
+                        contentDescription = null,
+                        tint = curioDialogActionColor(),
+                        size = 14.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Editing message",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = "Cancel",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = curioDialogActionColor(),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable(onClick = onDropEdit)
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                    )
+                }
+            }
+        }
         Row(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1574,8 +1814,10 @@ cursorBrush = SolidColor(curioDialogActionColor()),
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     CurioIcon(
-                        name = CurioIcons.ArrowForward,
-                        contentDescription = "Send",
+                        // An edit in flight turns the arrow into a check: the
+                        // same button, a different verb.
+                        name = if (editTarget != null) CurioIcons.Check else CurioIcons.ArrowForward,
+                        contentDescription = if (editTarget != null) "Save edit" else "Send",
                         tint = if (armed) androidx.compose.ui.graphics.Color.White
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         size = 20.dp

@@ -97,6 +97,7 @@ object CurioIcons {
     const val Shuffle     = "shuffle"
     const val GridView    = "grid_view"
     const val Apps        = "apps"
+    const val Lock        = "lock"             // sealed — encrypted messages (verified ligature in the bundled subset)
     // v377 — share-card editor "No fact": eye crossed out — added to the
     // bundled Material Symbols subset via fontTools (verified ligature;
     // pure rlig glyph, no cmap codepoint change).

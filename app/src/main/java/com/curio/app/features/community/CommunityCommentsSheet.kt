@@ -92,6 +92,11 @@ internal fun CommunityCommentsSheet(
     // the chip above the composer names the person, so a branch is never
     // posted at the wrong place by accident.
     var replyTo by remember { mutableStateOf<CommunityComment?>(null) }
+    // The reply being EDITED: its words load into the composer and the button
+    // becomes Save until the edit lands or is dropped.
+    var editing by remember { mutableStateOf<CommunityComment?>(null) }
+    // Branch roots whose folded answers the member expanded ("show more").
+    var expandedRoots by remember { mutableStateOf(setOf<String>()) }
     var friendIds by remember {
         mutableStateOf(AppPreferences.getLocalFriendIds(context))
     }
@@ -155,7 +160,7 @@ internal fun CommunityCommentsSheet(
     // composable context, so `remember` cannot live inside it. Each top-level
     // reply is followed by the replies that answer it, so a branch reads under
     // the line it belongs to instead of at the bottom of the sheet.
-    val branch = remember(replies) { branchOrder(replies) }
+    val branch = remember(replies, expandedRoots) { branchRenderList(replies, expandedRoots) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -212,12 +217,21 @@ internal fun CommunityCommentsSheet(
                         )
                     }
                 }
-                items(branch, key = { it.first.id }) { (reply, depth) ->
+                items(branch.filterIsInstance<BranchRender.Reply>(), key = { it.comment.id }) { node ->
+                    val reply = node.comment
+                    val depth = node.depth
                     CommunityReplyRow(
                         reply = reply,
                         depth = depth,
                         onAuthor = { if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId) },
                         onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
+                        onEdit = if (reply.mine) {
+                            {
+                                editing = reply
+                                text = reply.body
+                                replyTo = null
+                            }
+                        } else null,
                         canAddFriend = myUserId == null || (reply.authorId != myUserId && reply.authorId !in friendIds),
                         onAddFriend = {
                             if (myUserId != null) {
@@ -239,6 +253,10 @@ internal fun CommunityCommentsSheet(
                             scope.launch {
                                 CommunityApi.deleteComment(accessToken, reply.id).fold(
                                     onSuccess = {
+                                        if (editing?.id == reply.id) {
+                                            editing = null
+                                            text = ""
+                                        }
                                         load()
                                         onChanged()
                                     },
@@ -247,6 +265,25 @@ internal fun CommunityCommentsSheet(
                             }
                         }
                     )
+                }
+                items(
+                    branch.filterIsInstance<BranchRender.More>(),
+                    key = { "more-${it.rootId}" }
+                ) { more ->
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        modifier = Modifier
+                            .padding(start = 18.dp)
+                            .clickable { expandedRoots = expandedRoots + more.rootId }
+                    ) {
+                        Text(
+                            text = "Show ${more.hidden} more",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                            color = curioDialogActionColor(),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                        )
+                    }
                 }
             }
 
@@ -305,8 +342,11 @@ internal fun CommunityCommentsSheet(
                     },
                     label = {
                         Text(
-                            if (replyTo == null) "Add a reply"
-                            else "Reply to @${replyTo?.authorLabel}"
+                            when {
+                                editing != null -> "Edit your reply"
+                                replyTo == null -> "Add a reply"
+                                else -> "Reply to @${replyTo?.authorLabel}"
+                            }
                         )
                     },
                     maxLines = 3,
@@ -315,26 +355,39 @@ internal fun CommunityCommentsSheet(
                 Spacer(Modifier.width(8.dp))
                 Button(
                     onClick = {
+                        val editTarget = editing
                         val parent = replyTo
                         val handle = AppPreferences.getUsername(context).ifBlank {
                             AppPreferences.getDisplayName(context)
                         }
                         scope.launch {
-                            CommunityApi.comment(
-                                accessToken,
-                                card.id,
-                                text,
-                                handle,
-                                parentId = parent?.id
-                            ).fold(
-                                onSuccess = {
-                                    text = ""
-                                    replyTo = null
-                                    load()
-                                    onChanged()
-                                },
-                                onFailure = { error = it.message }
-                            )
+                            when {
+                                editTarget != null -> CommunityApi.editComment(
+                                    accessToken, editTarget.id, text
+                                ).fold(
+                                    onSuccess = {
+                                        editing = null
+                                        text = ""
+                                        load()
+                                    },
+                                    onFailure = { error = it.message }
+                                )
+                                else -> CommunityApi.comment(
+                                    accessToken,
+                                    card.id,
+                                    text,
+                                    handle,
+                                    parentId = parent?.id
+                                ).fold(
+                                    onSuccess = {
+                                        text = ""
+                                        replyTo = null
+                                        load()
+                                        onChanged()
+                                    },
+                                    onFailure = { error = it.message }
+                                )
+                            }
                         }
                     },
                     enabled = text.isNotBlank() && CurioContentFilter.isClean(text),
@@ -342,7 +395,7 @@ internal fun CommunityCommentsSheet(
                     colors = curioDialogActionButtonColors()
                 ) {
                     Text(
-                        text = "Send",
+                        text = if (editing != null) "Save" else "Send",
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold
                         )
@@ -369,7 +422,9 @@ internal fun CommunityReplyRow(
     onReply: () -> Unit,
     canAddFriend: Boolean = true,
     onAddFriend: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    /** Loads the reply's words into the composer as an EDIT — mine only. */
+    onEdit: (() -> Unit)? = null
 ) {
     Surface(
         shape = RoundedCornerShape(18.dp),
@@ -419,6 +474,14 @@ internal fun CommunityReplyRow(
                     )
                     Spacer(Modifier.weight(1f))
                     if (reply.mine) {
+                        if (onEdit != null) {
+                            ReplyPill(
+                                glyph = CurioIcons.Edit,
+                                label = "Edit",
+                                onClick = onEdit
+                            )
+                            Spacer(Modifier.width(6.dp))
+                        }
                         ReplyPill(
                             glyph = CurioIcons.Close,
                             label = "Remove",
@@ -449,6 +512,13 @@ internal fun CommunityReplyRow(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (reply.editedAtMillis != null) {
+                    Text(
+                        text = "edited",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }
@@ -497,6 +567,52 @@ internal fun branchOrder(replies: List<CommunityComment>): List<Pair<CommunityCo
     }
     val placed = out.map { it.first.id }.toSet()
     replies.filterNot { it.id in placed }.forEach { out += it to 0 }
+    return out
+}
+
+/** One row of a rendered branch: a reply, or a "show N more" door. */
+internal sealed class BranchRender {
+    internal data class Reply(val comment: CommunityComment, val depth: Int) : BranchRender()
+    internal data class More(val rootId: String, val hidden: Int) : BranchRender()
+}
+
+/** How many answers show under one top-level reply before the door. */
+internal const val BRANCH_PREVIEW = 3
+
+/**
+ * The render list for a branch thread: each top-level reply shows its first
+ * [BRANCH_PREVIEW] answers, and a branch longer than that folds behind a
+ * "show N more" door instead of stretching the page. Roots with a folded
+ * branch re-render in full once their door is expanded.
+ */
+internal fun branchRenderList(
+    replies: List<CommunityComment>,
+    expandedRoots: Set<String>
+): List<BranchRender> {
+    val children = replies.filter { it.parentId != null }.groupBy { it.parentId }
+    val seen = mutableSetOf<String>()
+    val out = ArrayList<BranchRender>(replies.size)
+    replies.filter { it.parentId == null }.forEach { root ->
+        seen += root.id
+        out += BranchRender.Reply(root, 0)
+        val answers = children[root.id].orEmpty()
+        if (answers.size <= BRANCH_PREVIEW || root.id in expandedRoots) {
+            answers.forEach { child ->
+                seen += child.id
+                out += BranchRender.Reply(child, 1)
+            }
+        } else {
+            answers.take(BRANCH_PREVIEW).forEach { child ->
+                seen += child.id
+                out += BranchRender.Reply(child, 1)
+            }
+            out += BranchRender.More(root.id, answers.size - BRANCH_PREVIEW)
+        }
+    }
+    // Orphans (their parent vanished) stay visible at the top level.
+    replies.filterNot { it.id in seen }.forEach {
+        out += BranchRender.Reply(it, 0)
+    }
     return out
 }
 

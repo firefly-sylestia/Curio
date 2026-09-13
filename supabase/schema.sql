@@ -427,6 +427,34 @@ create policy cmt_delete_own on public.community_comments
     for delete to authenticated
     using (author = auth.uid());
 
+-- Editing a reply: the author alone, body only, never ownership, card or
+-- branch. The trigger above already pins the parent on update, and the body
+-- length + content CHECKs re-run on the new text automatically. The stamp is
+-- server-owned: a body change always sets edited_at, no client say in it.
+alter table public.community_comments
+    add column if not exists edited_at timestamptz;
+
+create or replace function public.curio_stamp_comment_edit()
+returns trigger
+language plpgsql
+as $$
+begin
+    if new.body is distinct from old.body and new.edited_at is null then
+        new.edited_at := now();
+    end if;
+    return new;
+end $$;
+drop trigger if exists community_comments_stamp_edit on public.community_comments;
+create trigger community_comments_stamp_edit
+    before update on public.community_comments
+    for each row execute function public.curio_stamp_comment_edit();
+
+drop policy if exists cmt_update_own on public.community_comments;
+create policy cmt_update_own on public.community_comments
+    for update to authenticated
+    using (author = auth.uid())
+    with check (author = auth.uid());
+
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5. community_reports — moderation queue (write-only for users)
 -- ───────────────────────────────────────────────────────────────────────────
@@ -995,8 +1023,59 @@ begin
     on conflict (user_id, device_id) do update
         set public_key = excluded.public_key,
             retired_at = null;
+    -- Publishing this device RETIRES every other active device of the same
+    -- account: one identity per account at a time is the invariant the
+    -- message trigger's completeness check is built on, and a reinstall or a
+    -- replaced keypair must not leave a second active row the sender can
+    -- never wrap for.
+    update public.dm_device_keys
+       set retired_at = now()
+     where user_id = auth.uid()
+       and device_id <> p_device_id
+       and retired_at is null;
 end $$;
 grant execute on function public.curio_publish_dm_device(text, text) to authenticated;
+
+-- The devices that still lack an envelope for one conversation key version —
+-- the sender's TO-DO list, computed with the SAME rules the message insert
+-- trigger re-checks, grace window included: a device registered in the last
+-- two minutes is not demanded yet, so it is left out here too (wrapping for
+-- it stays possible client-side, but never required). A sender could not
+-- reliably compute this themselves: row-level security deliberately hides
+-- the other party's device rows, yet the trigger demands a wrap for them,
+-- so the server must be the one to name the missing devices. Security
+-- definer because it reads both parties' rows; it returns only ids, never
+-- key material.
+create or replace function public.curio_dm_missing_envelopes(
+    p_conversation_id text,
+    p_key_version integer
+)
+returns table (user_id uuid, device_id text, public_key text)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select device.user_id, device.device_id, device.public_key
+      from public.dm_device_keys device
+     where device.user_id in (
+              select c.first_user from public.dm_conversations c
+               where c.conversation_id = p_conversation_id
+              union all
+              select c.second_user from public.dm_conversations c
+               where c.conversation_id = p_conversation_id
+           )
+       and device.retired_at is null
+       and device.created_at <= now() - interval '2 minutes'
+       and not exists (
+              select 1 from public.dm_key_envelopes envelope
+               where envelope.conversation_id = p_conversation_id
+                 and envelope.recipient = device.user_id
+                 and envelope.device_id = device.device_id
+                 and envelope.key_version = p_key_version
+           );
+$$;
+grant execute on function public.curio_dm_missing_envelopes(text, integer) to authenticated;
 
 alter table public.dm_messages enable row level security;
 
@@ -1032,6 +1111,39 @@ create policy dm_update_receipt on public.dm_messages
     for update to authenticated
     using (recipient = auth.uid())
     with check (recipient = auth.uid());
+
+-- Editing a sent message: the SENDER alone, and only the edit stamp and the
+-- plaintext body may change. Encrypted rows are refused outright — their
+-- ciphertext is bound to a conversation key version, and an "edit" would
+-- need a full re-wrap for every device; that is re-encryption, not editing.
+alter table public.dm_messages add column if not exists edited_at timestamptz;
+
+drop policy if exists dm_edit_own on public.dm_messages;
+create policy dm_edit_own on public.dm_messages
+    for update to authenticated
+    using (sender = auth.uid())
+    with check (sender = auth.uid());
+
+create or replace function public.curio_guard_dm_message_edit()
+returns trigger
+language plpgsql
+as $$
+begin
+    if new.sender <> old.sender or new.recipient <> old.recipient then
+        raise exception 'curio: a message cannot change its conversation';
+    end if;
+    if new.migration_state <> 'plaintext' then
+        raise exception 'curio: encrypted messages cannot be edited';
+    end if;
+    if new.body is distinct from old.body and new.edited_at is null then
+        new.edited_at := now();
+    end if;
+    return new;
+end $$;
+drop trigger if exists dm_messages_guard_edit on public.dm_messages;
+create trigger dm_messages_guard_edit
+    before update on public.dm_messages
+    for each row execute function public.curio_guard_dm_message_edit();
 
 -- A participant may clear the entire two-person thread. The client scopes the
 -- DELETE to both directions, while this policy prevents deleting somebody

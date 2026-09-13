@@ -163,6 +163,25 @@ fun OnlineModeScreen(navController: NavController) {
                             AppPreferences.setCommunityTabEnabled(context, wanted)
                         }
                     )
+                    SettingsOptionDivider()
+                    // Encrypted messaging is EXPERIMENTAL and strictly
+                    // opt-in: the per-chat "Encrypted" pill stays hidden in
+                    // conversations until this device switch is on. Off by
+                    // default while the key distribution is still settling.
+                    SettingsOptionSwitchRow(
+                        icon = CurioIcons.Lock,
+                        title = "Encrypted messages",
+                        subtitle = if (onlineMode && account.signedIn) {
+                            "Experimental. Show the encryption toggle inside conversations so you can opt a chat in."
+                        } else {
+                            "Turn on Online mode and sign in to try encrypted messages."
+                        },
+                        checked = AppPreferences.dmEncryptionEnabledState,
+                        enabled = onlineMode && account.signedIn,
+                        onCheckedChange = { wanted ->
+                            AppPreferences.setDmEncryptionEnabled(context, wanted)
+                        }
+                    )
                 }
             }
 

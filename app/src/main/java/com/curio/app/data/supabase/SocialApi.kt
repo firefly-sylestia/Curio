@@ -155,8 +155,21 @@ data class CurioDirectMessage(
     val ciphertext: String? = null,
     val nonce: String? = null,
     val encryptionVersion: String? = null,
-    val migrationState: String = "legacy"
+    val migrationState: String = "legacy",
+    val editedAtMillis: Long? = null
 )
+
+/** A device of one conversation party that still has no envelope for a version. */
+data class CurioDmMissingEnvelope(
+    val userId: String,
+    val deviceId: String,
+    val publicKey: String
+) {
+    /** The wrap-ready identity; valid when the public key came back readable. */
+    fun toIdentity(): CurioDmIdentity? = publicKey
+        .takeIf { it.isNotBlank() && it != "null" }
+        ?.let { CurioDmIdentity(deviceId, it, userId) }
+}
 
 /**
  * The server-owned delivery mode for one two-person conversation.
@@ -267,7 +280,7 @@ object SocialApi {
     private const val THREAD_LIMIT = 200
 
     /** The columns a conversation read needs — one list, both paths. */
-    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,ciphertext,nonce,encryption_version,migration_state,created_at,read_at"
+    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,ciphertext,nonce,encryption_version,migration_state,created_at,read_at,edited_at"
 
     /**
      * The public identity columns, in two shapes.
@@ -959,6 +972,9 @@ private const val PERSON_COLUMNS_PRIVACY =
                         readAtMillis = row.optString("read_at")
                             .takeIf { it.isNotBlank() }
                             ?.let(::epochMillis),
+                        editedAtMillis = row.optString("edited_at")
+                            .takeIf { it.isNotBlank() && it != "null" }
+                            ?.let(::epochMillis),
                         mine = row.optString("sender") == myUserId
                     )
                 )
@@ -1087,6 +1103,50 @@ private const val PERSON_COLUMNS_PRIVACY =
           if (version > 0) put(version, CurioDmEnvelope(
             row.optString("device_id"), version, row.optString("encrypted_key"), row.optString("encryption_version")
           ))
+        }
+      }
+    }
+  }
+
+  /**
+   * The devices still missing an envelope for a key version, straight from
+   * the server through the `curio_dm_missing_envelopes` security-definer
+   * RPC — the SAME bookkeeping the message trigger checks, so the sender
+   * can wrap exactly what is missing instead of guessing from a table read
+   * that row-level security may have emptied.
+   *
+   * Returns `null` (not a list) when the RPC is not installed on the project
+   * yet — the caller then falls back to wrapping for every readable device.
+   */
+  suspend fun dmMissingEnvelopes(
+    accessToken: String,
+    conversationId: String,
+    keyVersion: Int
+  ): Result<List<CurioDmMissingEnvelope>?> = withContext(Dispatchers.IO) {
+    mapped {
+      val request = SupabaseClient.requestBuilder("/rest/v1/rpc/curio_dm_missing_envelopes", accessToken)
+        .post(
+          JSONObject()
+            .put("p_conversation_id", conversationId)
+            .put("p_key_version", keyVersion)
+            .toString().toRequestBody(jsonMediaType)
+        ).build()
+      val body = SupabaseClient.executeBody(request)
+      if (body.isBlank() || body == "null") return@mapped null
+      val rows = JSONArray(body)
+      buildList(rows.length()) {
+        for (index in 0 until rows.length()) {
+          val row = rows.optJSONObject(index) ?: continue
+          val userId = row.optString("user_id")
+          val deviceId = row.optString("device_id")
+          if (userId.isNotBlank() && deviceId.isNotBlank()) {
+            add(
+              CurioDmMissingEnvelope(
+                userId, deviceId,
+                row.optString("public_key").takeUnless { it == "null" }.orEmpty()
+              )
+            )
+          }
         }
       }
     }
@@ -1245,6 +1305,27 @@ private const val PERSON_COLUMNS_PRIVACY =
                 val request = SupabaseClient
                     .requestBuilder("$MESSAGES?id=eq.${id(messageId)}", accessToken)
                     .delete()
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    /**
+     * Edits one of MY plaintext messages. Encrypted rows are refused by the
+     * server's edit guard (their ciphertext is bound to a key version), and
+     * the `edited_at` stamp is server-owned — the client never sends it.
+     */
+    suspend fun editMessage(accessToken: String, messageId: String, body: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val text = body.trim()
+                require(text.isNotBlank()) { "Message is empty." }
+                if (text.length > MAX_MESSAGE_CHARS) {
+                    throw IllegalArgumentException("Keep it under $MAX_MESSAGE_CHARS characters.")
+                }
+                val request = SupabaseClient
+                    .requestBuilder("$MESSAGES?id=eq.${id(messageId)}", accessToken)
+                    .put(JSONObject().put("body", text).toString().toRequestBody(jsonMediaType))
                     .build()
                 SupabaseClient.executeBody(request)
             }

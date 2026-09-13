@@ -59,6 +59,7 @@ import com.curio.app.features.settings.SettingsOptionRow
 import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
+import com.curio.app.data.StreakTracker
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -372,6 +373,8 @@ private fun SocialProfileHeader(
     var menuOpen by remember { mutableStateOf(false) }
     val likes = remember(cards) { cards.sumOf { it.likeCount } }
     val replies = remember(cards) { cards.sumOf { it.commentCount } }
+    val context = LocalContext.current
+    val streak = remember(isMe) { if (isMe) StreakTracker.getStreak(context) else 0 }
 
     Surface(
         shape = RoundedCornerShape(26.dp),
@@ -427,6 +430,11 @@ private fun SocialProfileHeader(
             }
 
             // ── Row two: the counts, as equal columns under the identity ──
+            // The APP profile's stat language: big number over a small label,
+            // the number wearing the rose accent the hero uses — a member's
+            // page reads like the page they already know. On your OWN page the
+            // streak (flame + days) joins the columns; another member's
+            // streak is device-local, so it is simply absent rather than zero.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -434,6 +442,9 @@ private fun SocialProfileHeader(
                 SocialProfileStat(value = cards.size, label = "posts")
                 SocialProfileStat(value = likes, label = "likes")
                 SocialProfileStat(value = replies, label = "replies")
+                if (isMe) {
+                    SocialProfileStreak(value = streak)
+                }
             }
 
             // Their own words, and NOTHING when they wrote none — a profile
@@ -515,17 +526,44 @@ private fun SocialProfileHeader(
 }
 
 /** One count in the identity block: the number OVER its label, centred —
- *  a column reads at a glance where a run of inline numbers does not. */
+ *  a column reads at a glance where a run of inline numbers does not. The
+ *  number wears the rose accent, matching the app profile's hero stats. */
 @Composable
 private fun SocialProfileStat(value: Int, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value.toString(),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurface
+            color = settingsRoseAccent()
         )
         Text(
             text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+/** The streak column: the flame over the days, the icon doing the labelling. */
+@Composable
+private fun SocialProfileStreak(value: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CurioIcon(
+                name = CurioIcons.LocalFire,
+                contentDescription = null,
+                tint = settingsRoseAccent(),
+                size = 16.dp
+            )
+            Spacer(Modifier.width(3.dp))
+            Text(
+                text = value.toString(),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = settingsRoseAccent()
+            )
+        }
+        Text(
+            text = "streak",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

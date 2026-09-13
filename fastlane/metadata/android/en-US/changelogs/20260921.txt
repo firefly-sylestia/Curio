@@ -1,4 +1,10 @@
 ADD:
+- Replies now branch: answer a reply directly, long branches fold behind a "show more" door, and both replies and messages can be edited with an "edited" mark. Messages gain hold-to-remove; encrypted messaging moves behind an opt-in switch in Settings → Online mode while it is reworked.
+- Profiles: the community page wears the app's own stat style (rose numbers over labels), shows the member's bio, and adds your streak as flame plus days on your own page. Post previews fill their square tile completely.
+- Liking and disliking pop.
+
+FIX:
+- Encrypted sends: the server now names the devices still missing a key envelope (with their public keys), so a send wraps exactly what the server will check, instead of failing with "missing a device envelope".
 - Opening a post hides the bottom navigation so the card owns the whole screen, and the comments live right under the post now, in the same list, updating live.
 - Community wall doors (Chats, Friends, You) are compact icon tiles without the extra captions.
 

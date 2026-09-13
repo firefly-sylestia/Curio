@@ -146,6 +146,8 @@ data class CommunityComment(
     /** The reply this one answers — null at the top level. */
     val parentId: String? = null,
     val createdAtMillis: Long,
+    /** Server-stamped the last time the author changed the body (null = never). */
+    val editedAtMillis: Long? = null,
     val mine: Boolean
 ) {
     /** Display name first, live username second, post-time snapshot last. */
@@ -299,7 +301,7 @@ object CommunityApi {
         myUserId: String?
     ): Result<List<CommunityComment>> = withContext(Dispatchers.IO) {
         val parsed = mapped {
-            val path = "$COMMENTS?select=id,author,author_handle,body,parent_id,created_at" +
+            val path = "$COMMENTS?select=id,author,author_handle,body,parent_id,created_at,edited_at" +
                 "&card_id=eq.$cardId&order=created_at.asc&limit=200"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             val array = JSONArray(SupabaseClient.executeBody(request))
@@ -316,6 +318,9 @@ object CommunityApi {
                             parentId = row.optString("parent_id")
                                 .takeIf { it.isNotBlank() && it != "null" },
                             createdAtMillis = epochMillis(row.optString("created_at")),
+                            editedAtMillis = row.optString("edited_at")
+                                .takeIf { it.isNotBlank() && it != "null" }
+                                ?.let(::epochMillis),
                             mine = myUserId != null && row.optString("author") == myUserId
                         )
                     )
@@ -363,6 +368,30 @@ object CommunityApi {
             SupabaseClient.executeBody(request)
         }
     }
+
+    /**
+     * Edits one of MY replies. The `edited_at` stamp is server-owned (the
+     * edit trigger sets it when the body changes); the length and content
+     * checks re-run on the new text.
+     */
+    suspend fun editComment(accessToken: String, commentId: String, body: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val text = body.trim()
+                if (text.isEmpty()) throw IllegalArgumentException("Write something first.")
+                if (text.length > MAX_COMMENT_CHARS) {
+                    throw IllegalArgumentException(
+                        "Keep it under $MAX_COMMENT_CHARS characters (it's ${text.length})."
+                    )
+                }
+                CurioContentFilter.problem(text)?.let { throw IllegalArgumentException(it) }
+                val request = SupabaseClient
+                    .requestBuilder("$COMMENTS?id=eq.$commentId", accessToken)
+                    .put(JSONObject().put("body", text).toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
 
     /** Only a comment's own author may remove it. */
     suspend fun deleteComment(accessToken: String, commentId: String): Result<Unit> =

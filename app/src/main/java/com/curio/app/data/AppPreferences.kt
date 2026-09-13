@@ -307,6 +307,7 @@ object AppPreferences {
     // Off by default: Online Mode alone is about sync, this is the louder
     // "I want the community in my nav" choice.
     private const val KEY_COMMUNITY_TAB_ENABLED = "community_tab_enabled"
+    private const val KEY_DM_ENCRYPTION_ENABLED = "dm_encryption_enabled"
     private const val KEY_TERMS_ACCEPTED_VERSION = "terms_accepted_version"
     private const val KEY_LOCAL_FRIEND_IDS = "local_friend_ids"
     const val CURRENT_TERMS_VERSION = 1
@@ -374,6 +375,20 @@ object AppPreferences {
     fun setCommunityTabEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_COMMUNITY_TAB_ENABLED, enabled).apply()
         communityTabEnabledState = enabled
+    }
+
+    // ── DM encryption gate (v3xx57) ─────────────────────────────────
+    // Encrypted messaging is EXPERIMENTAL and stays opt-in until the key
+    // distribution story is solid: the per-chat toggle in a conversation is
+    // hidden unless this device-level switch is on. Off by default — exactly
+    // the wrong thing to hand every member while "missing device envelope"
+    // can still happen between versions.
+    fun isDmEncryptionEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DM_ENCRYPTION_ENABLED, false)
+
+    fun setDmEncryptionEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DM_ENCRYPTION_ENABLED, enabled).apply()
+        dmEncryptionEnabledState = enabled
     }
 
     // ── Social privacy (v3xx55) ───────────────────────────────────────
@@ -1293,6 +1308,9 @@ object AppPreferences {
     /** Mirrors [isCommunityTabEnabled] — the opt-in Community nav tab. */
     var communityTabEnabledState by mutableStateOf(false)
         private set
+    /** Mirrors [isDmEncryptionEnabled] — the experimental encrypted-DM gate. */
+    var dmEncryptionEnabledState by mutableStateOf(false)
+        private set
     /** Mirrors [getProfileVisibility] — "public" or "friends". */
     var profileVisibilityState by mutableStateOf("public")
         private set
@@ -1805,6 +1823,7 @@ object AppPreferences {
         autoBackupFrequencyDaysState = getAutoBackupFrequencyDays(context)
         onlineModeEnabledState = isOnlineModeEnabled(context)
         communityTabEnabledState = isCommunityTabEnabled(context)
+        dmEncryptionEnabledState = isDmEncryptionEnabled(context)
         profileVisibilityState = getProfileVisibility(context)
         hideActivityState = isActivityHidden(context)
     presenceModeState = getPresenceMode(context)

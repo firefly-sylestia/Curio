@@ -332,6 +332,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 glyph = CurioIcons.ThumbUp,
                                 label = if (current.likeCount > 0) current.likeCount.toString() else "Like",
                                 tinted = current.likedByMe,
+                                animate = true,
                                 // The count moves with the tap and the server
                                 // is told afterwards: waiting for a round trip
                                 // AND a page reload made a like feel broken.
@@ -345,6 +346,27 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                             CommunityApi.like(token, current.id, myUserId ?: return@launch)
                                         } else {
                                             CommunityApi.unlike(token, current.id, myUserId ?: return@launch)
+                                        }
+                                        call.onFailure { failure -> error = failure.message }
+                                    }
+                                }
+                            )
+                            // The card's own page gains the dislike the wall
+                            // has: one reaction per person, so disliking takes
+                            // back a like in the same tap, optimistically.
+                            CommunityAction(
+                                glyph = CurioIcons.ThumbDown,
+                                label = if (current.dislikeCount > 0) current.dislikeCount.toString() else "",
+                                tinted = current.dislikedByMe,
+                                animate = true,
+                                onClick = {
+                                    val disliking = !current.dislikedByMe
+                                    card = current.toggleDislike()
+                                    scope.launch {
+                                        val call = if (disliking) {
+                                            CommunityApi.dislike(token, current.id, myUserId ?: return@launch)
+                                        } else {
+                                            CommunityApi.undislike(token, current.id, myUserId ?: return@launch)
                                         }
                                         call.onFailure { failure -> error = failure.message }
                                     }
@@ -517,6 +539,8 @@ private fun CommunityInlineReplies(
     var error by remember(card.id) { mutableStateOf<String?>(null) }
     var text by remember(card.id) { mutableStateOf("") }
     var replyTo by remember(card.id) { mutableStateOf<CommunityComment?>(null) }
+    var editing by remember(card.id) { mutableStateOf<CommunityComment?>(null) }
+    var expandedRoots by remember(card.id) { mutableStateOf(setOf<String>()) }
     var pushed by remember(card.id) { mutableStateOf(0) }
 
     suspend fun load() {
@@ -562,7 +586,7 @@ private fun CommunityInlineReplies(
     }
     LaunchedEffect(pushed) { if (pushed > 0) load() }
 
-    val branch = remember(replies) { branchOrder(replies) }
+    val branch = remember(replies, expandedRoots) { branchRenderList(replies, expandedRoots) }
 
     Surface(
         shape = RoundedCornerShape(22.dp),
@@ -592,24 +616,54 @@ private fun CommunityInlineReplies(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            replies.forEach { reply ->
+            branch.filterIsInstance<BranchRender.Reply>().forEach { node ->
+                val reply = node.comment
                 CommunityReplyRow(
                     reply = reply,
-                    depth = 0,
+                    depth = node.depth,
                     onAuthor = { if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId) },
                     onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
+                    onEdit = if (reply.mine) {
+                        {
+                            editing = reply
+                            text = reply.body
+                            replyTo = null
+                        }
+                    } else null,
                     canAddFriend = false,
                     onAddFriend = { },
                     onDelete = {
                         val active = accessToken
                         if (active != null) scope.launch {
                             CommunityApi.deleteComment(active, reply.id).fold(
-                                onSuccess = { load() },
+                                onSuccess = {
+                                    if (editing?.id == reply.id) {
+                                        editing = null
+                                        text = ""
+                                    }
+                                    load()
+                                },
                                 onFailure = { error = it.message }
                             )
                         }
                     }
                 )
+            }
+            branch.filterIsInstance<BranchRender.More>().forEach { more ->
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    modifier = Modifier
+                        .padding(start = 18.dp)
+                        .clickable { expandedRoots = expandedRoots + more.rootId }
+                ) {
+                    Text(
+                        text = "Show ${more.hidden} more",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                        color = curioDialogActionColor(),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                    )
+                }
             }
 
             error?.let { message ->
@@ -664,8 +718,11 @@ private fun CommunityInlineReplies(
                     },
                     label = {
                         Text(
-                            if (replyTo == null) "Add a reply"
-                            else "Reply to @${replyTo?.authorLabel}"
+                            when {
+                                editing != null -> "Edit your reply"
+                                replyTo == null -> "Add a reply"
+                                else -> "Reply to @${replyTo?.authorLabel}"
+                            }
                         )
                     },
                     maxLines = 3,
@@ -675,25 +732,38 @@ private fun CommunityInlineReplies(
                 Button(
                     onClick = {
                         val active = accessToken ?: return@Button
+                        val editTarget = editing
                         val parent = replyTo
-                        val handle = AppPreferences.getUsername(context).ifBlank {
-                            AppPreferences.getDisplayName(context)
-                        }
-                        scope.launch {
-                            CommunityApi.comment(
-                                active,
-                                card.id,
-                                text,
-                                handle,
-                                parentId = parent?.id
-                            ).fold(
-                                onSuccess = {
-                                    text = ""
-                                    replyTo = null
-                                    load()
-                                },
-                                onFailure = { error = it.message }
-                            )
+                        when {
+                            editTarget != null -> scope.launch {
+                                CommunityApi.editComment(active, editTarget.id, text).fold(
+                                    onSuccess = {
+                                        editing = null
+                                        text = ""
+                                        load()
+                                    },
+                                    onFailure = { error = it.message }
+                                )
+                            }
+                            else -> scope.launch {
+                                val handle = AppPreferences.getUsername(context).ifBlank {
+                                    AppPreferences.getDisplayName(context)
+                                }
+                                CommunityApi.comment(
+                                    active,
+                                    card.id,
+                                    text,
+                                    handle,
+                                    parentId = parent?.id
+                                ).fold(
+                                    onSuccess = {
+                                        text = ""
+                                        replyTo = null
+                                        load()
+                                    },
+                                    onFailure = { error = it.message }
+                                )
+                            }
                         }
                     },
                     enabled = accessToken != null && text.isNotBlank() && CurioContentFilter.isClean(text),
@@ -701,7 +771,7 @@ private fun CommunityInlineReplies(
                     colors = curioDialogActionButtonColors()
                 ) {
                     Text(
-                        text = "Send",
+                        text = if (editing != null) "Save" else "Send",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                     )
                 }
