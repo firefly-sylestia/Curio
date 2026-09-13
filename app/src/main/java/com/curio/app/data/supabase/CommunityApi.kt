@@ -376,13 +376,22 @@ object CommunityApi {
             }
         }
 
-    /** Posts a card. The owner column and the 24-hour expiry are set by the DB. */
+    /**
+     * Posts a card and hands back the row the server stored.
+     *
+     * `return=representation` is what lets the wall put the card up the moment
+     * the sheet closes: the poster sees their own post instantly, wearing the
+     * id the server assigned, instead of waiting for a whole feed read to come
+     * back and find it. The owner column and the 24-hour expiry are set by the
+     * DB, so the returned row is the only place those exist before a refresh.
+     */
     suspend fun post(
         accessToken: String,
         draft: CommunityCardDraft,
-        handle: String
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        mappedUnit {
+        handle: String,
+        myUserId: String? = null
+    ): Result<CommunityCard> = withContext(Dispatchers.IO) {
+        mapped {
             draftProblem(draft)?.let { throw IllegalArgumentException(it) }
             // v3xx53 — the app-level filter (see CommunityApi.comment): the
             // words a person typed, plus the handle and byline that ride with
@@ -404,10 +413,12 @@ object CommunityApi {
                 .put("body_scale", draft.bodyScale.toDouble())
                 .put("byline", draft.byline.trim())
             val request = SupabaseClient.requestBuilder(CARDS, accessToken)
-                .header("Prefer", "return=minimal")
+                .header("Prefer", "return=representation")
                 .post(payload.toString().toRequestBody(jsonMediaType))
                 .build()
-            SupabaseClient.executeBody(request)
+            val body = SupabaseClient.executeBody(request)
+            parseCards(body, myUserId).firstOrNull()
+                ?: throw CommunityError("The card could not be posted.")
         }
     }
 

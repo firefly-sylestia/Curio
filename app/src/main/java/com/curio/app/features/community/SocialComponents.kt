@@ -404,6 +404,38 @@ internal fun SocialPersonCard(
  * line for a quote.
  */
 @Composable
+/**
+ * A card with this device's like MOVED, without waiting for the server.
+ *
+ * The row holds ONE reaction per person (`community_reactions` is keyed by
+ * card + user), so leaving a like takes back a dislike in the same tap — the
+ * counts move together, or the pill pair would disagree with the server the
+ * moment the call lands. Shared by the wall and a card's own page so both
+ * answer a tap at the same speed.
+ */
+internal fun CommunityCard.toggleLike(): CommunityCard {
+    val liking = !likedByMe
+    return copy(
+        likedByMe = liking,
+        likeCount = (likeCount + if (liking) 1 else -1).coerceAtLeast(0),
+        dislikedByMe = if (liking) false else dislikedByMe,
+        dislikeCount = if (liking && dislikedByMe) (dislikeCount - 1).coerceAtLeast(0)
+        else dislikeCount
+    )
+}
+
+/** [toggleLike]'s twin, for the other pill. */
+internal fun CommunityCard.toggleDislike(): CommunityCard {
+    val disliking = !dislikedByMe
+    return copy(
+        dislikedByMe = disliking,
+        dislikeCount = (dislikeCount + if (disliking) 1 else -1).coerceAtLeast(0),
+        likedByMe = if (disliking) false else likedByMe,
+        likeCount = if (disliking && likedByMe) (likeCount - 1).coerceAtLeast(0)
+        else likeCount
+    )
+}
+
 internal fun SocialTextPost(
     card: CommunityCard,
     onClick: () -> Unit,

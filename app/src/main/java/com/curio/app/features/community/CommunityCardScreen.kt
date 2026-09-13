@@ -323,17 +323,21 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 glyph = CurioIcons.ThumbUp,
                                 label = if (current.likeCount > 0) current.likeCount.toString() else "Like",
                                 tinted = current.likedByMe,
+                                // The count moves with the tap and the server
+                                // is told afterwards: waiting for a round trip
+                                // AND a page reload made a like feel broken.
+                                // A failed call no longer hides — the page says
+                                // so and the next read puts the truth back.
                                 onClick = {
+                                    val liking = !current.likedByMe
+                                    card = current.toggleLike()
                                     scope.launch {
-                                        val call = if (current.likedByMe && myUserId != null) {
-                                            CommunityApi.unlike(token, current.id, myUserId)
-                                        } else {
+                                        val call = if (liking) {
                                             CommunityApi.like(token, current.id, myUserId ?: return@launch)
+                                        } else {
+                                            CommunityApi.unlike(token, current.id, myUserId ?: return@launch)
                                         }
-                                        call.fold(
-                                            onSuccess = { load() },
-                                            onFailure = { error = it.message }
-                                        )
+                                        call.onFailure { failure -> error = failure.message }
                                     }
                                 }
                             )

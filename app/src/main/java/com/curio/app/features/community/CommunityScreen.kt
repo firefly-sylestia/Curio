@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
@@ -141,6 +140,10 @@ fun CommunityScreen(navController: NavController) {
     val asTab = AppPreferences.communityTabVisible
     var cards by remember { mutableStateOf<List<CommunityCard>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
+    // ONLY a pull-down sets this: the wall's own refresh indicator belongs to
+    // the user's gesture, never to a background read (a like used to flash a
+    // spinner because every action funnelled through `load()`).
+    var refreshing by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     // True while the WALL on screen is the device's own copy (the first
     // request failed), so the page can say so instead of pretending.
@@ -208,6 +211,18 @@ fun CommunityScreen(navController: NavController) {
         }
     }
 
+    /**
+     * Moves ONE card on screen without asking the server anything.
+     *
+     * This is what makes the wall feel instant: a like, a dislike or a count
+     * change answers the tap immediately and the network catches up behind it.
+     * A failed call resyncs through [refreshQuietly], so the screen is never
+     * left disagreeing with the row.
+     */
+    fun patchCard(cardId: String, transform: (CommunityCard) -> CommunityCard) {
+        cards = cards.map { if (it.id == cardId) transform(it) else it }
+    }
+
     LaunchedEffect(eligible, token) {
         if (eligible) {
             // The device's copy FIRST — an offline open is a wall, not a blank
@@ -269,8 +284,14 @@ fun CommunityScreen(navController: NavController) {
         }
 
         PullToRefreshBox(
-            isRefreshing = loading,
-            onRefresh = { scope.launch { load() } },
+            isRefreshing = refreshing,
+            onRefresh = {
+                refreshing = true
+                scope.launch {
+                    load()
+                    refreshing = false
+                }
+            },
             modifier = Modifier.fillMaxSize()
         ) {
         LazyColumn(
@@ -392,16 +413,6 @@ fun CommunityScreen(navController: NavController) {
                             Spacer(Modifier.width(6.dp))
                             Text("You")
                         }
-                        if (loading) {
-                            CircularProgressIndicator(
-                                strokeWidth = 2.dp,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        } else {
-                            TextButton(onClick = { scope.launch { load() } }) {
-                                Text("Refresh")
-                            }
-                        }
                     }
                 }
 
@@ -448,33 +459,49 @@ fun CommunityScreen(navController: NavController) {
                             }
                         },
                         onComments = { commentsFor = card },
+                        // The pill answers the tap NOW and the server is told
+                        // afterwards: a like used to wait for a round trip AND
+                        // a full feed rebuild before the count moved, which is
+                        // exactly the "slow" the wall was feeling. A rejected
+                        // call resyncs the wall from the server instead of
+                        // leaving the tap on screen as a lie.
                         onLike = {
                             val active = token ?: return@CommunityCardItem
-                            val userId = account.session?.userId
+                            val userId = account.session?.userId ?: return@CommunityCardItem
+                            val liking = !card.likedByMe
+                            patchCard(card.id) { it.toggleLike() }
                             scope.launch {
-                                val call = if (card.likedByMe && userId != null) {
-                                    CommunityApi.unlike(active, card.id, userId)
+                                val call = if (liking) {
+                                    CommunityApi.like(active, card.id, userId)
                                 } else {
-                                    CommunityApi.like(active, card.id, userId ?: return@launch)
+                                    CommunityApi.unlike(active, card.id, userId)
                                 }
                                 call.fold(
-                                    onSuccess = { load() },
-                                    onFailure = { error = it.message }
+                                    onSuccess = { SocialFeedCache.write(context, cards) },
+                                    onFailure = { failure ->
+                                        error = failure.message
+                                        refreshQuietly()
+                                    }
                                 )
                             }
                         },
                         onDislike = {
                             val active = token ?: return@CommunityCardItem
-                            val userId = account.session?.userId
+                            val userId = account.session?.userId ?: return@CommunityCardItem
+                            val disliking = !card.dislikedByMe
+                            patchCard(card.id) { it.toggleDislike() }
                             scope.launch {
-                                val call = if (card.dislikedByMe && userId != null) {
-                                    CommunityApi.undislike(active, card.id, userId)
+                                val call = if (disliking) {
+                                    CommunityApi.dislike(active, card.id, userId)
                                 } else {
-                                    CommunityApi.dislike(active, card.id, userId ?: return@launch)
+                                    CommunityApi.undislike(active, card.id, userId)
                                 }
                                 call.fold(
-                                    onSuccess = { load() },
-                                    onFailure = { error = it.message }
+                                    onSuccess = { SocialFeedCache.write(context, cards) },
+                                    onFailure = { failure ->
+                                        error = failure.message
+                                        refreshQuietly()
+                                    }
                                 )
                             }
                         },
@@ -550,12 +577,25 @@ fun CommunityScreen(navController: NavController) {
                     CommunityApi.post(
                         token,
                         draft,
-                        AppPreferences.getDisplayName(context)
+                        AppPreferences.getDisplayName(context),
+                        account.session?.userId
                     ).fold(
-                        onSuccess = {
+                        onSuccess = { posted ->
                             composing = false
                             notice = "Posted — it disappears in 24 hours."
-                            load()
+                            // On the wall before the sheet is even gone, in
+                            // this device's own name and portrait: the row the
+                            // server stored IS the card. The rest of the feed
+                            // is reconciled quietly behind it, so nobody waits
+                            // on a full-page read to see their own post.
+                            val shown = posted.copy(
+                                authorDisplayName = AppPreferences.getDisplayName(context),
+                                authorName = AppPreferences.getUsername(context),
+                                authorAvatar = AppPreferences.getSocialAvatarStyle(context)
+                            )
+                            cards = listOf(shown) + cards.filterNot { it.id == shown.id }
+                            SocialFeedCache.write(context, cards)
+                            refreshQuietly()
                         },
                         onFailure = { error = it.message }
                     )
@@ -571,7 +611,7 @@ fun CommunityScreen(navController: NavController) {
                 accessToken = active,
                 myUserId = account.session?.userId,
                 onDismiss = { commentsFor = null },
-                onChanged = { scope.launch { load() } },
+                onChanged = { scope.launch { refreshQuietly() } },
                 onOpenProfile = { id ->
                     navController.navigate(CurioRoutes.socialProfile(id)) { launchSingleTop = true }
                 }
