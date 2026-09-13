@@ -1,5 +1,20 @@
 # Prompt Log — current request
 
+## Request (2026-09-13, IN PROGRESS — Social refresh, posting, and worldwide online policy)
+
+User (chat): make Social swipe-to-refresh and the upgraded posting experience always-on; provide terms/conditions and README coverage suitable for a worldwide launch.
+
+### Plan
+
+1. Add Material3 pull-to-refresh around the Social wall so users can refresh without finding a text action.
+2. Preserve the existing post sheet's card/note/quote flow and safety gates; keep its publishing surface lightweight rather than adding another media path.
+3. Add worldwide baseline Terms and Privacy notices that clearly cover acceptable use, reports, age, content/IP, encryption limits, retention, member controls and cross-border processing. They must explicitly require country-specific legal review before launch; no code or document can truthfully guarantee legal compliance in every country.
+
+### Completion
+
+- Social now supports native pull-to-refresh using the Material3 refresh surface, backed by the existing server refresh function and progress state.
+- Added the worldwide Online Terms of Use and Online Privacy Notice, and linked both from the README's Online Mode disclosure. They deliberately identify mandatory jurisdiction-specific counsel/contact-detail work before launch instead of making an unsafe universal-compliance claim.
+
 ## Request (2026-09-13, IN PROGRESS — immediate encrypted DM delivery)
 
 User (chat): encryption-off messages work, but sending/receiving feels slow and

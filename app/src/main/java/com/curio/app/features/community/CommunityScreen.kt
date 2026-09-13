@@ -37,6 +37,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PullToRefreshBox
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -267,6 +268,11 @@ fun CommunityScreen(navController: NavController) {
             )
         }
 
+        PullToRefreshBox(
+            isRefreshing = loading,
+            onRefresh = { scope.launch { load() } },
+            modifier = Modifier.fillMaxSize()
+        ) {
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -488,6 +494,7 @@ fun CommunityScreen(navController: NavController) {
                     )
                 }
             }
+        }
         }
 
         // The one way to post: a floating pill above the wall, labelled with
