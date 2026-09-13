@@ -312,7 +312,7 @@ fun ChatsScreen(navController: NavController) {
                     item(key = "to-friends") {
                         SettingsOptionCard {
                             SettingsOptionRow(
-                                icon = CurioIcons.Hub,
+                                icon = CurioIcons.Friends,
                                 title = "Open Friends",
                                 subtitle = "Find someone to talk to",
                                 onClick = { navController.navigate(CurioRoutes.FRIENDS) }

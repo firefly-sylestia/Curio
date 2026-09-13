@@ -1,5 +1,7 @@
 package com.curio.app.features.community
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -28,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,9 +64,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -393,17 +399,16 @@ fun CommunityScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         CommunityDoorTile(
-                            icon = CurioIcons.Notes,
+                            icon = CurioIcons.Chats,
                             label = "Chats",
                             onClick = { navController.navigate(CurioRoutes.CHATS) },
                             modifier = Modifier.weight(1f)
                         )
                         CommunityDoorTile(
-                            // Hub: the network-of-people glyph Friends already
-                            // owns; the chats tile deliberately takes a
-                            // different mark (the stacked-lines `notes` used
-                            // by the thread list) so the two never blur.
-                            icon = CurioIcons.Hub,
+                            // Groups: two people side by side — the mark a
+                            // friends list deserves; the chats tile takes the
+                            // speech bubble so the two never blur.
+                            icon = CurioIcons.Friends,
                             label = "Friends",
                             onClick = { navController.navigate(CurioRoutes.FRIENDS) },
                             modifier = Modifier.weight(1f)
@@ -565,7 +570,7 @@ fun CommunityScreen(navController: NavController) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Post a topic",
+                    "Post",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     )
@@ -696,7 +701,12 @@ internal fun CommunityCardCanvas(
         contentAlignment = if (fillHeight) Alignment.TopStart else Alignment.Center
     ) {
     BoxWithConstraints(
-        modifier = if (fillHeight) Modifier.fillMaxSize() else Modifier.fillMaxWidth(widthFraction)
+        modifier = if (fillHeight) Modifier.fillMaxSize() else Modifier.fillMaxWidth(widthFraction),
+        // The painted footprint is CENTERED in the room it has: a card whose
+        // scale clamps (a wide phone where the item outgrows the 405dp card)
+        // must never hug the left edge of its row, and a fill-mode crop keeps
+        // its overflow symmetric about the vertical axis.
+        contentAlignment = if (fillHeight) Alignment.TopCenter else Alignment.Center
     ) {
         val density = LocalDensity.current
         val scale = with(density) {
@@ -713,10 +723,15 @@ internal fun CommunityCardCanvas(
                 (maxWidth.toPx() / cardWidth.toPx()).coerceAtMost(1f)
             }
         }
+        // The PAINTED FOOTPRINT leads: a box exactly the size the scaled card
+        // will cover, which the parent centers. Inside it the UNSCALED card
+        // draws through the layer transform, so the visible art always sits
+        // where the footprint says — never pinned to a corner by the layout
+        // box outliving the scale.
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(cardHeight * scale)
+                .requiredSize(cardWidth * scale, cardHeight * scale),
+            contentAlignment = Alignment.TopStart
         ) {
             Box(
                 modifier = Modifier
@@ -725,7 +740,7 @@ internal fun CommunityCardCanvas(
                     // that coerced box was then scaled DOWN again — the card
                     // shrank to roughly a quarter of the tile. requiredSize
                     // keeps the nominal card geometry, the graphicsLayer does
-                    // the shrinking, and the crop clips the overflow.
+                    // the shrinking, and the footprint above clips the rest.
                     .requiredSize(cardWidth, cardHeight)
                     .graphicsLayer(
                         scaleX = scale,
@@ -1027,15 +1042,14 @@ internal fun CommunityDoorTile(
 }
 
 /**
- * The composer: TWO STEPS, then the wall.
+ * The composer: a WRITE-FIRST canvas, then the wall.
  *
- * Step one is a compact sheet: pick the kind (Card / Note / Quote), pick the
- * topic for a card, write the words. Everything one tap away, nothing typed
- * twice. "Preview" opens step two — the full-height editor where the card is
- * drawn exactly as the wall will show it, with style and aspect choices
- * beside it. Notes and quotes keep their plain look in both steps (they have
- * no card art by design); for them the preview step is only the caption and
- * the final look-over.
+ * The sheet opens on a borderless writer (a Note, the fastest post) with the
+ * live post rendering above it as it is typed — there is no separate preview
+ * step, because the preview IS the page. A quiet kind switch (Note / Topic /
+ * Quote) recolors the canvas in place; everything that attaches to a post
+ * (topic, style, shape, credit) lives in compact pill rows that only appear
+ * when they mean something, so the surface never reads like a form.
  *
  * Three kinds, one flow. A **Card** is a topic being passed on — the topic is
  * chosen from the app's own catalog rather than typed, and its own quick fact
@@ -1053,19 +1067,20 @@ internal fun CommunityComposerSheet(
     onDismiss: () -> Unit,
     onPost: (CommunityCardDraft) -> Unit,
     /**
-     * What this composer opens AS. The wall's floating button opens a plain
-     * topic card; the reveal page's note/quote doors open straight into their
-     * own kind, which is what keeps those two flows out of the card editor.
+     * What this composer opens AS. The wall's floating button opens a NOTE
+     * (the fastest post, the new default); the reveal page's note/quote doors
+     * open straight into their own kind, which keeps those flows out of the
+     * topic picker.
      */
-    seedKind: String = KIND_CARD,
+    seedKind: String = KIND_NOTE,
     seedTopic: CurioTopic? = null,
     seedFact: String = "",
     seedCredit: String = ""
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    // CARD / NOTE / QUOTE — what is being posted. Card is the default because
-    // it is what the wall is known for; the other two exist so a thought that
-    // is NOT about a topic never has to borrow one.
+    // CARD / NOTE / QUOTE — what is being posted. Note is the default: the
+    // composer is first a place to write, and a thought that is NOT about a
+    // topic never has to borrow one.
     var kind by remember { mutableStateOf(seedKind) }
     var picked by remember { mutableStateOf(seedTopic) }
     var query by remember { mutableStateOf("") }
@@ -1074,15 +1089,20 @@ internal fun CommunityComposerSheet(
     // Who said it — the QUOTE's credit, stored in the card's byline.
     var credit by remember { mutableStateOf(seedCredit) }
     var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
-    // The card's shape (story 9:16 or classic 3:4), chosen in the preview
-    // step where the difference is actually visible.
+    // The card's shape (story 9:16 or classic 3:4), toggled from the pills.
     var aspect by remember { mutableStateOf(ShareCardAspect.PORTRAIT) }
-    // Step two of the flow: the full-height preview editor.
-    var showPreview by remember { mutableStateOf(false) }
+    // The inline tool rows: which pill is expanded (null = none). One at a
+    // time, so the sheet stays a canvas rather than growing a settings page.
+    var openTool by remember { mutableStateOf<String?>(null) }
     // The whole-catalog index, loaded once. It is the prebuilt lightweight
     // index (name/byline keys only), so searching never parses a lane.
     var index by remember { mutableStateOf<List<com.curio.app.data.TopicIndexEntry>?>(null) }
     LaunchedEffect(Unit) { index = TopicJsonLoader.loadIndex() }
+
+    // The writer takes focus as the sheet settles — write-first means the
+    // keyboard is already up and the placeholder is already blinking.
+    val writerFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { writerFocus.requestFocus() }
 
     val q = query.trim()
     val results: List<CurioTopic> = remember(index, q) {
@@ -1128,9 +1148,8 @@ internal fun CommunityComposerSheet(
         caption = caption,
         byline = if (kind == KIND_QUOTE) credit.trim() else ""
     )
-    // What the preview step draws: a CommunityCard rebuilt from the draft,
-    // wearing its chosen shape, so the editor is looking at the same object
-    // that will be posted.
+    // What the live canvas draws: a CommunityCard rebuilt from the draft,
+    // wearing its chosen shape — the same object the wall will render.
     val previewCard = CommunityCard(
         id = "preview",
         authorId = "",
@@ -1172,215 +1191,83 @@ internal fun CommunityComposerSheet(
                 .fillMaxWidth()
                 .imePadding()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 22.dp),
+                .padding(bottom = 22.dp)
+                .animateContentSize(
+                    animationSpec = androidx.compose.animation.core.spring(
+                        dampingRatio = 0.85f,
+                        stiffness = 380f
+                    )
+                ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = when (kind) {
-                    KIND_NOTE -> "Write a note"
-                    KIND_QUOTE -> "Post a quote"
-                    else -> "Post a topic"
-                },
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-            )
-            // WHAT KIND — the chips decide whether a topic picker, a credit
-            // line or card art is part of this post at all.
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.horizontalScroll(rememberScrollState())
-            ) {
-                listOf(
-                    KIND_CARD to "Topic card",
-                    KIND_NOTE to "Note",
-                    KIND_QUOTE to "Quote"
-                ).forEach { (value, label) ->
-                    FilterChip(
-                        selected = kind == value,
-                        onClick = {
-                            kind = value
-                            // Switching away from a topic card drops the
-                            // topic: a note and a quote carry no topic, and a
-                            // stale one must not leak into them.
-                            if (value != KIND_CARD) picked = null
-                        },
-                        label = {
-                            Text(label, style = MaterialTheme.typography.labelSmall)
-                        }
-                    )
-                }
-            }
-
-            if (topicCard && picked == null) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    singleLine = true,
-                    label = { Text("Search topics") },
-                    placeholder = { Text("A book, a film, a dish…") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                when {
-                    q.length < 2 -> Text(
-                        text = "Type at least two letters to search the catalog.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    results.isEmpty() -> Text(
-                        text = "Nothing matches that. Try another spelling.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    else -> LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 260.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        items(results, key = { "${it.categoryId.name}|${it.name}" }) { topic ->
-                            TopicPickRow(
-                                topic = topic,
-                                onClick = {
-                                    picked = topic
-                                    query = ""
-                                    // The topic's OWN quick fact seeds the
-                                    // card — a card is that topic being passed
-                                    // on, so it starts from the fact the app
-                                    // already wrote for it, and stays fully
-                                    // editable.
-                                    if (fact.isBlank()) fact = quickFactOf(topic)
-                                }
-                            )
-                        }
-                    }
-                }
-            } else if (topicCard) {
-                // The chosen topic, wearing its lane — tap to pick again.
+            // ── Header: kind switch + Post ──────────────────────────────
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // The ghost kind switch: one rounded rail, the active kind a
+                // quiet pill inside it. No labels explaining what a note is.
                 Surface(
-                    onClick = { picked = null },
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier = Modifier.padding(3.dp)
                     ) {
-                        CurioIcon(
-                            name = lane?.iconGlyph ?: CurioIcons.Wildcard,
-                            contentDescription = null,
-                            tint = lane?.accent ?: MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 20.dp
-                        )
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 10.dp)
-                        ) {
-                            Text(
-                                text = picked?.name.orEmpty(),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1
-                            )
-                            Text(
-                                text = lane?.displayName.orEmpty(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Text(
-                            text = "Change",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = curioDialogActionColor()
-                        )
-                    }
-                }
-            }
-
-            OutlinedTextField(
-                value = caption,
-                onValueChange = {
-                    if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
-                },
-                singleLine = true,
-                label = { Text("A caption above it (optional)") },
-                supportingText = { Text("${caption.length}/${CommunityApi.MAX_CAPTION_CHARS}") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = fact,
-                onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
-                minLines = 3,
-                label = {
-                    Text(
-                        when (kind) {
-                            KIND_NOTE -> "Your note"
-                            KIND_QUOTE -> "The quote"
-                            else -> "The words on the card"
-                        }
-                    )
-                },
-                supportingText = { Text("${fact.length}/${CommunityApi.MAX_FACT_CHARS}") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (kind == KIND_QUOTE) {
-                OutlinedTextField(
-                    value = credit,
-                    onValueChange = { if (it.length <= 80) credit = it },
-                    singleLine = true,
-                    label = { Text("Who said it") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            if (topicCard) {
-                Text(
-                    text = "STYLE",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.2.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.horizontalScroll(rememberScrollState())
-                ) {
-                    styles.forEach { option ->
-                        FilterChip(
-                            selected = option == style,
-                            onClick = { style = option },
-                            label = {
-                                Text(option.label, style = MaterialTheme.typography.labelSmall)
+                        listOf(
+                            KIND_NOTE to "Note",
+                            KIND_CARD to "Topic",
+                            KIND_QUOTE to "Quote"
+                        ).forEach { (value, label) ->
+                            val active = kind == value
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = if (active) MaterialTheme.colorScheme.surface else Color.Transparent,
+                                onClick = {
+                                    kind = value
+                                    // Switching away from a topic card drops
+                                    // the topic: a note and a quote carry no
+                                    // topic, and a stale one must not leak.
+                                    if (value != KIND_CARD) picked = null
+                                    openTool = null
+                                }
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = if (active) FontWeight.Bold else FontWeight.Medium
+                                    ),
+                                    color = if (active) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
+                                )
                             }
-                        )
+                        }
                     }
                 }
-            }
-            problem?.let { reason ->
-                Text(
-                    text = reason,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TextButton(onClick = onDismiss) { Text("Cancel") }
                 Spacer(Modifier.weight(1f))
-                // PREVIEW is the second step: the full editor with the card
-                // drawn as the wall will show it. It only makes sense when
-                // the draft already stands.
-                TextButton(
-                    onClick = { showPreview = true },
-                    enabled = problem == null
-                ) { Text("Preview") }
+                // The counter only speaks near the limit — a form counts every
+                // keystroke; a canvas speaks up when the room runs out.
+                val budget = if (kind == KIND_NOTE) CommunityApi.MAX_FACT_CHARS else CommunityApi.MAX_FACT_CHARS
+                val used = fact.length
+                if (used > budget * 4 / 5) {
+                    Text(
+                        text = "${CommunityApi.MAX_FACT_CHARS - used}",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = if (used >= CommunityApi.MAX_FACT_CHARS) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 10.dp)
+                    )
+                }
+                // POST, top right where a send belongs. It wakes with the
+                // draft: a scale pop the moment the post becomes valid.
+                val ready = problem == null
+                val postPop = remember { androidx.compose.animation.core.Animatable(if (ready) 1f else 0.92f) }
+                LaunchedEffect(ready) {
+                    postPop.snapTo(if (ready) 1.12f else 0.92f)
+                    postPop.animateTo(
+                        if (ready) 1f else 0.92f,
+                        androidx.compose.animation.core.spring(dampingRatio = 0.5f, stiffness = 600f)
+                    )
+                }
                 Button(
                     onClick = {
                         // For a note or a quote the card style is irrelevant —
@@ -1392,166 +1279,359 @@ internal fun CommunityComposerSheet(
                             )
                         )
                     },
-                    enabled = problem == null,
+                    enabled = ready,
                     shape = RoundedCornerShape(50),
-                    colors = curioDialogActionButtonColors()
+                    colors = curioDialogActionButtonColors(),
+                    modifier = Modifier.graphicsLayer(
+                        scaleX = postPop.value,
+                        scaleY = postPop.value
+                    )
                 ) {
-                    Text("Post")
+                    Text(
+                        "Post",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    )
                 }
             }
-        }
-    }
 
-    // ── Step two: the full-height preview editor ─────────────────────────
-    if (showPreview) {
-        Dialog(
-            onDismissRequest = { showPreview = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(28.dp),
+            // ── The live canvas: the post AS it will appear ─────────────
+            // Crossfaded between kinds so switching Note / Topic / Quote
+            // re-dresses the same page instead of jumping.
+            Crossfade(targetState = topicCard, label = "composerCanvas") { asCard ->
+                if (asCard) {
+                    CommunityCardCanvas(
+                        card = previewCard,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(24.dp))
+                            .fillMaxWidth(),
+                        widthFraction = 1f
+                    )
+                } else {
+                    SocialTextPost(card = previewCard, onClick = null)
+                }
+            }
+
+            // ── The writer ──────────────────────────────────────────────
+            // Borderless: the placeholder is the only chrome. This is the
+            // surface the keyboard writes into, not a field on a form.
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.92f)
-                    .padding(16.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .imePadding(),
-                ) {
-                    // Header: back into the sheet, title, and the POST that
-                    // finishes the whole flow from here.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                if (topicCard && picked != null && caption.isEmpty()) {
+                    // A topic card's caption line: small, optional, out of the
+                    // way until used. It rides above the body writer.
+                    BasicTextField(
+                        value = caption,
+                        onValueChange = {
+                            if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
+                        },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(curioDialogActionColor()),
+                        decorationBox = { inner ->
+                            Box {
+                                if (caption.isEmpty()) Text(
+                                    text = "Caption (optional)",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+                                )
+                                inner()
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.Close,
-                            contentDescription = "Back to the composer",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 22.dp,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable { showPreview = false }
-                                .padding(4.dp)
+                            .padding(top = 10.dp)
+                    )
+                }
+                BasicTextField(
+                    value = fact,
+                    onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
+                    textStyle = when (kind) {
+                        KIND_QUOTE -> MaterialTheme.typography.titleMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        Text(
-                            text = if (topicCard) "Preview" else "Final look",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
+                        else -> MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        Button(
-                            onClick = {
-                                onPost(
-                                    draft.copy(
-                                        style = if (topicCard) style.name else ShareCardStyle.PAPER.name
-                                    )
-                                )
-                            },
-                            enabled = problem == null,
-                            shape = RoundedCornerShape(50),
-                            colors = curioDialogActionButtonColors()
-                        ) {
-                            Text("Post")
+                    },
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(curioDialogActionColor()),
+                    decorationBox = { inner ->
+                        Box(modifier = Modifier.padding(vertical = 12.dp)) {
+                            if (fact.isEmpty()) Text(
+                                text = when (kind) {
+                                    KIND_NOTE -> "What is catching your eye?"
+                                    KIND_QUOTE -> "The line worth keeping"
+                                    else -> "Say something about this topic"
+                                },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+                            )
+                            inner()
                         }
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(writerFocus)
+                )
+            }
 
+            // ── The pill rows ───────────────────────────────────────────
+            // Everything that attaches to the post, one pill per concern,
+            // shown only when it means something. A pill opens a quiet inline
+            // row beneath it; nothing ever grows into a labeled section.
+            if (topicCard) {
+                // TOPIC — attach or swap the topic the card passes on.
+                if (picked == null) {
+                    ComposerPill(
+                        label = if (q.length >= 2) "Searching \"$q\""
+                        else "Attach a topic",
+                        icon = CurioIcons.Wildcard,
+                        expanded = openTool == "topic",
+                        onClick = { openTool = if (openTool == "topic") null else "topic" }
+                    )
+                } else {
+                    ComposerPill(
+                        label = picked?.name.orEmpty(),
+                        icon = lane?.iconGlyph ?: CurioIcons.Wildcard,
+                        iconTint = lane?.accent,
+                        trailing = "Change",
+                        expanded = false,
+                        onClick = { openTool = "topic"; picked = null }
+                    )
+                }
+                // The topic search lives INSIDE the pill's shadow: a quiet
+                // rounded tray that grows under the pill while it is open.
+                androidx.compose.animation.AnimatedVisibility(visible = openTool == "topic" && picked == null) {
                     Column(
                         modifier = Modifier
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        // THE CARD, as the wall will draw it — full width of
-                        // the editor for a topic card; the words composed as a
-                        // text post for a note or a quote.
-                        if (topicCard) {
-                            CommunityCardCanvas(
-                                card = previewCard,
-                                modifier = Modifier.clip(RoundedCornerShape(24.dp)),
-                                widthFraction = 1f
-                            )
-                        } else {
-                            SocialTextPost(card = previewCard, onClick = null)
-                        }
-
-                        if (topicCard) {
-                            // ── Aspect ──
-                            Text(
-                                text = "SHAPE",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.2.sp
-                                ),
+                        BasicTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(curioDialogActionColor()),
+                            decorationBox = { inner ->
+                                Box {
+                                    if (query.isEmpty()) Text(
+                                        text = "Search the catalog — a book, a film, a dish",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+                                    )
+                                    inner()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        when {
+                            q.length < 2 -> {}
+                            results.isEmpty() -> Text(
+                                text = "Nothing matches that. Try another spelling.",
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                modifier = Modifier.horizontalScroll(rememberScrollState())
+                            else -> LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 200.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                listOf(ShareCardAspect.PORTRAIT, ShareCardAspect.CLASSIC).forEach { option ->
-                                    FilterChip(
-                                        selected = aspect == option,
-                                        onClick = { aspect = option },
-                                        label = { Text(if (option == ShareCardAspect.PORTRAIT) "Story" else "Classic", style = MaterialTheme.typography.labelSmall) }
+                                items(results, key = { "${it.categoryId.name}|${it.name}" }) { topic ->
+                                    TopicPickRow(
+                                        topic = topic,
+                                        onClick = {
+                                            picked = topic
+                                            query = ""
+                                            openTool = null
+                                            // The topic's OWN quick fact seeds
+                                            // the card — a card is that topic
+                                            // being passed on, and it stays
+                                            // fully editable.
+                                            if (fact.isBlank()) fact = quickFactOf(topic)
+                                        }
                                     )
                                 }
                             }
-                            // ── Caption ──
-                            OutlinedTextField(
-                                value = caption,
-                                onValueChange = {
-                                    if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
-                                },
-                                singleLine = true,
-                                label = { Text("A caption above it (optional)") },
-                                supportingText = { Text("${caption.length}/${CommunityApi.MAX_CAPTION_CHARS}") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
                         }
-                        if (kind == KIND_QUOTE) {
-                            OutlinedTextField(
-                                value = credit,
-                                onValueChange = { if (it.length <= 80) credit = it },
-                                singleLine = true,
-                                label = { Text("Who said it") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        // The words stay editable here too — the preview step
-                        // is where the last wording usually happens.
-                        OutlinedTextField(
-                            value = fact,
-                            onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
-                            minLines = 3,
-                            label = {
-                                Text(
-                                    when (kind) {
-                                        KIND_NOTE -> "Your note"
-                                        KIND_QUOTE -> "The quote"
-                                        else -> "The words on the card"
-                                    }
-                                )
-                            },
-                            supportingText = { Text("${fact.length}/${CommunityApi.MAX_FACT_CHARS}") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        problem?.let { reason ->
-                            Text(
-                                text = reason,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(Modifier.height(12.dp))
                     }
                 }
+
+                // STYLE + SHAPE — two compact pills, one row.
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ComposerPill(
+                        label = style.label,
+                        icon = CurioIcons.Notes,
+                        expanded = openTool == "style",
+                        onClick = { openTool = if (openTool == "style") null else "style" },
+                        modifier = Modifier.weight(1f)
+                    )
+                    ComposerPill(
+                        label = if (aspect == ShareCardAspect.PORTRAIT) "Story" else "Classic",
+                        icon = CurioIcons.Wildcard,
+                        expanded = openTool == "shape",
+                        onClick = { openTool = if (openTool == "shape") null else "shape" },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                androidx.compose.animation.AnimatedVisibility(visible = openTool == "style") {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                            .padding(10.dp)
+                            .horizontalScroll(rememberScrollState())
+                    ) {
+                        styles.forEach { option ->
+                            FilterChip(
+                                selected = option == style,
+                                onClick = { style = option; openTool = null },
+                                label = {
+                                    Text(option.label, style = MaterialTheme.typography.labelSmall)
+                                }
+                            )
+                        }
+                    }
+                }
+                androidx.compose.animation.AnimatedVisibility(visible = openTool == "shape") {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                            .padding(10.dp)
+                    ) {
+                        listOf(ShareCardAspect.PORTRAIT, ShareCardAspect.CLASSIC).forEach { option ->
+                            FilterChip(
+                                selected = aspect == option,
+                                onClick = { aspect = option; openTool = null },
+                                label = {
+                                    Text(
+                                        if (option == ShareCardAspect.PORTRAIT) "Story 9:16" else "Classic 3:4",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            if (kind == KIND_QUOTE) {
+                ComposerPill(
+                    label = if (credit.isBlank()) "Who said it" else credit,
+                    icon = CurioIcons.FormatQuote,
+                    expanded = openTool == "credit",
+                    onClick = { openTool = if (openTool == "credit") null else "credit" }
+                )
+                androidx.compose.animation.AnimatedVisibility(visible = openTool == "credit") {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                    ) {
+                        BasicTextField(
+                            value = credit,
+                            onValueChange = { if (it.length <= 80) credit = it },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(curioDialogActionColor()),
+                            decorationBox = { inner ->
+                                Box(modifier = Modifier.padding(vertical = 12.dp)) {
+                                    if (credit.isEmpty()) Text(
+                                        text = "The name under the line",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+                                    )
+                                    inner()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
+            problem?.let { reason ->
+                Text(
+                    text = reason,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/**
+ * One compact pill in the composer's attach rail: a glyph, a few words, and
+ * either a chevron (closed) or nothing (expanded — the tray under it is the
+ * affordance). It is the whole "form" the composer offers; everything else is
+ * canvas.
+ */
+@Composable
+private fun ComposerPill(
+    label: String,
+    icon: String,
+    expanded: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    iconTint: Color? = null,
+    trailing: String? = null
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (expanded) curioDialogActionColor().copy(alpha = 0.12f)
+        else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+        modifier = modifier.curioPressClickable(
+            pressedScale = 0.96f,
+            hapticOnPress = false,
+            onClickLabel = label,
+            onClick = onClick
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp)
+        ) {
+            CurioIcon(
+                name = icon,
+                contentDescription = null,
+                tint = iconTint ?: curioDialogActionColor(),
+                size = 15.dp
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+            if (trailing != null) {
+                Text(
+                    text = trailing,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = curioDialogActionColor()
+                )
             }
         }
     }

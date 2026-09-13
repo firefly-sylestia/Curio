@@ -538,7 +538,7 @@ fun FriendsScreen(navController: NavController) {
                 if (friends.isEmpty() && !loading) {
                     item(key = "no-friends") {
                         SocialEmptyCard(
-                            icon = CurioIcons.Hub,
+                            icon = CurioIcons.Friends,
                             title = "No friends yet",
                             body = "Search a name above. Adding someone sends them a request " +
                                 "they can accept."

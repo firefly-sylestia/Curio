@@ -215,6 +215,10 @@ object CurioIcons {
     // was needed — never add a name here without checking it first, a
     // missing ligature renders as the literal word instead of an icon.
     const val Hub             = "hub"                   // connected nodes — the social wall
+    const val Chats           = "chat_bubble"           // a speech bubble — the chats list (glyph added to the bundled subset)
+    const val Friends         = "groups"                // two people — friends (glyph added to the bundled subset)
+    const val Send            = "send"                  // paper plane — the composer's send (glyph added to the bundled subset)
+    const val MoreHoriz       = "more_horiz"            // … — a quiet overflow (glyph added to the bundled subset)
     // v3xx53 — the SOCIAL tab's glyph. `public` is verified present in the
     // bundled subset (it is listed in the face's ligature table alongside the
     // names above), and a globe reads as "a shared space" far better than
