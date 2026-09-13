@@ -140,6 +140,18 @@ object SupabaseClient {
         return JSONObject(String(decoded, Charsets.UTF_8)).getString("sub")
     }
 
+    /**
+     * When the access token stops being accepted, or 0 when its `exp` claim
+     * cannot be read. Read without verifying the signature: this is only used
+     * to decide WHEN to refresh, never to decide whether a token is valid.
+     */
+    internal fun accessTokenExpiresAtMillis(token: String): Long = runCatching {
+        val payload = token.split('.').getOrNull(1) ?: return@runCatching 0L
+        val decoded = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+        val seconds = JSONObject(String(decoded, Charsets.UTF_8)).optLong("exp")
+        if (seconds > 0L) seconds * 1_000L else 0L
+    }.getOrDefault(0L)
+
     private fun requireConfigured() {
         check(isConfigured) {
             "Supabase is not configured. Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY for the Android build."

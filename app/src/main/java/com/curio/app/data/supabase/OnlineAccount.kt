@@ -7,7 +7,10 @@ import androidx.compose.runtime.setValue
 import com.curio.app.data.AppPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -25,6 +28,9 @@ import kotlinx.coroutines.launch
  */
 object OnlineAccount {
     private val recoveryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /** The running token-refresh loop; replaced whenever a session starts. */
+    private var refreshJob: Job? = null
 
     /** What the account UI renders. */
     data class State(
@@ -70,6 +76,7 @@ object OnlineAccount {
                     AppPreferences.setOnlineModeEnabled(context, true)
                     SupabaseClient.updateOnlineMode(refreshed.accessToken, true)
                     state = state.copy(session = refreshed, busy = false, error = null)
+                    keepSessionFresh(context, refreshed)
                     recoveryScope.launch {
                         restoreProfileIdentity(context, refreshed)
                         publishIdentity(context, refreshed.accessToken, refreshed.userId)
@@ -99,6 +106,7 @@ object OnlineAccount {
                 SupabaseClient.updateOnlineMode(session.accessToken, true)
                 restoreProfileIdentity(context, session)
                 state = State(session = session)
+                keepSessionFresh(context, session)
                 publishIdentity(context, session.accessToken, session.userId)
                 true
             },
@@ -136,6 +144,7 @@ object OnlineAccount {
                     SupabaseClient.updateOnlineMode(session.accessToken, true)
                     restoreProfileIdentity(context, session)
                     state = State(session = session)
+                    keepSessionFresh(context, session)
                     publishIdentity(context, session.accessToken, session.userId)
                     true
                 }
@@ -150,6 +159,10 @@ object OnlineAccount {
     /** Signs out locally no matter what the server says, and drops Online Mode. */
     suspend fun signOut(context: Context) {
         val token = state.session?.accessToken
+        // The freshness loop must stop BEFORE the session is dropped, or a
+        // refresh already in flight could write the signed-out session back.
+        refreshJob?.cancel()
+        refreshJob = null
         state = state.copy(busy = true, error = null, notice = null)
         if (token != null) SupabaseClient.signOut(token)
         SupabaseSessionStore.clear(context)
@@ -192,6 +205,51 @@ object OnlineAccount {
     /** Clears a shown error/notice (the UI calls this when it moves on). */
     fun clearMessage() {
         state = state.copy(error = null, notice = null)
+    }
+
+    /**
+     * Keeps the access token fresh for as long as the app runs.
+     *
+     * A Supabase access token lives about an hour, and EVERYTHING online is
+     * authorised by it: the REST reads, and the realtime channel, which is
+     * joined with that exact token and stops delivering when the server no
+     * longer accepts it. Refreshing a few minutes before the JWT's own `exp`
+     * means the screens re-run their `watch()` with a new token and the
+     * channel is rebuilt as the new RLS context, instead of realtime going
+     * quiet an hour into a session while the app still looks connected.
+     *
+     * A failed refresh is retried, never treated as a sign-out: the token in
+     * hand is usually still usable, and a phone that lost signal must not lose
+     * the session over it.
+     */
+    private fun keepSessionFresh(context: Context, session: SupabaseClient.Session) {
+        refreshJob?.cancel()
+        refreshJob = recoveryScope.launch {
+            var current = session
+            while (isActive) {
+                val live = state.session ?: return@launch
+                // A different session (sign-out, or another account) owns the
+                // token now: this loop is the old one and retires itself.
+                if (live.accessToken != current.accessToken) return@launch
+                val expiresAt = SupabaseClient.accessTokenExpiresAtMillis(current.accessToken)
+                delay(
+                    if (expiresAt > 0L) {
+                        (expiresAt - System.currentTimeMillis() - REFRESH_LEAD_MS)
+                            .coerceAtLeast(MIN_REFRESH_WAIT_MS)
+                    } else {
+                        DEFAULT_REFRESH_INTERVAL_MS
+                    }
+                )
+                SupabaseClient.refreshSession(current.refreshToken).fold(
+                    onSuccess = { refreshed ->
+                        SupabaseSessionStore.save(context, refreshed)
+                        state = state.copy(session = refreshed, error = null)
+                        current = refreshed
+                    },
+                    onFailure = { delay(REFRESH_RETRY_MS) }
+                )
+            }
+        }
     }
 
     /**
@@ -242,6 +300,18 @@ object OnlineAccount {
  * answering from the old shape.
  */
 internal const val SOCIAL_CACHE_PREFS = "curio_social_cache"
+
+/** How long before a token's own `exp` the session is refreshed. */
+private const val REFRESH_LEAD_MS = 5L * 60 * 1000
+
+/** The floor for a token that is already near (or past) its expiry. */
+private const val MIN_REFRESH_WAIT_MS = 30L * 1000
+
+/** Used when the token carries no readable `exp` claim. */
+private const val DEFAULT_REFRESH_INTERVAL_MS = 50L * 60 * 1000
+
+/** Backoff after a failed refresh, before asking again. */
+private const val REFRESH_RETRY_MS = 2L * 60 * 1000
 
 /**
  * Maps a transport failure to copy that is safe to render: rate limits and

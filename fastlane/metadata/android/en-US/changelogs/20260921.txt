@@ -1,11 +1,14 @@
 ADD:
 - Social: pull down on the wall to refresh the latest posts.
+- Messages: the other person's "typing…" line and their reactions arrive the instant they happen over the live connection, and both only fall back to a slow safety check when it is unavailable.
 - Messages: encrypted deliveries decrypt before rendering and load key envelopes in one fast batch.
 - Messages: shared per-chat encryption switch, reliable versioned decryption, and plaintext fallback.
 - Messages: delete locally or unsend your sent message for both people.
 
 FIX: Social — new accounts now create and mirror their Online mode profile before opening the wall, so they can see and post immediately.
 FIX: Messages — exact device envelopes now restore safely with clear encrypted-message recovery states.
+FIX: Messages — sending an encrypted message works again: the key envelope a sender wraps for its OWN devices was refused by the server, which blocked every encrypted send with a "conversation does not match participants" error.
+FIX: Messages and Community — live updates stay live: the sign-in token is refreshed in the background before it expires, a channel the server closes is noticed instead of silently going quiet, and a screen that changes what it listens to re-joins instead of keeping the old subscription.
 FIX: Messages — encrypted multi-device delivery no longer trips envelope security on duplicate sends.
 FIX: Messages — a conversation from an older install can rotate an unreadable encryption key and send again instead of failing before delivery.
 FIX: Messages — the composer now stays directly above the keyboard when an empty chat first opens, and recipients load the exact encryption-key version used by each message.

@@ -645,20 +645,69 @@ create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
     or public.curio_are_friends(auth.uid(), recipient)
   );
 
+-- The canonical id of a two-person conversation: both uuid texts, in the
+-- order the app sorts them. ONE definition, shared by the envelope validator
+-- and both dm_messages triggers, so a conversation can never mean two
+-- different strings on two different code paths.
+create or replace function public.curio_dm_conversation_of(a uuid, b uuid)
+returns text
+language sql
+immutable
+as $$
+    select case when a::text < b::text
+        then a::text || ':' || b::text
+        else b::text || ':' || a::text end;
+$$;
+
+-- The person on the other side of `actor` in a canonical two-party
+-- conversation id, or null when the id is not canonical or does not name the
+-- actor. Used for the envelopes a sender wraps for its OWN devices, where the
+-- authenticated user and the recipient are the same account and there is no
+-- counterparty to compare against directly.
+create or replace function public.curio_dm_conversation_peer(conversation text, actor uuid)
+returns uuid
+language plpgsql
+immutable
+as $$
+declare
+    first_party  text := split_part(conversation, ':', 1);
+    second_party text := split_part(conversation, ':', 2);
+begin
+    if conversation !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+        return null;
+    end if;
+    if conversation <> public.curio_dm_conversation_of(first_party::uuid, second_party::uuid) then
+        return null;
+    end if;
+    if first_party = actor::text then return second_party::uuid; end if;
+    if second_party = actor::text then return first_party::uuid; end if;
+    return null;
+end $$;
+
 -- An envelope is only meaningful for a currently registered recipient device
 -- and for the canonical two-party conversation. This rejects a mismatched
 -- device ID, recipient, or conversation before ciphertext reaches storage.
+--
+-- A sender ALSO wraps the same conversation key for its own devices
+-- (recipient = auth.uid()) so a reinstall or a second phone can still read the
+-- thread, and the message trigger below requires exactly those rows. That case
+-- has no peer to compare against, so it is held to the canonical conversation
+-- of the sender and the single other party named in the id — who must be the
+-- sender's accepted friend.
 create or replace function public.curio_validate_dm_envelope()
 returns trigger
 language plpgsql
 as $$
 declare
-    canonical text := case when auth.uid()::text < new.recipient::text
-        then auth.uid()::text || ':' || new.recipient::text
-        else new.recipient::text || ':' || auth.uid()::text end;
+    self_peer uuid;
 begin
-    if new.conversation_id <> canonical then
-        raise exception 'curio: envelope conversation does not match participants';
+    if new.conversation_id <> public.curio_dm_conversation_of(auth.uid(), new.recipient) then
+        self_peer := case when new.recipient = auth.uid()
+            then public.curio_dm_conversation_peer(new.conversation_id, auth.uid())
+            else null end;
+        if self_peer is null or not public.curio_are_friends(auth.uid(), self_peer) then
+            raise exception 'curio: envelope conversation does not match participants';
+        end if;
     end if;
     if not exists (
         select 1 from public.dm_device_keys key
@@ -793,9 +842,7 @@ security definer
 set search_path = public
 as $$
 declare
-    conversation text := case when new.sender::text < new.recipient::text
-        then new.sender::text || ':' || new.recipient::text
-        else new.recipient::text || ':' || new.sender::text end;
+    conversation text := public.curio_dm_conversation_of(new.sender, new.recipient);
     encryption_on boolean := true;
 begin
     select encryption_enabled into encryption_on
@@ -822,9 +869,7 @@ returns trigger
 language plpgsql
 as $$
 declare
-    conversation text := case when new.sender::text < new.recipient::text
-        then new.sender::text || ':' || new.recipient::text
-        else new.recipient::text || ':' || new.sender::text end;
+    conversation text := public.curio_dm_conversation_of(new.sender, new.recipient);
     version_text text;
     key_version_value integer;
 begin
@@ -1600,12 +1645,18 @@ revoke all on public.member_blocks from anon;
 -- and a project with no realtime publication (or a database that predates it)
 -- simply reports a notice and keeps working — the app polls in that case.
 --
--- REPLICA IDENTITY FULL on the two tables whose UPDATES matter (a read receipt,
--- an answered request): a filtered UPDATE subscription is matched against the
--- OLD row, which only carries the primary key unless the full row is published.
+-- REPLICA IDENTITY FULL on the tables whose UPDATES and DELETES are filtered
+-- (a read receipt, an answered request, a reaction taken back): a filtered
+-- subscription is matched against the OLD row, which only carries the primary
+-- key unless the full row is published. dm_typing is deliberately NOT changed:
+-- the open conversation watches it for INSERT/UPDATE only, and its primary key
+-- already carries the `sender` its filter matches on. All four message-side
+-- tables (dm_messages, dm_typing, dm_reactions, friend_requests) are added to
+-- the publication above.
 
 alter table public.dm_messages replica identity full;
 alter table public.friend_requests replica identity full;
+alter table public.dm_reactions replica identity full;
 
 do $$
 declare

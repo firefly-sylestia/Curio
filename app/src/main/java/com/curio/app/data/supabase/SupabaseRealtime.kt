@@ -61,7 +61,12 @@ data class RealtimeWatch(
  *    project without the publication) never breaks a screen.
  *  - **A refused channel is not retried forever.** A join the server rejects
  *    (RLS, or a table missing from the `supabase_realtime` publication) will
- *    not start working on the eleventh attempt, so it stops and reports why.
+ *    not start working on the eleventh attempt, so it stops and reports why —
+ *    until a new token arrives or a screen changes its bindings.
+ *  - **A dropped channel is noticed.** `phx_close` (the server closing the
+ *    channel, usually an expired token) and `phx_error` are both treated as a
+ *    lost link, so `isLinked` tells the truth and the screens fall back to
+ *    their fast tick while the channel is rebuilt.
  *
  * Frames are guarded everywhere: a WebSocket callback runs on its own thread,
  * and an exception escaping one would take the process down.
@@ -137,12 +142,23 @@ object SupabaseRealtime {
         onChange: () -> Unit
     ) {
         if (watches.isEmpty() || !SupabaseClient.isConfigured) return
+        val previous = subscriptions[owner]
         val tokenChanged = token != null && token != accessToken
+        val bindingsChanged = previous != null && previous.watches != watches
         token = accessToken
         subscriptions[owner] = Subscription(watches, onChange)
         if (tokenChanged) {
             // A new session is a new RLS context: the old channel's bindings
             // were authorised as somebody else, so it has to be rebuilt.
+            refused = false
+            reopen()
+        } else if (bindingsChanged) {
+            // A channel holds the bindings it was JOINED with — the server
+            // cannot add one afterwards. A screen that re-declares a different
+            // set (another table, a filter that now covers different rows)
+            // must re-join, or it would silently keep hearing about the OLD
+            // rows. A changed set is also worth one fresh attempt after a
+            // refusal, because the rejection was about the previous bindings.
             refused = false
             reopen()
         } else {
@@ -239,7 +255,12 @@ object SupabaseRealtime {
         lastProblem = reason
         heartbeat?.cancel()
         heartbeat = null
+        // The socket may still be alive (the server closed only the CHANNEL),
+        // so it is torn down here rather than left dangling while a
+        // replacement is opened.
+        val dead = socket
         socket = null
+        runCatching { dead?.cancel() }
         scheduleReconnect()
     }
 
@@ -371,7 +392,16 @@ object SupabaseRealtime {
                 // and a tampered frame cannot put a row on screen.
                 notifySubscribers()
             }
-            "phx_error" -> refuse("Realtime channel error")
+            // The server closed the CHANNEL while the socket is still up — an
+            // expired access token is the usual reason. Without this branch
+            // `isLinked` would stay true and every screen would sit on its slow
+            // safety tick while hearing nothing at all, which is exactly what
+            // "realtime looks connected but nothing is live" is.
+            "phx_close" -> lost("channel closed")
+            // A channel PROCESS error is recoverable: the channel is rejoined,
+            // with backoff, rather than treated as a permanent refusal (that is
+            // reserved for a join the server actually rejected).
+            "phx_error" -> lost("channel error")
         }
     }
 

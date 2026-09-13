@@ -462,15 +462,15 @@ fun DirectMessageScreen(
         SocialApi.markRead(token, otherUserId, myUserId)
     }
 
-    // "is typing…" — polled, not pushed (Curio's online layer has no realtime
-    // socket by design). A second and a half: the row is one tiny read of a
-    // single server-stamped timestamp, and a typing indicator that arrives
-    // after the message it was announcing is worse than none.
+    // "is typing…" — pushed by a `dm_typing` frame, and re-read on a timer as
+    // the safety net (the push shows it the instant the other side starts; the
+    // timer is what CLEARS a row whose writer stopped refreshing it). Fast only
+    // while the push channel is down.
     LaunchedEffect(eligible, token, myUserId) {
         if (!eligible || token == null || myUserId == null) return@LaunchedEffect
         while (true) {
             peerTyping = SocialApi.isTyping(token, myUserId, otherUserId)
-            delay(1_500)
+            delay(if (SupabaseRealtime.isLinked) TYPING_SAFETY_TICK_MS else TYPING_TICK_MS)
         }
     }
 
@@ -518,10 +518,28 @@ fun DirectMessageScreen(
         }
     }
 
+    /**
+     * The live bits that are NOT part of the message delta: the other side's
+     * "is typing…" row and their reactions on the messages already on screen.
+     *
+     * Both are tiny RLS-protected reads, driven by a realtime hint instead of a
+     * tick. Reactions are re-read whole (rather than merged) because a REMOVED
+     * reaction has no row to merge from — the other person taking their glyph
+     * back is exactly as live as them leaving one.
+     */
+    suspend fun refreshLiveBits(active: String, me: String) {
+        peerTyping = SocialApi.isTyping(active, me, otherUserId)
+        val ids = messages.map { it.id }.filterNot { it.startsWith(LOCAL_ID_PREFIX) }
+        if (ids.isEmpty()) return
+        SocialApi.reactions(active, ids).onSuccess { fresh -> reactions = fresh }
+    }
+
     // REALTIME — the server tells this screen when the thread moved, instead of
-    // a timer asking. Two bindings, both SERVER-filtered: their new messages
-    // (INSERT), and my own message being read (UPDATE on a row I sent them).
-    // The subscription is released the moment the screen goes away.
+    // a timer asking. Four bindings, all SERVER-filtered: their new messages
+    // (INSERT), my own message being read (UPDATE on a row I sent them), their
+    // "is typing…" row (INSERT/UPDATE), and a reaction from them (the row's
+    // primary key carries the reactor, so INSERT/UPDATE/DELETE all match the
+    // filter). The subscription is released the moment the screen goes away.
     DisposableEffect(eligible, token, myUserId, otherUserId) {
         val active = token
         val me = myUserId
@@ -540,12 +558,25 @@ fun DirectMessageScreen(
                         table = "dm_messages",
                         filter = "recipient=eq.$otherUserId",
                         events = listOf("UPDATE")
+                    ),
+                    RealtimeWatch(
+                        table = "dm_typing",
+                        filter = "sender=eq.$otherUserId",
+                        events = listOf("INSERT", "UPDATE")
+                    ),
+                    RealtimeWatch(
+                        table = "dm_reactions",
+                        filter = "user_id=eq.$otherUserId",
+                        events = listOf("INSERT", "UPDATE", "DELETE")
                     )
                 )
             ) {
                 // The push arrives on a socket thread; the counter is Compose
                 // state, so the bump is posted to the composition's own scope.
                 scope.launch { pushed++ }
+                // The live bits that are not part of the message delta — the
+                // typing row and their reactions — are re-read right away.
+                scope.launch { refreshLiveBits(active, me) }
             }
         }
         onDispose { SupabaseRealtime.unwatch(owner) }
@@ -1469,6 +1500,20 @@ private const val LIVE_TICK_MS = 1_200L
  * longer the thing that makes the thread feel live.
  */
 private const val SAFETY_TICK_MS = 20_000L
+
+/**
+ * How often the "is typing…" row is re-read when realtime is NOT linked.
+ *
+ * 1.5s is the old whole mechanism: the row is one tiny read of a single
+ * server-stamped timestamp, and an indicator that arrives after the message it
+ * was announcing is worse than none. Once the push channel is linked a
+ * `dm_typing` frame shows it immediately, so this becomes a slow safety tick —
+ * it also has to clear a writer that vanished without deleting its row.
+ */
+private const val TYPING_TICK_MS = 1_500L
+
+/** The typing row's safety-net cadence once realtime is linked. */
+private const val TYPING_SAFETY_TICK_MS = 5_000L
 
 /** The id prefix of a bubble that is sent but not yet confirmed. */
 private const val LOCAL_ID_PREFIX = "local-"
