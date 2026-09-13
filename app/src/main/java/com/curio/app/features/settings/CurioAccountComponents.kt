@@ -467,6 +467,7 @@ internal fun CurioAccountIdentityCard(
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
             }
+        }
 
         if (includeAvatarPicker) {
             Text(

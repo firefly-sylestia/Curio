@@ -119,6 +119,14 @@
   only caller invokes it inside the non-suspend `mapped {}` lambda. Fixed by
   making it blocking like the file's own convention (`presenceOf`), which is
   safe because the only caller is already on the IO dispatcher.
+- CI on that fix then failed across `CurioAccountComponents.kt` and
+  `ProfileScreen.kt` with dozens of "Unresolved reference": removing the
+  username row's trailing text had also removed the ROW's closing brace, so
+  every helper defined later in the file became a local function of
+  `CurioAccountIdentityCard` ("Modifier 'internal' is not applicable to 'local
+  function'" was the tell). One restored brace fixes all of it. Lesson: a
+  str_replace that deletes trailing content must account for the braces the
+  deleted block was carrying.
 
 ### Still open (tracked, next slices)
 
