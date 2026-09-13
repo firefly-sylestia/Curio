@@ -1698,7 +1698,7 @@ begin
                          'member_blocks',
                          'community_reactions','community_comments',
                          'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
-                         'dm_typing','dm_reactions','member_blocks')
+                         'dm_typing','dm_reactions','dm_conversations','dm_conversation_hidden')
        and c.relrowsecurity = false;
     if rls_off is null then
         raise notice 'PASS  RLS enabled on every Curio table';
@@ -1714,7 +1714,8 @@ begin
        and tablename in ('profiles','cloud_captures','community_cards',
                          'community_reactions','community_comments',
                          'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
-                         'dm_typing','dm_reactions','member_blocks');
+                         'dm_typing','dm_reactions','member_blocks',
+                         'dm_conversations','dm_conversation_hidden');
     if anon_open is null then
         raise notice 'PASS  no anon policies on Curio tables';
     else
@@ -1726,7 +1727,8 @@ begin
       from unnest(array['profiles','cloud_captures','community_cards',
                         'community_reactions','community_comments',
                         'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
-                        'dm_typing','dm_reactions','member_blocks']) as t
+                        'dm_typing','dm_reactions','member_blocks',
+                        'dm_conversations','dm_conversation_hidden']) as t
      where not exists (
         select 1 from pg_class c
           join pg_namespace n on n.oid = c.relnamespace
