@@ -394,7 +394,6 @@ fun CommunityScreen(navController: NavController) {
                         CommunityDoorTile(
                             icon = CurioIcons.Notes,
                             label = "Chats",
-                            subtitle = "Direct messages",
                             onClick = { navController.navigate(CurioRoutes.CHATS) },
                             modifier = Modifier.weight(1f)
                         )
@@ -405,14 +404,12 @@ fun CommunityScreen(navController: NavController) {
                             // by the thread list) so the two never blur.
                             icon = CurioIcons.Hub,
                             label = "Friends",
-                            subtitle = "Your people",
                             onClick = { navController.navigate(CurioRoutes.FRIENDS) },
                             modifier = Modifier.weight(1f)
                         )
                         CommunityDoorTile(
                             icon = CurioIcons.Person,
                             label = "You",
-                            subtitle = "Your profile",
                             onClick = {
                                 // Guarded: an unmatched person/ route would throw.
                                 val me = account.session?.userId
@@ -950,18 +947,15 @@ internal fun CommunityAction(
 }
 
 /**
- * One of the wall's three doors — Chats, Friends, You — as a proper TILE.
- *
- * Bare text buttons read as leftover links and gave the social layer no
- * presence of its own; the tile gives each door an icon in a rounded well,
- * a label and one quiet subtitle, and the press squish every other surface
- * on this screen wears. Equal weights keep the row balanced on any width.
+ * One of the wall's three doors — Chats, Friends, You — as a compact TILE:
+ * an icon in a rounded well beside the label, no narration under it. The
+ * press squish every other surface on this screen wears. Equal weights keep
+ * the row balanced on any width.
  */
 @Composable
 internal fun CommunityDoorTile(
     icon: String,
     label: String,
-    subtitle: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -975,36 +969,29 @@ internal fun CommunityDoorTile(
             onClick = onClick
         )
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+                .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(14.dp),
                 color = curioDialogActionColor().copy(alpha = 0.14f)
             ) {
                 CurioIcon(
                     name = icon,
                     contentDescription = null,
                     tint = curioDialogActionColor(),
-                    size = 20.dp,
-                    modifier = Modifier.padding(10.dp)
+                    size = 18.dp,
+                    modifier = Modifier.padding(9.dp)
                 )
             }
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
     }

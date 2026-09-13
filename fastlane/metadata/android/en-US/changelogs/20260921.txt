@@ -1,10 +1,10 @@
 ADD:
 - Opening a post hides the bottom navigation so the card owns the whole screen, and the comments live right under the post now, in the same list, updating live.
-- Community wall doors (Chats, Friends, You) are proper tiles with icons instead of bare text links.
+- Community wall doors (Chats, Friends, You) are compact icon tiles without the extra captions.
 
 FIX:
-- Report and take-down on an open post are icons now, without the worded buttons crowding the action row.
-- Share-card previews fill their square tile on profiles instead of floating small in the box.
+- Messages: registering this device's encrypted identity goes through a server RPC that cannot trip the "violates row level security policy" error, and a failed registration no longer blocks the conversation: plain messages always send and render, encrypted ones stay sealed with a clear note until the device registers.
+- Server setup: re-pasting the SQL no longer silently drops the policy that lets a sender read their friend's device keys, which was breaking encrypted sends between healthy accounts.
 
 ADD:
 - Post a topic: a two-step composer. Step one is a compact sheet (kind, topic, words); Preview opens a full-height editor with the card drawn exactly as the wall will show it, where shape, style, caption and wording can still be changed before posting.

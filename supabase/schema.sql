@@ -954,9 +954,49 @@ begin
     return retired;
 end $$;
 
-drop function if exists public.curio_retire_dm_device(p_device_id text, p_user_id uuid);
-drop policy if exists dm_device_keys_select_participant on public.dm_device_keys;
+-- This RPC is the ONLY writer the client uses to retire a device, and it
+-- must stay. Nothing here drops any dm_device_keys policy: an earlier
+-- revision of this file carried a stray
+-- `drop policy if exists dm_device_keys_select_participant` on this very
+-- spot, so every re-paste of the schema silently removed the policy that
+-- lets a sender read their friend's device keys — encrypted sends then
+-- failed with RLS violations for perfectly healthy accounts.
 grant execute on function public.curio_retire_dm_device(text) to authenticated;
+
+-- Publishes (registers or refreshes) the caller's DM device identity.
+--
+-- The client used to upsert dm_device_keys over REST, which only works while
+-- the live database's INSERT and UPDATE policies both agree with this file's;
+-- any drift (a policy renamed, dropped, or recreated by hand) surfaces to the
+-- member as "new row violates row-level security policy" and every encrypted
+-- conversation stalls. This security-definer RPC writes the row directly, so
+-- publishing works regardless of which policy versions the project has.
+-- Only the caller's OWN identity can be written (auth.uid() below), the
+-- inputs are length-checked, and the envelope + message triggers still
+-- validate every key that is ever wrapped with it.
+create or replace function public.curio_publish_dm_device(
+    p_device_id text,
+    p_public_key text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if p_device_id is null or length(p_device_id) = 0 or length(p_device_id) > 128 then
+        raise exception 'curio: invalid device id';
+    end if;
+    if p_public_key is null or length(p_public_key) = 0 or length(p_public_key) > 4096 then
+        raise exception 'curio: invalid device public key';
+    end if;
+    insert into public.dm_device_keys (user_id, device_id, public_key, key_version)
+    values (auth.uid(), p_device_id, p_public_key, 1)
+    on conflict (user_id, device_id) do update
+        set public_key = excluded.public_key,
+            retired_at = null;
+end $$;
+grant execute on function public.curio_publish_dm_device(text, text) to authenticated;
 
 alter table public.dm_messages enable row level security;
 

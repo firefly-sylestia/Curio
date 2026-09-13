@@ -985,13 +985,20 @@ private const val PERSON_COLUMNS_PRIVACY =
     }
   }
 
-  /** Publishes this device's public identity; the private key never enters this API. */
+  /**
+   * Publishes this device's public identity; the private key never enters
+   * this API. Goes through the `curio_publish_dm_device` RPC rather than a
+   * REST upsert: the RPC writes as the definer, so publishing cannot fail
+   * with "new row violates row level security policy" when the live
+   * database's policies drift from this file's. The `userId` parameter is
+   * kept for call-site clarity but the server always binds the row to the
+   * authenticated account.
+   */
   suspend fun publishDmIdentity(accessToken: String, identity: CurioDmIdentity, userId: String): Result<Unit> = withContext(Dispatchers.IO) {
     mappedUnit {
-      val payload = JSONObject().put("user_id", userId).put("device_id", identity.deviceId)
-        .put("public_key", identity.publicKey).put("key_version", 1)
-      val request = SupabaseClient.requestBuilder("/rest/v1/dm_device_keys?on_conflict=user_id,device_id", accessToken)
-        .header("Prefer", "resolution=merge-duplicates,return=minimal")
+      val payload = JSONObject().put("p_device_id", identity.deviceId)
+        .put("p_public_key", identity.publicKey)
+      val request = SupabaseClient.requestBuilder("/rest/v1/rpc/curio_publish_dm_device", accessToken)
         .post(payload.toString().toRequestBody(jsonMediaType)).build()
       SupabaseClient.executeBody(request)
     }

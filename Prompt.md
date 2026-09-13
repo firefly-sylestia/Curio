@@ -222,6 +222,27 @@ brace) are recorded below in Verification status.
 
 ## User prompts
 
+### Prompt (2026-09-13, latest) — identity publish RLS failure + door tile captions
+
+Symptoms: "this device could not register its encrypted-message identity" even
+with encryption off, and messages not going through. Root causes found: (1) the
+schema file carried a stray `drop policy if exists
+dm_device_keys_select_participant` near the retire RPC, so every re-paste
+silently deleted the friend key-read policy; (2) the client published the
+device identity with a raw REST upsert that fails the moment the live
+database's policies drift from the file; (3) `load()` aborted rendering the
+whole page when the publish failed, so even a successful plaintext send never
+appeared. Fixes: publish now goes through a new security-definer RPC
+(`curio_publish_dm_device`), the stray drop is removed and guarded by comment,
+and `load()` degrades gracefully when registration fails (plaintext always
+works; ciphertext says why). Also removed the door tiles' subtitles per the
+user's request.
+
+USER ACTION REQUIRED: the schema changes are not live until the user re-pastes
+supabase/schema.sql into the Supabase dashboard (or at minimum runs the retire
++ publish RPC definitions). The client works with or without the re-paste
+except that encrypted sends need the RPC present.
+
 ### Prompt (2026-09-13, later) — shipped in c08fdb54 + this working tree
 
 The chats/friends doors were bare text with mismatched icons; an open post kept

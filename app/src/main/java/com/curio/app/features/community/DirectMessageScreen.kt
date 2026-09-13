@@ -195,17 +195,24 @@ fun DirectMessageScreen(
                     DmCryptoDiagnostics.failure("identity_load", null, null, null, failure)
                     return@fold
                 }
-                // The same self-heal the send path does: a stale identity of
-                // MINE (a previous install) is retired before this device
-                // publishes, so the server counts exactly one active device
-                // per side and the envelope completeness check can pass.
-                SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
-                    .filter { it.deviceId != identity.deviceId }
-                    .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
+                var identityUsable = true
                 SocialApi.publishDmIdentity(active, identity, me).getOrElse { failure ->
-                    error = "This device could not register its encrypted-message identity."
+                    // Registration keeps the ENCRYPTED features honest, but it
+                    // must never take the conversation down with it: without
+                    // this row the device cannot receive wrapped keys, so
+                    // ciphertext stays sealed — and the error text says that
+                    // plainly instead of pretending the page is broken.
+                    identityUsable = false
                     DmCryptoDiagnostics.failure("identity_publish", null, null, null, failure)
-                    return@fold
+                }
+                // The same self-heal the send path does: a stale identity of
+                // MINE (a previous install) is retired so the server counts
+                // exactly one active device per side. Best-effort — the send
+                // path retires again before wrapping.
+                if (identityUsable) {
+                    SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
+                        .filter { it.deviceId != identity.deviceId }
+                        .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
                 }
                 // Get every envelope a page needs in ONE request. The former
                 // per-message sequential requests delayed arrivals and could
