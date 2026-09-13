@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -236,6 +238,14 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                     friendRequestId = friendRequestId,
                     asked = asked,
                     onBlock = { confirmBlock = true },
+                    onEdit = {
+                        // The profile's own door back into the editor — the
+                        // same dialog "You" opens, without a detour through
+                        // Settings.
+                        navController.navigate(CurioRoutes.PROFILE) {
+                            launchSingleTop = true
+                        }
+                    },
                     onAsk = {
                         if (myUserId != null) {
                             scope.launch {
@@ -331,14 +341,18 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
 }
 
 /**
- * The identity block — who this is, what they have posted in the last day, and
- * the one action that fits the relationship.
+ * The identity block — Instagram's shape, Curio's materials.
  *
- * The counts are computed from the SAME list the grid renders, so the page can
- * never claim a number it is not showing: "posts" is what is on screen, "likes"
- * and "replies" are what those posts received. The portrait is the same
- * code-drawn disc used everywhere else, at the largest size in the app, so a
- * member looks identical in the wall, in a reply and here.
+ * One row: the portrait at its largest, then the name, the @handle and the
+ * three counts laid out as equal columns BENEATH each other (a number over
+ * its label, like a profile that respects scanning), then the bio and the
+ * single action that fits the relationship. Everything that was explanation
+ * has been cut: a profile states who this is and shows their work — it does
+ * not narrate its own privacy rules, which live in Settings → Online mode.
+ *
+ * The counts are computed from the SAME list the grid renders, so the page
+ * can never claim a number it is not showing: "posts" is what is on screen,
+ * "likes" and "replies" are what those posts received.
  */
 @Composable
 private fun SocialProfileHeader(
@@ -350,6 +364,8 @@ private fun SocialProfileHeader(
     asked: Boolean,
     onAsk: () -> Unit,
     onMessage: () -> Unit,
+    /** Opens the member's own editor (only offered on your own profile). */
+    onEdit: () -> Unit = {},
     /** Blocks this member — the one destructive move a profile offers. */
     onBlock: () -> Unit
 ) {
@@ -366,9 +382,10 @@ private fun SocialProfileHeader(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            // ── Row one: portrait + identity ────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(18.dp)
             ) {
                 SocialAvatar(
                     style = person?.avatarStyle ?: 0,
@@ -377,7 +394,7 @@ private fun SocialProfileHeader(
                 )
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     // The DISPLAY name LEADS; the @username reads beneath it.
                     // Presence is deliberately NOT drawn here — Curio's
@@ -400,18 +417,23 @@ private fun SocialProfileHeader(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-                        SocialProfileStat(value = cards.size, label = "posts")
-                        SocialProfileStat(value = likes, label = "likes")
-                        SocialProfileStat(value = replies, label = "replies")
+                    if (loading) {
+                        CircularProgressIndicator(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(14.dp)
+                        )
                     }
                 }
-                if (loading) {
-                    CircularProgressIndicator(
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+            }
+
+            // ── Row two: the counts, as equal columns under the identity ──
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                SocialProfileStat(value = cards.size, label = "posts")
+                SocialProfileStat(value = likes, label = "likes")
+                SocialProfileStat(value = replies, label = "replies")
             }
 
             // Their own words, and NOTHING when they wrote none — a profile
@@ -424,6 +446,7 @@ private fun SocialProfileHeader(
                 )
             }
 
+            // ── Row three: the one action that fits, and the ⋮ ───────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -433,20 +456,20 @@ private fun SocialProfileHeader(
                 // the ⋮ below always sits at the end of it.
                 Box(Modifier.weight(1f)) {
                     when {
-                        isMe -> Text(
-                            text = "This is your own profile — your name and portrait live in Edit profile.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        isMe -> SocialProfileAction(
+                            label = "Edit profile",
+                            glyph = CurioIcons.Edit,
+                            onClick = onEdit
                         )
                         friendRequestId != null -> SocialProfileAction(
                             label = "Message",
                             glyph = CurioIcons.Notes,
                             onClick = onMessage
                         )
-                        asked -> Text(
-                            text = "Friend request sent. They will see it in Friends.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        asked -> SocialProfileAction(
+                            label = "Request sent",
+                            glyph = CurioIcons.Person,
+                            onClick = {}
                         )
                         else -> SocialProfileAction(
                             label = "Add friend",
@@ -487,30 +510,18 @@ private fun SocialProfileHeader(
                     }
                 }
             }
-
-            // The privacy promise, in one line: what this page exposes, and
-            // what it deliberately never does.
-            Text(
-                text = "A profile shows a name, a portrait and the last 24 hours of posts. " +
-                    "Your activity status stays inside direct chats; email, saved entries " +
-                    "and messages are never part of it.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
 
-/** One count in the identity block: the number, then what it counts. */
+/** One count in the identity block: the number OVER its label, centred —
+ *  a column reads at a glance where a run of inline numbers does not. */
 @Composable
 private fun SocialProfileStat(value: Int, label: String) {
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value.toString(),
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
@@ -524,14 +535,16 @@ private fun SocialProfileStat(value: Int, label: String) {
 /**
  * The profile's primary action, as a filled pill — the same door the wall and a
  * conversation use, so "Message" and "Add friend" can never look like two
- * different kinds of thing depending on where you are.
+ * different kinds of thing depending on where you are. It fills the row's
+ * width, the way a profile's primary action should.
  */
 @Composable
 private fun SocialProfileAction(label: String, glyph: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        colors = curioDialogActionButtonColors()
+        colors = curioDialogActionButtonColors(),
+        modifier = Modifier.fillMaxWidth()
     ) {
         CurioIcon(
             name = glyph,
@@ -548,14 +561,14 @@ private fun SocialProfileAction(label: String, glyph: String, onClick: () -> Uni
 }
 
 /**
- * ONE preview in the profile grid.
+ * ONE preview in the profile grid — a square, Instagram-style.
  *
- * A topic card is its own art, rendered at the tile's width (the real share
- * card, never a lookalike, so the preview matches the exported image). A note
- * or a quote has no art — the words ARE the post, so the tile shows them,
- * clipped to a tidy handful of lines with the credit under a quote. Nothing but
- * the post: a preview is a door, and the counts and actions live on the post's
- * own page.
+ * A topic card is its own art, rendered at the tile's width and CROPPED to
+ * the square: the real share card (never a lookalike) fills the whole tile
+ * instead of floating as a shrunken portrait strip inside a box it does not
+ * fill. A note or a quote has no art — the words ARE the post — so the tile
+ * shows them on the same square canvas. Nothing but the post: a preview is a
+ * door, and the counts and actions live on the post's own page.
  */
 @Composable
 private fun SocialProfileTile(card: CommunityCard, onClick: () -> Unit) {
@@ -568,23 +581,32 @@ private fun SocialProfileTile(card: CommunityCard, onClick: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            // The square is the grid's rhythm: every tile the same height,
+            // whatever the post inside it is.
+            .aspectRatio(1f)
     ) {
         if (card.kind == KIND_CARD) {
-            // Clipped to the tile's own rounding: the share card brings its own
-            // full-bleed art, and an unclipped preview would square off the
-            // corners of the tile it sits in.
+            // Clipped to the tile's own rounding: the share card brings its
+            // own full-bleed art, and an unclipped preview would square off
+            // the corners of the tile it sits in.
             CommunityCardCanvas(
                 card = card,
                 modifier = Modifier
+                    .fillMaxSize()
                     .clip(RoundedCornerShape(18.dp))
                     .then(tap),
-                widthFraction = 1f
+                // 0f: the canvas scale is driven by HEIGHT here (the square
+                // tile is shorter than the card is tall), so the crop keeps
+                // the card's own width and trims the bottom — the top of the
+                // card, where its title lives, is always what shows.
+                widthFraction = 0f
             )
         } else {
             Column(
                 modifier = Modifier
-                    .heightIn(min = 118.dp)
+                    .fillMaxSize()
                     .then(tap)
                     .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -602,6 +624,7 @@ private fun SocialProfileTile(card: CommunityCard, onClick: () -> Unit) {
                     maxLines = 7,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.weight(1f))
                 card.byline.trim().takeIf { it.isNotEmpty() }?.let { credit ->
                     Text(
                         text = "— $credit",

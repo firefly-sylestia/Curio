@@ -451,7 +451,8 @@ internal fun CommunityCard.toggleDislike(): CommunityCard {
 @Composable
 internal fun SocialTextPost(
     card: CommunityCard,
-    onClick: () -> Unit,
+    /** Null renders the post as a still — the composer's preview step. */
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -459,7 +460,13 @@ internal fun SocialTextPost(
         color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
         modifier = modifier
             .fillMaxWidth()
-            .curioPressClickable(pressedScale = 0.99f, onClick = onClick)
+            .then(
+                if (onClick != null) {
+                    Modifier.curioPressClickable(pressedScale = 0.99f, onClick = onClick)
+                } else {
+                    Modifier
+                }
+            )
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),

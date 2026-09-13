@@ -1,5 +1,7 @@
 ADD:
-- Messages: when an encrypted message fails, a dialog explains why and offers one tap to send it with encryption off instead, so a conversation never dead-ends.
+- Post a topic: a two-step composer. Step one is a compact sheet (kind, topic, words); Preview opens a full-height editor with the card drawn exactly as the wall will show it, where shape, style, caption and wording can still be changed before posting.
+- Profiles: the member page is Instagram-shaped now: one portrait-plus-identity row, the posts/likes/replies counts as columns underneath, the bio, and a full-width action. The grid is square tiles with the card art cropped to fill, so previews read as a gallery.
+- Community: posting, takedowns and reports use a tighter icon set, the wall's rows animate into place as the feed builds, and the composer button, cards and sheets keep one visual language.
 
 FIX:
 - Messages: encrypted sends no longer fail with "missing a device envelope for its key version" after a reinstall or a second device: old device identities are retired when a new one publishes, the server gives freshly registered devices a two-minute grace window, and every conversation you open heals its device list automatically.

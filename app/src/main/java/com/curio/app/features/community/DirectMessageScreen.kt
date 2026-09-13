@@ -980,12 +980,21 @@ fun DirectMessageScreen(
                 busy = sending,
                 onDismiss = { if (!sending) encryptionIssue = null },
                 onConfirm = {
+                    // The dialog lives OUTSIDE the eligible branch, so the
+                    // session values are read from the screen's own state
+                    // here; without a session there is nothing to send.
+                    val active = token
+                    val me = myUserId
+                    if (active == null || me == null) {
+                        encryptionIssue = null
+                        return@SocialConfirmDialog
+                    }
                     scope.launch {
                         pending = pending.filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
                         draft = failedDraft
                         failedDraft = ""
                         encryptionIssue = null
-                        send(activeToken, activeUserId, forcePlaintext = true)
+                        send(active, me, forcePlaintext = true)
                     }
                 }
             )

@@ -36,13 +36,32 @@ Fix (all three legs):
 
 Batch A needs: re-paste schema.sql (envelope grace + retirement RPC).
 
-### Batch B (this push, then watch CI once at the end)
-- Profile grid: the share-card tile fills its box (no letterboxing).
-- Profile header: Instagram-style, fewer texts.
-- Post-a-topic composer: full redesign on my own judgment (two-step flow,
-  keep notes/quotes).
-- Community screen: proper icon set, take-down as an icon action, card and
-  animation polish.
+### Batch B (this push, then watch CI once at the end) — SHIPPED
+- Profile grid: tiles are square (aspectRatio 1f) and the card canvas gained
+  a FILL mode (`widthFraction = 0f`: scale driven by height, top-aligned
+  crop), so a share card fills its tile instead of floating small. Notes and
+  quotes fill the same square with words pinned to the bottom.
+- Profile header: Instagram shape — portrait + identity row, counts as three
+  centred COLUMNS beneath, bio, then a full-width action. The privacy
+  narration paragraph and the two explanatory status texts are gone (the
+  action row states everything now: Edit profile / Message / Request sent /
+  Add friend); blocking stays behind the ⋮. "Edit profile" on your own
+  profile navigates to CurioRoutes.PROFILE.
+- Composer: two steps. Step one is the compact sheet (kind chips, topic
+  search/pick, words, style). "Preview" opens a full-height Dialog editor:
+  the card drawn via CommunityCardCanvas at full width (SocialTextPost still,
+  now nullable-onClick), SHAPE chips (PORTRAIT/CLASSIC — new state), caption,
+  credit and wording all editable, Post from the header. The preview draws a
+  CommunityCard rebuilt from the draft.
+- Wall: rows animate in with `Modifier.animateItem()` inside a Box; take
+  down/report are ICON-only pills (blank label, richer contentDescription,
+  square padding); the stale duplicate-author comment removed.
+- SocialTextPost.onClick is now nullable (preview renders it as a still).
+
+CI fix carried in this push: the encryption dialog referenced activeToken /
+activeUserId, which only exist inside the eligible branch; it now reads
+token / myUserId from the screen's own state and bails cleanly without a
+session.
 
 ## Previous request (shipped: d9bcf3ed, cfc8fb4c, 0c530794 — CI green)
 
