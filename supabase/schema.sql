@@ -833,36 +833,6 @@ create policy dm_delete_participant on public.dm_messages
     for delete to authenticated
     using (sender = auth.uid() or recipient = auth.uid());
 
--- Realtime delivery is required for message, reaction, request, and presence
--- updates. This block is idempotent when the schema is pasted more than once.
-do $$
-begin
-    if not exists (
-        select 1 from pg_publication_tables
-        where pubname = 'supabase_realtime' and tablename = 'dm_messages'
-    ) then
-        alter publication supabase_realtime add table public.dm_messages;
-    end if;
-    if not exists (
-        select 1 from pg_publication_tables
-        where pubname = 'supabase_realtime' and tablename = 'dm_reactions'
-    ) then
-        alter publication supabase_realtime add table public.dm_reactions;
-    end if;
-    if not exists (
-        select 1 from pg_publication_tables
-        where pubname = 'supabase_realtime' and tablename = 'friend_requests'
-    ) then
-        alter publication supabase_realtime add table public.friend_requests;
-    end if;
-    if not exists (
-        select 1 from pg_publication_tables
-        where pubname = 'supabase_realtime' and tablename = 'dm_typing'
-    ) then
-        alter publication supabase_realtime add table public.dm_typing;
-    end if;
-end $$;
-
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5e. dm_typing — "is typing…", one row per (sender, recipient) pair
 --
@@ -987,6 +957,42 @@ create policy dm_reactions_delete_own on public.dm_reactions
     for delete to authenticated
     using (user_id = auth.uid());
 
+-- Per-user "delete for me" marker. It hides a thread from one inbox without
+-- destroying the other participant's history.
+create table if not exists public.dm_conversation_hidden (
+    user_id uuid not null references auth.users(id) on delete cascade,
+    other_user_id uuid not null references auth.users(id) on delete cascade,
+    hidden_at timestamptz not null default now(),
+    primary key (user_id, other_user_id),
+    check (user_id <> other_user_id)
+);
+alter table public.dm_conversation_hidden enable row level security;
+drop policy if exists dm_hidden_owner on public.dm_conversation_hidden;
+create policy dm_hidden_owner on public.dm_conversation_hidden
+    for all to authenticated
+    using (user_id = auth.uid())
+    with check (user_id = auth.uid());
+create index if not exists dm_hidden_other_idx
+    on public.dm_conversation_hidden (other_user_id, user_id);
+
+-- Realtime delivery is required for message, reaction, request, and typing
+-- updates. The checks keep this safe to paste repeatedly after all tables exist.
+do $$
+begin
+    if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'dm_messages') then
+        alter publication supabase_realtime add table public.dm_messages;
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'dm_reactions') then
+        alter publication supabase_realtime add table public.dm_reactions;
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'friend_requests') then
+        alter publication supabase_realtime add table public.friend_requests;
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'dm_typing') then
+        alter publication supabase_realtime add table public.dm_typing;
+    end if;
+end $$;
+
 -- ───────────────────────────────────────────────────────────────────────────
 -- 6. Expiry sweep — housekeeping for the 24-hour cards
 -- ───────────────────────────────────────────────────────────────────────────
@@ -1024,7 +1030,7 @@ revoke all on function public.curio_purge_expired_cards() from public, anon, aut
 -- modified client cannot post around it either.
 --
 -- `curio_normalize_text` folds a string down to plain lowercase Latin letters:
--- accents dropped, look-alikes mapped (0→o, 3→e, @→a, $→s, |→i …) and every
+-- accents dropped, look-alikes mapped (0→o, 3→e, @���a, $→s, |→i …) and every
 -- remaining separator or unknown character becomes a word boundary — so spaced
 -- single-letter evasions can still be joined while ordinary words keep their
 -- boundaries. The map is APPLIED IN THE
