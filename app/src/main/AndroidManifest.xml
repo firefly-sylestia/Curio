@@ -113,11 +113,21 @@
             </intent-filter>
         </receiver>
 
+        <!-- v3xx57 — the keyboard may only ever be reported as an INSET.
+             With no soft-input mode the system is free to PAN the whole
+             window instead, and it does so on top of whatever the layout
+             already did with the inset: that is what threw the message box
+             most of the way up the screen the moment a composer added its own
+             lift. ADJUST_RESIZE is the mode an edge-to-edge app wants (the
+             window is not resized while the app draws behind the system bars,
+             it simply stops the pan), so the IME inset is the one and only
+             thing that moves content out of the keyboard's way. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Curio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
