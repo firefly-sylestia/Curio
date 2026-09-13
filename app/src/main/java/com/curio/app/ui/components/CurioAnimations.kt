@@ -17,9 +17,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,16 +38,10 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.CurioAlivePreferences
 import com.curio.app.ui.theme.CurioMotion
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Screen-level entrance animations
-// ═══════════════════════════════════════════════════════════════════════════
-
 @Composable
 fun ScreenEntrance(content: @Composable () -> Unit) {
-    val context = LocalContext.current
-    val alive = CurioAlivePreferences.isEnabled(context)
+    val alive = CurioAlivePreferences.isEnabled(LocalContext.current)
     val state = remember { MutableTransitionState(false).apply { targetState = true } }
-    val initialOffset = if (alive) 12 else { value: Int -> value / 8 }
     AnimatedVisibility(
         visibleState = state,
         enter = fadeIn(
@@ -64,7 +55,7 @@ fun ScreenEntrance(content: @Composable () -> Unit) {
             } else {
                 spring<IntOffset>(dampingRatio = 1f, stiffness = 750f)
             },
-            initialOffsetY = if (alive) ({ initialOffset }) else ({ it / 8 })
+            initialOffsetY = { fullHeight -> if (alive) 12 else fullHeight / 8 }
         ),
         content = { content() }
     )
@@ -156,10 +147,6 @@ fun MorphingContainer(
     ) { content() }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Ambient / breathing animations
-// ═══════════════════════════════════════════════════════════════════════════
-
 @Composable
 fun rememberBreathingScale(
     active: Boolean = true,
@@ -232,10 +219,6 @@ fun rememberRotatingReveal(
     return rotation to pulse
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Interactive micro-animations
-// ═══════════════════════════════════════════════════════════════════════════
-
 @Composable
 fun rememberAnimatedScaleOnPress(
     pressed: Boolean,
@@ -253,10 +236,6 @@ fun rememberAnimatedScaleOnPress(
         label = "pressScale"
     )
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Pulsing + waveform animations (carried forward from v1)
-// ═══════════════════════════════════════════════════════════════════════════
 
 @Composable
 fun rememberPulseScale(active: Boolean): Float {
