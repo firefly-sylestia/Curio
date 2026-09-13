@@ -1,5 +1,43 @@
 # Prompt Log — current request
 
+## Request (2026-09-13, DONE — new account Social access and legacy encrypted conversations)
+
+User (chat): a fresh install can create an ID but cannot see the Social wall or
+post because Supabase reports a `community_cards` row-level-security refusal;
+an older friend conversation fails while preparing encryption, although a new
+friend can receive messages.
+
+### Diagnosis and plan
+
+1. New sign-ins and sign-ups only set the local Online Mode preference. They
+   start identity publishing asynchronously but do not synchronously upsert the
+   server-side `profiles` row whose `online_mode_enabled` flag is required by
+   all community RLS policies. Mirror that state immediately after every
+   session activation and when restoring a session; mirror disabling too so the
+   server privacy state cannot drift from the app.
+2. Existing conversations can retain an envelope encrypted for a device keypair
+   that was invalidated or replaced. Rotate a new envelope version when the old
+   envelope cannot be opened, retaining the old version for historical reads.
+   Ignore malformed legacy public-device-key rows when another valid recipient
+   device exists, while reporting a clear update-needed error if none do.
+3. Update the active store changelog, run static checks only (Gradle is
+   forbidden in this workspace), then commit, push and open the required PR.
+
+### Completion
+
+- Session creation and restoration now upsert the account's server-side Online
+  Mode profile before Social is used; turning Online Mode off now mirrors off
+  to the server too. This supplies the `profiles` row required by community
+  RLS, so fresh accounts can load and post to the wall.
+- Sending in an older encrypted conversation now rotates to the next key
+  version if its saved envelope cannot be opened. The old envelope stays in
+  place for past messages, valid recipient devices receive the new envelope,
+  and a friend with no valid device key gets an actionable update prompt rather
+  than a generic encryption failure.
+- `git diff --check` passed. The repository-local delimiter checker referenced
+  by the DOX guide (`scripts/check_braces.js`) is absent, so Gradle remains
+  deferred to CI as required by the environment contract.
+
 ## Request (2026-09-12, IN PROGRESS — the content filter, the SOCIAL tab, and
 ## 24-hour messages)
 

@@ -38,6 +38,13 @@ object CurioDmCrypto {
         return CurioDmEnvelope(recipient.deviceId, keyVersion, b64(cipher.doFinal(key)), ENVELOPE_VERSION)
     }
 
+    /** Returns whether a stored public identity is usable for a new envelope. */
+    fun canWrapFor(recipient: CurioDmIdentity): Boolean = runCatching {
+        KeyFactory.getInstance("RSA").generatePublic(
+            X509EncodedKeySpec(Base64.decode(recipient.publicKey, Base64.NO_WRAP))
+        )
+    }.isSuccess
+
     fun unwrapConversationKey(envelope: CurioDmEnvelope): ByteArray {
         require(envelope.version == ENVELOPE_VERSION) { "Unsupported key envelope version." }
         val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
