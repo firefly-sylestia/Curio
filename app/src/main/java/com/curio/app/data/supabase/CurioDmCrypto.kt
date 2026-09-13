@@ -4,6 +4,9 @@ import android.content.Context
 import android.util.Base64
 import java.security.KeyFactory
 import java.security.SecureRandom
+import java.security.spec.MGF1ParameterSpec
+import java.security.spec.OAEPParameterSpec
+import java.security.spec.PSource
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
@@ -21,6 +24,12 @@ object CurioDmCrypto {
     private const val KEY_BYTES = 32
     private const val NONCE_BYTES = 12
     private const val TAG_BITS = 128
+    private val OAEP_SPEC = OAEPParameterSpec(
+        "SHA-256",
+        "MGF1",
+        MGF1ParameterSpec.SHA256,
+        PSource.PSpecified.DEFAULT
+    )
 
     fun identity(context: Context): CurioDmIdentity = runCatching {
         val pair = CurioSecureStore.identityKeyPair()
@@ -34,7 +43,7 @@ object CurioDmCrypto {
     fun wrapConversationKey(key: ByteArray, recipient: CurioDmIdentity, keyVersion: Int): CurioDmEnvelope {
         val publicKey = KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(Base64.decode(recipient.publicKey, Base64.NO_WRAP)))
         val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey)
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey, OAEP_SPEC)
         return CurioDmEnvelope(recipient.deviceId, keyVersion, b64(cipher.doFinal(key)), ENVELOPE_VERSION)
     }
 
@@ -48,7 +57,7 @@ object CurioDmCrypto {
     fun unwrapConversationKey(envelope: CurioDmEnvelope): ByteArray {
         require(envelope.version == ENVELOPE_VERSION) { "Unsupported key envelope version." }
         val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
-        cipher.init(Cipher.DECRYPT_MODE, CurioSecureStore.identityKeyPair().private)
+        cipher.init(Cipher.DECRYPT_MODE, CurioSecureStore.identityKeyPair().private, OAEP_SPEC)
         return cipher.doFinal(Base64.decode(envelope.encryptedKey, Base64.NO_WRAP))
     }
 

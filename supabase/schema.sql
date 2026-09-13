@@ -467,7 +467,7 @@ create policy prof_select_discoverable on public.profiles
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5c. friend_requests — one request per pair, either direction
--- ───────────────────────────────────────────────────────────────────────────
+-- ──────────���────────────────────────────────────────────────────────────────
 create table if not exists public.friend_requests (
     id           uuid primary key default gen_random_uuid(),
     requester    uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -824,13 +824,44 @@ create policy dm_update_receipt on public.dm_messages
     using (recipient = auth.uid())
     with check (recipient = auth.uid());
 
--- Server deletion is sender-only unsend for both participants. “Delete for
--- me” is device-local and intentionally has no database write.
+-- A participant may clear the entire two-person thread. The client scopes the
+-- DELETE to both directions, while this policy prevents deleting somebody
+-- else's conversation.
 drop policy if exists dm_delete_own on public.dm_messages;
 drop policy if exists dm_delete_participant on public.dm_messages;
 create policy dm_delete_participant on public.dm_messages
     for delete to authenticated
-    using (sender = auth.uid());
+    using (sender = auth.uid() or recipient = auth.uid());
+
+-- Realtime delivery is required for message, reaction, request, and presence
+-- updates. This block is idempotent when the schema is pasted more than once.
+do $$
+begin
+    if not exists (
+        select 1 from pg_publication_tables
+        where pubname = 'supabase_realtime' and tablename = 'dm_messages'
+    ) then
+        alter publication supabase_realtime add table public.dm_messages;
+    end if;
+    if not exists (
+        select 1 from pg_publication_tables
+        where pubname = 'supabase_realtime' and tablename = 'dm_reactions'
+    ) then
+        alter publication supabase_realtime add table public.dm_reactions;
+    end if;
+    if not exists (
+        select 1 from pg_publication_tables
+        where pubname = 'supabase_realtime' and tablename = 'friend_requests'
+    ) then
+        alter publication supabase_realtime add table public.friend_requests;
+    end if;
+    if not exists (
+        select 1 from pg_publication_tables
+        where pubname = 'supabase_realtime' and tablename = 'dm_typing'
+    ) then
+        alter publication supabase_realtime add table public.dm_typing;
+    end if;
+end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5e. dm_typing — "is typing…", one row per (sender, recipient) pair
@@ -1479,7 +1510,7 @@ revoke all on public.member_blocks from anon;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5g. realtime — which tables the app may SUBSCRIBE to
--- ─────��─────────────────────────────────────────────────────────────────────
+-- ─────��──��──────────────────────────────────────────────────────────────────
 -- Curio's live surfaces (an open conversation, the inbox, the wall) are driven
 -- by Supabase Realtime instead of a timer: the server announces a change and
 -- the screen pulls the delta through the normal REST path. Nothing is trusted
