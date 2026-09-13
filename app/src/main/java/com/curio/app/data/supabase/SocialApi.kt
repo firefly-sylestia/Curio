@@ -832,11 +832,15 @@ private const val PERSON_COLUMNS_PRIVACY =
      * Best-effort and silent: a project that has not been re-pasted since §5h
      * has no such table, and an inbox must read as EMPTY-HIDDEN — never as a
      * failure that blanks the whole list.
+     *
+     * Blocking (not suspending) on purpose, like [presenceOf]: the only caller
+     * is already inside `withContext(Dispatchers.IO)` — inside `mapped {}` —
+     * and a non-suspend helper is what a `mapped` body may call.
      */
-    private suspend fun hiddenConversations(
+    private fun hiddenConversations(
         accessToken: String,
         myUserId: String
-    ): Result<Map<String, Long>> = withContext(Dispatchers.IO) {
+    ): Result<Map<String, Long>> =
         runCatching {
             val path = "$HIDDEN?select=other_user_id,hidden_at&user_id=eq.${id(myUserId)}" +
                 "&limit=200"
@@ -850,7 +854,6 @@ private const val PERSON_COLUMNS_PRIVACY =
             }
             out
         }
-    }
 
     /**
      * The LIVE half of a set of members: the last-active stamp and the privacy

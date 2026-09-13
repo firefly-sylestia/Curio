@@ -113,6 +113,12 @@
 - No Gradle build is allowed in this environment (root AGENTS rule); CI
   typechecks on push.
 - **ask_user for tests is owed after this task closes** (user directive).
+- CI on `d9bcf3ed`'s parent (`1eef908a`) failed on
+  `SocialApi.kt:741 Suspension functions can only be called within coroutine
+  body`: the batch had made `hiddenConversations` a suspend helper while its
+  only caller invokes it inside the non-suspend `mapped {}` lambda. Fixed by
+  making it blocking like the file's own convention (`presenceOf`), which is
+  safe because the only caller is already on the IO dispatcher.
 
 ### Still open (tracked, next slices)
 
