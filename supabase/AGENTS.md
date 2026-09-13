@@ -20,6 +20,8 @@ There is no deployment automation: the file is pasted into the Supabase dashboar
 
 ## Local Contracts
 
+- **DM mode and deletion:** `dm_conversations.encryption_enabled` is the server-authoritative, two-participant mode for new DMs. Its RLS and party-pinning trigger prevent a client from changing the chat members; `dm_messages` has an insert trigger that rejects plaintext while encryption is on and ciphertext while it is off. Existing conversations without a row default to encrypted. A `dm_messages` DELETE is sender-only unsend; device-local deletion is intentionally not represented in Supabase.
+
 - **RLS is the security boundary.** The Android app ships only the public URL + publishable/anon key, so every table must keep RLS enabled with policies for `authenticated` only. Never add an `anon` policy, never disable RLS, and never grant the app a service-role key.
 - **Text only.** The tables carry no media columns. Capture sync mirrors text metadata and serialized text content; images, audio and screenshots never sync, and community cards are rebuilt on each device with the app's own share-card renderer.
 - **24-hour cards.** `community_cards.expires_at` defaults to `now() + interval '24 hours'` and the insert policy refuses anything longer than 25 hours. Every read filters `expires_at > now()`, so expiry holds even before the sweep runs; `curio_purge_expired_cards()` is housekeeping (optionally scheduled with `pg_cron`). Replies (`community_comments`) cascade off the card, so a comment can never outlive its 24-hour card.

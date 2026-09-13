@@ -129,6 +129,9 @@ data class CurioDirectMessage(
     val migrationState: String = "legacy"
 )
 
+/** The server-owned delivery mode for one two-person conversation. */
+data class CurioDmConversation(val encryptionEnabled: Boolean = true)
+
 /**
  * One reaction somebody left on one message. [kind] is the reaction itself —
  * an emoji character — so the server stores a few bytes and the caller only
@@ -164,6 +167,7 @@ object SocialApi {
     private const val REQUESTS = "/rest/v1/friend_requests"
     private const val BLOCKS = "/rest/v1/member_blocks"
     private const val MESSAGES = "/rest/v1/dm_messages"
+    private const val CONVERSATIONS = "/rest/v1/dm_conversations"
     private const val TYPING = "/rest/v1/dm_typing"
     private const val REACTIONS = "/rest/v1/dm_reactions"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
@@ -807,7 +811,7 @@ private const val PERSON_COLUMNS_PRIVACY =
     }
   }
 
-  suspend fun dmEnvelope(
+    suspend fun dmEnvelope(
     accessToken: String,
     conversationId: String,
     deviceId: String,
@@ -819,6 +823,61 @@ private const val PERSON_COLUMNS_PRIVACY =
       val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
       val rows = JSONArray(SupabaseClient.executeBody(request))
       rows.optJSONObject(0)?.let { CurioDmEnvelope(it.optString("device_id"), it.optInt("key_version"), it.optString("encrypted_key"), it.optString("encryption_version")) }
+    }
+  }
+
+  /**
+   * Reads the one shared delivery setting. A conversation created before this
+   * setting existed deliberately remains encrypted until somebody changes it.
+   */
+  suspend fun dmConversation(accessToken: String, conversationId: String): Result<CurioDmConversation> = withContext(Dispatchers.IO) {
+    mapped {
+      val request = SupabaseClient.requestBuilder(
+        "$CONVERSATIONS?select=encryption_enabled&conversation_id=eq.${encode(conversationId)}&limit=1",
+        accessToken
+      ).get().build()
+      val row = JSONArray(SupabaseClient.executeBody(request)).optJSONObject(0)
+      CurioDmConversation(row?.optBoolean("encryption_enabled", true) ?: true)
+    }
+  }
+
+  /** Changes the shared mode for both participants; the database pins its parties. */
+  suspend fun setDmEncryption(
+    accessToken: String,
+    conversationId: String,
+    myUserId: String,
+    otherUserId: String,
+    enabled: Boolean
+  ): Result<CurioDmConversation> = withContext(Dispatchers.IO) {
+    mapped {
+      val payload = JSONObject()
+        .put("conversation_id", conversationId)
+        .put("first_user", listOf(myUserId, otherUserId).sorted().first())
+        .put("second_user", listOf(myUserId, otherUserId).sorted().last())
+        .put("encryption_enabled", enabled)
+      val request = SupabaseClient.requestBuilder(
+        "$CONVERSATIONS?on_conflict=conversation_id", accessToken
+      ).header("Prefer", "resolution=merge-duplicates,return=representation")
+        .post(payload.toString().toRequestBody(jsonMediaType)).build()
+      val row = JSONArray(SupabaseClient.executeBody(request)).optJSONObject(0)
+      CurioDmConversation(row?.optBoolean("encryption_enabled", enabled) ?: enabled)
+    }
+  }
+
+  /** Sends a new plaintext row only after the server accepted plaintext mode for this chat. */
+  suspend fun sendPlaintext(accessToken: String, toUserId: String, body: String, myUserId: String): Result<Unit> = withContext(Dispatchers.IO) {
+    mappedUnit {
+      require(body.isNotBlank()) { "Message is empty." }
+      require(toUserId != myUserId) { "You can't message yourself." }
+      lastMessageAt = throttle(lastMessageAt, WRITE_GAP_MS, "Slow down a moment.")
+      val payload = JSONObject()
+        .put("recipient", toUserId)
+        .put("body", body)
+        .put("migration_state", "plaintext")
+      val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
+        .header("Prefer", "return=minimal")
+        .post(payload.toString().toRequestBody(jsonMediaType)).build()
+      SupabaseClient.executeBody(request)
     }
   }
 

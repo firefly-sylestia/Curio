@@ -158,6 +158,9 @@ fun DirectMessageScreen(
     var reactionTarget by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
+    // This is read from the server-owned conversation row. It is never a
+    // device preference: both participants see and use the same mode.
+    var encryptionEnabled by remember(otherUserId) { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var loadedOnce by remember { mutableStateOf(false) }
     // A server push bumps this, which re-runs the delta fetch below. It is a
@@ -172,6 +175,8 @@ fun DirectMessageScreen(
         SocialApi.messages(active, otherUserId, me).fold(
             onSuccess = { raw ->
                 val conversationId = dmConversationId(me, otherUserId)
+                encryptionEnabled = SocialApi.dmConversation(active, conversationId)
+                    .getOrDefault(com.curio.app.data.supabase.CurioDmConversation()).encryptionEnabled
                 val identity = CurioDmCrypto.identity(context)
                 SocialApi.publishDmIdentity(active, identity, me)
                 // The server envelope is authoritative. A phone may already have
@@ -184,6 +189,7 @@ fun DirectMessageScreen(
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
+                    else if (message.migrationState == "plaintext") message
                     else {
                         val encrypted = com.curio.app.data.supabase.CurioEncryptedMessage(
                             message.ciphertext.orEmpty(),
@@ -193,23 +199,18 @@ fun DirectMessageScreen(
                         // A thread can hold messages from multiple envelope
                         // generations. Install the version this message names,
                         // not merely the latest one, before attempting AES-GCM.
+                        // Fetch the exact version even when a local key exists.
+                        // A restored/rotated device can retain a stale key under the
+                        // same version; AES-GCM must reject it rather than guess.
                         CurioDmCrypto.messageKeyVersion(encrypted.version)?.let { keyVersion ->
-                            if (CurioDmCrypto.existingKey(context, conversationId, keyVersion) == null) {
-                                SocialApi.dmEnvelope(active, conversationId, identity.deviceId, keyVersion)
-                                    .getOrNull()
-                                    ?.let { envelope ->
-                                        runCatching {
-                                            CurioDmCrypto.installEnvelope(context, conversationId, envelope)
-                                        }
-                                    }
-                            }
+                            SocialApi.dmEnvelope(active, conversationId, identity.deviceId, keyVersion)
+                                .getOrNull()
+                                ?.let { envelope ->
+                                    runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
+                                }
                         }
                         runCatching {
-                            message.copy(body = CurioDmCrypto.decrypt(
-                            context,
-                            conversationId,
-                            encrypted
-                            ))
+                            message.copy(body = CurioDmCrypto.decrypt(context, conversationId, encrypted))
                         }.getOrElse { message.copy(body = "Unable to decrypt this message") }
                     }
                 }
@@ -219,8 +220,9 @@ fun DirectMessageScreen(
                 // opening a conversation can never lose a message this phone
                 // already had. Newest wins per id, so a cached row still gets
                 // its fresh read receipt.
-                val known = SocialMessageCache.read(context, otherUserId, me)
-                val merged = (known + fresh)
+                val hidden = SocialMessageCache.hiddenIds(context, otherUserId)
+                val known = SocialMessageCache.read(context, otherUserId, me).filterNot { it.id in hidden }
+                val merged = (known + fresh.filterNot { it.id in hidden })
                     .distinctBy { it.id }
                     .sortedBy { it.createdAtMillis }
                 messages = merged
@@ -278,6 +280,22 @@ fun DirectMessageScreen(
         draft = ""
 
         val conversationId = dmConversationId(me, otherUserId)
+        if (!encryptionEnabled) {
+            SocialApi.sendPlaintext(active, otherUserId, text, me).fold(
+                onSuccess = {
+                    SocialApi.setTyping(active, otherUserId, false)
+                    pending = pending.filterNot { it.id == optimistic.id }
+                    load(active, me)
+                },
+                onFailure = { failure ->
+                    pending = pending.filterNot { it.id == optimistic.id }
+                    draft = text
+                    error = failure.message ?: "That message didn't send."
+                }
+            )
+            sending = false
+            return
+        }
         val encrypted = runCatching {
             val mine = CurioDmCrypto.identity(context)
             SocialApi.publishDmIdentity(active, mine, me).getOrThrow()
@@ -626,6 +644,31 @@ fun DirectMessageScreen(
                             }
                         )
                     }
+                    item(key = "delivery-mode") {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            SocialPill(
+                                label = if (encryptionEnabled) "Encrypted" else "Encryption off",
+                                icon = CurioIcons.Warning,
+                                tone = if (encryptionEnabled) SocialPillTone.ACCENT else SocialPillTone.NEUTRAL,
+                                enabled = !sending,
+                                onClick = {
+                                    scope.launch {
+                                        val conversationId = dmConversationId(activeUserId, otherUserId)
+                                        SocialApi.setDmEncryption(
+                                            activeToken, conversationId, activeUserId, otherUserId,
+                                            !encryptionEnabled
+                                        ).fold(
+                                            onSuccess = { encryptionEnabled = it.encryptionEnabled },
+                                            onFailure = { error = it.message ?: "Couldn't change message encryption." }
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
 
                     error?.let { message -> item(key = "error") { SocialNote(message, true) } }
 
@@ -655,6 +698,23 @@ fun DirectMessageScreen(
                                 myUserId = activeUserId,
                                 onTap = { openReactions(message.id) },
                                 onPick = { kind -> pickReaction(message.id, kind) },
+                                onDeleteLocal = {
+                                    SocialMessageCache.hide(context, otherUserId, message.id)
+                                    messages = messages.filterNot { it.id == message.id }
+                                },
+                                onUnsend = if (message.mine && !message.id.startsWith(LOCAL_ID_PREFIX)) {
+                                    {
+                                        scope.launch {
+                                            SocialApi.deleteMessage(activeToken, message.id).fold(
+                                                onSuccess = {
+                                                    messages = messages.filterNot { it.id == message.id }
+                                                    SocialMessageCache.write(context, otherUserId, messages)
+                                                },
+                                                onFailure = { error = it.message ?: "Couldn't unsend that message." }
+                                            )
+                                        }
+                                    }
+                                } else null,
                                 animateIn = message.id.startsWith(LOCAL_ID_PREFIX)
                             )
                         }
@@ -885,6 +945,8 @@ private fun MessageEntry(
     myUserId: String,
     onTap: () -> Unit,
     onPick: (String) -> Unit,
+    onDeleteLocal: () -> Unit,
+    onUnsend: (() -> Unit)?,
     animateIn: Boolean
 ) {
     // `initial = !animateIn` is what makes this safe to use for EVERY row: a
@@ -918,6 +980,15 @@ private fun MessageEntry(
                     mine = message.mine,
                     onPick = onPick
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = if (message.mine) Arrangement.End else Arrangement.Start
+                ) {
+                    SocialPill(label = "Delete for me", onClick = onDeleteLocal, tone = SocialPillTone.NEUTRAL)
+                    onUnsend?.let { unsend ->
+                        SocialPill(label = "Unsend", onClick = unsend, tone = SocialPillTone.DESTRUCTIVE)
+                    }
+                }
             }
         }
     }

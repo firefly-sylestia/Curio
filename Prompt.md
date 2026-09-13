@@ -1,6 +1,46 @@
 # Prompt Log — current request
 
-## Request (2026-09-13, IN PROGRESS — profile post-kind rendering)
+## Request (2026-09-13, IN PROGRESS — dependable per-chat message encryption)
+
+User (chat): receiver phones report “Unable to decrypt this message” even on
+the same app version. Fix it properly; add a shared per-chat encryption switch
+so both members use the same mode, plus both local delete and sender-only
+unsend.
+
+### Research and plan
+
+1. The current decrypt retry fetches an envelope only when the key is absent.
+   A stale key with the right version survives and AES-GCM necessarily rejects
+   it. Treat the server envelope for the message’s exact version as
+   authoritative and install it before every decrypt attempt; retry once only
+   when a fresh envelope was installed.
+2. Conversation mode must be server-authoritative, not a phone preference:
+   add a two-participant `dm_conversations` row, RLS, and an insert trigger
+   that rejects a plaintext/ciphertext payload that does not match the shared
+   mode. Missing legacy rows mean encrypted. New plaintext is only allowed
+   after a participant changes that shared row, so both phones immediately
+   read the same state.
+3. Preserve historical encrypted rows; changing mode applies only to new
+   messages. Add local-device hide storage for “Delete for me” and make
+   server-side recall sender-only for “Unsend for everyone.”
+4. Static verification only — Gradle is forbidden in this environment. The
+   external documentation endpoint rejected this environment’s requests, so
+   implementation follows the already-supported AES-GCM unique-nonce and
+   authenticated-conversation-id design, with server-side payload enforcement.
+
+### Completion
+
+- Decryption now refreshes and installs the server envelope for the message’s
+  exact key version even when a stale local key exists, eliminating the
+  same-version AES-GCM authentication failure after a key replacement.
+- Every chat now has a server-authoritative shared encryption mode. It defaults
+  to encrypted for legacy conversations, applies to both members, and the SQL
+  trigger rejects a payload that does not match the selected mode. Turning it
+  off affects only new messages; earlier ciphertext remains decryptable.
+- Tapping a message opens its actions: every message can be hidden only on this
+  device, and a sender can unsend their own server message for both members.
+
+## Request (2026-09-13, DONE — profile post-kind rendering)
 
 User (chat): on another member's profile, their NOTE and QUOTE posts render as
 topic share cards instead of text posts.

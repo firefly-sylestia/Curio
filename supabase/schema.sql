@@ -653,6 +653,51 @@ create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
 -- ───────────────────────────���─────────────────────────────────���─────────────
 -- 5e. dm_messages — ciphertext-only writes; legacy body is read-only
 -- ────────────────────────────────────���──────────────────────────────────────
+-- ───────────────────────────────────────────────────────────────────────────
+-- 5e. Shared DM delivery mode — one row for the two participants
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.dm_conversations (
+    conversation_id text primary key,
+    first_user uuid not null references auth.users (id) on delete cascade,
+    second_user uuid not null references auth.users (id) on delete cascade,
+    encryption_enabled boolean not null default true,
+    updated_at timestamptz not null default now(),
+    constraint dm_conversations_two_people check (first_user <> second_user)
+);
+
+alter table public.dm_conversations enable row level security;
+drop policy if exists dm_conversations_select_participant on public.dm_conversations;
+create policy dm_conversations_select_participant on public.dm_conversations
+  for select to authenticated using (auth.uid() = first_user or auth.uid() = second_user);
+drop policy if exists dm_conversations_write_participant on public.dm_conversations;
+create policy dm_conversations_write_participant on public.dm_conversations
+  for insert to authenticated with check (
+    (auth.uid() = first_user or auth.uid() = second_user)
+    and public.curio_are_friends(first_user, second_user)
+  );
+drop policy if exists dm_conversations_update_participant on public.dm_conversations;
+create policy dm_conversations_update_participant on public.dm_conversations
+  for update to authenticated using (auth.uid() = first_user or auth.uid() = second_user)
+  with check (auth.uid() = first_user or auth.uid() = second_user);
+
+create or replace function public.curio_pin_dm_conversation_parties()
+returns trigger
+language plpgsql
+as $$
+begin
+    if new.conversation_id <> old.conversation_id
+       or new.first_user <> old.first_user
+       or new.second_user <> old.second_user then
+        raise exception 'curio: conversation participants cannot change';
+    end if;
+    new.updated_at = now();
+    return new;
+end $$;
+drop trigger if exists dm_conversations_pin_parties on public.dm_conversations;
+create trigger dm_conversations_pin_parties
+    before update on public.dm_conversations
+    for each row execute function public.curio_pin_dm_conversation_parties();
+
 create table if not exists public.dm_messages (
     id         uuid primary key default gen_random_uuid(),
     sender     uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -661,7 +706,7 @@ create table if not exists public.dm_messages (
     ciphertext text,
     nonce      text,
     encryption_version text,
-    migration_state text not null default 'legacy' check (migration_state in ('legacy','encrypted','pending_reencrypt')),
+    migration_state text not null default 'legacy' check (migration_state in ('legacy','plaintext','encrypted','pending_reencrypt')),
     created_at timestamptz not null default now(),
     read_at    timestamptz,
     constraint dm_messages_not_self check (sender <> recipient),
@@ -675,7 +720,14 @@ alter table public.dm_messages add column if not exists ciphertext text;
 alter table public.dm_messages add column if not exists nonce text;
 alter table public.dm_messages add column if not exists encryption_version text;
 alter table public.dm_messages add column if not exists migration_state text not null default 'legacy';
+alter table public.dm_messages drop constraint if exists dm_messages_migration_state_check;
+alter table public.dm_messages add constraint dm_messages_migration_state_check check (migration_state in ('legacy','plaintext','encrypted','pending_reencrypt'));
 alter table public.dm_messages alter column body drop not null;
+alter table public.dm_messages drop constraint if exists dm_messages_ciphertext_shape;
+alter table public.dm_messages add constraint dm_messages_ciphertext_shape check (
+    (migration_state in ('legacy','plaintext') and body is not null and ciphertext is null and nonce is null and encryption_version is null)
+    or (migration_state in ('encrypted','pending_reencrypt') and body is null and ciphertext is not null and nonce is not null and encryption_version is not null)
+);
 
 -- Existing plaintext rows remain explicitly legacy/read-only during migration.
 drop policy if exists dm_insert_friends on public.dm_messages;
@@ -708,6 +760,34 @@ drop trigger if exists dm_messages_pin_parties on public.dm_messages;
 create trigger dm_messages_pin_parties
     before update on public.dm_messages
     for each row execute function public.curio_pin_message_parties();
+
+create or replace function public.curio_enforce_dm_delivery_mode()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    conversation text := case when new.sender::text < new.recipient::text
+        then new.sender::text || ':' || new.recipient::text
+        else new.recipient::text || ':' || new.sender::text end;
+    encryption_on boolean := true;
+begin
+    select encryption_enabled into encryption_on
+    from public.dm_conversations where conversation_id = conversation;
+    if coalesce(encryption_on, true) and new.migration_state not in ('encrypted', 'pending_reencrypt') then
+        raise exception 'curio: this conversation requires encrypted messages';
+    end if;
+    if not coalesce(encryption_on, true) and new.migration_state <> 'plaintext' then
+        raise exception 'curio: this conversation has encryption turned off';
+    end if;
+    return new;
+end $$;
+
+drop trigger if exists dm_messages_enforce_delivery_mode on public.dm_messages;
+create trigger dm_messages_enforce_delivery_mode
+    before insert on public.dm_messages
+    for each row execute function public.curio_enforce_dm_delivery_mode();
 
 alter table public.dm_messages enable row level security;
 
@@ -744,13 +824,13 @@ create policy dm_update_receipt on public.dm_messages
     using (recipient = auth.uid())
     with check (recipient = auth.uid());
 
--- A direct-message deletion is a recall for the two participants, not a
--- sender-only local hide. The participant check keeps unrelated accounts out.
+-- Server deletion is sender-only unsend for both participants. “Delete for
+-- me” is device-local and intentionally has no database write.
 drop policy if exists dm_delete_own on public.dm_messages;
 drop policy if exists dm_delete_participant on public.dm_messages;
 create policy dm_delete_participant on public.dm_messages
     for delete to authenticated
-    using (sender = auth.uid() or recipient = auth.uid());
+    using (sender = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5e. dm_typing — "is typing…", one row per (sender, recipient) pair
