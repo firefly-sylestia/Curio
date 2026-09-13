@@ -1,6 +1,54 @@
 # Prompt Log — current request
 
-## Request (2026-09-13, IN PROGRESS — profile + settings polish, account lifecycle, encryption default)
+## Request (2026-09-13, IN PROGRESS — encryption envelope fix + redesign batch)
+
+### Batch A: the envelope failure (user: "it still says encrypted message is
+missing a device envelope for its key version")
+
+Root cause chain (server-side completeness check vs. device lifecycle):
+1. `curio_enforce_dm_message_envelopes` requires an envelope for EVERY active
+   device of BOTH participants at the message's key version.
+2. A reinstall publishes a SECOND active device row (nothing ever retires the
+   old one), so the sender must wrap a key for hardware that no longer holds
+   the account. Permanent failure once a stale row exists.
+3. A device registered moments before the send (friend's second phone, or the
+   publisher itself on a reinstall) had no envelope yet, failing a send the
+   sender had done correctly.
+
+Fix (all three legs):
+- Schema: the envelope check now gives devices registered in the last TWO
+  MINUTES a grace (the publisher wraps and stores everything BEFORE pushing
+  its row, so a brand-new device between those steps is not a sender's
+  fault); devices older than the grace are still strictly checked. New
+  `curio_retire_dm_device(text)` security-definer RPC (own rows only, grants
+  to authenticated; the older two-arg prototype is dropped).
+- SocialApi: `retireDmDevice` calls the RPC.
+- DirectMessageScreen: BOTH `load()` and the encrypted send path retire every
+  OTHER active identity of MINE before publishing, so one device per side is
+  active; the friend's rows are theirs. Old envelopes stay historically
+  valid (retired devices keep their delivered envelopes for reads).
+- Encrypted-failure UX: the inline advice line is replaced by a DIALOG
+  (SocialConfirmDialog, non-destructive) that states the reason, states the
+  version-mismatch reality, and offers "Send without encryption" — which
+  flips the shared mode off for BOTH, then sends the failed text (kept in
+  `failedDraft`) with the optimistic bubble reused. Plaintext failures keep
+  the plain error line. `encryptedSendAdvice` is gone.
+
+Batch A needs: re-paste schema.sql (envelope grace + retirement RPC).
+
+### Batch B (this push, then watch CI once at the end)
+- Profile grid: the share-card tile fills its box (no letterboxing).
+- Profile header: Instagram-style, fewer texts.
+- Post-a-topic composer: full redesign on my own judgment (two-step flow,
+  keep notes/quotes).
+- Community screen: proper icon set, take-down as an icon action, card and
+  animation polish.
+
+## Previous request (shipped: d9bcf3ed, cfc8fb4c, 0c530794 — CI green)
+
+Profile + settings polish, account lifecycle, encryption default — see git
+log for the details; the CI-lesson notes (suspension-in-mapped, the Row
+brace) are recorded below in Verification status.
 
 ### User asks, verbatim intent
 

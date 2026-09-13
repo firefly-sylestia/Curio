@@ -1,4 +1,10 @@
 ADD:
+- Messages: when an encrypted message fails, a dialog explains why and offers one tap to send it with encryption off instead, so a conversation never dead-ends.
+
+FIX:
+- Messages: encrypted sends no longer fail with "missing a device envelope for its key version" after a reinstall or a second device: old device identities are retired when a new one publishes, the server gives freshly registered devices a two-minute grace window, and every conversation you open heals its device list automatically.
+
+ADD:
 - Edit profile: a real editor — the page's own colours instead of the cream slab, the portrait picker beside your photo in one place, sectioned layout with soft reveal animation, your username stated in one line, and Sign out right there with the account.
 - Settings: your privacy rules (profile visibility, activity, blocked people) now live inside Online mode next to the account they belong to; the separate Privacy card is gone.
 - Accounts: a brand-new account is given a friendly username automatically (like amber_otter_4821), so adding friends works from the first minute — change it in Edit profile whenever you like.

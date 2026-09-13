@@ -175,6 +175,12 @@ fun DirectMessageScreen(
     // is keyed on the thread so opening another conversation starts fresh.
     var pushed by remember(otherUserId) { mutableStateOf(0) }
 
+    // An ENCRYPTED send that failed raises this instead of a dead error line:
+    // the dialog states the reason and offers the one-tap way out (turn the
+    // shared mode off for both, then send the same text). Keyed on the thread
+    // so another conversation never inherits a stale dialog.
+    var encryptionIssue by remember(otherUserId) { mutableStateOf<String?>(null) }
+
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
     suspend fun load(active: String, me: String) {
@@ -189,6 +195,13 @@ fun DirectMessageScreen(
                     DmCryptoDiagnostics.failure("identity_load", null, null, null, failure)
                     return@fold
                 }
+                // The same self-heal the send path does: a stale identity of
+                // MINE (a previous install) is retired before this device
+                // publishes, so the server counts exactly one active device
+                // per side and the envelope completeness check can pass.
+                SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
+                    .filter { it.deviceId != identity.deviceId }
+                    .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
                 SocialApi.publishDmIdentity(active, identity, me).getOrElse { failure ->
                     error = "This device could not register its encrypted-message identity."
                     DmCryptoDiagnostics.failure("identity_publish", null, null, null, failure)
@@ -336,11 +349,16 @@ fun DirectMessageScreen(
         }
     }
 
-    suspend fun send(active: String, me: String) {
+    // The text an ENCRYPTED send was carrying when it failed, so the dialog's
+    // one-tap fallback can send the very words the member already typed.
+    var failedDraft by remember(otherUserId) { mutableStateOf("") }
+
+    suspend fun send(active: String, me: String, forcePlaintext: Boolean = false) {
         val text = draft.trim()
         if (text.isEmpty() || sending) return
         sending = true
         error = null
+        encryptionIssue = null
 
         // Optimistic: the bubble is on screen before the request leaves, and
         // its id is local-only so a refresh can never show it twice.
@@ -356,7 +374,23 @@ fun DirectMessageScreen(
         draft = ""
 
         val conversationId = dmConversationId(me, otherUserId)
-        if (!encryptionEnabled) {
+        if (!encryptionEnabled || forcePlaintext) {
+            // The dialog's promise, kept here: turning the shared mode off is
+            // part of the fallback send, for BOTH people — if the server
+            // refuses the change, the plain error line says why and nothing is
+            // sent in the wrong mode.
+            if (forcePlaintext && encryptionEnabled) {
+                SocialApi.setDmEncryption(active, conversationId, me, otherUserId, false).fold(
+                    onSuccess = { encryptionEnabled = false },
+                    onFailure = { failure ->
+                        pending = pending.filterNot { it.id == optimistic.id }
+                        draft = text
+                        error = failure.message ?: "Couldn't change message encryption."
+                        sending = false
+                        return
+                    }
+                )
+            }
             SocialApi.sendPlaintext(active, otherUserId, text, me).fold(
                 onSuccess = {
                     SocialApi.setTyping(active, otherUserId, false)
@@ -374,6 +408,17 @@ fun DirectMessageScreen(
         }
         val encrypted = runCatching {
             val mine = CurioDmCrypto.identity(context)
+            // A reinstall leaves the PREVIOUS device row active on the server
+            // forever, and the envelope completeness check then demands a key
+            // be wrapped for hardware this account no longer owns — the exact
+            // "missing a device envelope for its key version" failure. Retire
+            // every other active identity of MINE first so only this device
+            // counts, then publish this one. The friend's rows are theirs to
+            // manage, and old envelopes stay historically valid for their
+            // devices.
+            SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
+                .filter { it.deviceId != mine.deviceId }
+                .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
             SocialApi.publishDmIdentity(active, mine, me).getOrThrow()
             val ownEnvelope = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
                 .getOrNull()
@@ -419,7 +464,13 @@ fun DirectMessageScreen(
             val reason = failure.message
                 ?.takeIf { it.isNotBlank() }
                 ?: "Couldn't prepare this encrypted message. Please try again."
-            error = if (encryptionEnabled) encryptedSendAdvice(reason) else reason
+            if (encryptionEnabled) {
+                error = null
+                failedDraft = text
+                encryptionIssue = reason
+            } else {
+                error = reason
+            }
             sending = false
             return
         }
@@ -437,11 +488,16 @@ fun DirectMessageScreen(
                 load(active, me)
             },
             onFailure = { failure ->
-                // The bubble must not linger as if it were delivered.
                 pending = pending.filterNot { it.id == optimistic.id }
                 draft = text
                 val reason = failure.message ?: "That message didn't send."
-                error = if (encryptionEnabled) encryptedSendAdvice(reason) else reason
+                if (encryptionEnabled) {
+                    error = null
+                    failedDraft = text
+                    encryptionIssue = reason
+                } else {
+                    error = reason
+                }
             }
         )
         sending = false
@@ -906,6 +962,33 @@ fun DirectMessageScreen(
                     }
                 }
             }
+        }
+
+        // An encrypted send that could not be delivered raises THIS instead of
+        // a dead error line: the reason is stated, the one-tap way out (turn
+        // the shared mode off for both, send as normal text) is offered, and
+        // the honest status of the feature is named once, in full.
+        encryptionIssue?.let { reason ->
+            SocialConfirmDialog(
+                title = "Encrypted message didn't send",
+                body = "$reason\n\nEncryption only works while you are both on a version that " +
+                    "supports it. You can send this message with encryption turned off for " +
+                    "this chat instead — either of you can switch it back on later. " +
+                    "Encrypted messages are experimental and may be changed or withdrawn.",
+                confirmLabel = "Send without encryption",
+                destructive = false,
+                busy = sending,
+                onDismiss = { if (!sending) encryptionIssue = null },
+                onConfirm = {
+                    scope.launch {
+                        pending = pending.filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
+                        draft = failedDraft
+                        failedDraft = ""
+                        encryptionIssue = null
+                        send(activeToken, activeUserId, forcePlaintext = true)
+                    }
+                }
+            )
         }
 
         if (!wide) {
@@ -1498,24 +1581,6 @@ cursorBrush = SolidColor(curioDialogActionColor()),
         }
     }
 }
-
-/**
- * The line shown when an ENCRYPTED send fails: the reason, then what to do
- * about it.
- *
- * Encrypted delivery needs BOTH people on a build that publishes device keys,
- * so a failure here is usually about the other version rather than anything
- * the sender did wrong. Leaving them with a dead Send button is the worst
- * outcome, so the line names the one switch that fixes it and is honest that
- * the feature is provisional. Only ever used while encryption is ON: a
- * plaintext failure must not be dressed up with advice about a mode it is not
- * using.
- */
-private fun encryptedSendAdvice(reason: String): String =
-    "$reason\n\nEncryption only works when you are both on a version that supports it. " +
-        "Turn encryption off for this chat to keep messaging, and you can turn it " +
-        "back on later. Encrypted messages are still experimental and may be " +
-        "changed or withdrawn."
 
 /**
  * How often an OPEN conversation asks whether anything new arrived.

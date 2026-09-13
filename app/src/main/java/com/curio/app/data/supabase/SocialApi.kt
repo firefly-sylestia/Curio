@@ -966,6 +966,25 @@ private const val PERSON_COLUMNS_PRIVACY =
         }
     }
 
+  /**
+   * Retires one of this account's own device identities.
+   *
+   * A reinstall used to leave the old device row active forever, and the
+   * server's envelope completeness check then demanded a key be wrapped for
+   * hardware the account no longer owns, which is how every encrypted send
+   * started failing with "missing a device envelope for its key version". The
+   * caller retires BEFORE publishing the fresh identity, so the two rows are
+   * never active at once and the freshness window is never split between
+   * them.
+   */
+  suspend fun retireDmDevice(accessToken: String, deviceId: String): Result<Unit> = withContext(Dispatchers.IO) {
+    mappedUnit {
+      val request = SupabaseClient.requestBuilder("/rest/v1/rpc/curio_retire_dm_device", accessToken)
+        .post(JSONObject().put("p_device_id", deviceId).toString().toRequestBody(jsonMediaType)).build()
+      SupabaseClient.executeBody(request)
+    }
+  }
+
   /** Publishes this device's public identity; the private key never enters this API. */
   suspend fun publishDmIdentity(accessToken: String, identity: CurioDmIdentity, userId: String): Result<Unit> = withContext(Dispatchers.IO) {
     mappedUnit {

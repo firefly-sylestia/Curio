@@ -879,6 +879,14 @@ create trigger dm_messages_enforce_delivery_mode
 -- A ciphertext may only refer to a key version after every currently active
 -- device for both participants has its own envelope for that exact version.
 -- The server still sees only wrapped keys, never AES plaintext key material.
+--
+-- "Currently active" has a GRACE: a device registered in the last two minutes
+-- is not counted. The publisher only pushes its row AFTER it wrapped and
+-- stored every envelope for the version it is about to send, so a brand-new
+-- device appearing between those two steps used to fail the send through no
+-- fault of the sender (a reinstall registering, a friend signing in on a
+-- second phone mid-conversation). A device that has been active longer than
+-- the grace window MUST have its envelope — the check stays strict for it.
 create or replace function public.curio_enforce_dm_message_envelopes()
 returns trigger
 language plpgsql
@@ -887,6 +895,7 @@ declare
     conversation text := public.curio_dm_conversation_of(new.sender, new.recipient);
     version_text text;
     key_version_value integer;
+    missing integer;
 begin
     if new.migration_state not in ('encrypted', 'pending_reencrypt') then
         return new;
@@ -896,18 +905,19 @@ begin
         raise exception 'curio: invalid encrypted message key version';
     end if;
     key_version_value := version_text::integer;
-    if exists (
-        select 1 from public.dm_device_keys device
-         where device.user_id in (new.sender, new.recipient)
-           and device.retired_at is null
-           and not exists (
-               select 1 from public.dm_key_envelopes envelope
-                where envelope.conversation_id = conversation
-                  and envelope.recipient = device.user_id
-                  and envelope.device_id = device.device_id
-                  and envelope.key_version = key_version_value
-           )
-    ) then
+    select count(*) into missing
+        from public.dm_device_keys device
+        where device.user_id in (new.sender, new.recipient)
+          and device.retired_at is null
+          and device.created_at <= now() - interval '2 minutes'
+          and not exists (
+              select 1 from public.dm_key_envelopes envelope
+               where envelope.conversation_id = conversation
+                 and envelope.recipient = device.user_id
+                 and envelope.device_id = device.device_id
+                 and envelope.key_version = key_version_value
+          );
+    if missing > 0 then
         raise exception 'curio: encrypted message is missing a device envelope for its key version';
     end if;
     return new;
@@ -916,6 +926,37 @@ drop trigger if exists dm_messages_enforce_envelopes on public.dm_messages;
 create trigger dm_messages_enforce_envelopes
     before insert on public.dm_messages
     for each row execute function public.curio_enforce_dm_message_envelopes();
+
+-- Retires one of YOUR OWN device identities. A reinstall used to leave the
+-- old device row active forever, and the envelope completeness check then
+-- demanded a key be wrapped for hardware the account no longer owns — which
+-- is exactly how "missing a device envelope for its key version" started.
+-- The client calls this right before publishing a fresh identity. The
+-- retirement is permanent for envelopes: a device that comes back online
+-- publishes a NEW identity and participates from the next version onward.
+-- Security definer because the row to update may belong to an earlier
+-- session of the same account that has since been replaced.
+create or replace function public.curio_retire_dm_device(p_device_id text)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    retired integer;
+begin
+    update public.dm_device_keys
+       set retired_at = now()
+     where user_id = auth.uid()
+       and device_id = p_device_id
+       and retired_at is null;
+    get diagnostics retired = row_count;
+    return retired;
+end $$;
+
+drop function if exists public.curio_retire_dm_device(p_device_id text, p_user_id uuid);
+drop policy if exists dm_device_keys_select_participant on public.dm_device_keys;
+grant execute on function public.curio_retire_dm_device(text) to authenticated;
 
 alter table public.dm_messages enable row level security;
 
