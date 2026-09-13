@@ -35,6 +35,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,6 +65,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
+import com.curio.app.data.supabase.CurioDmIdentity
 import com.curio.app.data.supabase.CurioDmReaction
 import com.curio.app.data.supabase.CurioDmCrypto
 import com.curio.app.data.supabase.DmCryptoDiagnostics

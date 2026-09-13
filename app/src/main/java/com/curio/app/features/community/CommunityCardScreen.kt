@@ -381,15 +381,15 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 tinted = false,
                                 onClick = { }
                             )
-                            CommunityAction(CurioIcons.Share, "Share", false) { share(current) }
+                            CommunityAction(CurioIcons.Share, "Share", false, onClick = { share(current) })
                             // Report and take-down are ICONS here, exactly as
                             // they are on the wall: the actions are decided,
                             // not read, and the worded pills crowded the row.
-                            CommunityAction(CurioIcons.Flag, "", false) { reporting = true }
+                            CommunityAction(CurioIcons.Flag, "", false, onClick = { reporting = true })
                             if (current.mine) {
-                                CommunityAction(CurioIcons.Delete, "", false) {
+                                CommunityAction(CurioIcons.Delete, "", false, onClick = {
                                     takingDown = true
-                                }
+                                })
                             }
                         }
                     }
