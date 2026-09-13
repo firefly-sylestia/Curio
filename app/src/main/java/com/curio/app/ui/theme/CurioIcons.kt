@@ -112,9 +112,9 @@ object CurioIcons {
     const val Replay      = "replay"
     const val Refresh     = "refresh"
     const val Star        = "star"
-    const val StarOutline = "star_outline"
+    const val StarOutline = "star"             // Symbols has no star_outline — outline look comes from weight/tint at call sites
     const val Bookmark    = "bookmark"           // filled — pinned topic
-    const val BookmarkBorder = "bookmark_border" // outline — not pinned
+    const val BookmarkBorder = "bookmark"      // Symbols has no bookmark_border; same glyph, unpinned state is the caller's tint
     const val ThumbUp     = "thumb_up"            // 👍 — liked topic
     const val ThumbDown   = "thumb_down"          // 👎 — disliked topic
     const val FormatQuote = "format_quote"
@@ -127,7 +127,7 @@ object CurioIcons {
     const val TextIncrease = "text_increase"       // A+ — enlarge selection
     const val TextDecrease = "text_decrease"       // A− — shrink selection
     const val Mic         = "mic"
-    const val MicNone     = "mic_none"
+    const val MicNone     = "mic"               // Symbols has no mic_none — the idle state is the caller's tint
     const val Image       = "image"
     const val Fullscreen  = "fullscreen"   // ⤢ — expand mood board
     const val AspectRatio = "aspect_ratio" // ▭ — Smart Spin layout (small-screen fit)
@@ -164,10 +164,10 @@ object CurioIcons {
 
     // ── Backup / restore glyphs (Settings → Backup & restore)
     const val Backup       = "backup"        // cloud upload — export data
-    const val Restore      = "restore"       // cloud download — import data
+    const val Restore      = "history"       // Symbols has no restore — history reads as bring-back
 
     // ── Status / report glyphs
-    const val ErrorOutline = "error_outline"
+    const val ErrorOutline = "error"         // Symbols has no error_outline — same glyph at call-site tint
     const val BugReport     = "bug_report"
     const val Warning       = "warning"
     const val Download      = "download"     // ⬇ — check for updates

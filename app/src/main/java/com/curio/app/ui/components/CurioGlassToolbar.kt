@@ -87,6 +87,9 @@ fun CurioGlassToolbar(
     // (directly under the trailing pills): the Topic Database's Category
     // pill. Screens that don't pass it render the plain title.
     titleTrailing: (@Composable (ink: Color) -> Unit)? = null,
+    // Optional control that rides BEFORE the title column (a chat peer's
+    // avatar + name — messenger headers lead with the person).
+    titleLeading: (@Composable (ink: Color) -> Unit)? = null,
     // v3xx — optional extra content row below the title/subtitle block
     // (Home's stat segments, Profile's stats) — the bar grows to fit it.
     content: (@Composable (ink: Color) -> Unit)? = null,
@@ -229,6 +232,9 @@ fun CurioGlassToolbar(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    if (titleLeading != null) {
+                        titleLeading(ink)
+                    }
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             title,
@@ -316,6 +322,9 @@ fun CurioGlassToolbarMorph(
     streakCount: Int? = null,
     onStreakClick: (() -> Unit)? = null,
     onEditClick: (() -> Unit)? = null,
+    // Optional control riding BEFORE the title in the full bar (a chat
+    // peer's avatar + name) — messenger headers lead with the person.
+    titleLeading: (@Composable (ink: Color) -> Unit)? = null,
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null,
     modifier: Modifier = Modifier
 ) {
@@ -473,6 +482,9 @@ fun CurioGlassToolbarMorph(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 leadingPill(ink)
+                if (titleLeading != null) {
+                    titleLeading(ink)
+                }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         title,

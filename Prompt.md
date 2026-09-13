@@ -291,7 +291,22 @@ edited_at + edit guard/policy are all in the file but NOT live until pasted.
 
 ## User prompts
 
-### Prompt (2026-09-13, latest) — identity publish RLS failure + door tile captions
+### Prompt (2026-09-13, NEWEST, PENDING) — DM header side, card render accuracy, composer topic search + preview
+
+Verbatim asks: (1) the chat screen "Curious Explorer" header shows on the RIGHT
+side which is wrong; (2) the share-card render is still wrong — not accurate to
+the real card, sits too far left and cuts out of the screen, same in the
+profile grid view; (3) the post bottom sheet is still bad — the TOPIC posting
+flow is bad, "where did the topic search go", the card preview is bad, "the
+previous one was better, at least I was able to choose the card"; (4) a BLANK
+BOX appears above the "What's catching your eye?" writer — remove it; (5)
+finish the previous request too, be faster; prompt logged here FIRST before
+implementation.
+
+Status: PENDING — not started. Sequence: fix the font-build failure left over
+from the previous turn (lock ligature), then this batch.
+
+### Prompt (2026-09-13, latest done) — identity publish RLS failure + door tile captions
 
 Symptoms: "this device could not register its encrypted-message identity" even
 with encryption off, and messages not going through. Root causes found: (1) the

@@ -229,6 +229,10 @@ fun SettingsHeroHeader(
     // title (directly under the trailing pills): the Topic Database's
     // Category pill. Screens that don't pass it render the plain title.
     titleTrailing: (@Composable (ink: Color) -> Unit)? = null,
+    // An optional control that rides BEFORE the title column (a chat peer's
+    // avatar + name — messenger headers lead with the person, not with a
+    // title that would read first). Rendered left of the title text.
+    titleLeading: (@Composable (ink: Color) -> Unit)? = null,
     // v263 — RESTORED sticky-hero architecture: the scroll content records
     // into this LOCAL capture; the hero sits OUTSIDE it (drawn on top), so
     // its back pill can refract the rows scrolling behind it with REAL
@@ -253,6 +257,7 @@ fun SettingsHeroHeader(
             searchFocus = searchFocus,
             searchPlaceholder = searchPlaceholder,
             titleTrailing = titleTrailing,
+            titleLeading = titleLeading,
             glassBackdrop = glassBackdrop
         )
         return
@@ -478,6 +483,9 @@ fun SettingsHeroHeader(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
+                                if (titleLeading != null) {
+                                    titleLeading(ink)
+                                }
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         title,

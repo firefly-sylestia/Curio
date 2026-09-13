@@ -1283,14 +1283,16 @@ fun DirectMessageScreen(
             // top — not stated as a standing label with the person listed
             // below the fold.
             SettingsHeroHeader(
-                title = "",
+                title = person?.label ?: fallback,
                 subtitle = if (peerTyping) "Typing…" else "",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop,
-                titleTrailing = { ink ->
+                // The person LEADS the header — avatar first, then the name,
+                // exactly like a messenger. The old titleTrailing slot put
+                // them on the right edge, past the (empty) title.
+                titleLeading = { ink ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
                             .clickable {
@@ -1298,35 +1300,13 @@ fun DirectMessageScreen(
                                     launchSingleTop = true
                                 }
                             }
-                            .padding(end = 6.dp)
+                            .padding(end = 2.dp)
                     ) {
                         SocialAvatar(
                             style = person?.avatarStyle ?: 0,
-                            avatarSize = 34.dp,
+                            avatarSize = 38.dp,
                             online = person?.isActiveNow == true
                         )
-                        Column {
-                            Text(
-                                text = person?.label ?: fallback,
-                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                color = ink,
-                                maxLines = 1
-                            )
-                            if (peerTyping) {
-                                Text(
-                                    text = "Typing…",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                    color = ink
-                                )
-                            } else if (person != null && person!!.handle.isNotBlank()) {
-                                Text(
-                                    text = person!!.handleLabel,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = ink.copy(alpha = 0.75f),
-                                    maxLines = 1
-                                )
-                            }
-                        }
                     }
                 }
             )
