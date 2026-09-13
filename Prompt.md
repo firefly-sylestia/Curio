@@ -1,5 +1,32 @@
 # Prompt Log — current request
 
+## Request (2026-09-13, IN PROGRESS — immediate encrypted DM delivery)
+
+User (chat): encryption-off messages work, but sending/receiving feels slow and
+receiver-side encrypted messages still report unable to decrypt.
+
+### Diagnosis and plan
+
+1. Live `messagesSince` rows were merged directly into UI/cache without running
+the decrypt flow, so realtime delivery could display the transport row instead
+of decrypted text.
+2. Initial decrypt fetched envelopes serially once per message, making a thread
+slower as its history grew. Fetch every required key-version envelope in one
+server read, install the batch, then decrypt the page.
+3. Route a live arrival through that same batched decrypt path before display;
+keep read receipts and typing-state behavior afterwards.
+
+### Completion
+
+- Realtime arrivals now use the same page decrypt path before they reach the
+  thread, so a ciphertext transport row is never merged into the visible cache.
+- Required envelope versions are fetched together in one request rather than
+  serially per message, then installed before AES-GCM reads. This removes the
+  history-length network delay while retaining exact-version key selection.
+
+- Sender-side recipient and sender envelope writes now run concurrently before
+  the message insert, removing needless per-device round-trip delay.
+
 ## Request (2026-09-13, IN PROGRESS — DM cache compile repair)
 
 CI reports that `MutableSet` does not provide `takeLast` at the local-delete
@@ -7,7 +34,7 @@ cache write. Convert the set to a list before applying the 250-id cap, then
 run static checks only and commit the one-cycle compile repair.
 
 ### Completion
-+
+
 - The local hidden-message-id set is now converted to a list before capping,
   which resolves the CI `Unresolved reference: takeLast` Kotlin compile error.
 

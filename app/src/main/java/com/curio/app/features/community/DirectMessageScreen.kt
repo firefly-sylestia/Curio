@@ -88,6 +88,9 @@ import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -179,13 +182,17 @@ fun DirectMessageScreen(
                     .getOrDefault(com.curio.app.data.supabase.CurioDmConversation()).encryptionEnabled
                 val identity = CurioDmCrypto.identity(context)
                 SocialApi.publishDmIdentity(active, identity, me)
-                // The server envelope is authoritative. A phone may already have
-                // a stale device-local key from before the other participant's
-                // envelope was published; keeping it would make every message
-                // fail AES-GCM authentication on that phone.
-                val envelope = SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()
-                runCatching {
-                    envelope?.let { CurioDmCrypto.installEnvelope(context, conversationId, it) }
+                // Get every envelope a page needs in ONE request. The former
+                // per-message sequential requests delayed arrivals and could
+                // leave a realtime row rendered before its key was available.
+                val requiredVersions = raw.mapNotNull { message ->
+                    CurioDmCrypto.messageKeyVersion(message.encryptionVersion.orEmpty())
+                }.toSet()
+                val envelopes = SocialApi.dmEnvelopes(
+                    active, conversationId, identity.deviceId, requiredVersions
+                ).getOrDefault(emptyMap())
+                envelopes.values.forEach { envelope ->
+                    runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
@@ -197,18 +204,8 @@ fun DirectMessageScreen(
                             message.encryptionVersion.orEmpty()
                         )
                         // A thread can hold messages from multiple envelope
-                        // generations. Install the version this message names,
-                        // not merely the latest one, before attempting AES-GCM.
-                        // Fetch the exact version even when a local key exists.
-                        // A restored/rotated device can retain a stale key under the
-                        // same version; AES-GCM must reject it rather than guess.
-                        CurioDmCrypto.messageKeyVersion(encrypted.version)?.let { keyVersion ->
-                            SocialApi.dmEnvelope(active, conversationId, identity.deviceId, keyVersion)
-                                .getOrNull()
-                                ?.let { envelope ->
-                                    runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
-                                }
-                        }
+                        // generations. The page's exact-version envelopes were
+                        // fetched and installed above before any AES-GCM read.
                         runCatching {
                             message.copy(body = CurioDmCrypto.decrypt(context, conversationId, encrypted))
                         }.getOrElse { message.copy(body = "Unable to decrypt this message") }
@@ -322,10 +319,23 @@ fun DirectMessageScreen(
             val peers = SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow()
                 .filter(CurioDmCrypto::canWrapFor)
             check(peers.isNotEmpty()) { "This friend needs to open Curio once before encrypted messages can reach them." }
-            peers.forEach { peer ->
-                SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)).getOrThrow()
+            // Envelope writes are independent. Send them together instead of
+            // making the composer wait one network round trip per device.
+            coroutineScope {
+                (peers.map { peer ->
+                    async {
+                        SocialApi.saveDmEnvelope(
+                            active, conversationId, otherUserId,
+                            CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)
+                        ).getOrThrow()
+                    }
+                } + async {
+                    SocialApi.saveDmEnvelope(
+                        active, conversationId, me,
+                        CurioDmCrypto.wrapConversationKey(key, mine, keyVersion)
+                    ).getOrThrow()
+                }).awaitAll()
             }
-            SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine, keyVersion)).getOrThrow()
             CurioDmCrypto.encrypt(context, conversationId, key, keyVersion, text)
         }.getOrElse { failure ->
             pending = pending.filterNot { it.id == optimistic.id }
@@ -428,17 +438,15 @@ fun DirectMessageScreen(
             }
         }
         if (fresh.isEmpty()) return
-        val merged = (messages + fresh)
-            .distinctBy { it.id }
-            .sortedBy { it.createdAtMillis }
-        messages = merged
-        SocialMessageCache.write(context, otherUserId, merged)
+        // `messagesSince` returns transport rows. Route a real arrival through
+        // the same batched-envelope decrypt path as initial load; otherwise a
+        // realtime message can briefly keep its null body or stale ciphertext.
+        load(active, me)
         // An arrival means the other side stopped writing.
         peerTyping = false
         if (fresh.any { !it.mine }) {
             SocialApi.markRead(active, otherUserId, me)
         }
-        SocialApi.reactions(active, merged.map { it.id }).onSuccess { reactions = it }
     }
 
     // REALTIME — the server tells this screen when the thread moved, instead of

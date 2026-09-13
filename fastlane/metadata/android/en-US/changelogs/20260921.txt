@@ -1,4 +1,5 @@
 ADD:
+- Messages: encrypted deliveries decrypt before rendering and load key envelopes in one fast batch.
 - Messages: shared per-chat encryption switch, reliable versioned decryption, and plaintext fallback.
 - Messages: delete locally or unsend your sent message for both people.
 

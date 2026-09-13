@@ -826,6 +826,32 @@ private const val PERSON_COLUMNS_PRIVACY =
     }
   }
 
+  /** All envelopes this device needs for one page of versioned messages, in one read. */
+  suspend fun dmEnvelopes(
+    accessToken: String,
+    conversationId: String,
+    deviceId: String,
+    keyVersions: Collection<Int>
+  ): Result<Map<Int, CurioDmEnvelope>> = withContext(Dispatchers.IO) {
+    mapped {
+      val versions = keyVersions.filter { it > 0 }.distinct()
+      if (versions.isEmpty()) return@mapped emptyMap()
+      val path = "/rest/v1/dm_key_envelopes?select=device_id,key_version,encrypted_key,encryption_version" +
+        "&conversation_id=eq.${encode(conversationId)}&device_id=eq.${encode(deviceId)}" +
+        "&key_version=in.(${versions.joinToString(",")})"
+      val rows = JSONArray(SupabaseClient.executeBody(SupabaseClient.requestBuilder(path, accessToken).get().build()))
+      buildMap {
+        for (index in 0 until rows.length()) {
+          val row = rows.optJSONObject(index) ?: continue
+          val version = row.optInt("key_version")
+          if (version > 0) put(version, CurioDmEnvelope(
+            row.optString("device_id"), version, row.optString("encrypted_key"), row.optString("encryption_version")
+          ))
+        }
+      }
+    }
+  }
+
   /**
    * Reads the one shared delivery setting. A conversation created before this
    * setting existed deliberately remains encrypted until somebody changes it.
