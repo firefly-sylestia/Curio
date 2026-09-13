@@ -38,6 +38,13 @@ object CurioDmCrypto {
         return CurioDmEnvelope(recipient.deviceId, keyVersion, b64(cipher.doFinal(key)), ENVELOPE_VERSION)
     }
 
+    /** Returns whether a stored public identity is usable for a new envelope. */
+    fun canWrapFor(recipient: CurioDmIdentity): Boolean = runCatching {
+        KeyFactory.getInstance("RSA").generatePublic(
+            X509EncodedKeySpec(Base64.decode(recipient.publicKey, Base64.NO_WRAP))
+        )
+    }.isSuccess
+
     fun unwrapConversationKey(envelope: CurioDmEnvelope): ByteArray {
         require(envelope.version == ENVELOPE_VERSION) { "Unsupported key envelope version." }
         val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
@@ -64,6 +71,11 @@ object CurioDmCrypto {
     fun existingKey(context: Context, conversationId: String, keyVersion: Int): ByteArray? =
         stored(context, conversationId, keyVersion)
 
+    /** The envelope version required to read an encrypted message, or null for an unsupported payload. */
+    fun messageKeyVersion(encryptionVersion: String): Int? =
+        encryptionVersion.removePrefix("$VERSION:").toIntOrNull()
+            ?: if (encryptionVersion == VERSION) 1 else null
+
     fun newKey(context: Context, conversationId: String, keyVersion: Int): ByteArray {
         val key = ByteArray(KEY_BYTES).also(SecureRandom()::nextBytes)
         check(CurioSecureStore.put(context, keyName(conversationId, keyVersion), b64(key))) { "Secure storage unavailable." }
@@ -79,8 +91,8 @@ object CurioDmCrypto {
     }
 
     fun decrypt(context: Context, conversationId: String, encrypted: CurioEncryptedMessage): String {
-        val version = encrypted.version.removePrefix("$VERSION:").toIntOrNull()
-            ?: if (encrypted.version == VERSION) 1 else throw IllegalArgumentException("Unsupported message encryption version.")
+        val version = messageKeyVersion(encrypted.version)
+            ?: throw IllegalArgumentException("Unsupported message encryption version.")
         val key = stored(context, conversationId, version) ?: throw IllegalStateException("This device does not have this message's key.")
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), GCMParameterSpec(TAG_BITS, Base64.decode(encrypted.nonce, Base64.NO_WRAP)))

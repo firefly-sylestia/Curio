@@ -747,6 +747,8 @@ private const val PERSON_COLUMNS_PRIVACY =
     /** One PostgREST page of `dm_messages` rows, oldest first. */
     private fun parseMessages(body: String, myUserId: String): List<CurioDirectMessage> {
         val rows = JSONArray(body)
+        fun JSONObject.stringOrNull(name: String): String? =
+            optString(name).takeUnless { it.isBlank() || it.equals("null", true) }
         return buildList(rows.length()) {
             for (index in 0 until rows.length()) {
                 val row = rows.optJSONObject(index) ?: continue
@@ -754,11 +756,11 @@ private const val PERSON_COLUMNS_PRIVACY =
                     CurioDirectMessage(
                         id = row.optString("id"),
                         senderId = row.optString("sender"),
-                        body = row.optString("body"),
-                        ciphertext = row.optString("ciphertext").takeIf { it.isNotBlank() },
-                        nonce = row.optString("nonce").takeIf { it.isNotBlank() },
-                        encryptionVersion = row.optString("encryption_version").takeIf { it.isNotBlank() },
-                        migrationState = row.optString("migration_state", "legacy"),
+                        body = row.stringOrNull("body").orEmpty(),
+                        ciphertext = row.stringOrNull("ciphertext"),
+                        nonce = row.stringOrNull("nonce"),
+                        encryptionVersion = row.stringOrNull("encryption_version"),
+                        migrationState = row.stringOrNull("migration_state") ?: "legacy",
                         createdAtMillis = epochMillis(row.optString("created_at")),
                         readAtMillis = row.optString("read_at")
                             .takeIf { it.isNotBlank() }
@@ -805,9 +807,15 @@ private const val PERSON_COLUMNS_PRIVACY =
     }
   }
 
-  suspend fun dmEnvelope(accessToken: String, conversationId: String, deviceId: String): Result<CurioDmEnvelope?> = withContext(Dispatchers.IO) {
+  suspend fun dmEnvelope(
+    accessToken: String,
+    conversationId: String,
+    deviceId: String,
+    keyVersion: Int? = null
+  ): Result<CurioDmEnvelope?> = withContext(Dispatchers.IO) {
     mapped {
-      val path = "/rest/v1/dm_key_envelopes?select=device_id,key_version,encrypted_key,encryption_version&conversation_id=eq.${encode(conversationId)}&device_id=eq.${encode(deviceId)}&order=key_version.desc&limit=1"
+      val versionFilter = keyVersion?.let { "&key_version=eq.$it" }.orEmpty()
+      val path = "/rest/v1/dm_key_envelopes?select=device_id,key_version,encrypted_key,encryption_version&conversation_id=eq.${encode(conversationId)}&device_id=eq.${encode(deviceId)}$versionFilter&order=key_version.desc&limit=1"
       val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
       val rows = JSONArray(SupabaseClient.executeBody(request))
       rows.optJSONObject(0)?.let { CurioDmEnvelope(it.optString("device_id"), it.optInt("key_version"), it.optString("encrypted_key"), it.optString("encryption_version")) }

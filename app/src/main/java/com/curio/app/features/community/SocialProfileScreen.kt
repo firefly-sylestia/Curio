@@ -42,6 +42,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CurioPerson
+import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -237,17 +238,26 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             }
 
             items(cards, key = { it.id }) { card ->
-                // The same card canvas the wall uses: their cards look exactly
-                // like they did where you found them.
-                CommunityCardCanvas(
-                    card = card,
-                    modifier = Modifier.clickable {
-                        navController.navigate(CurioRoutes.communityCard(card.id)) {
-                            launchSingleTop = true
-                        }
-                    },
-                    widthFraction = 0.86f
-                )
+                val openPost = {
+                    navController.navigate(CurioRoutes.communityCard(card.id)) {
+                        launchSingleTop = true
+                    }
+                }
+                // Topic cards retain their art. A note or quote has no topic,
+                // so its words (and quote credit) use the same text surface as
+                // the wall instead of borrowing a meaningless share-card.
+                if (card.kind == KIND_CARD) {
+                    CommunityCardCanvas(
+                        card = card,
+                        modifier = Modifier.clickable(onClick = openPost),
+                        widthFraction = 0.86f
+                    )
+                } else {
+                    SocialTextPost(
+                        card = card,
+                        onClick = openPost
+                    )
+                }
             }
         }
 

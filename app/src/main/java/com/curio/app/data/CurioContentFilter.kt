@@ -25,20 +25,14 @@ import java.util.Locale
  *     letters lose their accents, digits and symbols are mapped to the letters
  *     they stand in for (`0→o`, `3→e`, `@→a`, `$→s`, `|→i`, `!→i`, `+→t`), and
  *     every character the fold doesn't recognise simply DISAPPEARS.
- *  2. **Two views** of the folded text: the **squash** view (all separators
- *     gone, so `f u c k` and `f.u.c.k` collapse onto each other) and the
- *     **collapse** view (runs of the same letter squeezed to one, so `fuuuuck`
- *     and `shiiit` collapse too).
- *  3. **Two match modes.** Unambiguous words are matched anywhere in either
- *     view. Ambiguous ones — words that hide inside innocent ones (`ass` in
- *     "class", `sex` in "Essex", `hoe` in "shoes", `cock` in "cocktail") — are
- *     matched only as whole words, and consecutive single-letter words (`a s s`,
- *     `f u c k`) are merged into one word first, so the spaced trick fails too.
+ *  2. **A normalised word view.** Words are matched only as whole words, with
+ *     consecutive single-letter words merged first. This still identifies
+ *     deliberate spacing (`s e x`) without refusing innocent longer words
+ *     that merely contain the same letters.
  *
- * Deliberately NOT clever about context: an over-eager filter is recoverable
- * (the person rewords), a leak is not. The one known cost is the classic
- * boundary case — a long innocent word that literally contains a severe one
- * (the "Scunthorpe problem") is refused; that trade-off is taken on purpose.
+ * A public safety filter must be narrow enough that normal writing is never a
+ * guessing game. The exact canonical term that caused a refusal is returned to
+ * the author, and substring matches are intentionally never used.
  *
  * This is the client half. `supabase/schema.sql` carries the same fold as
  * `curio_text_is_clean` and CHECKs it on every social table, so a modified
@@ -60,46 +54,32 @@ object CurioContentFilter {
 
     /** Null when [text] is fine; otherwise the message the person should read. */
     fun problem(text: String?): String? =
-        if (text.isNullOrBlank() || isClean(text)) null else BLOCKED_MESSAGE
+        matchedTerm(text)?.let { term ->
+            "That public text contains \"$term\", which isn't allowed here. Remove or reword it and try again."
+        }
 
     /** Null when EVERY field is fine — the shape an API call uses. */
     fun problemIn(vararg texts: String?): String? =
         texts.firstNotNullOfOrNull { problem(it) }
 
     /** True when [text] carries nothing from the lexicon. */
-    fun isClean(text: String): Boolean = !carriesBadWord(text)
+    fun isClean(text: String): Boolean = matchedTerm(text) == null
 
     /** True when [text] carries something from the lexicon. */
-    fun carriesBadWord(text: String): Boolean {
-        val folded = fold(text)
-        val squash = NON_LETTER.replace(folded, "")
-        if (squash.length < 3) return false
-        val collapse = COLLAPSE.replace(squash, "$1")
+    fun carriesBadWord(text: String): Boolean = matchedTerm(text) != null
 
-        // 1. Unambiguous words — matched ANYWHERE in either view, which is what
-        //    defeats every separator and character-substitution trick.
-        for (word in UNAMBIGUOUS) {
-            if (squash.contains(word) || collapse.contains(word)) return true
-        }
-        // 2. Phrases ("kill yourself"), matched on the squash view so spacing
-        //    inside the phrase can't break it.
-        for (phrase in PHRASES) {
-            if (squash.contains(phrase)) return true
-        }
-        // 3. Name-like words — whole words only, so "class", "Essex", "shoes",
-        //    "cocktail", "analysis" and "title" all stay usable.
+    /** The canonical safety term that matched, or null when [text] is allowed. */
+    private fun matchedTerm(text: String?): String? {
+        if (text.isNullOrBlank()) return null
+        val folded = fold(text)
         val words = mergedWords(folded)
-        for (word in NAME_LIKE) {
-            if (word in words) return true
-        }
-        return false
+        return (UNAMBIGUOUS + NAME_LIKE).firstOrNull { it in words }
     }
 
     // ── the fold ──────────────────────────────────────────────────────────
 
     private val MARKS = Regex("\\p{M}+")
     private val NON_LETTER = Regex("[^a-z]")
-    private val COLLAPSE = Regex("(.)\\1+")
 
     /** Keeps separators, maps look-alike characters, strips accents. */
     private fun fold(raw: String): String {
@@ -173,8 +153,8 @@ object CurioContentFilter {
     // ── the lexicon ───────────────────────────────────────────────────────
     // A MODERATION list: these strings live here only so the filter can refuse
     // them. Grouped so a future change can tune one group at a time. Anything
-    // ≥ 3 letters that is NOT a substring of an ordinary word goes in
-    // UNAMBIGUOUS; anything that hides inside a harmless word goes in NAME_LIKE.
+    // Every term is matched as a whole normalised word so ordinary writing is
+    // never blocked by a substring coincidence.
     //
     // Deliberately EXCLUDED: mild words (damn, hell, crap, suck, butt), body
     // parts used plainly, and identity words (jew, queer, gay, gypsy) — those
@@ -184,9 +164,6 @@ object CurioContentFilter {
 
     /** Profanity + explicit sexual content and slang. */
     private val EXPLICIT = listOf(
-        "fuck", "fucker", "fuckers", "fucking", "fuk", "fuking", "fukk", "fck",
-        "fuxk", "fux", "fuq", "fook", "phuck", "phuk", "fvck", "fvk", "fack",
-        "fucked", "motherfucker", "motherfucking",
         "shit", "shits", "shyt", "bullshit", "dipshit", "shithead",
         "bitch", "bitches", "bich", "biatch",
         "cunt", "cunts", "kunt", "kunts", "dickhead", "dickheads",
@@ -216,18 +193,13 @@ object CurioContentFilter {
         "killyourself", "neckyourself"
     )
 
-    /** Matched ANYWHERE in the squash/collapse views. */
+    /** Public-safety terms, all matched as complete normalised words. */
     private val UNAMBIGUOUS: List<String> = (EXPLICIT + SLURS)
         .map { NON_LETTER.replace(fold(it), "") }
         .filter { it.length >= 3 }
         .distinct()
 
-    /**
-     * Words that hide inside ordinary ones, so they are matched as WHOLE words
-     * only: `ass` in "class"/"pass", `sex` in "Essex"/"Sussex", `hoe` in
-     * "shoes", `cock` in "cocktail", `cum` in "cucumber", `tit` in "title",
-     * `rape` in "grape", `dic` in "dictionary", `nude` in "nudged".
-     */
+    /** Additional public-safety terms, also matched as complete normalised words. */
     private val NAME_LIKE: Set<String> = setOf(
         "ass", "arse", "asses", "dumbass", "jackass", "kickass",
         "sex", "sexy", "sexual", "sexist", "sexton", "sextoy", "sextoys",
@@ -238,10 +210,4 @@ object CurioContentFilter {
         "homo", "escort", "escorts", "coon", "paki", "kys"
     ).map { fold(it) }.toSet()
 
-    /** Whole phrases, matched on the squash view so spacing can't break them. */
-    private val PHRASES: List<String> = listOf(
-        "killyourself", "killyourselfplease", "neckyourself",
-        "rapeyou", "rapeher", "rapehim", "rapekids",
-        "sendnudes", "sendnude", "childporn", "cpforsale"
-    ).map { NON_LETTER.replace(fold(it), "") }
 }

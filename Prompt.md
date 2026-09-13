@@ -1,5 +1,115 @@
 # Prompt Log — current request
 
+## Request (2026-09-13, IN PROGRESS — profile post-kind rendering)
+
+User (chat): on another member's profile, their NOTE and QUOTE posts render as
+topic share cards instead of text posts.
+
+### Diagnosis and plan
+
+The profile list always calls `CommunityCardCanvas`, ignoring `CommunityCard.kind`.
+Use the same branch as the Social wall: only `CARD` uses topic-card art; NOTE
+and QUOTE use `SocialTextPost`, which preserves the quote credit. Update the
+current release note and run static checks.
+
+### Completion
+
+- Member profile posts now branch by their persisted kind. Topic cards retain
+  the share-card preview, while notes and quotes render as their original text
+  posts; quotes retain the credited byline.
+
+## Request (2026-09-13, DONE — less aggressive public-text filtering)
+
+User (chat): public safety restrictions are catching unintended words without
+saying what triggered them; remove the `fuck` family from the filtered list and
+stop the annoying accidental blocks.
+
+### Diagnosis and plan
+
+1. The public text gate currently searches its normalised, separator-free text
+   for terms anywhere, creating substring false positives in otherwise valid
+   words. Match the remaining terms as whole normalised words instead.
+2. Return the canonical matched term in the client-side refusal, so the author
+   can identify and reword the actual trigger.
+3. Remove every `fuck` spelling from both the app lexicon and the Supabase
+   backstop, keeping the client and database rules aligned.
+
+### Completion
+
+- Public safety matching now uses complete normalised words instead of
+  separator-free substring searches, eliminating accidental matches inside
+  otherwise ordinary words while retaining deliberate spaced-word detection.
+- A refusal now states the canonical term that matched, both in the API-facing
+  error and in the live reply and username validation.
+- Removed the `fuck` family from the Android lexicon and the Supabase rule so
+  the app and backend agree on what public text is allowed.
+
+## Request (2026-09-13, DONE — DM keyboard position and recipient decryption)
+
+User (chat): opening a conversation and focusing the empty composer initially
+places it far above the keyboard until typing forces a re-layout; newly sent
+messages arrive on the recipient as `null` / unable to decrypt.
+
+### Diagnosis and plan
+
+1. The direct-message screen is already resized around the IME by the host.
+   Its composer then adds `imePadding()` again, producing the empty-field
+   double offset shown in the screenshot. Remove the second inset consumer.
+2. The decrypt path installs only the most recent envelope. Messages include a
+   key version, and a recipient needs the envelope for that exact version — a
+   newer envelope cannot decrypt a message encrypted under an earlier key.
+   Fetch and install the versioned envelope before decrypting each message.
+3. Treat JSON `null` message bodies as an empty fallback value, never literal
+   visible text. Update the release note and use static checks only.
+
+### Completion
+
+- The composer no longer consumes the IME inset a second time, so focus keeps
+  it directly above the keyboard from the first frame.
+- Encrypted reads now parse each message's key version and request/install that
+  exact recipient envelope before AES-GCM decryption. This covers conversations
+  spanning key rotations instead of trying a newer key for an older message.
+- Database JSON `null` values are now normalised on every message field; the
+  literal word `null` cannot render as a chat bubble.
+
+## Request (2026-09-13, DONE — new account Social access and legacy encrypted conversations)
+
+User (chat): a fresh install can create an ID but cannot see the Social wall or
+post because Supabase reports a `community_cards` row-level-security refusal;
+an older friend conversation fails while preparing encryption, although a new
+friend can receive messages.
+
+### Diagnosis and plan
+
+1. New sign-ins and sign-ups only set the local Online Mode preference. They
+   start identity publishing asynchronously but do not synchronously upsert the
+   server-side `profiles` row whose `online_mode_enabled` flag is required by
+   all community RLS policies. Mirror that state immediately after every
+   session activation and when restoring a session; mirror disabling too so the
+   server privacy state cannot drift from the app.
+2. Existing conversations can retain an envelope encrypted for a device keypair
+   that was invalidated or replaced. Rotate a new envelope version when the old
+   envelope cannot be opened, retaining the old version for historical reads.
+   Ignore malformed legacy public-device-key rows when another valid recipient
+   device exists, while reporting a clear update-needed error if none do.
+3. Update the active store changelog, run static checks only (Gradle is
+   forbidden in this workspace), then commit, push and open the required PR.
+
+### Completion
+
+- Session creation and restoration now upsert the account's server-side Online
+  Mode profile before Social is used; turning Online Mode off now mirrors off
+  to the server too. This supplies the `profiles` row required by community
+  RLS, so fresh accounts can load and post to the wall.
+- Sending in an older encrypted conversation now rotates to the next key
+  version if its saved envelope cannot be opened. The old envelope stays in
+  place for past messages, valid recipient devices receive the new envelope,
+  and a friend with no valid device key gets an actionable update prompt rather
+  than a generic encryption failure.
+- `git diff --check` passed. The repository-local delimiter checker referenced
+  by the DOX guide (`scripts/check_braces.js`) is absent, so Gradle remains
+  deferred to CI as required by the environment contract.
+
 ## Request (2026-09-12, IN PROGRESS — the content filter, the SOCIAL tab, and
 ## 24-hour messages)
 
