@@ -281,9 +281,11 @@ internal fun SocialIconPill(
  * ONE PERSON, as a box card: portrait, name, live @username and the pills that
  * make sense for where the relationship actually stands.
  *
- * Every social list renders people through this, which is why a name, a
- * portrait and a set of actions look and behave the same on the wall, in
- * Friends and in search results.
+ * Every list that asks something of a person renders them through this — a
+ * waiting request, an ask you sent, a search hit — which is why a name, a
+ * portrait and a set of actions look and behave the same wherever they
+ * appear. The calm, dense lists ([SocialSidebarRow]) deliberately do not use
+ * it: a sidebar row is a door, not a set of decisions.
  */
 @Composable
 internal fun SocialPersonCard(
