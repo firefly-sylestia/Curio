@@ -92,7 +92,18 @@ object SupabaseClient {
                     .post(body.toString().toRequestBody(jsonMediaType))
                     .build()
                 val response = executeBody(request)
-                if (response.isBlank()) null else parseSession(response)
+                if (response.isBlank()) return@runCatching null
+                // A signup against a project with email confirmation ON comes
+                // back as the new USER with NO session. That is a success with
+                // a step left, not a failure: parsing it as a session threw on
+                // the missing access_token, which is what surfaced "Something
+                // went wrong" for a perfectly normal signup and made the user
+                // sign in again to be told to confirm their email.
+                val json = runCatching { JSONObject(response) }.getOrNull()
+                    ?: return@runCatching null
+                val access = json.optString("access_token")
+                if (json.isNull("access_token") || access.isBlank()) null
+                else parseSession(response)
             }
         }
 

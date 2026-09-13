@@ -1,4 +1,17 @@
 ADD:
+- Edit profile: a real editor — the page's own colours instead of the cream slab, the portrait picker beside your photo in one place, sectioned layout with soft reveal animation, your username stated in one line, and Sign out right there with the account.
+- Settings: your privacy rules (profile visibility, activity, blocked people) now live inside Online mode next to the account they belong to; the separate Privacy card is gone.
+- Accounts: a brand-new account is given a friendly username automatically (like amber_otter_4821), so adding friends works from the first minute — change it in Edit profile whenever you like.
+- Messages: if an encrypted message fails to send, the app says what to do — turn encryption off for that chat to keep talking while encryption is being reworked.
+- Profile: Sign out now also lives in Edit profile, confirmed before it signs you out.
+
+FIX:
+- Accounts: signing out forgets the username — the next account on this device gets its own handle and its own chats, not the previous member's.
+- Accounts: creating an account with email confirmation on no longer says "something went wrong" — it confirms the account was made and tells you to check your inbox, right from the sign-up form.
+- Messages: encryption is OFF by default for new chats, so a message always sends — turn it on per chat when you both want it.
+- Online mode: turning it on now brings the Social tab with it, so the wall is one tap away instead of a second switch.
+
+ADD:
 - Chats: your conversations have their own screen now — the last line, when it arrived and an unread badge per person, reached from the wall's action row beside Friends.
 - Friends: the list is a contacts sidebar — filed A–Z under letter headings, with a green dot on anyone who is active right now, and tapping a friend opens your chat with them. The Friends glyph is a people mark instead of a notepad.
 - Messages: hold a chat in the list to delete it — for you, or for both of you. "For you" leaves the other person's copy alone (and the chat returns if they write again); "for both of you" deletes the whole conversation for both accounts.

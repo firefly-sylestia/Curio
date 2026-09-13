@@ -280,7 +280,13 @@ internal fun CurioAuthCard(
 @Composable
 internal fun CurioAccountIdentityCard(
     /** Shown above the fields, e.g. the signed-in email. */
-    email: String? = null
+    email: String? = null,
+    /**
+     * Whether the portrait picker renders here. Edit profile places it beside
+     * the member's photo instead (one portrait, chosen in one place), so this
+     * is the switch that keeps it from appearing twice on the same page.
+     */
+    includeAvatarPicker: Boolean = true
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -325,11 +331,16 @@ internal fun CurioAccountIdentityCard(
             )
         }
 
-        // A NAME and a HANDLE are different things, and this is the one place
-        // the handle is chosen — so it is said here, once, instead of leaving
-        // the two fields to look like duplicates of each other.
+        // Stated ONCE, and only when it has something to say: an account
+        // with no handle yet gets the invite to claim one, an account that
+        // has one gets its handle echoed back (the field starts as that
+        // handle, so "what am I called?" is answered by the page itself).
         Text(
-            text = "Choose a unique username so friends can find and mention you.",
+            text = if (savedName.isBlank()) {
+                "Choose a unique username so friends can find and mention you."
+            } else {
+                "You are @${savedName.trim().removePrefix("@")}. Friends find and mention you with it."
+            },
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -355,11 +366,14 @@ internal fun CurioAccountIdentityCard(
             nameProblem != null -> nameProblem to true
             nameAnswer != null -> nameAnswer!! to nameFailed
             token == null -> "Sign in to claim a username." to false
-            clean.isEmpty() -> "Choose a username: 3 to 24 letters, numbers or underscores." to false
-            !changed -> "That is already your username." to false
-            else -> "Free to claim — save it and it is yours." to false
+            clean.isEmpty() && savedName.isBlank() ->
+                "Choose a username: 3 to 24 letters, numbers or underscores." to false
+            changed -> "Free to claim — save it and it is yours." to false
+            else -> "" to false
         }
-        AccountMessage(text = status.first, isError = status.second)
+        if (status.first.isNotEmpty()) {
+            AccountMessage(text = status.first, isError = status.second)
+        }
 
         // v3xx53 — the ACCOUNT POLICY, stated where the name is chosen. The
         // filter above is the enforcement; this is the warning, and it is
@@ -453,24 +467,17 @@ internal fun CurioAccountIdentityCard(
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
             }
-            Text(
-                text = "Friends find you by this name.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
 
-        Text(
-            text = "Profile icon",
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items((0 until SOCIAL_AVATAR_STYLE_COUNT).toList()) { style ->
-                AvatarPickerIcon(style, style == avatarStyle) {
+        if (includeAvatarPicker) {
+            Text(
+                text = "Profile icon",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            SocialAvatarPickerRow(
+                selected = avatarStyle,
+                enabled = !savingName,
+                onPick = { style ->
                     avatarStyle = style
                     AppPreferences.setSocialAvatarStyle(context, style)
                     token?.let { active ->
@@ -482,14 +489,31 @@ internal fun CurioAccountIdentityCard(
                         }
                     }
                 }
-            }
+            )
         }
-        Text(
-            text = "Twenty-eight hand-drawn icons. Nothing is uploaded: the icon is a single " +
-                "number on your profile.",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+    }
+}
+
+/**
+ * The 28 code-drawn portraits, as one horizontal picker.
+ *
+ * Shared so the portrait is chosen in exactly one visual language wherever it
+ * is offered. The caller owns persistence: this only says which one was
+ * tapped, because Online mode and Edit profile save it through the same call.
+ */
+@Composable
+internal fun SocialAvatarPickerRow(
+    selected: Int,
+    enabled: Boolean = true,
+    onPick: (Int) -> Unit
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items((0 until SOCIAL_AVATAR_STYLE_COUNT).toList()) { style ->
+            AvatarPickerIcon(style, style == selected, enabled = enabled) { onPick(style) }
+        }
     }
 }
 

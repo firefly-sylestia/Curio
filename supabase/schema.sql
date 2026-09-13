@@ -734,10 +734,19 @@ create table if not exists public.dm_conversations (
     conversation_id text primary key,
     first_user uuid not null references auth.users (id) on delete cascade,
     second_user uuid not null references auth.users (id) on delete cascade,
-    encryption_enabled boolean not null default true,
+    -- Encryption starts OFF (decided). The encrypted path needs BOTH people on
+    -- a build that publishes device keys, so defaulting to it left a chat
+    -- between mismatched versions unable to send anything at all. One tap in
+    -- the conversation turns it on, and an existing conversation keeps the
+    -- mode it already has.
+    encryption_enabled boolean not null default false,
     updated_at timestamptz not null default now(),
     constraint dm_conversations_two_people check (first_user <> second_user)
 );
+
+-- Idempotent: a project whose row was created before this decision keeps its
+-- existing default until this line runs, and existing ROWS are untouched.
+alter table public.dm_conversations alter column encryption_enabled set default false;
 
 alter table public.dm_conversations enable row level security;
 drop policy if exists dm_conversations_select_participant on public.dm_conversations;
@@ -843,14 +852,20 @@ set search_path = public
 as $$
 declare
     conversation text := public.curio_dm_conversation_of(new.sender, new.recipient);
-    encryption_on boolean := true;
+    encryption_on boolean := false;
 begin
     select encryption_enabled into encryption_on
     from public.dm_conversations where conversation_id = conversation;
-    if coalesce(encryption_on, true) and new.migration_state not in ('encrypted', 'pending_reencrypt') then
+    -- A conversation with no row at all is PLAINTEXT, matching the column's own
+    -- default. It used to fall back to "encrypted", which is how a chat between
+    -- two clients that never agreed on a mode refused every message.
+    if coalesce(encryption_on, false) and new.migration_state not in ('encrypted', 'pending_reencrypt') then
         raise exception 'curio: this conversation requires encrypted messages';
     end if;
-    if not coalesce(encryption_on, true) and new.migration_state <> 'plaintext' then
+    -- 'legacy' is accepted alongside 'plaintext' while encryption is off: a
+    -- build older than the encryption work writes it by default, and refusing
+    -- it is exactly the "message does not send until both people update" bug.
+    if not coalesce(encryption_on, false) and new.migration_state not in ('plaintext', 'legacy') then
         raise exception 'curio: this conversation has encryption turned off';
     end if;
     return new;

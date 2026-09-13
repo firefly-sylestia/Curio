@@ -42,9 +42,10 @@ import kotlinx.coroutines.launch
  * ONLINE MODE — the account page for Curio's online layer.
  *
  * Signed out it is the email/password form (sign in + create account);
- * signed in it shows the account and the Online Mode switch. The switch is
- * the contract the rest of the online work hangs off: with it off, Curio
- * behaves exactly like the local-only app, and Room stays the source of
+ * signed in it shows the account, the Social tab switch, the member's own
+ * privacy rules ([SocialPrivacyOptions]) and the Online Mode switch. The
+ * switch is the contract the rest of the online work hangs off: with it off,
+ * Curio behaves exactly like the local-only app, and Room stays the source of
  * truth for everything.
  *
  * Text only by design — captures' media never leaves the device, which is
@@ -145,14 +146,14 @@ fun OnlineModeScreen(navController: NavController) {
             item { SettingsSectionHeading("Social") }
             item {
                 SettingsOptionCard {
-                    // The tab is strictly opt-in and is the only Social control
-                    // kept in Settings; the full Social and Friends experiences
-                    // are available from the app navigation.
+                    // Strictly opt-in, and turned ON for you the moment Online
+                    // mode goes on (see OnlineAccount.enableOnlineMode), since
+                    // the wall is what most members came here for.
                     SettingsOptionSwitchRow(
                         icon = CurioIcons.Public,
                         title = "Social tab",
                         subtitle = if (onlineMode && account.signedIn) {
-                            "Show Social in the app navigation."
+                            "Show Social in the app navigation. It is turned on with Online mode."
                         } else {
                             "Turn on Online mode and sign in to show Social."
                         },
@@ -164,6 +165,13 @@ fun OnlineModeScreen(navController: NavController) {
                     )
                 }
             }
+
+            // The privacy controls used to live behind their own card in the
+            // Settings hub, one page away from the account they actually
+            // belong to. They are the account's own rules, so they are stated
+            // here, on the page where the account is.
+            item { SettingsSectionHeading("Privacy") }
+            item { SocialPrivacyOptions() }
 
             item { SettingsSectionHeading("Sync") }
             item {

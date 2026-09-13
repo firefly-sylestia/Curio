@@ -158,8 +158,14 @@ data class CurioDirectMessage(
     val migrationState: String = "legacy"
 )
 
-/** The server-owned delivery mode for one two-person conversation. */
-data class CurioDmConversation(val encryptionEnabled: Boolean = true)
+/**
+ * The server-owned delivery mode for one two-person conversation.
+ *
+ * OFF unless the server says otherwise (decided): the encrypted path needs
+ * both people on a build that publishes device keys, so a chat between
+ * mismatched versions could not send at all when this defaulted to on.
+ */
+data class CurioDmConversation(val encryptionEnabled: Boolean = false)
 
 /**
  * One reaction somebody left on one message. [kind] is the reaction itself —
@@ -322,6 +328,19 @@ private const val PERSON_COLUMNS_PRIVACY =
     ): Result<Map<String, CurioPerson>> = withContext(Dispatchers.IO) {
         mapped { namesOf(accessToken, ids.toList()) }
     }
+
+    /**
+     * A handle nobody has claimed yet, in the shape the server accepts.
+     *
+     * Used only when a signed-in account has NO username, because without one
+     * a member cannot be found, added or mentioned. Two ordinary words plus a
+     * few digits: it reads like a name rather than a serial number, it stays
+     * inside the 3 to 24 character rule the column and the API both enforce,
+     * and the member replaces it in Edit profile whenever they like. Nothing
+     * here is a secret, so `Random` is enough.
+     */
+    fun suggestUsername(): String =
+        "${USERNAME_WORDS.random()}_${USERNAME_WORDS.random()}_${(1000..9999).random()}"
 
     /** Saves a normalized handle; the unique index turns duplicates into a safe failure. */
     suspend fun updateUsername(accessToken: String, username: String): Result<Unit> =
@@ -1045,8 +1064,12 @@ private const val PERSON_COLUMNS_PRIVACY =
   }
 
   /**
-   * Reads the one shared delivery setting. A conversation created before this
-   * setting existed deliberately remains encrypted until somebody changes it.
+   * Reads the one shared delivery setting.
+   *
+   * A conversation with NO row reads as encryption OFF, which is what the
+   * column defaults to and what the insert trigger now enforces, so the client
+   * and the server can never disagree about a brand-new chat. A row that says
+   * true is still honoured exactly as before.
    */
   suspend fun dmConversation(accessToken: String, conversationId: String): Result<CurioDmConversation> = withContext(Dispatchers.IO) {
     mapped {
@@ -1055,7 +1078,7 @@ private const val PERSON_COLUMNS_PRIVACY =
         accessToken
       ).get().build()
       val row = JSONArray(SupabaseClient.executeBody(request)).optJSONObject(0)
-      CurioDmConversation(row?.optBoolean("encryption_enabled", true) ?: true)
+      CurioDmConversation(row?.optBoolean("encryption_enabled", false) ?: false)
     }
   }
 
@@ -1433,6 +1456,18 @@ private const val PERSON_COLUMNS_PRIVACY =
             else -> null
         }
     }
+
+    /**
+     * The pool a generated handle is drawn from. Deliberately short words:
+     * the longest pair plus four digits is 20 characters, comfortably inside
+     * the 24-character ceiling, and none of them trips the content filter.
+     */
+    private val USERNAME_WORDS = listOf(
+        "curious", "quiet", "sunny", "brave", "amber", "vivid", "gentle",
+        "clever", "mellow", "swift", "lucky", "otter", "finch", "koala",
+        "comet", "maple", "willow", "ember", "harbor", "meadow", "pixel",
+        "lantern", "acorn", "pebble"
+    )
 
     /** PostgREST answers with an offset timestamp — 0 when it cannot be read. */
     private fun epochMillis(iso: String): Long =

@@ -3,8 +3,10 @@ package com.curio.app.features.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -42,80 +44,38 @@ import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.launch
 
 /**
- * PRIVACY — the member's own rules about who can see what.
+ * PRIVACY, as a set of controls rather than a page.
  *
- * Three decisions, and each one is enforced where it actually matters:
+ * The three decisions live here once ([SocialPrivacyOptions]) and are HOSTED
+ * where they belong: Online mode's own page, which is where a member is when
+ * they are thinking about their account, and this route keeps working as a
+ * direct shortcut for the Edit profile button.
+ *
+ * Each decision is enforced where it actually matters:
  *
  *  - **Who sees your profile.** A friends-only profile is readable by accepted
- *    friends alone; the discoverable SELECT policy in `supabase/schema.sql`
- *    §5f is what refuses everyone else.
+ *    friends alone. The discoverable SELECT policy in `supabase/schema.sql` §5f
+ *    is what refuses everyone else.
  *  - **Whether anything is drawn about your activity.** Hiding it clears the
- *    stamp on the server in the same write, so there is nothing to read — the
+ *    stamp on the server in the same write, so there is nothing to read. The
  *    promise is kept by absence, not by a flag somebody might forget to check.
  *  - **Who is blocked.** A block removes the pair from every reachable
- *    surface: cards, replies, likes, requests, messages and each other's
- *    profiles, in both directions.
+ *    surface in both directions: cards, replies, likes, requests, messages and
+ *    each other's profiles.
  *
  * Every switch writes its LOCAL preference first, so the choice holds on a
- * device with no signal, and then mirrors it onto the profile row. The screen
- * says that plainly rather than pretending the network is always there.
+ * device with no signal, and then mirrors it onto the profile row.
  */
 @Composable
 fun PrivacyScreen(navController: NavController) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val account = OnlineAccount.state
     val wide = windowWidthSizeClass().isWide
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
 
-    // The observable mirrors, so the switches move the instant they are tapped
-    // and the direct-message presence reader agrees.
-    val visibility = AppPreferences.profileVisibilityState
-    val presenceMode = AppPreferences.presenceModeState
-    val token = account.session?.accessToken
-
-    var blocked by remember { mutableStateOf<List<CurioPerson>>(emptyList()) }
-    var unblockTarget by remember { mutableStateOf<CurioPerson?>(null) }
-    var busy by remember { mutableStateOf(false) }
-    var notice by remember { mutableStateOf<String?>(null) }
-
+    // Arriving here directly (the Edit profile shortcut) must restore the
+    // session before the options below can read the account.
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
-
-    suspend fun loadBlocked(active: String) {
-        // Best-effort: a project that has not been re-pasted since §5f has no
-        // `member_blocks`, and that is an empty list, not a broken page.
-        SocialApi.blocks(active).onSuccess { blocked = it }
-    }
-
-    LaunchedEffect(token) { token?.let { loadBlocked(it) } }
-
-    // The local preference is authoritative and lands immediately; the server
-    // copy follows, and a failure is reported instead of silently dropped.
-    fun applyPrivacy(nextVisibility: String, nextPresenceMode: String) {
-        AppPreferences.setProfileVisibility(context, nextVisibility)
-        AppPreferences.setPresenceMode(context, nextPresenceMode)
-        scope.launch {
-            val active = token
-            if (active == null) {
-                notice = "Saved on this device. Sign in to apply it to your account."
-                return@launch
-            }
-            SocialApi.updatePrivacy(active, nextVisibility, nextPresenceMode == AppPreferences.PRESENCE_HIDDEN, nextPresenceMode).fold(
-                onSuccess = { notice = "Saved." },
-                onFailure = {
-                    notice = "Saved on this device — it will sync when you're back online."
-                }
-            )
-            // Hiding activity takes the stamp away NOW; showing it again
-            // publishes a fresh one so the line comes back straight away.
-            if (nextPresenceMode == AppPreferences.PRESENCE_ACTIVE) {
-                SocialPresence.publish(context, force = true)
-            } else {
-                SocialPresence.withdraw(context)
-            }
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -162,128 +122,7 @@ fun PrivacyScreen(navController: NavController) {
                     navController = navController
                 )
             }
-
-            item { SettingsSectionHeading("Your profile") }
-            item {
-                SettingsOptionCard {
-                    SettingsOptionSwitchRow(
-                        icon = CurioIcons.Person,
-                        title = "Friends-only profile",
-                        subtitle = if (visibility == PROFILE_VISIBILITY_FRIENDS) {
-                            "Only your friends can open your profile or find you by name."
-                        } else {
-                            "Any signed-in member with Online mode on can open your profile."
-                        },
-                        checked = visibility == PROFILE_VISIBILITY_FRIENDS,
-                        onCheckedChange = { wanted ->
-                            applyPrivacy(
-                                if (wanted) PROFILE_VISIBILITY_FRIENDS else PROFILE_VISIBILITY_PUBLIC,
-                                presenceMode
-                            )
-                        }
-                    )
-                    SettingsOptionDivider()
-                    SettingsOptionInfoRow(
-                        CurioIcons.Info,
-                        "Your profile holds only your name and portrait",
-                        "Cards, replies and messages are separate things that happen to " +
-                            "carry your name — nothing else about you is part of it."
-                    )
-                }
-            }
-
-            item { SettingsSectionHeading("Activity") }
-            item {
-                SettingsOptionCard {
-                    SettingsOptionRow(
-                        icon = CurioIcons.VisibilityOff,
-                        title = "Show active status",
-                        subtitle = if (presenceMode == AppPreferences.PRESENCE_ACTIVE) "Selected · In direct chats, show when you were last active." else "In direct chats, show when you were last active.",
-                        onClick = { applyPrivacy(visibility, AppPreferences.PRESENCE_ACTIVE) }
-                    )
-                    SettingsOptionDivider()
-                    SettingsOptionRow(
-                        icon = CurioIcons.VisibilityOff,
-                        title = "Do not disturb",
-                        subtitle = "Show DND in direct chats and do not publish activity time.",
-                        onClick = { applyPrivacy(visibility, AppPreferences.PRESENCE_DND) }
-                    )
-                    SettingsOptionDivider()
-                    SettingsOptionRow(
-                        icon = CurioIcons.VisibilityOff,
-                        title = "Show nothing",
-                        subtitle = "Hide your status and activity time completely.",
-                        onClick = { applyPrivacy(visibility, AppPreferences.PRESENCE_HIDDEN) }
-                    )
-                }
-            }
-
-            item { SettingsSectionHeading("Blocked people") }
-            item {
-                SettingsOptionCard {
-                    if (blocked.isEmpty()) {
-                        SettingsOptionInfoRow(
-                            CurioIcons.Info,
-                            "Nobody is blocked",
-                            "Block someone from their profile. A block stops messages, " +
-                                "requests and each other's cards, both ways."
-                        )
-                    } else {
-                        blocked.forEachIndexed { index, person ->
-                            if (index > 0) SettingsOptionDivider()
-                            SettingsOptionRow(
-                                icon = CurioIcons.Delete,
-                                title = person.label,
-                                subtitle = "Blocked · tap to unblock",
-                                onClick = { unblockTarget = person }
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (!account.signedIn) {
-                item {
-                    SettingsOptionCard {
-                        SettingsOptionInfoRow(
-                            CurioIcons.Warning,
-                            "Sign in to apply these to your account",
-                            "They are already saved on this device. Signing in mirrors them, " +
-                                "and they are what other members' servers enforce."
-                        )
-                    }
-                }
-            }
-
-            notice?.let { message ->
-                item {
-                    Text(
-                        text = message,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 2.dp)
-                    )
-                }
-            }
-
-            item { SettingsSectionHeading("Always true") }
-            item {
-                SettingsOptionCard {
-                    SettingsOptionInfoRow(
-                        CurioIcons.Image,
-                        "Photos, audio and recordings never leave this device",
-                        "The online layer is text only — there is no field anywhere in the " +
-                            "schema that could carry a capture."
-                    )
-                    SettingsOptionDivider()
-                    SettingsOptionInfoRow(
-                        CurioIcons.Notes,
-                        "Messages are between the two people in the thread",
-                        "They are stored so they can be delivered, and a block ends the " +
-                            "conversation in both directions."
-                    )
-                }
-            }
+            item(key = "privacy-options") { SocialPrivacyOptions() }
         }
 
         if (!wide) {
@@ -292,6 +131,168 @@ fun PrivacyScreen(navController: NavController) {
                 subtitle = "Who can see what",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
+            )
+        }
+    }
+}
+
+/**
+ * The three privacy decisions, ready to be dropped into any settings page.
+ *
+ * It owns its own state, so a host only places it: the observables it reads
+ * are the app's own mirrors, which is why two hosts can never disagree about
+ * what is on. Sections, not a page: a host supplies its own headings if it
+ * wants different grouping.
+ */
+@Composable
+internal fun SocialPrivacyOptions() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val account = OnlineAccount.state
+
+    // The observable mirrors, so the switches move the instant they are tapped
+    // and the direct-message presence reader agrees.
+    val visibility = AppPreferences.profileVisibilityState
+    val presenceMode = AppPreferences.presenceModeState
+    val token = account.session?.accessToken
+
+    var blocked by remember { mutableStateOf<List<CurioPerson>>(emptyList()) }
+    var unblockTarget by remember { mutableStateOf<CurioPerson?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var notice by remember { mutableStateOf<String?>(null) }
+
+    suspend fun loadBlocked(active: String) {
+        // Best-effort: a project that has not been re-pasted since §5f has no
+        // `member_blocks`, and that is an empty list, not a broken page.
+        SocialApi.blocks(active).onSuccess { blocked = it }
+    }
+
+    LaunchedEffect(token) { token?.let { loadBlocked(it) } }
+
+    // The local preference is authoritative and lands immediately; the server
+    // copy follows, and a failure is reported instead of silently dropped.
+    fun applyPrivacy(nextVisibility: String, nextPresenceMode: String) {
+        AppPreferences.setProfileVisibility(context, nextVisibility)
+        AppPreferences.setPresenceMode(context, nextPresenceMode)
+        scope.launch {
+            val active = token
+            if (active == null) {
+                notice = "Saved on this device. Sign in to apply it to your account."
+                return@launch
+            }
+            SocialApi.updatePrivacy(
+                active,
+                nextVisibility,
+                nextPresenceMode == AppPreferences.PRESENCE_HIDDEN,
+                nextPresenceMode
+            ).fold(
+                onSuccess = { notice = "Saved." },
+                onFailure = {
+                    notice = "Saved on this device. It will sync when you are back online."
+                }
+            )
+            // Hiding activity takes the stamp away NOW; showing it again
+            // publishes a fresh one so the line comes back straight away.
+            if (nextPresenceMode == AppPreferences.PRESENCE_ACTIVE) {
+                SocialPresence.publish(context, force = true)
+            } else {
+                SocialPresence.withdraw(context)
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        SettingsSectionHeading("Your profile")
+        SettingsOptionCard {
+            SettingsOptionSwitchRow(
+                icon = CurioIcons.Person,
+                title = "Friends-only profile",
+                subtitle = if (visibility == PROFILE_VISIBILITY_FRIENDS) {
+                    "Only your friends can open your profile or find you by name."
+                } else {
+                    "Any signed-in member with Online mode on can open your profile."
+                },
+                checked = visibility == PROFILE_VISIBILITY_FRIENDS,
+                onCheckedChange = { wanted ->
+                    applyPrivacy(
+                        if (wanted) PROFILE_VISIBILITY_FRIENDS else PROFILE_VISIBILITY_PUBLIC,
+                        presenceMode
+                    )
+                }
+            )
+        }
+
+        SettingsSectionHeading("Activity")
+        SettingsOptionCard {
+            SettingsOptionSwitchRow(
+                icon = CurioIcons.VisibilityOff,
+                title = "Show active status",
+                subtitle = "In direct chats, show when you were last active.",
+                checked = presenceMode == AppPreferences.PRESENCE_ACTIVE,
+                onCheckedChange = { wanted ->
+                    applyPrivacy(
+                        visibility,
+                        if (wanted) AppPreferences.PRESENCE_ACTIVE else AppPreferences.PRESENCE_HIDDEN
+                    )
+                }
+            )
+            SettingsOptionDivider()
+            SettingsOptionSwitchRow(
+                icon = CurioIcons.Schedule,
+                title = "Do not disturb",
+                subtitle = "Show DND in direct chats and publish no activity time.",
+                checked = presenceMode == AppPreferences.PRESENCE_DND,
+                onCheckedChange = { wanted ->
+                    applyPrivacy(
+                        visibility,
+                        if (wanted) AppPreferences.PRESENCE_DND else AppPreferences.PRESENCE_ACTIVE
+                    )
+                }
+            )
+        }
+
+        SettingsSectionHeading("Blocked people")
+        SettingsOptionCard {
+            if (blocked.isEmpty()) {
+                SettingsOptionInfoRow(
+                    CurioIcons.Info,
+                    "Nobody is blocked",
+                    "Block someone from their profile. A block stops messages, " +
+                        "requests and each other's cards, both ways."
+                )
+            } else {
+                blocked.forEachIndexed { index, person ->
+                    if (index > 0) SettingsOptionDivider()
+                    SettingsOptionRow(
+                        icon = CurioIcons.Delete,
+                        title = person.label,
+                        subtitle = "Blocked. Tap to unblock",
+                        onClick = { unblockTarget = person }
+                    )
+                }
+            }
+        }
+
+        if (!account.signedIn) {
+            SettingsOptionCard {
+                SettingsOptionInfoRow(
+                    CurioIcons.Warning,
+                    "Sign in to apply these to your account",
+                    "They are already saved on this device. Signing in mirrors them, " +
+                        "and they are what other members' servers enforce."
+                )
+            }
+        }
+
+        notice?.let { message ->
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 2.dp)
             )
         }
     }

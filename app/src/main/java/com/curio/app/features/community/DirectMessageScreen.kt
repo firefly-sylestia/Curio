@@ -164,8 +164,10 @@ fun DirectMessageScreen(
     var loading by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
     // This is read from the server-owned conversation row. It is never a
-    // device preference: both participants see and use the same mode.
-    var encryptionEnabled by remember(otherUserId) { mutableStateOf(true) }
+    // device preference: both participants see and use the same mode. It
+    // starts OFF, which is what a brand-new conversation is (see the schema),
+    // and a row that says otherwise replaces it as soon as it loads.
+    var encryptionEnabled by remember(otherUserId) { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var loadedOnce by remember { mutableStateOf(false) }
     // A server push bumps this, which re-runs the delta fetch below. It is a
@@ -412,11 +414,12 @@ fun DirectMessageScreen(
             draft = text
             // This preparation also contacts the server to exchange public
             // keys. Do not misreport a friend/RLS/network failure as a broken
-            // keystore — that sent people looking for a device fix when the
+            // keystore: that sent people looking for a device fix when the
             // actionable problem was the server response.
-            error = failure.message
+            val reason = failure.message
                 ?.takeIf { it.isNotBlank() }
                 ?: "Couldn't prepare this encrypted message. Please try again."
+            error = if (encryptionEnabled) encryptedSendAdvice(reason) else reason
             sending = false
             return
         }
@@ -437,7 +440,8 @@ fun DirectMessageScreen(
                 // The bubble must not linger as if it were delivered.
                 pending = pending.filterNot { it.id == optimistic.id }
                 draft = text
-                error = failure.message ?: "That message didn't send."
+                val reason = failure.message ?: "That message didn't send."
+                error = if (encryptionEnabled) encryptedSendAdvice(reason) else reason
             }
         )
         sending = false
@@ -1494,6 +1498,24 @@ cursorBrush = SolidColor(curioDialogActionColor()),
         }
     }
 }
+
+/**
+ * The line shown when an ENCRYPTED send fails: the reason, then what to do
+ * about it.
+ *
+ * Encrypted delivery needs BOTH people on a build that publishes device keys,
+ * so a failure here is usually about the other version rather than anything
+ * the sender did wrong. Leaving them with a dead Send button is the worst
+ * outcome, so the line names the one switch that fixes it and is honest that
+ * the feature is provisional. Only ever used while encryption is ON: a
+ * plaintext failure must not be dressed up with advice about a mode it is not
+ * using.
+ */
+private fun encryptedSendAdvice(reason: String): String =
+    "$reason\n\nEncryption only works when you are both on a version that supports it. " +
+        "Turn encryption off for this chat to keep messaging, and you can turn it " +
+        "back on later. Encrypted messages are still experimental and may be " +
+        "changed or withdrawn."
 
 /**
  * How often an OPEN conversation asks whether anything new arrived.

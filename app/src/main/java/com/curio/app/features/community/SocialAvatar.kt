@@ -773,7 +773,12 @@ private fun DrawScope.drawCharacter(
  * speaks the same language as the rails and filter pills.
  */
 @Composable
-internal fun AvatarPickerIcon(style: Int, selected: Boolean, onClick: () -> Unit) {
+internal fun AvatarPickerIcon(
+    style: Int,
+    selected: Boolean,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
     val accent = MaterialTheme.colorScheme.primary
     Box(
         modifier = Modifier
@@ -788,7 +793,9 @@ internal fun AvatarPickerIcon(style: Int, selected: Boolean, onClick: () -> Unit
                     Modifier
                 }
             )
-            .clickable(onClick = onClick),
+            // A picker with a write in flight goes inert rather than lying:
+            // the same rule the username field follows while it saves.
+            .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         // The click lives on the tile (above), so the portrait itself is not

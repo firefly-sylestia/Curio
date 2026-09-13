@@ -1435,8 +1435,8 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),
     // ── Online mode (own screen — no row pulse) ──────────────────────
     SettingsDeepRow(CurioIcons.Refresh, "Online mode", "Sign in to sync your account", CurioRoutes.SETTINGS_ONLINE),
-    // ── Privacy (own screen — no row pulse) ──────────────────────────
-    SettingsDeepRow(CurioIcons.VisibilityOff, "Privacy", "Profile visibility, activity and blocked people", CurioRoutes.SETTINGS_PRIVACY),
+    // Privacy is not a section of its own any more: the rules belong to the
+    // account, so they are stated on the Online mode page next to it.
     // ── Updates (v112 — dedicated sub-page) ─────────────────────────
     SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.UPDATES),
     SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.UPDATES),
@@ -1600,7 +1600,6 @@ private val settingsNavRail = listOf(
     SettingsNavEntry("experiments", "Experiments", CurioIcons.AutoAwesome, CurioRoutes.USER_EXPERIMENTS),
     SettingsNavEntry("backup", "Backup", CurioIcons.Backup, CurioRoutes.SETTINGS_DATA),
     SettingsNavEntry("online", "Online", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE),
-    SettingsNavEntry("privacy", "Privacy", CurioIcons.VisibilityOff, CurioRoutes.SETTINGS_PRIVACY),
     SettingsNavEntry("support", "Support", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
 )
 
@@ -1656,11 +1655,11 @@ private data class SettingsSecondaryCard(
 
 private val settingsSecondaryCards = listOf(
     // v3xx54 — the account + Online Mode page: a secondary row, the same size
-    // as Recycle bin, instead of a big square card.
-    SettingsSecondaryCard("online", "Online mode", "Sign in and keep your account in sync", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE, SettingsDesignTone.BLUE, SettingsDesignVisual.REFRESH),
-    // v3xx55 — the member's own rules: who sees the profile, whether activity
-    // is drawn, and who is blocked.
-    SettingsSecondaryCard("privacy", "Privacy", "Profile visibility, activity and blocks", CurioIcons.VisibilityOff, CurioRoutes.SETTINGS_PRIVACY, SettingsDesignTone.VIOLET, SettingsDesignVisual.FLASK),
+    // as Recycle bin, instead of a big square card. The privacy rules (profile
+    // visibility, activity, blocks) are NOT a card of their own any more: they
+    // live on this page, next to the account they belong to. The route still
+    // exists for the Edit profile shortcut.
+    SettingsSecondaryCard("online", "Online mode", "Sign in, keep your account in sync, and set your privacy rules", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE, SettingsDesignTone.BLUE, SettingsDesignVisual.REFRESH),
     SettingsSecondaryCard("recycle", "Recycle bin", "Restore recently deleted captures", CurioIcons.Delete, CurioRoutes.RECYCLE_BIN, SettingsDesignTone.STEEL, SettingsDesignVisual.TRASH),
     SettingsSecondaryCard("updates", "Updates", "Your build, release notes & update checker", CurioIcons.Download, CurioRoutes.UPDATES, SettingsDesignTone.SAGE, SettingsDesignVisual.REFRESH),
     SettingsSecondaryCard("support", "Help & feedback", "Get support or suggest a feature", CurioIcons.SupportAgent, CurioRoutes.SUPPORT, SettingsDesignTone.LAVENDER, SettingsDesignVisual.CHAT)

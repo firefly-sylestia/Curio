@@ -73,14 +73,11 @@ object OnlineAccount {
             SupabaseClient.refreshSession(stored.refreshToken).fold(
                 onSuccess = { refreshed ->
                     SupabaseSessionStore.save(context, refreshed)
-                    AppPreferences.setOnlineModeEnabled(context, true)
+                    enableOnlineMode(context)
                     SupabaseClient.updateOnlineMode(refreshed.accessToken, true)
                     state = state.copy(session = refreshed, busy = false, error = null)
                     keepSessionFresh(context, refreshed)
-                    recoveryScope.launch {
-                        restoreProfileIdentity(context, refreshed)
-                        publishIdentity(context, refreshed.accessToken, refreshed.userId)
-                    }
+                    recoveryScope.launch { reconcileIdentity(context, refreshed) }
                 },
                 onFailure = {
                     // Keep the cached session for offline use, but avoid trapping
@@ -102,12 +99,11 @@ object OnlineAccount {
         return SupabaseClient.signIn(address, password).fold(
             onSuccess = { session ->
                 SupabaseSessionStore.save(context, session)
-                AppPreferences.setOnlineModeEnabled(context, true)
+                enableOnlineMode(context)
                 SupabaseClient.updateOnlineMode(session.accessToken, true)
-                restoreProfileIdentity(context, session)
+                reconcileIdentity(context, session)
                 state = State(session = session)
                 keepSessionFresh(context, session)
-                publishIdentity(context, session.accessToken, session.userId)
                 true
             },
             onFailure = { failure ->
@@ -133,19 +129,22 @@ object OnlineAccount {
         return SupabaseClient.signUp(address, password).fold(
             onSuccess = { session ->
                 if (session == null) {
+                    // Email confirmation is ON for this project, so the
+                    // account exists and the next step belongs to the inbox.
+                    // The email stays in the form and this reads as the
+                    // SUCCESS it is, not as a failure the user has to retry.
                     state = State(
-                        notice = "Almost there — confirm the link we emailed to " +
-                            "$address, then sign in."
+                        notice = "Account created. Confirm the link we emailed to " +
+                            "$address, then sign in with the same email."
                     )
                     false
                 } else {
                     SupabaseSessionStore.save(context, session)
-                    AppPreferences.setOnlineModeEnabled(context, true)
+                    enableOnlineMode(context)
                     SupabaseClient.updateOnlineMode(session.accessToken, true)
-                    restoreProfileIdentity(context, session)
+                    reconcileIdentity(context, session)
                     state = State(session = session)
                     keepSessionFresh(context, session)
-                    publishIdentity(context, session.accessToken, session.userId)
                     true
                 }
             },
@@ -167,6 +166,13 @@ object OnlineAccount {
         if (token != null) SupabaseClient.signOut(token)
         SupabaseSessionStore.clear(context)
         AppPreferences.setOnlineModeEnabled(context, false)
+        // The handle belongs to the ACCOUNT, not to this device, so it goes
+        // with it. Leaving it behind is how the next account signed in here
+        // inherited the previous member's username (and with it their place
+        // in friends' searches) until somebody noticed. The display name and
+        // the portrait stay: they are this person's own and are re-pulled from
+        // whichever account signs in next.
+        AppPreferences.setUsername(context, "")
         // The device's social copy goes too: every cached conversation, wall
         // page, inbox, reply set and remembered person lives in
         // [SocialCache] (see the caches in features/community). Signing out
@@ -195,11 +201,28 @@ object OnlineAccount {
      * failure is surfaced instead of silently dropping the change.
      */
     suspend fun setOnlineMode(context: Context, enabled: Boolean) {
-        AppPreferences.setOnlineModeEnabled(context, enabled)
+        if (enabled) enableOnlineMode(context)
+        else AppPreferences.setOnlineModeEnabled(context, false)
         val token = state.session?.accessToken ?: return
         SupabaseClient.updateOnlineMode(token, enabled).onFailure { failure ->
             state = state.copy(error = onlineAuthMessage(failure))
         }
+    }
+
+    /**
+     * Turns Online mode on, and brings the Social tab with it.
+     *
+     * The Social wall is what most members are actually turning this switch on
+     * for, and reaching it meant knowing that a SECOND, separate switch existed
+     * in the same page. The tab is only ever turned ON here, and only on a real
+     * off-to-on change: a member who switched the tab off on purpose keeps it
+     * off until they turn Online mode off and on again, and turning Online mode
+     * off hides the tab anyway (see `AppPreferences.communityTabVisible`).
+     */
+    private fun enableOnlineMode(context: Context) {
+        val wasOn = AppPreferences.isOnlineModeEnabled(context)
+        AppPreferences.setOnlineModeEnabled(context, true)
+        if (!wasOn) AppPreferences.setCommunityTabEnabled(context, true)
     }
 
     /** Clears a shown error/notice (the UI calls this when it moves on). */
@@ -253,43 +276,70 @@ object OnlineAccount {
     }
 
     /**
-     * Carries the identity this device already has onto the account.
+     * Makes the ACCOUNT and this device agree on who the member is.
      *
-     * A name and a handle are two different things: the handle is how people
-     * find you, the display name is what they READ first, and the bio is the
-     * line under it. A brand-new account would otherwise reach the wall with
-     * only a handle to its name, so the local name and bio are pushed the
-     * moment a session exists. Best-effort — a failed push is a blank second
-     * line or an absent bio, never a blocked sign-in.
+     * The account owns the handle: it is how a member is found, added and
+     * mentioned, so an account with none is given a generated one here rather
+     * than being unable to use the social half at all. The device's own name
+     * and bio are pushed ONLY into an account that has none of its own, so a
+     * sign-in can never rewrite the name an existing account already owns. A
+     * brand-new account therefore still reaches the wall with a real name, and
+     * an existing one keeps the name its owner chose.
+     *
+     * Best-effort throughout: a failed push is a blank second line or an
+     * absent bio, never a blocked sign-in.
      */
-    private fun publishIdentity(context: Context, accessToken: String, userId: String) {
-        val name = AppPreferences.getDisplayName(context)
-        val bio = AppPreferences.getCustomStreakTagline(context)
+    private suspend fun reconcileIdentity(context: Context, session: SupabaseClient.Session) {
+        // Register a public device key as soon as the account is active, rather
+        // than making a friend open a DM before they can receive the first
+        // encrypted message. Not on the critical path: signing in must not wait
+        // on key material.
         recoveryScope.launch {
-            // Register a public device key as soon as the account is active,
-            // rather than making a friend open a DM before they can receive
-            // the first encrypted message.
             runCatching { CurioDmCrypto.identity(context) }
-                .onSuccess { SocialApi.publishDmIdentity(accessToken, it, userId) }
-            if (name.isNotBlank()) SocialApi.updateDisplayName(accessToken, name)
-            if (bio.isNotBlank()) SocialApi.updateBio(accessToken, bio)
+                .onSuccess { SocialApi.publishDmIdentity(session.accessToken, it, session.userId) }
         }
+
+        val profile = SocialApi.profile(session.accessToken, session.userId).getOrNull() ?: return
+        if (profile.username.isBlank()) {
+            claimGeneratedUsername(context, session.accessToken)
+        } else {
+            AppPreferences.setUsername(context, profile.username)
+        }
+        if (profile.displayName.isNotBlank()) {
+            AppPreferences.setDisplayName(context, profile.displayName)
+        } else {
+            val name = AppPreferences.getDisplayName(context)
+            if (name.isNotBlank()) SocialApi.updateDisplayName(session.accessToken, name)
+        }
+        if (profile.bio.isBlank()) {
+            val bio = AppPreferences.getCustomStreakTagline(context)
+            if (bio.isNotBlank()) SocialApi.updateBio(session.accessToken, bio)
+        }
+        AppPreferences.setSocialAvatarStyle(context, profile.avatarStyle)
     }
 
     /**
-     * Rehydrates identity fields that belong to the online profile after an
-     * app-data clear.  In particular, never let the default local display
-     * name overwrite a name or username that the account already owns.
+     * Gives an account that has no handle one of its own.
+     *
+     * Without a username a member cannot be found, added or mentioned, which is
+     * every social action there is, so a brand-new account used to be stuck
+     * until somebody thought to claim one. The generated name is a normal
+     * username and can be replaced in Edit profile at any time.
+     *
+     * ONE attempt on purpose: a name already being taken is the only expected
+     * failure and the collision space is wide, while the client's rename
+     * cooldown means a second try would be refused anyway. A genuine failure
+     * (offline) simply leaves the account unnamed until the next sign-in, and
+     * nothing about the sign-in itself is blocked either way.
+     *
+     * A short, ordinary name is used rather than a wall of digits: it is what
+     * friends read on a card, and the member can replace it in one step.
      */
-    private suspend fun restoreProfileIdentity(context: Context, session: SupabaseClient.Session) {
-        val profile = SocialApi.profile(session.accessToken, session.userId).getOrNull() ?: return
-        profile.username.takeIf { it.isNotBlank() }?.let {
-            AppPreferences.setUsername(context, it)
+    private suspend fun claimGeneratedUsername(context: Context, accessToken: String) {
+        val candidate = SocialApi.suggestUsername()
+        SocialApi.updateUsername(accessToken, candidate).onSuccess {
+            AppPreferences.setUsername(context, candidate)
         }
-        profile.displayName.takeIf { it.isNotBlank() }?.let {
-            AppPreferences.setDisplayName(context, it)
-        }
-        AppPreferences.setSocialAvatarStyle(context, profile.avatarStyle)
     }
 }
 
