@@ -5,11 +5,11 @@ import android.util.Base64
 import java.security.KeyFactory
 import java.security.SecureRandom
 import java.security.spec.MGF1ParameterSpec
-import java.security.spec.OAEPParameterSpec
-import java.security.spec.PSource
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.OAEPParameterSpec
+import javax.crypto.spec.PSource
 import javax.crypto.spec.SecretKeySpec
 
 /** End-to-end DM crypto. A message permanently records the conversation-key version it used. */
