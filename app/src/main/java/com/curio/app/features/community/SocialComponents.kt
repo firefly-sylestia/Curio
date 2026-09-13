@@ -861,7 +861,13 @@ internal object SocialMessageCache {
     fun hide(context: Context, otherUserId: String, messageId: String) {
         val ids = hiddenIds(context, otherUserId).toMutableSet()
         ids += messageId
-        SocialCache.write(context, HIDDEN_KIND, otherUserId, JSONArray(ids.takeLast(250)), SocialCache.TTL_THREAD_MS)
+        SocialCache.write(
+            context,
+            HIDDEN_KIND,
+            otherUserId,
+            JSONArray(ids.toList().takeLast(250)),
+            SocialCache.TTL_THREAD_MS
+        )
     }
 
     fun write(

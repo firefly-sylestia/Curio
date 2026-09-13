@@ -1,5 +1,16 @@
 # Prompt Log — current request
 
+## Request (2026-09-13, IN PROGRESS — DM cache compile repair)
+
+CI reports that `MutableSet` does not provide `takeLast` at the local-delete
+cache write. Convert the set to a list before applying the 250-id cap, then
+run static checks only and commit the one-cycle compile repair.
+
+### Completion
++
+- The local hidden-message-id set is now converted to a list before capping,
+  which resolves the CI `Unresolved reference: takeLast` Kotlin compile error.
+
 ## Request (2026-09-13, IN PROGRESS — dependable per-chat message encryption)
 
 User (chat): receiver phones report “Unable to decrypt this message” even on
