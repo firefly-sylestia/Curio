@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -1388,6 +1389,12 @@ private fun MessageComposer(
   Column(
   modifier = modifier
   .fillMaxWidth()
+  // The keyboard sits ON TOP of the composer otherwise: the app is
+  // edge-to-edge (`setDecorFitsSystemWindows(false)`) and the NavHost only
+  // delivers the navigation-bar inset, never the IME one. This lifts the pill
+  // clear of the keyboard the moment it opens and returns it to the gesture
+  // bar when it closes.
+  .imePadding()
   .padding(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
