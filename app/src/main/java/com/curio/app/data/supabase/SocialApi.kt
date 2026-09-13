@@ -806,10 +806,23 @@ private const val PERSON_COLUMNS_PRIVACY =
       val payload = JSONObject().put("conversation_id", conversationId).put("recipient", recipient)
         .put("device_id", envelope.deviceId).put("key_version", envelope.keyVersion)
         .put("encrypted_key", envelope.encryptedKey).put("encryption_version", envelope.version)
-      val request = SupabaseClient.requestBuilder("/rest/v1/dm_key_envelopes?on_conflict=conversation_id,recipient,device_id,key_version", accessToken)
-        .header("Prefer", "resolution=ignore-duplicates,return=minimal")
+      // Do NOT use PostgREST's `on_conflict` upsert here. The sender is
+      // deliberately unable to SELECT a recipient's envelope, and PostgREST
+      // can route a duplicate upsert through RLS visibility checks before it
+      // applies conflict-ignore. Envelopes are immutable, so a plain insert
+      // plus a duplicate-key success path is both safer and reliable.
+      val request = SupabaseClient.requestBuilder("/rest/v1/dm_key_envelopes", accessToken)
+        .header("Prefer", "return=minimal")
         .post(payload.toString().toRequestBody(jsonMediaType)).build()
-      SupabaseClient.executeBody(request)
+      try {
+        SupabaseClient.executeBody(request)
+      } catch (failure: Throwable) {
+        val message = failure.message.orEmpty()
+        if (!message.contains("duplicate key", ignoreCase = true) &&
+            !message.contains("23505", ignoreCase = true) &&
+            !message.contains("unique constraint", ignoreCase = true)
+        ) throw failure
+      }
     }
   }
 

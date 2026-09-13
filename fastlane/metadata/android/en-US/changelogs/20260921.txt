@@ -6,6 +6,7 @@ ADD:
 
 FIX: Social — new accounts now create and mirror their Online mode profile before opening the wall, so they can see and post immediately.
 FIX: Messages — exact device envelopes now restore safely with clear encrypted-message recovery states.
+FIX: Messages — encrypted multi-device delivery no longer trips envelope security on duplicate sends.
 FIX: Messages — a conversation from an older install can rotate an unreadable encryption key and send again instead of failing before delivery.
 FIX: Messages — the composer now stays directly above the keyboard when an empty chat first opens, and recipients load the exact encryption-key version used by each message.
 FIX: Social safety — public text now names the matched safety term, avoids accidental substring blocks, and no longer filters the `fuck` word family.
