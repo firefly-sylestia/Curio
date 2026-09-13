@@ -1,5 +1,33 @@
 # Prompt Log — current request
 
+## Request (2026-09-13, DONE — DM keyboard position and recipient decryption)
+
+User (chat): opening a conversation and focusing the empty composer initially
+places it far above the keyboard until typing forces a re-layout; newly sent
+messages arrive on the recipient as `null` / unable to decrypt.
+
+### Diagnosis and plan
+
+1. The direct-message screen is already resized around the IME by the host.
+   Its composer then adds `imePadding()` again, producing the empty-field
+   double offset shown in the screenshot. Remove the second inset consumer.
+2. The decrypt path installs only the most recent envelope. Messages include a
+   key version, and a recipient needs the envelope for that exact version — a
+   newer envelope cannot decrypt a message encrypted under an earlier key.
+   Fetch and install the versioned envelope before decrypting each message.
+3. Treat JSON `null` message bodies as an empty fallback value, never literal
+   visible text. Update the release note and use static checks only.
+
+### Completion
+
+- The composer no longer consumes the IME inset a second time, so focus keeps
+  it directly above the keyboard from the first frame.
+- Encrypted reads now parse each message's key version and request/install that
+  exact recipient envelope before AES-GCM decryption. This covers conversations
+  spanning key rotations instead of trying a newer key for an older message.
+- Database JSON `null` values are now normalised on every message field; the
+  literal word `null` cannot render as a chat bubble.
+
 ## Request (2026-09-13, DONE — new account Social access and legacy encrypted conversations)
 
 User (chat): a fresh install can create an ID but cannot see the Social wall or

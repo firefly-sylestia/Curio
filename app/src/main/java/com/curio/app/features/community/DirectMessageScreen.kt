@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -185,17 +184,34 @@ fun DirectMessageScreen(
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
-                    else runCatching {
-                        message.copy(body = CurioDmCrypto.decrypt(
+                    else {
+                        val encrypted = com.curio.app.data.supabase.CurioEncryptedMessage(
+                            message.ciphertext.orEmpty(),
+                            message.nonce.orEmpty(),
+                            message.encryptionVersion.orEmpty()
+                        )
+                        // A thread can hold messages from multiple envelope
+                        // generations. Install the version this message names,
+                        // not merely the latest one, before attempting AES-GCM.
+                        CurioDmCrypto.messageKeyVersion(encrypted.version)?.let { keyVersion ->
+                            if (CurioDmCrypto.existingKey(context, conversationId, keyVersion) == null) {
+                                SocialApi.dmEnvelope(active, conversationId, identity.deviceId, keyVersion)
+                                    .getOrNull()
+                                    ?.let { envelope ->
+                                        runCatching {
+                                            CurioDmCrypto.installEnvelope(context, conversationId, envelope)
+                                        }
+                                    }
+                            }
+                        }
+                        runCatching {
+                            message.copy(body = CurioDmCrypto.decrypt(
                             context,
                             conversationId,
-                            com.curio.app.data.supabase.CurioEncryptedMessage(
-                                message.ciphertext.orEmpty(),
-                                message.nonce.orEmpty(),
-                                message.encryptionVersion.orEmpty()
-                            )
-                        ))
-                    }.getOrElse { message.copy(body = "Unable to decrypt this message") }
+                            encrypted
+                            ))
+                        }.getOrElse { message.copy(body = "Unable to decrypt this message") }
+                    }
                 }
                 // v3xx53 — the SERVER keeps 24 hours; the DEVICE keeps what it
                 // received. Merging (rather than replacing) is what makes "gone
@@ -650,7 +666,7 @@ fun DirectMessageScreen(
                 }
 
                 MessageComposer(
-                    modifier = Modifier.imePadding(),
+                    modifier = Modifier,
                     draft = draft,
                     title = fallback,
                     sending = sending,
