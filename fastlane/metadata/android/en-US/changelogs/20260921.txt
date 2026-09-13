@@ -1,4 +1,7 @@
 ADD:
+- Chats: your conversations have their own screen now — the last line, when it arrived and an unread badge per person, reached from the wall's action row beside Friends.
+- Friends: the list is a contacts sidebar — filed A–Z under letter headings, with a green dot on anyone who is active right now, and tapping a friend opens your chat with them. The Friends glyph is a people mark instead of a notepad.
+- Messages: hold a chat in the list to delete it — for you, or for both of you. "For you" leaves the other person's copy alone (and the chat returns if they write again); "for both of you" deletes the whole conversation for both accounts.
 - Social: pull down on the wall to refresh the latest posts.
 - Profiles: a member's page is a real page now — a big portrait, their name and @handle, live counts for their posts, likes and replies, their bio, the one action that fits how you know them (Message or Add friend) with blocking tucked behind the ⋮, and a grid of small post previews that opens the post when tapped.
 - Messages: the other person's "typing…" line and their reactions arrive the instant they happen over the live connection, and both only fall back to a slow safety check when it is unavailable.
@@ -13,6 +16,7 @@ FIX: Messages and Community — live updates stay live: the sign-in token is ref
 FIX: Messages — encrypted multi-device delivery no longer trips envelope security on duplicate sends.
 FIX: Messages — a conversation from an older install can rotate an unreadable encryption key and send again instead of failing before delivery.
 FIX: Messages — the composer now stays directly above the keyboard when an empty chat first opens, and recipients load the exact encryption-key version used by each message.
+FIX: Messages — the message box no longer sits under the keyboard: it lifts with the keyboard in every conversation, empty or full.
 FIX: Social safety — public text now names the matched safety term, avoids accidental substring blocks, and no longer filters the `fuck` word family.
 FIX: Social profiles — notes and quotes now stay as text posts with their quote credit, instead of rendering as unrelated topic cards.
 

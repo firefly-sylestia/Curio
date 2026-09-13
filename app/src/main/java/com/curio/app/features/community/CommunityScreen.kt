@@ -384,9 +384,23 @@ fun CommunityScreen(navController: NavController) {
                             .fillMaxWidth()
                             .padding(vertical = 2.dp)
                     ) {
+                        TextButton(onClick = { navController.navigate(CurioRoutes.CHATS) }) {
+                            CurioIcon(
+                                name = CurioIcons.BubbleChart,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 16.dp
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Chats")
+                        }
+                        Spacer(Modifier.width(4.dp))
+                        // v3xx56 — the friends glyph was a NOTE pad, which said
+                        // "writing", not "people". Hub reads as the network of
+                        // people a friends list actually is.
                         TextButton(onClick = { navController.navigate(CurioRoutes.FRIENDS) }) {
                             CurioIcon(
-                                name = CurioIcons.Notes,
+                                name = CurioIcons.Hub,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 size = 16.dp

@@ -277,6 +277,9 @@ object CurioRoutes {
     // rides in the query so the thread can name who it is with on the FIRST
     // frame (the caller already knows it; the id alone is opaque).
     const val FRIENDS = "friends"
+    // v3xx56 — the inbox, split off Friends: "who are my people" and "what was
+    // said" are two different questions, so they are two screens.
+    const val CHATS = "chats"
     const val DIRECT_MESSAGE = "dm/{userId}?handle={handle}"
     // v3xx — one card's own view: the full card, its caption, replies + share.
     const val COMMUNITY_CARD = "community/{cardId}"

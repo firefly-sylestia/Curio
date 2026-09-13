@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.size
@@ -22,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,7 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
@@ -51,6 +57,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.components.curioPressClickable
+import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
@@ -297,7 +304,11 @@ internal fun SocialPersonCard(
                 .fillMaxWidth()
                 .clickable(onClick = onOpenProfile)
         ) {
-            SocialAvatar(style = person.avatarStyle, avatarSize = 46.dp)
+            SocialAvatar(
+                style = person.avatarStyle,
+                avatarSize = 46.dp,
+                online = person.isActiveNow
+            )
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
                 Text(
                     text = person.label,
@@ -471,70 +482,136 @@ internal fun SocialTextPost(
 }
 
 /**
- * ONE CONVERSATION, as a box card: who, the last line, when, and a count when
- * something is unread. The card is the tap target, so the whole surface opens
- * the thread rather than a word in the corner.
+ * ONE DENSE ROW — a portrait, a name, one line under it, an optional stamp, an
+ * optional count, and an optional long press.
+ *
+ * Both social lists are this row: a CONVERSATION (the last line and when) and
+ * a CONTACT (their @handle), which is what makes the inbox and the contacts
+ * sidebar read as one system rather than two designs. Everything is optional
+ * and nothing is inferred — a member with no presence stamp simply has no dot.
+ *
+ * The row is the tap target, so the whole surface opens the thread or the
+ * profile, and a long press is the only place a destructive option lives.
  */
 @Composable
-internal fun SocialThreadCard(
-    thread: CurioDmThread,
-    onOpen: () -> Unit
+internal fun SocialSidebarRow(
+    person: CurioPerson,
+    subtitle: String,
+    onOpen: () -> Unit,
+    meta: String? = null,
+    badge: Int = 0,
+    onLongClick: (() -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null
 ) {
-    val unread = thread.unread > 0
-    SocialCard(modifier = Modifier.clickable(onClick = onOpen)) {
+    val haptics = LocalHapticFeedback.current
+    val press = rememberCurioPressSource(pressedScale = 0.985f)
+    val unread = badge > 0
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = if (unread) MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
+        else Color.Transparent,
+        modifier = Modifier
+            .fillMaxWidth()
+            // Clip BEFORE the indication so the press wash follows the row's
+            // 16dp corners instead of washing a square around them.
+            .clip(RoundedCornerShape(16.dp))
+            .then(press.modifier)
+            .combinedClickable(
+                interactionSource = press.interactionSource,
+                indication = LocalIndication.current,
+                onClickLabel = "Open ${person.label}",
+                onLongClickLabel = onLongClick?.let { "Options for ${person.label}" },
+                onLongClick = onLongClick?.let { action ->
+                    {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        action()
+                    }
+                },
+                onClick = onOpen
+            )
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
-            SocialAvatar(style = thread.person.avatarStyle, avatarSize = 48.dp)
+            SocialAvatar(
+                style = person.avatarStyle,
+                avatarSize = 50.dp,
+                online = person.isActiveNow
+            )
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = thread.person.label,
+                        text = person.label,
                         style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = if (unread) FontWeight.Bold else FontWeight.SemiBold
+                            fontWeight = if (unread) FontWeight.Bold else FontWeight.Medium
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         modifier = Modifier.weight(1f, fill = false)
                     )
-                    Spacer(Modifier.width(8.dp))
-                    if (thread.lastAtMillis > 0L) {
+                    Spacer(Modifier.weight(1f))
+                    if (meta != null) {
                         Text(
-                            text = socialStamp(thread.lastAtMillis),
+                            text = meta,
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 }
                 Text(
-                    text = thread.preview,
+                    text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = if (unread) MaterialTheme.colorScheme.onSurface
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             if (unread) {
                 Box(
                     modifier = Modifier
-                        .size(22.dp)
-                        .clip(CircleShape)
-                        .background(curioDialogActionColor()),
+                        .heightIn(min = 22.dp)
+                        .background(curioDialogActionColor(), CircleShape)
+                        .padding(horizontal = 7.dp, vertical = 3.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (thread.unread > 9) "9+" else thread.unread.toString(),
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        text = if (badge > 9) "9+" else badge.toString(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
                         color = Color.White
                     )
                 }
             }
+            trailing?.invoke()
         }
     }
 }
+
+/**
+ * The letter a contacts sidebar groups by, drawn as a quiet seam rather than a
+ * heading — the section is a fact about the list, not a title for it.
+ */
+@Composable
+internal fun SocialLetterHeader(letter: String) {
+    Text(
+        text = letter,
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 14.dp, top = 12.dp, bottom = 2.dp)
+    )
+}
+
+/**
+ * The first letter a person is filed under — `#` when their name has no
+ * letter to start with (a handle that begins with a digit or a symbol).
+ */
+internal fun socialLetterOf(label: String): String =
+    label.trim().firstOrNull()?.uppercaseChar()?.takeIf { it.isLetter() }?.toString() ?: "#"
 
 /**
  * THE SOCIAL CONFIRMATION — one dialog for every irreversible action in the
@@ -923,6 +1000,20 @@ internal object SocialMessageCache {
     }
 
     /**
+     * Forgets THIS device's copy of one conversation.
+     *
+     * "Delete for me" is two things, not one: the server marker that keeps the
+     * thread out of the inbox, and the copy this phone holds — leaving the
+     * second behind is how a deleted chat keeps opening from its own tile.
+     * The hidden-message set goes with it.
+     */
+    fun forget(context: Context, otherUserId: String) {
+        if (otherUserId.isBlank()) return
+        SocialCache.forget(context, KIND, otherUserId)
+        SocialCache.forget(context, HIDDEN_KIND, otherUserId)
+    }
+
+    /**
      * Forgets the prefs blobs the older build wrote. Called once per screen
      * entry and answered by a single key lookup, so a user who upgrades never
      * pays for the previous shape sitting in storage.
@@ -1136,6 +1227,28 @@ internal object SocialInboxCache {
             friends = friendsOf(row.optJSONArray("f")),
             atMillis = entry.atMillis
         )
+    }
+
+    /**
+     * Replaces ONLY the conversation half of the snapshot.
+     *
+     * The inbox and the chats list are two screens over one stored snapshot,
+     * and each one owns its own half: a chat deleted on the chats screen must
+     * not blank the friends list the other screen wrote.
+     */
+    fun replaceThreads(context: Context, threads: List<CurioDmThread>) {
+        val previous = read(context)
+        write(context, threads, previous?.requests.orEmpty(), previous?.friends.orEmpty())
+    }
+
+    /** [replaceThreads]' twin, for the contacts half. */
+    fun replaceContacts(
+        context: Context,
+        requests: List<CurioFriendRequest>,
+        friends: List<CurioFriend>
+    ) {
+        val previous = read(context)
+        write(context, previous?.threads.orEmpty(), requests, friends)
     }
 
     fun write(

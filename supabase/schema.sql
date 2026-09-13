@@ -1088,6 +1088,70 @@ create policy dm_hidden_owner on public.dm_conversation_hidden
 create index if not exists dm_hidden_other_idx
     on public.dm_conversation_hidden (other_user_id, user_id);
 
+--------------------------------------------------------------------------------
+-- 5h. Delete a conversation — for me, or for both of us
+--
+-- "Delete for me" is the per-user marker above (`dm_conversation_hidden`): it
+-- hides the thread from ONE inbox and destroys nobody else's history. A new
+-- message from the other person is newer than the marker, so the thread comes
+-- back on its own — hiding a chat can never swallow the reply that follows it.
+--
+-- "Delete for both of us" has to remove rows that belong to the OTHER person
+-- too, which no table grant can express without letting a client delete
+-- arbitrary messages. So it is a security-definer function with one narrow
+-- contract: the caller must be one of the two parties and the rows it touches
+-- are only ever the pair's own messages, hidden markers and conversation row.
+-- It answers how many messages went, so the app can say something honest.
+--
+-- Deliberately NOT gated on the friendship still existing: removing a friend
+-- is exactly when someone wants to clear the thread, and refusing then would
+-- leave them with a chat they cannot get rid of. The pair must simply have a
+-- conversation to delete — the friendship gate belongs on WRITING.
+create or replace function public.curio_delete_dm_conversation(other uuid)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    me uuid := auth.uid();
+    removed integer;
+begin
+    if me is null then
+        raise exception 'curio: sign in to delete a conversation';
+    end if;
+    if other is null or other = me then
+        raise exception 'curio: that is not a conversation';
+    end if;
+    if not exists (
+        select 1 from public.dm_conversations
+         where conversation_id = public.curio_dm_conversation_of(me, other)
+    ) and not exists (
+        select 1 from public.dm_messages
+         where (sender = me and recipient = other)
+            or (sender = other and recipient = me)
+    ) then
+        raise exception 'curio: there is no conversation to delete';
+    end if;
+
+    delete from public.dm_messages
+     where (sender = me and recipient = other)
+        or (sender = other and recipient = me);
+    get diagnostics removed = row_count;
+
+    delete from public.dm_conversation_hidden
+     where (user_id = me and other_user_id = other)
+        or (user_id = other and other_user_id = me);
+
+    delete from public.dm_conversations
+     where conversation_id = public.curio_dm_conversation_of(me, other);
+
+    return removed;
+end $$;
+
+revoke all on function public.curio_delete_dm_conversation(uuid) from public, anon;
+grant execute on function public.curio_delete_dm_conversation(uuid) to authenticated;
+
 -- Realtime delivery is required for message, reaction, request, and typing
 -- updates. The checks keep this safe to paste repeatedly after all tables exist.
 do $$

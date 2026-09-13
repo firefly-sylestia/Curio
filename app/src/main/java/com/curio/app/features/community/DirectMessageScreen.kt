@@ -985,7 +985,13 @@ private fun MessagePeerHeader(
                 .clickable(onClick = onOpenProfile)
                 .padding(14.dp)
         ) {
-            SocialAvatar(style = person?.avatarStyle ?: 0, avatarSize = 46.dp)
+            SocialAvatar(
+                style = person?.avatarStyle ?: 0,
+                avatarSize = 46.dp,
+                // The dot and the presence line under the name are the SAME
+                // fact, so they can never disagree.
+                online = person?.isActiveNow == true
+            )
             Column(
                 modifier = Modifier
                     .weight(1f)

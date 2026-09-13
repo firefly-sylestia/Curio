@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -100,13 +101,18 @@ private val AVATARS: List<AvatarArt> = listOf(
  * @param ring     the soft inner rim. Keep it on for avatars that sit on a
  *                 card or a page background; turn it off inside a busy
  *                 composed row where the extra stroke reads as noise.
+ * @param online   draws the live-presence dot in the lower-right corner. Only
+ *                 ever set from a last-active stamp that is honestly fresh
+ *                 (`CurioPerson.isActiveNow`) — an indicator that guesses is
+ *                 worse than no indicator.
  */
 @Composable
 internal fun SocialAvatar(
     style: Int,
     avatarSize: Dp = 40.dp,
     onClick: (() -> Unit)? = null,
-    ring: Boolean = true
+    ring: Boolean = true,
+    online: Boolean = false
 ) {
     val art = AVATARS[style.coerceIn(0, AVATARS.lastIndex)]
     Box(
@@ -153,8 +159,33 @@ internal fun SocialAvatar(
                 )
             }
         }
+
+        if (online) {
+            // CUT OUT of the portrait, not painted over it: the ring of page
+            // colour separates the dot from the art, which is what keeps it
+            // readable on all 28 grounds in both themes.
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(avatarSize * 0.30f)
+                    .clip(CircleShape)
+                    .background(ActiveDot)
+                    .border(
+                        width = (avatarSize * 0.05f).coerceAtLeast(1.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = CircleShape
+                    )
+            )
+        }
     }
 }
+
+/**
+ * The live-presence dot. One colour on purpose: it means "a stamp younger
+ * than five minutes", and a second shade for "recently" would turn a yes/no
+ * into something the user has to interpret.
+ */
+private val ActiveDot = Color(0xFF2FBF71)
 
 /**
  * The finishing pass EVERY portrait gets.

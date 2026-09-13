@@ -94,7 +94,36 @@ data class CurioPerson(
                 java.text.DateFormat.MEDIUM,
                 java.text.DateFormat.SHORT
             ).format(java.util.Date(lastActiveMillis))
+
+    /**
+     * True when a LIVE dot is honest: activity is visible and the stamp is
+     * inside [ACTIVE_NOW_WINDOW_MS]. A member who hid activity, one with no
+     * stamp, and one whose last stamp is older all answer false — the dot is
+     * drawn from the same fact as [presenceLabel], never from a guess.
+     */
+    val isActiveNow: Boolean
+        get() = !hideActivity && lastActiveMillis > 0L &&
+            System.currentTimeMillis() - lastActiveMillis < ACTIVE_NOW_WINDOW_MS
+
+    /**
+     * This identity with [presence]'s live fields folded in.
+     *
+     * An inbox resolves a name and a presence stamp in two different reads
+     * (the identity columns are what every project has; the presence columns
+     * are opt-in), so a row needs exactly one person out of the two answers.
+     * Presence only ever REFINES here: a missing read leaves this person
+     * untouched rather than blanking a name that already arrived.
+     */
+    fun withPresence(presence: CurioPerson?): CurioPerson = if (presence == null) this else copy(
+        hideActivity = presence.hideActivity,
+        presenceMode = presence.presenceMode,
+        lastActiveMillis = presence.lastActiveMillis,
+        bio = presence.bio.ifBlank { bio }
+    )
 }
+
+/** How fresh a last-active stamp must be for a green dot to be honest. */
+private const val ACTIVE_NOW_WINDOW_MS = 5L * 60 * 1000
 
 /** One accepted friendship, with the person on the other side. */
 data class CurioFriend(
@@ -170,6 +199,10 @@ object SocialApi {
     private const val CONVERSATIONS = "/rest/v1/dm_conversations"
     private const val TYPING = "/rest/v1/dm_typing"
     private const val REACTIONS = "/rest/v1/dm_reactions"
+    private const val HIDDEN = "/rest/v1/dm_conversation_hidden"
+
+    /** §5h — the one write that removes a conversation for BOTH participants. */
+    private const val RPC_DELETE_CONVERSATION = "/rest/v1/rpc/curio_delete_dm_conversation"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     /** The server's own ceiling for one message (also a DB check constraint). */
@@ -207,6 +240,16 @@ object SocialApi {
     private var lastMessageAt = 0L
     private var lastSocialWriteAt = 0L
     private var lastRenameAt = 0L
+
+    /** How long one presence answer is reused — the stamp itself moves slowly. */
+    private const val PRESENCE_TTL_MS = 60_000L
+
+    /**
+     * The last presence read per member: the answer and when it was taken.
+     * Guarded by nothing on purpose — the worst a race can do here is make two
+     * callers do the same tiny read.
+     */
+    private val presenceCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, CurioPerson>>()
 
     private fun throttle(lastAt: Long, gap: Long, message: String): Long {
         val now = System.currentTimeMillis()
@@ -689,19 +732,144 @@ private const val PERSON_COLUMNS_PRIVACY =
                     }
                 }
                 if (latest.isEmpty()) return@mapped emptyList()
-                val names = namesOf(accessToken, latest.keys.toList())
-                latest.map { (otherId, row) ->
-                    CurioDmThread(
-                        person = names[otherId] ?: CurioPerson(otherId, ""),
-                        preview = row.optString("body"),
-                        lastAtMillis = epochMillis(row.optString("created_at")),
-                        // A row older than the scan window counts as read;
-                        // the UI only needs enough to badge the row.
-                        unread = unread[otherId] ?: 0
-                    )
-                }.sortedByDescending { it.lastAtMillis }
+                val others = latest.keys.toList()
+                val names = namesOf(accessToken, others)
+                // A conversation this account swiped away reappears the moment
+                // the other person writes again: the marker is a MOMENT in
+                // time, and only a newer message clears it. Best-effort, so a
+                // project that has not been re-pasted simply hides nothing.
+                val hidden = hiddenConversations(accessToken, myUserId).getOrDefault(emptyMap())
+                val presence = presenceOf(accessToken, others)
+                latest
+                    .filter { (otherId, row) ->
+                        epochMillis(row.optString("created_at")) > (hidden[otherId] ?: 0L)
+                    }
+                    .map { (otherId, row) ->
+                        CurioDmThread(
+                            person = (names[otherId] ?: CurioPerson(otherId, ""))
+                                .withPresence(presence[otherId]),
+                            preview = row.optString("body"),
+                            lastAtMillis = epochMillis(row.optString("created_at")),
+                            // A row older than the scan window counts as read;
+                            // the UI only needs enough to badge the row.
+                            unread = unread[otherId] ?: 0
+                        )
+                    }.sortedByDescending { it.lastAtMillis }
             }
         }
+
+    /**
+     * Hides one conversation from THIS account's inbox — "delete for me".
+     *
+     * The other participant keeps their history, and the next message they
+     * send is newer than the marker, so the thread returns by itself
+     * ([threads] applies exactly that rule). Idempotent: hiding twice writes
+     * the same row.
+     */
+    suspend fun hideConversation(
+        accessToken: String,
+        myUserId: String,
+        otherUserId: String
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            id(myUserId)
+            id(otherUserId)
+            val payload = JSONObject()
+                .put("user_id", myUserId)
+                .put("other_user_id", otherUserId)
+                .put("hidden_at", Instant.now().toString())
+            val request = SupabaseClient.requestBuilder(HIDDEN, accessToken)
+                .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /**
+     * Deletes the WHOLE conversation for BOTH participants — "delete for both
+     * of us". Answers how many messages went.
+     *
+     * This is the §5h server function, not a table write: removing the other
+     * person's rows is not something a client may be trusted to do with a
+     * table grant. Unlike hiding, a failure here IS surfaced — the user asked
+     * for something permanent, so a silent no-op would be a lie.
+     */
+    suspend fun deleteConversation(accessToken: String, otherUserId: String): Result<Int> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                id(otherUserId)
+                val request = SupabaseClient.requestBuilder(RPC_DELETE_CONVERSATION, accessToken)
+                    .post(JSONObject().put("other", otherUserId).toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request).trim().toIntOrNull() ?: 0
+            }
+        }
+
+    /**
+     * The conversations this account has swiped away, as other-user id to the
+     * moment it was hidden.
+     *
+     * Best-effort and silent: a project that has not been re-pasted since §5h
+     * has no such table, and an inbox must read as EMPTY-HIDDEN — never as a
+     * failure that blanks the whole list.
+     */
+    private suspend fun hiddenConversations(
+        accessToken: String,
+        myUserId: String
+    ): Result<Map<String, Long>> = withContext(Dispatchers.IO) {
+        runCatching {
+            val path = "$HIDDEN?select=other_user_id,hidden_at&user_id=eq.${id(myUserId)}" +
+                "&limit=200"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            val rows = JSONArray(SupabaseClient.executeBody(request))
+            val out = HashMap<String, Long>(rows.length())
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                val other = row.optString("other_user_id")
+                if (other.isNotBlank()) out[other] = epochMillis(row.optString("hidden_at"))
+            }
+            out
+        }
+    }
+
+    /**
+     * The LIVE half of a set of members: the last-active stamp and the privacy
+     * switch that can take it away.
+     *
+     * The identity columns are what every project has ([PERSON_COLUMNS]); the
+     * presence ones are opt-in ([PERSON_COLUMNS_PRIVACY]), so this is a SECOND
+     * read that only an inbox makes. It is throttled by [PRESENCE_TTL_MS]
+     * because presence itself only moves every few minutes: a tick that runs
+     * every 20 seconds must not re-ask for the same stamp. Blocking (not
+     * suspending) on purpose — every caller is already on the IO dispatcher.
+     */
+    private fun presenceOf(accessToken: String, ids: List<String>): Map<String, CurioPerson> {
+        val wanted = ids.filter { it.matches(ID_PATTERN) }.distinct()
+        if (wanted.isEmpty()) return emptyMap()
+        val now = System.currentTimeMillis()
+        val fresh = LinkedHashMap<String, CurioPerson>(wanted.size)
+        val stale = ArrayList<String>()
+        for (userId in wanted) {
+            val hit = presenceCache[userId]
+            if (hit != null && now - hit.first < PRESENCE_TTL_MS) {
+                fresh[userId] = hit.second
+            } else {
+                stale += userId
+            }
+        }
+        if (stale.isEmpty()) return fresh
+        runCatching {
+            val path = "$PROFILES?select=id,$PERSON_COLUMNS_PRIVACY" +
+                "&id=in.(${stale.joinToString(",")})&limit=${stale.size}"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            parsePeople(SupabaseClient.executeBody(request)).forEach { (userId, person) ->
+                presenceCache[userId] = now to person
+                fresh[userId] = person
+            }
+        }
+        return fresh
+    }
 
     /** One conversation, oldest first (a chat reads downwards). */
     suspend fun messages(

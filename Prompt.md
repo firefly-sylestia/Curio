@@ -1,85 +1,92 @@
 # Prompt Log — current request
 
-## Request (2026-09-13, COMPLETE — Supabase realtime setup guide; nothing pushed)
+## Request (2026-09-13, IN PROGRESS — social restructure, slice 2 of N)
 
-User (chat): write a proper guide for setting up Realtime in Supabase (with
-policies etc.), do NOT push it yet, and explain the untracked files that
-appeared after they "installed Supabase".
+User (chat, continued from the social-perf slice): fix the CI compile error,
+the chat message box sitting under the keyboard, and then the big list —
+friends/chat split with long-press delete, composer + comment sheet revamps,
+share-to-social, realtime reply notifications. Three design questions were
+asked and answered:
 
-### What was asked and what was done
+- Friends ↔ Chats = **two separate screens**.
+- Long-press a chat row = **option to delete the chat for me or for both of us**.
+- The post-a-topic composer = **two-step: quick sheet, full-screen editor only
+  if the user asks for it** (and notes/quotes stay).
 
-1. **Guide** → `docs/REALTIME_SETUP.md` (398 lines): what "live" means in Curio
-   (the hand-rolled client contract, one `realtime:curio` channel, push-is-a-hint,
-   timer fallbacks), the publication SQL (§5e/§5g), replica identity for the
-   three filtered tables, a copy-paste verification query with expected output,
-   how RLS + the user's JWT filter every change, the 1-hour token rule, the
-   optional private-channel path for Broadcast/Presence (requirements, topic
-   design, `realtime.messages` policies, the client change it would need), a
-   troubleshooting table, an on-device verification checklist, the non-negotiable
-   security rules, and a short note on the CLI.
-2. **Pointer added** to `supabase/AGENTS.md` (the realtime contract's home) so the
-   guide is discoverable from the DOX chain.
-3. **Untracked files explained**: `package.json` + `package-lock.json` +
-   (git-ignored) `node_modules/` are a root Node install of `@supabase/server`
-   (Supabase's server-side SDK, beta) that nothing in Curio uses; `supabase/.temp/`
-   is the Supabase CLI's scratch dir (its `cli-latest` says v2.117.0), so the CLI
-   ran at least once. It was never linked: `supabase/.temp/project-ref` is empty
-   and there is no `supabase/config.toml`, so nothing reached the project.
+### What this slice shipped
 
-### State
+1. **CI fix** (`3a077c29`) — my previous slice put `toggleLike`/`toggleDislike`
+   between `@Composable` and `SocialTextPost`, so the annotation landed on the
+   helpers: every non-composable call site failed, and `SocialTextPost` lost its
+   annotation. Helpers moved above it. Same mistake class as AGENTS rule 8.
+2. **Composer under the keyboard** (`7435b55c`) — the app is edge-to-edge
+   (`setDecorFitsSystemWindows(false)`) and the NavHost delivers only the
+   navigation-bar inset, so `MessageComposer` needed `Modifier.imePadding()`.
+3. **Friends / Chats split** —
+   - `CurioRoutes.CHATS` + `ChatsScreen.kt` (new): the inbox — dense rows, the
+     last line, a stamp, an unread badge, a live dot, `PullToRefreshBox`, and a
+     long-press sheet with "Delete for me" / "Delete for both of us".
+   - `FriendsScreen.kt` rewritten as a **contacts sidebar**: search, incoming
+     requests, outgoing asks, then the friends list filed A–Z under
+     `SocialLetterHeader`; tap a friend opens the chat, long-press offers
+     Remove; no conversation list left on this screen.
+   - `SocialComponents.kt`: `SocialThreadCard` (a box card, chats-only) replaced
+     by `SocialSidebarRow` — ONE dense row used by both lists — plus
+     `SocialLetterHeader` / `socialLetterOf`. `SocialAvatar` grew
+     `online = …` (a green dot cut out of the portrait, valid only from
+     `CurioPerson.isActiveNow`), used by the row, the person card and the DM
+     header, so the dot and the "Active now" line can never disagree.
+   - `SocialInboxCache` gained `replaceThreads` / `replaceContacts` so the two
+     screens never blank each other's half of the snapshot.
+4. **Conversation deletion** —
+   - `dm_conversation_hidden` (already in the schema, unused by the client) is
+     now written by `SocialApi.hideConversation`; `threads()` filters a thread
+     out only while its newest message is OLDER than `hidden_at`, so a reply
+     brings it back.
+   - `supabase/schema.sql` §5h: `curio_delete_dm_conversation(other uuid)` —
+     security definer, participant-only, deletes the pair's messages, both
+     hidden markers and the conversation row; granted to `authenticated`.
+     Deliberately not gated on the friendship still existing.
+   - `SocialMessageCache.forget` wipes this device's copy on either path.
+5. **Presence** — `SocialApi.presenceOf` (opt-in `PERSON_COLUMNS_PRIVACY` read,
+   60s in-process cache) folded into `threads()` via `CurioPerson.withPresence`,
+   so an inbox row has a real last-active stamp without a second request per row.
+6. **Icons** — the wall's action row is now `Chats` (`BubbleChart`) + `Friends`
+   (`Hub`, was the `notes` pad) + `You`.
 
-- NOT committed and NOT pushed (user's explicit instruction): `docs/REALTIME_SETUP.md`
-  and the one-line pointer in `supabase/AGENTS.md`.
-- The previous request's slice 1 (optimistic likes and instant posting on the
-  wall) is already committed AND on `origin/main` as `abebf625`, together with
-  the encrypted-DM envelope fix `4373edfc`.
-- An old `stash@{0}` (a one-line Prompt.md tweak) is left untouched.
+### Still open (this request is not finished)
 
-## Interrupted request (2026-09-13, PARTIAL — slice 1 shipped)
+- Post-a-topic composer: two-step flow (quick sheet → full-screen editor),
+  compact/professional redesign, proper animations.
+- Comment sheet redesign; the composer field states.
+- Share-card editor → "Share to social" (+ share-with-link) inside the share
+  dialog.
+- Realtime reply notifications (`community_comments` for my cards,
+  `dm_messages` arriving while another screen is open).
+- Faster-sending animation flow polish in the DM thread.
 
-User (chat): friends screen (online indicator, delete chat on hold, avatar
-cut-out, faster syncing), instant likes/dislikes and posting, faster sending,
-revamped "post a topic" and comments sheets, proper swipe refresh with the
-refresh button removed, Friends as a sidebar with the current screen becoming
-Chats, avatar cut-out and a new Friends icon, share-with-link + share-to-social
-from the card editor, an Instagram-style member profile, and realtime reply
-notifications.
+### ⚠️ Needs the user
 
-Shipped (`abebf625`), plus the member-profile redesign in this slice:
-
-- Wall and card-page likes/dislikes are optimistic (`toggleLike`/`toggleDislike`
-  in `SocialComponents.kt`), so a tap answers itself; only a rejected call
-  resyncs.
-- `CommunityApi.post` returns the stored `CommunityCard`, so a new post is on the
-  wall the moment the sheet closes.
-- `loading` no longer drives `PullToRefreshBox`; a new `refreshing` flag belongs
-  to the user's gesture, and the wall's `Refresh` button is gone.
-- The replies sheet refreshes quietly instead of rebuilding the wall.
-- **Member profile redesigned** (`SocialProfileScreen.kt`): a `LazyVerticalGrid`
-  (2 preview columns on a phone, 3 wide) with a full-width Instagram-style
-  identity block — 84dp portrait, display name, @handle, three counts (posts /
-  likes / replies) computed from the very cards the grid shows, the bio, one
-  action pill (Message / Add friend / own-page note), and Block moved behind a
-  ⋮ `CurioDropdownMenu`. Each post is a small preview tile: the real share card
-  clipped to the tile for a topic card, the words for a note or quote. Presence
-  is deliberately NOT drawn on a profile (activity stays inside direct chats).
-
-Still open (needs the user's answers, they are design decisions): the
-Friends/Chats restructure, inbox online indicator, delete-chat on long-press,
-avatar cut-out, comment sheet redesign, post-a-topic sheet revamp,
-share-with-link + share-to-social, member-profile redesign, reply notifications.
+Re-paste `supabase/schema.sql` into the dashboard: the "delete for both of us"
+option calls the new §5h function, and until the paste it answers a clear error.
+Re-running the file is idempotent.
 
 ## Archive
 
-Previous request logs were replaced at the start of this request. They remain
-available in Git history (`git log -p -- Prompt.md`).
+The Supabase realtime setup guide (`docs/REALTIME_SETUP.md`, still unpushed by
+the user's request) and the social-perf slice (`abebf625`) are logged in Git
+history (`git log -p -- Prompt.md`).
 
 ## User prompts
 
-### Prompt (2026-09-13) — COMPLETE
+### Prompt (2026-09-13) — IN PROGRESS (slice 2 shipped, see above)
 
-Create the Supabase realtime setup guide (with policies), do not push it yet,
-and explain the untracked files left by the Supabase install.
+Fix the CI compile error and the chat message box under the keyboard; then
+split Friends into a sidebar and a Chats screen (two screens), long-press a
+chat to delete it for me or for both of us, two-step post-a-topic composer
+(full-screen editor only on request, keep notes and quotes) — plus the rest of
+the social list (comment sheet, share to social, realtime reply notifications,
+faster sending).
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
 

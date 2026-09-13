@@ -106,6 +106,7 @@ import com.curio.app.features.settings.BackupToolsScreen
 import com.curio.app.features.settings.BookCoverHubScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
+import com.curio.app.features.community.ChatsScreen
 import com.curio.app.features.community.CommunityCardScreen
 import com.curio.app.features.community.CommunityScreen
 import com.curio.app.features.community.DirectMessageScreen
@@ -1089,6 +1090,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.FRIENDS) {
                 FriendsScreen(navController = navController)
+            }
+            composable(CurioRoutes.CHATS) {
+                ChatsScreen(navController = navController)
             }
             composable(
                 route = CurioRoutes.DIRECT_MESSAGE,

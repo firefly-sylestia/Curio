@@ -4,14 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +38,6 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
-import com.curio.app.data.supabase.CurioDmThread
 import com.curio.app.data.supabase.CurioFriend
 import com.curio.app.data.supabase.CurioFriendRequest
 import com.curio.app.data.supabase.CurioPerson
@@ -49,6 +58,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -56,27 +66,28 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * FRIENDS — the social half of the community: find people, ask them, answer
- * them, and open a private conversation.
+ * FRIENDS — the contacts sidebar: find people, ask them, answer them.
  *
- * Gated exactly like the wall is — signed in with Online Mode on — and the
- * server agrees: discovery, asking and messaging are all enforced by RLS, so
- * an offline client or a hand-modified one gets the same nothing back.
+ * This screen answers ONE question — "who are my people?" — and the inbox
+ * answers the other one ("what was said?") on its own screen ([ChatsScreen]).
+ * Splitting them is what lets the list be what a contacts list should be: a
+ * dense, alphabetical sidebar you can scan, not a feed of conversations with
+ * the friends buried under them.
  *
- * Text only, like the rest of the online layer: no field anywhere in the
- * schema could carry a photo or a recording.
+ * The order is the order a person asks the questions:
  *
- * The screen is written as four questions the app can actually answer, in the
- * order a person asks them:
+ *  1. **Is anything waiting on me?** — incoming requests first, because a
+ *     request is the only thing here with a deadline.
+ *  2. **Who am I looking for?** — search, which also answers "add someone new".
+ *  3. **Who did I ask?** — outgoing requests, so a pending ask is visible.
+ *  4. **My people** — the A–Z sidebar, filed under a letter.
  *
- *  1. **Who is this?** — every face is a [SocialPersonCard]: portrait, live
- *     name, @username, and the pills for where the relationship stands.
- *  2. **What do they want from me?** — incoming requests come FIRST, because a
- *     request that is waiting is the only thing here with a deadline.
- *  3. **What did they say?** — open conversations are [SocialThreadCard]s with
- *     the last line and an unread count.
- *  4. **Who are my people?** — the friends list last, as the calm baseline.
+ * Tapping a row opens the CHAT with that person (the thing you want from a
+ * contact), and a long press offers the one destructive action: removing them.
+ * Everything is enforced by RLS — discovery, asking and messaging all need
+ * Online Mode on both sides.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsScreen(navController: NavController) {
     val context = LocalContext.current
@@ -88,19 +99,19 @@ fun FriendsScreen(navController: NavController) {
 
     val onlineMode = AppPreferences.onlineModeEnabledState
     var friends by remember { mutableStateOf<List<CurioFriend>>(emptyList()) }
-    var threads by remember { mutableStateOf<List<CurioDmThread>>(emptyList()) }
     var requests by remember { mutableStateOf<List<CurioFriendRequest>>(emptyList()) }
     var results by remember { mutableStateOf<List<CurioPerson>>(emptyList()) }
     var query by remember { mutableStateOf("") }
     var searching by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
+    var refreshing by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
     // Removal is the one destructive move here, so it asks first — naming the
     // person it is about to remove.
     var removing by remember { mutableStateOf<CurioFriend?>(null) }
     var busy by remember { mutableStateOf(false) }
-    // A server push bumps this: a new message or a request that arrived while
+    // A server push bumps this: a request that arrived (or was answered) while
     // the list is open appears immediately instead of on the next tick.
     var pushed by remember { mutableStateOf(0) }
 
@@ -112,7 +123,7 @@ fun FriendsScreen(navController: NavController) {
 
     suspend fun load(active: String, me: String) {
         loading = true
-        // Independent calls: a failure in one must not blank the other lists.
+        // Independent calls: a failure in one must not blank the others.
         SocialApi.friends(active, me).fold(
             onSuccess = {
                 friends = it
@@ -124,88 +135,67 @@ fun FriendsScreen(navController: NavController) {
             onSuccess = { requests = it },
             onFailure = { error = it.message }
         )
-        SocialApi.threads(active, me).fold(
-            onSuccess = { threads = it },
-            onFailure = { error = it.message }
-        )
-        // Every identity this screen just resolved is REMEMBERED, so opening a
-        // conversation from here can draw the real name and portrait on the
+        // Every identity this screen resolved is REMEMBERED, so opening a
+        // conversation (or a profile) draws the real name and portrait on the
         // first frame instead of waiting for the network to answer again.
         SocialPeopleCache.remember(
             context,
-            friends.map { it.person } +
-                requests.map { it.person } +
-                threads.map { it.person }
+            friends.map { it.person } + requests.map { it.person }
         )
-        // The inbox itself is REMEMBERED: the conversations, their unread
-        // badges, the pending requests and the friends list all draw on the
-        // next entry — including an offline one — instead of on a spinner.
-        SocialInboxCache.write(context, threads, requests, friends)
+        // Conversations are NOT this screen's to write — [SocialInboxCache]
+        // keeps one snapshot for both screens and the chats screen owns the
+        // thread half of it.
+        SocialInboxCache.replaceContacts(context, requests, friends)
         loading = false
+    }
+
+    suspend fun refreshQuietly(active: String, me: String) {
+        SocialApi.requests(active, me).onSuccess { if (it != requests) requests = it }
+        SocialInboxCache.replaceContacts(context, requests, friends)
     }
 
     LaunchedEffect(eligible, token, myUserId) {
         if (eligible && token != null && myUserId != null) {
-            // The device's copy FIRST — the list, the requests and the unread
-            // badges are on screen before the network is asked anything. The
-            // empty guards keep a re-entry from clobbering state the live tick
-            // has already refreshed.
+            // The device's copy FIRST — the list and the requests are on screen
+            // before the network is asked anything. The empty guards keep a
+            // re-entry from clobbering state the live tick already refreshed.
             SocialInboxCache.read(context)?.let { cached ->
                 if (friends.isEmpty()) friends = cached.friends
-                if (threads.isEmpty()) threads = cached.threads
                 if (requests.isEmpty()) requests = cached.requests
                 SocialPeopleCache.remember(
                     context,
-                    cached.friends.map { it.person } +
-                        cached.requests.map { it.person } +
-                        cached.threads.map { it.person }
+                    cached.friends.map { it.person } + cached.requests.map { it.person }
                 )
             }
             load(token, myUserId)
         } else {
             friends = emptyList()
             requests = emptyList()
-            threads = emptyList()
         }
     }
 
-    /**
-     * The quiet inbox refresh — shared by a realtime push and the fallback
-     * timer. It never touches the loading state: no spinner, no flicker, just a
-     * new line and a fresh unread badge where there is one.
-     */
-    suspend fun refreshInbox(active: String, me: String) {
-        SocialApi.threads(active, me).onSuccess { if (it != threads) threads = it }
-        SocialApi.requests(active, me).onSuccess { if (it != requests) requests = it }
-        SocialInboxCache.write(context, threads, requests, friends)
-    }
-
-    // THE INBOX KEEPS UP WHILE YOU WATCH — the list used to be a snapshot from
-    // the moment it composed, so a message (or a request) that arrived while
-    // it was open only appeared after leaving the screen and coming back.
-    //
-    // Realtime is the mechanism now; this timer is the safety net, and it only
-    // runs at the old fast cadence while the push channel is NOT linked.
+    // THE SAFETY NET. Realtime is the mechanism now; this only runs at the old
+    // fast cadence while the push channel is NOT linked.
     LaunchedEffect(eligible, token, myUserId) {
         if (!eligible || token == null || myUserId == null) return@LaunchedEffect
         while (true) {
-            delay(if (SupabaseRealtime.isLinked) INBOX_SAFETY_TICK_MS else INBOX_TICK_MS)
-            refreshInbox(token, myUserId)
+            delay(if (SupabaseRealtime.isLinked) FRIENDS_SAFETY_TICK_MS else FRIENDS_TICK_MS)
+            refreshQuietly(token, myUserId)
         }
     }
 
-    // REALTIME — three SERVER-filtered bindings: a message addressed to me, a
-    // request waiting on me, and my own request being answered (or cancelled).
+    // REALTIME — a request waiting on me, and my own request being answered
+    // (or cancelled). Both directions, because an accepted request has to
+    // become a friend row without a reload.
     DisposableEffect(eligible, token, myUserId) {
         val active = token
         val me = myUserId
-        val owner = "inbox"
+        val owner = "friends"
         if (eligible && active != null && me != null) {
             SupabaseRealtime.watch(
                 owner = owner,
                 accessToken = active,
                 watches = listOf(
-                    RealtimeWatch(table = "dm_messages", filter = "recipient=eq.$me"),
                     RealtimeWatch(
                         table = "friend_requests",
                         filter = "addressee=eq.$me",
@@ -228,7 +218,8 @@ fun FriendsScreen(navController: NavController) {
         if (!eligible || token == null || myUserId == null || pushed == 0) return@LaunchedEffect
         // A short settle window so a burst of events is ONE refresh.
         delay(300)
-        refreshInbox(token, myUserId)
+        SocialApi.friends(token, myUserId).onSuccess { friends = it }
+        refreshQuietly(token, myUserId)
     }
 
     // Search runs off the typed text; [SocialApi.searchPeople] ignores anything
@@ -277,6 +268,17 @@ fun FriendsScreen(navController: NavController) {
         else -> SocialRelation.NONE
     }
 
+    // ── THE SIDEBAR SECTIONS ────────────────────────────────────────────
+    // Built ONCE per friends list, sorted by the name as it is DISPLAYED (so
+    // the letters match what the eye reads), and keyed by the same first letter
+    // the header shows.
+    val sections = remember(friends) {
+        friends
+            .sortedBy { it.person.label.lowercase() }
+            .groupBy { socialLetterOf(it.person.label) }
+            .toSortedMap()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -293,253 +295,274 @@ fun FriendsScreen(navController: NavController) {
             )
         }
 
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .layerBackdrop(glassBackdrop)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = wideContentEdgePadding(),
-                end = wideContentEdgePadding(),
-                top = if (wide) 0.dp else SettingsHeroTotalHeight,
-                bottom = 24.dp +
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            ),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            if (wide) {
-                item(key = "hero", contentType = "hero") {
-                    SettingsHeroHeader(
-                        title = "Friends",
-                        subtitle = "Requests and messages",
-                        onBack = { navController.popBackStack() }
-                    )
+        PullToRefreshBox(
+            isRefreshing = refreshing,
+            onRefresh = {
+                val active = token
+                val me = myUserId
+                if (active != null && me != null) {
+                    refreshing = true
+                    scope.launch {
+                        load(active, me)
+                        refreshing = false
+                    }
                 }
-            }
-            if (!eligible || token == null || myUserId == null) {
-                item { SettingsSectionHeading("Before you start") }
-                item {
-                    SettingsOptionCard {
-                        when {
-                            !OnlineAccount.configured -> SettingsOptionInfoRow(
-                                CurioIcons.Warning,
-                                "Not set up in this build",
-                                "This build has no Curio online project, so there is nobody to add."
-                            )
-                            !account.signedIn -> {
-                                SettingsOptionInfoRow(
-                                    CurioIcons.Info,
-                                    "Sign in to add friends",
-                                    "Friends are tied to a Curio account — profile, username and all."
+            },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .layerBackdrop(glassBackdrop)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = wideContentEdgePadding(),
+                    end = wideContentEdgePadding(),
+                    top = if (wide) 0.dp else SettingsHeroTotalHeight,
+                    bottom = 24.dp +
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                if (wide) {
+                    item(key = "hero", contentType = "hero") {
+                        SettingsHeroHeader(
+                            title = "Friends",
+                            subtitle = "Your people",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                }
+                if (!eligible || token == null || myUserId == null) {
+                    item { SettingsSectionHeading("Before you start") }
+                    item {
+                        SettingsOptionCard {
+                            when {
+                                !OnlineAccount.configured -> SettingsOptionInfoRow(
+                                    CurioIcons.Warning,
+                                    "Not set up in this build",
+                                    "This build has no Curio online project, so there is nobody to add."
                                 )
-                                SettingsOptionRow(
-                                    icon = CurioIcons.Person,
-                                    title = "Sign in or create an account",
-                                    subtitle = "Settings → Online mode",
-                                    onClick = { navController.navigate(CurioRoutes.SETTINGS_ONLINE) }
-                                )
-                            }
-                            else -> {
-                                SettingsOptionInfoRow(
-                                    CurioIcons.Info,
-                                    "Online mode is off",
-                                    "Friends and messages stay off while Online mode is off."
-                                )
-                                SettingsOptionRow(
-                                    icon = CurioIcons.Refresh,
-                                    title = "Turn Online mode on",
-                                    subtitle = "Settings → Online mode",
-                                    onClick = { navController.navigate(CurioRoutes.SETTINGS_ONLINE) }
-                                )
+                                !account.signedIn -> {
+                                    SettingsOptionInfoRow(
+                                        CurioIcons.Info,
+                                        "Sign in to add friends",
+                                        "Friends are tied to a Curio account — profile, username and all."
+                                    )
+                                    SettingsOptionRow(
+                                        icon = CurioIcons.Person,
+                                        title = "Sign in or create an account",
+                                        subtitle = "Settings → Online mode",
+                                        onClick = { navController.navigate(CurioRoutes.SETTINGS_ONLINE) }
+                                    )
+                                }
+                                else -> {
+                                    SettingsOptionInfoRow(
+                                        CurioIcons.Info,
+                                        "Online mode is off",
+                                        "Friends and messages stay off while Online mode is off."
+                                    )
+                                    SettingsOptionRow(
+                                        icon = CurioIcons.Refresh,
+                                        title = "Turn Online mode on",
+                                        subtitle = "Settings → Online mode",
+                                        onClick = { navController.navigate(CurioRoutes.SETTINGS_ONLINE) }
+                                    )
+                                }
                             }
                         }
                     }
+                    return@LazyColumn
                 }
-                return@LazyColumn
-            }
 
-            // From here on both are non-null (checked above), so the callbacks
-            // below capture plain Strings instead of re-testing — a null check
-            // inside every one-click lambda is how stale-state bugs hide.
-            val activeToken = token
-            val activeUserId = myUserId
+                // From here on both are non-null (checked above), so the
+                // callbacks below capture plain Strings instead of re-testing —
+                // a null check inside every one-click lambda is how stale-state
+                // bugs hide.
+                val activeToken = token
+                val activeUserId = myUserId
 
-            notice?.let { message -> item(key = "notice") { SocialNote(message, false) } }
-            error?.let { message -> item(key = "error") { SocialNote(message, true) } }
-
-            // ── 1. waiting on you ────────────────────────────────────────
-            val incoming = requests.filter { it.incoming }
-            if (incoming.isNotEmpty()) {
-                item { SettingsSectionHeading("Waiting on you") }
-                items(incoming, key = { "in-${it.id}" }) { request ->
-                    SocialPersonCard(
-                        person = request.person,
-                        relation = SocialRelation.INCOMING,
-                        onOpenProfile = {
-                            navController.navigate(CurioRoutes.socialProfile(request.person.userId)) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onAdd = {},
-                        onMessage = {},
-                        onRemove = {},
-                        onAccept = {
-                            scope.launch {
-                                SocialApi.respond(activeToken, request.id, true).fold(
-                                    onSuccess = {
-                                        notice = "You and ${request.person.label} are friends."
-                                        load(activeToken, activeUserId)
-                                    },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        },
-                        onDecline = {
-                            scope.launch {
-                                SocialApi.respond(activeToken, request.id, false).fold(
-                                    onSuccess = { load(activeToken, activeUserId) },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        }
-                    )
-                }
-            }
-
-            // ── 2. what did they say ─────────────────────────────────────
-            if (threads.isNotEmpty()) {
-                item { SettingsSectionHeading("Messages") }
-                items(threads, key = { "dm-${it.person.userId}" }) { thread ->
-                    SocialThreadCard(
-                        thread = thread,
-                        onOpen = {
-                            navController.navigate(
-                                CurioRoutes.directMessage(
-                                    thread.person.userId,
-                                    thread.person.label
-                                )
+                // The inbox lives on its own screen; this is the one line that
+                // says so, so a person on Friends is never stuck without a way
+                // to reach what was said.
+                item(key = "to-chats") {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp, bottom = 2.dp)
+                    ) {
+                        TextButton(onClick = { navController.navigate(CurioRoutes.CHATS) }) {
+                            CurioIcon(
+                                name = CurioIcons.BubbleChart,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 16.dp
                             )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Chats")
                         }
-                    )
+                        Spacer(Modifier.weight(1f))
+                    }
                 }
-            }
 
-            // ── 3. find someone ──────────────────────────────────────────
-            item { SettingsSectionHeading("Find people") }
-            item(key = "search") {
-                SocialSearchField(
-                    value = query,
-                    placeholder = "Search a name or @username",
-                    busy = searching,
-                    onValueChange = { query = it }
-                )
-            }
-            if (results.isNotEmpty()) {
-                items(results, key = { "hit-${it.userId}" }) { person ->
-                    SocialPersonCard(
-                        person = person,
-                        relation = relationOf(person.userId),
-                        onOpenProfile = {
-                            navController.navigate(CurioRoutes.socialProfile(person.userId)) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onAdd = {
-                            scope.launch {
-                                SocialApi.ask(activeToken, person.userId, activeUserId).fold(
-                                    onSuccess = {
-                                        notice = "Request sent to ${person.label}."
-                                        load(activeToken, activeUserId)
-                                    },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        },
-                        onMessage = {
-                            navController.navigate(
-                                CurioRoutes.directMessage(person.userId, person.label)
-                            )
-                        },
-                        onRemove = {
-                            requestIdOf[person.userId]?.let { id ->
+                notice?.let { message -> item(key = "notice") { SocialNote(message, false) } }
+                error?.let { message -> item(key = "error") { SocialNote(message, true) } }
+
+                // ── 1. waiting on you ────────────────────────────────────
+                val incoming = requests.filter { it.incoming }
+                if (incoming.isNotEmpty()) {
+                    item { SettingsSectionHeading("Waiting on you") }
+                    items(incoming, key = { "in-${it.id}" }) { request ->
+                        SocialPersonCard(
+                            person = request.person,
+                            relation = SocialRelation.INCOMING,
+                            onOpenProfile = {
+                                navController.navigate(CurioRoutes.socialProfile(request.person.userId)) {
+                                    launchSingleTop = true
+                                }
+                            },
+                            onAdd = {},
+                            onMessage = {},
+                            onRemove = {},
+                            onAccept = {
                                 scope.launch {
-                                    SocialApi.remove(activeToken, id).fold(
+                                    SocialApi.respond(activeToken, request.id, true).fold(
+                                        onSuccess = {
+                                            notice = "You and ${request.person.label} are friends."
+                                            load(activeToken, activeUserId)
+                                        },
+                                        onFailure = { error = it.message }
+                                    )
+                                }
+                            },
+                            onDecline = {
+                                scope.launch {
+                                    SocialApi.respond(activeToken, request.id, false).fold(
                                         onSuccess = { load(activeToken, activeUserId) },
                                         onFailure = { error = it.message }
                                     )
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
-            } else if (query.trim().length >= 2 && !searching) {
-                item(key = "no-hits") {
-                    SocialEmptyCard(
-                        icon = CurioIcons.SearchOff,
-                        title = "Nobody matched",
-                        body = "Only accounts with Online mode on can be found. Try their @username."
-                    )
-                }
-            }
 
-            // ── 4. you asked ─────────────────────────────────────────────
-            val outgoing = requests.filterNot { it.incoming }
-            if (outgoing.isNotEmpty()) {
-                item { SettingsSectionHeading("You asked") }
-                items(outgoing, key = { "out-${it.id}" }) { request ->
-                    SocialPersonCard(
-                        person = request.person,
-                        relation = SocialRelation.OUTGOING,
-                        onOpenProfile = {
-                            navController.navigate(CurioRoutes.socialProfile(request.person.userId)) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onAdd = {},
-                        onMessage = {},
-                        onRemove = {
-                            scope.launch {
-                                SocialApi.remove(activeToken, request.id).fold(
-                                    onSuccess = { load(activeToken, activeUserId) },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        }
+                // ── 2. find someone ──────────────────────────────────────
+                item { SettingsSectionHeading("Find people") }
+                item(key = "search") {
+                    SocialSearchField(
+                        value = query,
+                        placeholder = "Search a name or @username",
+                        busy = searching,
+                        onValueChange = { query = it }
                     )
                 }
-            }
+                if (results.isNotEmpty()) {
+                    items(results, key = { "hit-${it.userId}" }) { person ->
+                        SocialPersonCard(
+                            person = person,
+                            relation = relationOf(person.userId),
+                            onOpenProfile = {
+                                navController.navigate(CurioRoutes.socialProfile(person.userId)) {
+                                    launchSingleTop = true
+                                }
+                            },
+                            onAdd = {
+                                scope.launch {
+                                    SocialApi.ask(activeToken, person.userId, activeUserId).fold(
+                                        onSuccess = {
+                                            notice = "Request sent to ${person.label}."
+                                            load(activeToken, activeUserId)
+                                        },
+                                        onFailure = { error = it.message }
+                                    )
+                                }
+                            },
+                            onMessage = {
+                                navController.navigate(
+                                    CurioRoutes.directMessage(person.userId, person.label)
+                                )
+                            },
+                            onRemove = {
+                                requestIdOf[person.userId]?.let { id ->
+                                    scope.launch {
+                                        SocialApi.remove(activeToken, id).fold(
+                                            onSuccess = { load(activeToken, activeUserId) },
+                                            onFailure = { error = it.message }
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+                } else if (query.trim().length >= 2 && !searching) {
+                    item(key = "no-hits") {
+                        SocialEmptyCard(
+                            icon = CurioIcons.SearchOff,
+                            title = "Nobody matched",
+                            body = "Only accounts with Online mode on can be found. Try their @username."
+                        )
+                    }
+                }
 
-            // ── 5. your people ───────────────────────────────────────────
-            item { SettingsSectionHeading("Friends") }
-            if (friends.isEmpty() && !loading) {
-                item(key = "no-friends") {
-                    SocialEmptyCard(
-                        icon = CurioIcons.Hub,
-                        title = "No friends yet",
-                        body = "Search a name above. Adding someone sends them a request they can accept."
-                    )
-                }
-            } else {
-                items(friends, key = { "friend-${it.requestId}" }) { friend ->
-                    SocialPersonCard(
-                        person = friend.person,
-                        relation = SocialRelation.FRIEND,
-                        onOpenProfile = {
-                            navController.navigate(CurioRoutes.socialProfile(friend.person.userId)) {
-                                launchSingleTop = true
+                // ── 3. you asked ─────────────────────────────────────────
+                val outgoing = requests.filterNot { it.incoming }
+                if (outgoing.isNotEmpty()) {
+                    item { SettingsSectionHeading("You asked") }
+                    items(outgoing, key = { "out-${it.id}" }) { request ->
+                        SocialPersonCard(
+                            person = request.person,
+                            relation = SocialRelation.OUTGOING,
+                            onOpenProfile = {
+                                navController.navigate(CurioRoutes.socialProfile(request.person.userId)) {
+                                    launchSingleTop = true
+                                }
+                            },
+                            onAdd = {},
+                            onMessage = {},
+                            onRemove = {
+                                scope.launch {
+                                    SocialApi.remove(activeToken, request.id).fold(
+                                        onSuccess = { load(activeToken, activeUserId) },
+                                        onFailure = { error = it.message }
+                                    )
+                                }
                             }
-                        },
-                        onAdd = {},
-                        onMessage = {
-                            navController.navigate(
-                                CurioRoutes.directMessage(
-                                    friend.person.userId,
-                                    friend.person.label
-                                )
+                        )
+                    }
+                }
+
+                // ── 4. your people, A–Z ──────────────────────────────────
+                item { SettingsSectionHeading("Friends") }
+                if (friends.isEmpty() && !loading) {
+                    item(key = "no-friends") {
+                        SocialEmptyCard(
+                            icon = CurioIcons.Hub,
+                            title = "No friends yet",
+                            body = "Search a name above. Adding someone sends them a request " +
+                                "they can accept."
+                        )
+                    }
+                } else {
+                    sections.forEach { (letter, people) ->
+                        item(key = "letter-$letter") { SocialLetterHeader(letter) }
+                        items(people, key = { "friend-${it.requestId}" }) { friend ->
+                            SocialSidebarRow(
+                                person = friend.person,
+                                subtitle = friend.person.handleLabel,
+                                onOpen = {
+                                    navController.navigate(
+                                        CurioRoutes.directMessage(
+                                            friend.person.userId,
+                                            friend.person.label
+                                        )
+                                    )
+                                },
+                                onLongClick = { removing = friend }
                             )
-                        },
-                        onRemove = { removing = friend }
-                    )
+                        }
+                    }
                 }
             }
         }
@@ -578,7 +601,7 @@ fun FriendsScreen(navController: NavController) {
         if (!wide) {
             SettingsHeroHeader(
                 title = "Friends",
-                subtitle = "Requests and messages",
+                subtitle = "Your people",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
             )
@@ -586,15 +609,8 @@ fun FriendsScreen(navController: NavController) {
     }
 }
 
-/**
- * How often an OPEN inbox asks whether anything moved. Slower than a thread's
- * tick on purpose: the list is a directory, not a conversation, and a reply
- * the user is waiting on lives in the thread they will open anyway.
- */
-private const val INBOX_TICK_MS = 5_000L
+/** The open-contacts cadence used only while realtime is NOT linked. */
+private const val FRIENDS_TICK_MS = 5_000L
 
-/**
- * The safety-net cadence once realtime is linked. The inbox is a list the user
- * glides past, so a missed frame is worth a slower backstop than the thread's.
- */
-private const val INBOX_SAFETY_TICK_MS = 30_000L
+/** The safety-net cadence once realtime is linked. */
+private const val FRIENDS_SAFETY_TICK_MS = 30_000L
