@@ -488,7 +488,7 @@ private fun ReplyPill(glyph: String, label: String, onClick: () -> Unit) {
  * with a parent we cannot see) still renders — at the top level — so nothing
  * a member wrote is ever hidden.
  */
-private fun branchOrder(replies: List<CommunityComment>): List<Pair<CommunityComment, Int>> {
+internal fun branchOrder(replies: List<CommunityComment>): List<Pair<CommunityComment, Int>> {
     val children = replies.filter { it.parentId != null }.groupBy { it.parentId }
     val out = ArrayList<Pair<CommunityComment, Int>>(replies.size)
     replies.filter { it.parentId == null }.forEach { root ->

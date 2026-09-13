@@ -222,7 +222,14 @@ brace) are recorded below in Verification status.
 
 ## User prompts
 
-### Prompt (2026-09-13) — batch in progress, see "Shipped in this batch"
+### Prompt (2026-09-13, later) — shipped in c08fdb54 + this working tree
+
+The chats/friends doors were bare text with mismatched icons; an open post kept
+the bottom nav and showed a full "Report" button; the card and profile pages
+had too much empty space below. Shipped: door tiles with icons, nav bar hidden
+on the card route (it shares the wall's prefix), report/take-down icon-only on
+the card page, replies inline under the post (same list, same realtime), and
+the tile cover-mode crop that keeps a card's title visible.
 
 Profile polish (remove the bio/streak card below achievements; keep both in
 the hero), a professional themed Edit profile with the icon picker beside the

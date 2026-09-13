@@ -381,58 +381,49 @@ fun CommunityScreen(navController: NavController) {
                     }
                 }
                 item {
-                    // The wall's actions. Posting lives on the floating button
-                    // at the bottom (one clear door), so this row only carries
-                    // the two places you go FROM the wall.
+                    // The wall's doors. Posting lives on the floating button
+                    // at the bottom (one clear door); these are the two places
+                    // you GO from the wall, each as a proper tile — icon first,
+                    // label under it — instead of three bare text buttons that
+                    // read as leftover links.
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        TextButton(onClick = { navController.navigate(CurioRoutes.CHATS) }) {
-                            CurioIcon(
-                                name = CurioIcons.BubbleChart,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("Chats")
-                        }
-                        Spacer(Modifier.width(4.dp))
-                        // v3xx56 — the friends glyph was a NOTE pad, which said
-                        // "writing", not "people". Hub reads as the network of
-                        // people a friends list actually is.
-                        TextButton(onClick = { navController.navigate(CurioRoutes.FRIENDS) }) {
-                            CurioIcon(
-                                name = CurioIcons.Hub,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("Friends")
-                        }
-                        Spacer(Modifier.weight(1f))
-                        TextButton(onClick = {
-                            // Guarded: an unmatched person/ route would throw.
-                            val me = account.session?.userId
-                            if (!me.isNullOrBlank()) {
-                                navController.navigate(CurioRoutes.socialProfile(me)) {
-                                    launchSingleTop = true
+                        CommunityDoorTile(
+                            icon = CurioIcons.Notes,
+                            label = "Chats",
+                            subtitle = "Direct messages",
+                            onClick = { navController.navigate(CurioRoutes.CHATS) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        CommunityDoorTile(
+                            // Hub: the network-of-people glyph Friends already
+                            // owns; the chats tile deliberately takes a
+                            // different mark (the stacked-lines `notes` used
+                            // by the thread list) so the two never blur.
+                            icon = CurioIcons.Hub,
+                            label = "Friends",
+                            subtitle = "Your people",
+                            onClick = { navController.navigate(CurioRoutes.FRIENDS) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        CommunityDoorTile(
+                            icon = CurioIcons.Person,
+                            label = "You",
+                            subtitle = "Your profile",
+                            onClick = {
+                                // Guarded: an unmatched person/ route would throw.
+                                val me = account.session?.userId
+                                if (!me.isNullOrBlank()) {
+                                    navController.navigate(CurioRoutes.socialProfile(me)) {
+                                        launchSingleTop = true
+                                    }
                                 }
-                            }
-                        }) {
-                            CurioIcon(
-                                name = CurioIcons.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("You")
-                        }
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
 
@@ -702,7 +693,9 @@ internal fun CommunityCardCanvas(
     Box(
         modifier = modifier
             .then(if (fillHeight) Modifier else Modifier.fillMaxWidth()),
-        contentAlignment = Alignment.Center
+        // Fill mode crops the card to the box: the overflow hangs off the
+        // BOTTOM (TopStart), so the card's title always stays visible.
+        contentAlignment = if (fillHeight) Alignment.TopStart else Alignment.Center
     ) {
     BoxWithConstraints(
         modifier = if (fillHeight) Modifier.fillMaxSize() else Modifier.fillMaxWidth(widthFraction)
@@ -710,27 +703,22 @@ internal fun CommunityCardCanvas(
         val density = LocalDensity.current
         val scale = with(density) {
             if (fillHeight) {
-                // Fill the box's height (and never upscale past the card's
-                // own size): the width overflows and the parent's clip keeps
-                // the crop tidy.
-                (maxHeight.toPx() / cardHeight.toPx()).coerceAtMost(1f)
+                // COVER semantics: the larger of the two ratios, so the card
+                // overflows the box in ONE direction only and the box is
+                // completely filled — a share card in a square tile is a
+                // cropped preview, never a letterboxed miniature.
+                maxOf(
+                    maxWidth.toPx() / cardWidth.toPx(),
+                    maxHeight.toPx() / cardHeight.toPx()
+                )
             } else {
                 (maxWidth.toPx() / cardWidth.toPx()).coerceAtMost(1f)
             }
         }
         Box(
             modifier = Modifier
-                .then(
-                    if (fillHeight) {
-                        Modifier
-                            .fillMaxWidth()
-                            .height(cardHeight * scale)
-                    } else {
-                        Modifier
-                            .fillMaxWidth()
-                            .height(cardHeight * scale)
-                    }
-                )
+                .fillMaxWidth()
+                .height(cardHeight * scale)
         ) {
             Box(
                 modifier = Modifier
@@ -956,7 +944,67 @@ internal fun CommunityAction(
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = if (tinted) FontWeight.Bold else FontWeight.Medium
                 ),
-                color = ink
+                color = ink                    )
+        }
+    }
+}
+
+/**
+ * One of the wall's three doors — Chats, Friends, You — as a proper TILE.
+ *
+ * Bare text buttons read as leftover links and gave the social layer no
+ * presence of its own; the tile gives each door an icon in a rounded well,
+ * a label and one quiet subtitle, and the press squish every other surface
+ * on this screen wears. Equal weights keep the row balanced on any width.
+ */
+@Composable
+internal fun CommunityDoorTile(
+    icon: String,
+    label: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = modifier.curioPressClickable(
+            pressedScale = 0.96f,
+            hapticOnPress = false,
+            onClickLabel = label,
+            onClick = onClick
+        )
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = curioDialogActionColor().copy(alpha = 0.14f)
+            ) {
+                CurioIcon(
+                    name = icon,
+                    contentDescription = null,
+                    tint = curioDialogActionColor(),
+                    size = 20.dp,
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
     }
@@ -1012,7 +1060,7 @@ internal fun CommunityComposerSheet(
     var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
     // The card's shape (story 9:16 or classic 3:4), chosen in the preview
     // step where the difference is actually visible.
-    var aspect by remember { mutableStateOf(ShareCardAspect.STORY) }
+    var aspect by remember { mutableStateOf(ShareCardAspect.PORTRAIT) }
     // Step two of the flow: the full-height preview editor.
     var showPreview by remember { mutableStateOf(false) }
     // The whole-catalog index, loaded once. It is the prebuilt lightweight
@@ -1083,6 +1131,7 @@ internal fun CommunityComposerSheet(
         byline = draft.byline,
         createdAtMillis = System.currentTimeMillis(),
         expiresAtMillis = System.currentTimeMillis() + 24L * 3_600_000L,
+        bodyScale = draft.bodyScale,
         likeCount = 0,
         likedByMe = false,
         dislikeCount = 0,

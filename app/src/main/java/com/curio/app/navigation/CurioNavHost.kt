@@ -400,8 +400,13 @@ fun CurioNavHost(
     // shows on the Community wall only while its opt-in tab is on; with the
     // opt-in off the wall is a plain pushed page reached from Settings and
     // keeps the old chromeless look.
+    // A card's own view shares the WALL's route prefix ("community/…"), so
+    // the prefix check alone kept the nav bar on a post — the one place it
+    // should never float over. The card route is excluded by its FULL route
+    // pattern instead.
+    val isCardRoute = currentRoute == CurioRoutes.COMMUNITY_CARD
     val showBottomBar =
-        routePrefix in CurioRoutes.liveTabPrefixes() && !isRevealRoutePrefix
+        routePrefix in CurioRoutes.liveTabPrefixes() && !isRevealRoutePrefix && !isCardRoute
     // v193 — the floating pill bar stays composed briefly after the route
     // leaves the tab set so the previously-selected pill COLLAPSES with the
     // same spring it expands with. The old `showBottomBar` gate unmounted
