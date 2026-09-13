@@ -615,20 +615,15 @@ drop policy if exists dm_device_keys_delete_own on public.dm_device_keys;
 create policy dm_device_keys_delete_own on public.dm_device_keys
   for delete to authenticated using (user_id = auth.uid());
 
--- PostgREST implements an upsert as an INSERT followed by an UPDATE on a
--- conflicting row. PostgreSQL requires the caller to be able to SELECT that
--- existing row before the UPDATE policy is considered. A sender could write a
--- first envelope for a friend but could not replace it after restoring a
--- device, which made all later sends fail with an RLS error. An envelope is
--- still encrypted to its recipient's public key; allowing the accepted friend
--- to see the envelope lets the participant upsert it without exposing message
--- plaintext or a private key.
+-- Recipients alone read their envelopes. Senders write immutable RSA-wrapped
+-- copies with a plain INSERT; duplicate-key races are handled client-side as a
+-- successful existing envelope. Do not reopen SELECT just to make a PostgREST
+-- upsert work: an envelope must not be readable by the other participant.
 drop policy if exists dm_key_envelopes_recipient on public.dm_key_envelopes;
 drop policy if exists dm_key_envelopes_select_participant on public.dm_key_envelopes;
 create policy dm_key_envelopes_select_participant on public.dm_key_envelopes
     for select to authenticated using (
         recipient = auth.uid()
-        or public.curio_are_friends(auth.uid(), recipient)
     );
 
 drop policy if exists dm_key_envelopes_write_participant on public.dm_key_envelopes;
@@ -649,6 +644,36 @@ create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
     recipient = auth.uid()
     or public.curio_are_friends(auth.uid(), recipient)
   );
+
+-- An envelope is only meaningful for a currently registered recipient device
+-- and for the canonical two-party conversation. This rejects a mismatched
+-- device ID, recipient, or conversation before ciphertext reaches storage.
+create or replace function public.curio_validate_dm_envelope()
+returns trigger
+language plpgsql
+as $$
+declare
+    canonical text := case when auth.uid()::text < new.recipient::text
+        then auth.uid()::text || ':' || new.recipient::text
+        else new.recipient::text || ':' || auth.uid()::text end;
+begin
+    if new.conversation_id <> canonical then
+        raise exception 'curio: envelope conversation does not match participants';
+    end if;
+    if not exists (
+        select 1 from public.dm_device_keys key
+         where key.user_id = new.recipient
+           and key.device_id = new.device_id
+           and key.retired_at is null
+    ) then
+        raise exception 'curio: envelope device is not registered to recipient';
+    end if;
+    return new;
+end $$;
+drop trigger if exists dm_key_envelopes_validate on public.dm_key_envelopes;
+create trigger dm_key_envelopes_validate
+    before insert or update on public.dm_key_envelopes
+    for each row execute function public.curio_validate_dm_envelope();
 
 -- ───────────────────────────���─────────────────────────────────���─────────────
 -- 5e. dm_messages — ciphertext-only writes; legacy body is read-only
@@ -788,6 +813,49 @@ drop trigger if exists dm_messages_enforce_delivery_mode on public.dm_messages;
 create trigger dm_messages_enforce_delivery_mode
     before insert on public.dm_messages
     for each row execute function public.curio_enforce_dm_delivery_mode();
+
+-- A ciphertext may only refer to a key version after every currently active
+-- device for both participants has its own envelope for that exact version.
+-- The server still sees only wrapped keys, never AES plaintext key material.
+create or replace function public.curio_enforce_dm_message_envelopes()
+returns trigger
+language plpgsql
+as $$
+declare
+    conversation text := case when new.sender::text < new.recipient::text
+        then new.sender::text || ':' || new.recipient::text
+        else new.recipient::text || ':' || new.sender::text end;
+    version_text text;
+    key_version_value integer;
+begin
+    if new.migration_state not in ('encrypted', 'pending_reencrypt') then
+        return new;
+    end if;
+    version_text := substring(new.encryption_version from '^curio-dm-aesgcm-v1:([1-9][0-9]*)$');
+    if version_text is null then
+        raise exception 'curio: invalid encrypted message key version';
+    end if;
+    key_version_value := version_text::integer;
+    if exists (
+        select 1 from public.dm_device_keys device
+         where device.user_id in (new.sender, new.recipient)
+           and device.retired_at is null
+           and not exists (
+               select 1 from public.dm_key_envelopes envelope
+                where envelope.conversation_id = conversation
+                  and envelope.recipient = device.user_id
+                  and envelope.device_id = device.device_id
+                  and envelope.key_version = key_version_value
+           )
+    ) then
+        raise exception 'curio: encrypted message is missing a device envelope for its key version';
+    end if;
+    return new;
+end $$;
+drop trigger if exists dm_messages_enforce_envelopes on public.dm_messages;
+create trigger dm_messages_enforce_envelopes
+    before insert on public.dm_messages
+    for each row execute function public.curio_enforce_dm_message_envelopes();
 
 alter table public.dm_messages enable row level security;
 
@@ -1259,6 +1327,8 @@ grant select, insert, update, delete on public.community_reactions to authentica
 grant select, insert, delete on public.community_comments to authenticated;
 grant select, insert on public.community_reports to authenticated;
 grant select, insert, update, delete on public.friend_requests to authenticated;
+grant select, insert, update, delete on public.dm_device_keys to authenticated;
+grant select, insert, update, delete on public.dm_key_envelopes to authenticated;
 grant select, insert, update, delete on public.dm_messages to authenticated;
 grant select, insert, update, delete on public.dm_typing to authenticated;
 grant select, insert, update, delete on public.dm_reactions to authenticated;
@@ -1278,6 +1348,8 @@ revoke all on public.community_reactions from anon;
 revoke all on public.community_comments from anon;
 revoke all on public.community_reports from anon;
 revoke all on public.friend_requests from anon;
+revoke all on public.dm_device_keys from anon;
+revoke all on public.dm_key_envelopes from anon;
 revoke all on public.dm_messages from anon;
 revoke all on public.dm_typing from anon;
 revoke all on public.dm_reactions from anon;
@@ -1574,7 +1646,7 @@ begin
        and c.relname in ('profiles','cloud_captures','community_cards',
                          'member_blocks',
                          'community_reactions','community_comments',
-                         'community_reports','friend_requests','dm_messages',
+                         'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
                          'dm_typing','dm_reactions','member_blocks')
        and c.relrowsecurity = false;
     if rls_off is null then
@@ -1590,7 +1662,7 @@ begin
        and roles::text like '%anon%'
        and tablename in ('profiles','cloud_captures','community_cards',
                          'community_reactions','community_comments',
-                         'community_reports','friend_requests','dm_messages',
+                         'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
                          'dm_typing','dm_reactions','member_blocks');
     if anon_open is null then
         raise notice 'PASS  no anon policies on Curio tables';
@@ -1602,7 +1674,7 @@ begin
       into missing
       from unnest(array['profiles','cloud_captures','community_cards',
                         'community_reactions','community_comments',
-                        'community_reports','friend_requests','dm_messages',
+                        'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
                         'dm_typing','dm_reactions','member_blocks']) as t
      where not exists (
         select 1 from pg_class c

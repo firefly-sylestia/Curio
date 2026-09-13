@@ -20,6 +20,7 @@ There is no deployment automation: the file is pasted into the Supabase dashboar
 
 ## Local Contracts
 
+- **DM encryption envelopes:** `dm_device_keys` holds only public device keys; `dm_key_envelopes` holds per-device RSA-OAEP-wrapped conversation keys. Envelope SELECT is recipient-only, and its trigger requires the canonical conversation ID plus a registered non-retired recipient device. The Android client provides the cryptographic recipient-key correspondence; the database never receives private or plaintext AES keys.
 - **DM mode and deletion:** `dm_conversations.encryption_enabled` is the server-authoritative, two-participant mode for new DMs. Its RLS and party-pinning trigger prevent a client from changing the chat members; `dm_messages` has an insert trigger that rejects plaintext while encryption is on and ciphertext while it is off. Existing conversations without a row default to encrypted. A `dm_messages` DELETE is sender-only unsend; device-local deletion is intentionally not represented in Supabase.
 
 - **RLS is the security boundary.** The Android app ships only the public URL + publishable/anon key, so every table must keep RLS enabled with policies for `authenticated` only. Never add an `anon` policy, never disable RLS, and never grant the app a service-role key.

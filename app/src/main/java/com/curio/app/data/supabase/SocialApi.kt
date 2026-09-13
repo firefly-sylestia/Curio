@@ -791,10 +791,12 @@ private const val PERSON_COLUMNS_PRIVACY =
   suspend fun dmIdentities(accessToken: String, userIds: Collection<String>): Result<List<CurioDmIdentity>> = withContext(Dispatchers.IO) {
     mapped {
       val ids = userIds.joinToString(",") { id(it) }
-      val request = SupabaseClient.requestBuilder("/rest/v1/dm_device_keys?select=device_id,public_key&user_id=in.($ids)&retired_at=is.null", accessToken).get().build()
+      val request = SupabaseClient.requestBuilder("/rest/v1/dm_device_keys?select=user_id,device_id,public_key&user_id=in.($ids)&retired_at=is.null", accessToken).get().build()
       val rows = JSONArray(SupabaseClient.executeBody(request))
       buildList {
-        for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { add(CurioDmIdentity(it.optString("device_id"), it.optString("public_key"))) }
+        for (i in 0 until rows.length()) rows.optJSONObject(i)?.let {
+          add(CurioDmIdentity(it.optString("device_id"), it.optString("public_key"), it.optString("user_id")))
+        }
       }
     }
   }
@@ -804,10 +806,32 @@ private const val PERSON_COLUMNS_PRIVACY =
       val payload = JSONObject().put("conversation_id", conversationId).put("recipient", recipient)
         .put("device_id", envelope.deviceId).put("key_version", envelope.keyVersion)
         .put("encrypted_key", envelope.encryptedKey).put("encryption_version", envelope.version)
-      val request = SupabaseClient.requestBuilder("/rest/v1/dm_key_envelopes?on_conflict=conversation_id,recipient,device_id,key_version", accessToken)
-        .header("Prefer", "resolution=merge-duplicates,return=minimal")
+      // Do NOT use PostgREST's `on_conflict` upsert here. The sender is
+      // deliberately unable to SELECT a recipient's envelope, and PostgREST
+      // can route a duplicate upsert through RLS visibility checks before it
+      // applies conflict-ignore. Envelopes are immutable, so a plain insert
+      // plus a duplicate-key success path is both safer and reliable.
+      val request = SupabaseClient.requestBuilder("/rest/v1/dm_key_envelopes", accessToken)
+        .header("Prefer", "return=minimal")
         .post(payload.toString().toRequestBody(jsonMediaType)).build()
-      SupabaseClient.executeBody(request)
+      try {
+        SupabaseClient.executeBody(request)
+      } catch (failure: Throwable) {
+        val message = failure.message.orEmpty()
+        if (!message.contains("duplicate key", ignoreCase = true) &&
+            !message.contains("23505", ignoreCase = true) &&
+            !message.contains("unique constraint", ignoreCase = true)
+        ) throw failure
+      }
+    }
+  }
+
+  /** The largest envelope version visible to this recipient in one conversation. */
+  suspend fun dmHighestKeyVersion(accessToken: String, conversationId: String): Result<Int> = withContext(Dispatchers.IO) {
+    mapped {
+      val path = "/rest/v1/dm_key_envelopes?select=key_version&conversation_id=eq.${encode(conversationId)}&order=key_version.desc&limit=1"
+      val row = JSONArray(SupabaseClient.executeBody(SupabaseClient.requestBuilder(path, accessToken).get().build())).optJSONObject(0)
+      row?.optInt("key_version")?.takeIf { it > 0 } ?: 0
     }
   }
 
@@ -918,7 +942,7 @@ private const val PERSON_COLUMNS_PRIVACY =
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             require(ciphertext.isNotBlank() && nonce.isNotBlank()) { "Encrypted message is empty." }
-            require(encryptionVersion == CurioDmCrypto.VERSION || encryptionVersion.startsWith("${CurioDmCrypto.VERSION}:")) {
+            require(CurioDmCrypto.messageKeyVersion(encryptionVersion) != null) {
                 "Unsupported message encryption version."
             }
             if (toUserId == myUserId) throw IllegalArgumentException("You can't message yourself.")
