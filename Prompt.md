@@ -1,6 +1,99 @@
 # Prompt Log — current request
 
-## Request (2026-09-13, IN PROGRESS — profile post-kind rendering)
+## Request (2026-09-13, IN PROGRESS — Social refresh, posting, and worldwide online policy)
+
+User (chat): make Social swipe-to-refresh and the upgraded posting experience always-on; provide terms/conditions and README coverage suitable for a worldwide launch.
+
+### Plan
+
+1. Add Material3 pull-to-refresh around the Social wall so users can refresh without finding a text action.
+2. Preserve the existing post sheet's card/note/quote flow and safety gates; keep its publishing surface lightweight rather than adding another media path.
+3. Add worldwide baseline Terms and Privacy notices that clearly cover acceptable use, reports, age, content/IP, encryption limits, retention, member controls and cross-border processing. They must explicitly require country-specific legal review before launch; no code or document can truthfully guarantee legal compliance in every country.
+
+### Completion
+
+- Social now supports native pull-to-refresh using the Material3 refresh surface, backed by the existing server refresh function and progress state.
+- Added the worldwide Online Terms of Use and Online Privacy Notice, and linked both from the README's Online Mode disclosure. They deliberately identify mandatory jurisdiction-specific counsel/contact-detail work before launch instead of making an unsafe universal-compliance claim.
+
+## Request (2026-09-13, IN PROGRESS — immediate encrypted DM delivery)
+
+User (chat): encryption-off messages work, but sending/receiving feels slow and
+receiver-side encrypted messages still report unable to decrypt.
+
+### Diagnosis and plan
+
+1. Live `messagesSince` rows were merged directly into UI/cache without running
+the decrypt flow, so realtime delivery could display the transport row instead
+of decrypted text.
+2. Initial decrypt fetched envelopes serially once per message, making a thread
+slower as its history grew. Fetch every required key-version envelope in one
+server read, install the batch, then decrypt the page.
+3. Route a live arrival through that same batched decrypt path before display;
+keep read receipts and typing-state behavior afterwards.
+
+### Completion
+
+- Realtime arrivals now use the same page decrypt path before they reach the
+  thread, so a ciphertext transport row is never merged into the visible cache.
+- Required envelope versions are fetched together in one request rather than
+  serially per message, then installed before AES-GCM reads. This removes the
+  history-length network delay while retaining exact-version key selection.
+
+- Sender-side recipient and sender envelope writes now run concurrently before
+  the message insert, removing needless per-device round-trip delay.
+
+## Request (2026-09-13, IN PROGRESS — DM cache compile repair)
+
+CI reports that `MutableSet` does not provide `takeLast` at the local-delete
+cache write. Convert the set to a list before applying the 250-id cap, then
+run static checks only and commit the one-cycle compile repair.
+
+### Completion
+
+- The local hidden-message-id set is now converted to a list before capping,
+  which resolves the CI `Unresolved reference: takeLast` Kotlin compile error.
+
+## Request (2026-09-13, IN PROGRESS — dependable per-chat message encryption)
+
+User (chat): receiver phones report “Unable to decrypt this message” even on
+the same app version. Fix it properly; add a shared per-chat encryption switch
+so both members use the same mode, plus both local delete and sender-only
+unsend.
+
+### Research and plan
+
+1. The current decrypt retry fetches an envelope only when the key is absent.
+   A stale key with the right version survives and AES-GCM necessarily rejects
+   it. Treat the server envelope for the message’s exact version as
+   authoritative and install it before every decrypt attempt; retry once only
+   when a fresh envelope was installed.
+2. Conversation mode must be server-authoritative, not a phone preference:
+   add a two-participant `dm_conversations` row, RLS, and an insert trigger
+   that rejects a plaintext/ciphertext payload that does not match the shared
+   mode. Missing legacy rows mean encrypted. New plaintext is only allowed
+   after a participant changes that shared row, so both phones immediately
+   read the same state.
+3. Preserve historical encrypted rows; changing mode applies only to new
+   messages. Add local-device hide storage for “Delete for me” and make
+   server-side recall sender-only for “Unsend for everyone.”
+4. Static verification only — Gradle is forbidden in this environment. The
+   external documentation endpoint rejected this environment’s requests, so
+   implementation follows the already-supported AES-GCM unique-nonce and
+   authenticated-conversation-id design, with server-side payload enforcement.
+
+### Completion
+
+- Decryption now refreshes and installs the server envelope for the message’s
+  exact key version even when a stale local key exists, eliminating the
+  same-version AES-GCM authentication failure after a key replacement.
+- Every chat now has a server-authoritative shared encryption mode. It defaults
+  to encrypted for legacy conversations, applies to both members, and the SQL
+  trigger rejects a payload that does not match the selected mode. Turning it
+  off affects only new messages; earlier ciphertext remains decryptable.
+- Tapping a message opens its actions: every message can be hidden only on this
+  device, and a sender can unsend their own server message for both members.
+
+## Request (2026-09-13, DONE — profile post-kind rendering)
 
 User (chat): on another member's profile, their NOTE and QUOTE posts render as
 topic share cards instead of text posts.

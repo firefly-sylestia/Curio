@@ -68,6 +68,8 @@ Everything lives on your device. No analytics. No tracking. No ads. Open source.
 >
 > **How long it is kept:** a wall post, its replies and a direct message each live **24 hours** on the server and are then swept away — an expired message is gone even for the two people in it. Your own device keeps the conversations it received (a private copy for you), and signing out deletes that copy along with the session token.
 
+> **Online terms and privacy:** before enabling Online Mode, read the [Online Terms of Use](docs/ONLINE_TERMS.md) and [Online Privacy Notice](docs/ONLINE_PRIVACY.md). They describe content rules, reporting, direct-message encryption limits, retention and member controls. These worldwide baseline documents require jurisdiction-specific legal review and operator contact details before public launch.
+
 ---
 
 ## 🚀 Quick Start
