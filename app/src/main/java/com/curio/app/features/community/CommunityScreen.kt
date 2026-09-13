@@ -441,10 +441,12 @@ fun CommunityScreen(navController: NavController) {
                 }
                 error?.let { message ->
                     item {
+                        // Quiet on-surface ink — a red slab atop the wall read
+                        // as a tester build's log, not a sentence.
                         Text(
                             message,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

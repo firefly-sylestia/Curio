@@ -50,9 +50,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalIndication
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +79,7 @@ import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.data.supabase.SupabaseRealtime
+import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
@@ -152,6 +157,10 @@ fun DirectMessageScreen(
     var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
     // Sent-but-not-yet-confirmed messages, drawn exactly like real ones.
     var pending by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
+    // Sent bubbles waiting for their server row: rendered exactly like a
+    // delivered message (same text, same clock), dropped the moment the real
+    // row arrives. This is what keeps a send from vanishing and returning.
+    var sentShadow by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
     var person by remember {
         // On screen from the FIRST frame: the device remembers every identity
         // it has resolved, and the route carries the handle the caller already
@@ -191,6 +200,45 @@ fun DirectMessageScreen(
     // shared mode off for both, then send the same text). Keyed on the thread
     // so another conversation never inherits a stale dialog.
     var encryptionIssue by remember(otherUserId) { mutableStateOf<String?>(null) }
+
+    /**
+     * Reacting to one message, from ANYWHERE on the screen (the bubbles and
+     * the hold-menu dialog both land here): optimistic glyph first, server
+     * confirm after, revert on failure. Guarded so a call without a live
+     * session is simply a no-op.
+     */
+    fun pickReactionScreen(messageId: String, kind: String, activeToken: String?, activeUserId: String?) {
+        if (activeToken == null || activeUserId == null) return
+        scope.launch {
+            val mine = reactions[messageId]?.firstOrNull { it.userId == activeUserId }
+            reactionTarget = null
+            val optimistic = if (mine?.kind == kind) {
+                reactions[messageId].orEmpty().filterNot { it.userId == activeUserId }
+            } else {
+                reactions[messageId].orEmpty()
+                    .filterNot { it.userId == activeUserId } +
+                    CurioDmReaction(messageId, activeUserId, kind)
+            }
+            reactions = reactions + (messageId to optimistic)
+            val result = if (mine?.kind == kind) {
+                SocialApi.clearReaction(activeToken, messageId)
+            } else {
+                SocialApi.react(activeToken, messageId, kind)
+            }
+            result.fold(
+                onSuccess = {
+                    SocialApi.reactions(activeToken, listOf(messageId))
+                        .onSuccess { fresh ->
+                            reactions = reactions + (messageId to fresh.getOrElse(messageId) { emptyList<CurioDmReaction>() })
+                        }
+                },
+                onFailure = {
+                    reactions = reactions + (messageId to (mine?.let { listOf(it) } ?: emptyList()))
+                    error = it.message
+                }
+            )
+        }
+    }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
@@ -334,6 +382,15 @@ fun DirectMessageScreen(
                     .sortedBy { it.createdAtMillis }
                 messages = merged
                 SocialMessageCache.write(context, otherUserId, merged)
+                // Shadows whose words are now covered by a real server row
+                // (same text, mine, within ten seconds) retire here — the
+                // swap is invisible because both render the same bubble.
+                sentShadow = sentShadow.filterNot { shadow ->
+                    merged.any { real ->
+                        real.mine && real.body == shadow.body &&
+                            kotlin.math.abs(real.createdAtMillis - shadow.createdAtMillis) < 10_000L
+                    }
+                }
                 error = null
                 loadedOnce = true
             },
@@ -442,7 +499,14 @@ fun DirectMessageScreen(
             SocialApi.sendPlaintext(active, otherUserId, text, me).fold(
                 onSuccess = {
                     SocialApi.setTyping(active, otherUserId, false)
+                    // The bubble does NOT vanish while the thread re-reads: it
+                    // moves from [pending] to [sentShadow], a stand-in that
+                    // renders until the server's own copy of the same words
+                    // lands in [messages] — then it is dropped silently. The
+                    // old remove-then-load sequence was the flicker: gone for
+                    // a beat, then back.
                     pending = pending.filterNot { it.id == optimistic.id }
+                    sentShadow = sentShadow + optimistic
                     load(active, me)
                 },
                 onFailure = { failure ->
@@ -566,7 +630,10 @@ fun DirectMessageScreen(
         ).fold(
             onSuccess = {
                 SocialApi.setTyping(active, otherUserId, false)
+                // Same shadow swap as the plaintext path: never remove the
+                // bubble before its replacement exists.
                 pending = pending.filterNot { it.id == optimistic.id }
+                sentShadow = sentShadow + optimistic
                 load(active, me)
             },
             onFailure = { failure ->
@@ -589,6 +656,7 @@ fun DirectMessageScreen(
         if (!eligible || token == null || myUserId == null) {
             messages = emptyList()
             pending = emptyList()
+            sentShadow = emptyList()
             reactions = emptyMap()
             peerTyping = false
             return@LaunchedEffect
@@ -785,9 +853,12 @@ fun DirectMessageScreen(
         SocialApi.setTyping(token, otherUserId, false)
     }
 
-    val thread = remember(messages, pending) { messages + pending }
-
-    // The rows that sit ABOVE the messages in the same LazyColumn. Scrolling
+    val thread = remember(messages, pending, sentShadow) {
+        // Shadows sit BETWEEN the confirmed rows and the still-sending tail:
+        // they are delivered as far as anyone can see, and they sort by their
+        // own (phone) clock like the optimistic rows do.
+        messages + (sentShadow + pending).sortedBy { it.createdAtMillis }
+    }        // The rows that sit ABOVE the messages in the same LazyColumn. Scrolling
     // needs the message's real index, not its index within the conversation.
     val headerRows = (if (wide) 1 else 0) +
         1 + // the peer card
@@ -854,36 +925,11 @@ fun DirectMessageScreen(
                     reactionTarget = if (reactionTarget == messageId) null else messageId
                 }
 
+                // The real picker logic lives at SCREEN scope (see below), so
+                // the hold-menu dialog — which sits outside the eligible
+                // branch — can react on the member's behalf too.
                 fun pickReaction(messageId: String, kind: String) {
-                    val mine = reactions[messageId]?.firstOrNull { it.userId == activeUserId }
-                    reactionTarget = null
-                    scope.launch {
-                        val optimistic = if (mine?.kind == kind) {
-                            reactions[messageId].orEmpty().filterNot { it.userId == activeUserId }
-                        } else {
-                            reactions[messageId].orEmpty()
-                                .filterNot { it.userId == activeUserId } +
-                                CurioDmReaction(messageId, activeUserId, kind)
-                        }
-                        reactions = reactions + (messageId to optimistic)
-                        val result = if (mine?.kind == kind) {
-                            SocialApi.clearReaction(activeToken, messageId)
-                        } else {
-                            SocialApi.react(activeToken, messageId, kind)
-                        }
-                        result.fold(
-                            onSuccess = {
-                                SocialApi.reactions(activeToken, listOf(messageId))
-                                    .onSuccess { fresh ->
-                                        reactions = reactions + (messageId to fresh.getOrElse(messageId) { emptyList<CurioDmReaction>() })
-                                    }
-                            },
-                            onFailure = {
-                                reactions = reactions + (messageId to (mine?.let { listOf(it) } ?: emptyList()))
-                                error = it.message
-                            }
-                        )
-                    }
+                    pickReactionScreen(messageId, kind, activeToken, activeUserId)
                 }
 
                 LazyColumn(
@@ -1088,9 +1134,12 @@ fun DirectMessageScreen(
             }
         }
 
-        // The HOLD menu for one message. Copy (any message), Edit (mine,
-        // plaintext only — an encrypted row is bound to its key version),
-        // Remove (mine). Nothing else: a menu is a decision, not a page.
+        // The HOLD menu for one message: the reaction palette rides at the
+        // top (the emoji choice used to require a second tap on the bubble —
+        // it lives here, where the finger already is), then Copy (any
+        // message), Edit (mine, plaintext only — an encrypted row is bound to
+        // its key version), Remove (mine). Nothing else: a menu is a
+        // decision, not a page.
         actionTarget?.let { target ->
             val canEdit = target.mine && target.migrationState == "plaintext" &&
                 !target.id.startsWith(LOCAL_ID_PREFIX)
@@ -1107,11 +1156,41 @@ fun DirectMessageScreen(
                     )
                 },
                 text = {
-                    Text(
-                        text = target.body.take(160) + if (target.body.length > 160) "…" else "",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = target.body.take(160) + if (target.body.length > 160) "…" else "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        // The palette, inline: picking one reacts AND closes,
+                        // picking the one already on the message clears it.
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            val current = reactions[target.id]
+                                ?.firstOrNull { it.userId == myUserId }?.kind
+                            SocialReactions.PALETTE.forEach { (emoji, _) ->
+                                val chosen = current != null &&
+                                    SocialReactions.emojiFor(current) == emoji
+                                Surface(
+                                    onClick = {
+                                        actionTarget = null
+                                        pickReactionScreen(target.id, emoji, token, myUserId)
+                                    },
+                                    shape = RoundedCornerShape(50),
+                                    color = if (chosen) curioDialogActionColor().copy(alpha = 0.16f)
+                                    else MaterialTheme.colorScheme.surfaceContainerHigh
+                                ) {
+                                    Text(
+                                        text = emoji,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 },
                 dismissButton = {
                     TextButton(onClick = { actionTarget = null }) { Text("Close") }
@@ -1198,11 +1277,58 @@ fun DirectMessageScreen(
         }
 
         if (!wide) {
+            // The conversation's hero IS the peer: their portrait rides in the
+            // title slot and the @username (or a live Typing… line) rides as
+            // the subtitle, so the person you are writing to is named at the
+            // top — not stated as a standing label with the person listed
+            // below the fold.
             SettingsHeroHeader(
-                title = title,
-                subtitle = if (peerTyping) "Typing…" else "Private messages",
+                title = "",
+                subtitle = if (peerTyping) "Typing…" else "",
                 onBack = { navController.popBackStack() },
-                glassBackdrop = glassBackdrop
+                glassBackdrop = glassBackdrop,
+                titleTrailing = { ink ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable {
+                                navController.navigate(CurioRoutes.socialProfile(otherUserId)) {
+                                    launchSingleTop = true
+                                }
+                            }
+                            .padding(end = 6.dp)
+                    ) {
+                        SocialAvatar(
+                            style = person?.avatarStyle ?: 0,
+                            avatarSize = 34.dp,
+                            online = person?.isActiveNow == true
+                        )
+                        Column {
+                            Text(
+                                text = person?.label ?: fallback,
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = ink,
+                                maxLines = 1
+                            )
+                            if (peerTyping) {
+                                Text(
+                                    text = "Typing…",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = ink
+                                )
+                            } else if (person != null && person!!.handle.isNotBlank()) {
+                                Text(
+                                    text = person!!.handleLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = ink.copy(alpha = 0.75f),
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                }
             )
         }
     }
@@ -1401,8 +1527,12 @@ private fun MessageEntry(
 /**
  * One message. Yours sits on the right in the accent container, theirs on the
  * left on the raised surface — the reading direction of every messenger, so
- * who said what needs no label. Corners open up on the first line of a run and
- * only the last line of a run gets the full rounding and the timestamp.
+ * who said what needs no label. Corners open up on the first line of a run
+ * and only the last line of a run gets the full rounding and the timestamp.
+ * Both fills are OPAQUE: a translucent bubble let the background bleed
+ * through and read as unfinished. A plain TAP opens nothing destructive —
+ * it is the reaction tap (with a soft press squish); every decision
+ * (copy, edit, remove) lives behind the HOLD.
  */
 @Composable
 private fun MessageBubble(
@@ -1416,24 +1546,26 @@ private fun MessageBubble(
     onLongPress: () -> Unit
 ) {
     val mine = message.mine
+    val dark = isCurioDarkTheme()
     val shape = if (mine) {
         RoundedCornerShape(
             topStart = 20.dp,
             topEnd = if (firstOfRun) 20.dp else 7.dp,
-            bottomStart = if (lastOfRun) 20.dp else 7.dp,
-            bottomEnd = 7.dp
+            bottomStart = 7.dp,
+            bottomEnd = if (lastOfRun) 20.dp else 7.dp
         )
     } else {
         RoundedCornerShape(
             topStart = if (firstOfRun) 20.dp else 7.dp,
             topEnd = 20.dp,
-            bottomStart = 7.dp,
-            bottomEnd = if (lastOfRun) 20.dp else 7.dp
+            bottomStart = if (lastOfRun) 20.dp else 7.dp,
+            bottomEnd = 7.dp
         )
     }
 
     val mineGlyph = reactions.firstOrNull { it.userId == myUserId }?.kind
     val others = reactions.filterNot { it.userId == myUserId }
+    val haptics = LocalHapticFeedback.current
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -1464,33 +1596,45 @@ private fun MessageBubble(
             horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
             modifier = Modifier.weight(1f, fill = false)
         ) {
+            val press = rememberCurioPressSource(pressedScale = 0.96f)
             Box(
                 modifier = Modifier
+                    .then(press.modifier)
                     .clip(shape)
                     .background(
-                        if (mine) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surfaceContainerHigh
+                        when {
+                            mine -> if (dark) Color(0xFF3A2A33) else MaterialTheme.colorScheme.primary
+                            dark -> MaterialTheme.colorScheme.surfaceContainerHighest
+                            else -> Color(0xFFF3EDE7)
+                        }
                     )
                     .combinedClickable(
-                        onClick = onTap,
+                        interactionSource = press.interactionSource,
+                        indication = LocalIndication.current,
+                        onClickLabel = "React to this message",
+                        onLongClickLabel = "Message options",
                         // The HOLD is the message's decision point: it opens
-                        // the action menu (remove, edit). A plain tap keeps
-                        // opening reactions.
-                        onLongClick = onLongPress
+                        // the action menu (copy, edit, remove, reactions). A
+                        // plain tap keeps opening reactions.
+                        onLongClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onLongPress()
+                        },
+                        onClick = onTap
                     )
                     .padding(horizontal = 14.dp, vertical = 9.dp)
             ) {
                 Text(
                     text = message.body,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (mine) MaterialTheme.colorScheme.onPrimaryContainer
+                    color = if (mine) Color.White
                     else MaterialTheme.colorScheme.onSurface
                 )
                 if (message.editedAtMillis != null) {
                     Text(
                         text = "edited",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (mine) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        color = if (mine) Color.White.copy(alpha = 0.7f)
                         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 }

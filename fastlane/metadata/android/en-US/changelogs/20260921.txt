@@ -1,9 +1,15 @@
 ADD:
+- Post a topic, rebuilt: the sheet opens straight onto a writer with the post rendering live above it as you type — no forms, no preview step. Notes are the default; topic, style and shape attach from compact pills. The wall's button is simply "Post".
+- Messages: holding a bubble opens everything at once — the reaction palette, copy, edit, remove. A tap only reacts. Bubbles are opaque with a cleaner shape and a soft press squish; a sent bubble stays put instead of vanishing and coming back.
+- A conversation's header is the person: their portrait, name and @username ride the title bar, with a live "Typing…" line.
+- Chats and Friends get their own icons (a speech bubble and two people) instead of borrowed ones.
 - Replies now branch: answer a reply directly, long branches fold behind a "show more" door, and both replies and messages can be edited with an "edited" mark. Messages gain hold-to-remove; encrypted messaging moves behind an opt-in switch in Settings → Online mode while it is reworked.
 - Profiles: the community page wears the app's own stat style (rose numbers over labels), shows the member's bio, and adds your streak as flame plus days on your own page. Post previews fill their square tile completely.
 - Liking and disliking pop.
 
 FIX:
+- Share-card previews on the wall and in profile grids are properly centred in their tiles — no more hugging the left or top corner, and the post counts on a profile are readable on any theme.
+- Error notes across the social screens are quiet on-surface sentences with a small glyph, not red slabs that read like a tester build.
 - Encrypted sends: the server now names the devices still missing a key envelope (with their public keys), so a send wraps exactly what the server will check, instead of failing with "missing a device envelope".
 - Opening a post hides the bottom navigation so the card owns the whole screen, and the comments live right under the post now, in the same list, updating live.
 - Community wall doors (Chats, Friends, You) are compact icon tiles without the extra captions.

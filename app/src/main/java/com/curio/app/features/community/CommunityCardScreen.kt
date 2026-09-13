@@ -416,10 +416,12 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
 
             error?.takeIf { current != null }?.let { message ->
                 item(key = "error") {
+                    // Quiet on-surface ink: a red slab under a post read as a
+                    // tester build, not as a sentence for a person.
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -670,7 +672,7 @@ private fun CommunityInlineReplies(
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -678,7 +680,7 @@ private fun CommunityInlineReplies(
                 Text(
                     text = problem,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 

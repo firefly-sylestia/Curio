@@ -270,7 +270,7 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -527,14 +527,16 @@ private fun SocialProfileHeader(
 
 /** One count in the identity block: the number OVER its label, centred —
  *  a column reads at a glance where a run of inline numbers does not. The
- *  number wears the rose accent, matching the app profile's hero stats. */
+ *  number wears ON-SURFACE ink: the rose accent only had real contrast
+ *  against the hero's tint, and on the plain page background it washed out
+ *  (the "can't read the post counts" failure). The label stays quiet. */
 @Composable
 private fun SocialProfileStat(value: Int, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value.toString(),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-            color = settingsRoseAccent()
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = label,
@@ -552,14 +554,14 @@ private fun SocialProfileStreak(value: Int) {
             CurioIcon(
                 name = CurioIcons.LocalFire,
                 contentDescription = null,
-                tint = settingsRoseAccent(),
+                tint = MaterialTheme.colorScheme.onSurface,
                 size = 16.dp
             )
             Spacer(Modifier.width(3.dp))
             Text(
                 text = value.toString(),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = settingsRoseAccent()
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
         Text(

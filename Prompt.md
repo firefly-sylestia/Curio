@@ -1,5 +1,45 @@
 # Prompt Log — current request
 
+## Request (2026-09-13, LATEST: composer redesign + DM feel + icon marks)
+
+User asks (summarised): the community "post a topic" sheet feels like filling
+in forms — rebuild it (write-first, notes default); chats/friends icons don't
+match; hide the red tester-looking error notes; sending feels glitchy (bubble
+vanishes then returns); bubbles are translucent with a bad shape and no
+animation; tapping bubbles should NOT open emoji/delete (that belongs to
+hold); the DM header says "Curious Explorer · Private messages" instead of
+showing the person; the share-card preview sits too far left on the wall and
+top-left in the profile grid; profile post-count text unreadable.
+
+Done in this batch:
+- CommunityCardCanvas: painted footprint box (requiredSize cardWidth*scale ×
+  cardHeight*scale) inside a CENTERING parent — kills the left-hug on wide
+  walls and the top-left pin in fill mode (profile grid TopCenter).
+- Composer: full rewrite in place. Opens on a borderless writer (Note default),
+  live canvas crossfades Note/Topic/Quote as you type, Post top-right with a
+  scale pop when valid, counter only appears past 80% of budget, topic/style/
+  shape/credit are compact pills with inline trays, focus requester arms the
+  keyboard. The two-step Preview dialog is GONE. FAB label now "Post".
+- Icon font rebuilt: chat_bubble, groups, send, more_horiz ligatures merged
+  from the full Material Symbols font (gids-only subset + feaLib-compiled
+  liga for exactly the retained icons; verified every name shapes to one
+  outlined glyph). CurioIcons.Chats/Friends/Send/MoreHoriz added; wall door
+  tiles + empty cards use them.
+- DM: hero header now carries the peer (avatar + name + @handle via
+  titleTrailing; Typing… replaces the handle live). MessagePeerHeader card
+  stays below for taps.
+- DM send flicker: sentShadow stage — an optimistic bubble moves to the
+  shadow list when the request succeeds and retires only when a real server
+  row with the same words lands, so the bubble never disappears.
+- Bubbles: opaque fills (light: primary vs warm paper; dark: deep rose vs
+  raised surface), tighter tail rounding, press squish + long-press haptic;
+  tap = reactions only, HOLD = the action dialog which now hosts the reaction
+  palette inline (pickReactionScreen hoisted to screen scope for the dialog).
+- Red tester errors: SocialNote + the wall/card/profile error lines are quiet
+  on-surface ink with a small warning glyph.
+- Profile stats: numbers now onSurface (rose washed out on the page), streak
+  flame matches.
+
 ## Request (2026-09-13, IN PROGRESS — encryption envelope fix + redesign batch)
 
 ### Batch A: the envelope failure (user: "it still says encrypted message is

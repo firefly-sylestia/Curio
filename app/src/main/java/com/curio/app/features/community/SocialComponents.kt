@@ -747,15 +747,32 @@ internal fun socialStamp(millis: Long): String {
     }
 }
 
-/** One line of feedback under a section — [isError] picks the ink. */
+/**
+ * One line of feedback under a section. An ERROR is a quiet on-surface line
+ * with a small warning glyph — never a red slab: bright error ink across a
+ * whole card read as a tester build's crash log rather than a sentence for a
+ * person.
+ */
 @Composable
 internal fun SocialNote(message: String, isError: Boolean) {
-    Text(
-        text = message,
-        style = MaterialTheme.typography.bodySmall,
-        color = if (isError) MaterialTheme.colorScheme.error
-        else MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        if (isError) {
+            CurioIcon(
+                name = CurioIcons.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 14.dp
+            )
+        }
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 /**
