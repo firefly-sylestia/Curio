@@ -68,6 +68,7 @@ object OnlineAccount {
                 onSuccess = { refreshed ->
                     SupabaseSessionStore.save(context, refreshed)
                     AppPreferences.setOnlineModeEnabled(context, true)
+                    SupabaseClient.updateOnlineMode(refreshed.accessToken, true)
                     state = state.copy(session = refreshed, busy = false, error = null)
                     recoveryScope.launch {
                         restoreProfileIdentity(context, refreshed)
@@ -95,6 +96,7 @@ object OnlineAccount {
             onSuccess = { session ->
                 SupabaseSessionStore.save(context, session)
                 AppPreferences.setOnlineModeEnabled(context, true)
+                SupabaseClient.updateOnlineMode(session.accessToken, true)
                 restoreProfileIdentity(context, session)
                 state = State(session = session)
                 publishIdentity(context, session.accessToken, session.userId)
@@ -131,6 +133,7 @@ object OnlineAccount {
                 } else {
                     SupabaseSessionStore.save(context, session)
                     AppPreferences.setOnlineModeEnabled(context, true)
+                    SupabaseClient.updateOnlineMode(session.accessToken, true)
                     restoreProfileIdentity(context, session)
                     state = State(session = session)
                     publishIdentity(context, session.accessToken, session.userId)
@@ -180,9 +183,8 @@ object OnlineAccount {
      */
     suspend fun setOnlineMode(context: Context, enabled: Boolean) {
         AppPreferences.setOnlineModeEnabled(context, enabled)
-        if (!enabled) return
         val token = state.session?.accessToken ?: return
-        SupabaseClient.updateOnlineMode(token, true).onFailure { failure ->
+        SupabaseClient.updateOnlineMode(token, enabled).onFailure { failure ->
             state = state.copy(error = onlineAuthMessage(failure))
         }
     }

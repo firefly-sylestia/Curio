@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -185,17 +184,34 @@ fun DirectMessageScreen(
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
-                    else runCatching {
-                        message.copy(body = CurioDmCrypto.decrypt(
+                    else {
+                        val encrypted = com.curio.app.data.supabase.CurioEncryptedMessage(
+                            message.ciphertext.orEmpty(),
+                            message.nonce.orEmpty(),
+                            message.encryptionVersion.orEmpty()
+                        )
+                        // A thread can hold messages from multiple envelope
+                        // generations. Install the version this message names,
+                        // not merely the latest one, before attempting AES-GCM.
+                        CurioDmCrypto.messageKeyVersion(encrypted.version)?.let { keyVersion ->
+                            if (CurioDmCrypto.existingKey(context, conversationId, keyVersion) == null) {
+                                SocialApi.dmEnvelope(active, conversationId, identity.deviceId, keyVersion)
+                                    .getOrNull()
+                                    ?.let { envelope ->
+                                        runCatching {
+                                            CurioDmCrypto.installEnvelope(context, conversationId, envelope)
+                                        }
+                                    }
+                            }
+                        }
+                        runCatching {
+                            message.copy(body = CurioDmCrypto.decrypt(
                             context,
                             conversationId,
-                            com.curio.app.data.supabase.CurioEncryptedMessage(
-                                message.ciphertext.orEmpty(),
-                                message.nonce.orEmpty(),
-                                message.encryptionVersion.orEmpty()
-                            )
-                        ))
-                    }.getOrElse { message.copy(body = "Unable to decrypt this message") }
+                            encrypted
+                            ))
+                        }.getOrElse { message.copy(body = "Unable to decrypt this message") }
+                    }
                 }
                 // v3xx53 — the SERVER keeps 24 hours; the DEVICE keeps what it
                 // received. Merging (rather than replacing) is what makes "gone
@@ -267,15 +283,28 @@ fun DirectMessageScreen(
             SocialApi.publishDmIdentity(active, mine, me).getOrThrow()
             val ownEnvelope = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
                 .getOrNull()
-            val keyVersion = ownEnvelope?.keyVersion
-                ?: ((System.currentTimeMillis() / 1_000L) + (System.nanoTime() and 0x3ffL))
+            // A conversation from a previous install can carry an envelope
+            // that this device's replacement keypair cannot open. Keep that
+            // historical envelope for older messages and rotate a new version
+            // for the next send instead of failing the entire conversation.
+            val restoredKey = ownEnvelope?.let { envelope ->
+                runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
+                    .getOrNull()
+            }
+            val keyVersion = when {
+                restoredKey != null -> ownEnvelope!!.keyVersion
+                ownEnvelope != null -> ownEnvelope.keyVersion.coerceAtMost(Int.MAX_VALUE - 1) + 1
+                else -> ((System.currentTimeMillis() / 1_000L) + (System.nanoTime() and 0x3ffL))
                     .coerceAtMost(Int.MAX_VALUE.toLong())
                     .toInt()
-            val key = ownEnvelope
-                ?.let { envelope -> CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
+            }
+            val key = restoredKey
                 ?: CurioDmCrypto.existingKey(context, conversationId, keyVersion)
                 ?: CurioDmCrypto.newKey(context, conversationId, keyVersion)
-            SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow().forEach { peer ->
+            val peers = SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow()
+                .filter(CurioDmCrypto::canWrapFor)
+            check(peers.isNotEmpty()) { "This friend needs to open Curio once before encrypted messages can reach them." }
+            peers.forEach { peer ->
                 SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)).getOrThrow()
             }
             SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine, keyVersion)).getOrThrow()
@@ -637,7 +666,7 @@ fun DirectMessageScreen(
                 }
 
                 MessageComposer(
-                    modifier = Modifier.imePadding(),
+                    modifier = Modifier,
                     draft = draft,
                     title = fallback,
                     sending = sending,

@@ -914,8 +914,9 @@ revoke all on function public.curio_purge_expired_cards() from public, anon, aut
 --
 -- `curio_normalize_text` folds a string down to plain lowercase Latin letters:
 -- accents dropped, look-alikes mapped (0→o, 3→e, @→a, $→s, |→i …) and every
--- remaining separator or unknown character REMOVED — so "f u c k", "f.u.c.k",
--- "fuuuuck" and "fück" all land on the same letters. The map is APPLIED IN THE
+-- remaining separator or unknown character becomes a word boundary — so spaced
+-- single-letter evasions can still be joined while ordinary words keep their
+-- boundaries. The map is APPLIED IN THE
 -- SAME ORDER as the Kotlin `CurioContentFilter.LOOKALIKES` list: the
 -- single-character `translate()` first, then the ligatures `translate` cannot
 -- express because their target is more than one letter (ß→ss, æ→ae, œ→oe,
@@ -954,7 +955,7 @@ as $$
             ),
             'þ', 'th'
         ),
-        '[^a-z]', '', 'g'
+        '[^a-z]+', ' ', 'g'
     )
     from folded;
 $$;
@@ -965,13 +966,9 @@ language plpgsql
 immutable
 as $$
 declare
-    -- Words matched ANYWHERE in the folded text (profanity, explicit sexual
-    -- content, slurs and harassment). Safe to match anywhere because none of
-    -- them hides inside an ordinary word.
+    -- Public-safety terms. They are matched as complete normalised words so an
+    -- innocent longer word is never refused because it contains a substring.
     anywhere text[] := array[
-        'fuck','fucker','fuckers','fucking','fuk','fuking','fukk','fck','fuxk',
-        'fux','fuq','fook','phuck','phuk','fvck','fvk','fack','fucked',
-        'motherfucker','motherfucking',
         'shit','shits','shyt','bullshit','dipshit','shithead',
         'bitch','bitches','bich','biatch','cunt','cunts','kunt','kunts',
         'dickhead','dickheads','pussy','pussies','whore','whores','slut',
@@ -992,9 +989,7 @@ declare
         'nazis','hitler','whitepower','whitepride','gaschamber','killyourself',
         'neckyourself'
     ];
-    -- Words that hide inside ordinary ones (ass in "class", sex in "Essex",
-    -- hoe in "shoes", cock in "cocktail", cum in "cucumber") — matched as
-    -- WHOLE words only.
+    -- Additional public-safety terms, also matched as complete normalised words.
     wholeword text[] := array[
         'ass','arse','asses','dumbass','jackass','kickass','sex','sexy',
         'sexual','sexist','sextoy','sextoys','nude','nudes','naked','boob',
@@ -1004,32 +999,21 @@ declare
         'escorts','coon','paki','kys'
     ];
     folded    text;
-    squash    text;
-    collapsed text;
     merged    text;
     bad       text;
     pass      integer;
 begin
     folded := public.curio_normalize_text(raw);
-    squash := regexp_replace(folded, '[^a-z]', '', 'g');
-    if length(squash) < 3 then
+    if length(regexp_replace(folded, '[^a-z]', '', 'g')) < 3 then
         return true;
     end if;
-    -- Runs of the same letter squeezed, so "fuuuuck" reads as "fuck".
-    collapsed := regexp_replace(squash, '(.)\1+', '\1', 'g');
-
-    foreach bad in array anywhere loop
-        if position(bad in squash) > 0 or position(bad in collapsed) > 0 then
-            return false;
-        end if;
-    end loop;
 
     -- Word view, with runs of SINGLE letters merged ("f u c k" -> "fuck").
     merged := array_to_string(regexp_split_to_table(folded, '[^a-z]+'), ' ');
     for pass in 1..12 loop
         merged := regexp_replace(merged, '\y([a-z]) ([a-z])\y', '\1\2', 'g');
     end loop;
-    foreach bad in array wholeword loop
+    foreach bad in array (anywhere || wholeword) loop
         if (' ' || merged || ' ') like ('% ' || bad || ' %') then
             return false;
         end if;

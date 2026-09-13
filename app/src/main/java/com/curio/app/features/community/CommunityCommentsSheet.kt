@@ -258,12 +258,11 @@ internal fun CommunityCommentsSheet(
                 )
             }
 
-            // v3xx53 — the app-level filter, surfaced as you type: send stays
-            // disabled and the line says why (the API refuses it again on the
-            // way out, and the schema's CHECK is the third gate).
-            if (CurioContentFilter.carriesBadWord(text)) {
+            // The exact canonical match is surfaced as the person types. The
+            // API and schema enforce the same public-text rule on send.
+            CurioContentFilter.problem(text)?.let { problem ->
                 Text(
-                    text = CurioContentFilter.BLOCKED_MESSAGE,
+                    text = problem,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )

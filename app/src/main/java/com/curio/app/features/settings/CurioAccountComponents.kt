@@ -308,7 +308,7 @@ internal fun CurioAccountIdentityCard(
             "Usernames use 3 to 24 letters, numbers or underscores."
         // v3xx53 — the same text filter every post and message goes through,
         // stated BEFORE the request instead of only as the server's answer.
-        !CurioContentFilter.isClean(clean) -> CurioContentFilter.BLOCKED_MESSAGE
+        CurioContentFilter.problem(clean) != null -> CurioContentFilter.problem(clean)
         else -> null
     }
     val changed = clean.isNotEmpty() && clean != savedName.trim().removePrefix("@").lowercase()
@@ -707,4 +707,3 @@ private fun looksLikeEmail(value: String): Boolean {
     val dot = value.lastIndexOf('.')
     return at in 1 until value.length - 1 && dot > at + 1 && dot < value.length - 1
 }
-
