@@ -1,5 +1,6 @@
 ADD:
 - Social: pull down on the wall to refresh the latest posts.
+- Profiles: a member's page is a real page now — a big portrait, their name and @handle, live counts for their posts, likes and replies, their bio, the one action that fits how you know them (Message or Add friend) with blocking tucked behind the ⋮, and a grid of small post previews that opens the post when tapped.
 - Messages: the other person's "typing…" line and their reactions arrive the instant they happen over the live connection, and both only fall back to a slow safety check when it is unavailable.
 - Messages: encrypted deliveries decrypt before rendering and load key envelopes in one fast batch.
 - Messages: shared per-chat encryption switch, reliable versioned decryption, and plaintext fallback.

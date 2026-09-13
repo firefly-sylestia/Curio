@@ -1,63 +1,73 @@
 # Prompt Log — current request
 
-## Request (2026-09-13, IN PROGRESS — social redesign pass, slice 1 shipped)
+## Request (2026-09-13, COMPLETE — Supabase realtime setup guide; nothing pushed)
 
-User (chat), one message, many asks:
+User (chat): write a proper guide for setting up Realtime in Supabase (with
+policies etc.), do NOT push it yet, and explain the untracked files that
+appeared after they "installed Supabase".
 
-1. Friends screen: proper online indicator, recent-message previews, delete a
-   chat by tap-and-hold, proper avatar cut-out, faster syncing.
-2. Social speed: likes/dislikes must not wait, posting must not wait, faster
-   sending, no "slow waiting" feel — better animation flow.
-3. "Post a topic" bottom sheet: full revamp/redesign — professional, compact,
-   easier, properly animated.
-4. Swipe-down refresh: proper animation; REMOVE the refresh button.
-5. Replies/comments bottom sheet: proper redesign.
-6. Avatar cut-out; change the Friends icon; make Friends a SIDEBAR and turn the
-   current Friends screen into CHATS.
-7. Share-card editor: share with a link, and a "share to social" button in the
-   share dialog.
-8. Other member's profile: full redesign, Instagram-style, bio visible, small
-   post previews.
-9. Realtime notifications for replies.
+### What was asked and what was done
 
-### Diagnosis and plan
+1. **Guide** → `docs/REALTIME_SETUP.md` (398 lines): what "live" means in Curio
+   (the hand-rolled client contract, one `realtime:curio` channel, push-is-a-hint,
+   timer fallbacks), the publication SQL (§5e/§5g), replica identity for the
+   three filtered tables, a copy-paste verification query with expected output,
+   how RLS + the user's JWT filter every change, the 1-hour token rule, the
+   optional private-channel path for Broadcast/Presence (requirements, topic
+   design, `realtime.messages` policies, the client change it would need), a
+   troubleshooting table, an on-device verification checklist, the non-negotiable
+   security rules, and a short note on the CLI.
+2. **Pointer added** to `supabase/AGENTS.md` (the realtime contract's home) so the
+   guide is discoverable from the DOX chain.
+3. **Untracked files explained**: `package.json` + `package-lock.json` +
+   (git-ignored) `node_modules/` are a root Node install of `@supabase/server`
+   (Supabase's server-side SDK, beta) that nothing in Curio uses; `supabase/.temp/`
+   is the Supabase CLI's scratch dir (its `cli-latest` says v2.117.0), so the CLI
+   ran at least once. It was never linked: `supabase/.temp/project-ref` is empty
+   and there is no `supabase/config.toml`, so nothing reached the project.
 
-The speed complaint had a concrete, mechanical cause (fixed in slice 1):
+### State
 
-- Every like/dislike on the wall called `CommunityApi.like(...)` and then
-  `load()` — a FULL feed read that also set `loading = true`. `loading` drives
-  both the page skeleton AND `PullToRefreshBox.isRefreshing`, so one tap
-  flashed a refresh spinner, rebuilt every card, and only then moved a count.
-- Posting did the same: `post()` replied `return=minimal`, so the app could not
-  draw the new card until a full feed read came back.
-- A card's own page had the identical pattern on its Like pill.
-- The wall's header carried an explicit `Refresh` TextButton (the button the
-  user wants gone) plus a spinner that only existed because of the above.
+- NOT committed and NOT pushed (user's explicit instruction): `docs/REALTIME_SETUP.md`
+  and the one-line pointer in `supabase/AGENTS.md`.
+- The previous request's slice 1 (optimistic likes and instant posting on the
+  wall) is already committed AND on `origin/main` as `abebf625`, together with
+  the encrypted-DM envelope fix `4373edfc`.
+- An old `stash@{0}` (a one-line Prompt.md tweak) is left untouched.
 
-### Completion (slice 1 — shipped)
+## Interrupted request (2026-09-13, PARTIAL — slice 1 shipped)
 
-- Wall like/dislike are OPTIMISTIC: the pill and its count move with the tap,
-  the server is told behind it, and only a rejected call resyncs the wall from
-  the server. `toggleLike`/`toggleDislike` live in `SocialComponents.kt` (the
-  one social kit) and keep the one-reaction-per-person rule in step (a like
-  takes back a dislike).
-- `CommunityApi.post` now returns the stored `CommunityCard` (PostgREST
-  `return=representation`), so the wall puts the post up the instant the sheet
-  closes, wearing this device's own name and portrait, and reconciles the rest
-  of the feed quietly afterwards.
-- `loading` no longer drives the pull-to-refresh indicator: a new `refreshing`
-  flag belongs to the user's gesture alone, so a background read can never
-  flash a spinner.
-- The `Refresh` TextButton is REMOVED from the wall header.
-- A card's own page likes optimistically too.
-- The replies sheet's `onChanged` refreshes quietly instead of spinning the
-  whole wall.
+User (chat): friends screen (online indicator, delete chat on hold, avatar
+cut-out, faster syncing), instant likes/dislikes and posting, faster sending,
+revamped "post a topic" and comments sheets, proper swipe refresh with the
+refresh button removed, Friends as a sidebar with the current screen becoming
+Chats, avatar cut-out and a new Friends icon, share-with-link + share-to-social
+from the card editor, an Instagram-style member profile, and realtime reply
+notifications.
 
-### Still to do (needs the user's answers — see below)
+Shipped (`abebf625`), plus the member-profile redesign in this slice:
 
-Friends/Chats restructure, online indicator in the inbox, delete-chat on
-long-press, avatar cut-out, comment sheet redesign, post-a-topic sheet revamp,
-share-with-link + share-to-social, other-profile redesign, reply notifications.
+- Wall and card-page likes/dislikes are optimistic (`toggleLike`/`toggleDislike`
+  in `SocialComponents.kt`), so a tap answers itself; only a rejected call
+  resyncs.
+- `CommunityApi.post` returns the stored `CommunityCard`, so a new post is on the
+  wall the moment the sheet closes.
+- `loading` no longer drives `PullToRefreshBox`; a new `refreshing` flag belongs
+  to the user's gesture, and the wall's `Refresh` button is gone.
+- The replies sheet refreshes quietly instead of rebuilding the wall.
+- **Member profile redesigned** (`SocialProfileScreen.kt`): a `LazyVerticalGrid`
+  (2 preview columns on a phone, 3 wide) with a full-width Instagram-style
+  identity block — 84dp portrait, display name, @handle, three counts (posts /
+  likes / replies) computed from the very cards the grid shows, the bio, one
+  action pill (Message / Add friend / own-page note), and Block moved behind a
+  ⋮ `CurioDropdownMenu`. Each post is a small preview tile: the real share card
+  clipped to the tile for a topic card, the words for a note or quote. Presence
+  is deliberately NOT drawn on a profile (activity stays inside direct chats).
+
+Still open (needs the user's answers, they are design decisions): the
+Friends/Chats restructure, inbox online indicator, delete-chat on long-press,
+avatar cut-out, comment sheet redesign, post-a-topic sheet revamp,
+share-with-link + share-to-social, member-profile redesign, reply notifications.
 
 ## Archive
 
@@ -66,13 +76,10 @@ available in Git history (`git log -p -- Prompt.md`).
 
 ## User prompts
 
-### Prompt (2026-09-13) — IN PROGRESS
+### Prompt (2026-09-13) — COMPLETE
 
-Social redesign pass: friends/inbox (online indicator, delete chat on hold,
-avatar cut-out, speed), instant likes/dislikes and posting, revamped compose
-and comments sheets, swipe-refresh without the refresh button, Friends-as-
-sidebar + Chats, share-with-link and share-to-social, Instagram-style member
-profile, realtime reply notifications.
+Create the Supabase realtime setup guide (with policies), do not push it yet,
+and explain the untracked files left by the Supabase install.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
 
