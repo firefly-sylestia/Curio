@@ -110,13 +110,7 @@ internal object CurioSecureStore {
             runCatching { prefs(context).edit().remove(name).apply() }
             return true
         }
-        val sealed = runCatching { seal(context, name, value) }.recoverCatching { failure ->
-            if (!name.startsWith(DM_NAME_PREFIX) && name != "dm-device-id") throw failure
-            runCatching {
-                KeyStore.getInstance(KEYSTORE).apply { load(null) }.deleteEntry(DM_KEY_ALIAS)
-            }
-            seal(context, name, value)
-        }
+        val sealed = runCatching { seal(context, name, value) }
         return sealed.getOrElse { failure ->
             // Never log the value; the failure itself is what matters.
             Log.w(TAG, "Could not seal a stored value", failure)
@@ -152,20 +146,61 @@ internal object CurioSecureStore {
     }
 
     /**
+     * Reads a required DM binding without treating a broken Keystore/prefs read
+     * as an absent value. Generating a new device ID after that kind of failure
+     * would strand the envelopes addressed to the existing device identity.
+     */
+    private fun requiredDmValue(context: Context, name: String): String? {
+        val raw = prefs(context).getString(name, null) ?: return null
+        val split = raw.indexOf(':')
+        check(split > 0) { "Stored DM identity is malformed." }
+        return try {
+            val iv = Base64.decode(raw.substring(0, split), Base64.NO_WRAP)
+            val body = Base64.decode(raw.substring(split + 1), Base64.NO_WRAP)
+            val cipher = Cipher.getInstance(TRANSFORMATION).apply {
+                init(Cipher.DECRYPT_MODE, keyFor(name), GCMParameterSpec(GCM_TAG_BITS, iv))
+            }
+            String(cipher.doFinal(body), Charsets.UTF_8)
+        } catch (failure: Exception) {
+            throw IllegalStateException("Stored DM identity cannot be read.", failure)
+        }
+    }
+
+    /**
      * Stores a device identifier and an RSA identity keypair in the Android
      * Keystore. The private key is non-exportable; only the public key leaves
      * the device.
      */
-    fun deviceId(context: Context): String? = get(context, "dm-device-id")
+    fun deviceId(context: Context): String? = requiredDmValue(context, "dm-device-id")
 
     fun ensureDeviceId(context: Context): String {
         deviceId(context)?.let { return it }
         val value = java.util.UUID.randomUUID().toString()
-        if (!put(context, "dm-device-id", value)) {
-            resetDmStorage(context)
-            check(put(context, "dm-device-id", value)) { "Secure storage unavailable." }
-        }
+        check(put(context, "dm-device-id", value)) { "Secure storage unavailable." }
         return value
+    }
+
+    /**
+     * Binds the published RSA public key to this device ID. A Keystore reset
+     * can legitimately remove the RSA alias while secure prefs survive; that
+     * is a new cryptographic device, so it receives a new device ID instead of
+     * overwriting the old device's server identity.
+     */
+    fun ensureDmIdentityBinding(context: Context, publicKey: String): String {
+        val previous = requiredDmValue(context, "dm-identity-public-key")
+        val existingDeviceId = deviceId(context)
+        check(previous == null || existingDeviceId != null) {
+            "Stored DM identity is incomplete; recovery must not replace this device ID."
+        }
+        if (previous != null && previous != publicKey) {
+            prefs(context).edit()
+                .remove("dm-device-id")
+                .remove("dm-identity-public-key")
+                .apply()
+        }
+        val deviceId = ensureDeviceId(context)
+        check(put(context, "dm-identity-public-key", publicKey)) { "Secure storage unavailable." }
+        return deviceId
     }
 
     /** Clears only recoverable DM material when Android Keystore invalidates it. */
@@ -173,6 +208,7 @@ internal object CurioSecureStore {
         runCatching {
             prefs(context).edit()
                 .remove("dm-device-id")
+                .remove("dm-identity-public-key")
                 .apply()
         }
         runCatching {
@@ -190,16 +226,14 @@ internal object CurioSecureStore {
         val store = KeyStore.getInstance(KEYSTORE).apply { load(null) }
         val existing = try {
             store.getEntry(alias, null)
-        } catch (_: Exception) {
-            runCatching { store.deleteEntry(alias) }
-            null
+        } catch (failure: Exception) {
+            throw IllegalStateException("DM identity key cannot be read.", failure)
         }
         if (existing is KeyStore.PrivateKeyEntry) {
-            return runCatching {
+            return try {
                 java.security.KeyPair(existing.certificate.publicKey, existing.privateKey)
-            }.getOrElse {
-                runCatching { store.deleteEntry(alias) }
-                return generateIdentityKeyPair(alias)
+            } catch (failure: Exception) {
+                throw IllegalStateException("DM identity key cannot be used.", failure)
             }
         }
         return generateIdentityKeyPair(alias)

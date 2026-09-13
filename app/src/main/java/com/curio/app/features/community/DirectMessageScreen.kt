@@ -62,6 +62,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.CurioDmReaction
 import com.curio.app.data.supabase.CurioDmCrypto
+import com.curio.app.data.supabase.DmCryptoDiagnostics
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.dmConversationId
 import com.curio.app.data.supabase.OnlineAccount
@@ -180,19 +181,53 @@ fun DirectMessageScreen(
                 val conversationId = dmConversationId(me, otherUserId)
                 encryptionEnabled = SocialApi.dmConversation(active, conversationId)
                     .getOrDefault(com.curio.app.data.supabase.CurioDmConversation()).encryptionEnabled
-                val identity = CurioDmCrypto.identity(context)
-                SocialApi.publishDmIdentity(active, identity, me)
+                val identity = runCatching { CurioDmCrypto.identity(context) }.getOrElse { failure ->
+                    error = "This device's encrypted-message identity is unavailable."
+                    DmCryptoDiagnostics.failure("identity_load", null, null, null, failure)
+                    return@fold
+                }
+                SocialApi.publishDmIdentity(active, identity, me).getOrElse { failure ->
+                    error = "This device could not register its encrypted-message identity."
+                    DmCryptoDiagnostics.failure("identity_publish", null, null, null, failure)
+                    return@fold
+                }
                 // Get every envelope a page needs in ONE request. The former
                 // per-message sequential requests delayed arrivals and could
                 // leave a realtime row rendered before its key was available.
                 val requiredVersions = raw.mapNotNull { message ->
                     CurioDmCrypto.messageKeyVersion(message.encryptionVersion.orEmpty())
                 }.toSet()
-                val envelopes = SocialApi.dmEnvelopes(
+                val envelopeResult = SocialApi.dmEnvelopes(
                     active, conversationId, identity.deviceId, requiredVersions
-                ).getOrDefault(emptyMap())
-                envelopes.values.forEach { envelope ->
-                    runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
+                )
+                val envelopeFailure = envelopeResult.exceptionOrNull()
+                val envelopes = envelopeResult.getOrDefault(emptyMap())
+                val installedVersions = mutableSetOf<Int>()
+                requiredVersions.forEach { version ->
+                    val envelope = envelopes[version]
+                    if (envelope == null) {
+                        DmCryptoDiagnostics.event(
+                            stage = "envelope_missing", conversationId = conversationId,
+                            keyVersion = version, deviceId = identity.deviceId,
+                            detail = "found=false installed=false"
+                        )
+                    } else {
+                        runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
+                            .onSuccess { key ->
+                                installedVersions += version
+                                DmCryptoDiagnostics.event(
+                                    stage = "envelope_install", conversationId = conversationId,
+                                    keyVersion = version, deviceId = identity.deviceId,
+                                    detail = "found=true installed=true keyLength=${key.size} rsaUnwrap=success"
+                                )
+                            }
+                            .onFailure { failure ->
+                                DmCryptoDiagnostics.failure(
+                                    "envelope_install", conversationId, null, version, failure,
+                                    "found=true installed=false rsaUnwrap=failure"
+                                )
+                            }
+                    }
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
@@ -206,9 +241,50 @@ fun DirectMessageScreen(
                         // A thread can hold messages from multiple envelope
                         // generations. The page's exact-version envelopes were
                         // fetched and installed above before any AES-GCM read.
-                        runCatching {
-                            message.copy(body = CurioDmCrypto.decrypt(context, conversationId, encrypted))
-                        }.getOrElse { message.copy(body = "Unable to decrypt this message") }
+                        val version = CurioDmCrypto.messageKeyVersion(encrypted.version)
+                        when {
+                            version == null -> message.copy(body = "Unsupported encrypted message format")
+                            envelopeFailure != null -> {
+                                DmCryptoDiagnostics.failure(
+                                    "envelope_fetch", conversationId, message.id, version, envelopeFailure,
+                                    "envelopeFound=unknown keyInstalled=false"
+                                )
+                                message.copy(body = "Message key could not be retrieved")
+                            }
+                            envelopes[version] == null -> {
+                                DmCryptoDiagnostics.event(
+                                    stage = "message_key_missing", conversationId = conversationId,
+                                    messageId = message.id, keyVersion = version,
+                                    deviceId = identity.deviceId,
+                                    detail = "envelopeFound=false keyInstalled=false"
+                                )
+                                message.copy(body = "Message key is unavailable on this device")
+                            }
+                            version !in installedVersions -> message.copy(body = "Message key envelope is invalid")
+                            else -> runCatching {
+                                CurioDmCrypto.decrypt(context, conversationId, encrypted)
+                            }.onSuccess { plaintext ->
+                                DmCryptoDiagnostics.event(
+                                    stage = "aes_decrypt", conversationId = conversationId,
+                                    messageId = message.id, keyVersion = version,
+                                    deviceId = identity.deviceId,
+                                    detail = "keyInstalled=true keyLength=32 nonceLength=${android.util.Base64.decode(encrypted.nonce, android.util.Base64.NO_WRAP).size} ciphertextLength=${android.util.Base64.decode(encrypted.ciphertext, android.util.Base64.NO_WRAP).size} aesDecrypt=success"
+                                )
+                            }.onFailure { failure ->
+                                DmCryptoDiagnostics.failure(
+                                    "aes_decrypt", conversationId, message.id, version, failure,
+                                    "keyInstalled=true aesDecrypt=failure"
+                                )
+                            }.fold(
+                                onSuccess = { plaintext -> message.copy(body = plaintext) },
+                                onFailure = { failure ->
+                                    val reason = if (failure is javax.crypto.AEADBadTagException) {
+                                        "Message authentication failed"
+                                    } else "Message key or encrypted data is invalid"
+                                    message.copy(body = reason)
+                                }
+                            )
+                        }
                     }
                 }
                 // v3xx53 — the SERVER keeps 24 hours; the DEVICE keeps what it
@@ -308,33 +384,26 @@ fun DirectMessageScreen(
             }
             val keyVersion = when {
                 restoredKey != null -> ownEnvelope!!.keyVersion
-                ownEnvelope != null -> ownEnvelope.keyVersion.coerceAtMost(Int.MAX_VALUE - 1) + 1
-                else -> ((System.currentTimeMillis() / 1_000L) + (System.nanoTime() and 0x3ffL))
-                    .coerceAtMost(Int.MAX_VALUE.toLong())
-                    .toInt()
+                else -> SocialApi.dmHighestKeyVersion(active, conversationId).getOrThrow()
+                    .coerceAtMost(Int.MAX_VALUE - 1) + 1
             }
             val key = restoredKey
                 ?: CurioDmCrypto.existingKey(context, conversationId, keyVersion)
                 ?: CurioDmCrypto.newKey(context, conversationId, keyVersion)
-            val peers = SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow()
+            val peers = SocialApi.dmIdentities(active, listOf(otherUserId, me)).getOrThrow()
                 .filter(CurioDmCrypto::canWrapFor)
-            check(peers.isNotEmpty()) { "This friend needs to open Curio once before encrypted messages can reach them." }
+            check(peers.any { it.userId == otherUserId }) { "This friend needs to open Curio once before encrypted messages can reach them." }
             // Envelope writes are independent. Send them together instead of
             // making the composer wait one network round trip per device.
             coroutineScope {
-                (peers.map { peer ->
+                peers.map { peer ->
                     async {
                         SocialApi.saveDmEnvelope(
-                            active, conversationId, otherUserId,
+                            active, conversationId, peer.userId,
                             CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)
                         ).getOrThrow()
                     }
-                } + async {
-                    SocialApi.saveDmEnvelope(
-                        active, conversationId, me,
-                        CurioDmCrypto.wrapConversationKey(key, mine, keyVersion)
-                    ).getOrThrow()
-                }).awaitAll()
+                }.awaitAll()
             }
             CurioDmCrypto.encrypt(context, conversationId, key, keyVersion, text)
         }.getOrElse { failure ->
