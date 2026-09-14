@@ -10,12 +10,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,10 +43,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -668,10 +667,12 @@ fun CommunityScreen(navController: NavController) {
 /**
  * A community card drawn at whatever width it is given.
  *
- * The REAL share card is rendered (never a simplified lookalike), scaled as a
- * LAYER: its own geometry is 405×720 / 450×600 dp, so scaling keeps the
- * internal layout and text wrapping identical to the exported image while the
- * feed and the card view can show it at their own width.
+ * The REAL share card is rendered (never a simplified lookalike), laid out
+ * DIRECTLY at the width its row offers — the same way the card editor draws
+ * its own preview (a 280dp base). The card's own layout and smart fit size the
+ * title, the fact box and the text for the size they are handed, so a post
+ * shows the WHOLE card, crisp: nothing is scaled as a layer, nothing is
+ * cropped, and no row reserves height the art does not use.
  */
 @Composable
 internal fun CommunityCardCanvas(
@@ -680,15 +681,9 @@ internal fun CommunityCardCanvas(
     /**
      * How much of the available width the card claims, centred.
      *
-     * The wall uses less than the full width: a share card is a TALL portrait
-     * (405×720dp), so at full width one card fills the whole screen and the
-     * feed stops feeling like a feed. The card's own view passes 1f and shows
-     * it whole.
-     *
-     * A caller that passes **0f** asks for the FILL mode used by the profile
-     * grid: the scale is driven by the available HEIGHT instead of the width,
-     * so the card is cropped to whatever box it is given (top-aligned, where
-     * its title lives) rather than floating small inside that box.
+     * The wall claims less than the full width: a share card is a tall poster,
+     * and one drawn edge to edge stops reading as a post among others. The
+     * card's own view passes 1f and fills the page it owns.
      */
     widthFraction: Float = 1f
 ) {
@@ -696,82 +691,38 @@ internal fun CommunityCardCanvas(
         .getOrDefault(ShareCardStyle.PAPER)
     val aspect = runCatching { ShareCardAspect.valueOf(card.aspect) }
         .getOrDefault(ShareCardAspect.CLASSIC)
-    val cardWidth = aspect.widthDp.dp
-    val cardHeight = aspect.heightDp.dp
     val accent = remember(card.accentHex) { parseAccent(card.accentHex) }
-    val fillHeight = widthFraction == 0f
 
     Box(
-        modifier = modifier
-            .clipToBounds()
-            .then(if (fillHeight) Modifier else Modifier.fillMaxWidth()),
-        // Keep every rendering surface centered. Fill mode intentionally crops
-        // the tall card inside its bounded tile, but never pins the art to the
-        // tile's top-left corner.
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-    BoxWithConstraints(
-        modifier = if (fillHeight) Modifier.fillMaxSize() else Modifier.fillMaxWidth(widthFraction),
-        contentAlignment = Alignment.Center
-    ) {
-        val density = LocalDensity.current
-        val scale = with(density) {
-            if (fillHeight) {
-                // COVER semantics: the larger of the two ratios, so the card
-                // overflows the box in ONE direction only and the box is
-                // completely filled — a share card in a square tile is a
-                // cropped preview, never a letterboxed miniature.
-                maxOf(
-                    maxWidth.toPx() / cardWidth.toPx(),
-                    maxHeight.toPx() / cardHeight.toPx()
-                )
-            } else {
-                (maxWidth.toPx() / cardWidth.toPx()).coerceAtMost(1f)
-            }
-        }
-        // The PAINTED FOOTPRINT leads: a box exactly the size the scaled card
-        // will cover, which the parent centers. Inside it the UNSCALED card
-        // draws through the layer transform, so the visible art always sits
-        // where the footprint says — never pinned to a corner by the layout
-        // box outliving the scale.
-        Box(
-            modifier = Modifier
-                .requiredSize(cardWidth * scale, cardHeight * scale),
-            contentAlignment = Alignment.TopStart
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth(widthFraction.coerceIn(0.2f, 1f)),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
+            // The card keeps its own aspect ratio and is capped at its design
+            // width, so a wide window shows it at its natural size instead of
+            // inflating the art.
+            val targetWidth = minOf(maxWidth, aspect.widthDp.dp)
+            TopicShareCard(
+                topicName = card.topicName,
+                categoryName = card.categoryName,
+                categoryGlyph = card.categoryGlyph,
+                accent = accent,
+                factText = card.factText,
+                // The card wears the author's CURRENT username, so renaming
+                // yourself updates everything you ever posted.
+                sharerName = card.authorLabel,
+                aspect = aspect,
+                style = style,
+                byline = card.byline,
+                bodyScale = card.bodyScale,
                 modifier = Modifier
-                    // REQUIRED size, not `size`: a measured size is coerced
-                    // into the incoming constraints, and inside a square tile
-                    // that coerced box was then scaled DOWN again — the card
-                    // shrank to roughly a quarter of the tile. requiredSize
-                    // keeps the nominal card geometry, the graphicsLayer does
-                    // the shrinking, and the footprint above clips the rest.
-                    .requiredSize(cardWidth, cardHeight)
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        transformOrigin = TransformOrigin(0f, 0f)
-                    )
-            ) {
-                TopicShareCard(
-                    topicName = card.topicName,
-                    categoryName = card.categoryName,
-                    categoryGlyph = card.categoryGlyph,
-                    accent = accent,
-                    factText = card.factText,
-                    // The card wears the author's CURRENT username, so renaming
-                    // yourself updates everything you ever posted.
-                    sharerName = card.authorLabel,
-                    aspect = aspect,
-                    style = style,
-                    byline = card.byline,
-                    bodyScale = card.bodyScale,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+                    .width(targetWidth)
+                    .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+            )
         }
-    }
     }
 }
 
@@ -797,10 +748,7 @@ private fun CommunityCardItem(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Column(modifier = Modifier.padding(12.dp)) {
             // ── Who posted it ────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -847,6 +795,7 @@ private fun CommunityCardItem(
             }
 
             if (card.caption.isNotBlank()) {
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = card.caption,
                     style = MaterialTheme.typography.bodyMedium,
@@ -855,6 +804,7 @@ private fun CommunityCardItem(
                 )
             }
 
+            Spacer(Modifier.height(8.dp))
             if (card.kind == KIND_CARD) {
                 CommunityCardCanvas(
                     card = card,
@@ -869,6 +819,10 @@ private fun CommunityCardItem(
                 SocialTextPost(card = card, onClick = onOpen)
             }
 
+            // The art and its actions are ONE object: a tight seam keeps the
+            // like/dislike row attached to the card instead of floating in an
+            // empty band under it.
+            Spacer(Modifier.height(4.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -911,11 +865,11 @@ private fun CommunityCardItem(
 /**
  * How much of the wall's width one card claims.
  *
- * FULL width: the card IS the post, and a share card shrunk to three quarters
- * of the page made every post read like a thumbnail. The list's own edge
- * padding is the only gutter a card needs.
+ * A card is drawn just under the editor's own 280dp base, so the wall and the
+ * card editor agree on what a post looks like, and the row's box keeps a small
+ * even gutter around the art instead of framing a full-bleed poster.
  */
-private const val FEED_CARD_WIDTH = 0.88f
+private const val FEED_CARD_WIDTH = 0.78f
 
 /**
  * One action on a card, as a PILL: an icon and its count on one rounded

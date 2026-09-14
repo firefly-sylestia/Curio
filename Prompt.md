@@ -1,5 +1,72 @@
 # Prompt Log — current request
 
+## Request (2026-09-14, COMPLETE — social card render fix + topic-only profile tiles)
+
+User pointed at commit `541c3c6` (Sep 12): the topic card rendered fine in the
+Social page there, but now "the social topic share card rendering is so much
+worse" — bad in the profile grid, bad in the post topic preview, "etc etc" —
+and asked for the profile preview to become "just the topic with topic icon no
+rendering there".
+
+### Root cause (found by walking the commit range, not by guessing)
+
+`CommunityCardCanvas` (CommunityScreen.kt) renders the real share card scaled
+as a LAYER. Two separate regressions landed after `541c3c6`:
+
+1. `19f17ce7` replaced the old `<size> + graphicsLayer` wrapper with
+   `requiredSize(...)` on BOTH the footprint and the art, and `69e5113b`
+   replaced the fill-mode `TopStart`/`TopCenter` alignment with plain
+   `Alignment.Center`. Net effect: every surface drew a card whose content was
+   laid out at the 405×720 design geometry and then shrunk 0.77× — text that
+   is 14–23% smaller *relative to the card* than the version the user liked,
+   which is exactly the reported "too small" — and the square profile tile
+   centre-cropped the art (title gone, card cut in half).
+2. `3acd25ab` shrank the wall card to 0.88 of its row and the composer preview
+   to 0.72, which piled more dead space around art that was already reading
+   small.
+
+The card is authored for a DIRECT layout: the share sheet renders its own
+preview at a fixed 280dp width with no layer transform, and every smart-fit
+constant (`factAvailHeightDp`, `factLineHeightDp`, the auto-tall detector) is
+calibrated on that 280dp base. Layer-scaling it to a different width changes
+the ratio of type to card — that is the whole "too small"/"not the real card"
+complaint.
+
+### Confirmed with the user (ask_user)
+
+- What is wrong now: *too small with dead space*, *cut off / cropped* and
+  *off-centre / not aligned*.
+- Sizing: "both at the sep 12 style look but more smaller also less empty
+  space below them for the like and dislike".
+
+### Shipped
+
+- `CommunityCardCanvas` rewritten (CommunityScreen.kt): the card is laid out
+  DIRECTLY at the width its row offers — `width(targetWidth).aspectRatio(h/w)`
+  with the target capped at the card's design width (405/450dp) — instead of a
+  layer-scaled miniature. No crop, no dead band, no double scaling; the card's
+  own workspace/fit handles the size (the editor's own 280dp base). The square
+  "fill" crop mode is retired with the profile tile that used it.
+- Wall: `FEED_CARD_WIDTH` 0.88f → 0.78f (a ~277dp card on a phone, just under
+  the editor's base) and the item's uniform spacing replaced with explicit
+  8dp seams and a 4dp seam between the art and the like/dislike row.
+- Composer preview: 0.72f → 0.85f, so the live preview is the wall's card.
+- `SocialProfileTile`: a TOPIC post previews as the topic — lane accent wash
+  (lifted twin in dark mode), lane glyph in a chip, topic name — with no card
+  art in the grid. Notes and quotes keep their word tiles.
+- `app/AGENTS.md`: the direct-layout contract, the wall/preview/own-page
+  fractions, and the topic-tile profile preview. Changelog tightened (the
+  stale 88%/compact/cropped bullets replaced).
+
+### Verified
+
+- Brace/paren balance on all three edited Kotlin files (python).
+- Grepped every removed symbol (`requiredSize`, `TransformOrigin`,
+  `LocalDensity`) — no references left; `aspectRatio`/`height` imports added
+  and used; `parseAccent` is `internal` in the same package for the tile.
+- No Gradle in this environment (root AGENTS rule); CI on this push is
+  authoritative.
+
 ## Request (2026-09-14, COMPLETE — CI fix + DM header/ticks/scroll polish)
 
 User pasted the CI log (Unresolved 'mineGlyph'/'others' — my MessageBubble
@@ -405,7 +472,21 @@ edited_at + edit guard/policy are all in the file but NOT live until pasted.
 
 ## User prompts
 
-### Prompt (2026-09-13, NEWEST, PENDING) — DM header side, card render accuracy, composer topic search + preview
+### Prompt (2026-09-14, DONE) — social card render regression + profile "topic with topic icon"
+
+Verbatim: at commit `541c3c6` the topic card rendered fine in the Social page,
+but today "the social topic share card rendering is so much worse" — bad in the
+profile grid, bad in the post topic preview, "etc etc" — fix it, and in the
+profile change the preview to "just the topic with topic icon no rendering
+there".
+
+Status: DONE in this push (see the request log at the top: the canvas lays the
+card out directly at the row's width, the wall/preview sizes were retuned with
+a tighter seam above the like/dislike row, and the profile grid tile is the
+topic's own colour, glyph and name). Also closes items (2) and (3) of the
+2026-09-13 prompt below.
+
+### Prompt (2026-09-13) — DM header side, card render accuracy, composer topic search + preview
 
 Verbatim asks: (1) the chat screen "Curious Explorer" header shows on the RIGHT
 side which is wrong; (2) the share-card render is still wrong — not accurate to
@@ -417,8 +498,14 @@ BOX appears above the "What's catching your eye?" writer — remove it; (5)
 finish the previous request too, be faster; prompt logged here FIRST before
 implementation.
 
-Status: PENDING — not started. Sequence: fix the font-build failure left over
-from the previous turn (lock ligature), then this batch.
+Status: (2) card render accuracy DONE 2026-09-14 (card laid out at the row's
+width, no crop, no dead band; profile tile is topic + glyph). (3) the flow it
+describes no longer exists: the bottom sheet was replaced by the full-screen
+`CommunityPostScreen`, which HAS the topic search and now previews the card at
+the wall's own size. (1) the DM header is person-first now: the peer's portrait,
+name and @username ride the title bar with a live "Typing…" line. (4) the
+blank box it saw came from that deleted sheet — re-check on the current
+composer before acting. (5) superseded by the batches above.
 
 ### Prompt (2026-09-13, latest done) — identity publish RLS failure + door tile captions
 

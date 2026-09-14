@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +72,7 @@ import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.launch
@@ -603,10 +605,11 @@ private fun SocialProfileAction(label: String, glyph: String, onClick: () -> Uni
 /**
  * ONE preview in the profile grid — a square, Instagram-style.
  *
- * A topic card is its own art, rendered at the tile's width and CROPPED to
- * the square: the real share card (never a lookalike) fills the whole tile
- * instead of floating as a shrunken portrait strip inside a box it does not
- * fill. A note or a quote has no art — the words ARE the post — so the tile
+ * A TOPIC post previews as the TOPIC, not as card art: the tile wears the
+ * lane's own colour wash, that lane's mark in a chip, and the topic's name.
+ * A share card squeezed into a square tile is a cropped thumbnail of a poster
+ * nobody can read, and the full card already has a page of its own one tap
+ * away. A note or a quote has no topic — the words ARE the post — so the tile
  * shows them on the same square canvas. Nothing but the post: a preview is a
  * door, and the counts and actions live on the post's own page.
  */
@@ -618,31 +621,58 @@ private fun SocialProfileTile(card: CommunityCard, onClick: () -> Unit) {
         onClickLabel = "Open post",
         onClick = onClick
     )
+    val topic = card.kind == KIND_CARD
+    // The lane's colour, as remembered on the post itself ([CommunityCard
+    // .accentHex]). In dark mode the deep accent reads muddy on a midnight
+    // page, so the wash takes the lifted twin — the same rule the category
+    // backgrounds follow everywhere else in Curio.
+    val accent = remember(card.accentHex) { parseAccent(card.accentHex) }
+    val dark = isCurioDarkTheme()
+    val tint = if (dark) lerp(accent, Color.White, 0.55f) else accent
+    val base = MaterialTheme.colorScheme.surfaceContainerLow
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = if (topic) lerp(base, tint, if (dark) 0.18f else 0.13f) else base,
         modifier = Modifier
             .fillMaxWidth()
             // The square is the grid's rhythm: every tile the same height,
             // whatever the post inside it is.
             .aspectRatio(1f)
     ) {
-        if (card.kind == KIND_CARD) {
-            // Clipped to the tile's own rounding: the share card brings its
-            // own full-bleed art, and an unclipped preview would square off
-            // the corners of the tile it sits in.
-            CommunityCardCanvas(
-                card = card,
+        if (topic) {
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(18.dp))
-                    .then(tap),
-                // 0f: the canvas scale is driven by HEIGHT here (the square
-                // tile is shorter than the card is tall), so the crop keeps
-                // the card's own width and trims the bottom — the top of the
-                // card, where its title lives, is always what shows.
-                widthFraction = 0f
-            )
+                    .then(tap)
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(13.dp),
+                    color = tint.copy(alpha = if (dark) 0.24f else 0.16f)
+                ) {
+                    Box(
+                        modifier = Modifier.size(30.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CurioIcon(
+                            name = card.categoryGlyph.ifBlank { CurioIcons.Notes },
+                            contentDescription = null,
+                            tint = tint,
+                            size = 17.dp
+                        )
+                    }
+                }
+                Text(
+                    text = card.topicName,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 5,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         } else {
             Column(
                 modifier = Modifier

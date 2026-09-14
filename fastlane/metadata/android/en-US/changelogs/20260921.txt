@@ -1,3 +1,7 @@
+FIX:
+- Topic cards render whole and crisp at the size the card editor shows: no more shrunken art, cropped corners, off-centre cards or an empty band between a card and its like row.
+- Profiles: a topic post's grid tile is the topic itself — the lane's colour wash, the lane's icon and the topic name — instead of a share card squeezed into a square.
+
 ADD:
 - Posting goes full screen: Post opens a proper Create page. Write first, the post renders live above as you type, and topic, look and shape attach from quiet controls. The old bottom sheet is gone.
 - Messages: hold a bubble for Instagram-style actions — the emoji palette sits in its own pill, text options (Reply, Copy, Edit, Remove) float as separate chips below. Tap outside to dismiss.
@@ -17,14 +21,14 @@ ADD:
 - A conversation's header is the person: their portrait, name and @username ride the title bar, with a live "Typing…" line.
 - Chats and Friends get their own icons (a speech bubble and two people) instead of borrowed ones.
 - Replies now branch: answer a reply directly, long branches fold behind a "show more" door, and both replies and messages can be edited with an "edited" mark. Messages gain hold-to-remove; encrypted messaging moves behind an opt-in switch in Settings → Online mode while it is reworked.
-- Profiles: the community page wears the app's own stat style (rose numbers over labels), shows the member's bio, and adds your streak as flame plus days on your own page. Post previews fill their square tile completely.
+- Profiles: the community page wears the app's own stat style (rose numbers over labels), shows the member's bio, and adds your streak as flame plus days on your own page. Every post has a square preview tile that opens it.
 - Liking and disliking pop.
 
 FIX:
-- Share-card previews on the wall are scaled to 88% width so they breathe in the feed instead of filling edge-to-edge.
-- Post composer preview card uses a compact size so the writing area isn't pushed under the fold.
+- Share-card previews on the wall are drawn at the card editor's own size and centred in the row, so the feed reads as posts instead of full-bleed posters.
+- The composer's card preview shows the card at the size the wall will show it, instead of a small thumbnail.
 - Post composer sits below the status bar instead of running under it.
-- Share-card previews on the wall and in profile grids are properly centred in their tiles — no more hugging the left or top corner, and the post counts on a profile are readable on any theme.
+- Post counts on a profile are readable on any theme.
 - Error notes across the social screens are quiet on-surface sentences with a small glyph, not red slabs that read like a tester build.
 - Encrypted sends: the server now names the devices still missing a key envelope (with their public keys), so a send wraps exactly what the server will check, instead of failing with "missing a device envelope".
 - Opening a post hides the bottom navigation so the card owns the whole screen, and the comments live right under the post now, in the same list, updating live.

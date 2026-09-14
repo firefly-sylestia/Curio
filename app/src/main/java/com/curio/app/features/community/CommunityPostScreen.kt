@@ -261,12 +261,16 @@ internal fun CommunityPostScreen(
                                         verticalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
                                         if (topic != null) {
+                                            // The preview is the card at the wall's
+                                            // own size: a post is written against
+                                            // what it will look like, not against a
+                                            // thumbnail of it.
                                             CommunityCardCanvas(
                                                 card = draftPreviewCard(draft),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clip(RoundedCornerShape(20.dp)),
-                                                widthFraction = 0.72f
+                                                widthFraction = 0.85f
                                             )
                                         } else {
                                             EmptyTopicPreview()
