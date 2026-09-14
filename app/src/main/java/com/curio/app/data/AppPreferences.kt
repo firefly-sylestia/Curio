@@ -1148,12 +1148,13 @@ object AppPreferences {
     // v101 — the pill glow (dark mode) is the SUBTLE top-only version
     // (gentler glass edge + a glow that hugs the pill's top). v3xx — the
     // experiment concluded: subtle is the always-on default, no toggle.
-    // v3xx — CABINET v2 experiment (Settings → Experiments → Cabinet v2,
-    // default OFF): while enabled, the saved-entries + liked-books surfaces
-    // render as the new collections view with jacket-art covers and Home's
-    // Save shortcut repoints into it. When the experiment settles the toggle
-    // is removed and the winning view ships always-on.
-    var cabinetV2EnabledState by mutableStateOf(false)
+    // v3xx — CABINET v2 (Settings → Experiments → Cabinet v2): the
+    // collections view — jacket-art covers, glass toolbar, search, batch
+    // select — is now the DEFAULT (decided): new installs and members who
+    // never touched the toggle land on it, while a member who explicitly
+    // turned the experiment OFF keeps the classic grid. The toggle stays for
+    // comparison until the experiment formally settles.
+    var cabinetV2EnabledState by mutableStateOf(true)
     // v3xx45 — SCREEN REVEAL experiment (Settings → Dev page, default OFF):
     // opening a screen plays the SAME circular iris as the light/dark flip —
     // the current screen is frozen and peels away from where you tapped, a
@@ -2202,10 +2203,9 @@ object AppPreferences {
         paperStatCardsState = enabled
     }
 
-    /** Whether the Cabinet v2 experiment is on (default OFF; see the state
-     *  comment above). */
+    /** Whether Cabinet v2 (the collections view) is on — the default now. */
     fun isCabinetV2Enabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CABINET_V2, false)
+        prefs(context).getBoolean(KEY_CABINET_V2, true)
 
     fun setCabinetV2Enabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_CABINET_V2, enabled).apply()

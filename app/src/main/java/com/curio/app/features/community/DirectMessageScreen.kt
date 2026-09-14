@@ -494,6 +494,7 @@ fun DirectMessageScreen(
         )
         pending = pending + optimistic
         draft = ""
+        pendingSends++
 
         val conversationId = dmConversationId(me, otherUserId)
         if (!encryptionEnabled || forcePlaintext) {
@@ -899,6 +900,16 @@ fun DirectMessageScreen(
         } else if (pinnedToNewest) {
             listState.animateScrollToItem(newest)
         }
+    }
+    // v-fix — SENDING always scrolls to bottom, even when the member has
+    // scrolled up to read history. The main LaunchedEffect above skips the
+    // scroll when pinnedToNewest is false (reading history), so a send
+    // while scrolled up used to drop the optimistic bubble off-screen.
+    var pendingSends by remember(otherUserId) { mutableStateOf(0) }
+    LaunchedEffect(pendingSends) {
+        if (pendingSends == 0) return@LaunchedEffect
+        // +1 for the optimistic message that is about to enter [thread]
+        listState.animateScrollToItem(headerRows + thread.lastIndex + 1)
     }
 
     // The DISPLAY name wins over the name the route carried, so a rename shows
@@ -1444,7 +1455,45 @@ private fun MessageEntry(
             fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)),
         exit = ExitTransition.None
     ) {
+        // The action sheet floats ABOVE the bubble (Instagram-style).
+        // A full-width invisible tap target sits above it so tapping
+        // anywhere outside the pills dismisses the sheet.
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            AnimatedVisibility(
+                visible = actionSheet,
+                enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
+                    slideInVertically { -it / 3 },
+                exit = fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Invisible full-width dismiss target above the sheet
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clickable { onHold() }
+                    )
+                    MessageActionSheet(
+                        mine = message.mine,
+                        current = reactions.firstOrNull { it.userId == myUserId }?.kind,
+                        canEdit = message.mine && message.migrationState == "plaintext" &&
+                            !message.id.startsWith(LOCAL_ID_PREFIX),
+                        canRemove = onRemove != null,
+                        onPick = onPick,
+                        onCopy = onCopy,
+                        onEdit = onEdit,
+                        onRemove = onRemove,
+                        onReply = onReply
+                    )
+                    // Invisible dismiss target below the sheet
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(32.dp)
+                            .clickable { onHold() }
+                    )
+                }
+            }
             MessageBubble(
                 message = message,
                 firstOfRun = firstOfRun,
@@ -1457,31 +1506,6 @@ private fun MessageEntry(
                 onSwipeReply = onSwipeReply,
                 quoteOf = quoteOf
             )
-            // Instagram-style action bar: floating pills attached to the held
-            // bubble — the emoji palette first, then Copy and (for mine) Edit
-            // and Remove. No dialog, no scrim: the thread stays readable and
-            // a second hold anywhere drops it.
-            AnimatedVisibility(
-                visible = actionSheet,
-                enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
-                    slideInVertically { it / 3 },
-                exit = fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
-            ) {
-                MessageActionSheet(
-                    mine = message.mine,
-                    current = reactions.firstOrNull { it.userId == myUserId }?.kind,
-                    // An encrypted row is bound to its key version — words
-                    // written in ciphertext cannot be re-written as text.
-                    canEdit = message.mine && message.migrationState == "plaintext" &&
-                        !message.id.startsWith(LOCAL_ID_PREFIX),
-                    canRemove = onRemove != null,
-                    onPick = onPick,
-                    onCopy = onCopy,
-                    onEdit = onEdit,
-                    onRemove = onRemove,
-                    onReply = onReply
-                )
-            }
         }
     }
 }
@@ -1547,8 +1571,31 @@ private fun MessageBubble(
     // pulling a received bubble rightward is Instagram's own motion.
     val leanX = if (mine) -settle.value else settle.value
 
+    // Outer row with full-row swipe hit area (including timestamp columns).
+    // The gesture tracker lives here so the entire row is draggable, not
+    // just the bubble surface.
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(message.id, mine) {
+                detectDragGestures(
+                    onDragStart = { replyDrag = 0f },
+                    onDragEnd = {
+                        if (kotlin.math.abs(replyDrag) >= dragLimit * 0.6f) {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onSwipeReply()
+                        }
+                        replyDrag = 0f
+                    },
+                    onDragCancel = { replyDrag = 0f }
+                ) { change, amount ->
+                    change.consume()
+                    // Own messages swipe right-to-left (negative);
+                    // theirs swipe left-to-right (positive).
+                    val raw = replyDrag + amount.x
+                    replyDrag = if (mine) raw.coerceIn(-dragLimit, 0f) else raw.coerceIn(0f, dragLimit)
+                }
+            },
         horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
@@ -1611,25 +1658,8 @@ private fun MessageBubble(
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     onDoubleTap()
                                 },
-                                onClick = {}
-                            )
-                            .pointerInput(message.id) {
-                                detectDragGestures(
-                                    onDragStart = { replyDrag = 0f },
-                                    onDragEnd = {
-                                        if (replyDrag >= dragLimit * 0.6f) {
-                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onSwipeReply()
-                                        }
-                                        replyDrag = 0f
-                                    },
-                                    onDragCancel = { replyDrag = 0f }
-                                ) { change, amount ->
-                                    change.consume()
-                                    replyDrag = (replyDrag + amount.x).coerceIn(0f, dragLimit)
-                                }
-                            }
-                            .padding(horizontal = 14.dp, vertical = 9.dp)                            ) {
+                                onClick = {}                            )
+                            .padding(horizontal = 14.dp, vertical = 9.dp)) {
                         if (quoteOf != null) {
                             ReplyQuoteRow(quoteOf)
                         }

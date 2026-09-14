@@ -1246,10 +1246,13 @@ fun TopicRevealScreen(
     // album sheets): poster header + favorite heart, watched-progress rail,
     // the synopsis accordion, then the episodes grouped by season. v3xx — an
     // episode chip on the reveal opens it scrolled to (and pre-expanding)
-    // that episode, mirroring the album track chips.
+    // that episode, mirroring the album track chips. v-fix — the sheet now
+    // opens for EVERY series: the poster card section shows for all series
+    // topics, so series without an authored guide get the poster/synopsis
+    // sheet (with a quiet empty-guide line) instead of a dead tap.
     val seriesSheetTopic = resolved
     if (seriesSheetTopic != null && seriesSheetTopic.categoryId == CategoryId.SERIES &&
-        showSeriesSheet && !seriesSheetTopic.episodes.isNullOrEmpty()
+        showSeriesSheet
     ) {
         EpisodeNotesSheet(
             cat = cat,
@@ -5290,7 +5293,6 @@ private fun EpisodeNotesSheet(
     onDismiss: () -> Unit
 ) {
     val episodes = topic.episodes.orEmpty()
-    if (episodes.isEmpty()) return
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val fetchConsent = AppPreferences.seriesFetchEnabledState
@@ -5487,10 +5489,13 @@ private fun EpisodeNotesSheet(
             }
 
             // ── Pinned watched-progress rail — stays above the list ──────
+            // Hidden entirely for series without an authored episode guide
+            // (a 0 / 0 rail reads as broken; the sheet is synopsis-only then).
             Spacer(Modifier.height(12.dp))
             val progressLabel = if (watchedTotal > 0)
                 "$watchedTotal of ${episodes.size} episodes watched"
             else "${episodes.size} episodes"
+            if (episodes.isNotEmpty()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -5531,7 +5536,7 @@ private fun EpisodeNotesSheet(
                     )
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            }
 
             // v3xx33 — Cabinet shelf toggles: Curiying now / Want to read.
             CabinetShelfToggleChips(
@@ -5566,6 +5571,16 @@ private fun EpisodeNotesSheet(
                             // v3xx — the series sheet's accordion wears the
                             // TV/clapperboard glyph, never the book icon.
                             icon = CurioIcons.Movie
+                        )
+                    }
+                }
+                if (episodes.isEmpty()) {
+                    item(key = "series_empty_guide") {
+                        Text(
+                            "No episode guide yet.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                 }

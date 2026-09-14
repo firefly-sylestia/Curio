@@ -505,22 +505,28 @@ fun CabinetV2Content(navController: NavController) {
     val rawContent = entries.isNotEmpty() || books.isNotEmpty() ||
         albums.isNotEmpty() || series.isNotEmpty() || userCollections.isNotEmpty()
 
-    // ── Empty-Cabinet suggestions (existing v2 behavior).
-    var suggestions by remember { mutableStateOf<List<CurioTopic>>(emptyList()) }
-    var suggestionSeed by remember { mutableIntStateOf(0) }
+    // ── Empty-Cabinet suggestions: one pick per category, shown as
+    // grouped rows (books · series · albums · places · people …).
+    var suggestions by remember { mutableStateOf<Map<CategoryId, List<CurioTopic>>>(emptyMap()) }
+    var suggestionSeed by remember { mutableStateOf(0) }
+    val suggestionCats = remember {
+        listOf(CategoryId.BOOKS, CategoryId.SERIES, CategoryId.ALBUMS,
+            CategoryId.PLACES, CategoryId.PEOPLE, CategoryId.SCIENCE)
+    }
     LaunchedEffect(suggestionSeed) {
-        val picked = mutableListOf<CurioTopic>()
-        val seen = mutableSetOf<String>()
-        var guard = 0
-        while (picked.size < 3 && guard < 40) {
-            guard++
-            val t = runCatching { TopicCatalog.randomFor(CategoryId.WILDCARD) }.getOrNull() ?: break
-            if (t.name !in seen) {
-                seen.add(t.name)
-                picked.add(t)
+        val grouped = mutableMapOf<CategoryId, MutableList<CurioTopic>>()
+        for (cat in suggestionCats) {
+            val picks = mutableListOf<CurioTopic>()
+            val seen = mutableSetOf<String>()
+            var guard = 0
+            while (picks.size < 2 && guard < 20) {
+                guard++
+                val t = runCatching { TopicCatalog.randomFor(cat) }.getOrNull() ?: break
+                if (t.name !in seen) { seen.add(t.name); picks.add(t) }
             }
+            if (picks.isNotEmpty()) grouped[cat] = picks
         }
-        suggestions = picked
+        suggestions = grouped
     }
 
     // ── Collection edit state.
@@ -815,12 +821,9 @@ fun CabinetV2Content(navController: NavController) {
                 else -> v2HomeItems(
                     everythingLikes = allLikes,
                     everythingCount = allLikes.size,
-                    savedEntries = entries.sortedByDescending { it.capturedAtMillis },
                     visibleShelves = visibleShelves,
                     userCollections = shownUserCollections,
                     searching = searching,
-                    selectionMode = selectionMode,
-                    selectedEntryIds = selectedEntryIds,
                     onOpenEverything = { openLevel = "everything"; searchActive = false; searchQuery = "" },
                     onOpenShelf = { id ->
                         openLevel = when (id) {
@@ -838,8 +841,6 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     },
                     onOpenCollection = { id -> openLevel = id; searchActive = false; searchQuery = "" },
-                    // v3xx — the collection cards' ⋮ now drives RENAME / DELETE
-                    // straight from an anchored dropdown (no center overlay).
                     onRenameCollection = { id -> renameTarget = id },
                     onDeleteCollection = { id -> deleteTarget = id },
                     onNewCollection = { showCreateSheet = true },
@@ -850,23 +851,7 @@ fun CabinetV2Content(navController: NavController) {
                             CurioRoutes.revealFor(t.categoryId.routeSlug, t.name)
                         ) { launchSingleTop = true }
                     },
-                    // v3xx50 — only claim "empty" once the archive has
-                    // actually been read (see [archiveReady]).
                     showSuggestions = archiveReady && !rawContent,
-                    savedSkeletonCount = if (archiveReady) 0 else skeletonCount,
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
-                    },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    },
                     onClearSearch = { searchQuery = ""; searchActive = false }
                 )
             }
@@ -1113,27 +1098,19 @@ fun CabinetV2Content(navController: NavController) {
 private fun LazyGridScope.v2HomeItems(
     everythingLikes: List<V2Liked>,
     everythingCount: Int,
-    savedEntries: List<CurioEntry>,
     visibleShelves: List<Pair<V2Shelf, Int>>,
     userCollections: List<CurioCollection>,
     searching: Boolean,
-    selectionMode: Boolean,
-    selectedEntryIds: Set<String>,
     onOpenEverything: () -> Unit,
     onOpenShelf: (V2ShelfId) -> Unit,
     onOpenCollection: (String) -> Unit,
     onRenameCollection: (String) -> Unit,
     onDeleteCollection: (String) -> Unit,
     onNewCollection: () -> Unit,
-    suggestions: List<CurioTopic>,
+    suggestions: Map<CategoryId, List<CurioTopic>>,
     onShuffle: () -> Unit,
     onOpenSuggestion: (CurioTopic) -> Unit,
     showSuggestions: Boolean,
-    /** v3xx50 — when > 0 the archive has not been read yet: paint this many
-     *  entry-card placeholders in the Saved-entries slot. */
-    savedSkeletonCount: Int,
-    onEntryLongClick: (String) -> Unit,
-    onEntryClick: (String) -> Unit,
     onClearSearch: () -> Unit
 ) {
     if (searching && visibleShelves.isEmpty() && userCollections.isEmpty()) {
@@ -1169,35 +1146,7 @@ private fun LazyGridScope.v2HomeItems(
                 onOpen = onOpenEverything
             )
         }
-        if (savedEntries.isNotEmpty()) {
-            item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-                V2PageSectionHeader(
-                    title = "Saved entries",
-                    subtitle = "Your latest additions",
-                    trailing = "${savedEntries.size}"
-                )
-            }
-            v2EntryItems(
-                entries = savedEntries,
-                fullSpan = false,
-                selectionMode = selectionMode,
-                selectedEntryIds = selectedEntryIds,
-                onEntryLongClick = onEntryLongClick,
-                onEntryClick = onEntryClick
-            )
-        } else if (savedSkeletonCount > 0) {
-            // v3xx50 — the archive is still arriving: hold the exact slot the
-            // real cards will occupy (same header, same 2-column grid) with
-            // as many placeholders as there are saved entries to come.
-            item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-                V2PageSectionHeader(
-                    title = "Saved entries",
-                    subtitle = "Your latest additions",
-                    trailing = null
-                )
-            }
-            v2SkeletonItems(count = savedSkeletonCount)
-        }
+
     }
 
     if (visibleShelves.isNotEmpty() || userCollections.isNotEmpty()) {
@@ -3907,7 +3856,7 @@ private fun topicKindForMember(m: CurioCollectionMember): V2Kind = when (m.kind)
  *  discoveries (re-rolled by the Shuffle pill) instead of a blank page. */
 @Composable
 private fun V2EmptySuggestions(
-    suggestions: List<CurioTopic>,
+    suggestions: Map<CategoryId, List<CurioTopic>>,
     onShuffle: () -> Unit,
     onOpen: (CurioTopic) -> Unit,
     modifier: Modifier = Modifier
@@ -3917,6 +3866,12 @@ private fun V2EmptySuggestions(
             text = "Your Cabinet is empty",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
             color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Here are some topics to get you started.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(16.dp))
         if (suggestions.isEmpty()) {
@@ -3932,12 +3887,21 @@ private fun V2EmptySuggestions(
                 Spacer(Modifier.height(10.dp))
             }
         } else {
-            suggestions.forEach { t ->
-                V2LikedRow(
-                    item = V2Liked(t.name, topicKind(t), t),
-                    onClick = { onOpen(t) }
+            suggestions.forEach { (catId, topics) ->
+                val cat = CurioCategories.byId(catId)
+                Text(
+                    text = catId.name.lowercase().replaceFirstChar { it.uppercase() } + "s",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
                 )
-                Spacer(Modifier.height(10.dp))
+                topics.forEach { t ->
+                    V2LikedRow(
+                        item = V2Liked(t.name, topicKind(t), t),
+                        onClick = { onOpen(t) }
+                    )
+                    Spacer(Modifier.height(6.dp))
+                }
             }
         }
         Spacer(Modifier.height(6.dp))
