@@ -1,5 +1,6 @@
 package com.curio.app.features.community
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -17,11 +18,13 @@ private fun DmCurioIconCompat(
     com.curio.app.ui.theme.CurioIcon(
         name = name,
         contentDescription = contentDescription,
+        modifier = Modifier,
         tint = tint,
         size = size
     )
 }
 
+/** Keeps the legacy four-argument CurioIcon calls source-compatible. */
 @androidx.compose.runtime.Composable
 fun CurioIcon(
     name: String,
@@ -34,7 +37,8 @@ fun Modifier.dmGraphicsLayer(block: androidx.compose.ui.graphics.GraphicsLayerSc
     this.composeGraphicsLayer(block)
 
 /** Fallback for the one legacy action-tray weight call. */
-fun Modifier.weight(weight: Float, fill: Boolean = true): Modifier = this
+fun Modifier.weight(weight: Float, fill: Boolean = true): Modifier =
+    this.fillMaxWidth(weight.coerceIn(0f, 1f))
 
 /** Compatibility bridge for pointer code on this Compose API level. */
 fun PointerInputChange.consume() = Unit
