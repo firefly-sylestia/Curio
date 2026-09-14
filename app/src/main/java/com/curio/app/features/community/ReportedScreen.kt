@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,6 +26,7 @@ import com.curio.app.data.supabase.OnlineAccount
 @Composable
 fun ReportedScreen(navController: NavController) {
     val account = OnlineAccount.state
+    val scope = rememberCoroutineScope()
     val token = account.session?.accessToken
     var reports by remember { mutableStateOf(emptyList<com.curio.app.data.supabase.CommunityReport>()) }
     var message by remember { mutableStateOf("Loading reports…") }
@@ -57,7 +59,7 @@ fun ReportedScreen(navController: NavController) {
                     report.note?.let { Text("Note: $it") }
                     Button(onClick = {
                         val active = token ?: return@Button
-                        kotlinx.coroutines.MainScope().launch {
+                        scope.launch {
                             CommunityApi.deleteAny(active, report.cardId).onSuccess {
                                 reports = reports.filterNot { it.cardId == report.cardId }
                             }

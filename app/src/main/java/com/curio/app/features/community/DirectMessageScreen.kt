@@ -1851,7 +1851,7 @@ private fun MessageActionSheet(
                 ActionChip("Reply", onReply)
                 ActionChip("Copy", onCopy)
                 if (canEdit) ActionChip("Edit", onEdit)
-                if (canRemove) ActionChip("Remove", { onRemove?.invoke() }, destructive = true)
+                if (canRemove) ActionChip("Delete for everyone", { onRemove?.invoke() }, destructive = true)
             }
         }
     }
