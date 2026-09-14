@@ -109,6 +109,7 @@ import com.curio.app.features.settings.UserExperimentsScreen
 import com.curio.app.features.community.ChatsScreen
 import com.curio.app.features.community.CommunityCardScreen
 import com.curio.app.features.community.CommunityScreen
+import com.curio.app.features.community.ReportedScreen
 import com.curio.app.features.community.DirectMessageScreen
 import com.curio.app.features.community.FriendsScreen
 import com.curio.app.features.community.SocialProfileScreen
@@ -1066,9 +1067,13 @@ fun CurioNavHost(
                     PrivacyScreen(navController = navController)
                 }
             }
-            composable(CurioRoutes.COMMUNITY) {
-                CommunityScreen(navController = navController)
-            }
+composable(CurioRoutes.COMMUNITY) {
+        CommunityScreen(navController = navController)
+    }
+    composable(CurioRoutes.REPORTED) {
+        ReportedScreen(navController = navController)
+    }
+
             composable(
                 route = CurioRoutes.COMMUNITY_CARD,
                 arguments = listOf(navArgument("cardId") { type = NavType.StringType })

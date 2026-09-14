@@ -71,6 +71,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -1464,42 +1466,31 @@ private fun MessageEntry(
         // A full-width invisible tap target sits above it so tapping
         // anywhere outside the pills dismisses the sheet.
         Box(modifier = Modifier.fillMaxWidth()) {
-            AnimatedVisibility(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = (-72).dp),
-                visible = actionSheet,
-                enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
-                    slideInVertically { -it / 3 },
-                exit = fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Invisible full-width dismiss target above the sheet
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .clickable { onHold() }
-                    )
-                    MessageActionSheet(
-                        mine = message.mine,
-                        current = reactions.firstOrNull { it.userId == myUserId }?.kind,
-                        canEdit = message.mine && message.migrationState == "plaintext" &&
-                            !message.id.startsWith(LOCAL_ID_PREFIX),
-                        canRemove = onRemove != null,
-                        onPick = onPick,
-                        onCopy = onCopy,
-                        onEdit = onEdit,
-                        onRemove = onRemove,
-                        onReply = onReply
-                    )
-                    // Invisible dismiss target below the sheet
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(32.dp)
-                            .clickable { onHold() }
-                    )
+            if (actionSheet) {
+                Popup(
+                    alignment = if (message.mine) Alignment.TopEnd else Alignment.TopStart,
+                    offset = IntOffset(0, with(LocalDensity.current) { (-96).dp.roundToPx() }),
+                    properties = PopupProperties(focusable = true, dismissOnClickOutside = true),
+                    onDismissRequest = onHold
+                ) {
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
+                            slideInVertically { -it / 3 }
+                    ) {
+                        MessageActionSheet(
+                            mine = message.mine,
+                            current = reactions.firstOrNull { it.userId == myUserId }?.kind,
+                            canEdit = message.mine && message.migrationState == "plaintext" &&
+                                !message.id.startsWith(LOCAL_ID_PREFIX),
+                            canRemove = onRemove != null,
+                            onPick = onPick,
+                            onCopy = onCopy,
+                            onEdit = onEdit,
+                            onRemove = onRemove,
+                            onReply = onReply
+                        )
+                    }
                 }
             }
             MessageBubble(
@@ -1575,31 +1566,22 @@ private fun MessageBubble(
         animationSpec = if (replyDrag == 0f) spring(dampingRatio = 0.6f, stiffness = 500f) else snap(),
         label = "replySettle"
     )
-    // Whichever way the swipe is answered, the BUBBLE leans the opposite way:
-    // pulling a received bubble rightward is Instagram's own motion.
-    val leanX = if (mine) -settle.value else settle.value
+    // The bubble follows the finger in the same direction for both sides;
+    // only the allowed drag direction differs between sent and received rows.
+    val leanX = settle.value
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
-        if (mine && lastOfRun) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(end = 6.dp, bottom = 2.dp)
-            ) {
-                Text(
-                    text = socialStamp(message.createdAtMillis),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        if (!mine) {
+            Spacer(modifier = Modifier.weight(1f, fill = true))
         }
 
         Column(
             horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
-            modifier = Modifier.weight(1f, fill = false)
+            modifier = Modifier.weight(0f, fill = false)
         ) {
             val press = rememberCurioPressSource(pressedScale = 0.96f)
             Box(modifier = Modifier.offset { IntOffset(leanX.roundToInt(), 0) }) {
@@ -1695,6 +1677,15 @@ private fun MessageBubble(
             if (mineGlyph != null || others.isNotEmpty()) {
                 ReactionChips(mineGlyph = mineGlyph, others = others)
             }
+        }
+
+        if (mine && lastOfRun) {
+            Text(
+                text = socialStamp(message.createdAtMillis),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
+            )
         }
 
         if (!mine && lastOfRun) {
@@ -1860,7 +1851,7 @@ private fun MessageActionSheet(
                 ActionChip("Reply", onReply)
                 ActionChip("Copy", onCopy)
                 if (canEdit) ActionChip("Edit", onEdit)
-                if (canRemove) ActionChip("Remove", { onRemove?.invoke() }, destructive = true)
+                if (canRemove) ActionChip("Delete for everyone", { onRemove?.invoke() }, destructive = true)
             }
         }
     }

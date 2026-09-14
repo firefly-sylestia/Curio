@@ -137,8 +137,18 @@ fun CommunityScreen(navController: NavController) {
     // scroll reset, no offline flag) so a post landing while you read is simply
     // there the next time you look up.
     var pushed by remember { mutableStateOf(0) }
+    var isCommunityAdmin by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+    LaunchedEffect(token, account.session?.userId) {
+        val active = token
+        val userId = account.session?.userId
+        if (active != null && userId != null) {
+            CommunityApi.isAdmin(active, userId).onSuccess { isCommunityAdmin = it }
+        } else {
+            isCommunityAdmin = false
+        }
+    }
 
     val eligible = account.signedIn && onlineMode && token != null
 
@@ -302,6 +312,19 @@ fun CommunityScreen(navController: NavController) {
                         subtitle = "",
                         onBack = if (asTab) null else ({ navController.popBackStack() })
                     )
+                }
+            }
+            if (isCommunityAdmin) {
+                item { SettingsSectionHeading("Moderation") }
+                item {
+                    SettingsOptionCard {
+                        SettingsOptionRow(
+                            icon = CurioIcons.Warning,
+                            title = "Reported posts",
+                            subtitle = "Review reports and manage community posts",
+                            onClick = { navController.navigate(CurioRoutes.REPORTED) }
+                        )
+                    }
                 }
             }
             if (!eligible) {
@@ -743,7 +766,8 @@ internal fun CommunityCardCanvas(
                     aspect = aspect,
                     style = style,
                     byline = card.byline,
-                    bodyScale = card.bodyScale
+                    bodyScale = card.bodyScale,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

@@ -273,6 +273,7 @@ object CurioRoutes {
     // ONLY optional bottom-nav tab: it joins [bottomNavRoutePrefixes] while
     // the user's opt-in tab is showing (see [liveTabPrefixes]).
     const val COMMUNITY = "community"
+    const val REPORTED = "reported"
     // v3xx — the social layer: friend requests + direct messages. The handle
     // rides in the query so the thread can name who it is with on the FIRST
     // frame (the caller already knows it; the id alone is opaque).
@@ -360,7 +361,7 @@ object CurioRoutes {
     /**
      * Route PREFIXES where the bottom navigation bar should be visible.
      * Use this (not [bottomNavRoutes]) when checking `destination.route`
-     * — the Nav library returns the route TEMPLATE (e.g.
+     * ��� the Nav library returns the route TEMPLATE (e.g.
      * `spin/{categorySlug}`), not the resolved URL, so exact-string
      * membership fails for any parameterised route. The previous check
      * `currentRoute in bottomNavRoutes` hid the bar when on

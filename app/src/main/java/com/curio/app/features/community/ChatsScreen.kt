@@ -110,6 +110,7 @@ fun ChatsScreen(navController: NavController) {
     var actionsFor by remember { mutableStateOf<CurioDmThread?>(null) }
     var busy by remember { mutableStateOf(false) }
     var pushed by remember { mutableStateOf(0) }
+    var cacheHydrated by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
@@ -121,7 +122,9 @@ fun ChatsScreen(navController: NavController) {
         loading = true
         SocialApi.threads(active, me).fold(
             onSuccess = {
-                threads = it
+                // A transient empty response must not erase the cached people
+                // before PostgREST/realtime has finished warming up.
+                if (it.isNotEmpty() || !cacheHydrated) threads = it
                 error = null
             },
             onFailure = { error = it.message }
@@ -150,6 +153,7 @@ fun ChatsScreen(navController: NavController) {
             if (threads.isEmpty()) {
                 SocialInboxCache.read(context)?.let { cached ->
                     if (threads.isEmpty()) threads = cached.threads
+                    cacheHydrated = cached.threads.isNotEmpty()
                     SocialPeopleCache.remember(context, cached.threads.map { it.person })
                 }
             }

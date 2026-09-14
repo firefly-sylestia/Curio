@@ -1347,8 +1347,9 @@ private const val PERSON_COLUMNS_PRIVACY =
                 }
                 val request = SupabaseClient
                     .requestBuilder("$MESSAGES?id=eq.${id(messageId)}", accessToken)
-                    .put(JSONObject().put("body", text).toString().toRequestBody(jsonMediaType))
-                    .build()
+.patch(JSONObject().put("body", text).toString().toRequestBody(jsonMediaType))
+        .header("Prefer", "return=minimal")
+        .build()
                 SupabaseClient.executeBody(request)
             }
         }
