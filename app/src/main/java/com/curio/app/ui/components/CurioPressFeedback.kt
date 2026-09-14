@@ -54,30 +54,29 @@ fun rememberCurioPressSource(
 ): CurioPressSource {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val context = LocalContext.current
-    val alive = CurioAlivePreferences.isEnabled(context)
+    val alive = CurioAlivePreferences.isEnabled(LocalContext.current)
     val targetScale = if (pressed) {
-        if (alive) minOf(pressedScale, 0.955f) else pressedScale
+        if (alive) minOf(pressedScale, 0.92f) else pressedScale
     } else 1f
     val scale by animateFloatAsState(
         targetValue = targetScale,
         animationSpec = if (alive) {
-            androidx.compose.animation.core.spring(dampingRatio = 0.72f, stiffness = 1050f)
+            androidx.compose.animation.core.spring(dampingRatio = 0.64f, stiffness = 680f)
         } else CurioMotion.Springs.Press,
         label = "curioPressScale"
     )
     val haptics = LocalHapticFeedback.current
     LaunchedEffect(pressed) {
         if (pressed && hapticOnPress) {
-            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
         }
     }
     val animatedModifier = if (alive) {
         Modifier.graphicsLayer {
             scaleX = scale
             scaleY = scale
-            rotationZ = if (pressed) -0.45f else 0f
-            alpha = if (pressed) 0.985f else 1f
+            rotationZ = if (pressed) -1.15f else 0f
+            alpha = if (pressed) 0.965f else 1f
             transformOrigin = TransformOrigin.Center
         }
     } else {
@@ -91,7 +90,7 @@ fun rememberCurioControlTick(): (() -> Unit) -> Unit {
     val haptics = LocalHapticFeedback.current
     return remember(haptics) {
         { action ->
-            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
             action()
         }
     }
