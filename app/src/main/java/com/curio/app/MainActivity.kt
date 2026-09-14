@@ -9,6 +9,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
@@ -44,7 +46,9 @@ import kotlinx.coroutines.withContext
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.features.community.SocialNotificationWatcher
+import com.curio.app.features.create.BookCreateScreen
 import com.curio.app.features.create.CreateEntryLauncher
+import com.curio.app.features.create.JournalScreen
 import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingCommunityOpen
@@ -160,13 +164,14 @@ class MainActivity : ComponentActivity() {
                     val currentRoute = backStackEntry?.destination?.route
                     val onHome = currentRoute == CurioRoutes.HOME
                     var showCreateButton by remember(currentRoute) { mutableStateOf(true) }
+                    var creationWorkspace by remember { mutableStateOf<String?>(null) }
                     val createScrollConnection = remember(onHome) {
                         object : NestedScrollConnection {
                             override fun onPreScroll(
                                 available: Offset,
                                 source: NestedScrollSource
                             ): Offset {
-                                if (!onHome) return Offset.Zero
+                                if (!onHome || creationWorkspace != null) return Offset.Zero
                                 when {
                                     available.y < -2f -> showCreateButton = false
                                     available.y > 2f -> showCreateButton = true
@@ -183,7 +188,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         CurioNavHost(navController = navController)
                         AnimatedVisibility(
-                            visible = onHome && showCreateButton,
+                            visible = onHome && showCreateButton && creationWorkspace == null,
                             enter = slideInVertically(
                                 animationSpec = tween(220, easing = FastOutSlowInEasing),
                                 initialOffsetY = { it }
@@ -198,15 +203,33 @@ class MainActivity : ComponentActivity() {
                         ) {
                             CreateEntryLauncher(
                                 onJournal = {
-                                    navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
+                                    creationWorkspace = "journal"
                                 },
                                 onBook = {
-                                    navController.navigate(CurioRoutes.SETTINGS_BOOK_BROWSER) { launchSingleTop = true }
+                                    creationWorkspace = "book"
                                 },
                                 onQuickNote = {
                                     navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
                                 }
                             )
+                        }
+
+                        AnimatedVisibility(
+                            visible = creationWorkspace != null,
+                            enter = fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)),
+                            exit = fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            when (creationWorkspace) {
+                                "journal" -> JournalScreen(
+                                    onClose = { creationWorkspace = null },
+                                    onSaved = { creationWorkspace = null }
+                                )
+                                "book" -> BookCreateScreen(
+                                    onClose = { creationWorkspace = null },
+                                    onCreated = { creationWorkspace = null }
+                                )
+                            }
                         }
                     }
                 }
