@@ -181,6 +181,7 @@ val seededShelfIds: Set<String> = setOf(
 
 /** The three virtual shelves open into these levels. */
 const val SHELF_LEVEL_FAVORITES = "shelf:favorites"
+const val SHELF_LEVEL_COMPLETED = "shelf:completed-topics"
 const val SHELF_LEVEL_SAVED = "shelf:saved"
 const val SHELF_LEVEL_NOTES = "shelf:notes"
 
