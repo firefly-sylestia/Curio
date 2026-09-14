@@ -1580,8 +1580,7 @@ private fun MessageBubble(
         }
 
         Column(
-            horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
-            modifier = Modifier.weight(0f, fill = false)
+            horizontalAlignment = if (mine) Alignment.End else Alignment.Start
         ) {
             val press = rememberCurioPressSource(pressedScale = 0.96f)
             Box(modifier = Modifier.offset { IntOffset(leanX.roundToInt(), 0) }) {
