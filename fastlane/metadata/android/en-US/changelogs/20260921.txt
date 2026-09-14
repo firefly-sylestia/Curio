@@ -1,4 +1,13 @@
 FIX:
+- Messages: received bubbles sit on the left again, and the reply banner says "Replying to you" instead of "yourself".
+- Messages: swiping answers sideways only, so a long message scrolls normally instead of fighting the reply gesture.
+- Messages: replies show the words they answer — comfortably readable in both themes — and a quote that has aged out says so instead of disappearing.
+- Messages: older plain messages show their real words again instead of "re-encryption required", and Edit works on them.
+- Messages and replies: editing goes through the server, so a saved edit really saves (the reply editor used to fail outright).
+- Messages: "Delete for everyone" is a solid red action instead of a see-through one.
+- Replies: a compact sheet — the age instead of the @username under each name, and a proper bordered typing box.
+
+FIX:
 - Topic cards render whole and crisp at the size the card editor shows: no more shrunken art, cropped corners, off-centre cards or an empty band between a card and its like row.
 - Profiles: a topic post's grid tile is the topic itself — the lane's colour wash, the lane's icon and the topic name — instead of a share card squeezed into a square.
 

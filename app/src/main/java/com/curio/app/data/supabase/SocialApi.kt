@@ -159,7 +159,21 @@ data class CurioDirectMessage(
     val editedAtMillis: Long? = null,
     /** The message this one answers — one level deep, same conversation. */
     val replyTo: String? = null
-)
+) {
+    /**
+     * A row whose words the sender may rewrite.
+     *
+     * `plaintext` is today's plain send and `legacy` is a row written before
+     * encryption became opt-in — the table's own CHECK guarantees both carry a
+     * body and no ciphertext. An ENCRYPTED row is not editable: its ciphertext
+     * is bound to a conversation key version, so rewriting it would mean
+     * re-wrapping for every device, which is re-encryption rather than editing.
+     * The old test only accepted `plaintext`, so every message sent before the
+     * default flipped showed no Edit at all.
+     */
+    val editableText: Boolean
+        get() = (migrationState == "plaintext" || migrationState == "legacy") && body.isNotBlank()
+}
 
 /** A device of one conversation party that still has no envelope for a version. */
 data class CurioDmMissingEnvelope(
@@ -1333,9 +1347,15 @@ private const val PERSON_COLUMNS_PRIVACY =
         }
 
     /**
-     * Edits one of MY plaintext messages. Encrypted rows are refused by the
-     * server's edit guard (their ciphertext is bound to a key version), and
-     * the `edited_at` stamp is server-owned — the client never sends it.
+     * Rewrites one of MY messages IN PLACE, through the server function.
+     *
+     * A direct table PATCH looked like it worked and changed nothing whenever
+     * the row policies did not expose the row (PostgREST answers 204 either
+     * way), which is exactly "I can't edit my message". `curio_edit_dm_message`
+     * checks the sender, the plain-text state and the message's own day, stamps
+     * `edited_at` server-side, and RAISES when it refuses — so a success from
+     * here means the row really changed. The id never moves, so reactions and
+     * answers to this line stay attached to it.
      */
     suspend fun editMessage(accessToken: String, messageId: String, body: String): Result<Unit> =
         withContext(Dispatchers.IO) {
@@ -1345,11 +1365,13 @@ private const val PERSON_COLUMNS_PRIVACY =
                 if (text.length > MAX_MESSAGE_CHARS) {
                     throw IllegalArgumentException("Keep it under $MAX_MESSAGE_CHARS characters.")
                 }
+                val payload = JSONObject()
+                    .put("p_message_id", id(messageId))
+                    .put("p_body", text)
                 val request = SupabaseClient
-                    .requestBuilder("$MESSAGES?id=eq.${id(messageId)}", accessToken)
-.patch(JSONObject().put("body", text).toString().toRequestBody(jsonMediaType))
-        .header("Prefer", "return=minimal")
-        .build()
+                    .requestBuilder("/rest/v1/rpc/curio_edit_dm_message", accessToken)
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
                 SupabaseClient.executeBody(request)
             }
         }

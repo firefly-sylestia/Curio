@@ -1230,7 +1230,11 @@ begin
     if new.sender <> old.sender or new.recipient <> old.recipient then
         raise exception 'curio: a message cannot change its conversation';
     end if;
-    if new.migration_state <> 'plaintext' then
+    -- 'legacy' is a plain-text row from before encryption became opt-in: the
+    -- table's own CHECK guarantees it carries a body and no ciphertext, so it
+    -- is as editable as a 'plaintext' one (refusing it is why an older message
+    -- showed no Edit at all). Anything carrying a ciphertext is not editable.
+    if new.migration_state not in ('plaintext', 'legacy') then
         raise exception 'curio: encrypted messages cannot be edited';
     end if;
     if new.body is distinct from old.body and new.edited_at is null then
@@ -1242,6 +1246,97 @@ drop trigger if exists dm_messages_guard_edit on public.dm_messages;
 create trigger dm_messages_guard_edit
     before update on public.dm_messages
     for each row execute function public.curio_guard_dm_message_edit();
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 5d2. EDITS ARE SERVER FUNCTIONS, not table writes
+--
+-- Editing a reply or a message used to be a direct table write, and both had
+-- a failure mode that reads to a member as "editing is broken":
+--
+--   * a PUT on a filtered table route runs through PostgREST's upsert path,
+--     which answered `column pgrst_body.id does not exist` for every reply
+--     edit, and
+--   * a PATCH whose row policies do not expose the row answers 204 while
+--     changing NOTHING, so the app painted a success over a message that never
+--     changed.
+--
+-- The function is now the authority for both. It checks who is asking, re-runs
+-- the public-text rule (replies only — a private conversation is deliberately
+-- unfiltered), stamps `edited_at` itself and RAISES a readable reason when it
+-- refuses, so a client can never show a success for an edit that did not
+-- happen. The row's ID never moves, so reactions and answers pointing at the
+-- line stay attached to it.
+-- ───────────────────────────────────────────────────────────────────────────
+
+create or replace function public.curio_edit_comment(p_comment_id uuid, p_body text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    clean text := btrim(coalesce(p_body, ''));
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if clean = '' then
+        raise exception 'curio: write something first';
+    end if;
+    if char_length(clean) > 400 then
+        raise exception 'curio: keep a reply under 400 characters';
+    end if;
+    if not public.curio_text_is_clean(clean) then
+        raise exception 'curio: that wording is not allowed here';
+    end if;
+    update public.community_comments
+       set body = clean,
+           edited_at = now()
+     where id = p_comment_id
+       and author = actor;
+    if not found then
+        raise exception 'curio: that reply is not yours to edit';
+    end if;
+end $$;
+
+create or replace function public.curio_edit_dm_message(p_message_id uuid, p_body text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    clean text := btrim(coalesce(p_body, ''));
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if clean = '' then
+        raise exception 'curio: the message is empty';
+    end if;
+    if char_length(clean) > 2000 then
+        raise exception 'curio: keep a message under 2000 characters';
+    end if;
+    -- A private conversation is NOT content-filtered: the sender test below is
+    -- the whole guard, exactly as it is for sending.
+    update public.dm_messages
+       set body = clean,
+           edited_at = now()
+     where id = p_message_id
+       and sender = actor
+       and migration_state in ('plaintext', 'legacy')
+       and created_at > now() - interval '24 hours';
+    if not found then
+        raise exception 'curio: only your own plain message from the last day can be edited';
+    end if;
+end $$;
+
+revoke all on function public.curio_edit_comment(uuid, text) from public, anon;
+grant execute on function public.curio_edit_comment(uuid, text) to authenticated;
+revoke all on function public.curio_edit_dm_message(uuid, text) from public, anon;
+grant execute on function public.curio_edit_dm_message(uuid, text) to authenticated;
 
 -- A participant may clear the entire two-person thread. The client scopes the
 -- DELETE to both directions, while this policy prevents deleting somebody

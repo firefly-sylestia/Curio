@@ -1,12 +1,15 @@
 package com.curio.app.features.community
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -15,13 +18,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +39,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -172,9 +177,9 @@ internal fun CommunityCommentsSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -205,8 +210,8 @@ internal fun CommunityCommentsSheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 340.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .heightIn(max = 320.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (replies.isEmpty() && !loading && error == null) {
                     item(key = "empty") {
@@ -317,14 +322,14 @@ internal fun CommunityCommentsSheet(
                         modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp)
                     ) {
                         Text(
-                            text = "Replying to @${target.authorLabel}",
+                            text = "Replying to ${target.authorLabel}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.width(6.dp))
                         CurioIcon(
                             name = CurioIcons.Close,
-                            contentDescription = "Stop replying to @${target.authorLabel}",
+                            contentDescription = "Stop replying to ${target.authorLabel}",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             size = 14.dp,
                             modifier = Modifier
@@ -334,24 +339,54 @@ internal fun CommunityCommentsSheet(
                     }
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = {
-                        if (it.length <= CommunityApi.MAX_COMMENT_CHARS) text = it
-                    },
-                    label = {
-                        Text(
-                            when {
-                                editing != null -> "Edit your reply"
-                                replyTo == null -> "Add a reply"
-                                else -> "Reply to @${replyTo?.authorLabel}"
-                            }
-                        )
-                    },
-                    maxLines = 3,
+            // The composer is the app's OWN writing surface (a rounded field
+            // with a hairline border that lights up in the brand rose while it
+            // has the cursor) instead of Material's outlined box, which sat in
+            // this sheet like a form control.
+            var composerFocused by remember { mutableStateOf(false) }
+            Row(verticalAlignment = Alignment.Bottom) {
+                Surface(
+                    shape = RoundedCornerShape(22.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (composerFocused) curioDialogActionColor()
+                        else MaterialTheme.colorScheme.outlineVariant
+                    ),
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    BasicTextField(
+                        value = text,
+                        onValueChange = {
+                            if (it.length <= CommunityApi.MAX_COMMENT_CHARS) text = it
+                        },
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(curioDialogActionColor()),
+                        maxLines = 4,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged { composerFocused = it.isFocused }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        decorationBox = { inner ->
+                            Box {
+                                if (text.isEmpty()) {
+                                    Text(
+                                        text = when {
+                                            editing != null -> "Edit your reply"
+                                            replyTo == null -> "Add a reply"
+                                            else -> "Reply to ${replyTo?.authorLabel}"
+                                        },
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                inner()
+                            }
+                        }
+                    )
+                }
                 Spacer(Modifier.width(8.dp))
                 Button(
                     onClick = {
@@ -392,7 +427,9 @@ internal fun CommunityCommentsSheet(
                     },
                     enabled = text.isNotBlank() && CurioContentFilter.isClean(text),
                     shape = RoundedCornerShape(50),
-                    colors = curioDialogActionButtonColors()
+                    colors = curioDialogActionButtonColors(),
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
+                    modifier = Modifier.height(46.dp)
                 ) {
                     Text(
                         text = if (editing != null) "Save" else "Send",
@@ -427,7 +464,7 @@ internal fun CommunityReplyRow(
     onEdit: (() -> Unit)? = null
 ) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         color = if (depth == 0) {
             MaterialTheme.colorScheme.surfaceContainerLow
         } else {
@@ -437,22 +474,22 @@ internal fun CommunityReplyRow(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = (depth * 18).dp)
+            .padding(start = (depth * 14).dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(horizontal = 11.dp, vertical = 10.dp),
             verticalAlignment = Alignment.Top
         ) {
             SocialAvatar(
                 style = reply.authorAvatar,
-                avatarSize = 34.dp,
+                avatarSize = 30.dp,
                 onClick = onAuthor
             )
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
+                    .padding(start = 9.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // The DISPLAY name leads; the @username rides the meta line
                 // beneath it, beside the age and the reply's own actions.
@@ -466,8 +503,12 @@ internal fun CommunityReplyRow(
                     modifier = Modifier.clickable(onClick = onAuthor)
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // The AGE only: the display name above already says who this
+                    // is, and a @handle on every line turns a conversation into
+                    // a directory. (A branch's parent is named in the composer
+                    // chip, by name as well.)
                     Text(
-                        text = "${reply.authorHandleLabel} · ${agoLabel(reply.createdAtMillis)}",
+                        text = agoLabel(reply.createdAtMillis),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1

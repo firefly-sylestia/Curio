@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.fadeOut
@@ -319,7 +319,16 @@ fun DirectMessageScreen(
                     }
                 }
                 val fresh = raw.map { message ->
-                    if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
+                    // 'legacy' is a plain-text row from before encryption became
+                    // opt-in — the table's own CHECK says such a row carries a
+                    // body and no ciphertext, so its words ARE the message and
+                    // showing a "re-encryption required" placeholder hid every
+                    // message sent before the default flipped. Only a legacy row
+                    // with nothing in it falls back to that line.
+                    if (message.migrationState == "legacy") {
+                        if (message.body.isNotBlank()) message
+                        else message.copy(body = "Legacy message — re-encryption required")
+                    }
                     else if (message.migrationState == "plaintext") message
                     else {
                         val encrypted = com.curio.app.data.supabase.CurioEncryptedMessage(
@@ -1481,7 +1490,7 @@ private fun MessageEntry(
                         MessageActionSheet(
                             mine = message.mine,
                             current = reactions.firstOrNull { it.userId == myUserId }?.kind,
-                            canEdit = message.mine && message.migrationState == "plaintext" &&
+                            canEdit = message.mine && message.editableText &&
                                 !message.id.startsWith(LOCAL_ID_PREFIX),
                             canRemove = onRemove != null,
                             onPick = onPick,
@@ -1570,15 +1579,16 @@ private fun MessageBubble(
     // only the allowed drag direction differs between sent and received rows.
     val leanX = settle.value
 
+    // The side IS the label: mine right (Arrangement.End), theirs left
+    // (Arrangement.Start). A weighted spacer used to sit before a received
+    // bubble, which ate the free space and pushed every short reply of theirs
+    // to the RIGHT — the alignment arrangement alone is what puts a bubble on
+    // its side.
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
-        if (!mine) {
-            Spacer(modifier = Modifier.weight(1f, fill = true))
-        }
-
         Column(
             horizontalAlignment = if (mine) Alignment.End else Alignment.Start
         ) {
@@ -1597,8 +1607,14 @@ private fun MessageBubble(
                     shadowElevation = 1.dp,
                     modifier = Modifier
                         .then(press.modifier)
+                        // HORIZONTAL ONLY: the thread must stay scrollable
+                        // UNDER a long message, so the bubble watches for a
+                        // sideways drag and lets a vertical one fall through to
+                        // the list (a plain drag detector consumed every drag,
+                        // which is what made a long bubble impossible to scroll
+                        // past).
                         .pointerInput(message.id, mine) {
-                            detectDragGestures(
+                            detectHorizontalDragGestures(
                                 onDragStart = { replyDrag = 0f },
                                 onDragEnd = {
                                     if (kotlin.math.abs(replyDrag) >= dragLimit * 0.85f) {
@@ -1608,9 +1624,8 @@ private fun MessageBubble(
                                     replyDrag = 0f
                                 },
                                 onDragCancel = { replyDrag = 0f }
-                            ) { change, amount ->
-                                change.consume()
-                                val raw = replyDrag + amount.x * 0.45f
+                            ) { _, amount ->
+                                val raw = replyDrag + amount * 0.45f
                                 replyDrag = if (mine) raw.coerceIn(-dragLimit, 0f)
                                 else raw.coerceIn(0f, dragLimit)
                             }
@@ -1636,8 +1651,14 @@ private fun MessageBubble(
                                 },
                                 onClick = {}                            )
                             .padding(horizontal = 14.dp, vertical = 9.dp)) {
-                        if (quoteOf != null) {
-                            ReplyQuoteRow(quoteOf)
+                        if (message.replyTo != null) {
+                            // An answer never silently loses its quote: a parent
+                            // that has fallen out of the 24-hour window says so
+                            // instead of the row just vanishing from the bubble.
+                            ReplyQuoteRow(
+                                quoted = quoteOf ?: "This message is no longer available",
+                                mine = mine
+                            )
                         }
                         Text(
                             text = message.body,
@@ -1751,9 +1772,13 @@ private fun ReactionChip(kind: String, count: Int, mine: Boolean) {
  * The quick quote above an answer: the parent's words, one soft bar. Instagram
  * renders this INSIDE the bubble and Curio does too — the bar is deliberately
  * quiet so the answer stays the loudest line.
+ *
+ * The ink follows the BUBBLE, not the brand: white on my rose bubble, the
+ * page's own muted ink on their neutral one. Hardcoded white made a received
+ * answer's quote invisible on the light theme.
  */
 @Composable
-private fun ReplyQuoteRow(quoted: String) {
+private fun ReplyQuoteRow(quoted: String, mine: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1765,13 +1790,17 @@ private fun ReplyQuoteRow(quoted: String) {
                 .width(3.dp)
                 .height(34.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(Color.White.copy(alpha = 0.55f))
+                .background(
+                    if (mine) Color.White.copy(alpha = 0.55f)
+                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                )
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = quoted,
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White.copy(alpha = 0.85f),
+            color = if (mine) Color.White.copy(alpha = 0.85f)
+            else MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
@@ -1858,20 +1887,25 @@ private fun MessageActionSheet(
 
 @Composable
 private fun ActionChip(label: String, onClick: () -> Unit, destructive: Boolean = false) {
+    // A destructive action is a SOLID fill, not a wash: a 12%-alpha pill read
+    // as a disabled button floating over the thread instead of as the one
+    // decision that cannot be undone.
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = if (destructive)
-            MaterialTheme.colorScheme.error.copy(alpha = 0.12f)
+            MaterialTheme.colorScheme.error
         else
             curioDialogContainerColor(),
+        contentColor = if (destructive)
+            MaterialTheme.colorScheme.onError
+        else
+            MaterialTheme.colorScheme.onSurface,
         shadowElevation = 3.dp
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = if (destructive) MaterialTheme.colorScheme.error
-            else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
         )
     }
@@ -2000,7 +2034,7 @@ private fun MessageComposer(
                     Spacer(Modifier.width(8.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Replying to ${quoteTarget?.let { if (it.mine) "yourself" else title }}",
+                            text = "Replying to ${if (quoteTarget?.mine == true) "you" else title}",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = curioDialogActionColor(),
                             maxLines = 1

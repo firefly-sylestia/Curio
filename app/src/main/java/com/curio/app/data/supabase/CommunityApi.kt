@@ -379,9 +379,14 @@ object CommunityApi {
     }
 
     /**
-     * Edits one of MY replies. The `edited_at` stamp is server-owned (the
-     * edit trigger sets it when the body changes); the length and content
-     * checks re-run on the new text.
+     * Edits one of MY replies, through the server function.
+     *
+     * A PUT on a filtered table route goes through PostgREST's upsert path,
+     * which is what answered "column pgrst_body.id does not exist" every time
+     * a reply was edited. `curio_edit_comment` checks the author, re-runs the
+     * public-text rules, stamps `edited_at` server-side and either writes the
+     * row or raises — an edit can no longer half-happen behind a 204. The
+     * checks below stay, because the API layer is the app's own last door.
      */
     suspend fun editComment(accessToken: String, commentId: String, body: String): Result<Unit> =
         withContext(Dispatchers.IO) {
@@ -394,9 +399,12 @@ object CommunityApi {
                     )
                 }
                 CurioContentFilter.problem(text)?.let { throw IllegalArgumentException(it) }
+                val payload = JSONObject()
+                    .put("p_comment_id", commentId)
+                    .put("p_body", text)
                 val request = SupabaseClient
-                    .requestBuilder("$COMMENTS?id=eq.$commentId", accessToken)
-                    .put(JSONObject().put("body", text).toString().toRequestBody(jsonMediaType))
+                    .requestBuilder("/rest/v1/rpc/curio_edit_comment", accessToken)
+                    .post(payload.toString().toRequestBody(jsonMediaType))
                     .build()
                 SupabaseClient.executeBody(request)
             }
