@@ -505,13 +505,12 @@ fun CabinetV2Content(navController: NavController) {
     val rawContent = entries.isNotEmpty() || books.isNotEmpty() ||
         albums.isNotEmpty() || series.isNotEmpty() || userCollections.isNotEmpty()
 
-    // ── Empty-Cabinet suggestions: one pick per category, shown as
-    // grouped rows (books · series · albums · places · people …).
+    // ── Empty-Cabinet suggestions: exactly three shuffled picks from the
+    // shelves members can collect here — one book, series, and album.
     var suggestions by remember { mutableStateOf<Map<CategoryId, List<CurioTopic>>>(emptyMap()) }
     var suggestionSeed by remember { mutableStateOf(0) }
     val suggestionCats = remember {
-        listOf(CategoryId.BOOKS, CategoryId.SERIES, CategoryId.ALBUMS,
-            CategoryId.FILMS, CategoryId.SCIENTISTS, CategoryId.DISCOVERIES)
+        listOf(CategoryId.BOOKS, CategoryId.SERIES, CategoryId.ALBUMS)
     }
     LaunchedEffect(suggestionSeed) {
         val grouped = mutableMapOf<CategoryId, MutableList<CurioTopic>>()
@@ -519,7 +518,7 @@ fun CabinetV2Content(navController: NavController) {
             val picks = mutableListOf<CurioTopic>()
             val seen = mutableSetOf<String>()
             var guard = 0
-            while (picks.size < 2 && guard < 20) {
+            while (picks.size < 1 && guard < 20) {
                 guard++
                 val t = runCatching { TopicCatalog.randomFor(cat) }.getOrNull() ?: break
                 if (t.name !in seen) { seen.add(t.name); picks.add(t) }
@@ -1557,7 +1556,7 @@ private fun V2HeroTrailing(
 
 // ────────────────────────────────────────────────────────────────────────
 // Collection cards
-// ────────────────────────────────────────────────────────────────────────
+// ───────────────────��────────────────────────────────────────────────────
 
 /** The "+ New collection" tile at the foot of the collections home. */
 @Composable

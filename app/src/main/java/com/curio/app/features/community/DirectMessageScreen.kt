@@ -1462,8 +1462,11 @@ private fun MessageEntry(
         // The action sheet floats ABOVE the bubble (Instagram-style).
         // A full-width invisible tap target sits above it so tapping
         // anywhere outside the pills dismisses the sheet.
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             AnimatedVisibility(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = (-72).dp),
                 visible = actionSheet,
                 enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
                     slideInVertically { -it / 3 },
@@ -1565,7 +1568,7 @@ private fun MessageBubble(
     // short travel, then the reply banner raises. The lean tracks the finger
     // exactly while dragging (snap) and springs back to rest on release.
     var replyDrag by remember { mutableStateOf(0f) }
-    val dragLimit = with(LocalDensity.current) { 56.dp.toPx() }
+    val dragLimit = with(LocalDensity.current) { 44.dp.toPx() }
     val settle = animateFloatAsState(
         targetValue = replyDrag,
         animationSpec = if (replyDrag == 0f) spring(dampingRatio = 0.6f, stiffness = 500f) else snap(),
@@ -1575,31 +1578,8 @@ private fun MessageBubble(
     // pulling a received bubble rightward is Instagram's own motion.
     val leanX = if (mine) -settle.value else settle.value
 
-    // Outer row with full-row swipe hit area (including timestamp columns).
-    // The gesture tracker lives here so the entire row is draggable, not
-    // just the bubble surface.
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .pointerInput(message.id, mine) {
-                detectDragGestures(
-                    onDragStart = { replyDrag = 0f },
-                    onDragEnd = {
-                        if (kotlin.math.abs(replyDrag) >= dragLimit * 0.6f) {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSwipeReply()
-                        }
-                        replyDrag = 0f
-                    },
-                    onDragCancel = { replyDrag = 0f }
-                ) { change, amount ->
-                    change.consume()
-                    // Own messages swipe right-to-left (negative);
-                    // theirs swipe left-to-right (positive).
-                    val raw = replyDrag + amount.x
-                    replyDrag = if (mine) raw.coerceIn(-dragLimit, 0f) else raw.coerceIn(0f, dragLimit)
-                }
-            },
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
@@ -1642,7 +1622,26 @@ private fun MessageBubble(
                         else -> MaterialTheme.colorScheme.surfaceContainerHigh
                     },
                     shadowElevation = 1.dp,
-                    modifier = Modifier.then(press.modifier)
+                    modifier = Modifier
+                        .then(press.modifier)
+                        .pointerInput(message.id, mine) {
+                            detectDragGestures(
+                                onDragStart = { replyDrag = 0f },
+                                onDragEnd = {
+                                    if (kotlin.math.abs(replyDrag) >= dragLimit * 0.85f) {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onSwipeReply()
+                                    }
+                                    replyDrag = 0f
+                                },
+                                onDragCancel = { replyDrag = 0f }
+                            ) { change, amount ->
+                                change.consume()
+                                val raw = replyDrag + amount.x * 0.45f
+                                replyDrag = if (mine) raw.coerceIn(-dragLimit, 0f)
+                                else raw.coerceIn(0f, dragLimit)
+                            }
+                        }
                 ) {
                     Column(
                         modifier = Modifier
