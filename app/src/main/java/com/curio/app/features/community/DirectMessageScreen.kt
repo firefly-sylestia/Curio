@@ -317,11 +317,14 @@ fun DirectMessageScreen(
         if (text.isEmpty() || sending) return
         sending = true
         SocialApi.editMessage(active, message.id, text).fold(
-            onSuccess = {
-                editing = null
-                draft = ""
-                load(active, message.senderId)
-            },
+onSuccess = {
+  messages = messages.map { current ->
+    if (current.id == message.id) current.copy(body = text, editedAtMillis = System.currentTimeMillis()) else current
+  }
+  SocialMessageCache.write(context, otherUserId, messages)
+  editing = null
+  draft = ""
+},
             onFailure = { failure -> error = failure.message ?: "Couldn't edit that message." }
         )
         sending = false

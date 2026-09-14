@@ -416,9 +416,15 @@ internal fun CommunityCommentsSheet(
                                     accessToken, editTarget.id, text
                                 ).fold(
                                     onSuccess = {
+                                        replies = replies.map { current ->
+                                            if (current.id == editTarget.id) current.copy(
+                                                body = text,
+                                                editedAtMillis = System.currentTimeMillis()
+                                            ) else current
+                                        }
+                                        SocialCommentsCache.write(context, card.id, replies)
                                         editing = null
                                         text = ""
-                                        load()
                                     },
                                     onFailure = { error = it.message }
                                 )
