@@ -160,7 +160,7 @@ class MainActivity : ComponentActivity() {
                     val currentRoute = backStackEntry?.destination?.route
                     val onHome = currentRoute == CurioRoutes.HOME
                     var showCreateButton by remember(currentRoute) { mutableStateOf(true) }
-                    val createScrollConnection = remember {
+                    val createScrollConnection = remember(onHome) {
                         object : NestedScrollConnection {
                             override fun onPreScroll(
                                 available: Offset,
