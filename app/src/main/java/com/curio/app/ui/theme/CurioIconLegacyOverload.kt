@@ -1,6 +1,7 @@
 package com.curio.app.ui.theme
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 
@@ -15,6 +16,7 @@ fun CurioIcon(
     CurioIcon(
         name = name,
         contentDescription = contentDescription,
+        modifier = Modifier,
         tint = tint,
         size = size
     )
