@@ -45,10 +45,13 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioContentFilter
+import com.curio.app.data.supabase.CommunityAdminRow
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
+import com.curio.app.data.supabase.CommunityReportReasons
 import com.curio.app.data.supabase.KIND_CARD
+import com.curio.app.data.supabase.ModerationReasons
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SupabaseRealtime
@@ -95,8 +98,22 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
     var reporting by remember { mutableStateOf(false) }
     var takingDown by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
+    // The moderator's own row: what this account may do to SOMEONE ELSE'S post,
+    // loaded once so the action row can offer the right move.
+    var myAdmin by remember { mutableStateOf<CommunityAdminRow?>(null) }
+    var moderationRemove by remember { mutableStateOf<CommunityCard?>(null) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+
+    LaunchedEffect(token, myUserId) {
+        val active = token
+        val me = myUserId
+        if (active != null && me != null) {
+            CommunityApi.myAdminRow(active, me).onSuccess { myAdmin = it }
+        } else {
+            myAdmin = null
+        }
+    }
 
     suspend fun load() {
         val active = token ?: return
@@ -334,6 +351,16 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                             CommunityAction(CurioIcons.Flag, "", false, onClick = { reporting = true })
                             if (current.mine) {
                                 CommunityAction(CurioIcons.Delete, "", false, onClick = { takingDown = true })
+                            } else if (myAdmin?.allows("posts") == true) {
+                                // A moderator's move on someone else's post — the
+                                // same removal the queue does, with the same
+                                // reason sheet, from the post itself.
+                                CommunityAction(
+                                    CurioIcons.Delete,
+                                    "",
+                                    false,
+                                    onClick = { moderationRemove = current }
+                                )
                             }
                         }
                     }
@@ -400,13 +427,45 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
 
     if (reporting) {
         token?.let { active ->
-            ReportCardDialog(
+            ReportTargetDialog(
+                title = "Report this post",
+                subtitle = "Reports go to the moderation team, with your reason.",
+                reasons = CommunityReportReasons.CONTENT,
                 onDismiss = { reporting = false },
-                onReport = { reason ->
+                onReport = { reason, note ->
                     scope.launch {
-                        CommunityApi.report(active, cardId, reason).fold(
+                        CommunityApi.report(active, "card", cardId, reason, note).fold(
                             onSuccess = { reporting = false },
                             onFailure = { error = it.message }
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    moderationRemove?.let { target ->
+        token?.let { active ->
+            ModerationReasonDialog(
+                title = "Remove this post",
+                subtitle = "It disappears from the wall for everyone. The author is not told why.",
+                reasons = ModerationReasons.REMOVAL,
+                confirmLabel = "Remove",
+                busy = busy,
+                onDismiss = { if (!busy) moderationRemove = null },
+                onConfirm = { reason, note ->
+                    busy = true
+                    scope.launch {
+                        CommunityApi.removeCardWithReason(active, target.id, reason, note).fold(
+                            onSuccess = {
+                                moderationRemove = null
+                                busy = false
+                                load()
+                            },
+                            onFailure = {
+                                error = it.message
+                                busy = false
+                            }
                         )
                     }
                 }

@@ -1,3 +1,8 @@
+ADD:
+- Moderation: reports now cover posts, replies AND members, each with a reason and an optional note — and reporting the same thing again refreshes your report instead of being refused.
+- Moderation: a control room for the team. The queue removes content, hides an author, or dismisses and reopens a report — always with a reason — and the team half adds moderators by @username with five permissions each. @jugnu is the owner and cannot be removed.
+- Hiding a member hides their content and pauses their posting; their account keeps working, and a moderator can restore them from their profile.
+
 FIX:
 - Messages: received bubbles sit on the left again, and the reply banner says "Replying to you" instead of "yourself".
 - Messages: swiping answers sideways only, so a long message scrolls normally instead of fighting the reply gesture.

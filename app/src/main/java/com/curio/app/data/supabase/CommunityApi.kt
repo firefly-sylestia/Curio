@@ -103,12 +103,113 @@ data class CommunityCard(
  */
 data class CommunityReport(
     val id: String,
-    val cardId: String,
+    val cardId: String?,
+    val commentId: String?,
+    val targetUserId: String?,
     val reporterId: String,
     val reason: String,
     val note: String?,
-    val createdAtMillis: Long
-)
+    /** open | dismissed | resolved */
+    val status: String,
+    /** What the moderator decided, in one line. */
+    val resolution: String?,
+    val createdAtMillis: Long,
+    val updatedAtMillis: Long
+) {
+    /** card | comment | user — what this report names. */
+    val targetKind: String
+        get() = when {
+            cardId != null -> "card"
+            commentId != null -> "comment"
+            else -> "user"
+        }
+
+    /** The reported row's id (a member report names the member). */
+    val targetId: String get() = cardId ?: commentId ?: targetUserId.orEmpty()
+
+    val open: Boolean get() = status == "open"
+}
+
+/**
+ * One moderator's row in `community_admins`.
+ *
+ * [role] is 'owner' (everything, protected) or 'admin' (the five switches). The
+ * client reads this to decide what to OFFER; the database asks
+ * `curio_admin_can` again for every action, so a hidden button is never the
+ * guard.
+ */
+data class CommunityAdminRow(
+    val userId: String,
+    val role: String,
+    val canDeletePosts: Boolean,
+    val canDeleteReplies: Boolean,
+    val canHandleReports: Boolean,
+    val canManageAdmins: Boolean,
+    val canBanMembers: Boolean
+) {
+    val owner: Boolean get() = role == "owner"
+
+    /** 'posts' | 'replies' | 'reports' | 'admins' | 'bans'. */
+    fun allows(permission: String): Boolean = when {
+        owner -> true
+        permission == "posts" -> canDeletePosts
+        permission == "replies" -> canDeleteReplies
+        permission == "reports" -> canHandleReports
+        permission == "admins" -> canManageAdmins
+        permission == "bans" -> canBanMembers
+        else -> false
+    }
+}
+
+/**
+ * The report reasons the app offers, one per target kind.
+ *
+ * A short label (the schema stores it in one column, ≤40 chars) — the NOTE is
+ * where a member adds anything specific, and every one of these is shown to a
+ * moderator beside the content it names.
+ */
+object CommunityReportReasons {
+    /** A card or a reply. */
+    val CONTENT = listOf(
+        "Spam or scam",
+        "Harassment or hate",
+        "Sexual content",
+        "False or harmful claim",
+        "Not what it claims to be",
+        "Something else"
+    )
+
+    /** A member. */
+    val MEMBER = listOf(
+        "Harassment or bullying",
+        "Impersonation",
+        "Hateful name or portrait",
+        "Spam account",
+        "Something else"
+    )
+}
+
+/** The reasons a moderator can put on a removal. */
+object ModerationReasons {
+    val REMOVAL = listOf(
+        "Harassment or hate",
+        "Sexual content",
+        "Spam or scam",
+        "False or harmful claim",
+        "Off-topic",
+        "Duplicate",
+        "Something else"
+    )
+
+    val HIDE = listOf(
+        "Repeated harassment",
+        "Hate speech",
+        "Spam or scam account",
+        "Impersonation",
+        "Repeated policy breaks",
+        "Something else"
+    )
+}
 
 data class CommunityCardDraft(
     val topicName: String,
@@ -196,6 +297,26 @@ object CommunityApi {
     private const val REACTIONS = "/rest/v1/community_reactions"
     private const val COMMENTS = "/rest/v1/community_comments"
     private const val REPORTS = "/rest/v1/community_reports"
+    private const val ADMINS = "/rest/v1/community_admins"
+
+    /** The moderator row's columns, in one place. */
+    private const val ADMIN_COLUMNS =
+        "user_id,role,can_delete_posts,can_delete_replies,can_handle_reports," +
+            "can_manage_admins,can_ban_members"
+
+    /** The reply SELECT the sheet and the moderation queue share. */
+    private const val COMMENT_COLUMNS =
+        "$COMMENTS?select=id,author,author_handle,body,parent_id,created_at,edited_at"
+
+    // The moderation doors. Every one of them is a server function: the CHECK
+    // of who may do what lives in the database, not in the client.
+    private const val RPC_REPORT = "/rest/v1/rpc/curio_file_report"
+    private const val RPC_HANDLE_REPORT = "/rest/v1/rpc/curio_handle_report"
+    private const val RPC_REMOVE_CARD = "/rest/v1/rpc/curio_moderate_remove_card"
+    private const val RPC_REMOVE_COMMENT = "/rest/v1/rpc/curio_moderate_remove_comment"
+    private const val RPC_HIDE_MEMBER = "/rest/v1/rpc/curio_moderate_hide_member"
+    private const val RPC_SET_ADMIN = "/rest/v1/rpc/curio_set_community_admin"
+    private const val RPC_REMOVE_ADMIN = "/rest/v1/rpc/curio_remove_community_admin"
 
     /**
      * The columns one card needs, including the two embedded children the
@@ -310,31 +431,9 @@ object CommunityApi {
         myUserId: String?
     ): Result<List<CommunityComment>> = withContext(Dispatchers.IO) {
         val parsed = mapped {
-            val path = "$COMMENTS?select=id,author,author_handle,body,parent_id,created_at,edited_at" +
-                "&card_id=eq.$cardId&order=created_at.asc&limit=200"
+            val path = "$COMMENT_COLUMNS&card_id=eq.$cardId&order=created_at.asc&limit=200"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
-            val array = JSONArray(SupabaseClient.executeBody(request))
-            buildList(array.length()) {
-                for (index in 0 until array.length()) {
-                    val row = array.optJSONObject(index) ?: continue
-                    add(
-                        CommunityComment(
-                            id = row.optString("id"),
-                            authorId = row.optString("author"),
-                            authorHandle = row.optString("author_handle")
-                                .ifBlank { "A curious soul" },
-                            body = row.optString("body"),
-                            parentId = row.optString("parent_id")
-                                .takeIf { it.isNotBlank() && it != "null" },
-                            createdAtMillis = epochMillis(row.optString("created_at")),
-                            editedAtMillis = row.optString("edited_at")
-                                .takeIf { it.isNotBlank() && it != "null" }
-                                ?.let(::epochMillis),
-                            mine = myUserId != null && row.optString("author") == myUserId
-                        )
-                    )
-                }
-            }
+            parseComments(SupabaseClient.executeBody(request), myUserId)
         }
         // A reply shows the author's CURRENT name and portrait too, so a
         // rename never leaves an old handle stranded in a thread.
@@ -513,30 +612,42 @@ object CommunityApi {
     suspend fun undislike(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
         unlike(accessToken, cardId, myUserId)
 
-    /** Files a report. One per card per user (the DB's unique constraint). */
+    /**
+     * Files a report against a CARD, a REPLY or a MEMBER.
+     *
+     * Through the server function, which keeps ONE row per reporter per target
+     * and REFRESHES it when the same thing is reported again. The old table
+     * route hit the (card_id, reporter) unique constraint, so a second report
+     * answered with an error instead of being filed — that is the "it doesn't
+     * let me report again" bug.
+     */
     suspend fun report(
         accessToken: String,
-        cardId: String,
+        kind: String,
+        targetId: String,
         reason: String,
         note: String? = null
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
-            val payload = JSONObject().put("card_id", cardId).put("reason", reason)
-            note?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put("note", it) }
-            val request = SupabaseClient.requestBuilder(REPORTS, accessToken)
-                .header("Prefer", "return=minimal")
+            val payload = JSONObject()
+                .put("p_kind", kind)
+                .put("p_target", targetId)
+                .put("p_reason", reason)
+            note?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put("p_note", it) }
+            val request = SupabaseClient.requestBuilder(RPC_REPORT, accessToken)
                 .post(payload.toString().toRequestBody(jsonMediaType))
                 .build()
             SupabaseClient.executeBody(request)
         }
     }
 
-    /** Reads the moderation queue; RLS exposes it only to database admins. */
+    /** Reads the moderation queue, newest first. RLS exposes it to handlers only. */
     suspend fun reported(accessToken: String): Result<List<CommunityReport>> =
         withContext(Dispatchers.IO) {
             mapped {
                 val request = SupabaseClient.requestBuilder(
-                    "$REPORTS?select=id,card_id,reporter,reason,note,created_at&order=created_at.desc",
+                    "$REPORTS?select=id,card_id,comment_id,target_user,reporter,reason,note," +
+                        "status,resolution,created_at,updated_at&order=created_at.desc&limit=120",
                     accessToken
                 ).get().build()
                 val rows = JSONArray(SupabaseClient.executeBody(request))
@@ -545,29 +656,210 @@ object CommunityApi {
                         val row = rows.optJSONObject(index) ?: continue
                         add(CommunityReport(
                             id = row.optString("id"),
-                            cardId = row.optString("card_id"),
+                            cardId = row.optString("card_id")
+                                .takeIf { it.isNotBlank() && it != "null" },
+                            commentId = row.optString("comment_id")
+                                .takeIf { it.isNotBlank() && it != "null" },
+                            targetUserId = row.optString("target_user")
+                                .takeIf { it.isNotBlank() && it != "null" },
                             reporterId = row.optString("reporter"),
                             reason = row.optString("reason"),
                             note = row.optString("note").takeIf { it.isNotBlank() && it != "null" },
-                            createdAtMillis = epochMillis(row.optString("created_at"))
+                            status = row.optString("status").ifBlank { "open" },
+                            resolution = row.optString("resolution")
+                                .takeIf { it.isNotBlank() && it != "null" },
+                            createdAtMillis = epochMillis(row.optString("created_at")),
+                            updatedAtMillis = epochMillis(row.optString("updated_at"))
                         ))
                     }
                 }
             }
         }
 
-    suspend fun isAdmin(accessToken: String, userId: String): Result<Boolean> =
+    /**
+     * Cards by id, for the moderation queue. The admin read policy keeps a
+     * reported card readable even after its own 24 hours are up, which is
+     * usually exactly why it was reported.
+     */
+    suspend fun cardsByIds(
+        accessToken: String,
+        ids: List<String>,
+        myUserId: String?
+    ): Result<List<CommunityCard>> = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext Result.success(emptyList())
+        val parsed = mapped {
+            val path = "$CARDS?select=$CARD_COLUMNS&id=in.(${ids.distinct().joinToString(",")})&limit=100"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            parseCards(SupabaseClient.executeBody(request), myUserId)
+        }
+        val cards = parsed.getOrNull() ?: return@withContext parsed.asFailure()
+        Result.success(withAuthors(accessToken, cards))
+    }
+
+    /** Replies by id — the queue's other content kind. */
+    suspend fun commentsByIds(
+        accessToken: String,
+        ids: List<String>,
+        myUserId: String?
+    ): Result<List<CommunityComment>> = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext Result.success(emptyList())
+        val parsed = mapped {
+            val path = "$COMMENT_COLUMNS&id=in.(${ids.distinct().joinToString(",")})&limit=100"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            parseComments(SupabaseClient.executeBody(request), myUserId)
+        }
+        val replies = parsed.getOrNull() ?: return@withContext parsed.asFailure()
+        Result.success(withCommentAuthors(accessToken, replies))
+    }
+
+    /**
+     * MY OWN moderation row — null for a member who is not on the team. The
+     * UI reads this to decide which tools to offer; every action is checked
+     * again in the database.
+     */
+    suspend fun myAdminRow(accessToken: String, userId: String): Result<CommunityAdminRow?> =
         withContext(Dispatchers.IO) {
             mapped {
-                val request = SupabaseClient.requestBuilder(
-                    "/rest/v1/community_admins?user_id=eq.$userId&select=user_id&limit=1",
-                    accessToken
-                ).get().build()
-                JSONArray(SupabaseClient.executeBody(request)).length() > 0
+                val path = "$ADMINS?select=$ADMIN_COLUMNS&user_id=eq.$userId&limit=1"
+                val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+                parseAdmins(SupabaseClient.executeBody(request)).firstOrNull()
             }
         }
 
-    /** Admin-only deletion; the database policy is the final authority. */
+    /** The whole moderation team. RLS exposes the list to the team itself. */
+    suspend fun admins(accessToken: String): Result<List<CommunityAdminRow>> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val path = "$ADMINS?select=$ADMIN_COLUMNS&order=created_at.asc&limit=100"
+                val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+                parseAdmins(SupabaseClient.executeBody(request))
+            }
+        }
+
+    /** Grants or edits one admin. Only a manager may call it; the server agrees. */
+    suspend fun setAdmin(
+        accessToken: String,
+        userId: String,
+        role: String,
+        canDeletePosts: Boolean,
+        canDeleteReplies: Boolean,
+        canHandleReports: Boolean,
+        canManageAdmins: Boolean,
+        canBanMembers: Boolean
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject()
+                .put("p_user_id", userId)
+                .put("p_role", role)
+                .put("p_can_delete_posts", canDeletePosts)
+                .put("p_can_delete_replies", canDeleteReplies)
+                .put("p_can_handle_reports", canHandleReports)
+                .put("p_can_manage_admins", canManageAdmins)
+                .put("p_can_ban_members", canBanMembers)
+            val request = SupabaseClient.requestBuilder(RPC_SET_ADMIN, accessToken)
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** Takes one admin off the team. The owner can never be removed. */
+    suspend fun removeAdmin(accessToken: String, userId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val payload = JSONObject().put("p_user_id", userId)
+                val request = SupabaseClient.requestBuilder(RPC_REMOVE_ADMIN, accessToken)
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    /**
+     * Works one queue row: `dismiss`, `remove_content`, `hide_author` or
+     * `reopen`. The reason is required by the server for anything that acts on
+     * content or a member.
+     */
+    suspend fun handleReport(
+        accessToken: String,
+        reportId: String,
+        action: String,
+        reason: String? = null,
+        note: String? = null
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject()
+                .put("p_report", reportId)
+                .put("p_action", action)
+            reason?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put("p_reason", it) }
+            note?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put("p_note", it) }
+            val request = SupabaseClient.requestBuilder(RPC_HANDLE_REPORT, accessToken)
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** Removes one post with a reason, from the card page or the queue. */
+    suspend fun removeCardWithReason(
+        accessToken: String,
+        cardId: String,
+        reason: String,
+        note: String? = null
+    ): Result<Unit> = moderate(RPC_REMOVE_CARD, mapOf("p_card_id" to cardId, "p_reason" to reason, "p_note" to note), accessToken)
+
+    /** Removes one reply with a reason. */
+    suspend fun removeCommentWithReason(
+        accessToken: String,
+        commentId: String,
+        reason: String,
+        note: String? = null
+    ): Result<Unit> = moderate(RPC_REMOVE_COMMENT, mapOf("p_comment_id" to commentId, "p_reason" to reason, "p_note" to note), accessToken)
+
+    /** Hides or restores a member. A ban never touches their account. */
+    suspend fun hideMember(
+        accessToken: String,
+        userId: String,
+        hidden: Boolean,
+        reason: String? = null
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject()
+                .put("p_user_id", userId)
+                .put("p_hidden", hidden)
+            reason?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put("p_reason", it) }
+            val request = SupabaseClient.requestBuilder(RPC_HIDE_MEMBER, accessToken)
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** Shared shape for the two removal calls: same payload rules, same errors. */
+    private suspend fun moderate(
+        rpc: String,
+        values: Map<String, String?>,
+        accessToken: String
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject()
+            values.forEach { (key, value) ->
+                value?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put(key, it) }
+            }
+            val request = SupabaseClient.requestBuilder(rpc, accessToken)
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** True when I am anywhere on the team (queue access, admin row visible). */
+    suspend fun isAdmin(accessToken: String, userId: String): Result<Boolean> =
+        withContext(Dispatchers.IO) {
+            mapped { myAdminRow(accessToken, userId).getOrNull() != null }
+        }
+
+    /** Admin-only deletion; the database function/policy is the final authority. */
     suspend fun deleteAny(accessToken: String, cardId: String): Result<Unit> =
         delete(accessToken, cardId)
 
@@ -584,6 +876,53 @@ object CommunityApi {
         }
 
     // ── internals ──────���─────────────────────────────────────────────────
+
+    /** One reply row, parsed in exactly one place (sheet and queue share it). */
+    private fun parseComments(body: String, myUserId: String?): List<CommunityComment> {
+        val array = JSONArray(body)
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                add(
+                    CommunityComment(
+                        id = row.optString("id"),
+                        authorId = row.optString("author"),
+                        authorHandle = row.optString("author_handle")
+                            .ifBlank { "A curious soul" },
+                        body = row.optString("body"),
+                        parentId = row.optString("parent_id")
+                            .takeIf { it.isNotBlank() && it != "null" },
+                        createdAtMillis = epochMillis(row.optString("created_at")),
+                        editedAtMillis = row.optString("edited_at")
+                            .takeIf { it.isNotBlank() && it != "null" }
+                            ?.let(::epochMillis),
+                        mine = myUserId != null && row.optString("author") == myUserId
+                    )
+                )
+            }
+        }
+    }
+
+    /** One moderator row. */
+    private fun parseAdmins(body: String): List<CommunityAdminRow> {
+        val array = JSONArray(body)
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                add(
+                    CommunityAdminRow(
+                        userId = row.optString("user_id"),
+                        role = row.optString("role").ifBlank { "admin" },
+                        canDeletePosts = row.optBoolean("can_delete_posts", true),
+                        canDeleteReplies = row.optBoolean("can_delete_replies", true),
+                        canHandleReports = row.optBoolean("can_handle_reports", true),
+                        canManageAdmins = row.optBoolean("can_manage_admins", false),
+                        canBanMembers = row.optBoolean("can_ban_members", false)
+                    )
+                )
+            }
+        }
+    }
 
     private fun <T> mapped(block: () -> T): Result<T> = try {
         Result.success(block())

@@ -1,5 +1,83 @@
 # Prompt Log — current request
 
+## Request (2026-09-14, DONE — chat bubble/swipe/edit fixes + the community moderation system)
+
+Verbatim asks (one message, many parts): the recent chat-bubble change is bad
+— "the bubble for the receiver is on the right side now" and the "delete for
+everyone" button is transparent (make it a solid fill); a long message cannot
+be scrolled because "swipe to reply dominates"; rename Reported to Moderation
+and make the moderation UI better; add more moderation tools, a reason when
+deleting, comment reports and id reports; "when i try to report again, it doesnt
+let me" — fix that; add report reasons for users; add an admins option with
+permission options and make the current jugnu the owner; the comments view is
+"kinda bad" — make the comment typing box match the UI with a better border,
+don't show the @username in the sheet (name only) and make it compact; editing
+fails with "column pgsrt_body.id does not exist"; the DM edit cannot edit and
+the reply preview logic is glitchy — "use delete and replace logic for edits in
+server".
+
+### Confirmed with the user (ask_user)
+
+- Edits: **"Edit in place via a server function"** (not delete+replace).
+- Grantable permissions: Delete posts, Delete replies, Handle reports, Manage
+  admins, Ban / unban members (all five shipped as independent switches).
+- A ban: **"Hide their content only"** (the account keeps working).
+- Re-reporting: **"Refresh my existing report"**.
+
+### Root causes found (not guessed)
+
+- The received bubble sat right because a weighted spacer pushed short rows to
+  the end; the horizontal swipe-to-reply consumed vertical drags; the quote
+  inside a bubble was hardcoded white; legacy plain rows rendered a
+  placeholder instead of their words.
+- `pgrst_body.id does not exist` came from a filtered PUT on a table whose
+  PostgREST `body` column collides with the PUT's own `body` filter — and a
+  PATCH the policies did not expose answered 204 over an unchanged row. Both
+  edits now go through `security definer` server functions.
+- "Report again" was refused by `community_reports`'s `(card_id, reporter)`
+  unique constraint, and a report could only ever name a CARD.
+
+### Shipped — commit 1 (`ac53cf30`, already pushed)
+
+Chat bubbles (left/right), the vertical scroll vs. swipe fix, the solid
+"Delete for everyone" chip, server-function edits for DMs AND replies (with the
+new `edited_at` path), the legacy-body fallback, the compact reply sheet
+(age instead of @username) and the app's own bordered typing box.
+
+### Shipped — this commit (the moderation system)
+
+- **Schema** (`supabase/schema.sql`): `community_reports` gains `comment_id` /
+  `target_user` / `status` / `resolution` / `handled_by` / `handled_at` /
+  `updated_at`, the one-target CHECK, per-kind partial unique indexes and the
+  old `(card_id, reporter)` constraint dropped; `community_admins` gains
+  `role` + five permission columns and seeds `@jugnu` as the protected OWNER;
+  new RESTRICTIVE policies hide a banned member's cards/replies and block their
+  posting; new `moderation_actions` audit table; and seven `security definer`
+  functions (`curio_file_report`, `curio_handle_report`,
+  `curio_moderate_remove_card` / `_remove_comment` / `_hide_member`,
+  `curio_set_community_admin`, `curio_remove_community_admin`) plus the
+  `curio_admin_can` / `curio_member_hidden` tests.
+- **API**: `CommunityReport` now names a card, a reply or a member and carries
+  its status/resolution; `CommunityAdminRow` + `CommunityReportReasons` +
+  `ModerationReasons`; new calls `cardsByIds` / `commentsByIds` / `myAdminRow` /
+  `admins` / `setAdmin` / `removeAdmin` / `handleReport` /
+  `removeCardWithReason` / `removeCommentWithReason` (all RPCs);
+  `SocialApi.findByUsername` / `hideMember` / `moderationStatus`.
+- **UI**: `ModerationScreen.kt` replaces `ReportedScreen.kt` (route
+  `CurioRoutes.MODERATION`) — a queue with Open/All, per-report content preview,
+  Remove / Hide author / Dismiss / Reopen, and a Team half (add by @username,
+  five switches each, owner protected); `ModerationDialogs.kt` (the shared
+  member report sheet + the moderator reason sheet); a reply row now offers
+  Report to members and Remove-with-reason to moderators; a post's page offers
+  the same moderator removal; a profile's ⋮ offers Report member and
+  Hide/Restore member; a hidden member sees WHY on the wall.
+
+### Needs the user
+
+- **Re-paste `supabase/schema.sql`** (Dashboard → SQL Editor → Run; idempotent).
+  Until then the new queue/team calls will fail — the old schema has none of
+  the RPCs, the new report columns or the owner seed.
+
 ## Request (2026-09-14, COMPLETE — social card render fix + topic-only profile tiles)
 
 User pointed at commit `541c3c6` (Sep 12): the topic card rendered fine in the
@@ -471,6 +549,29 @@ missing-envelopes RPCs, comment edit column/trigger/policy, dm_messages
 edited_at + edit guard/policy are all in the file but NOT live until pasted.
 
 ## User prompts
+
+### Prompt (2026-09-14, DONE in this push) — chat bubbles/swipe/edit + the moderation system
+
+Verbatim: the chat bubble for the receiver sits on the right and the "delete
+for everyone" button is transparent (make it solid); a long message cannot be
+scrolled above because swipe-to-reply dominates; rename Reported to Moderation,
+making the moderation UI better; add more moderation tools, a reason when
+deleting, comment reports and id reports; re-reporting is refused; add report
+reasons for users; add an admins option with permission options and make the
+current jugnu the owner; the comments view is bad — the typing box should match
+the UI with a better border, the sheet should show the name and not the
+username, and be compact; editing says "column pgsrt_body.id does not exist";
+the DM edit cannot edit and the reply preview is glitchy — "use delete and
+replace logic for edits in server".
+
+Status: DONE. Chat bubble/swipe/solid-chip/edit-path/reply-sheet work pushed as
+`ac53cf30`; the moderation system (schema + API + `ModerationScreen` + dialogs +
+report/hide/restore doors) pushed in this commit. Decided with ask_user: edit in
+place via a server function, the five granular permissions, hide-content-only
+bans, and a repeat report REFRESHES the reporter's own row.
+
+USER ACTION REQUIRED: re-paste `supabase/schema.sql` for the moderation schema
+to go live.
 
 ### Prompt (2026-09-14, DONE) — social card render regression + profile "topic with topic icon"
 

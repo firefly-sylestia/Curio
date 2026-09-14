@@ -197,6 +197,16 @@ data class CurioDmMissingEnvelope(
 data class CurioDmConversation(val encryptionEnabled: Boolean = false)
 
 /**
+ * Whether this account is hidden from the community, and the reason recorded
+ * with it. Read from the member's OWN profile row, so it is the one place a
+ * ban is ever explained to the person it applies to.
+ */
+data class CurioModerationStatus(
+    val hidden: Boolean = false,
+    val reason: String? = null
+)
+
+/**
  * One reaction somebody left on one message. [kind] is the reaction itself —
  * an emoji character — so the server stores a few bytes and the caller only
  * decides whether the reacting [userId] is the reader.
@@ -452,6 +462,49 @@ private const val PERSON_COLUMNS_PRIVACY =
                     parsePeople(SupabaseClient.executeBody(request)).values.firstOrNull()
                 }.getOrNull()
                 wide ?: namesOf(accessToken, listOf(userId))[userId]
+            }
+        }
+
+    /**
+     * One member by @username — how a moderator adds somebody to the team.
+     *
+     * The plain handle is what people know (`@jugnu`), and the stored column
+     * never carries the sigil, so it is trimmed here rather than trusted. The
+     * discoverable-profile policy is what decides whether the row is readable
+     * at all; a member who is not discoverable simply is not found.
+     */
+    suspend fun findByUsername(accessToken: String, username: String): Result<CurioPerson?> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val clean = username.trim().removePrefix("@")
+                if (clean.isBlank()) return@mapped null
+                val pattern = clean.replace("*", "").replace(",", "").replace("(", "").replace(")", "")
+                val path = "$PROFILES?select=$PERSON_COLUMNS&username=ilike.$pattern&limit=1"
+                val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+                parsePeople(SupabaseClient.executeBody(request)).values.firstOrNull()
+            }
+        }
+
+    /**
+     * MY OWN moderation state — is this account hidden, and why.
+     *
+     * A ban never touches the account (`banned` lives on the member's own
+     * profile), so this is the one read that lets the app SAY so: content is
+     * hidden and posting is refused, and the member deserves the sentence that
+     * explains it instead of a raw server error.
+     */
+    suspend fun moderationStatus(accessToken: String, userId: String): Result<CurioModerationStatus> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                if (!userId.matches(ID_PATTERN)) return@mapped CurioModerationStatus()
+                val path = "$PROFILES?select=banned,ban_reason&id=eq.$userId&limit=1"
+                val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+                val rows = JSONArray(SupabaseClient.executeBody(request))
+                val row = rows.optJSONObject(0) ?: return@mapped CurioModerationStatus()
+                CurioModerationStatus(
+                    hidden = row.optBoolean("banned", false),
+                    reason = row.optString("ban_reason").takeIf { it.isNotBlank() && it != "null" }
+                )
             }
         }
 

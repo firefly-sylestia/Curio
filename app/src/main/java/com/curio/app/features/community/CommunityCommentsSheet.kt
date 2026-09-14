@@ -49,6 +49,8 @@ import com.curio.app.data.CurioContentFilter
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
+import com.curio.app.data.supabase.CommunityReportReasons
+import com.curio.app.data.supabase.ModerationReasons
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SupabaseRealtime
@@ -80,6 +82,9 @@ internal fun CommunityCommentsSheet(
     /** Called after a reply is added or removed, so the host can refresh its
      *  comment count. */
     onChanged: () -> Unit = {},
+    /** True when this account may remove someone ELSE's reply (a moderator
+     *  holding the replies permission). The database checks again on the call. */
+    canModerateReplies: Boolean = false,
     onAddFriend: (String) -> Unit = {},
     /** Opens a reply author's profile — the second place a member is reachable
      *  from, next to the card's own author row. */
@@ -106,6 +111,11 @@ internal fun CommunityCommentsSheet(
         mutableStateOf(AppPreferences.getLocalFriendIds(context))
     }
     var pushed by remember(card.id) { mutableStateOf(0) }
+    // The reply a report reason sheet is open for, and the one a moderator is
+    // removing — both leave the composer alone.
+    var reportingReply by remember { mutableStateOf<CommunityComment?>(null) }
+    var moderatingReply by remember { mutableStateOf<CommunityComment?>(null) }
+    var moderationBusy by remember { mutableStateOf(false) }
 
     suspend fun load() {
         loading = true
@@ -238,6 +248,10 @@ internal fun CommunityCommentsSheet(
                             }
                         } else null,
                         canAddFriend = myUserId == null || (reply.authorId != myUserId && reply.authorId !in friendIds),
+                        onReport = if (reply.mine) null else { { reportingReply = reply } },
+                        onModerate = if (!reply.mine && canModerateReplies) {
+                            { moderatingReply = reply }
+                        } else null,
                         onAddFriend = {
                             if (myUserId != null) {
                                 scope.launch {
@@ -441,6 +455,60 @@ internal fun CommunityCommentsSheet(
             }
         }
     }
+
+    // Reporting a reply, and a moderator's removal of one — both ask for a
+    // reason, both are decided by the database.
+    reportingReply?.let { target ->
+        ReportTargetDialog(
+            title = "Report this reply",
+            subtitle = "Reports go to the moderation team, with your reason.",
+            reasons = CommunityReportReasons.CONTENT,
+            onDismiss = { reportingReply = null },
+            onReport = { reason, note ->
+                scope.launch {
+                    CommunityApi.report(accessToken, "comment", target.id, reason, note).fold(
+                        onSuccess = {
+                            reportingReply = null
+                            error = "Thanks — we'll take a look."
+                        },
+                        onFailure = { error = it.message }
+                    )
+                }
+            }
+        )
+    }
+
+    moderatingReply?.let { target ->
+        ModerationReasonDialog(
+            title = "Remove this reply",
+            subtitle = "It disappears from the thread for everyone. The author is not told why.",
+            reasons = ModerationReasons.REMOVAL,
+            confirmLabel = "Remove",
+            busy = moderationBusy,
+            onDismiss = { if (!moderationBusy) moderatingReply = null },
+            onConfirm = { reason, note ->
+                moderationBusy = true
+                scope.launch {
+                    CommunityApi.removeCommentWithReason(accessToken, target.id, reason, note).fold(
+                        onSuccess = {
+                            moderatingReply = null
+                            moderationBusy = false
+                            if (editing?.id == target.id) {
+                                editing = null
+                                text = ""
+                            }
+                            load()
+                            onChanged()
+                        },
+                        onFailure = {
+                            error = it.message
+                            moderationBusy = false
+                        }
+                    )
+                }
+            }
+        )
+    }
 }
 
 /**
@@ -461,7 +529,11 @@ internal fun CommunityReplyRow(
     onAddFriend: () -> Unit,
     onDelete: () -> Unit,
     /** Loads the reply's words into the composer as an EDIT — mine only. */
-    onEdit: (() -> Unit)? = null
+    onEdit: (() -> Unit)? = null,
+    /** Files a report on this reply — not offered on your own. */
+    onReport: (() -> Unit)? = null,
+    /** A moderator's removal of someone else's reply. */
+    onModerate: (() -> Unit)? = null
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
@@ -530,7 +602,9 @@ internal fun CommunityReplyRow(
                         )
                     } else {
                         // Reply arms the composer for this line (branches), and
-                        // Add friend stays available beside it.
+                        // Add friend stays available beside it. A moderator gets
+                        // the removal instead of the report — they are the
+                        // person the report would go to.
                         if (reply.authorId.isNotBlank()) {
                             ReplyPill(
                                 glyph = CurioIcons.FormatQuote,
@@ -543,6 +617,20 @@ internal fun CommunityReplyRow(
                                     glyph = CurioIcons.Person,
                                     label = "Add",
                                     onClick = onAddFriend
+                                )
+                                Spacer(Modifier.width(6.dp))
+                            }
+                            if (onModerate != null) {
+                                ReplyPill(
+                                    glyph = CurioIcons.Delete,
+                                    label = "Remove",
+                                    onClick = onModerate
+                                )
+                            } else if (onReport != null) {
+                                ReplyPill(
+                                    glyph = CurioIcons.Flag,
+                                    label = "Report",
+                                    onClick = onReport
                                 )
                             }
                         }

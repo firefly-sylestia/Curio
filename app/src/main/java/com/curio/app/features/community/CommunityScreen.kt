@@ -52,11 +52,14 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CommunityApi
+import com.curio.app.data.supabase.CommunityReportReasons
+import com.curio.app.data.supabase.CurioModerationStatus
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
@@ -137,15 +140,27 @@ fun CommunityScreen(navController: NavController) {
     // there the next time you look up.
     var pushed by remember { mutableStateOf(0) }
     var isCommunityAdmin by remember { mutableStateOf(false) }
+    // May THIS account remove someone else's reply — the sheet's one moderator
+    // move. The database asks again; this only decides what is offered.
+    var canModerateReplies by remember { mutableStateOf(false) }
+    // My OWN moderation state — only ever used to explain a hidden account to
+    // the person it applies to.
+    var moderation by remember { mutableStateOf<CurioModerationStatus?>(null) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
     LaunchedEffect(token, account.session?.userId) {
         val active = token
         val userId = account.session?.userId
         if (active != null && userId != null) {
-            CommunityApi.isAdmin(active, userId).onSuccess { isCommunityAdmin = it }
+            CommunityApi.myAdminRow(active, userId).onSuccess { row ->
+                isCommunityAdmin = row != null
+                canModerateReplies = row?.allows("replies") == true
+            }
+            SocialApi.moderationStatus(active, userId).onSuccess { moderation = it }
         } else {
             isCommunityAdmin = false
+            canModerateReplies = false
+            moderation = null
         }
     }
 
@@ -319,9 +334,24 @@ fun CommunityScreen(navController: NavController) {
                     SettingsOptionCard {
                         SettingsOptionRow(
                             icon = CurioIcons.Warning,
-                            title = "Reported posts",
-                            subtitle = "Review reports and manage community posts",
-                            onClick = { navController.navigate(CurioRoutes.REPORTED) }
+                            title = "Moderation",
+                            subtitle = "Work the reports, and manage the team",
+                            onClick = { navController.navigate(CurioRoutes.MODERATION) }
+                        )
+                    }
+                }
+            }
+            // A hidden member is told WHY, in their own words: the ban lives on
+            // their profile row, so the app can explain it instead of letting
+            // posting fail with a raw server error.
+            moderation?.takeIf { it.hidden }?.let { status ->
+                item(key = "hidden-notice") {
+                    SettingsOptionCard {
+                        SettingsOptionInfoRow(
+                            CurioIcons.VisibilityOff,
+                            "Your account is hidden",
+                            status.reason ?: "A moderator hid your content. Posting and replies are " +
+                                "paused meanwhile — reach out if you think this is a mistake."
                         )
                     }
                 }
@@ -610,6 +640,7 @@ fun CommunityScreen(navController: NavController) {
                 card = open,
                 accessToken = active,
                 myUserId = account.session?.userId,
+                canModerateReplies = canModerateReplies,
                 onDismiss = { commentsFor = null },
                 onChanged = { scope.launch { refreshQuietly() } },
                 onOpenProfile = { id ->
@@ -620,12 +651,15 @@ fun CommunityScreen(navController: NavController) {
     }
 
     reporting?.let { card ->
-        ReportCardDialog(
+        ReportTargetDialog(
+            title = "Report this post",
+            subtitle = "Reports go to the moderation team, with your reason.",
+            reasons = CommunityReportReasons.CONTENT,
             onDismiss = { reporting = null },
-            onReport = { reason ->
-                val active = token ?: return@ReportCardDialog
+            onReport = { reason, note ->
+                val active = token ?: return@ReportTargetDialog
                 scope.launch {
-                    CommunityApi.report(active, card.id, reason).fold(
+                    CommunityApi.report(active, "card", card.id, reason, note).fold(
                         onSuccess = {
                             reporting = null
                             notice = "Thanks — we'll take a look."
@@ -1001,37 +1035,6 @@ internal fun CommunityDoorTile(
         }
     }
 }
-
-/** The report reasons the dialog offers — one tap, no free text. */
-@Composable
-internal fun ReportCardDialog(
-    onDismiss: () -> Unit,
-    onReport: (String) -> Unit
-) {
-    val reasons = listOf(
-        "spam" to "Spam or a repeated card",
-        "offensive" to "Offensive or harmful",
-        "off_topic" to "Not what it claims to be"
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = curioDialogContainerColor(),
-        shape = CurioDialogShape,
-        title = { Text("Report this card") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                reasons.forEach { (id, label) ->
-                    TextButton(onClick = { onReport(id) }) { Text(label) }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        },
-        dismissButton = {}
-    )
-}
-
 
 internal fun parseAccent(hex: String): Color =
     runCatching { Color(0xFF000000 or hex.removePrefix("#").toLong(16)) }

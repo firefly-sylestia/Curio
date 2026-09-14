@@ -460,16 +460,70 @@ create policy cmt_update_own on public.community_comments
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.community_reports (
     id         uuid primary key default gen_random_uuid(),
-    card_id    uuid not null references public.community_cards (id) on delete cascade,
+    card_id    uuid references public.community_cards (id) on delete cascade,
     reporter   uuid not null default auth.uid() references auth.users (id) on delete cascade,
     reason     text not null default 'other',
     note       text,
-    created_at timestamptz not null default now(),
-    constraint community_reports_once unique (card_id, reporter)
+    created_at timestamptz not null default now()
 );
+
+-- A report names a CARD, a REPLY or a MEMBER — exactly one of the three, which
+-- is what makes one moderation queue able to hold every kind of report. The
+-- old (card_id, reporter) unique constraint is DROPPED: re-reporting has to be
+-- possible (curio_file_report REFRESHES the reporter's own row instead of
+-- refusing the second attempt, which used to answer with an error).
+alter table public.community_reports alter column card_id drop not null;
+alter table public.community_reports add column if not exists comment_id uuid
+    references public.community_comments (id) on delete cascade;
+alter table public.community_reports add column if not exists target_user uuid
+    references auth.users (id) on delete cascade;
+alter table public.community_reports add column if not exists status text not null default 'open';
+alter table public.community_reports add column if not exists resolution text;
+alter table public.community_reports add column if not exists handled_by uuid
+    references auth.users (id) on delete set null;
+alter table public.community_reports add column if not exists handled_at timestamptz;
+alter table public.community_reports add column if not exists updated_at timestamptz not null default now();
+
+alter table public.community_reports drop constraint if exists community_reports_once;
+
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'community_reports_status_values') then
+        alter table public.community_reports add constraint community_reports_status_values
+            check (status in ('open', 'dismissed', 'resolved'));
+    end if;
+    if not exists (select 1 from pg_constraint where conname = 'community_reports_one_target') then
+        alter table public.community_reports add constraint community_reports_one_target
+            check (
+                (case when card_id is not null then 1 else 0 end) +
+                (case when comment_id is not null then 1 else 0 end) +
+                (case when target_user is not null then 1 else 0 end) = 1
+            );
+    end if;
+    if not exists (select 1 from pg_constraint where conname = 'community_reports_not_self') then
+        alter table public.community_reports add constraint community_reports_not_self
+            check (target_user is null or target_user <> reporter);
+    end if;
+end $$;
+
+-- One row per reporter per target, enforced per target KIND (a partial unique
+-- index per column): a second report refreshes that row, so a member can always
+-- report again after their first one was dismissed.
+create unique index if not exists community_reports_card_once
+    on public.community_reports (card_id, reporter) where card_id is not null;
+create unique index if not exists community_reports_comment_once
+    on public.community_reports (comment_id, reporter) where comment_id is not null;
+create unique index if not exists community_reports_user_once
+    on public.community_reports (target_user, reporter) where target_user is not null;
 
 create index if not exists community_reports_card_idx
     on public.community_reports (card_id);
+create index if not exists community_reports_comment_idx
+    on public.community_reports (comment_id);
+create index if not exists community_reports_user_idx
+    on public.community_reports (target_user);
+create index if not exists community_reports_open_idx
+    on public.community_reports (status, created_at desc);
 
 alter table public.community_reports enable row level security;
 
@@ -483,16 +537,39 @@ create policy rep_select_own on public.community_reports
     for select to authenticated
     using (reporter = auth.uid());
 
--- 5a. Database-managed moderation admins. @jugnu is seeded below after
--- resolving the account from profiles; subsequent admins can be added here.
+-- 5a. The moderation team — roles, one permission per capability, and the
+-- OWNER.
+--
+-- Privilege is database-managed: the client can only ask "may I?" and the
+-- answer comes from here (curio_admin_can). Two roles exist. 'owner' bypasses
+-- every switch, cannot be removed or demoted by ANYONE (so the community can
+-- never lock itself out of its own controls) and is seeded below from the
+-- @jugnu profile — a handle, never a UUID baked into the client. 'admin' holds
+-- five independent switches, granted one by one from the Moderation screen.
 create table if not exists public.community_admins (
     user_id uuid primary key references auth.users (id) on delete cascade,
     added_by uuid references auth.users (id) on delete set null,
     created_at timestamptz not null default now()
 );
 
+alter table public.community_admins add column if not exists role text not null default 'admin';
+alter table public.community_admins add column if not exists can_delete_posts boolean not null default true;
+alter table public.community_admins add column if not exists can_delete_replies boolean not null default true;
+alter table public.community_admins add column if not exists can_handle_reports boolean not null default true;
+alter table public.community_admins add column if not exists can_manage_admins boolean not null default false;
+alter table public.community_admins add column if not exists can_ban_members boolean not null default false;
+
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'community_admins_role_values') then
+        alter table public.community_admins add constraint community_admins_role_values
+            check (role in ('owner', 'admin'));
+    end if;
+end $$;
+
 alter table public.community_admins enable row level security;
 
+-- Any row here counts as "on the team".
 create or replace function public.curio_is_community_admin(subject uuid default auth.uid())
 returns boolean
 language sql
@@ -503,40 +580,102 @@ as $$
     select exists (select 1 from public.community_admins where user_id = subject)
 $$;
 
-revoke all on function public.curio_is_community_admin(uuid) from public;
+-- …and every ACTION asks for its own permission: one of
+-- 'posts' | 'replies' | 'reports' | 'admins' | 'bans'. Anything unrecognised
+-- is a NO, and the owner is always a yes.
+create or replace function public.curio_admin_can(p_permission text, subject uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select coalesce((
+        select case
+            when a.role = 'owner' then true
+            when p_permission = 'posts' then a.can_delete_posts
+            when p_permission = 'replies' then a.can_delete_replies
+            when p_permission = 'reports' then a.can_handle_reports
+            when p_permission = 'admins' then a.can_manage_admins
+            when p_permission = 'bans' then a.can_ban_members
+            else false
+        end
+        from public.community_admins a
+        where a.user_id = subject
+    ), false)
+$$;
+
+revoke all on function public.curio_is_community_admin(uuid) from public, anon;
 grant execute on function public.curio_is_community_admin(uuid) to authenticated;
+revoke all on function public.curio_admin_can(text, uuid) from public, anon;
+grant execute on function public.curio_admin_can(text, uuid) to authenticated;
 
 drop policy if exists community_admins_select_admin on public.community_admins;
 create policy community_admins_select_admin on public.community_admins
     for select to authenticated
     using (public.curio_is_community_admin());
 
-drop policy if exists rep_select_admin on public.community_reports;
-create policy rep_select_admin on public.community_reports
-    for select to authenticated
-    using (public.curio_is_community_admin());
-
-drop policy if exists cards_delete_admin on public.community_cards;
-create policy cards_delete_admin on public.community_cards
-    for delete to authenticated
-    using (public.curio_is_community_admin());
-
 drop policy if exists community_admins_insert_admin on public.community_admins;
 create policy community_admins_insert_admin on public.community_admins
     for insert to authenticated
-    with check (public.curio_is_community_admin());
+    with check (public.curio_admin_can('admins'));
+
+drop policy if exists community_admins_update_admin on public.community_admins;
+create policy community_admins_update_admin on public.community_admins
+    for update to authenticated
+    using (public.curio_admin_can('admins'))
+    with check (public.curio_admin_can('admins'));
 
 drop policy if exists community_admins_delete_admin on public.community_admins;
 create policy community_admins_delete_admin on public.community_admins
     for delete to authenticated
-    using (public.curio_is_community_admin());
+    using (public.curio_admin_can('admins'));
 
--- Seed @jugnu when that handle exists. This is idempotent and keeps the
--- privilege database-managed rather than embedding a UUID in the client.
-insert into public.community_admins (user_id)
-select p.id from public.profiles p
+drop policy if exists rep_select_admin on public.community_reports;
+create policy rep_select_admin on public.community_reports
+    for select to authenticated
+    using (public.curio_admin_can('reports'));
+
+drop policy if exists cards_delete_admin on public.community_cards;
+create policy cards_delete_admin on public.community_cards
+    for delete to authenticated
+    using (public.curio_admin_can('posts'));
+
+drop policy if exists comments_delete_admin on public.community_comments;
+create policy comments_delete_admin on public.community_comments
+    for delete to authenticated
+    using (public.curio_admin_can('replies'));
+
+-- Reported content has to stay READABLE to the people who review it —
+-- including a card whose own 24 hours are already up, which is often exactly
+-- why it was reported. These are ADDITIVE select policies (permissive
+-- policies OR together), so nothing narrows for a normal member.
+drop policy if exists cards_select_admin on public.community_cards;
+create policy cards_select_admin on public.community_cards
+    for select to authenticated
+    using (public.curio_admin_can('reports'));
+
+drop policy if exists comments_select_admin on public.community_comments;
+create policy comments_select_admin on public.community_comments
+    for select to authenticated
+    using (public.curio_admin_can('reports'));
+
+-- Seed the OWNER from the profile that carries the @jugnu handle. Idempotent,
+-- and it PROMOTES the row if that account was already on the team.
+insert into public.community_admins (
+    user_id, role, can_delete_posts, can_delete_replies,
+    can_handle_reports, can_manage_admins, can_ban_members
+)
+select p.id, 'owner', true, true, true, true, true
+from public.profiles p
 where lower(trim(leading '@' from coalesce(p.username, ''))) = 'jugnu'
-on conflict (user_id) do nothing;
+on conflict (user_id) do update set
+    role = 'owner',
+    can_delete_posts = true,
+    can_delete_replies = true,
+    can_handle_reports = true,
+    can_manage_admins = true,
+    can_ban_members = true;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5b. profile discoverability
@@ -1825,6 +1964,460 @@ create policy dm_select_participants on public.dm_messages
 --     '11 * * * *',
 --     $$select public.curio_purge_expired_cards(); select public.curio_purge_expired_messages();$$
 -- );
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 6b. Moderation — bans, the audit trail, and the actions themselves
+--
+-- A ban HIDES a member (content gone, posting refused); it never touches their
+-- account, so nothing has to be undone to let them back in. Every action
+-- records WHO did it, TO WHAT and WHY: a removal without a reason is not a
+-- moderation action, it is an accident with no way to explain itself later.
+-- ───────────────────────────────────────────────────────────────────────────
+
+-- The ban is a column on the member's own profile (readable by them, so the
+-- app can say what happened) and the enforcement lives in the policies.
+alter table public.profiles add column if not exists banned boolean not null default false;
+alter table public.profiles add column if not exists banned_at timestamptz;
+alter table public.profiles add column if not exists banned_by uuid
+    references auth.users (id) on delete set null;
+alter table public.profiles add column if not exists ban_reason text;
+
+-- Security definer: a banned member's content must be filtered by a test that
+-- reads the profile even where row policies would hide it.
+create or replace function public.curio_member_hidden(subject uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select coalesce((select p.banned from public.profiles p where p.id = subject), false)
+$$;
+
+revoke all on function public.curio_member_hidden(uuid) from public, anon;
+grant execute on function public.curio_member_hidden(uuid) to authenticated;
+
+-- RESTRICTIVE policies AND with the existing permissive ones, so a hidden
+-- member's cards and replies disappear without touching the read rules
+-- themselves. A moderator reviewing a report still sees the content (that is
+-- how they decide whether to lift the ban), and the author cannot post while
+-- hidden.
+drop policy if exists cards_hide_hidden_author on public.community_cards;
+create policy cards_hide_hidden_author on public.community_cards
+    as restrictive
+    for select to authenticated
+    using (
+        not public.curio_member_hidden(owner)
+        or public.curio_admin_can('reports')
+    );
+
+drop policy if exists comments_hide_hidden_author on public.community_comments;
+create policy comments_hide_hidden_author on public.community_comments
+    as restrictive
+    for select to authenticated
+    using (
+        not public.curio_member_hidden(author)
+        or public.curio_admin_can('reports')
+    );
+
+drop policy if exists cards_block_hidden_author on public.community_cards;
+create policy cards_block_hidden_author on public.community_cards
+    as restrictive
+    for insert to authenticated
+    with check (not public.curio_member_hidden(auth.uid()));
+
+drop policy if exists comments_block_hidden_author on public.community_comments;
+create policy comments_block_hidden_author on public.community_comments
+    as restrictive
+    for insert to authenticated
+    with check (not public.curio_member_hidden(auth.uid()));
+
+-- The record of every moderation decision.
+create table if not exists public.moderation_actions (
+    id           uuid primary key default gen_random_uuid(),
+    actor        uuid references auth.users (id) on delete set null,
+    action       text not null,
+    target_kind  text not null,
+    target_id    uuid,
+    target_owner uuid,
+    reason       text,
+    note         text,
+    created_at   timestamptz not null default now()
+);
+
+alter table public.moderation_actions enable row level security;
+
+drop policy if exists moderation_actions_select_admin on public.moderation_actions;
+create policy moderation_actions_select_admin on public.moderation_actions
+    for select to authenticated
+    using (public.curio_admin_can('reports'));
+
+grant select on public.moderation_actions to authenticated;
+revoke all on public.moderation_actions from anon;
+
+/**
+ * Files a report against a CARD, a REPLY or a MEMBER.
+ *
+ * One row per reporter per target: reporting the same thing again REFRESHES
+ * that row (reason, note, back to 'open') instead of failing on a unique
+ * constraint, which is what made "report again" impossible. Returns the id.
+ */
+create or replace function public.curio_file_report(
+    p_kind text,
+    p_target uuid,
+    p_reason text,
+    p_note text default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_reason text := coalesce(nullif(btrim(coalesce(p_reason, '')), ''), 'other');
+    v_note text := nullif(btrim(coalesce(p_note, '')), '');
+    v_card uuid := null;
+    v_comment uuid := null;
+    v_user uuid := null;
+    v_report uuid;
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if p_target is null then
+        raise exception 'curio: nothing to report';
+    end if;
+    if p_kind = 'card' then
+        v_card := p_target;
+        if not exists (select 1 from public.community_cards where id = p_target) then
+            raise exception 'curio: that post is gone';
+        end if;
+    elsif p_kind = 'comment' then
+        v_comment := p_target;
+        if not exists (select 1 from public.community_comments where id = p_target) then
+            raise exception 'curio: that reply is gone';
+        end if;
+    elsif p_kind = 'user' then
+        v_user := p_target;
+        if p_target = actor then
+            raise exception 'curio: you cannot report yourself';
+        end if;
+        if not exists (select 1 from public.profiles where id = p_target) then
+            raise exception 'curio: that member is gone';
+        end if;
+    else
+        raise exception 'curio: unknown report target';
+    end if;
+
+    select r.id into v_report
+      from public.community_reports r
+     where r.reporter = actor
+       and r.card_id is not distinct from v_card
+       and r.comment_id is not distinct from v_comment
+       and r.target_user is not distinct from v_user
+     limit 1;
+
+    if v_report is null then
+        insert into public.community_reports (card_id, comment_id, target_user, reporter, reason, note)
+        values (v_card, v_comment, v_user, actor, left(v_reason, 40), left(v_note, 500))
+        returning id into v_report;
+    else
+        update public.community_reports
+           set reason = left(v_reason, 40),
+               note = left(v_note, 500),
+               status = 'open',
+               resolution = null,
+               handled_by = null,
+               handled_at = null,
+               updated_at = now()
+         where id = v_report;
+    end if;
+    return v_report;
+end $$;
+
+/** Hides a member and stamps why. Content-only: the account stays usable. */
+create or replace function public.curio_moderate_hide_member(
+    p_user_id uuid,
+    p_hidden boolean,
+    p_reason text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('bans') then
+        raise exception 'curio: you do not have permission to hide members';
+    end if;
+    if p_hidden and v_reason is null then
+        raise exception 'curio: a reason is required';
+    end if;
+    update public.profiles
+       set banned = p_hidden,
+           banned_at = case when p_hidden then now() else null end,
+           banned_by = case when p_hidden then actor else null end,
+           ban_reason = case when p_hidden then left(v_reason, 300) else null end
+     where id = p_user_id;
+    if not found then
+        raise exception 'curio: that member is gone';
+    end if;
+    insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner, reason)
+    values (actor, case when p_hidden then 'hide_member' else 'unhide_member' end, 'user', p_user_id, p_user_id, v_reason);
+end $$;
+
+/** Removes one card, with the reason the author will never be told by accident. */
+create or replace function public.curio_moderate_remove_card(
+    p_card_id uuid,
+    p_reason text,
+    p_note text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+    v_owner uuid;
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('posts') then
+        raise exception 'curio: you do not have permission to remove posts';
+    end if;
+    if v_reason is null then
+        raise exception 'curio: a reason is required';
+    end if;
+    select owner into v_owner from public.community_cards where id = p_card_id;
+    if v_owner is null then
+        raise exception 'curio: that post is already gone';
+    end if;
+    delete from public.community_cards where id = p_card_id;
+    insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner, reason, note)
+    values (actor, 'remove_post', 'card', p_card_id, v_owner, left(v_reason, 300), left(nullif(btrim(coalesce(p_note, '')), ''), 500));
+end $$;
+
+/** Removes one reply, with the same rule: no reason, no removal. */
+create or replace function public.curio_moderate_remove_comment(
+    p_comment_id uuid,
+    p_reason text,
+    p_note text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+    v_author uuid;
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('replies') then
+        raise exception 'curio: you do not have permission to remove replies';
+    end if;
+    if v_reason is null then
+        raise exception 'curio: a reason is required';
+    end if;
+    select author into v_author from public.community_comments where id = p_comment_id;
+    if v_author is null then
+        raise exception 'curio: that reply is already gone';
+    end if;
+    delete from public.community_comments where id = p_comment_id;
+    insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner, reason, note)
+    values (actor, 'remove_reply', 'comment', p_comment_id, v_author, left(v_reason, 300), left(nullif(btrim(coalesce(p_note, '')), ''), 500));
+end $$;
+
+/**
+ * Works one queue row: dismiss it, remove the content it named, or hide the
+ * member it named. The permission test is per ACTION — handling the queue is
+ * not the same right as removing what it points at.
+ */
+create or replace function public.curio_handle_report(
+    p_report uuid,
+    p_action text,
+    p_reason text default null,
+    p_note text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+    v_card uuid;
+    v_comment uuid;
+    v_user uuid;
+    v_author uuid;
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('reports') then
+        raise exception 'curio: you do not have permission to handle reports';
+    end if;
+    select card_id, comment_id, target_user into v_card, v_comment, v_user
+      from public.community_reports where id = p_report;
+    if not found then
+        raise exception 'curio: that report is gone';
+    end if;
+    if p_action = 'dismiss' then
+        if v_reason is null then
+            v_reason := 'no action needed';
+        end if;
+        update public.community_reports
+           set status = 'dismissed', resolution = left(v_reason, 300),
+               handled_by = actor, handled_at = now(), updated_at = now()
+         where id = p_report;
+        insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner, reason, note)
+        values (actor, 'dismiss_report', 'report', p_report, null, left(v_reason, 300), left(nullif(btrim(coalesce(p_note, '')), ''), 500));
+    elsif p_action = 'remove_content' then
+        if v_card is not null then
+            perform public.curio_moderate_remove_card(v_card, coalesce(v_reason, 'removed after a report'), p_note);
+        elsif v_comment is not null then
+            perform public.curio_moderate_remove_comment(v_comment, coalesce(v_reason, 'removed after a report'), p_note);
+        else
+            raise exception 'curio: this report names a member, hide them instead';
+        end if;
+        update public.community_reports
+           set status = 'resolved', resolution = left(coalesce(v_reason, 'content removed'), 300),
+               handled_by = actor, handled_at = now(), updated_at = now()
+         where id = p_report;
+    elsif p_action = 'hide_author' then
+        if v_card is not null then
+            select owner into v_author from public.community_cards where id = v_card;
+        elsif v_comment is not null then
+            select author into v_author from public.community_comments where id = v_comment;
+        else
+            v_author := v_user;
+        end if;
+        if v_author is null then
+            raise exception 'curio: the member this names is gone';
+        end if;
+        perform public.curio_moderate_hide_member(v_author, true, coalesce(v_reason, 'hidden after a report'));
+        update public.community_reports
+           set status = 'resolved', resolution = left(coalesce(v_reason, 'member hidden'), 300),
+               handled_by = actor, handled_at = now(), updated_at = now()
+         where id = p_report;
+    elsif p_action = 'reopen' then
+        update public.community_reports
+           set status = 'open', resolution = null, handled_by = null, handled_at = null, updated_at = now()
+         where id = p_report;
+    else
+        raise exception 'curio: unknown moderation action';
+    end if;
+end $$;
+
+/**
+ * Grants or edits one admin. The owner row can never be touched from here, and
+ * only someone with the 'admins' permission may call this at all.
+ */
+create or replace function public.curio_set_community_admin(
+    p_user_id uuid,
+    p_role text,
+    p_can_delete_posts boolean,
+    p_can_delete_replies boolean,
+    p_can_handle_reports boolean,
+    p_can_manage_admins boolean,
+    p_can_ban_members boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_role text := case when p_role = 'owner' then 'owner' else 'admin' end;
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('admins') then
+        raise exception 'curio: you do not have permission to manage admins';
+    end if;
+    if exists (select 1 from public.community_admins where user_id = p_user_id and role = 'owner') then
+        raise exception 'curio: the owner cannot be changed';
+    end if;
+    if v_role = 'owner' and exists (select 1 from public.community_admins where role = 'owner') then
+        raise exception 'curio: there is already an owner';
+    end if;
+    insert into public.community_admins (
+        user_id, added_by, role, can_delete_posts, can_delete_replies,
+        can_handle_reports, can_manage_admins, can_ban_members
+    )
+    values (
+        p_user_id, actor, v_role,
+        coalesce(p_can_delete_posts, true),
+        coalesce(p_can_delete_replies, true),
+        coalesce(p_can_handle_reports, true),
+        coalesce(p_can_manage_admins, false),
+        coalesce(p_can_ban_members, false)
+    )
+    on conflict (user_id) do update set
+        role = excluded.role,
+        can_delete_posts = excluded.can_delete_posts,
+        can_delete_replies = excluded.can_delete_replies,
+        can_handle_reports = excluded.can_handle_reports,
+        can_manage_admins = excluded.can_manage_admins,
+        can_ban_members = excluded.can_ban_members;
+    insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner)
+    values (actor, 'set_admin', 'user', p_user_id, p_user_id);
+end $$;
+
+/** Takes one admin off the team. The owner can never be removed. */
+create or replace function public.curio_remove_community_admin(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('admins') then
+        raise exception 'curio: you do not have permission to manage admins';
+    end if;
+    if exists (select 1 from public.community_admins where user_id = p_user_id and role = 'owner') then
+        raise exception 'curio: the owner cannot be removed';
+    end if;
+    delete from public.community_admins where user_id = p_user_id;
+    insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner)
+    values (actor, 'remove_admin', 'user', p_user_id, p_user_id);
+end $$;
+
+revoke all on function public.curio_file_report(text, uuid, text, text) from public, anon;
+grant execute on function public.curio_file_report(text, uuid, text, text) to authenticated;
+revoke all on function public.curio_handle_report(uuid, text, text, text) from public, anon;
+grant execute on function public.curio_handle_report(uuid, text, text, text) to authenticated;
+revoke all on function public.curio_moderate_remove_card(uuid, text, text) from public, anon;
+grant execute on function public.curio_moderate_remove_card(uuid, text, text) to authenticated;
+revoke all on function public.curio_moderate_remove_comment(uuid, text, text) from public, anon;
+grant execute on function public.curio_moderate_remove_comment(uuid, text, text) to authenticated;
+revoke all on function public.curio_moderate_hide_member(uuid, boolean, text) from public, anon;
+grant execute on function public.curio_moderate_hide_member(uuid, boolean, text) to authenticated;
+revoke all on function public.curio_set_community_admin(uuid, text, boolean, boolean, boolean, boolean, boolean) from public, anon;
+grant execute on function public.curio_set_community_admin(uuid, text, boolean, boolean, boolean, boolean, boolean) to authenticated;
+revoke all on function public.curio_remove_community_admin(uuid) from public, anon;
+grant execute on function public.curio_remove_community_admin(uuid) to authenticated;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 7. Grants

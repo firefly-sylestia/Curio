@@ -45,9 +45,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.supabase.CommunityAdminRow
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
+import com.curio.app.data.supabase.CommunityReportReasons
 import com.curio.app.data.supabase.CurioPerson
+import com.curio.app.data.supabase.ModerationReasons
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.data.supabase.OnlineAccount
@@ -121,6 +124,14 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
     var error by remember { mutableStateOf<String?>(null) }
     var confirmBlock by remember { mutableStateOf(false) }
     var blocking by remember { mutableStateOf(false) }
+    // Reporting a member, and a moderator's hide / restore — three different
+    // doors into the same queue.
+    var reporting by remember { mutableStateOf(false) }
+    var hideMember by remember { mutableStateOf(false) }
+    var restoreMember by remember { mutableStateOf(false) }
+    var moderationBusy by remember { mutableStateOf(false) }
+    var targetHidden by remember { mutableStateOf(false) }
+    var myAdmin by remember { mutableStateOf<CommunityAdminRow?>(null) }
 
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
@@ -149,6 +160,12 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             onFailure = { error = it.message }
         )
         if (!isMe && myUserId != null) {
+            // Is this member hidden right now? Read from their own profile row,
+            // so a moderator's menu can offer Hide or Restore rather than a
+            // one-way door. Best-effort: not discoverable simply reads as not
+            // hidden, and no action is lost by that.
+            SocialApi.moderationStatus(active, userId).onSuccess { targetHidden = it.hidden }
+            CommunityApi.myAdminRow(active, myUserId).onSuccess { myAdmin = it }
             // Are we already friends? Decides Message vs Add friend.
             SocialApi.friends(active, myUserId).fold(
                 onSuccess = { list ->
@@ -241,6 +258,13 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                     friendRequestId = friendRequestId,
                     asked = asked,
                     onBlock = { confirmBlock = true },
+                    onReport = { reporting = true },
+                    onHide = if (myAdmin?.allows("bans") == true && !targetHidden) {
+                        { hideMember = true }
+                    } else null,
+                    onRestore = if (myAdmin?.allows("bans") == true && targetHidden) {
+                        { restoreMember = true }
+                    } else null,
                     onEdit = {
                         // The profile's own door back into the editor — the
                         // same dialog "You" opens, without a detour through
@@ -315,6 +339,81 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
         }
     }
 
+    if (reporting) {
+        val active = token
+        if (active != null) {
+            ReportTargetDialog(
+                title = "Report this member",
+                subtitle = "Reports go to the moderation team, with your reason.",
+                reasons = CommunityReportReasons.MEMBER,
+                onDismiss = { reporting = false },
+                onReport = { reason, note ->
+                    scope.launch {
+                        CommunityApi.report(active, "user", userId, reason, note).fold(
+                            onSuccess = { reporting = false },
+                            onFailure = { error = it.message }
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    if (hideMember) {
+        val active = token
+        if (active != null) {
+            ModerationReasonDialog(
+                title = "Hide ${person?.label ?: "this member"}?",
+                subtitle = "Their content disappears and they cannot post. Their account keeps " +
+                    "working, and you can restore them at any time.",
+                reasons = ModerationReasons.HIDE,
+                confirmLabel = "Hide",
+                busy = moderationBusy,
+                onDismiss = { if (!moderationBusy) hideMember = false },
+                onConfirm = { reason, _ ->
+                    moderationBusy = true
+                    scope.launch {
+                        SocialApi.hideMember(active, userId, true, reason).fold(
+                            onSuccess = {
+                                targetHidden = true
+                                hideMember = false
+                            },
+                            onFailure = { error = it.message }
+                        )
+                        moderationBusy = false
+                    }
+                }
+            )
+        }
+    }
+
+    if (restoreMember) {
+        val active = token
+        if (active != null) {
+            SocialConfirmDialog(
+                title = "Restore ${person?.label ?: "this member"}?",
+                body = "Their content becomes visible again and they can post and reply.",
+                confirmLabel = "Restore",
+                destructive = false,
+                busy = moderationBusy,
+                onDismiss = { if (!moderationBusy) restoreMember = false },
+                onConfirm = {
+                    moderationBusy = true
+                    scope.launch {
+                        SocialApi.hideMember(active, userId, false).fold(
+                            onSuccess = {
+                                targetHidden = false
+                                restoreMember = false
+                            },
+                            onFailure = { error = it.message }
+                        )
+                        moderationBusy = false
+                    }
+                }
+            )
+        }
+    }
+
     if (confirmBlock) {
         SocialConfirmDialog(
             title = "Block ${person?.label ?: "this member"}?",
@@ -370,7 +469,13 @@ private fun SocialProfileHeader(
     /** Opens the member's own editor (only offered on your own profile). */
     onEdit: () -> Unit = {},
     /** Blocks this member — the one destructive move a profile offers. */
-    onBlock: () -> Unit
+    onBlock: () -> Unit,
+    /** Files a member report — the reason list is the MEMBER one. */
+    onReport: () -> Unit = {},
+    /** A moderator's hide, offered only while the member is visible. */
+    onHide: (() -> Unit)? = null,
+    /** …and the way back, offered only while they are hidden. */
+    onRestore: (() -> Unit)? = null
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val likes = remember(cards) { cards.sumOf { it.likeCount } }
@@ -511,6 +616,32 @@ private fun SocialProfileHeader(
                             onDismissRequest = { menuOpen = false },
                             accent = settingsRoseAccent()
                         ) {
+                            CurioDropdownItem(
+                                text = { Text("Report member", style = MaterialTheme.typography.bodyMedium) },
+                                onClick = {
+                                    menuOpen = false
+                                    onReport()
+                                }
+                            )
+                            onHide?.let { hide ->
+                                CurioDropdownItem(
+                                    text = { Text("Hide member", style = MaterialTheme.typography.bodyMedium) },
+                                    onClick = {
+                                        menuOpen = false
+                                        hide()
+                                    },
+                                    danger = true
+                                )
+                            }
+                            onRestore?.let { restore ->
+                                CurioDropdownItem(
+                                    text = { Text("Restore member", style = MaterialTheme.typography.bodyMedium) },
+                                    onClick = {
+                                        menuOpen = false
+                                        restore()
+                                    }
+                                )
+                            }
                             CurioDropdownItem(
                                 text = { Text("Block", style = MaterialTheme.typography.bodyMedium) },
                                 onClick = {

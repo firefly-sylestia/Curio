@@ -273,7 +273,10 @@ object CurioRoutes {
     // ONLY optional bottom-nav tab: it joins [bottomNavRoutePrefixes] while
     // the user's opt-in tab is showing (see [liveTabPrefixes]).
     const val COMMUNITY = "community"
-    const val REPORTED = "reported"
+    // v3xx57 — the moderation control room: the report queue (posts, replies
+    // and members) plus the team and its permissions. Reached from the Social
+    // tab's own Moderation door, and only by members of the team.
+    const val MODERATION = "moderation"
     // v3xx — the social layer: friend requests + direct messages. The handle
     // rides in the query so the thread can name who it is with on the FIRST
     // frame (the caller already knows it; the id alone is opaque).
