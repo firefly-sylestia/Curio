@@ -1566,31 +1566,22 @@ private fun MessageBubble(
         animationSpec = if (replyDrag == 0f) spring(dampingRatio = 0.6f, stiffness = 500f) else snap(),
         label = "replySettle"
     )
-    // Whichever way the swipe is answered, the BUBBLE leans the opposite way:
-    // pulling a received bubble rightward is Instagram's own motion.
-    val leanX = if (mine) -settle.value else settle.value
+    // The bubble follows the finger in the same direction for both sides;
+    // only the allowed drag direction differs between sent and received rows.
+    val leanX = settle.value
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
-        if (mine && lastOfRun) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(end = 6.dp, bottom = 2.dp)
-            ) {
-                Text(
-                    text = socialStamp(message.createdAtMillis),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        if (!mine) {
+            Spacer(modifier = Modifier.weight(1f, fill = true))
         }
 
         Column(
             horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
-            modifier = Modifier.weight(1f, fill = false)
+            modifier = Modifier.weight(0f, fill = false)
         ) {
             val press = rememberCurioPressSource(pressedScale = 0.96f)
             Box(modifier = Modifier.offset { IntOffset(leanX.roundToInt(), 0) }) {
@@ -1686,6 +1677,15 @@ private fun MessageBubble(
             if (mineGlyph != null || others.isNotEmpty()) {
                 ReactionChips(mineGlyph = mineGlyph, others = others)
             }
+        }
+
+        if (mine && lastOfRun) {
+            Text(
+                text = socialStamp(message.createdAtMillis),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
+            )
         }
 
         if (!mine && lastOfRun) {
