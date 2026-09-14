@@ -1,15 +1,33 @@
 # Prompt Log — current request
 
+## Request (2026-09-14, IN PROGRESS — full-screen composer + canonical social card polish)
+
+User asked to continue the same Phase 4 branch after the composer redesign, fix the remaining CI compiler error, and continue the quality pass. The Social post composer should remain a dedicated full-screen creation flow rather than a bottom sheet, and topic posts must render using the exact share-card visual system rather than a lookalike.
+
+Latest CI error received:
+- `CommunityPostScreen.kt:693:9 No parameter with name 'categorySlug' found.`
+
+Fix applied:
+- Removed the stale `categorySlug` argument from the `CommunityCard(...)` preview construction. `CommunityCardDraft` still retains its `categorySlug` field because the draft/API model uses it; only `CommunityCard` no longer receives it.
+- Restored the full composer implementation after the correction rather than keeping an accidental simplified rewrite.
+
+Remaining quality pass:
+- Watch authoritative Android CI for the latest commit before calling the branch green.
+- Verify the topic renderer at each display size against the exact 405×720 / 450×600 logical share-card geometry used by export. Avoid double-scaling or alternate card geometry.
+- Keep the same canonical `TopicShareCard` implementation for composer, feed, full-card view and export; improve only the surrounding sizing/measurement wrapper where needed.
+- Add tasteful Alive-aware tactics: selection morphs, stronger but controlled Post readiness/press feedback, animated style/aspect choices where useful, smoother topic-picker transitions, and keyboard-aware editing without turning the UI into motion noise.
+- Update this log again when the social polish batch is complete.
+
 ## Request (2026-09-13, LATEST: composer redesign + DM feel + icon marks)
 
 User asks (summarised): the community "post a topic" sheet feels like filling
 in forms — rebuild it (write-first, notes default); chats/friends icons don't
 match; hide the red tester-looking error notes; sending feels glitchy (bubble
 vanishes then returns); bubbles are translucent with a bad shape and no
-animation; tapping bubbles should NOT open emoji/delete (that belongs to
-hold); the DM header says "Curious Explorer · Private messages" instead of
-showing the person; the share-card preview sits too far left on the wall and
-top-left in the profile grid; profile post-count text unreadable.
+animation; tapping bubbles should NOT open emoji/delete (that belongs to hold);
+the DM header says "Curious Explorer · Private messages" instead of showing the
+person; the share-card preview sits too far left on the wall and top-left in
+the profile grid; profile post-count text unreadable.
 
 Done in this batch:
 - CommunityCardCanvas: painted footprint box (requiredSize cardWidth*scale ×
@@ -77,10 +95,10 @@ Fix (all three legs):
 Batch A needs: re-paste schema.sql (envelope grace + retirement RPC).
 
 ### Batch B (this push, then watch CI once at the end) — SHIPPED
-- Profile grid: tiles are square (aspectRatio 1f) and the card canvas gained
-  a FILL mode (`widthFraction = 0f`: scale driven by height, top-aligned
-  crop), so a share card fills its tile instead of floating small. Notes and
-  quotes fill the same square with words pinned to the bottom.
+- Profile grid: tiles are square (aspectRatio 1f) and the card canvas gained a
+  FILL mode (`widthFraction = 0f`: scale driven by height, top-aligned crop), so
+  a share card fills its tile instead of floating small. Notes and quotes fill
+  the same square with words pinned to the bottom.
 - Profile header: Instagram shape — portrait + identity row, counts as three
   centred COLUMNS beneath, bio, then a full-width action. The privacy
   narration paragraph and the two explanatory status texts are gone (the
@@ -215,7 +233,7 @@ brace) are recorded below in Verification status.
 ### Verification status
 
 - Braces balance-checked (python) on ProfileScreen.kt and PrivacyScreen.kt.
-- Same-package symbols verified (SettingsOptionCard family, ChatsScreen
+- Same-package symbols verified (SettingsOptionRow family, ChatsScreen
   import fix already committed in `1eef908a`).
 - No Gradle build is allowed in this environment (root AGENTS rule); CI
   typechecks on push.
@@ -334,6 +352,7 @@ the bottom nav and showed a full "Report" button; the card and profile pages
 had too much empty space below. Shipped: door tiles with icons, nav bar hidden
 on the card route (it shares the wall's prefix), report/take-down icon-only on
 the card page, replies inline under the post (same list, same realtime), and
+
 the tile cover-mode crop that keeps a card's title visible.
 
 Profile polish (remove the bio/streak card below achievements; keep both in

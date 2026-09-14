@@ -49,7 +49,6 @@ import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.KIND_CARD
-import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SupabaseRealtime
@@ -64,9 +63,11 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.ShareCardAspect
 import com.curio.app.ui.components.ShareCardStyle
 import com.curio.app.ui.components.TopicShareCard
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -76,20 +77,7 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.launch
 
-/**
- * ONE COMMUNITY CARD — the card's own view.
- *
- * The full card at full width, the poster's caption, its author and remaining
- * life, the actions (like, share as an image, report, take down your own) and
- * the replies underneath. Comments live here rather than in the feed so the
- * wall stays scannable, and they die with the card (the DB cascades), which is
- * what keeps the 24-hour promise honest.
- *
- * This is a SOCIAL page, not a settings one: it carries the app's torn hero
- * (the established Curio header) and none of the settings chrome — the
- * settings rail that used to ride this list is gone, so opening a card from
- * the wall stays inside the community.
- */
+/** Full community post page: card, author, reactions and inline replies. */
 @Composable
 fun CommunityCardScreen(navController: NavController, cardId: String) {
     val context = LocalContext.current
@@ -105,8 +93,6 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var reporting by remember { mutableStateOf(false) }
-    // Taking a card down is irreversible — it asks first, like every other
-    // destructive move in the social layer.
     var takingDown by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
 
@@ -116,10 +102,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         val active = token ?: return
         loading = true
         CommunityApi.card(active, cardId, myUserId).fold(
-            onSuccess = {
-                card = it
-                error = null
-            },
+            onSuccess = { card = it; error = null },
             onFailure = { error = it.message }
         )
         loading = false
@@ -127,17 +110,11 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
 
     LaunchedEffect(cardId, token) { if (token != null) load() }
 
-    /** Shares the card as the same PNG the reveal page produces. */
     fun share(current: CommunityCard) {
         if (current.kind != KIND_CARD) {
-            // A note or a quote has no card art of its own, so it is shared as
-            // the TEXT it is (the credit riding under a quote) instead of as a
-            // card for a topic it was never about.
             val body = buildString {
                 append(current.factText)
-                if (current.kind == KIND_QUOTE && current.byline.isNotBlank()) {
-                    append("\n— ").append(current.byline)
-                }
+                if (current.byline.isNotBlank()) append("\n— ").append(current.byline)
             }
             val send = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
@@ -172,8 +149,6 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         )
     }
 
-    // Read the state once per composition — the list then renders this
-    // snapshot instead of re-reading a state var inside the lazy scope.
     val current = card
 
     Box(
@@ -194,9 +169,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
 
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .layerBackdrop(glassBackdrop)
-                .fillMaxSize(),
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
@@ -229,9 +202,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                 }
                 current == null && loading -> item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 40.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp),
                         contentAlignment = Alignment.Center
                     ) { CircularProgressIndicator(strokeWidth = 2.dp) }
                 }
@@ -255,12 +226,12 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                         }
                     }
                     item(key = "card", contentType = "card") {
-                        if (current.kind == KIND_CARD) {
-                            CommunityCardCanvas(card = current)
-                        } else {
-                            // A note or a quote is words: it is rendered as
-                            // text here exactly as it is on the wall.
-                            SocialTextPost(card = current, onClick = {})
+                        ScreenEntrance {
+                            if (current.kind == KIND_CARD) {
+                                CommunityCardCanvas(card = current)
+                            } else {
+                                SocialTextPost(card = current, onClick = {})
+                            }
                         }
                     }
                     item(key = "meta") {
@@ -269,30 +240,25 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(50))
-                                .clickable {
-                                    if (current.authorId.isNotBlank()) {
-                                        navController.navigate(
-                                            CurioRoutes.socialProfile(current.authorId)
-                                        ) { launchSingleTop = true }
+                                .curioPressClickable(
+                                    pressedScale = 0.985f,
+                                    hapticOnPress = false,
+                                    onClick = {
+                                        if (current.authorId.isNotBlank()) {
+                                            navController.navigate(CurioRoutes.socialProfile(current.authorId)) {
+                                                launchSingleTop = true
+                                            }
+                                        }
                                     }
-                                }
+                                )
                         ) {
-                            // The portrait, the DISPLAY name and the LIVE
-                            // username: renaming either updates every card you
-                            // ever posted.
                             SocialAvatar(style = current.authorAvatar, avatarSize = 38.dp)
                             Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 10.dp)
+                                modifier = Modifier.weight(1f).padding(start = 10.dp)
                             ) {
-                                // The display name LEADS; the @username opens
-                                // the meta line beneath it.
                                 Text(
                                     text = current.authorLabel,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1
                                 )
@@ -301,8 +267,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                         current.authorHandleLabel,
                                         current.categoryName.takeIf { it.isNotBlank() },
                                         agoLabel(current.createdAtMillis),
-                                        if (current.hoursLeft <= 0L) "expiring"
-                                        else "${current.hoursLeft}h left"
+                                        if (current.hoursLeft <= 0L) "expiring" else "${current.hoursLeft}h left"
                                     ).joinToString(" · "),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -315,10 +280,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 size = 18.dp
                             )
                             if (loading) {
-                                CircularProgressIndicator(
-                                    strokeWidth = 2.dp,
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
                             }
                         }
                     }
@@ -333,27 +295,18 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 label = if (current.likeCount > 0) current.likeCount.toString() else "Like",
                                 tinted = current.likedByMe,
                                 animate = true,
-                                // The count moves with the tap and the server
-                                // is told afterwards: waiting for a round trip
-                                // AND a page reload made a like feel broken.
-                                // A failed call no longer hides — the page says
-                                // so and the next read puts the truth back.
                                 onClick = {
                                     val liking = !current.likedByMe
                                     card = current.toggleLike()
                                     scope.launch {
-                                        val call = if (liking) {
-                                            CommunityApi.like(token, current.id, myUserId ?: return@launch)
-                                        } else {
-                                            CommunityApi.unlike(token, current.id, myUserId ?: return@launch)
-                                        }
+                                        val active = token ?: return@launch
+                                        val uid = myUserId ?: return@launch
+                                        val call = if (liking) CommunityApi.like(active, current.id, uid)
+                                        else CommunityApi.unlike(active, current.id, uid)
                                         call.onFailure { failure -> error = failure.message }
                                     }
                                 }
                             )
-                            // The card's own page gains the dislike the wall
-                            // has: one reaction per person, so disliking takes
-                            // back a like in the same tap, optimistically.
                             CommunityAction(
                                 glyph = CurioIcons.ThumbDown,
                                 label = if (current.dislikeCount > 0) current.dislikeCount.toString() else "",
@@ -363,61 +316,41 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                     val disliking = !current.dislikedByMe
                                     card = current.toggleDislike()
                                     scope.launch {
-                                        val call = if (disliking) {
-                                            CommunityApi.dislike(token, current.id, myUserId ?: return@launch)
-                                        } else {
-                                            CommunityApi.undislike(token, current.id, myUserId ?: return@launch)
-                                        }
+                                        val active = token ?: return@launch
+                                        val uid = myUserId ?: return@launch
+                                        val call = if (disliking) CommunityApi.dislike(active, current.id, uid)
+                                        else CommunityApi.undislike(active, current.id, uid)
                                         call.onFailure { failure -> error = failure.message }
                                     }
                                 }
                             )
-                            // The replies sit directly under the post, so
-                            // this count is a LABEL, not a door any more.
                             CommunityAction(
                                 glyph = CurioIcons.FormatQuote,
-                                label = if (current.commentCount > 0) current.commentCount.toString()
-                                else "Comment",
+                                label = if (current.commentCount > 0) current.commentCount.toString() else "Comment",
                                 tinted = false,
                                 onClick = { }
                             )
                             CommunityAction(CurioIcons.Share, "Share", false, onClick = { share(current) })
-                            // Report and take-down are ICONS here, exactly as
-                            // they are on the wall: the actions are decided,
-                            // not read, and the worded pills crowded the row.
                             CommunityAction(CurioIcons.Flag, "", false, onClick = { reporting = true })
                             if (current.mine) {
-                                CommunityAction(CurioIcons.Delete, "", false, onClick = {
-                                    takingDown = true
-                                })
+                                CommunityAction(CurioIcons.Delete, "", false, onClick = { takingDown = true })
                             }
                         }
                     }
-
-                    // ── The replies, INLINE under the post ──────────────
-                    // The comments used to open as a separate sheet over the
-                    // card, which buried the thing being discussed. Reading
-                    // and writing replies now lives on the card's own page,
-                    // in the same list, under the same hero.
                     item(key = "replies") {
                         CommunityInlineReplies(
                             card = current,
                             accessToken = token,
                             myUserId = myUserId,
                             onOpenProfile = { id ->
-                                navController.navigate(CurioRoutes.socialProfile(id)) {
-                                    launchSingleTop = true
-                                }
+                                navController.navigate(CurioRoutes.socialProfile(id)) { launchSingleTop = true }
                             }
                         )
                     }
                 }
             }
-
             error?.takeIf { current != null }?.let { message ->
                 item(key = "error") {
-                    // Quiet on-surface ink: a red slab under a post read as a
-                    // tester build, not as a sentence for a person.
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
@@ -438,13 +371,10 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
     }
 
     if (takingDown) {
-        // `?.let` hands the lambda a definitely non-null token, so the delete
-        // never leans on a smart cast across a lambda boundary.
         token?.let { active ->
             SocialConfirmDialog(
                 title = "Take this card down?",
-                body = "It disappears from the wall for everyone right away. " +
-                    "Its replies go with it.",
+                body = "It disappears from the wall for everyone right away. Its replies go with it.",
                 confirmLabel = "Take down",
                 busy = busy,
                 onDismiss = { if (!busy) takingDown = false },
@@ -469,8 +399,6 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
     }
 
     if (reporting) {
-        // `?.let` hands the lambda a definitely non-null token, so the report
-        // call never leans on a smart cast across a lambda boundary.
         token?.let { active ->
             ReportCardDialog(
                 onDismiss = { reporting = false },
@@ -485,21 +413,13 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
             )
         }
     }
-
-    // (Replies are inline in the list now — no sheet over the card.)
 }
 
-/** A one-line row that opens another settings surface (the locked states). */
 @Composable
-private fun SettingsOptionRowLink(
-    title: String,
-    onClick: () -> Unit
-) {
+private fun SettingsOptionRowLink(title: String, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
     ) {
         TextButton(onClick = onClick) {
             CurioIcon(
@@ -518,15 +438,7 @@ private fun SettingsOptionRowLink(
     }
 }
 
-/**
- * The card's replies, INLINE under the post.
- *
- * The sheet that used to open over the card buried the thing being discussed:
- * reading and writing replies belongs on the card's own page. This section
- * reuses the wall's reply rows and composer semantics, loads from the device
- * cache first, follows the same realtime channel, and counts towards nothing
- * but this card.
- */
+/** The card replies, inline under the post. */
 @Composable
 private fun CommunityInlineReplies(
     card: CommunityCard,
@@ -568,8 +480,6 @@ private fun CommunityInlineReplies(
         load()
     }
 
-    // Live replies: the same socket the sheet listened on, so a new reply
-    // lands while the card is open.
     DisposableEffect(card.id, accessToken) {
         if (accessToken == null) return@DisposableEffect onDispose { }
         val owner = "card-replies:${card.id}"
@@ -606,9 +516,7 @@ private fun CommunityInlineReplies(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
-                if (loading) {
-                    CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(14.dp))
-                }
+                if (loading) CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(14.dp))
             }
 
             if (replies.isEmpty() && !loading && error == null) {
@@ -657,7 +565,11 @@ private fun CommunityInlineReplies(
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
                     modifier = Modifier
                         .padding(start = 18.dp)
-                        .clickable { expandedRoots = expandedRoots + more.rootId }
+                        .curioPressClickable(
+                            pressedScale = 0.985f,
+                            hapticOnPress = false,
+                            onClick = { expandedRoots = expandedRoots + more.rootId }
+                        )
                 ) {
                     Text(
                         text = "Show ${more.hidden} more",
@@ -706,7 +618,11 @@ private fun CommunityInlineReplies(
                             size = 14.dp,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
-                                .clickable { replyTo = null }
+                                .curioPressClickable(
+                                    pressedScale = 0.92f,
+                                    hapticOnPress = false,
+                                    onClick = { replyTo = null }
+                                )
                         )
                     }
                 }
