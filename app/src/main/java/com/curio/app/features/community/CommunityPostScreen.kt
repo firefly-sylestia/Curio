@@ -152,7 +152,7 @@ internal fun CommunityPostScreen(
         categorySlug = if (kind == KIND_CARD) topic?.categoryId?.name.orEmpty().lowercase() else "",
         categoryGlyph = if (kind == KIND_CARD) selectedCategory?.iconGlyph.orEmpty() else "",
         accentHex = if (kind == KIND_CARD) accentHex else "",
-        factText = if (kind == KIND_CARD) text else "",
+        factText = text,
         caption = caption,
         kind = kind,
         style = style.name,
@@ -399,6 +399,7 @@ internal fun CommunityPostScreen(
                                                         selected = entry.topic == topic,
                                                         onClick = {
                                                             topic = entry.topic
+                                                            if (text.isBlank()) text = entry.topic.teaser
                                                             query = ""
                                                             topicOpen = false
                                                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)

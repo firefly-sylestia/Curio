@@ -331,7 +331,7 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
-    // v3xx ��� the episode an EPISODES chip opens the series sheet at (null =
+    // v3xx ����� the episode an EPISODES chip opens the series sheet at (null =
     // opened from the poster card, list starts at the top). Mirrors the
     // album sheet's [selectedAlbumTrack].
     var selectedSeriesEpisode by remember { mutableStateOf<com.curio.app.data.SeriesEpisode?>(null) }
@@ -1046,7 +1046,7 @@ fun TopicRevealScreen(
                 // the card. The tags row below simply follows the hero
                 // directly.
 
-                // ── 5. Teaser card ──────────────────────────────────────────
+                // ── 5. Teaser card ─────────────────────────────────���────────
                 // v135 — only rendered once the topic resolves: an
                 // unresolvable legacy topic shows its name + actions instead
                 // of a permanent "Loading topic…" placeholder.
@@ -3863,7 +3863,7 @@ private fun ChapterNoteField(
     surfaceHigh: Color = Color.Unspecified,
     onSurface: Color = Color.Unspecified,
     onSurfaceVariant: Color = Color.Unspecified,
-    // v371 — EXPAND opens the full white writing sheet; SHARE seeds the
+    // v371 ��� EXPAND opens the full white writing sheet; SHARE seeds the
     // share card with the current note as a Chapter review.
     onExpand: () -> Unit = {},
     onShare: (String) -> Unit = {}
@@ -5292,18 +5292,18 @@ private fun EpisodeNotesSheet(
     onSelectEpisode: (com.curio.app.data.SeriesEpisode) -> Unit = {},
     onDismiss: () -> Unit
 ) {
-    var episodes by remember { mutableStateOf(topic.episodes.orEmpty()) }
-    val context = LocalContext.current
+  var episodes by remember { mutableStateOf(topic.episodes.orEmpty()) }
+  val fetchConsent = AppPreferences.seriesFetchEnabledState
+  val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
-    val fetchConsent = AppPreferences.seriesFetchEnabledState
-    // v-expand — enrich episodes with TVMaze metadata (airdate, runtime,
-    // rating, still image) when the user has fetch consent. Runs once
-    // per show open; the fetcher is memoized so reopens are instant.
-    LaunchedEffect(topic.name, fetchConsent) {
-        if (fetchConsent && episodes.isNotEmpty()) {
-            episodes = SeriesEpisodeFetcher.enrich(topic.name, episodes)
-        }
-    }
+  // Enrich every authored episode with available metadata. The fetcher is
+  // memoized and keeps authored values when a provider has no match, so the
+  // reveal always shows the episode details and still art it can resolve.
+  LaunchedEffect(topic.name, episodes.size) {
+  if (episodes.isNotEmpty()) {
+  episodes = SeriesEpisodeFetcher.enrich(topic.name, episodes)
+  }
+  }
     // v371 — same resolved-poster fix as the album sheet: the palette must
     // come from the RESOLVED poster URL (TVMaze → iTunes), not the (usually
     // empty) authored topic.imageUrl — otherwise the series sheet always

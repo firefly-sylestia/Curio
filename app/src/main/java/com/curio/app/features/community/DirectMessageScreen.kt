@@ -692,9 +692,10 @@ fun DirectMessageScreen(
         if (cached.isNotEmpty()) messages = cached
         load(token, myUserId)
         loadPerson(token)
-        // A receipt is a courtesy, not a requirement: a failure here must never
-        // blank a thread that loaded fine.
-        SocialApi.markRead(token, otherUserId, myUserId)
+        // Existing incoming messages are marked only after the conversation
+        // has rendered and the user has entered this screen; new arrivals use
+        // the same rule in pullDelta below. Never mark a sender's messages
+        // read merely because the sender refreshed their own thread.
     }
 
     // "is typing…" — pushed by a `dm_typing` frame, and re-read on a timer as
@@ -1462,8 +1463,11 @@ private fun MessageEntry(
         // The action sheet floats ABOVE the bubble (Instagram-style).
         // A full-width invisible tap target sits above it so tapping
         // anywhere outside the pills dismisses the sheet.
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             AnimatedVisibility(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = (-72).dp),
                 visible = actionSheet,
                 enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
                     slideInVertically { -it / 3 },
@@ -1565,7 +1569,7 @@ private fun MessageBubble(
     // short travel, then the reply banner raises. The lean tracks the finger
     // exactly while dragging (snap) and springs back to rest on release.
     var replyDrag by remember { mutableStateOf(0f) }
-    val dragLimit = with(LocalDensity.current) { 56.dp.toPx() }
+    val dragLimit = with(LocalDensity.current) { 44.dp.toPx() }
     val settle = animateFloatAsState(
         targetValue = replyDrag,
         animationSpec = if (replyDrag == 0f) spring(dampingRatio = 0.6f, stiffness = 500f) else snap(),
@@ -1575,31 +1579,8 @@ private fun MessageBubble(
     // pulling a received bubble rightward is Instagram's own motion.
     val leanX = if (mine) -settle.value else settle.value
 
-    // Outer row with full-row swipe hit area (including timestamp columns).
-    // The gesture tracker lives here so the entire row is draggable, not
-    // just the bubble surface.
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .pointerInput(message.id, mine) {
-                detectDragGestures(
-                    onDragStart = { replyDrag = 0f },
-                    onDragEnd = {
-                        if (kotlin.math.abs(replyDrag) >= dragLimit * 0.6f) {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSwipeReply()
-                        }
-                        replyDrag = 0f
-                    },
-                    onDragCancel = { replyDrag = 0f }
-                ) { change, amount ->
-                    change.consume()
-                    // Own messages swipe right-to-left (negative);
-                    // theirs swipe left-to-right (positive).
-                    val raw = replyDrag + amount.x
-                    replyDrag = if (mine) raw.coerceIn(-dragLimit, 0f) else raw.coerceIn(0f, dragLimit)
-                }
-            },
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
@@ -1612,15 +1593,6 @@ private fun MessageBubble(
                     text = socialStamp(message.createdAtMillis),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                // WhatsApp's tick language: one tick is SENT, two (in the
-                // accent) are READ. The word "Seen" claimed a reading that
-                // the stamp could not honestly prove.
-                Text(
-                    text = if (receipt != null) "\u2713\u2713" else "\u2713",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (receipt != null) curioDialogActionColor()
-                    else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -1642,7 +1614,26 @@ private fun MessageBubble(
                         else -> MaterialTheme.colorScheme.surfaceContainerHigh
                     },
                     shadowElevation = 1.dp,
-                    modifier = Modifier.then(press.modifier)
+                    modifier = Modifier
+                        .then(press.modifier)
+                        .pointerInput(message.id, mine) {
+                            detectDragGestures(
+                                onDragStart = { replyDrag = 0f },
+                                onDragEnd = {
+                                    if (kotlin.math.abs(replyDrag) >= dragLimit * 0.85f) {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onSwipeReply()
+                                    }
+                                    replyDrag = 0f
+                                },
+                                onDragCancel = { replyDrag = 0f }
+                            ) { change, amount ->
+                                change.consume()
+                                val raw = replyDrag + amount.x * 0.45f
+                                replyDrag = if (mine) raw.coerceIn(-dragLimit, 0f)
+                                else raw.coerceIn(0f, dragLimit)
+                            }
+                        }
                 ) {
                     Column(
                         modifier = Modifier
@@ -1679,6 +1670,19 @@ private fun MessageBubble(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (mine) Color.White.copy(alpha = 0.7f)
                                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                        if (mine && lastOfRun) {
+                            Text(
+                                text = if (receipt != null) "\u2713\u2713" else "\u2713",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 8.sp,
+                                    lineHeight = 8.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = if (receipt != null) Color.White.copy(alpha = 0.86f)
+                                else Color.White.copy(alpha = 0.62f),
+                                modifier = Modifier.align(Alignment.End)
                             )
                         }
                     }

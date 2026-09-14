@@ -680,18 +680,16 @@ internal fun CommunityCardCanvas(
 
     Box(
         modifier = modifier
+            .clipToBounds()
             .then(if (fillHeight) Modifier else Modifier.fillMaxWidth()),
-        // Fill mode crops the card to the box: the overflow hangs off the
-        // BOTTOM (TopStart), so the card's title always stays visible.
-        contentAlignment = if (fillHeight) Alignment.TopStart else Alignment.Center
+        // Keep every rendering surface centered. Fill mode intentionally crops
+        // the tall card inside its bounded tile, but never pins the art to the
+        // tile's top-left corner.
+        contentAlignment = Alignment.Center
     ) {
     BoxWithConstraints(
         modifier = if (fillHeight) Modifier.fillMaxSize() else Modifier.fillMaxWidth(widthFraction),
-        // The painted footprint is CENTERED in the room it has: a card whose
-        // scale clamps (a wide phone where the item outgrows the 405dp card)
-        // must never hug the left edge of its row, and a fill-mode crop keeps
-        // its overflow symmetric about the vertical axis.
-        contentAlignment = if (fillHeight) Alignment.TopCenter else Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         val density = LocalDensity.current
         val scale = with(density) {
