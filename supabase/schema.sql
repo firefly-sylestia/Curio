@@ -793,84 +793,24 @@ as $$
 $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 5d. DM encryption identities and conversation-key envelopes
 -- ───────────────────────────────────────────────────────────────────────────
-create table if not exists public.dm_device_keys (
-    user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
-    device_id text not null,
-    public_key text not null,
-    key_version integer not null default 1 check (key_version > 0),
-    created_at timestamptz not null default now(),
-    retired_at timestamptz,
-    primary key (user_id, device_id)
-);
-
-create table if not exists public.dm_key_envelopes (
-    conversation_id text not null,
-    recipient uuid not null references auth.users (id) on delete cascade,
-    device_id text not null,
-    key_version integer not null check (key_version > 0),
-    encrypted_key text not null,
-    encryption_version text not null default 'curio-dm-v1',
-    created_at timestamptz not null default now(),
-    primary key (conversation_id, recipient, device_id, key_version)
-);
-
-alter table public.dm_device_keys enable row level security;
-alter table public.dm_key_envelopes enable row level security;
-
-drop policy if exists dm_device_keys_own on public.dm_device_keys;
-drop policy if exists dm_device_keys_select_participant on public.dm_device_keys;
-create policy dm_device_keys_select_participant on public.dm_device_keys
-  for select to authenticated using (
-    user_id = auth.uid() or public.curio_are_friends(auth.uid(), user_id)
-  );
-drop policy if exists dm_device_keys_own on public.dm_device_keys;
-create policy dm_device_keys_own on public.dm_device_keys
-  for insert to authenticated with check (user_id = auth.uid());
-
-drop policy if exists dm_device_keys_update_own on public.dm_device_keys;
-create policy dm_device_keys_update_own on public.dm_device_keys
-  for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-
-drop policy if exists dm_device_keys_delete_own on public.dm_device_keys;
-create policy dm_device_keys_delete_own on public.dm_device_keys
-  for delete to authenticated using (user_id = auth.uid());
-
--- Recipients alone read their envelopes. Senders write immutable RSA-wrapped
--- copies with a plain INSERT; duplicate-key races are handled client-side as a
--- successful existing envelope. Do not reopen SELECT just to make a PostgREST
--- upsert work: an envelope must not be readable by the other participant.
-drop policy if exists dm_key_envelopes_recipient on public.dm_key_envelopes;
-drop policy if exists dm_key_envelopes_select_participant on public.dm_key_envelopes;
-create policy dm_key_envelopes_select_participant on public.dm_key_envelopes
-    for select to authenticated using (
-        recipient = auth.uid()
-    );
-
-drop policy if exists dm_key_envelopes_write_participant on public.dm_key_envelopes;
-create policy dm_key_envelopes_write_participant on public.dm_key_envelopes
-  for insert to authenticated with check (
-  recipient = auth.uid()
-  or public.curio_are_friends(auth.uid(), recipient)
-  );
-
-drop policy if exists dm_key_envelopes_update_participant on public.dm_key_envelopes;
-create policy dm_key_envelopes_update_participant on public.dm_key_envelopes
-  for update to authenticated
-  using (
-    recipient = auth.uid()
-    or public.curio_are_friends(auth.uid(), recipient)
-  )
-  with check (
-    recipient = auth.uid()
-    or public.curio_are_friends(auth.uid(), recipient)
-  );
-
+-- 5d. DM encryption — REMOVED
+--
+-- Messages are plain text between accepted friends again: no device keypairs,
+-- no conversation-key envelopes and no per-conversation encryption mode. The
+-- three tables the encryption work introduced (`dm_device_keys`,
+-- `dm_key_envelopes`, `dm_conversations`), their policies, their triggers and
+-- their RPCs are all gone — the tables are DROPPED at the end of this file
+-- (§6c Removal), so a project that already shipped them really loses them on
+-- the next paste.
+--
+-- The one helper kept is the canonical conversation id: the reply guard and
+-- `curio_delete_dm_conversation` both still name a conversation with it.
+-- ───────────────────────────────────────────────────────────────────────────
 -- The canonical id of a two-person conversation: both uuid texts, in the
--- order the app sorts them. ONE definition, shared by the envelope validator
--- and both dm_messages triggers, so a conversation can never mean two
--- different strings on two different code paths.
+-- order the app sorts them. ONE definition, shared by every code path that
+-- names a conversation, so a conversation can never mean two different strings
+-- on two different code paths.
 create or replace function public.curio_dm_conversation_of(a uuid, b uuid)
 returns text
 language sql
@@ -881,150 +821,22 @@ as $$
         else b::text || ':' || a::text end;
 $$;
 
--- The person on the other side of `actor` in a canonical two-party
--- conversation id, or null when the id is not canonical or does not name the
--- actor. Used for the envelopes a sender wraps for its OWN devices, where the
--- authenticated user and the recipient are the same account and there is no
--- counterparty to compare against directly.
-create or replace function public.curio_dm_conversation_peer(conversation text, actor uuid)
-returns uuid
-language plpgsql
-immutable
-as $$
-declare
-    first_party  text := split_part(conversation, ':', 1);
-    second_party text := split_part(conversation, ':', 2);
-begin
-    if conversation !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
-        return null;
-    end if;
-    if conversation <> public.curio_dm_conversation_of(first_party::uuid, second_party::uuid) then
-        return null;
-    end if;
-    if first_party = actor::text then return second_party::uuid; end if;
-    if second_party = actor::text then return first_party::uuid; end if;
-    return null;
-end $$;
-
--- An envelope is only meaningful for a currently registered recipient device
--- and for the canonical two-party conversation. This rejects a mismatched
--- device ID, recipient, or conversation before ciphertext reaches storage.
+-- ───────────────────────────────────────────────────────────────────────────
+-- 5e. dm_messages — plain text between accepted friends
 --
--- A sender ALSO wraps the same conversation key for its own devices
--- (recipient = auth.uid()) so a reinstall or a second phone can still read the
--- thread, and the message trigger below requires exactly those rows. That case
--- has no peer to compare against, so it is held to the canonical conversation
--- of the sender and the single other party named in the id — who must be the
--- sender's accepted friend.
-create or replace function public.curio_validate_dm_envelope()
-returns trigger
-language plpgsql
-as $$
-declare
-    self_peer uuid;
-begin
-    if new.conversation_id <> public.curio_dm_conversation_of(auth.uid(), new.recipient) then
-        self_peer := case when new.recipient = auth.uid()
-            then public.curio_dm_conversation_peer(new.conversation_id, auth.uid())
-            else null end;
-        if self_peer is null or not public.curio_are_friends(auth.uid(), self_peer) then
-            raise exception 'curio: envelope conversation does not match participants';
-        end if;
-    end if;
-    if not exists (
-        select 1 from public.dm_device_keys key
-         where key.user_id = new.recipient
-           and key.device_id = new.device_id
-           and key.retired_at is null
-    ) then
-        raise exception 'curio: envelope device is not registered to recipient';
-    end if;
-    return new;
-end $$;
-drop trigger if exists dm_key_envelopes_validate on public.dm_key_envelopes;
-create trigger dm_key_envelopes_validate
-    before insert or update on public.dm_key_envelopes
-    for each row execute function public.curio_validate_dm_envelope();
-
--- ───────────────────────────���─────────────────────────────────���─────────────
--- 5e. dm_messages — ciphertext-only writes; legacy body is read-only
--- ────────────────────────────────────���──────────────────────────────────────
+-- The `dm_conversations` mode table that used to live here went with the
+-- encryption layer (§6c Removal). Every message carries its words in `body`
+-- and nothing else: no ciphertext, no nonce, no per-message mode.
 -- ───────────────────────────────────────────────────────────────────────────
--- 5e. Shared DM delivery mode — one row for the two participants
--- ───────────────────────────────────────────────────────────────────────────
-create table if not exists public.dm_conversations (
-    conversation_id text primary key,
-    first_user uuid not null references auth.users (id) on delete cascade,
-    second_user uuid not null references auth.users (id) on delete cascade,
-    -- Encryption starts OFF (decided). The encrypted path needs BOTH people on
-    -- a build that publishes device keys, so defaulting to it left a chat
-    -- between mismatched versions unable to send anything at all. One tap in
-    -- the conversation turns it on, and an existing conversation keeps the
-    -- mode it already has.
-    encryption_enabled boolean not null default false,
-    updated_at timestamptz not null default now(),
-    constraint dm_conversations_two_people check (first_user <> second_user)
-);
-
--- Idempotent: a project whose row was created before this decision keeps its
--- existing default until this line runs, and existing ROWS are untouched.
-alter table public.dm_conversations alter column encryption_enabled set default false;
-
-alter table public.dm_conversations enable row level security;
-drop policy if exists dm_conversations_select_participant on public.dm_conversations;
-create policy dm_conversations_select_participant on public.dm_conversations
-  for select to authenticated using (auth.uid() = first_user or auth.uid() = second_user);
-drop policy if exists dm_conversations_write_participant on public.dm_conversations;
-create policy dm_conversations_write_participant on public.dm_conversations
-  for insert to authenticated with check (
-    (auth.uid() = first_user or auth.uid() = second_user)
-    and public.curio_are_friends(first_user, second_user)
-  );
-drop policy if exists dm_conversations_update_participant on public.dm_conversations;
-create policy dm_conversations_update_participant on public.dm_conversations
-  for update to authenticated using (auth.uid() = first_user or auth.uid() = second_user)
-  with check (auth.uid() = first_user or auth.uid() = second_user);
-
-create or replace function public.curio_pin_dm_conversation_parties()
-returns trigger
-language plpgsql
-as $$
-begin
-    if new.conversation_id <> old.conversation_id
-       or new.first_user <> old.first_user
-       or new.second_user <> old.second_user then
-        raise exception 'curio: conversation participants cannot change';
-    end if;
-    new.updated_at = now();
-    return new;
-end $$;
-drop trigger if exists dm_conversations_pin_parties on public.dm_conversations;
-create trigger dm_conversations_pin_parties
-    before update on public.dm_conversations
-    for each row execute function public.curio_pin_dm_conversation_parties();
-
 create table if not exists public.dm_messages (
     id         uuid primary key default gen_random_uuid(),
     sender     uuid not null default auth.uid() references auth.users (id) on delete cascade,
     recipient  uuid not null references auth.users (id) on delete cascade,
-    body       text,
-    ciphertext text,
-    nonce      text,
-    encryption_version text,
-    migration_state text not null default 'legacy' check (migration_state in ('legacy','plaintext','encrypted','pending_reencrypt')),
+    body       text not null,
     created_at timestamptz not null default now(),
     read_at    timestamptz,
-    constraint dm_messages_not_self check (sender <> recipient),
-    constraint dm_messages_ciphertext_shape check (
-        (migration_state = 'legacy' and body is not null and ciphertext is null)
-        or (migration_state in ('encrypted','pending_reencrypt') and ciphertext is not null and nonce is not null and encryption_version is not null)
-    )
+    constraint dm_messages_not_self check (sender <> recipient)
 );
-
-alter table public.dm_messages add column if not exists ciphertext text;
-alter table public.dm_messages add column if not exists nonce text;
-alter table public.dm_messages add column if not exists encryption_version text;
-alter table public.dm_messages add column if not exists migration_state text not null default 'legacy';
 
 -- Threaded replies (v3xx54): a message may answer ONE other message of the
 -- same conversation. Null = a normal line. The trigger below enforces the
@@ -1068,21 +880,22 @@ drop trigger if exists dm_messages_check_reply on public.dm_messages;
 create trigger dm_messages_check_reply
     before insert on public.dm_messages
     for each row execute function public.curio_check_dm_reply();
-alter table public.dm_messages drop constraint if exists dm_messages_migration_state_check;
-alter table public.dm_messages add constraint dm_messages_migration_state_check check (migration_state in ('legacy','plaintext','encrypted','pending_reencrypt'));
-alter table public.dm_messages alter column body drop not null;
+-- The words are the message. No ciphertext, no per-message mode.
+--
+-- A row left over from the encryption era has no readable words in it at all,
+-- so it is deleted here BEFORE `body` becomes NOT NULL and before the column
+-- that held it is dropped (§6d). The constraint drops come first because both
+-- of them describe shapes that no longer exist.
 alter table public.dm_messages drop constraint if exists dm_messages_ciphertext_shape;
-alter table public.dm_messages add constraint dm_messages_ciphertext_shape check (
-    (migration_state in ('legacy','plaintext') and body is not null and ciphertext is null and nonce is null and encryption_version is null)
-    or (migration_state in ('encrypted','pending_reencrypt') and body is null and ciphertext is not null and nonce is not null and encryption_version is not null)
-);
+alter table public.dm_messages drop constraint if exists dm_messages_migration_state_check;
+delete from public.dm_messages where body is null;
+alter table public.dm_messages alter column body set not null;
 
--- Existing plaintext rows remain explicitly legacy/read-only during migration.
 drop policy if exists dm_insert_friends on public.dm_messages;
 create policy dm_insert_friends on public.dm_messages
     for insert to authenticated with check (
-        sender = auth.uid() and migration_state = 'encrypted'
-        and body is null and ciphertext is not null and nonce is not null
+        sender = auth.uid()
+        and body is not null
         and exists (select 1 from public.profiles me where me.id = auth.uid() and me.online_mode_enabled)
         and exists (select 1 from public.profiles them where them.id = dm_messages.recipient and them.online_mode_enabled)
         and public.curio_are_friends(auth.uid(), dm_messages.recipient)
@@ -1108,211 +921,6 @@ drop trigger if exists dm_messages_pin_parties on public.dm_messages;
 create trigger dm_messages_pin_parties
     before update on public.dm_messages
     for each row execute function public.curio_pin_message_parties();
-
-create or replace function public.curio_enforce_dm_delivery_mode()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-    conversation text := public.curio_dm_conversation_of(new.sender, new.recipient);
-    encryption_on boolean := false;
-begin
-    select encryption_enabled into encryption_on
-    from public.dm_conversations where conversation_id = conversation;
-    -- A conversation with no row at all is PLAINTEXT, matching the column's own
-    -- default. It used to fall back to "encrypted", which is how a chat between
-    -- two clients that never agreed on a mode refused every message.
-    if coalesce(encryption_on, false) and new.migration_state not in ('encrypted', 'pending_reencrypt') then
-        raise exception 'curio: this conversation requires encrypted messages';
-    end if;
-    -- 'legacy' is accepted alongside 'plaintext' while encryption is off: a
-    -- build older than the encryption work writes it by default, and refusing
-    -- it is exactly the "message does not send until both people update" bug.
-    if not coalesce(encryption_on, false) and new.migration_state not in ('plaintext', 'legacy') then
-        raise exception 'curio: this conversation has encryption turned off';
-    end if;
-    return new;
-end $$;
-
-drop trigger if exists dm_messages_enforce_delivery_mode on public.dm_messages;
-create trigger dm_messages_enforce_delivery_mode
-    before insert on public.dm_messages
-    for each row execute function public.curio_enforce_dm_delivery_mode();
-
--- A ciphertext may only refer to a key version after every currently active
--- device for both participants has its own envelope for that exact version.
--- The server still sees only wrapped keys, never AES plaintext key material.
---
--- "Currently active" has a GRACE: a device registered in the last two minutes
--- is not counted. The publisher only pushes its row AFTER it wrapped and
--- stored every envelope for the version it is about to send, so a brand-new
--- device appearing between those two steps used to fail the send through no
--- fault of the sender (a reinstall registering, a friend signing in on a
--- second phone mid-conversation). A device that has been active longer than
--- the grace window MUST have its envelope — the check stays strict for it.
-create or replace function public.curio_enforce_dm_message_envelopes()
-returns trigger
-language plpgsql
-as $$
-declare
-    conversation text := public.curio_dm_conversation_of(new.sender, new.recipient);
-    version_text text;
-    key_version_value integer;
-    missing integer;
-begin
-    if new.migration_state not in ('encrypted', 'pending_reencrypt') then
-        return new;
-    end if;
-    version_text := substring(new.encryption_version from '^curio-dm-aesgcm-v1:([1-9][0-9]*)$');
-    if version_text is null then
-        raise exception 'curio: invalid encrypted message key version';
-    end if;
-    key_version_value := version_text::integer;
-    select count(*) into missing
-        from public.dm_device_keys device
-        where device.user_id in (new.sender, new.recipient)
-          and device.retired_at is null
-          and device.created_at <= now() - interval '2 minutes'
-          and not exists (
-              select 1 from public.dm_key_envelopes envelope
-               where envelope.conversation_id = conversation
-                 and envelope.recipient = device.user_id
-                 and envelope.device_id = device.device_id
-                 and envelope.key_version = key_version_value
-          );
-    if missing > 0 then
-        raise exception 'curio: encrypted message is missing a device envelope for its key version';
-    end if;
-    return new;
-end $$;
-drop trigger if exists dm_messages_enforce_envelopes on public.dm_messages;
-create trigger dm_messages_enforce_envelopes
-    before insert on public.dm_messages
-    for each row execute function public.curio_enforce_dm_message_envelopes();
-
--- Retires one of YOUR OWN device identities. A reinstall used to leave the
--- old device row active forever, and the envelope completeness check then
--- demanded a key be wrapped for hardware the account no longer owns — which
--- is exactly how "missing a device envelope for its key version" started.
--- The client calls this right before publishing a fresh identity. The
--- retirement is permanent for envelopes: a device that comes back online
--- publishes a NEW identity and participates from the next version onward.
--- Security definer because the row to update may belong to an earlier
--- session of the same account that has since been replaced.
-create or replace function public.curio_retire_dm_device(p_device_id text)
-returns integer
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-    retired integer;
-begin
-    update public.dm_device_keys
-       set retired_at = now()
-     where user_id = auth.uid()
-       and device_id = p_device_id
-       and retired_at is null;
-    get diagnostics retired = row_count;
-    return retired;
-end $$;
-
--- This RPC is the ONLY writer the client uses to retire a device, and it
--- must stay. Nothing here drops any dm_device_keys policy: an earlier
--- revision of this file carried a stray
--- `drop policy if exists dm_device_keys_select_participant` on this very
--- spot, so every re-paste of the schema silently removed the policy that
--- lets a sender read their friend's device keys — encrypted sends then
--- failed with RLS violations for perfectly healthy accounts.
-grant execute on function public.curio_retire_dm_device(text) to authenticated;
-
--- Publishes (registers or refreshes) the caller's DM device identity.
---
--- The client used to upsert dm_device_keys over REST, which only works while
--- the live database's INSERT and UPDATE policies both agree with this file's;
--- any drift (a policy renamed, dropped, or recreated by hand) surfaces to the
--- member as "new row violates row-level security policy" and every encrypted
--- conversation stalls. This security-definer RPC writes the row directly, so
--- publishing works regardless of which policy versions the project has.
--- Only the caller's OWN identity can be written (auth.uid() below), the
--- inputs are length-checked, and the envelope + message triggers still
--- validate every key that is ever wrapped with it.
-create or replace function public.curio_publish_dm_device(
-    p_device_id text,
-    p_public_key text
-)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-    if p_device_id is null or length(p_device_id) = 0 or length(p_device_id) > 128 then
-        raise exception 'curio: invalid device id';
-    end if;
-    if p_public_key is null or length(p_public_key) = 0 or length(p_public_key) > 4096 then
-        raise exception 'curio: invalid device public key';
-    end if;
-    insert into public.dm_device_keys (user_id, device_id, public_key, key_version)
-    values (auth.uid(), p_device_id, p_public_key, 1)
-    on conflict (user_id, device_id) do update
-        set public_key = excluded.public_key,
-            retired_at = null;
-    -- Publishing this device RETIRES every other active device of the same
-    -- account: one identity per account at a time is the invariant the
-    -- message trigger's completeness check is built on, and a reinstall or a
-    -- replaced keypair must not leave a second active row the sender can
-    -- never wrap for.
-    update public.dm_device_keys
-       set retired_at = now()
-     where user_id = auth.uid()
-       and device_id <> p_device_id
-       and retired_at is null;
-end $$;
-grant execute on function public.curio_publish_dm_device(text, text) to authenticated;
-
--- The devices that still lack an envelope for one conversation key version —
--- the sender's TO-DO list, computed with the SAME rules the message insert
--- trigger re-checks, grace window included: a device registered in the last
--- two minutes is not demanded yet, so it is left out here too (wrapping for
--- it stays possible client-side, but never required). A sender could not
--- reliably compute this themselves: row-level security deliberately hides
--- the other party's device rows, yet the trigger demands a wrap for them,
--- so the server must be the one to name the missing devices. Security
--- definer because it reads both parties' rows; it returns only ids, never
--- key material.
-create or replace function public.curio_dm_missing_envelopes(
-    p_conversation_id text,
-    p_key_version integer
-)
-returns table (user_id uuid, device_id text, public_key text)
-language sql
-stable
-security definer
-set search_path = public
-as $$
-    select device.user_id, device.device_id, device.public_key
-      from public.dm_device_keys device
-     where device.user_id in (
-              select c.first_user from public.dm_conversations c
-               where c.conversation_id = p_conversation_id
-              union all
-              select c.second_user from public.dm_conversations c
-               where c.conversation_id = p_conversation_id
-           )
-       and device.retired_at is null
-       and device.created_at <= now() - interval '2 minutes'
-       and not exists (
-              select 1 from public.dm_key_envelopes envelope
-               where envelope.conversation_id = p_conversation_id
-                 and envelope.recipient = device.user_id
-                 and envelope.device_id = device.device_id
-                 and envelope.key_version = p_key_version
-           );
-$$;
-grant execute on function public.curio_dm_missing_envelopes(text, integer) to authenticated;
 
 alter table public.dm_messages enable row level security;
 
@@ -1350,9 +958,8 @@ create policy dm_update_receipt on public.dm_messages
     with check (recipient = auth.uid());
 
 -- Editing a sent message: the SENDER alone, and only the edit stamp and the
--- plaintext body may change. Encrypted rows are refused outright — their
--- ciphertext is bound to a conversation key version, and an "edit" would
--- need a full re-wrap for every device; that is re-encryption, not editing.
+-- body may change. Every row is plain text now, so every row you own is
+-- editable.
 alter table public.dm_messages add column if not exists edited_at timestamptz;
 
 drop policy if exists dm_edit_own on public.dm_messages;
@@ -1368,13 +975,6 @@ as $$
 begin
     if new.sender <> old.sender or new.recipient <> old.recipient then
         raise exception 'curio: a message cannot change its conversation';
-    end if;
-    -- 'legacy' is a plain-text row from before encryption became opt-in: the
-    -- table's own CHECK guarantees it carries a body and no ciphertext, so it
-    -- is as editable as a 'plaintext' one (refusing it is why an older message
-    -- showed no Edit at all). Anything carrying a ciphertext is not editable.
-    if new.migration_state not in ('plaintext', 'legacy') then
-        raise exception 'curio: encrypted messages cannot be edited';
     end if;
     if new.body is distinct from old.body and new.edited_at is null then
         new.edited_at := now();
@@ -1465,10 +1065,9 @@ begin
            edited_at = now()
      where id = p_message_id
        and sender = actor
-       and migration_state in ('plaintext', 'legacy')
        and created_at > now() - interval '24 hours';
     if not found then
-        raise exception 'curio: only your own plain message from the last day can be edited';
+        raise exception 'curio: only your own message from the last day can be edited';
     end if;
 end $$;
 
@@ -1664,9 +1263,6 @@ begin
         raise exception 'curio: that is not a conversation';
     end if;
     if not exists (
-        select 1 from public.dm_conversations
-         where conversation_id = public.curio_dm_conversation_of(me, other)
-    ) and not exists (
         select 1 from public.dm_messages
          where (sender = me and recipient = other)
             or (sender = other and recipient = me)
@@ -1682,9 +1278,6 @@ begin
     delete from public.dm_conversation_hidden
      where (user_id = me and other_user_id = other)
         or (user_id = other and other_user_id = me);
-
-    delete from public.dm_conversations
-     where conversation_id = public.curio_dm_conversation_of(me, other);
 
     return removed;
 end $$;
@@ -2420,6 +2013,53 @@ revoke all on function public.curio_remove_community_admin(uuid) from public, an
 grant execute on function public.curio_remove_community_admin(uuid) to authenticated;
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 6d. Removal — the DM encryption layer is gone
+--
+-- DM encryption was withdrawn: every chat is plain text between two accepted
+-- friends again. Everything it added is removed here, on the way in, so a
+-- project that already shipped the encryption tables really loses them —
+-- dropping a table in the middle of the file would have been undone by that
+-- table's own `create … if not exists` above it, which is why the removal
+-- lives at the END of the script.
+--
+-- Order matters inside the block: trigger, then table, then function. The
+-- `to_regclass` guards keep the whole thing safe on a project that never had
+-- these tables (a fresh paste) as well as on one that did.
+-- ───────────────────────────────────────────────────────────────────────────
+do $$
+begin
+    if to_regclass('public.dm_key_envelopes') is not null then
+        drop trigger if exists dm_key_envelopes_validate on public.dm_key_envelopes;
+        drop table public.dm_key_envelopes;
+    end if;
+    if to_regclass('public.dm_device_keys') is not null then
+        drop table public.dm_device_keys;
+    end if;
+    if to_regclass('public.dm_conversations') is not null then
+        drop trigger if exists dm_conversations_pin_parties on public.dm_conversations;
+        drop table public.dm_conversations;
+    end if;
+end $$;
+
+drop function if exists public.curio_dm_conversation_peer(text, uuid);
+drop function if exists public.curio_validate_dm_envelope();
+drop function if exists public.curio_pin_dm_conversation_parties();
+drop function if exists public.curio_enforce_dm_delivery_mode();
+drop function if exists public.curio_enforce_dm_message_envelopes();
+drop function if exists public.curio_retire_dm_device(text);
+drop function if exists public.curio_publish_dm_device(text, text);
+drop function if exists public.curio_dm_missing_envelopes(text, integer);
+
+-- And the columns that only ever held ciphertext (plus the mode that said
+-- whether a row was encrypted) are gone. The row cleanup and the constraint
+-- drops that have to precede them already ran in §5e, where `body` became NOT
+-- NULL — this is the last step, after every reader of those columns is gone.
+alter table public.dm_messages drop column if exists ciphertext;
+alter table public.dm_messages drop column if exists nonce;
+alter table public.dm_messages drop column if exists encryption_version;
+alter table public.dm_messages drop column if exists migration_state;
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 7. Grants
 -- ───────────────────────────────────────────────────────────────────────────
 grant usage on schema public to authenticated;
@@ -2430,8 +2070,6 @@ grant select, insert, update, delete on public.community_reactions to authentica
 grant select, insert, delete on public.community_comments to authenticated;
 grant select, insert on public.community_reports to authenticated;
 grant select, insert, update, delete on public.friend_requests to authenticated;
-grant select, insert, update, delete on public.dm_device_keys to authenticated;
-grant select, insert, update, delete on public.dm_key_envelopes to authenticated;
 grant select, insert, update, delete on public.dm_messages to authenticated;
 grant select, insert, update, delete on public.dm_typing to authenticated;
 grant select, insert, update, delete on public.dm_reactions to authenticated;
@@ -2451,8 +2089,6 @@ revoke all on public.community_reactions from anon;
 revoke all on public.community_comments from anon;
 revoke all on public.community_reports from anon;
 revoke all on public.friend_requests from anon;
-revoke all on public.dm_device_keys from anon;
-revoke all on public.dm_key_envelopes from anon;
 revoke all on public.dm_messages from anon;
 revoke all on public.dm_typing from anon;
 revoke all on public.dm_reactions from anon;
@@ -2755,8 +2391,8 @@ begin
        and c.relname in ('profiles','cloud_captures','community_cards',
                          'member_blocks',
                          'community_reactions','community_comments',
-                         'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
-                         'dm_typing','dm_reactions','dm_conversations','dm_conversation_hidden')
+                         'community_reports','friend_requests','dm_messages',
+                         'dm_typing','dm_reactions','dm_conversation_hidden')
        and c.relrowsecurity = false;
     if rls_off is null then
         raise notice 'PASS  RLS enabled on every Curio table';
@@ -2771,9 +2407,9 @@ begin
        and roles::text like '%anon%'
        and tablename in ('profiles','cloud_captures','community_cards',
                          'community_reactions','community_comments',
-                         'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
+                         'community_reports','friend_requests','dm_messages',
                          'dm_typing','dm_reactions','member_blocks',
-                         'dm_conversations','dm_conversation_hidden');
+                         'dm_conversation_hidden');
     if anon_open is null then
         raise notice 'PASS  no anon policies on Curio tables';
     else
@@ -2784,9 +2420,9 @@ begin
       into missing
       from unnest(array['profiles','cloud_captures','community_cards',
                         'community_reactions','community_comments',
-                        'community_reports','friend_requests','dm_device_keys','dm_key_envelopes','dm_messages',
+                        'community_reports','friend_requests','dm_messages',
                         'dm_typing','dm_reactions','member_blocks',
-                        'dm_conversations','dm_conversation_hidden']) as t
+                        'dm_conversation_hidden']) as t
      where not exists (
         select 1 from pg_class c
           join pg_namespace n on n.oid = c.relnamespace

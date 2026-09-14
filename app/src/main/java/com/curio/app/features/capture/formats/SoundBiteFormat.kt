@@ -467,8 +467,11 @@ fun SoundBiteFormat(
             enabled = recordingState != AudioRecorder.State.RECORDING,
             imeAction = ImeAction.Next,
             paper = false,
-            // v3xx — the quick title joins the global text-history feed.
-            historyField = "Quick title"
+            // v3xx — the quick title joins the global text-history feed, but
+            // v3xx58 — it draws NO pill: the title's label stays clean (the
+            // versions are still restorable from the text-history screen).
+            historyField = "Quick title",
+            historyPill = false
         )
 
         // Rich-text note — formatting behind a small toggle. The toolbar

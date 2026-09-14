@@ -152,49 +152,14 @@ data class CurioDirectMessage(
     val createdAtMillis: Long,
     val readAtMillis: Long?,
     val mine: Boolean,
-    val ciphertext: String? = null,
-    val nonce: String? = null,
-    val encryptionVersion: String? = null,
-    val migrationState: String = "legacy",
     val editedAtMillis: Long? = null,
     /** The message this one answers — one level deep, same conversation. */
     val replyTo: String? = null
 ) {
-    /**
-     * A row whose words the sender may rewrite.
-     *
-     * `plaintext` is today's plain send and `legacy` is a row written before
-     * encryption became opt-in — the table's own CHECK guarantees both carry a
-     * body and no ciphertext. An ENCRYPTED row is not editable: its ciphertext
-     * is bound to a conversation key version, so rewriting it would mean
-     * re-wrapping for every device, which is re-encryption rather than editing.
-     * The old test only accepted `plaintext`, so every message sent before the
-     * default flipped showed no Edit at all.
-     */
+    /** A row whose words the sender may rewrite — every one of them, now. */
     val editableText: Boolean
-        get() = (migrationState == "plaintext" || migrationState == "legacy") && body.isNotBlank()
+        get() = body.isNotBlank()
 }
-
-/** A device of one conversation party that still has no envelope for a version. */
-data class CurioDmMissingEnvelope(
-    val userId: String,
-    val deviceId: String,
-    val publicKey: String
-) {
-    /** The wrap-ready identity; valid when the public key came back readable. */
-    fun toIdentity(): CurioDmIdentity? = publicKey
-        .takeIf { it.isNotBlank() && it != "null" }
-        ?.let { CurioDmIdentity(deviceId, it, userId) }
-}
-
-/**
- * The server-owned delivery mode for one two-person conversation.
- *
- * OFF unless the server says otherwise (decided): the encrypted path needs
- * both people on a build that publishes device keys, so a chat between
- * mismatched versions could not send at all when this defaulted to on.
- */
-data class CurioDmConversation(val encryptionEnabled: Boolean = false)
 
 /**
  * Whether this account is hidden from the community, and the reason recorded
@@ -241,7 +206,6 @@ object SocialApi {
     private const val REQUESTS = "/rest/v1/friend_requests"
     private const val BLOCKS = "/rest/v1/member_blocks"
     private const val MESSAGES = "/rest/v1/dm_messages"
-    private const val CONVERSATIONS = "/rest/v1/dm_conversations"
     private const val TYPING = "/rest/v1/dm_typing"
     private const val REACTIONS = "/rest/v1/dm_reactions"
     private const val HIDDEN = "/rest/v1/dm_conversation_hidden"
@@ -306,7 +270,7 @@ object SocialApi {
     private const val THREAD_LIMIT = 200
 
     /** The columns a conversation read needs — one list, both paths. */
-    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,ciphertext,nonce,encryption_version,migration_state,created_at,read_at,edited_at,reply_to"
+    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,created_at,read_at,edited_at,reply_to"
 
     /**
      * The public identity columns, in two shapes.
@@ -1033,10 +997,6 @@ private const val PERSON_COLUMNS_PRIVACY =
                         id = row.optString("id"),
                         senderId = row.optString("sender"),
                         body = row.stringOrNull("body").orEmpty(),
-                        ciphertext = row.stringOrNull("ciphertext"),
-                        nonce = row.stringOrNull("nonce"),
-                        encryptionVersion = row.stringOrNull("encryption_version"),
-                        migrationState = row.stringOrNull("migration_state") ?: "legacy",
                         createdAtMillis = epochMillis(row.optString("created_at")),
                         readAtMillis = row.optString("read_at")
                             .takeIf { it.isNotBlank() }
@@ -1068,218 +1028,6 @@ private const val PERSON_COLUMNS_PRIVACY =
     }
   }
 
-  /**
-   * Retires one of this account's own device identities.
-   *
-   * A reinstall used to leave the old device row active forever, and the
-   * server's envelope completeness check then demanded a key be wrapped for
-   * hardware the account no longer owns, which is how every encrypted send
-   * started failing with "missing a device envelope for its key version". The
-   * caller retires BEFORE publishing the fresh identity, so the two rows are
-   * never active at once and the freshness window is never split between
-   * them.
-   */
-  suspend fun retireDmDevice(accessToken: String, deviceId: String): Result<Unit> = withContext(Dispatchers.IO) {
-    mappedUnit {
-      val request = SupabaseClient.requestBuilder("/rest/v1/rpc/curio_retire_dm_device", accessToken)
-        .post(JSONObject().put("p_device_id", deviceId).toString().toRequestBody(jsonMediaType)).build()
-      SupabaseClient.executeBody(request)
-    }
-  }
-
-  /**
-   * Publishes this device's public identity; the private key never enters
-   * this API. Goes through the `curio_publish_dm_device` RPC rather than a
-   * REST upsert: the RPC writes as the definer, so publishing cannot fail
-   * with "new row violates row level security policy" when the live
-   * database's policies drift from this file's. The `userId` parameter is
-   * kept for call-site clarity but the server always binds the row to the
-   * authenticated account.
-   */
-  suspend fun publishDmIdentity(accessToken: String, identity: CurioDmIdentity, userId: String): Result<Unit> = withContext(Dispatchers.IO) {
-    mappedUnit {
-      val payload = JSONObject().put("p_device_id", identity.deviceId)
-        .put("p_public_key", identity.publicKey)
-      val request = SupabaseClient.requestBuilder("/rest/v1/rpc/curio_publish_dm_device", accessToken)
-        .post(payload.toString().toRequestBody(jsonMediaType)).build()
-      SupabaseClient.executeBody(request)
-    }
-  }
-
-  suspend fun dmIdentities(accessToken: String, userIds: Collection<String>): Result<List<CurioDmIdentity>> = withContext(Dispatchers.IO) {
-    mapped {
-      val ids = userIds.joinToString(",") { id(it) }
-      val request = SupabaseClient.requestBuilder("/rest/v1/dm_device_keys?select=user_id,device_id,public_key&user_id=in.($ids)&retired_at=is.null", accessToken).get().build()
-      val rows = JSONArray(SupabaseClient.executeBody(request))
-      buildList {
-        for (i in 0 until rows.length()) rows.optJSONObject(i)?.let {
-          add(CurioDmIdentity(it.optString("device_id"), it.optString("public_key"), it.optString("user_id")))
-        }
-      }
-    }
-  }
-
-  suspend fun saveDmEnvelope(accessToken: String, conversationId: String, recipient: String, envelope: CurioDmEnvelope): Result<Unit> = withContext(Dispatchers.IO) {
-    mappedUnit {
-      val payload = JSONObject().put("conversation_id", conversationId).put("recipient", recipient)
-        .put("device_id", envelope.deviceId).put("key_version", envelope.keyVersion)
-        .put("encrypted_key", envelope.encryptedKey).put("encryption_version", envelope.version)
-      // Do NOT use PostgREST's `on_conflict` upsert here. The sender is
-      // deliberately unable to SELECT a recipient's envelope, and PostgREST
-      // can route a duplicate upsert through RLS visibility checks before it
-      // applies conflict-ignore. Envelopes are immutable, so a plain insert
-      // plus a duplicate-key success path is both safer and reliable.
-      val request = SupabaseClient.requestBuilder("/rest/v1/dm_key_envelopes", accessToken)
-        .header("Prefer", "return=minimal")
-        .post(payload.toString().toRequestBody(jsonMediaType)).build()
-      try {
-        SupabaseClient.executeBody(request)
-      } catch (failure: Throwable) {
-        val message = failure.message.orEmpty()
-        if (!message.contains("duplicate key", ignoreCase = true) &&
-            !message.contains("23505", ignoreCase = true) &&
-            !message.contains("unique constraint", ignoreCase = true)
-        ) throw failure
-      }
-    }
-  }
-
-  /** The largest envelope version visible to this recipient in one conversation. */
-  suspend fun dmHighestKeyVersion(accessToken: String, conversationId: String): Result<Int> = withContext(Dispatchers.IO) {
-    mapped {
-      val path = "/rest/v1/dm_key_envelopes?select=key_version&conversation_id=eq.${encode(conversationId)}&order=key_version.desc&limit=1"
-      val row = JSONArray(SupabaseClient.executeBody(SupabaseClient.requestBuilder(path, accessToken).get().build())).optJSONObject(0)
-      row?.optInt("key_version")?.takeIf { it > 0 } ?: 0
-    }
-  }
-
-    suspend fun dmEnvelope(
-    accessToken: String,
-    conversationId: String,
-    deviceId: String,
-    keyVersion: Int? = null
-  ): Result<CurioDmEnvelope?> = withContext(Dispatchers.IO) {
-    mapped {
-      val versionFilter = keyVersion?.let { "&key_version=eq.$it" }.orEmpty()
-      val path = "/rest/v1/dm_key_envelopes?select=device_id,key_version,encrypted_key,encryption_version&conversation_id=eq.${encode(conversationId)}&device_id=eq.${encode(deviceId)}$versionFilter&order=key_version.desc&limit=1"
-      val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
-      val rows = JSONArray(SupabaseClient.executeBody(request))
-      rows.optJSONObject(0)?.let { CurioDmEnvelope(it.optString("device_id"), it.optInt("key_version"), it.optString("encrypted_key"), it.optString("encryption_version")) }
-    }
-  }
-
-  /** All envelopes this device needs for one page of versioned messages, in one read. */
-  suspend fun dmEnvelopes(
-    accessToken: String,
-    conversationId: String,
-    deviceId: String,
-    keyVersions: Collection<Int>
-  ): Result<Map<Int, CurioDmEnvelope>> = withContext(Dispatchers.IO) {
-    mapped {
-      val versions = keyVersions.filter { it > 0 }.distinct()
-      if (versions.isEmpty()) return@mapped emptyMap()
-      val path = "/rest/v1/dm_key_envelopes?select=device_id,key_version,encrypted_key,encryption_version" +
-        "&conversation_id=eq.${encode(conversationId)}&device_id=eq.${encode(deviceId)}" +
-        "&key_version=in.(${versions.joinToString(",")})"
-      val rows = JSONArray(SupabaseClient.executeBody(SupabaseClient.requestBuilder(path, accessToken).get().build()))
-      buildMap {
-        for (index in 0 until rows.length()) {
-          val row = rows.optJSONObject(index) ?: continue
-          val version = row.optInt("key_version")
-          if (version > 0) put(version, CurioDmEnvelope(
-            row.optString("device_id"), version, row.optString("encrypted_key"), row.optString("encryption_version")
-          ))
-        }
-      }
-    }
-  }
-
-  /**
-   * The devices still missing an envelope for a key version, straight from
-   * the server through the `curio_dm_missing_envelopes` security-definer
-   * RPC — the SAME bookkeeping the message trigger checks, so the sender
-   * can wrap exactly what is missing instead of guessing from a table read
-   * that row-level security may have emptied.
-   *
-   * Returns `null` (not a list) when the RPC is not installed on the project
-   * yet — the caller then falls back to wrapping for every readable device.
-   */
-  suspend fun dmMissingEnvelopes(
-    accessToken: String,
-    conversationId: String,
-    keyVersion: Int
-  ): Result<List<CurioDmMissingEnvelope>?> = withContext(Dispatchers.IO) {
-    mapped {
-      val request = SupabaseClient.requestBuilder("/rest/v1/rpc/curio_dm_missing_envelopes", accessToken)
-        .post(
-          JSONObject()
-            .put("p_conversation_id", conversationId)
-            .put("p_key_version", keyVersion)
-            .toString().toRequestBody(jsonMediaType)
-        ).build()
-      val body = SupabaseClient.executeBody(request)
-      if (body.isBlank() || body == "null") return@mapped null
-      val rows = JSONArray(body)
-      buildList(rows.length()) {
-        for (index in 0 until rows.length()) {
-          val row = rows.optJSONObject(index) ?: continue
-          val userId = row.optString("user_id")
-          val deviceId = row.optString("device_id")
-          if (userId.isNotBlank() && deviceId.isNotBlank()) {
-            add(
-              CurioDmMissingEnvelope(
-                userId, deviceId,
-                row.optString("public_key").takeUnless { it == "null" }.orEmpty()
-              )
-            )
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Reads the one shared delivery setting.
-   *
-   * A conversation with NO row reads as encryption OFF, which is what the
-   * column defaults to and what the insert trigger now enforces, so the client
-   * and the server can never disagree about a brand-new chat. A row that says
-   * true is still honoured exactly as before.
-   */
-  suspend fun dmConversation(accessToken: String, conversationId: String): Result<CurioDmConversation> = withContext(Dispatchers.IO) {
-    mapped {
-      val request = SupabaseClient.requestBuilder(
-        "$CONVERSATIONS?select=encryption_enabled&conversation_id=eq.${encode(conversationId)}&limit=1",
-        accessToken
-      ).get().build()
-      val row = JSONArray(SupabaseClient.executeBody(request)).optJSONObject(0)
-      CurioDmConversation(row?.optBoolean("encryption_enabled", false) ?: false)
-    }
-  }
-
-  /** Changes the shared mode for both participants; the database pins its parties. */
-  suspend fun setDmEncryption(
-    accessToken: String,
-    conversationId: String,
-    myUserId: String,
-    otherUserId: String,
-    enabled: Boolean
-  ): Result<CurioDmConversation> = withContext(Dispatchers.IO) {
-    mapped {
-      val payload = JSONObject()
-        .put("conversation_id", conversationId)
-        .put("first_user", listOf(myUserId, otherUserId).sorted().first())
-        .put("second_user", listOf(myUserId, otherUserId).sorted().last())
-        .put("encryption_enabled", enabled)
-      val request = SupabaseClient.requestBuilder(
-        "$CONVERSATIONS?on_conflict=conversation_id", accessToken
-      ).header("Prefer", "resolution=merge-duplicates,return=representation")
-        .post(payload.toString().toRequestBody(jsonMediaType)).build()
-      val row = JSONArray(SupabaseClient.executeBody(request)).optJSONObject(0)
-      CurioDmConversation(row?.optBoolean("encryption_enabled", enabled) ?: enabled)
-    }
-  }
-
   /** Sends a new plaintext row only after the server accepted plaintext mode for this chat. */
   suspend fun sendPlaintext(accessToken: String, toUserId: String, body: String, myUserId: String, replyTo: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
     mappedUnit {
@@ -1289,7 +1037,6 @@ private const val PERSON_COLUMNS_PRIVACY =
       val payload = JSONObject()
         .put("recipient", toUserId)
         .put("body", body)
-        .put("migration_state", "plaintext")
       if (replyTo != null) payload.put("reply_to", replyTo)
       val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
         .header("Prefer", "return=minimal")
@@ -1297,40 +1044,6 @@ private const val PERSON_COLUMNS_PRIVACY =
       SupabaseClient.executeBody(request)
     }
   }
-
-  /** Sends ciphertext only. Plaintext is intentionally not accepted by this boundary. */
-  suspend fun sendEncrypted(
-        accessToken: String,
-        toUserId: String,
-        ciphertext: String,
-        nonce: String,
-        encryptionVersion: String,
-        myUserId: String,
-        replyTo: String? = null
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        mappedUnit {
-            require(ciphertext.isNotBlank() && nonce.isNotBlank()) { "Encrypted message is empty." }
-            require(CurioDmCrypto.messageKeyVersion(encryptionVersion) != null) {
-                "Unsupported message encryption version."
-            }
-            if (toUserId == myUserId) throw IllegalArgumentException("You can't message yourself.")
-            id(toUserId)
-            lastMessageAt = throttle(lastMessageAt, WRITE_GAP_MS, "Slow down a moment.")
-            val payload = JSONObject()
-                .put("recipient", toUserId)
-                .put("body", JSONObject.NULL)
-                .put("ciphertext", ciphertext)
-                .put("nonce", nonce)
-                .put("encryption_version", encryptionVersion)
-                .put("migration_state", "encrypted")
-            if (replyTo != null) payload.put("reply_to", replyTo)
-            val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
-                .header("Prefer", "return=minimal")
-                .post(payload.toString().toRequestBody(jsonMediaType))
-                .build()
-            SupabaseClient.executeBody(request)
-        }
-    }
 
     /**
      * Stamps a read receipt on everything [otherUserId] sent this account.

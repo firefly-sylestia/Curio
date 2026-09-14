@@ -934,10 +934,11 @@ fun SaveCaptureScreen(
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     performSave()
                 },
-                onSelectTake = { i -> snapshotActive(); activeIndex = i },
-                onAddTake = {
+                onAddTake = { format ->
+                    // The New-take picker hands back what the take IS, so the
+                    // studio never has to guess a default format.
                     snapshotActive()
-                    sections.add(CaptureSectionState(nextId++, defaultFormat))
+                    sections.add(CaptureSectionState(nextId++, format))
                     activeIndex = sections.lastIndex
                 },
                 onRequestRemoveTake = { i ->

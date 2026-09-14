@@ -10183,8 +10183,13 @@ fun TopicShareSheet(
                     // v3xx — the TEXT-HISTORY pill sits at the sheet corner
                     // (top-right of the tools) and opens the global browser;
                     // see the block near routeFactChange above.
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextHistoryPill(onClick = { historyOpen = true })
+                    // v3xx60 — NOT while the TITLE is selected: the title asked
+                    // for the pill to go, so it stays out of its tools and is
+                    // still there for the fact and the other elements.
+                    if (!isTitle) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            TextHistoryPill(onClick = { historyOpen = true })
+                        }
                     }
                     // ── Tool pills row (scrollable) ────────────────────
                     Row(

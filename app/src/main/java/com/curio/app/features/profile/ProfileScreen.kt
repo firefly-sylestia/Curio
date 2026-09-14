@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -64,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -1216,13 +1218,59 @@ private fun ProfileDialogs(
                                 includeAvatarPicker = false
                             )
                         } else {
-                            Text(
-                                "Sign in to claim a username, carry your portrait into Social and " +
-                                    "keep your liked topics in sync.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            CurioAuthCard()
+                            // v3xx60 — signed out, the account is a TOGGLE: one
+                            // calm row states the offer and opens the form. It
+                            // never appears once the member is signed in — the
+                            // identity card takes its place above.
+                            var signInOpen by remember { mutableStateOf(false) }
+                            Surface(
+                                onClick = { signInOpen = !signInOpen },
+                                shape = RoundedCornerShape(16.dp),
+                                color = curioPillTintLift(),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.Person,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 18.dp
+                                    )
+                                    Spacer(Modifier.width(10.dp))
+                                    Text(
+                                        text = "Sign in to Curio",
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    val chevron by animateFloatAsState(
+                                        targetValue = if (signInOpen) 180f else 0f,
+                                        animationSpec = tween(CurioMotion.Durations.Quick),
+                                        label = "profileSignInChevron"
+                                    )
+                                    CurioIcon(
+                                        name = CurioIcons.KeyboardArrowDown,
+                                        contentDescription = if (signInOpen) "Collapse" else "Expand",
+                                        modifier = Modifier.rotate(chevron),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 18.dp
+                                    )
+                                }
+                            }
+                            AnimatedVisibility(visible = signInOpen) {
+                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    Text(
+                                        "Sign in to claim a username, carry your portrait into Social and " +
+                                            "keep your liked topics in sync.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    CurioAuthCard()
+                                }
+                            }
                         }
                     }
 

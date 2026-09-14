@@ -138,8 +138,12 @@ internal fun CaptureStudio(
     tagInput: String,
     onBack: () -> Unit,
     onSave: () -> Unit,
-    onSelectTake: (Int) -> Unit,
-    onAddTake: () -> Unit,
+    /**
+     * Starts a NEW take in the format the picker handed back. The tray shows
+     * one control (New take) that opens that picker, and the take it creates is
+     * the one that becomes active — no numbered rail, no take switcher.
+     */
+    onAddTake: (CaptureFormat) -> Unit,
     onRequestRemoveTake: (Int) -> Unit,
     onPickFormat: (CaptureFormat) -> Unit,
     onPickMood: (JournalMood?) -> Unit,
@@ -151,6 +155,8 @@ internal fun CaptureStudio(
     onImageTap: (String) -> Unit
 ) {
     var toolsOpen by remember { mutableStateOf(false) }
+    // The New-take picker: pick what the next take IS, then it is created.
+    var newTakeOpen by remember { mutableStateOf(false) }
     val activeSection = sections.getOrNull(activeIndex)
     val activeFormat = activeSection?.format ?: CaptureFormat.SoundBite
 
@@ -201,11 +207,20 @@ internal fun CaptureStudio(
             canSave = canSave,
             saveInProgress = saveInProgress,
             saveError = saveError,
-            onSelectTake = onSelectTake,
-            onAddTake = onAddTake,
-            onRequestRemoveTake = onRequestRemoveTake,
+            onAddTake = { newTakeOpen = true },
             onOpenTools = { toolsOpen = true },
             onSave = onSave
+        )
+    }
+
+    if (newTakeOpen) {
+        NewTakePickerSheet(
+            cat = cat,
+            onPick = { format ->
+                newTakeOpen = false
+                onAddTake(format)
+            },
+            onDismiss = { newTakeOpen = false }
         )
     }
 
@@ -598,9 +613,7 @@ private fun StudioTray(
     canSave: Boolean,
     saveInProgress: Boolean,
     saveError: String?,
-    onSelectTake: (Int) -> Unit,
     onAddTake: () -> Unit,
-    onRequestRemoveTake: (Int) -> Unit,
     onOpenTools: () -> Unit,
     onSave: () -> Unit
 ) {
@@ -627,12 +640,7 @@ private fun StudioTray(
         ) {
             StudioTakeRail(
                 cat = cat,
-                sections = sections,
-                activeIndex = activeIndex,
-                recording = recording,
                 tintWash = tintWash,
-                onSelect = onSelectTake,
-                onRequestRemove = onRequestRemoveTake,
                 onAddTake = onAddTake
             )
             saveError?.let { message ->
@@ -759,109 +767,26 @@ private fun StudioSaveButton(
 }
 
 /**
- * The take rail — one pill per take plus "New take". The active pill wears the
- * accent and springs a hair larger; a recording take's pill carries a pulsing
- * dot so the rail says WHERE the audio is being captured when the canvas is
- * scrolled away from the mic.
+ * The take rail — ONE control: New take.
+ *
+ * It used to draw a numbered pill per take ("1 · Note", "2 · Quote") with a
+ * remove cross and an active fill, which made the tray read as a tab strip and
+ * buried the one thing the member actually does here. The tray now offers the
+ * single door, and tapping it asks what the new take IS (the format picker)
+ * before the take exists — the studio already shows the take you are working
+ * on, so a switcher was never adding information.
  */
 @Composable
 private fun StudioTakeRail(
     cat: CurioCategory,
-    sections: SnapshotStateList<CaptureSectionState>,
-    activeIndex: Int,
-    recording: Boolean,
     tintWash: Boolean,
-    onSelect: (Int) -> Unit,
-    onRequestRemove: (Int) -> Unit,
     onAddTake: () -> Unit
 ) {
     val accent = cat.themedAccent()
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        sections.forEachIndexed { i, section ->
-            val active = i == activeIndex
-            // ONE press source per pill — a shared source would squish the
-            // whole rail whenever any single pill was touched.
-            val pressed = rememberCurioPressSource(pressedScale = 0.94f)
-            val selection by animateFloatAsState(
-                targetValue = if (active) 1f else 0.96f,
-                animationSpec = CurioMotion.Springs.Press,
-                label = "studioTakeSelection"
-            )
-            val fill by animateColorAsState(
-                targetValue = if (active) accent
-                else if (tintWash) cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHighest)
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-                animationSpec = tween(CurioMotion.Durations.Quick),
-                label = "studioTakeFill"
-            )
-            val contentColor = if (active) cat.onAccent()
-            else MaterialTheme.colorScheme.onSurface
-            Surface(
-                onClick = { onSelect(i) },
-                shape = RoundedCornerShape(50),
-                color = fill,
-                interactionSource = pressed.interactionSource,
-                modifier = Modifier
-                    .then(pressed.modifier)
-                    .graphicsLayer {
-                        scaleX = selection
-                        scaleY = selection
-                    }
-            ) {
-                Row(
-                    modifier = Modifier.padding(
-                        start = 12.dp,
-                        end = if (sections.size > 1) 4.dp else 12.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    if (active && recording) {
-                        StudioRailPulse(color = contentColor)
-                    } else {
-                        CurioIcon(
-                            name = formatGlyph(section.format),
-                            contentDescription = null,
-                            tint = if (active) contentColor
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 15.dp
-                        )
-                    }
-                    Text(
-                        text = "${i + 1} · ${section.format.shortName}",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium
-                        ),
-                        color = contentColor,
-                        maxLines = 1
-                    )
-                    if (sections.size > 1) {
-                        Surface(
-                            onClick = { onRequestRemove(i) },
-                            shape = CircleShape,
-                            color = Color.Transparent
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Close,
-                                contentDescription = "Remove take ${i + 1}",
-                                tint = if (active) contentColor
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp,
-                                modifier = Modifier.padding(4.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
         Surface(
             onClick = onAddTake,
             shape = RoundedCornerShape(50),
@@ -874,9 +799,9 @@ private fun StudioTakeRail(
             border = BorderStroke(1.dp, accent.copy(alpha = 0.35f))
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 CurioIcon(
                     name = CurioIcons.Add,
@@ -889,6 +814,75 @@ private fun StudioTakeRail(
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
+            }
+        }
+    }
+}
+
+/**
+ * What the NEXT take is — the picker the New take pill opens.
+ *
+ * A small sheet rather than the tools sheet: tools edit the take you are on
+ * (its format, mood and tags), while this only chooses what to start, so
+ * picking a card here can never rewrite the take underneath you.
+ */
+@Composable
+private fun NewTakePickerSheet(
+    cat: CurioCategory,
+    onPick: (CaptureFormat) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = curioDialogContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "New take",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Pick what this take captures",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                CAPTURE_FORMATS.chunked(2).forEach { pair ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        pair.forEach { fmt ->
+                            StudioFormatCard(
+                                format = fmt,
+                                selected = false,
+                                cat = cat,
+                                onClick = {
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                        onPick(fmt)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

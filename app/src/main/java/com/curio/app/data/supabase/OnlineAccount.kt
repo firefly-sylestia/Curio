@@ -290,15 +290,6 @@ object OnlineAccount {
      * absent bio, never a blocked sign-in.
      */
     private suspend fun reconcileIdentity(context: Context, session: SupabaseClient.Session) {
-        // Register a public device key as soon as the account is active, rather
-        // than making a friend open a DM before they can receive the first
-        // encrypted message. Not on the critical path: signing in must not wait
-        // on key material.
-        recoveryScope.launch {
-            runCatching { CurioDmCrypto.identity(context) }
-                .onSuccess { SocialApi.publishDmIdentity(session.accessToken, it, session.userId) }
-        }
-
         val profile = SocialApi.profile(session.accessToken, session.userId).getOrNull() ?: return
         if (profile.username.isBlank()) {
             claimGeneratedUsername(context, session.accessToken)

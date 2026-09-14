@@ -588,6 +588,39 @@ private fun PreferencesSection(highlightKey: String? = null) {
             val presetHours = listOf(9, 12, 15, 18, 21)
             val customTime = reminderMinute != 0 || reminderHour !in presetHours
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 6.dp)) {
+                // v3xx58 — the CLOCK LEADS (user request: it used to sit last,
+                // after the hour presets). It is the one control that can pick
+                // ANY time, so it opens the row — and it wears the screen's
+                // rose accent instead of the presets' plain fill, so it reads
+                // as a different kind of choice at a glance.
+                item {
+                    val rose = settingsRoseAccent()
+                    Surface(
+                        onClick = { showReminderTimePicker = true },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                        color = if (customTime) rose else rose.copy(alpha = 0.16f),
+                        contentColor = if (customTime) Color.White else rose,
+                        shadowElevation = 2.dp,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Schedule,
+                                contentDescription = null,
+                                tint = if (customTime) Color.White else rose,
+                                size = 15.dp
+                            )
+                            Text(
+                                formatReminderTime(reminderHour, reminderMinute),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
+                    }
+                }
                 items(presetHours) { hour ->
                     val selected = hour == reminderHour && reminderMinute == 0
                     // AMOLED: the selected chip swaps to pitch-black glass
@@ -616,36 +649,6 @@ private fun PreferencesSection(highlightKey: String? = null) {
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                         )
-                    }
-                }
-                item {
-                    Surface(
-                        onClick = { showReminderTimePicker = true },
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                        color = if (customTime) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = if (customTime) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface,
-                        shadowElevation = 2.dp,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Schedule,
-                                contentDescription = null,
-                                tint = if (customTime) MaterialTheme.colorScheme.onPrimary
-                                else MaterialTheme.colorScheme.onSurface,
-                                size = 15.dp
-                            )
-                            Text(
-                                formatReminderTime(reminderHour, reminderMinute),
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                            )
-                        }
                     }
                 }
             }

@@ -6553,7 +6553,8 @@ private fun RevealCategoryFavoriteBar(
                         )
                     }
                 }
-                // Favorite pill — icon-only when not favorited, expands when favorited.
+                // Completed pill (v3xx60 — renamed from Favorite) — icon-only
+                // when not completed, expands when completed.
                 Surface(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -6572,7 +6573,7 @@ private fun RevealCategoryFavoriteBar(
                     ) {
                         CurioIcon(
                             name = if (isFavorited) CurioIcons.Star else CurioIcons.StarOutline,
-                            contentDescription = if (isFavorited) "Unfavorite" else "Favorite",
+                            contentDescription = if (isFavorited) "Completed" else "Mark as completed",
                             tint = favLabelInk,
                             size = 26.dp
                         )
@@ -6582,7 +6583,7 @@ private fun RevealCategoryFavoriteBar(
                             exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
                         ) {
                             Text(
-                                text = "Favorite",
+                                text = "Completed",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontFamily = ChangaOneFontFamily,
                                     fontWeight = FontWeight.Normal,

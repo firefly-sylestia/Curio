@@ -459,7 +459,11 @@ fun PaperLineField(
     /** v3xx — TEXT HISTORY: when set, this field joins the global text
      *  history feed and shows a small history pill in its label row; the
      *  browser restores write straight back into this field. */
-    historyField: String? = null
+    historyField: String? = null,
+    /** v3xx58 — when false the field still SNAPSHOTS into the history feed but
+     *  draws no pill in its label row (the quick-title field asked for a quiet
+     *  label; its versions stay restorable from the text-history screen). */
+    historyPill: Boolean = true
 ) {
     // v3xx — text history for single-line paper fields (capture + pill +
     // browser), same self-contained pattern as [RichTextEditor].
@@ -490,7 +494,7 @@ fun PaperLineField(
                     )
                 }
                 trailingAction?.invoke()
-                if (historyField != null) {
+                if (historyField != null && historyPill) {
                     Spacer(Modifier.width(6.dp))
                     TextHistoryPill(onClick = { historyOpen = true }, size = 30.dp)
                 }

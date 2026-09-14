@@ -317,7 +317,12 @@ internal fun CurioAccountIdentityCard(
         CurioContentFilter.problem(clean) != null -> CurioContentFilter.problem(clean)
         else -> null
     }
-    val changed = clean.isNotEmpty() && clean != savedName.trim().removePrefix("@").lowercase()
+    // v3xx60 — a name that is both well-formed AND clears the safety filter
+    // needs no coaching: the field speaks for itself. The rules line and the
+    // policy warning below only appear while the field still has something to
+    // say (empty, broken, or carrying a banned term) — a valid name shows the
+    // field and nothing else.
+    val nameValid = clean.isNotEmpty() && nameProblem == null
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -335,15 +340,19 @@ internal fun CurioAccountIdentityCard(
         // with no handle yet gets the invite to claim one, an account that
         // has one gets its handle echoed back (the field starts as that
         // handle, so "what am I called?" is answered by the page itself).
-        Text(
-            text = if (savedName.isBlank()) {
-                "Choose a unique username so friends can find and mention you."
-            } else {
-                "You are @${savedName.trim().removePrefix("@")}. Friends find and mention you with it."
-            },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        // v3xx60 — and never once the typed name is valid: the field already
+        // carries the handle, so the echo is noise.
+        if (!nameValid) {
+            Text(
+                text = if (savedName.isBlank()) {
+                    "Choose a unique username so friends can find and mention you."
+                } else {
+                    "You are @${savedName.trim().removePrefix("@")}. Friends find and mention you with it."
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         AccountField(
             placeholder = "Username",
@@ -368,7 +377,9 @@ internal fun CurioAccountIdentityCard(
             token == null -> "Sign in to claim a username." to false
             clean.isEmpty() && savedName.isBlank() ->
                 "Choose a username: 3 to 24 letters, numbers or underscores." to false
-            changed -> "Free to claim — save it and it is yours." to false
+            // v3xx60 — a valid name gets no "free to claim" filler; the only
+            // lines left are the rule being broken, the server's verdict, and
+            // why a disabled button is disabled.
             else -> "" to false
         }
         if (status.first.isNotEmpty()) {
@@ -376,13 +387,17 @@ internal fun CurioAccountIdentityCard(
         }
 
         // v3xx53 — the ACCOUNT POLICY, stated where the name is chosen. The
-        // filter above is the enforcement; this is the warning, and it is
-        // deliberately not hidden behind a tap.
-        Text(
-            text = CurioContentFilter.NAME_WARNING,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
-        )
+        // filter above is the enforcement; this is the warning.
+        // v3xx60 — it now appears only when it APPLIES: the moment the typed
+        // name carries a banned term, alongside the refusal. A clean name
+        // never has the ban notice parked under the field.
+        if (CurioContentFilter.carriesBadWord(clean)) {
+            Text(
+                text = CurioContentFilter.NAME_WARNING,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
+            )
+        }
 
         TermsAcceptanceRow(
             accepted = termsAccepted,
@@ -554,8 +569,7 @@ private fun CurioTermsDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Curio stores your account details, profile information, posts, comments and reactions to provide the service.")
-                Text("Direct messages are encrypted on your devices. Message plaintext and private keys are not uploaded; encrypted message data and delivery metadata are stored so messages can sync between your devices.")
-                Text("Community posts and comments are not end-to-end encrypted. Do not share sensitive information there.")
+                Text("Direct messages are sent as plain text over the protected Online Mode connection and are stored so they can reach the other person. They are not end-to-end encrypted, so do not send anything you could not afford to disclose.")
                 Text("You can review these disclosures again from this screen at any time.")
             }
         },

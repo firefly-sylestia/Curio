@@ -78,12 +78,8 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
-import com.curio.app.data.supabase.CurioDmIdentity
 import com.curio.app.data.supabase.CurioDmReaction
-import com.curio.app.data.supabase.CurioDmCrypto
-import com.curio.app.data.supabase.DmCryptoDiagnostics
 import com.curio.app.data.supabase.CurioPerson
-import com.curio.app.data.supabase.dmConversationId
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SocialApi
@@ -187,11 +183,6 @@ fun DirectMessageScreen(
     var peerTyping by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
-    // This is read from the server-owned conversation row. It is never a
-    // device preference: both participants see and use the same mode. It
-    // starts OFF, which is what a brand-new conversation is (see the schema),
-    // and a row that says otherwise replaces it as soon as it loads.
-    var encryptionEnabled by remember(otherUserId) { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var loadedOnce by remember { mutableStateOf(false) }
     // A server push bumps this, which re-runs the delta fetch below. It is a
@@ -202,12 +193,6 @@ fun DirectMessageScreen(
     // whole page once, so a peer's edit or recall is reflected even though it
     // happened to a row OLDER than the newest one on screen.
     var pendingRealtimeRevisions by remember(otherUserId) { mutableStateOf(false) }
-
-    // An ENCRYPTED send that failed raises this instead of a dead error line:
-    // the dialog states the reason and offers the one-tap way out (turn the
-    // shared mode off for both, then send the same text). Keyed on the thread
-    // so another conversation never inherits a stale dialog.
-    var encryptionIssue by remember(otherUserId) { mutableStateOf<String?>(null) }
 
     /**
      * Reacting to one message, from the floating action sheet (the palette is
@@ -253,138 +238,9 @@ fun DirectMessageScreen(
         loading = true
         SocialApi.messages(active, otherUserId, me).fold(
             onSuccess = { raw ->
-                val conversationId = dmConversationId(me, otherUserId)
-                encryptionEnabled = SocialApi.dmConversation(active, conversationId)
-                    .getOrDefault(com.curio.app.data.supabase.CurioDmConversation()).encryptionEnabled
-                val identity = runCatching { CurioDmCrypto.identity(context) }.getOrElse { failure ->
-                    error = "This device's encrypted-message identity is unavailable."
-                    DmCryptoDiagnostics.failure("identity_load", null, null, null, failure)
-                    return@fold
-                }
-                var identityUsable = true
-                SocialApi.publishDmIdentity(active, identity, me).getOrElse { failure ->
-                    // Registration keeps the ENCRYPTED features honest, but it
-                    // must never take the conversation down with it: without
-                    // this row the device cannot receive wrapped keys, so
-                    // ciphertext stays sealed — and the error text says that
-                    // plainly instead of pretending the page is broken.
-                    identityUsable = false
-                    DmCryptoDiagnostics.failure("identity_publish", null, null, null, failure)
-                }
-                // The same self-heal the send path does: a stale identity of
-                // MINE (a previous install) is retired so the server counts
-                // exactly one active device per side. Best-effort — the send
-                // path retires again before wrapping.
-                if (identityUsable) {
-                    SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
-                        .filter { it.deviceId != identity.deviceId }
-                        .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
-                }
-                // Get every envelope a page needs in ONE request. The former
-                // per-message sequential requests delayed arrivals and could
-                // leave a realtime row rendered before its key was available.
-                val requiredVersions = raw.mapNotNull { message ->
-                    CurioDmCrypto.messageKeyVersion(message.encryptionVersion.orEmpty())
-                }.toSet()
-                val envelopeResult = SocialApi.dmEnvelopes(
-                    active, conversationId, identity.deviceId, requiredVersions
-                )
-                val envelopeFailure = envelopeResult.exceptionOrNull()
-                val envelopes = envelopeResult.getOrDefault(emptyMap())
-                val installedVersions = mutableSetOf<Int>()
-                requiredVersions.forEach { version ->
-                    val envelope = envelopes[version]
-                    if (envelope == null) {
-                        DmCryptoDiagnostics.event(
-                            stage = "envelope_missing", conversationId = conversationId,
-                            keyVersion = version, deviceId = identity.deviceId,
-                            detail = "found=false installed=false"
-                        )
-                    } else {
-                        runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
-                            .onSuccess { key ->
-                                installedVersions += version
-                                DmCryptoDiagnostics.event(
-                                    stage = "envelope_install", conversationId = conversationId,
-                                    keyVersion = version, deviceId = identity.deviceId,
-                                    detail = "found=true installed=true keyLength=${key.size} rsaUnwrap=success"
-                                )
-                            }
-                            .onFailure { failure ->
-                                DmCryptoDiagnostics.failure(
-                                    "envelope_install", conversationId, null, version, failure,
-                                    "found=true installed=false rsaUnwrap=failure"
-                                )
-                            }
-                    }
-                }
-                val fresh = raw.map { message ->
-                    // 'legacy' is a plain-text row from before encryption became
-                    // opt-in — the table's own CHECK says such a row carries a
-                    // body and no ciphertext, so its words ARE the message and
-                    // showing a "re-encryption required" placeholder hid every
-                    // message sent before the default flipped. Only a legacy row
-                    // with nothing in it falls back to that line.
-                    if (message.migrationState == "legacy") {
-                        if (message.body.isNotBlank()) message
-                        else message.copy(body = "Legacy message — re-encryption required")
-                    }
-                    else if (message.migrationState == "plaintext") message
-                    else {
-                        val encrypted = com.curio.app.data.supabase.CurioEncryptedMessage(
-                            message.ciphertext.orEmpty(),
-                            message.nonce.orEmpty(),
-                            message.encryptionVersion.orEmpty()
-                        )
-                        // A thread can hold messages from multiple envelope
-                        // generations. The page's exact-version envelopes were
-                        // fetched and installed above before any AES-GCM read.
-                        val version = CurioDmCrypto.messageKeyVersion(encrypted.version)
-                        when {
-                            version == null -> message.copy(body = "Unsupported encrypted message format")
-                            envelopeFailure != null -> {
-                                DmCryptoDiagnostics.failure(
-                                    "envelope_fetch", conversationId, message.id, version, envelopeFailure,
-                                    "envelopeFound=unknown keyInstalled=false"
-                                )
-                                message.copy(body = "Message key could not be retrieved")
-                            }
-                            envelopes[version] == null -> {
-                                DmCryptoDiagnostics.event(
-                                    stage = "message_key_missing", conversationId = conversationId,
-                                    messageId = message.id, keyVersion = version,
-                                    deviceId = identity.deviceId,
-                                    detail = "envelopeFound=false keyInstalled=false"
-                                )
-                                message.copy(body = "Message key is unavailable on this device")
-                            }
-                            version !in installedVersions -> message.copy(body = "Message key envelope is invalid")
-                            else -> runCatching {
-                                CurioDmCrypto.decrypt(context, conversationId, encrypted)
-                            }.onSuccess { plaintext ->
-                                DmCryptoDiagnostics.event(
-                                    stage = "aes_decrypt", conversationId = conversationId,
-                                    messageId = message.id, keyVersion = version,
-                                    deviceId = identity.deviceId,
-                                    detail = "keyInstalled=true keyLength=32 nonceLength=${android.util.Base64.decode(encrypted.nonce, android.util.Base64.NO_WRAP).size} ciphertextLength=${android.util.Base64.decode(encrypted.ciphertext, android.util.Base64.NO_WRAP).size} aesDecrypt=success"
-                                )
-                            }.onFailure { failure ->
-                                DmCryptoDiagnostics.failure(
-                                    "aes_decrypt", conversationId, message.id, version, failure,
-                                    "keyInstalled=true aesDecrypt=failure"
-                                )
-                            }.fold(
-                                onSuccess = { plaintext -> message.copy(body = plaintext) },
-                                onFailure = { failure ->
-                                    val reason = if (failure is javax.crypto.AEADBadTagException) {
-                                        "Message authentication failed"
-                                    } else "Message key or encrypted data is invalid"
-                                    message.copy(body = reason)
-                                }
-                            )
-                        }
-                    }
-                }
+                // Encryption is gone: every row carries its own words, so
+                // there is nothing to unwrap and no placeholder to substitute.
+                val fresh = raw
                 // v3xx53 — the SERVER keeps 24 hours; the DEVICE keeps what it
                 // received. Merging (rather than replacing) is what makes "gone
                 // from the server" and "gone from Curio" two different things:
@@ -440,10 +296,6 @@ fun DirectMessageScreen(
         }
     }
 
-    // The text an ENCRYPTED send was carrying when it failed, so the dialog's
-    // one-tap fallback can send the very words the member already typed.
-    var failedDraft by remember(otherUserId) { mutableStateOf("") }
-
     // The message whose floating action sheet is up (Instagram style): the
     // palette, Copy, Edit and Remove ride ON the thread — no dialog, no scrim.
     // A second hold on the same bubble drops it.
@@ -480,7 +332,7 @@ fun DirectMessageScreen(
     // up to read history).
     var pendingSends by remember(otherUserId) { mutableStateOf(0) }
 
-    suspend fun send(active: String, me: String, forcePlaintext: Boolean = false) {
+    suspend fun send(active: String, me: String) {
         // An edit in flight takes the composer over: Send IS Save until the
         // edit is committed or dropped.
         editing?.let { target ->
@@ -491,7 +343,6 @@ fun DirectMessageScreen(
         if (text.isEmpty() || sending) return
         sending = true
         error = null
-        encryptionIssue = null
         // A reply binds to the message raised above the composer; the banner
         // drops the moment the answer is on its way.
         val replyTo = quoteTarget?.id
@@ -512,25 +363,7 @@ fun DirectMessageScreen(
         draft = ""
         pendingSends++
 
-        val conversationId = dmConversationId(me, otherUserId)
-        if (!encryptionEnabled || forcePlaintext) {
-            // The dialog's promise, kept here: turning the shared mode off is
-            // part of the fallback send, for BOTH people — if the server
-            // refuses the change, the plain error line says why and nothing is
-            // sent in the wrong mode.
-            if (forcePlaintext && encryptionEnabled) {
-                SocialApi.setDmEncryption(active, conversationId, me, otherUserId, false).fold(
-                    onSuccess = { encryptionEnabled = false },
-                    onFailure = { failure ->
-                        pending = pending.filterNot { it.id == optimistic.id }
-                        draft = text
-                        error = failure.message ?: "Couldn't change message encryption."
-                        sending = false
-                        return
-                    }
-                )
-            }
-            SocialApi.sendPlaintext(active, otherUserId, text, me, replyTo).fold(
+        SocialApi.sendPlaintext(active, otherUserId, text, me, replyTo).fold(
                 onSuccess = {
                     SocialApi.setTyping(active, otherUserId, false)
                     // The bubble does NOT vanish while the thread re-reads: it
@@ -549,141 +382,6 @@ fun DirectMessageScreen(
                     error = failure.message ?: "That message didn't send."
                 }
             )
-            sending = false
-            return
-        }
-        val encrypted = runCatching {
-            val mine = CurioDmCrypto.identity(context)
-            // A reinstall leaves the PREVIOUS device row active on the server
-            // forever, and the envelope completeness check then demands a key
-            // be wrapped for hardware this account no longer owns — the exact
-            // "missing a device envelope for its key version" failure. Retire
-            // every other active identity of MINE first so only this device
-            // counts, then publish this one. The friend's rows are theirs to
-            // manage, and old envelopes stay historically valid for their
-            // devices.
-            SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
-                .filter { it.deviceId != mine.deviceId }
-                .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
-            SocialApi.publishDmIdentity(active, mine, me).getOrThrow()
-            val ownEnvelope = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
-                .getOrNull()
-            // A conversation from a previous install can carry an envelope
-            // that this device's replacement keypair cannot open. Keep that
-            // historical envelope for older messages and rotate a new version
-            // for the next send instead of failing the entire conversation.
-            val restoredKey = ownEnvelope?.let { envelope ->
-                runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
-                    .getOrNull()
-            }
-            val keyVersion = when {
-                restoredKey != null -> ownEnvelope!!.keyVersion
-                else -> SocialApi.dmHighestKeyVersion(active, conversationId).getOrThrow()
-                    .coerceAtMost(Int.MAX_VALUE - 1) + 1
-            }
-            val key = restoredKey
-                ?: CurioDmCrypto.existingKey(context, conversationId, keyVersion)
-                ?: CurioDmCrypto.newKey(context, conversationId, keyVersion)
-            // The server is the bookkeeper: it names the devices that still
-            // lack an envelope for this version (its own trigger re-checks the
-            // same list on insert). The client could not compute this list —
-            // row-level security hides the friend's device rows from the
-            // sender on purpose, and an empty read once made every send look
-            // like a friend who never opened the app.
-            val missing = SocialApi.dmMissingEnvelopes(active, conversationId, keyVersion)
-                .getOrNull()
-            val peers: List<CurioDmIdentity> = when {
-                missing != null -> {
-                    // The authoritative path: every row the server named comes
-                    // WITH its public key, so the wrap list is built directly
-                    // from it — no second read that row-level security could
-                    // empty. Rows without a usable key are skipped; if that
-                    // leaves the friend uncovered, the send fails with the
-                    // clear message below rather than a rejected insert.
-                    missing.mapNotNull { it.toIdentity() }.ifEmpty {
-                        // The server named devices but none carried a usable
-                        // key: fall back to the identity read for whatever it
-                        // can still see.
-                        SocialApi.dmIdentities(active, listOf(otherUserId, me))
-                            .getOrDefault(emptyList())
-                            .filter(CurioDmCrypto::canWrapFor)
-                    }
-                }
-                else -> {
-                    // The RPC is not installed on this project yet: wrap for
-                    // every device the (possibly empty) identity read sees.
-                    // A stale row that should have been retired is healed by
-                    // the publish above; the rest is the server's grace.
-                    SocialApi.dmIdentities(active, listOf(otherUserId, me)).getOrDefault(emptyList())
-                        .filter(CurioDmCrypto::canWrapFor)
-                }
-            }
-            check(peers.any { it.userId == otherUserId }) {
-                "This friend needs to open Curio once before encrypted messages can reach them."
-            }
-            // Envelope writes are independent. Send them together instead of
-            // making the composer wait one network round trip per device.
-            coroutineScope {
-                peers.map { peer ->
-                    async {
-                        SocialApi.saveDmEnvelope(
-                            active, conversationId, peer.userId,
-                            CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)
-                        ).getOrThrow()
-                    }
-                }.awaitAll()
-            }
-            CurioDmCrypto.encrypt(context, conversationId, key, keyVersion, text)
-        }.getOrElse { failure ->
-            pending = pending.filterNot { it.id == optimistic.id }
-            draft = text
-            // This preparation also contacts the server to exchange public
-            // keys. Do not misreport a friend/RLS/network failure as a broken
-            // keystore: that sent people looking for a device fix when the
-            // actionable problem was the server response.
-            val reason = failure.message
-                ?.takeIf { it.isNotBlank() }
-                ?: "Couldn't prepare this encrypted message. Please try again."
-            if (encryptionEnabled) {
-                error = null
-                failedDraft = text
-                encryptionIssue = reason
-            } else {
-                error = reason
-            }
-            sending = false
-            return
-        }
-        SocialApi.sendEncrypted(
-            active,
-            otherUserId,
-            encrypted.ciphertext,
-            encrypted.nonce,
-            encrypted.version,
-            me,
-            replyTo
-        ).fold(
-            onSuccess = {
-                SocialApi.setTyping(active, otherUserId, false)
-                // Same shadow swap as the plaintext path: never remove the
-                // bubble before its replacement exists.
-                pending = pending.filterNot { it.id == optimistic.id }
-                sentShadow = sentShadow + optimistic
-                load(active, me)
-            },
-            onFailure = { failure ->
-                pending = pending.filterNot { it.id == optimistic.id }
-                draft = text
-                val reason = failure.message ?: "That message didn't send."
-                if (encryptionEnabled) {
-                    error = null
-                    failedDraft = text
-                    encryptionIssue = reason
-                } else {
-                    error = reason
-                }
-            }
-        )
         sending = false
     }
 
@@ -1042,41 +740,6 @@ fun DirectMessageScreen(
                             }
                         )
                     }
-                    // The per-chat encryption toggle is EXPERIMENTAL and
-                    // opt-in at the device level: it only exists when the
-                    // member asked for it in Settings → Online mode. A
-                    // conversation whose shared mode is already ON keeps its
-                    // pill (and its encrypted behaviour) either way — the gate
-                    // hides the door, it never slams one that is open.
-                    val encryptionExposed = AppPreferences.dmEncryptionEnabledState || encryptionEnabled
-                    if (encryptionExposed) {
-                        item(key = "delivery-mode") {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                SocialPill(
-                                    label = if (encryptionEnabled) "Encrypted" else "Encryption off",
-                                    icon = if (encryptionEnabled) CurioIcons.Lock else CurioIcons.Warning,
-                                    tone = if (encryptionEnabled) SocialPillTone.ACCENT else SocialPillTone.NEUTRAL,
-                                    enabled = !sending,
-                                    onClick = {
-                                        scope.launch {
-                                            val conversationId = dmConversationId(activeUserId, otherUserId)
-                                            SocialApi.setDmEncryption(
-                                                activeToken, conversationId, activeUserId, otherUserId,
-                                                !encryptionEnabled
-                                            ).fold(
-                                                onSuccess = { encryptionEnabled = it.encryptionEnabled },
-                                                onFailure = { error = it.message ?: "Couldn't change message encryption." }
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-
                     error?.let { message -> item(key = "error") { SocialNote(message, true) } }
 
                     if (thread.isEmpty() && !loading && loadedOnce) {
@@ -1226,42 +889,6 @@ fun DirectMessageScreen(
                     }
                 }
             }
-        }
-
-        // An encrypted send that could not be delivered raises THIS instead of
-        // a dead error line: the reason is stated, the one-tap way out (turn
-        // the shared mode off for both, send as normal text) is offered, and
-        // the honest status of the feature is named once, in full.
-        encryptionIssue?.let { reason ->
-            SocialConfirmDialog(
-                title = "Encrypted message didn't send",
-                body = "$reason\n\nEncryption only works while you are both on a version that " +
-                    "supports it. You can send this message with encryption turned off for " +
-                    "this chat instead — either of you can switch it back on later. " +
-                    "Encrypted messages are experimental and may be changed or withdrawn.",
-                confirmLabel = "Send without encryption",
-                destructive = false,
-                busy = sending,
-                onDismiss = { if (!sending) encryptionIssue = null },
-                onConfirm = {
-                    // The dialog lives OUTSIDE the eligible branch, so the
-                    // session values are read from the screen's own state
-                    // here; without a session there is nothing to send.
-                    val active = token
-                    val me = myUserId
-                    if (active == null || me == null) {
-                        encryptionIssue = null
-                        return@SocialConfirmDialog
-                    }
-                    scope.launch {
-                        pending = pending.filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
-                        draft = failedDraft
-                        failedDraft = ""
-                        encryptionIssue = null
-                        send(active, me, forcePlaintext = true)
-                    }
-                }
-            )
         }
 
         if (!wide) {
