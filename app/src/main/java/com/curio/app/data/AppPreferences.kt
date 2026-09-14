@@ -181,6 +181,11 @@ object AppPreferences {
     // lines. Independent of [KEY_PET_ENABLED]: the pet layer can be on
     // while the learning brain is off.
     private const val KEY_PET_BRAIN_ENABLED = "pet_brain_enabled"
+    // v-performance — default-on controls for reducing avoidable startup and
+    // animation work. Splash timing intentionally is not gated by this mode.
+    private const val KEY_PERFORMANCE_MODE = "performance_mode"
+    private const val KEY_PERFORMANCE_PET_ANIMATION = "performance_pet_animation"
+    private const val KEY_PERFORMANCE_POINTER_TRACKING = "performance_pointer_tracking"
     private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
     private const val KEY_PINNED_TOPICS = "pinned_topics"   // JSON array of PinnedTopic
     private const val KEY_SAVED_QUOTES = "saved_quotes"      // JSON array of SavedQuote
@@ -520,7 +525,7 @@ object AppPreferences {
         return added
     }
 
-    // ── Series watched progress (v350) ───────────────────────���───���───────
+    // ── Series watched progress (v350) ───────────────────────����───���───────
     // Per-show set of watched episode keys ("S1E3"): JSON object show name →
     // JSON array of keys. The episode-list sheet toggles an episode; the UI
     // derives watched counts per season from the authored episode list.
@@ -1497,6 +1502,15 @@ object AppPreferences {
     // own catchphrases. Off = classic rule-based lines only.
     var petBrainEnabledState by mutableStateOf(true)
         private set
+    // Performance mode and its independently switchable reductions. All are
+    // enabled by default; turning off the master leaves the individual choices
+    // unchanged for a later re-enable.
+    var performanceModeState by mutableStateOf(true)
+        private set
+    var performancePetAnimationState by mutableStateOf(true)
+        private set
+    var performancePointerTrackingState by mutableStateOf(true)
+        private set
     // v16 — how talkative the pet is: "talkative" (lines ~1.4x), "cozy"
     // (default, unchanged), "quiet" (lines ~0.35x — mostly motion).
     var petChatterState by mutableStateOf("cozy")
@@ -1761,8 +1775,11 @@ object AppPreferences {
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
         petOutsideAppState = isPetOutsideAppEnabled(context)
-        petBrainEnabledState = isPetBrainEnabled(context)
-        petChatterState = getPetChatter(context)
+  petBrainEnabledState = isPetBrainEnabled(context)
+  performanceModeState = isPerformanceModeEnabled(context)
+  performancePetAnimationState = isPerformancePetAnimationEnabled(context)
+  performancePointerTrackingState = isPerformancePointerTrackingEnabled(context)
+  petChatterState = getPetChatter(context)
         petGameFrequencyState = getPetGameFrequency(context)
         autoOpenRevealState = isAutoOpenReveal(context)
         customReactionLinesState = isCustomReactionLinesEnabled(context)
@@ -2621,7 +2638,7 @@ object AppPreferences {
         voiceToTextEnabledState = enabled
     }
 
-    // ── Offline transcription model (v125) ─────────────────────────────
+    // ── Offline transcription model (v125) ───────────────────────────��─
     /** The selected offline model id ("" = none). */
     fun getOfflineModelId(context: Context): String =
         prefs(context).getString(KEY_OFFLINE_MODEL, "").orEmpty()
@@ -2941,6 +2958,31 @@ object AppPreferences {
         petBrainEnabledState = enabled
     }
 
+    // ── Performance mode ─────────────────────────────────────────────
+    fun isPerformanceModeEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PERFORMANCE_MODE, true)
+
+    fun setPerformanceModeEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PERFORMANCE_MODE, enabled).apply()
+        performanceModeState = enabled
+    }
+
+    fun isPerformancePetAnimationEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PERFORMANCE_PET_ANIMATION, true)
+
+    fun setPerformancePetAnimationEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PERFORMANCE_PET_ANIMATION, enabled).apply()
+        performancePetAnimationState = enabled
+    }
+
+    fun isPerformancePointerTrackingEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PERFORMANCE_POINTER_TRACKING, true)
+
+    fun setPerformancePointerTrackingEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PERFORMANCE_POINTER_TRACKING, enabled).apply()
+        performancePointerTrackingState = enabled
+    }
+
     // ── Pet designer recent colors (v8.47 color picker) ────────────────
     /** Recently-applied palette colors, most recent first (max 12). */
     fun getPetRecentColors(context: Context): List<String> {
@@ -2978,7 +3020,7 @@ object AppPreferences {
         customReactionLinesState = enabled
     }
 
-    // ── Daily reminder ───────────────────────────────────────────────
+    // ── Daily reminder ───��───────────────────────────────────────────
     fun isReminderEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_REMINDER_ENABLED, false)
 

@@ -85,7 +85,11 @@ object PetPointer {
      * cancelled so the eyes go neutral instead of following the scroll.
      */
     @Composable
-    fun trackerModifier(): Modifier = Modifier.pointerInput(Unit) {
+    fun trackerModifier(): Modifier {
+        if (!AppPreferences.performanceModeState || !AppPreferences.performancePointerTrackingState) {
+            return Modifier
+        }
+        return Modifier.pointerInput(Unit) {
         var pressStart: Offset? = null
         var dragging = false
         awaitPointerEventScope {
@@ -389,7 +393,9 @@ fun CurioPetSprite(
     // glance or ear flick — so per-frame edits (especially the eyes grid)
     // preview a still pose instead of a moving pet. The infinite transitions
     // aren't even created, so the frozen preview never re-triggers on them.
-    val idle = if (staticPose) null else rememberInfiniteTransition(label = "petIdle")
+    val reducedAnimation = AppPreferences.performanceModeState &&
+        AppPreferences.performancePetAnimationState
+    val idle = if (staticPose || reducedAnimation) null else rememberInfiniteTransition(label = "petIdle")
     // Keep the two user-visible essentials (body motion + blink), but derive
     // the slower ambient flourishes from the same motion phase. This avoids
     // five independent per-frame state channels for every visible pet while
@@ -1063,4 +1069,5 @@ fun CurioPetSprite(
             }
         }
     }
+}
 }

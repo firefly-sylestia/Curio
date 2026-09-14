@@ -161,7 +161,9 @@ fun SplashScreen(navController: NavHostController) {
             // v311 — even when Room is already warm, hold the splash for
             // a minimum time so the branding is visible on warm starts.
             // Smoothly ramp progress so the bar doesn't jump 0→100%.
-            val rampSteps = 6
+            // Keep branding visible for a short, consistent 450ms minimum on
+            // warm starts without holding the user for the old 900ms ramp.
+            val rampSteps = 3
             val rampDelay = 150L
             for (step in 1..rampSteps) {
                 delay(rampDelay)
@@ -187,7 +189,7 @@ fun SplashScreen(navController: NavHostController) {
                 }
                 jobs.forEach { it.join() }
             }
-            delay(250)
+            delay(450)
             // Cap the total warm-up at ~1s (Room makes this instant).
             withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
             warmedLanes = totalLanes

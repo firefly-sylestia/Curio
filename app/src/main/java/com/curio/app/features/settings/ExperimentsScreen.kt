@@ -118,6 +118,35 @@ fun ExperimentsScreen(navController: NavController) {
             // already gone (3D shuffle button always on, Pastel crown depth
             // passed), and v24 removed the Layout & input section.
 
+            // v-performance — startup and ambient animation controls. Splash
+            // branding remains a fixed 450ms default and is intentionally not
+            // controlled by this switch.
+            item { SettingsSectionHeading("Performance") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Performance mode",
+                            "Reduce avoidable pet and pointer animation work while keeping Curio's core experience intact",
+                            AppPreferences.performanceModeState
+                        ) { wanted -> AppPreferences.setPerformanceModeEnabled(context, wanted) }
+                        if (AppPreferences.performanceModeState) {
+                            CurioSettingsDivider()
+                            ExperimentSwitchRow(
+                                "Pet idle animation",
+                                "Allow the pet's continuous idle motion and blinking",
+                                AppPreferences.performancePetAnimationState
+                            ) { wanted -> AppPreferences.setPerformancePetAnimationEnabled(context, wanted) }
+                            CurioSettingsDivider()
+                            ExperimentSwitchRow(
+                                "Pet pointer tracking",
+                                "Let the pet's eyes follow hover and tap positions",
+                                AppPreferences.performancePointerTrackingState
+                            ) { wanted -> AppPreferences.setPerformancePointerTrackingEnabled(context, wanted) }
+                        }
+                    }
+                }
+            }
             // v293 — LIQUID GLASS + PILL GLOW moved here from Appearance.
             item { SettingsSectionHeading("Liquid glass") }
             item {
