@@ -1805,42 +1805,54 @@ private fun MessageActionSheet(
         enter = fadeIn() + scaleIn(initialScale = 0.9f),
         exit = ExitTransition.None
     ) {
-        Surface(
-            shape = RoundedCornerShape(50),
-            color = curioDialogContainerColor(),
-            shadowElevation = 6.dp,
+        Column(
+            horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
             modifier = Modifier.padding(vertical = 2.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            // Row 1: emoji reaction palette — a frosted pill with reaction
+            // emojis. Tapping the active one clears it (toggle).
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = curioDialogContainerColor(),
+                shadowElevation = 4.dp
             ) {
-                SocialReactions.PALETTE.forEach { (emoji, meaning) ->
-                    val chosen = current != null && SocialReactions.emojiFor(current) == emoji
-                    Surface(
-                        // The emoji IS the reaction: what the picker shows is
-                        // exactly what the server stores. Tapping the active
-                        // one takes it back (the screen's toggle logic).
-                        onClick = { onPick(emoji) },
-                        shape = CircleShape,
-                        color = Color.Transparent,
-                        modifier = Modifier.semantics { contentDescription = meaning }
-                    ) {
-                        Text(
-                            text = emoji,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(4.dp)
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(1.dp),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                ) {
+                    SocialReactions.PALETTE.forEach { (emoji, meaning) ->
+                        val chosen = current != null && SocialReactions.emojiFor(current) == emoji
+                        Surface(
+                            onClick = { onPick(emoji) },
+                            shape = CircleShape,
+                            color = if (chosen) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            else Color.Transparent,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .semantics { contentDescription = meaning }
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = emoji,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        }
                     }
                 }
+            }
+            Spacer(Modifier.height(6.dp))
+            // Row 2: text action chips — Reply, Copy, Edit, Remove. Each is
+            // its own frosted pill so the destructive Remove stands out.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 4.dp)
+            ) {
+                ActionChip("Reply", onReply)
                 ActionChip("Copy", onCopy)
                 if (canEdit) ActionChip("Edit", onEdit)
-                if (canRemove) {
-                    ActionChip("Remove", { onRemove?.invoke() }, destructive = true)
-                }
-                ActionChip("Reply", onReply)
-                Spacer(Modifier.width(2.dp))
+                if (canRemove) ActionChip("Remove", { onRemove?.invoke() }, destructive = true)
             }
         }
     }
@@ -1851,14 +1863,18 @@ private fun ActionChip(label: String, onClick: () -> Unit, destructive: Boolean 
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = if (destructive)
+            MaterialTheme.colorScheme.error.copy(alpha = 0.12f)
+        else
+            curioDialogContainerColor(),
+        shadowElevation = 3.dp
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             color = if (destructive) MaterialTheme.colorScheme.error
             else MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
         )
     }
 }

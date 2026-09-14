@@ -1,5 +1,11 @@
 ADD:
 - Posting goes full screen: Post opens a proper Create page. Write first, the post renders live above as you type, and topic, look and shape attach from quiet controls. The old bottom sheet is gone.
+- Messages: hold a bubble for Instagram-style actions — the emoji palette sits in its own pill, text options (Reply, Copy, Edit, Remove) float as separate chips below. Tap outside to dismiss.
+- Messages: swipe-to-reply is reversed for your own bubbles (right-to-left like Instagram) and the gesture covers the full message row.
+- Messages: sending always scrolls to the bottom, even when reading history.
+- Cabinet v2 is now on by default. Saved entries only appear inside their collection, not as a separate home section. Empty-cabinet suggestions are grouped by category (Books, Series, Albums, Places, People, Science).
+- Delete post now asks for confirmation before removing it from the wall.
+- Curio Alive motion layer is on by default for new installs.
 - Messages: swipe any bubble to reply. The conversation is threaded now, with the words you are answering shown inside the answer.
 - Messages: hold a bubble for Instagram-style actions. The emoji palette, Copy, Edit, Remove and Reply float right on the thread instead of a dialog, and a double-tap is the heart.
 - Messages: your bubbles wear the brand rose and theirs stay calm neutral, so a conversation reads at a glance in both themes.
@@ -14,6 +20,9 @@ ADD:
 - Liking and disliking pop.
 
 FIX:
+- Share-card previews on the wall are scaled to 88% width so they breathe in the feed instead of filling edge-to-edge.
+- Post composer preview card uses a compact size so the writing area isn't pushed under the fold.
+- Post composer sits below the status bar instead of running under it.
 - Share-card previews on the wall and in profile grids are properly centred in their tiles — no more hugging the left or top corner, and the post counts on a profile are readable on any theme.
 - Error notes across the social screens are quiet on-surface sentences with a small glyph, not red slabs that read like a tester build.
 - Encrypted sends: the server now names the devices still missing a key envelope (with their public keys), so a send wraps exactly what the server will check, instead of failing with "missing a device envelope".

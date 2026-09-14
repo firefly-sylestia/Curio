@@ -130,6 +130,7 @@ fun CommunityScreen(navController: NavController) {
     var offlineCopy by remember { mutableStateOf(false) }
     var composing by remember { mutableStateOf(false) }
     var reporting by remember { mutableStateOf<CommunityCard?>(null) }
+    var deleteTarget by remember { mutableStateOf<CommunityCard?>(null) }
     var commentsFor by remember { mutableStateOf<CommunityCard?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
     // A server push bumps this; the wall then refreshes QUIETLY (no spinner, no
@@ -493,18 +494,7 @@ fun CommunityScreen(navController: NavController) {
                                 }
                             },
                             onReport = { reporting = card },
-                            onDelete = {
-                                val active = token ?: return@CommunityCardItem
-                                scope.launch {
-                                    CommunityApi.delete(active, card.id).fold(
-                                        onSuccess = {
-                                            notice = "Your card was taken down."
-                                            load()
-                                        },
-                                        onFailure = { error = it.message }
-                                    )
-                                }
-                            }
+                            onDelete = { deleteTarget = card }
                         )
                     }
                 }
@@ -621,6 +611,32 @@ fun CommunityScreen(navController: NavController) {
                         onFailure = { error = it.message }
                     )
                 }
+            }
+        )
+    }
+
+    deleteTarget?.let { card ->
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            title = { Text("Delete post?") },
+            text = { Text("This will permanently remove your post from the community wall.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    val active = token ?: return@TextButton
+                    deleteTarget = null
+                    scope.launch {
+                        CommunityApi.delete(active, card.id).fold(
+                            onSuccess = {
+                                notice = "Your card was taken down."
+                                load()
+                            },
+                            onFailure = { error = it.message }
+                        )
+                    }
+                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) { Text("Cancel") }
             }
         )
     }
@@ -877,7 +893,7 @@ private fun CommunityCardItem(
  * of the page made every post read like a thumbnail. The list's own edge
  * padding is the only gutter a card needs.
  */
-private const val FEED_CARD_WIDTH = 1f
+private const val FEED_CARD_WIDTH = 0.88f
 
 /**
  * One action on a card, as a PILL: an icon and its count on one rounded
