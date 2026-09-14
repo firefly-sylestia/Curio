@@ -2049,6 +2049,7 @@ drop function if exists public.curio_pin_dm_conversation_parties();
 -- drop answers 2BP01 (cannot drop function ... other objects depend on it).
 drop trigger if exists dm_messages_enforce_delivery_mode on public.dm_messages;
 drop function if exists public.curio_enforce_dm_delivery_mode();
+drop trigger if exists dm_messages_enforce_envelopes on public.dm_messages;
 drop function if exists public.curio_enforce_dm_message_envelopes();
 drop function if exists public.curio_retire_dm_device(text);
 drop function if exists public.curio_publish_dm_device(text, text);
