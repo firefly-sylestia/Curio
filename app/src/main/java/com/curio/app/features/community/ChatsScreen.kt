@@ -124,7 +124,11 @@ fun ChatsScreen(navController: NavController) {
             onSuccess = {
                 // A transient empty response must not erase the cached people
                 // before PostgREST/realtime has finished warming up.
-                if (it.isNotEmpty() || !cacheHydrated) threads = it
+                if (it.isNotEmpty() || !cacheHydrated) {
+                    threads = it
+                    cacheHydrated = true
+                    SocialInboxCache.replaceThreads(context, it)
+                }
                 error = null
             },
             onFailure = { error = it.message }
@@ -138,9 +142,14 @@ fun ChatsScreen(navController: NavController) {
     /** The quiet refresh: no spinner, no flicker, just new rows where there are. */
     suspend fun refreshQuietly(active: String, me: String) {
         SocialApi.threads(active, me).onSuccess {
-            if (it != threads) {
+            // Never replace a visible inbox with a transient empty response.
+            // PostgREST/realtime can briefly return no rows while a screen is
+            // being resumed, which made the identity row disappear and return.
+            if (it.isNotEmpty() && it != threads) {
                 threads = it
+                cacheHydrated = true
                 SocialPeopleCache.remember(context, it.map { thread -> thread.person })
+                SocialInboxCache.replaceThreads(context, it)
             }
         }
     }
@@ -158,8 +167,6 @@ fun ChatsScreen(navController: NavController) {
                 }
             }
             load(token, myUserId)
-        } else {
-            threads = emptyList()
         }
     }
 

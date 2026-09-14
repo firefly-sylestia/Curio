@@ -317,11 +317,14 @@ fun DirectMessageScreen(
         if (text.isEmpty() || sending) return
         sending = true
         SocialApi.editMessage(active, message.id, text).fold(
-            onSuccess = {
-                editing = null
-                draft = ""
-                load(active, message.senderId)
-            },
+onSuccess = {
+  messages = messages.map { current ->
+    if (current.id == message.id) current.copy(body = text, editedAtMillis = System.currentTimeMillis()) else current
+  }
+  SocialMessageCache.write(context, otherUserId, messages)
+  editing = null
+  draft = ""
+},
             onFailure = { failure -> error = failure.message ?: "Couldn't edit that message." }
         )
         sending = false
@@ -345,7 +348,9 @@ fun DirectMessageScreen(
         error = null
         // A reply binds to the message raised above the composer; the banner
         // drops the moment the answer is on its way.
-        val replyTo = quoteTarget?.id
+        // Replies are displayed against the exact bubble the user selected, but
+        // the database stores every reply against the conversation root.
+        val replyTo = quoteTarget?.replyTo ?: quoteTarget?.id
         quoteTarget = null
 
         // Optimistic: the bubble is on screen before the request leaves, and
@@ -752,9 +757,8 @@ fun DirectMessageScreen(
                         }
                     }
 
-                    itemsIndexedWithDays(thread) { index, message, dayLabel, firstOfRun, lastOfRun ->
+                    itemsIndexedWithDays(thread) { index, message, _, firstOfRun, lastOfRun ->
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            if (dayLabel != null) SocialDayDivider(dayLabel)
                             MessageEntry(
                                 message = message,
                                 firstOfRun = firstOfRun,
@@ -938,6 +942,13 @@ fun DirectMessageScreen(
  * than as people talking. A run breaks on a change of sender, a gap of more
  * than five minutes, or a new day.
  */
+private fun dmTimeStamp(millis: Long): String {
+    if (millis <= 0L) return ""
+    return java.time.Instant.ofEpochMilli(millis)
+        .atZone(java.time.ZoneId.systemDefault())
+        .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+}
+
 private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedWithDays(
     thread: List<CurioDirectMessage>,
     row: @Composable (index: Int, message: CurioDirectMessage, dayLabel: String?, first: Boolean, last: Boolean) -> Unit
@@ -946,19 +957,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedWithDays(
         val message = thread[index]
         val previous = thread.getOrNull(index - 1)
         val next = thread.getOrNull(index + 1)
-        val newDay = previous == null ||
-            socialDayLabel(previous.createdAtMillis) != socialDayLabel(message.createdAtMillis)
-        val sameAsPrevious = !newDay && previous != null &&
+        val sameAsPrevious = previous != null &&
             previous.mine == message.mine &&
             message.createdAtMillis - previous.createdAtMillis <= 5 * 60 * 1000
         val sameAsNext = next != null &&
-            socialDayLabel(next.createdAtMillis) == socialDayLabel(message.createdAtMillis) &&
             next.mine == message.mine &&
             next.createdAtMillis - message.createdAtMillis <= 5 * 60 * 1000
         row(
             index,
             message,
-            if (newDay) socialDayLabel(message.createdAtMillis) else null,
+            null,
             !sameAsPrevious,
             !sameAsNext
         )
@@ -1117,7 +1125,7 @@ private fun MessageEntry(
                         MessageActionSheet(
                             mine = message.mine,
                             current = reactions.firstOrNull { it.userId == myUserId }?.kind,
-                            canEdit = message.mine && message.editableText &&
+                            canEdit = AppPreferences.socialTextEditingState && message.mine && message.editableText &&
                                 !message.id.startsWith(LOCAL_ID_PREFIX),
                             canRemove = onRemove != null,
                             onPick = onPick,
@@ -1308,7 +1316,7 @@ private fun MessageBubble(
                                 modifier = Modifier.align(Alignment.End)
                             ) {
                                 Text(
-                                    text = socialStamp(message.createdAtMillis),
+                                    text = dmTimeStamp(message.createdAtMillis),
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontSize = 8.sp,
                                         lineHeight = 8.sp

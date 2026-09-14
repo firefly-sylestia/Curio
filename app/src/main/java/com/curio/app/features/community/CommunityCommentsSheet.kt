@@ -241,7 +241,7 @@ internal fun CommunityCommentsSheet(
                         depth = depth,
                         onAuthor = { if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId) },
                         onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
-                        onEdit = if (reply.mine) {
+                        onEdit = if (reply.mine && AppPreferences.socialTextEditingState) {
                             {
                                 editing = reply
                                 text = reply.body
@@ -416,9 +416,15 @@ internal fun CommunityCommentsSheet(
                                     accessToken, editTarget.id, text
                                 ).fold(
                                     onSuccess = {
+                                        replies = replies.map { current ->
+                                            if (current.id == editTarget.id) current.copy(
+                                                body = text,
+                                                editedAtMillis = System.currentTimeMillis()
+                                            ) else current
+                                        }
+                                        SocialCommentsCache.write(context, card.id, replies)
                                         editing = null
                                         text = ""
-                                        load()
                                     },
                                     onFailure = { error = it.message }
                                 )
@@ -562,7 +568,7 @@ internal fun CommunityReplyRow(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 9.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
                 // The DISPLAY name leads; the @username rides the meta line
                 // beneath it, beside the age and the reply's own actions.
