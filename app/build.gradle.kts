@@ -111,7 +111,7 @@ android {
         // v113 — 1.1.0: new cosmic launcher icon + the accumulated feature
         // releases (Updates page, auto backup, dark mode, …). versionCode is
         // date-based; 20260920 is the +1 bump over the previous 20260919.
-        versionCode = 20260921
+        versionCode = 20260922
         versionName = envReleaseVersion ?: "1.1.1"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
