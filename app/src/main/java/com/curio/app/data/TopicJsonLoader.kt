@@ -624,7 +624,11 @@ object TopicJsonLoader {
                     season = ep.optInt("season", 1),
                     number = ep.optInt("number", i + 1),
                     title = ep.optString("title", "Episode ${i + 1}"),
-                    summary = ep.optString("summary", "")
+                    summary = ep.optString("summary", ""),
+                    airdate = ep.optString("airdate", ""),
+                    runtime = ep.optInt("runtime", 0),
+                    rating = ep.optDouble("rating", 0.0).toFloat(),
+                    stillUrl = ep.optString("stillUrl", "")
                 )
             }
         } else null

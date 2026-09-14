@@ -5292,10 +5292,18 @@ private fun EpisodeNotesSheet(
     onSelectEpisode: (com.curio.app.data.SeriesEpisode) -> Unit = {},
     onDismiss: () -> Unit
 ) {
-    val episodes = topic.episodes.orEmpty()
+    var episodes by remember { mutableStateOf(topic.episodes.orEmpty()) }
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val fetchConsent = AppPreferences.seriesFetchEnabledState
+    // v-expand — enrich episodes with TVMaze metadata (airdate, runtime,
+    // rating, still image) when the user has fetch consent. Runs once
+    // per show open; the fetcher is memoized so reopens are instant.
+    LaunchedEffect(topic.name, fetchConsent) {
+        if (fetchConsent && episodes.isNotEmpty()) {
+            episodes = SeriesEpisodeFetcher.enrich(topic.name, episodes)
+        }
+    }
     // v371 — same resolved-poster fix as the album sheet: the palette must
     // come from the RESOLVED poster URL (TVMaze → iTunes), not the (usually
     // empty) authored topic.imageUrl — otherwise the series sheet always
@@ -5791,8 +5799,28 @@ private fun EpisodeNotesSheet(
                                                 .height(1.dp)
                                                 .background(accent.copy(alpha = 0.22f))
                                         )
+                                        // v-expand — episode still image when available.
+                                        if (ep.stillUrl.isNotBlank()) {
+                                            coil.compose.AsyncImage(
+                                                model = ep.stillUrl,
+                                                contentDescription = "Episode still",
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(160.dp)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                            )
+                                        }
+                                        // Metadata chips: season/episode + airdate +
+                                        // runtime + rating in a compact row.
+                                        val metaParts = buildList {
+                                            add("S$season · E${ep.number}")
+                                            if (ep.airdate.isNotBlank()) add(ep.airdate)
+                                            if (ep.runtime > 0) add("${ep.runtime}m")
+                                            if (ep.rating > 0f) add("\u2605 ${"%.1f".format(ep.rating)}")
+                                        }
                                         Text(
-                                            "Season $season · Episode ${ep.number}",
+                                            metaParts.joinToString("  ·  "),
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                             color = if (isOpen) accent.copy(alpha = 0.9f) else ink
                                         )
@@ -5801,10 +5829,6 @@ private fun EpisodeNotesSheet(
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
                                             color = if (isOpen) ink else onSurface
                                         )
-                                        // v352 — the Watched toggle + Like
-                                        // heart moved onto the row (chips
-                                        // above); the panel now only holds
-                                        // the episode notes.
                                     }
                                 }
                             }

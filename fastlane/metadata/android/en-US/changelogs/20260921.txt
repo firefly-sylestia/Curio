@@ -6,6 +6,7 @@ ADD:
 - Cabinet v2 is now on by default. Saved entries only appear inside their collection, not as a separate home section. Empty-cabinet suggestions are grouped by category (Books, Series, Albums, Places, People, Science).
 - Delete post now asks for confirmation before removing it from the wall.
 - Curio Alive motion layer is on by default for new installs.
+- Series episodes now show TVMaze metadata: airdate, runtime, rating, and episode still images are fetched and displayed in the expanded episode card.
 - Messages: swipe any bubble to reply. The conversation is threaded now, with the words you are answering shown inside the answer.
 - Messages: hold a bubble for Instagram-style actions. The emoji palette, Copy, Edit, Remove and Reply float right on the thread instead of a dialog, and a double-tap is the heart.
 - Messages: your bubbles wear the brand rose and theirs stay calm neutral, so a conversation reads at a glance in both themes.
