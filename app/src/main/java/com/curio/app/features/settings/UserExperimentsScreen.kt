@@ -206,6 +206,17 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            item { SettingsSectionHeading("Social") }
+            item {
+                SettingsOptionCard {
+                    ExperimentSwitchRow(
+                        "Social text editing",
+                        "Show edit controls for your own direct messages and comments. Experimental.",
+                        AppPreferences.socialTextEditingState
+                    ) { AppPreferences.setSocialTextEditingEnabled(context, it) }
+                }
+            }
+
             item { SettingsSectionHeading("Content tools") }
             item {
                 SettingsOptionCard {

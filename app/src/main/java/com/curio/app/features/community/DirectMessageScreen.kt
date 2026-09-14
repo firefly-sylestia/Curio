@@ -1122,7 +1122,7 @@ private fun MessageEntry(
                         MessageActionSheet(
                             mine = message.mine,
                             current = reactions.firstOrNull { it.userId == myUserId }?.kind,
-                            canEdit = message.mine && message.editableText &&
+                            canEdit = AppPreferences.socialTextEditingState && message.mine && message.editableText &&
                                 !message.id.startsWith(LOCAL_ID_PREFIX),
                             canRemove = onRemove != null,
                             onPick = onPick,

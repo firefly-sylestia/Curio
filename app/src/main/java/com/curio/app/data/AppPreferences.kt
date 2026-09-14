@@ -520,7 +520,7 @@ object AppPreferences {
         return added
     }
 
-    // ── Series watched progress (v350) ───────────────────────────���───────
+    // ── Series watched progress (v350) ───────────────────────���───���───────
     // Per-show set of watched episode keys ("S1E3"): JSON object show name →
     // JSON array of keys. The episode-list sheet toggles an episode; the UI
     // derives watched counts per season from the authored episode list.
@@ -1151,6 +1151,8 @@ object AppPreferences {
     // bottom sheet, a live recording pulse and springy take switching. The
     // paper notes themselves are untouched; OFF = today's capture page.
     var captureStudioState by mutableStateOf(true)
+  var socialTextEditingState by mutableStateOf(false)
+  private set
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -1735,6 +1737,7 @@ object AppPreferences {
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
         captureStudioState = isCaptureStudioEnabled(context)
+  socialTextEditingState = isSocialTextEditingEnabled(context)
         cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -2077,6 +2080,7 @@ object AppPreferences {
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
     private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
+  private const val KEY_SOCIAL_TEXT_EDITING = "social_text_editing_enabled"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
@@ -2208,10 +2212,19 @@ object AppPreferences {
     fun isCaptureStudioEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_CAPTURE_STUDIO, true)
 
-    fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
-        captureStudioState = enabled
-    }
+  fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
+  prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
+  captureStudioState = enabled
+  }
+
+  fun isSocialTextEditingEnabled(context: Context): Boolean =
+  prefs(context).getBoolean(KEY_SOCIAL_TEXT_EDITING, false)
+
+  fun setSocialTextEditingEnabled(context: Context, enabled: Boolean) {
+  prefs(context).edit().putBoolean(KEY_SOCIAL_TEXT_EDITING, enabled).apply()
+  socialTextEditingState = enabled
+  }
+
 
     // v3xx — the "Subtle pill glow" experiment concluded: subtle is the
     // always-on default, toggle + plumbing removed.
