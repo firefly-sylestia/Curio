@@ -7,7 +7,7 @@
 
 ## What Curio processes
 
-Curio's offline discovery library stays on the device. When Online Mode is enabled, Curio processes account identifiers, username/display name, selected avatar style, bio, friend relationships, public cards/replies/reactions/reports, service timestamps and technical security records needed to run the service. Direct messages use the selected shared conversation mode: encrypted messages are uploaded as ciphertext and encryption metadata; encryption-off messages are uploaded as text.
+Curio's offline discovery library stays on the device. When Online Mode is enabled, Curio processes account identifiers, username/display name, selected avatar style, bio, friend relationships, public cards/replies/reactions/reports, service timestamps and technical security records needed to run the service. Direct-message encryption is not currently supported, so direct messages are uploaded as text over the protected Online Mode connection.
 
 ## Why and how long
 

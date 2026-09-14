@@ -365,7 +365,7 @@ fun CabinetV2Content(navController: NavController) {
             V2ShelfId.CURRENTLY_READING to (seededById["shelf:currently-reading"]?.members?.size ?: 0),
             V2ShelfId.WANT_TO_READ to (seededById["shelf:want-to-read"]?.members?.size ?: 0),
             V2ShelfId.SAVED to entries.size,
-            V2ShelfId.COMPLETED to (seededById["shelf:completed"]?.members?.size ?: 0),
+            V2ShelfId.COMPLETED to likedTopics.size,
             V2ShelfId.NOTES to noteEntries.size,
             V2ShelfId.PERSONAL to (seededById["shelf:personal"]?.members?.size ?: 0)
         )
@@ -545,6 +545,7 @@ fun CabinetV2Content(navController: NavController) {
         selectionMode -> "${selectedEntryIds.size} selected"
         openCollection != null -> openCollection.name
         openLevel == SHELF_LEVEL_FAVORITES -> "Favorites"
+        openLevel == SHELF_LEVEL_COMPLETED -> "Completed"
         openLevel == SHELF_LEVEL_SAVED -> "Saved entries"
         openLevel == SHELF_LEVEL_NOTES -> "Notes"
         openLevel == "everything" -> "Cupboard"
@@ -554,6 +555,7 @@ fun CabinetV2Content(navController: NavController) {
         selectionMode -> "Long-press cards to select"
         openCollection != null -> "${openCollection.members.size} item${if (openCollection.members.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_FAVORITES -> "${likedTopics.size} liked topic${if (likedTopics.size == 1) "" else "s"}"
+        openLevel == SHELF_LEVEL_COMPLETED -> "${likedTopics.size} completed topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
         openLevel == SHELF_LEVEL_NOTES -> "${noteEntries.size} notes & voice captures"
         openLevel == "everything" -> "Books · albums · series"
@@ -756,7 +758,7 @@ fun CabinetV2Content(navController: NavController) {
                 // v3xx43 — FAVORITES = the topics you liked (the reveal
                 // heart), listed as topic rows; the media covers live in the
                 // Cupboard, so the two shelves are no longer identical.
-                openLevel == SHELF_LEVEL_FAVORITES -> v2LikedTopicItems(
+                openLevel == SHELF_LEVEL_FAVORITES || openLevel == SHELF_LEVEL_COMPLETED -> v2LikedTopicItems(
                     likes = likedTopics,
                     searchQuery = searchQuery,
                     catalogReady = catalogReady,
@@ -827,6 +829,7 @@ fun CabinetV2Content(navController: NavController) {
                     onOpenShelf = { id ->
                         openLevel = when (id) {
                             V2ShelfId.FAVORITES -> SHELF_LEVEL_FAVORITES
+                            V2ShelfId.COMPLETED -> SHELF_LEVEL_COMPLETED
                             V2ShelfId.SAVED -> SHELF_LEVEL_SAVED
                             V2ShelfId.NOTES -> SHELF_LEVEL_NOTES
                             else -> {
@@ -1556,7 +1559,7 @@ private fun V2HeroTrailing(
 
 // ────────────────────────────────────────────────────────────────────────
 // Collection cards
-// ───────────────────��────────────────────────────────────────────────────
+// ───────────────────��──────────────────────��─────────────────────────────
 
 /** The "+ New collection" tile at the foot of the collections home. */
 @Composable

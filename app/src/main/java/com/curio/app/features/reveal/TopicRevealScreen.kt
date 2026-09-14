@@ -331,7 +331,7 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
-    // v3xx ����� the episode an EPISODES chip opens the series sheet at (null =
+    // v3xx ������� the episode an EPISODES chip opens the series sheet at (null =
     // opened from the poster card, list starts at the top). Mirrors the
     // album sheet's [selectedAlbumTrack].
     var selectedSeriesEpisode by remember { mutableStateOf<com.curio.app.data.SeriesEpisode?>(null) }
@@ -1046,7 +1046,7 @@ fun TopicRevealScreen(
                 // the card. The tags row below simply follows the hero
                 // directly.
 
-                // ── 5. Teaser card ─────────────────────────────────���────────
+                // ── 5. Teaser card ───────────────────────────────���─���────────
                 // v135 — only rendered once the topic resolves: an
                 // unresolvable legacy topic shows its name + actions instead
                 // of a permanent "Loading topic…" placeholder.
@@ -1085,7 +1085,7 @@ fun TopicRevealScreen(
 
         }
 
-        // ── Floating Category + Favorite bar (v212) ──────────────────────
+        // ── Floating Category + Completed bar (v212) ─────────────────────
         // Replaces the old Like/Dislike pill: category icon + name on the
         // left (expands on favorite), favorite star on the right. Slides
         // away on scroll-down, back on scroll-up. Now also visible in
@@ -4923,7 +4923,7 @@ private fun AlbumNotesSheet(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════���══════════════════════════════════
 // v336 — Album sheet helpers (synopsis accordion, heart glyph, listen links)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -6251,7 +6251,7 @@ private fun RevealSentimentPill(
         ) {
             SentimentSegment(
                 icon = if (isFav) CurioIcons.Star else CurioIcons.StarOutline,
-                label = "Favorite",
+                label = "Completed",
                 active = isFav,
                 accent = accent,
                 ink = ink,

@@ -27,7 +27,7 @@ Do not upload or publish material you do not have permission to use. By posting 
 
 ## 5. Direct messages and encryption
 
-Direct-message encryption is intended to protect message bodies in supported encrypted chats, but it is not a guarantee against a compromised device, a participant screenshotting content, backup/operating-system risks, a lost device key, or a lawful request directed to a participant. Some chats may have encryption switched off by a participant; the conversation visibly shows the current shared mode. Members should not send information they cannot afford to disclose.
+Direct-message encryption is not currently supported. Direct messages are sent as plaintext over the protected Online Mode connection and are not end-to-end encrypted. Members should not send information they cannot afford to disclose. Community cards, replies, reactions, reports, usernames and profile text are likewise not covered by end-to-end encryption.
 
 ## 6. Service rules and availability
 
