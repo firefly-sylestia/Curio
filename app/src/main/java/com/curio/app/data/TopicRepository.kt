@@ -83,13 +83,10 @@ object TopicRepository {
                     AppPreferences.setTopicCatalogSyncVersion(context, currentVersion)
                     AppPreferences.setTopicCatalogLastUpdate(context, installedAt)
                 }
+                // Mark the repository ready after the indexed Room catalog is
+                // available. Do not hydrate every category into heap here;
+                // callers should load only the lane/page they need.
                 initialized = true
-                // v294 — Pre-warm TopicJsonLoader caches from Room so
-                // counts and topic data are available immediately on
-                // restart (the in-memory caches are empty after process
-                // death). Loader reads then hit the warm cache / Room fast
-                // path instead of re-parsing JSON files.
-                warmLoaderFromRoom(dao)
             } else {
                 Log.e("TopicRepository", "Topic import completed with zero rows; will retry next launch")
             }
