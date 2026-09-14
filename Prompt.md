@@ -1,5 +1,18 @@
 # Prompt Log — current request
 
+## Request (2026-09-14, COMPLETE — schema.sql drop-order fix: delivery-mode trigger)
+
+Re-pasting schema.sql failed with `2BP01: cannot drop function
+curio_enforce_dm_delivery_mode() because other objects depend on it` — the
+trigger `dm_messages_enforce_delivery_mode` on `dm_messages` still referenced
+it. The §6d encryption-removal block dropped the function but never its
+trigger. Fixed: `drop trigger if exists dm_messages_enforce_delivery_mode on
+public.dm_messages;` now precedes the function drop (committed with the
+trigger fix, pushed as `80c747be`). Audited the rest of the removal list:
+`curio_validate_dm_envelope` and `curio_pin_dm_conversation_parties` have no
+surviving triggers on the file's tables, so no other drop can hit 2BP01.
+USER ACTION: re-paste schema.sql — it now runs clean.
+
 ## Request (2026-09-14, COMPLETE — CI fix: hideMember door + suspend-in-mapped)
 
 CI failed on two errors from the moderation batch (`ad9a41b5`):
