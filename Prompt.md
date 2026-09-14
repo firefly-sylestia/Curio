@@ -1,5 +1,77 @@
 # Prompt Log — current request
 
+## Request (2026-09-14, COMPLETE — composer remake + DM Instagram pass)
+
+User asks (post-PR-129 review): the new post screen — is it good and wired?
+Remove it and remake it. Plus: swipe-to-reply in DMs; the reaction/edits dialog
+is bad — make it Instagram style; give send/receive bubbles distinct colors
+and make the bubble better.
+
+Decisions confirmed with the user (ask_user):
+- Replies are TRUE threaded rows (schema change accepted; user re-pastes
+  schema.sql), not quote-text.
+- Gestures are Instagram-exact: double-tap = heart; hold = floating bar with
+  the emoji palette + Copy/Edit/Remove; no dialogs.
+- The old bottom-sheet composer is DELETED (one composer only).
+
+Shipped:
+- Schema §5e: `dm_messages.reply_to` (FK, on delete set null) + index +
+  `curio_check_dm_reply` trigger (same-conversation, one level deep, no
+  self-reply). USER ACTION REQUIRED: re-paste supabase/schema.sql.
+- SocialApi: `reply_to` in MESSAGE_COLUMNS + `CurioDirectMessage.replyTo`,
+  `replyTo` param on sendPlaintext/sendEncrypted, `replyPreview()` read.
+- DirectMessageScreen: swipe-to-reply (bubble leans, 60% threshold arms the
+  composer's reply banner), double-tap heart, hold = `MessageActionSheet`
+  (floating pills, no dialog — the old AlertDialog is deleted), quote inside
+  the bubble (`ReplyQuoteRow`), screen-level `replyQuotes` map fetching
+  out-of-window parents OUTSIDE composition (no suspend-in-composition),
+  distinct fills: mine = `curioDialogActionColor()` (brand rose), theirs =
+  neutral raised surface, both opaque + 1dp shadow.
+- CommunityPostScreen.kt remade (full-screen composer, all helpers restored
+  from the merged version with CI's categorySlug fix; keyboard options +
+  AnimatedContent polish added) and wired: the wall's floating Post button
+  opens it directly. Old `CommunityComposerSheet` (540 lines) + its private
+  helpers (ComposerPill, quickFactOf, TopicPickRow, hexOf) deleted; seed
+  params had no external callers (verified).
+- Changelog 20260921.txt updated (4 new ADD bullets).
+- app/AGENTS.md: posting-door contract + new DM-gestures contract updated.
+
+Notes for the next pass:
+- The realtime delta pull unchanged: replies arrive as normal dm_messages
+  rows (reply_to rides MESSAGE_COLUMNS), so threading needs no new bindings.
+- React-toggle semantics: pickReactionScreen already toggles; the sheet's
+  palette and the double-tap both land there.
+- CI on this push is authoritative (no Gradle in this environment).
+
+## Request (2026-09-14, COMPLETE — PR #129 merge review)
+
+User asked to review https://github.com/firefly-sylestia/Curio/pull/129
+(feat: Curio Alive animations + Phase 4 social polish, merged as 4fb0012)
+and confirm everything is alright. Review only — no code changes.
+
+Findings:
+- Merge itself is sound: 6/6 checks green at merge, local checkout already
+  contains it, and the stale `categorySlug` CI error was fixed inside the PR
+  (4a53ff41). Curio Alive ships correctly as an opt-in Experiments toggle with
+  classic motion preserved when OFF. The notification-ID change (per-peer/card
+  hashed ids over the 7311/7312 bases) is collision-safe across channels and
+  keeps the POST_NOTIFICATIONS guard. Scope discipline held: Android only.
+- ⚠️ The full-screen composer (CommunityPostScreen.kt, 716 lines) is merged
+  but NOT reachable: the only wiring commit (c1e2ac5a, CommunityScreenEntry.kt)
+  was reverted in 005dce82 shortly after. The wall still opens the old
+  CommunityComposerSheet bottom sheet in CommunityScreen.kt, so the PR's
+  headline composer claim is not user-live. Asked the user whether the revert
+  was intentional.
+- ⚠️ No fastlane changelog entry for the PR's user-visible changes (Alive
+  toggle, notification improvements, icon/nav fixes) — 20260921.txt untouched
+  by the merge.
+- CI on HEAD (the revert commit 005dce82) was still in progress at review
+  time; the merge commit itself is green. The revert only deletes an
+  unreferenced file, so risk is minimal.
+- Minor: CurioAlivePreferences.enabledState is consumed only by
+  UserExperimentsScreen (which seeds it on entry); all motion call sites read
+  isEnabled(context) directly — correct, slightly fragile.
+
 ## Request (2026-09-14, IN PROGRESS — full-screen composer + canonical social card polish)
 
 User asked to continue the same Phase 4 branch after the composer redesign, fix the remaining CI compiler error, and continue the quality pass. The Social post composer should remain a dedicated full-screen creation flow rather than a bottom sheet, and topic posts must render using the exact share-card visual system rather than a lookalike.

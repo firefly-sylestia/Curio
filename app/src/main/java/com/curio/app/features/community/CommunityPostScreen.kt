@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -36,23 +38,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -208,7 +214,7 @@ internal fun CommunityPostScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -234,7 +240,13 @@ internal fun CommunityPostScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     item(key = "preview") {
-                        AnimatedContent(targetState = kind, label = "post-kind") { mode ->
+                        AnimatedContent(
+                            targetState = kind,
+                            label = "post-kind",
+                            transitionSpec = {
+                                (fadeIn() + slideInVertically { it / 6 }).togetherWith(fadeOut())
+                            }
+                        ) { mode ->
                             if (mode == KIND_CARD) {
                                 Surface(
                                     shape = RoundedCornerShape(28.dp),
@@ -291,6 +303,10 @@ internal fun CommunityPostScreen(
                                     .focusRequester(writerRequester),
                                 textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                                 cursorBrush = SolidColor(curioDialogActionColor()),
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    imeAction = ImeAction.Default
+                                ),
                                 decorationBox = { inner ->
                                     Box {
                                         if (text.isBlank()) {
@@ -371,7 +387,7 @@ internal fun CommunityPostScreen(
                                                 }
                                             )
                                             Column(
-                                                modifier = Modifier.height(260.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                                                modifier = Modifier.height(260.dp).verticalScroll(rememberScrollState()),
                                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                                             ) {
                                                 topicResults.forEach { entry ->
@@ -635,7 +651,7 @@ private fun ComposerChoiceRow(
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
         )
         Row(
-            Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+            Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             values.forEach { value ->
@@ -683,6 +699,12 @@ private fun ComposerField(
     }
 }
 
+/**
+ * The preview draws the SAME [CommunityCard] the wall will build from the
+ * posted row — the canonical share-card pipeline, never a lookalike. The
+ * author fields come from this device's own identity; the server stamps the
+ * real ones on the posted row.
+ */
 @Composable
 private fun draftPreviewCard(draft: CommunityCardDraft): CommunityCard {
     val context = LocalContext.current

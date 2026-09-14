@@ -831,6 +831,49 @@ alter table public.dm_messages add column if not exists ciphertext text;
 alter table public.dm_messages add column if not exists nonce text;
 alter table public.dm_messages add column if not exists encryption_version text;
 alter table public.dm_messages add column if not exists migration_state text not null default 'legacy';
+
+-- Threaded replies (v3xx54): a message may answer ONE other message of the
+-- same conversation. Null = a normal line. The trigger below enforces the
+-- rules the client also follows: the parent must exist, sit in the SAME
+-- conversation, be at most ONE level deep, and never be the message itself.
+alter table public.dm_messages add column if not exists reply_to uuid references public.dm_messages (id) on delete set null;
+create index if not exists dm_messages_reply_to_idx on public.dm_messages (reply_to);
+
+create or replace function public.curio_check_dm_reply()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    parent record;
+    convo text := public.curio_dm_conversation_of(new.sender, new.recipient);
+    parent_convo text;
+begin
+    if new.reply_to is null then
+        return new;
+    end if;
+    if new.reply_to = new.id then
+        raise exception 'curio: a message cannot reply to itself';
+    end if;
+    select sender, recipient, reply_to into parent from public.dm_messages where id = new.reply_to;
+    if not found then
+        raise exception 'curio: the message being replied to no longer exists';
+    end if;
+    parent_convo := public.curio_dm_conversation_of(parent.sender, parent.recipient);
+    if parent_convo is null or parent_convo <> convo then
+        raise exception 'curio: a reply must live in the same conversation as its parent';
+    end if;
+    -- Threads stay one level deep: a reply to a reply quotes the root instead.
+    if parent.reply_to is not null then
+        raise exception 'curio: replies nest one level deep — reply to the root message';
+    end if;
+    return new;
+end $$;
+drop trigger if exists dm_messages_check_reply on public.dm_messages;
+create trigger dm_messages_check_reply
+    before insert on public.dm_messages
+    for each row execute function public.curio_check_dm_reply();
 alter table public.dm_messages drop constraint if exists dm_messages_migration_state_check;
 alter table public.dm_messages add constraint dm_messages_migration_state_check check (migration_state in ('legacy','plaintext','encrypted','pending_reencrypt'));
 alter table public.dm_messages alter column body drop not null;

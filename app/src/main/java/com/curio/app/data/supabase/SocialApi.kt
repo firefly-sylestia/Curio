@@ -156,7 +156,9 @@ data class CurioDirectMessage(
     val nonce: String? = null,
     val encryptionVersion: String? = null,
     val migrationState: String = "legacy",
-    val editedAtMillis: Long? = null
+    val editedAtMillis: Long? = null,
+    /** The message this one answers — one level deep, same conversation. */
+    val replyTo: String? = null
 )
 
 /** A device of one conversation party that still has no envelope for a version. */
@@ -280,7 +282,7 @@ object SocialApi {
     private const val THREAD_LIMIT = 200
 
     /** The columns a conversation read needs — one list, both paths. */
-    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,ciphertext,nonce,encryption_version,migration_state,created_at,read_at,edited_at"
+    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,ciphertext,nonce,encryption_version,migration_state,created_at,read_at,edited_at,reply_to"
 
     /**
      * The public identity columns, in two shapes.
@@ -975,12 +977,29 @@ private const val PERSON_COLUMNS_PRIVACY =
                         editedAtMillis = row.optString("edited_at")
                             .takeIf { it.isNotBlank() && it != "null" }
                             ?.let(::epochMillis),
+                        replyTo = row.stringOrNull("reply_to"),
                         mine = row.optString("sender") == myUserId
                     )
                 )
             }
         }
     }
+
+  /**
+   * The quoted line a reply points at. A reply renders its parent's words
+   * above its own bubble, and the parent is usually still on screen — this
+   * read is only for the message that fell out of the loaded window. The
+   * RLS read policy already limits every row to the conversation's two
+   * participants, so a foreign id simply returns nothing (and the caller
+   * renders no quote rather than a wrong one).
+   */
+  suspend fun replyPreview(accessToken: String, messageId: String, myUserId: String): Result<CurioDirectMessage?> = withContext(Dispatchers.IO) {
+    mapped {
+      val path = "$MESSAGES?select=$MESSAGE_COLUMNS&id=eq.${id(messageId)}&limit=1"
+      val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+      parseMessages(SupabaseClient.executeBody(request), myUserId).firstOrNull()
+    }
+  }
 
   /**
    * Retires one of this account's own device identities.
@@ -1195,7 +1214,7 @@ private const val PERSON_COLUMNS_PRIVACY =
   }
 
   /** Sends a new plaintext row only after the server accepted plaintext mode for this chat. */
-  suspend fun sendPlaintext(accessToken: String, toUserId: String, body: String, myUserId: String): Result<Unit> = withContext(Dispatchers.IO) {
+  suspend fun sendPlaintext(accessToken: String, toUserId: String, body: String, myUserId: String, replyTo: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
     mappedUnit {
       require(body.isNotBlank()) { "Message is empty." }
       require(toUserId != myUserId) { "You can't message yourself." }
@@ -1204,6 +1223,7 @@ private const val PERSON_COLUMNS_PRIVACY =
         .put("recipient", toUserId)
         .put("body", body)
         .put("migration_state", "plaintext")
+      if (replyTo != null) payload.put("reply_to", replyTo)
       val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
         .header("Prefer", "return=minimal")
         .post(payload.toString().toRequestBody(jsonMediaType)).build()
@@ -1218,7 +1238,8 @@ private const val PERSON_COLUMNS_PRIVACY =
         ciphertext: String,
         nonce: String,
         encryptionVersion: String,
-        myUserId: String
+        myUserId: String,
+        replyTo: String? = null
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             require(ciphertext.isNotBlank() && nonce.isNotBlank()) { "Encrypted message is empty." }
@@ -1235,6 +1256,7 @@ private const val PERSON_COLUMNS_PRIVACY =
                 .put("nonce", nonce)
                 .put("encryption_version", encryptionVersion)
                 .put("migration_state", "encrypted")
+            if (replyTo != null) payload.put("reply_to", replyTo)
             val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
                 .header("Prefer", "return=minimal")
                 .post(payload.toString().toRequestBody(jsonMediaType))

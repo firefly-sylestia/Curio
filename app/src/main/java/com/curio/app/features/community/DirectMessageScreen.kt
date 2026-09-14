@@ -23,33 +23,38 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
@@ -62,8 +67,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -93,7 +100,6 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -103,6 +109,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.async
+import kotlin.math.roundToInt
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -176,7 +183,6 @@ fun DirectMessageScreen(
     var reactions by remember { mutableStateOf<Map<String, List<CurioDmReaction>>>(emptyMap()) }
     var draft by remember { mutableStateOf("") }
     var peerTyping by remember { mutableStateOf(false) }
-    var reactionTarget by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
     // This is read from the server-owned conversation row. It is never a
@@ -202,16 +208,15 @@ fun DirectMessageScreen(
     var encryptionIssue by remember(otherUserId) { mutableStateOf<String?>(null) }
 
     /**
-     * Reacting to one message, from ANYWHERE on the screen (the bubbles and
-     * the hold-menu dialog both land here): optimistic glyph first, server
-     * confirm after, revert on failure. Guarded so a call without a live
-     * session is simply a no-op.
+     * Reacting to one message, from the floating action sheet (the palette is
+     * the sheet's first row): optimistic glyph first, server confirm after,
+     * revert on failure. Guarded so a call without a live session is simply a
+     * no-op.
      */
     fun pickReactionScreen(messageId: String, kind: String, activeToken: String?, activeUserId: String?) {
         if (activeToken == null || activeUserId == null) return
         scope.launch {
             val mine = reactions[messageId]?.firstOrNull { it.userId == activeUserId }
-            reactionTarget = null
             val optimistic = if (mine?.kind == kind) {
                 reactions[messageId].orEmpty().filterNot { it.userId == activeUserId }
             } else {
@@ -428,10 +433,17 @@ fun DirectMessageScreen(
     // one-tap fallback can send the very words the member already typed.
     var failedDraft by remember(otherUserId) { mutableStateOf("") }
 
-    // Long-press actions. A tap still opens reactions; a HOLD is the decided
-    // gesture: it alone reveals Remove (mine) and Edit (mine, plaintext) —
-    // nothing action-like sits under a message a finger is only reading.
+    // The message whose floating action sheet is up (Instagram style): the
+    // palette, Copy, Edit and Remove ride ON the thread — no dialog, no scrim.
+    // A second hold on the same bubble drops it.
     var actionTarget by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
+    // The message being ANSWERED: the swipe raised it. Its words ride above
+    // the composer until the answer is sent or the banner is dismissed.
+    var quoteTarget by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
+    // Quotes for replies whose parent fell out of the loaded window, fetched
+    // OUTSIDE composition (a suspend read must never run inside a composable).
+    var replyQuotes by remember(otherUserId) { mutableStateOf<Map<String, String>>(emptyMap()) }
+    val haptics = LocalHapticFeedback.current
     // The message being EDITED: its words load into the composer and the
     // send button becomes Save until the edit is done or dropped.
     var editing by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
@@ -464,6 +476,10 @@ fun DirectMessageScreen(
         sending = true
         error = null
         encryptionIssue = null
+        // A reply binds to the message raised above the composer; the banner
+        // drops the moment the answer is on its way.
+        val replyTo = quoteTarget?.id
+        quoteTarget = null
 
         // Optimistic: the bubble is on screen before the request leaves, and
         // its id is local-only so a refresh can never show it twice.
@@ -473,7 +489,8 @@ fun DirectMessageScreen(
             body = text,
             createdAtMillis = System.currentTimeMillis(),
             readAtMillis = null,
-            mine = true
+            mine = true,
+            replyTo = replyTo
         )
         pending = pending + optimistic
         draft = ""
@@ -496,7 +513,7 @@ fun DirectMessageScreen(
                     }
                 )
             }
-            SocialApi.sendPlaintext(active, otherUserId, text, me).fold(
+            SocialApi.sendPlaintext(active, otherUserId, text, me, replyTo).fold(
                 onSuccess = {
                     SocialApi.setTyping(active, otherUserId, false)
                     // The bubble does NOT vanish while the thread re-reads: it
@@ -626,7 +643,8 @@ fun DirectMessageScreen(
             encrypted.ciphertext,
             encrypted.nonce,
             encrypted.version,
-            me
+            me,
+            replyTo
         ).fold(
             onSuccess = {
                 SocialApi.setTyping(active, otherUserId, false)
@@ -921,15 +939,42 @@ fun DirectMessageScreen(
                 val activeToken = token
                 val activeUserId = myUserId
 
-                fun openReactions(messageId: String) {
-                    reactionTarget = if (reactionTarget == messageId) null else messageId
-                }
-
-                // The real picker logic lives at SCREEN scope (see below), so
-                // the hold-menu dialog — which sits outside the eligible
-                // branch — can react on the member's behalf too.
                 fun pickReaction(messageId: String, kind: String) {
                     pickReactionScreen(messageId, kind, activeToken, activeUserId)
+                }
+
+                // A double-tap IS a heart (Instagram's gesture): the first
+                // palette emoji, picked on the spot — and cleared again by the
+                // same double-tap when it is already the active reaction.
+                fun doubleTapReaction(messageId: String) {
+                    pickReaction(messageId, SocialReactions.PALETTE.first().first)
+                }
+
+                fun beginReply(message: CurioDirectMessage) {
+                    editing = null
+                    quoteTarget = message
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+
+                // A reply whose parent is no longer in the window still shows
+                // its words: fetch them once, outside composition, into the
+                // small quote map. RLS limits the read to this conversation.
+                val unresolvedQuoteIds = thread
+                    .mapNotNull { it.replyTo }
+                    .filter { id -> thread.none { it.id == id } && replyQuotes[id] == null }
+                    .distinct()
+                LaunchedEffect(unresolvedQuoteIds) {
+                    if (unresolvedQuoteIds.isEmpty()) return@LaunchedEffect
+                    val active = activeToken
+                    val me = activeUserId
+                    if (active == null || me == null) return@LaunchedEffect
+                    unresolvedQuoteIds.forEach { id ->
+                        SocialApi.replyPreview(active, id, me).getOrNull()?.let { row ->
+                            if (row.body.isNotBlank()) {
+                                replyQuotes = replyQuotes + (id to row.body)
+                            }
+                        }
+                    }
                 }
 
                 LazyColumn(
@@ -1026,29 +1071,48 @@ fun DirectMessageScreen(
                                 // an older receipt would be a lie if a newer
                                 // message was still unread.
                                 receipt = if (index == seenIndex) message.readAtMillis else null,
-                                accent = reactionTarget == message.id,
+                                actionSheet = actionTarget?.id == message.id,
                                 reactions = reactions[message.id].orEmpty(),
                                 myUserId = activeUserId,
-                                onTap = { openReactions(message.id) },
-                                onLongPress = { actionTarget = message },
-                                onPick = { kind -> pickReaction(message.id, kind) },
-                                onDeleteLocal = {
-                                    SocialMessageCache.hide(context, otherUserId, message.id)
-                                    messages = messages.filterNot { it.id == message.id }
+                                onDoubleTap = { doubleTapReaction(message.id) },
+                                // A second hold on the same bubble drops the sheet.
+                                onHold = {
+                                    actionTarget = if (actionTarget?.id == message.id) null else message
                                 },
-                                onUnsend = if (message.mine && !message.id.startsWith(LOCAL_ID_PREFIX)) {
+                                onSwipeReply = { beginReply(message) },
+                                onReply = { beginReply(message) },
+                                onPick = { kind -> pickReaction(message.id, kind) },
+                                onCopy = {
+                                    val clip = context.getSystemService(Context.CLIPBOARD_SERVICE)
+                                        as? android.content.ClipboardManager
+                                    clip?.setPrimaryClip(
+                                        android.content.ClipData.newPlainText("message", message.body)
+                                    )
+                                    actionTarget = null
+                                },
+                                onEdit = {
+                                    editing = message
+                                    draft = message.body
+                                    actionTarget = null
+                                },
+                                onRemove = if (message.mine && !message.id.startsWith(LOCAL_ID_PREFIX)) {
                                     {
+                                        actionTarget = null
                                         scope.launch {
                                             SocialApi.deleteMessage(activeToken, message.id).fold(
                                                 onSuccess = {
                                                     messages = messages.filterNot { it.id == message.id }
                                                     SocialMessageCache.write(context, otherUserId, messages)
                                                 },
-                                                onFailure = { error = it.message ?: "Couldn't unsend that message." }
+                                                onFailure = { error = it.message ?: "Couldn't remove that message." }
                                             )
                                         }
                                     }
                                 } else null,
+                                quoteOf = message.replyTo?.let { target ->
+                                    (thread + pending + sentShadow).firstOrNull { it.id == target }?.body
+                                        ?: replyQuotes[target]
+                                },
                                 animateIn = message.id.startsWith(LOCAL_ID_PREFIX)
                             )
                         }
@@ -1065,10 +1129,12 @@ fun DirectMessageScreen(
                     title = fallback,
                     sending = sending,
                     editTarget = editing,
+                    quoteTarget = quoteTarget,
                     onDropEdit = {
                         editing = null
                         draft = ""
                     },
+                    onDropQuote = { quoteTarget = null },
                     onDraftChange = { if (it.length <= SocialApi.MAX_MESSAGE_CHARS) draft = it },
                     onSend = { scope.launch { send(activeToken, activeUserId) } }
                 )
@@ -1132,112 +1198,6 @@ fun DirectMessageScreen(
                     }
                 }
             }
-        }
-
-        // The HOLD menu for one message: the reaction palette rides at the
-        // top (the emoji choice used to require a second tap on the bubble —
-        // it lives here, where the finger already is), then Copy (any
-        // message), Edit (mine, plaintext only — an encrypted row is bound to
-        // its key version), Remove (mine). Nothing else: a menu is a
-        // decision, not a page.
-        actionTarget?.let { target ->
-            val canEdit = target.mine && target.migrationState == "plaintext" &&
-                !target.id.startsWith(LOCAL_ID_PREFIX)
-            val canRemove = target.mine && !target.id.startsWith(LOCAL_ID_PREFIX)
-            AlertDialog(
-                onDismissRequest = { actionTarget = null },
-                containerColor = curioDialogContainerColor(),
-                shape = CurioDialogShape,
-                title = {
-                    Text(
-                        text = "Message",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(
-                            text = target.body.take(160) + if (target.body.length > 160) "…" else "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        // The palette, inline: picking one reacts AND closes,
-                        // picking the one already on the message clears it.
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            val current = reactions[target.id]
-                                ?.firstOrNull { it.userId == myUserId }?.kind
-                            SocialReactions.PALETTE.forEach { (emoji, _) ->
-                                val chosen = current != null &&
-                                    SocialReactions.emojiFor(current) == emoji
-                                Surface(
-                                    onClick = {
-                                        actionTarget = null
-                                        pickReactionScreen(target.id, emoji, token, myUserId)
-                                    },
-                                    shape = RoundedCornerShape(50),
-                                    color = if (chosen) curioDialogActionColor().copy(alpha = 0.16f)
-                                    else MaterialTheme.colorScheme.surfaceContainerHigh
-                                ) {
-                                    Text(
-                                        text = emoji,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { actionTarget = null }) { Text("Close") }
-                },
-                confirmButton = {
-                    Row {
-                        TextButton(onClick = {
-                            val clip = context.getSystemService(Context.CLIPBOARD_SERVICE)
-                                as? android.content.ClipboardManager
-                            clip?.setPrimaryClip(
-                                android.content.ClipData.newPlainText("message", target.body)
-                            )
-                            actionTarget = null
-                        }) { Text("Copy") }
-                        if (canEdit) {
-                            TextButton(onClick = {
-                                editing = target
-                                draft = target.body
-                                actionTarget = null
-                            }) { Text("Edit") }
-                        }
-                        if (canRemove) {
-                            TextButton(onClick = {
-                                actionTarget = null
-                                val active = token
-                                if (active != null) {
-                                    scope.launch {
-                                        SocialApi.deleteMessage(active, target.id).fold(
-                                            onSuccess = {
-                                                messages = messages.filterNot { it.id == target.id }
-                                                SocialMessageCache.write(context, otherUserId, messages)
-                                            },
-                                            onFailure = { error = it.message ?: "Couldn't remove that message." }
-                                        )
-                                    }
-                                }
-                            }) {
-                                Text(
-                                    "Remove",
-                                    color = MaterialTheme.colorScheme.error,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    }
-                }
-            )
         }
 
         // An encrypted send that could not be delivered raises THIS instead of
@@ -1454,14 +1414,18 @@ private fun MessageEntry(
     firstOfRun: Boolean,
     lastOfRun: Boolean,
     receipt: Long?,
-    accent: Boolean,
+    actionSheet: Boolean,
     reactions: List<CurioDmReaction>,
     myUserId: String,
-    onTap: () -> Unit,
-    onLongPress: () -> Unit,
+    onDoubleTap: () -> Unit,
+    onHold: () -> Unit,
+    onSwipeReply: () -> Unit,
+    onReply: () -> Unit,
     onPick: (String) -> Unit,
-    onDeleteLocal: () -> Unit,
-    onUnsend: (() -> Unit)?,
+    onCopy: () -> Unit,
+    onEdit: () -> Unit,
+    onRemove: (() -> Unit)?,
+    quoteOf: String?,
     animateIn: Boolean
 ) {
     // `initial = !animateIn` is what makes this safe to use for EVERY row: a
@@ -1487,17 +1451,34 @@ private fun MessageEntry(
                 receipt = receipt,
                 reactions = reactions,
                 myUserId = myUserId,
-                onTap = onTap,
-                onLongPress = onLongPress
+                onDoubleTap = onDoubleTap,
+                onHold = onHold,
+                onSwipeReply = onSwipeReply,
+                quoteOf = quoteOf
             )
-            // The action row under a message is GONE: actions are decided on
-            // a HOLD now, so nothing crowds the message a finger is only
-            // reading. (Reactions still open on a tap.)
-            if (accent) {
-                ReactionBar(
-                    current = reactions.firstOrNull { it.userId == myUserId }?.kind,
+            // Instagram-style action bar: floating pills attached to the held
+            // bubble — the emoji palette first, then Copy and (for mine) Edit
+            // and Remove. No dialog, no scrim: the thread stays readable and
+            // a second hold anywhere drops it.
+            AnimatedVisibility(
+                visible = actionSheet,
+                enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
+                    slideInVertically { it / 3 },
+                exit = fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
+            ) {
+                MessageActionSheet(
                     mine = message.mine,
-                    onPick = onPick
+                    current = reactions.firstOrNull { it.userId == myUserId }?.kind,
+                    // An encrypted row is bound to its key version — words
+                    // written in ciphertext cannot be re-written as text.
+                    canEdit = message.mine && message.migrationState == "plaintext" &&
+                        !message.id.startsWith(LOCAL_ID_PREFIX),
+                    canRemove = onRemove != null,
+                    onPick = onPick,
+                    onCopy = onCopy,
+                    onEdit = onEdit,
+                    onRemove = onRemove,
+                    onReply = onReply
                 )
             }
         }
@@ -1505,14 +1486,17 @@ private fun MessageEntry(
 }
 
 /**
- * One message. Yours sits on the right in the accent container, theirs on the
- * left on the raised surface — the reading direction of every messenger, so
- * who said what needs no label. Corners open up on the first line of a run
- * and only the last line of a run gets the full rounding and the timestamp.
+ * One message. Yours sits on the right in the brand rose, theirs on the left
+ * on the raised surface — the reading direction of every messenger, so who
+ * said what needs no label. Corners open up on the first line of a run and
+ * only the last line of a run gets the full rounding and the timestamp.
  * Both fills are OPAQUE: a translucent bubble let the background bleed
- * through and read as unfinished. A plain TAP opens nothing destructive —
- * it is the reaction tap (with a soft press squish); every decision
- * (copy, edit, remove) lives behind the HOLD.
+ * through and read as unfinished.
+ *
+ * Gestures: a DOUBLE-TAP is the heart (Instagram's), a HOLD raises the
+ * floating action sheet (reactions, copy, edit, remove), and a horizontal
+ * SWIPE answers the message — the bubble leans with the finger and snaps
+ * back when the reply is armed.
  */
 @Composable
 private fun MessageBubble(
@@ -1522,11 +1506,14 @@ private fun MessageBubble(
     receipt: Long?,
     reactions: List<CurioDmReaction>,
     myUserId: String,
-    onTap: () -> Unit,
-    onLongPress: () -> Unit
+    onDoubleTap: () -> Unit,
+    onHold: () -> Unit,
+    onSwipeReply: () -> Unit,
+    quoteOf: String?
 ) {
     val mine = message.mine
     val dark = isCurioDarkTheme()
+    val haptics = LocalHapticFeedback.current
     val shape = if (mine) {
         RoundedCornerShape(
             topStart = 20.dp,
@@ -1543,9 +1530,19 @@ private fun MessageBubble(
         )
     }
 
-    val mineGlyph = reactions.firstOrNull { it.userId == myUserId }?.kind
-    val others = reactions.filterNot { it.userId == myUserId }
-    val haptics = LocalHapticFeedback.current
+    // The swipe-to-answer gesture: the bubble follows the finger up to a
+    // short travel, then the reply banner raises. The lean tracks the finger
+    // exactly while dragging (snap) and springs back to rest on release.
+    var replyDrag by remember { mutableStateOf(0f) }
+    val dragLimit = with(LocalDensity.current) { 56.dp.toPx() }
+    val settle = animateFloatAsState(
+        targetValue = replyDrag,
+        animationSpec = if (replyDrag == 0f) spring(dampingRatio = 0.6f, stiffness = 500f) else snap(),
+        label = "replySettle"
+    )
+    // Whichever way the swipe is answered, the BUBBLE leans the opposite way:
+    // pulling a received bubble rightward is Instagram's own motion.
+    val leanX = if (mine) -settle.value else settle.value
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -1577,46 +1574,75 @@ private fun MessageBubble(
             modifier = Modifier.weight(1f, fill = false)
         ) {
             val press = rememberCurioPressSource(pressedScale = 0.96f)
-            Box(
-                modifier = Modifier
-                    .then(press.modifier)
-                    .clip(shape)
-                    .background(
-                        when {
-                            mine -> if (dark) Color(0xFF3A2A33) else MaterialTheme.colorScheme.primary
-                            dark -> MaterialTheme.colorScheme.surfaceContainerHighest
-                            else -> Color(0xFFF3EDE7)
+            Box(modifier = Modifier.offset { IntOffset(leanX.roundToInt(), 0) }) {
+                Surface(
+                    shape = shape,
+                    color = when {
+                        // Mine: the brand rose, both themes — no more dark
+                        // bubble that read as the other person's.
+                        mine -> curioDialogActionColor()
+                        // Theirs: a raised neutral, clearly not the accent.
+                        dark -> MaterialTheme.colorScheme.surfaceContainerHighest
+                        else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
+                    shadowElevation = 1.dp,
+                    modifier = Modifier.then(press.modifier)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .combinedClickable(
+                                interactionSource = press.interactionSource,
+                                indication = LocalIndication.current,
+                                onClickLabel = "Message options",
+                                onLongClickLabel = "Message options",
+                                // The HOLD is the message's decision point: it
+                                // raises the floating sheet (reactions, copy,
+                                // edit, remove). A second hold drops it.
+                                onLongClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onHold()
+                                },
+                                onDoubleClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onDoubleTap()
+                                },
+                                onClick = {}
+                            )
+                            .pointerInput(message.id) {
+                                detectDragGestures(
+                                    onDragStart = { replyDrag = 0f },
+                                    onDragEnd = {
+                                        if (replyDrag >= dragLimit * 0.6f) {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            onSwipeReply()
+                                        }
+                                        replyDrag = 0f
+                                    },
+                                    onDragCancel = { replyDrag = 0f }
+                                ) { change, amount ->
+                                    change.consume()
+                                    replyDrag = (replyDrag + amount.x).coerceIn(0f, dragLimit)
+                                }
+                            }
+                            .padding(horizontal = 14.dp, vertical = 9.dp)                            ) {
+                        if (quoteOf != null) {
+                            ReplyQuoteRow(quoteOf)
                         }
-                    )
-                    .combinedClickable(
-                        interactionSource = press.interactionSource,
-                        indication = LocalIndication.current,
-                        onClickLabel = "React to this message",
-                        onLongClickLabel = "Message options",
-                        // The HOLD is the message's decision point: it opens
-                        // the action menu (copy, edit, remove, reactions). A
-                        // plain tap keeps opening reactions.
-                        onLongClick = {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onLongPress()
-                        },
-                        onClick = onTap
-                    )
-                    .padding(horizontal = 14.dp, vertical = 9.dp)
-            ) {
-                Text(
-                    text = message.body,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (mine) Color.White
-                    else MaterialTheme.colorScheme.onSurface
-                )
-                if (message.editedAtMillis != null) {
-                    Text(
-                        text = "edited",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (mine) Color.White.copy(alpha = 0.7f)
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
+                        Text(
+                            text = message.body,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (mine) Color.White
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+                        if (message.editedAtMillis != null) {
+                            Text(
+                                text = "edited",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (mine) Color.White.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -1689,56 +1715,116 @@ private fun ReactionChip(kind: String, count: Int, mine: Boolean) {
 }
 
 /**
- * The palette under a tapped message. Every glyph is a name from Curio's own
- * icon set, so a reaction is a word on the server and never an upload.
+ * The quick quote above an answer: the parent's words, one soft bar. Instagram
+ * renders this INSIDE the bubble and Curio does too — the bar is deliberately
+ * quiet so the answer stays the loudest line.
  */
 @Composable
-private fun ReactionBar(
-    current: String?,
+private fun ReplyQuoteRow(quoted: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .height(34.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color.White.copy(alpha = 0.55f))
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = quoted,
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.White.copy(alpha = 0.85f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+/**
+ * The Instagram-style action bar: floating pills attached to the held bubble —
+ * the emoji palette first, then Copy, Edit (mine, plaintext), Remove (mine)
+ * and Reply. No dialog and no scrim: the thread stays readable, and a second
+ * hold anywhere drops the bar.
+ */
+@Composable
+private fun MessageActionSheet(
     mine: Boolean,
-    onPick: (String) -> Unit
+    current: String?,
+    canEdit: Boolean,
+    canRemove: Boolean,
+    onPick: (String) -> Unit,
+    onCopy: () -> Unit,
+    onEdit: () -> Unit,
+    onRemove: (() -> Unit)?,
+    onReply: () -> Unit
 ) {
     val visible = remember { MutableTransitionState(false).apply { targetState = true } }
     AnimatedVisibility(
         visibleState = visible,
-        enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
-            slideInVertically(initialOffsetY = { it / 3 }),
+        enter = fadeIn() + scaleIn(initialScale = 0.9f),
         exit = ExitTransition.None
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = if (mine) 0.dp else 2.dp)
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = curioDialogContainerColor(),
+            shadowElevation = 6.dp,
+            modifier = Modifier.padding(vertical = 2.dp)
         ) {
-            if (mine) Spacer(Modifier.weight(1f))
-            SocialReactions.PALETTE.forEach { (emoji, meaning) ->
-                // The emoji IS the reaction: it is drawn as text, so what the
-                // picker shows is exactly what the server stores — and a
-                // legacy row's icon name still resolves to its emoji.
-                val chosen = current != null && SocialReactions.emojiFor(current) == emoji
-                Surface(
-                    onClick = { onPick(emoji) },
-                    shape = RoundedCornerShape(50),
-                    color = if (chosen) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
-                    modifier = Modifier.semantics { contentDescription = meaning }
-                ) {
-                    Text(
-                        text = emoji,
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
-                        color = if (chosen) curioDialogActionColor()
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
-                    )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                SocialReactions.PALETTE.forEach { (emoji, meaning) ->
+                    val chosen = current != null && SocialReactions.emojiFor(current) == emoji
+                    Surface(
+                        // The emoji IS the reaction: what the picker shows is
+                        // exactly what the server stores. Tapping the active
+                        // one takes it back (the screen's toggle logic).
+                        onClick = { onPick(emoji) },
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        modifier = Modifier.semantics { contentDescription = meaning }
+                    ) {
+                        Text(
+                            text = emoji,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
                 }
+                ActionChip("Copy", onCopy)
+                if (canEdit) ActionChip("Edit", onEdit)
+                if (canRemove) {
+                    ActionChip("Remove", { onRemove?.invoke() }, destructive = true)
+                }
+                ActionChip("Reply", onReply)
+                Spacer(Modifier.width(2.dp))
             }
-            if (!mine) Spacer(Modifier.weight(1f))
         }
+    }
+}
+
+@Composable
+private fun ActionChip(label: String, onClick: () -> Unit, destructive: Boolean = false) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = if (destructive) MaterialTheme.colorScheme.error
+            else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        )
     }
 }
 
@@ -1807,7 +1893,10 @@ private fun MessageComposer(
     sending: Boolean,
     /** When set, the composer is EDITING this message: Save replaces Send. */
     editTarget: CurioDirectMessage?,
+    /** When set, the next send ANSWERS this message: the quote banner rides. */
+    quoteTarget: CurioDirectMessage?,
     onDropEdit: () -> Unit,
+    onDropQuote: () -> Unit,
     onDraftChange: (String) -> Unit,
     onSend: () -> Unit
 ) {
@@ -1839,6 +1928,54 @@ private fun MessageComposer(
             ),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+        // The REPLY banner: the message being answered, with a focused tint
+        // so it reads as "on the record" rather than as decoration.
+        androidx.compose.animation.AnimatedVisibility(visible = quoteTarget != null) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 7.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(3.dp)
+                            .height(26.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(curioDialogActionColor())
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Replying to ${quoteTarget?.let { if (it.mine) "yourself" else title }}",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = curioDialogActionColor(),
+                            maxLines = 1
+                        )
+                        Text(
+                            text = quoteTarget?.body.orEmpty(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Text(
+                        text = "Cancel",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = curioDialogActionColor(),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable(onClick = onDropQuote)
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                    )
+                }
+            }
+        }
         // The edit banner: what is being changed, and the way out. It sits
         // above the field so the composer's own height never jumps.
         androidx.compose.animation.AnimatedVisibility(visible = editTarget != null) {

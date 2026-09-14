@@ -1,5 +1,8 @@
 ADD:
-- Post a topic, rebuilt: the sheet opens straight onto a writer with the post rendering live above it as you type — no forms, no preview step. Notes are the default; topic, style and shape attach from compact pills. The wall's button is simply "Post".
+- Posting goes full screen: Post opens a proper Create page — write first, the post renders live above as you type, and topic, look and shape attach from quiet controls. The old bottom sheet is gone.
+- Messages: swipe any bubble to reply — the conversation is threaded now, with the words you are answering shown inside the answer.
+- Messages: hold a bubble for Instagram-style actions — the emoji palette, Copy, Edit, Remove and Reply float right on the thread instead of a dialog; double-tap is the heart.
+- Messages: your bubbles wear the brand rose and theirs stay calm neutral, so a conversation reads at a glance in both themes.
 - Messages: holding a bubble opens everything at once — the reaction palette, copy, edit, remove. A tap only reacts. Bubbles are opaque with a cleaner shape and a soft press squish; a sent bubble stays put instead of vanishing and coming back.
 - A conversation's header is the person: their portrait, name and @username ride the title bar, with a live "Typing…" line.
 - Chats and Friends get their own icons (a speech bubble and two people) instead of borrowed ones.
