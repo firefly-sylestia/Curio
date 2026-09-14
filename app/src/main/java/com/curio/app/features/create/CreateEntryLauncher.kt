@@ -14,7 +14,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,14 +40,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Curio's creation launcher. It deliberately owns only presentation/state:
- * callers decide where each destination goes, keeping this component cheap to
- * compose and independent from Navigation.
- *
- * The motion uses a spring because Compose springs preserve velocity when the
- * target changes, which makes an interrupted open/close feel continuous.
- */
+/** Presentation-only creation launcher. Navigation and persistence stay with the caller. */
 @Composable
 fun CreateEntryLauncher(
     modifier: Modifier = Modifier,
@@ -61,32 +53,25 @@ fun CreateEntryLauncher(
         targetValue = if (expanded) 45f else 0f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow
+            stiffness = Spring.StiffnessLow
         ),
         label = "create-plus-rotation"
     )
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding(),
+        modifier = modifier.fillMaxSize().navigationBarsPadding(),
         contentAlignment = Alignment.BottomCenter
     ) {
         AnimatedVisibility(
             visible = expanded,
-            enter = fadeIn(spring(stiffness = Spring.StiffnessMedium)) +
-                scaleIn(initialScale = 0.94f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
-            exit = fadeOut(spring()) +
-                scaleOut(targetScale = 0.94f, animationSpec = spring())
+            enter = fadeIn() + scaleIn(initialScale = 0.94f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
+            exit = fadeOut() + scaleOut(targetScale = 0.94f, animationSpec = spring())
         ) {
             Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.06f))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { expanded = false }
+                Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.06f)).clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { expanded = false }
             )
         }
 
@@ -111,8 +96,7 @@ fun CreateEntryLauncher(
             }
         }
 
-        Surface(
-            onClick = { expanded = !expanded },
+        Box(
             modifier = Modifier
                 .padding(bottom = 12.dp)
                 .size(if (expanded) 62.dp else 58.dp)
@@ -121,41 +105,24 @@ fun CreateEntryLauncher(
                     scaleX = if (expanded) 1.03f else 1f
                     scaleY = if (expanded) 1.03f else 1f
                 }
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable { expanded = !expanded }
                 .semantics { contentDescription = if (expanded) "Close creation menu" else "Create new entry" },
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shadowElevation = 10.dp
+            contentAlignment = Alignment.Center
         ) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("+", fontSize = 32.sp, lineHeight = 32.sp)
-            }
+            Text("+", fontSize = 32.sp, lineHeight = 32.sp, color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }
 
 @Composable
-private fun CreateOption(
-    title: String,
-    subtitle: String,
-    glyph: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 13.dp, vertical = 11.dp),
+private fun CreateOption(title: String, subtitle: String, glyph: String, onClick: () -> Unit) {
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).clickable(onClick = onClick).padding(horizontal = 13.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) {
             Text(glyph, fontSize = 19.sp, color = MaterialTheme.colorScheme.primary)
         }
         Spacer(Modifier.size(12.dp))
