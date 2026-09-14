@@ -2,7 +2,6 @@ package com.curio.app.features.create
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -56,6 +55,9 @@ fun CreateEntryLauncher(
         label = "create-plus-rotation"
     )
 
+    val fabColor = MaterialTheme.colorScheme.secondaryContainer
+    val fabContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -92,7 +94,7 @@ fun CreateEntryLauncher(
                 ),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 14.dp, bottom = 136.dp)
+                .padding(end = 14.dp, bottom = 154.dp)
         ) {
             Surface(
                 shape = RoundedCornerShape(28.dp),
@@ -139,11 +141,11 @@ fun CreateEntryLauncher(
         Surface(
             onClick = { expanded = !expanded },
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.primary,
-            shadowElevation = 7.dp,
+            color = fabColor,
+            shadowElevation = 8.dp,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 68.dp)
+                .padding(end = 16.dp, bottom = 86.dp)
                 .size(if (expanded) 60.dp else 56.dp)
                 .graphicsLayer {
                     rotationZ = rotation
@@ -157,8 +159,8 @@ fun CreateEntryLauncher(
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 CurioIcon(
                     CurioIcons.Add,
-                    contentDescription = if (expanded) "Close creation menu" else "Create new entry",
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = null,
+                    tint = fabContentColor,
                     size = 28.dp
                 )
             }
@@ -186,14 +188,14 @@ private fun CreateOption(
         ) {
             Surface(
                 shape = RoundedCornerShape(13.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     CurioIcon(
                         icon,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         size = 20.dp
                     )
                 }
