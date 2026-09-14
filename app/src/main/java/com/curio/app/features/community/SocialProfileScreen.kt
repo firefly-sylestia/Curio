@@ -373,7 +373,7 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 onConfirm = { reason, _ ->
                     moderationBusy = true
                     scope.launch {
-                        SocialApi.hideMember(active, userId, true, reason).fold(
+                        CommunityApi.hideMember(active, userId, true, reason).fold(
                             onSuccess = {
                                 targetHidden = true
                                 hideMember = false
@@ -400,7 +400,7 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 onConfirm = {
                     moderationBusy = true
                     scope.launch {
-                        SocialApi.hideMember(active, userId, false).fold(
+                        CommunityApi.hideMember(active, userId, false).fold(
                             onSuccess = {
                                 targetHidden = false
                                 restoreMember = false

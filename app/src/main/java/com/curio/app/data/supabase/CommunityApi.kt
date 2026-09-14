@@ -855,9 +855,7 @@ object CommunityApi {
 
     /** True when I am anywhere on the team (queue access, admin row visible). */
     suspend fun isAdmin(accessToken: String, userId: String): Result<Boolean> =
-        withContext(Dispatchers.IO) {
-            mapped { myAdminRow(accessToken, userId).getOrNull() != null }
-        }
+        myAdminRow(accessToken, userId).map { it != null }
 
     /** Admin-only deletion; the database function/policy is the final authority. */
     suspend fun deleteAny(accessToken: String, cardId: String): Result<Unit> =

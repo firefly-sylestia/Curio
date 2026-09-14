@@ -1,5 +1,24 @@
 # Prompt Log — current request
 
+## Request (2026-09-14, COMPLETE — CI fix: hideMember door + suspend-in-mapped)
+
+CI failed on two errors from the moderation batch (`ad9a41b5`):
+
+1. `SocialProfileScreen.kt:376/403 Unresolved 'hideMember'` (+ four
+   cannot-infer-T fallout): the profile screen's Hide/Restore dialogs called
+   `SocialApi.hideMember(...)`, but the ban RPC lives on **CommunityApi** —
+   SocialApi only got `moderationStatus` and `findByUsername`. Fixed by
+   pointing both calls at `CommunityApi.hideMember` (already imported).
+2. `CommunityApi.kt:859 Suspension functions can only be called within
+   coroutine body`: `isAdmin` invoked suspend `myAdminRow` inside the
+   non-inline `mapped { }` lambda. Fixed by dropping the wrapper —
+   `isAdmin = myAdminRow(...).map { it != null }`, which keeps the suspend
+   identity legal and the same Result contract.
+
+Lesson (same family as the 2026-09-13 one, now twice): a helper placed in the
+wrong API object compiles at write time in the author's head and fails only in
+CI — grep the receiver type of every new cross-file call before pushing.
+
 ## Request (2026-09-14, DONE — chat bubble/swipe/edit fixes + the community moderation system)
 
 Verbatim asks (one message, many parts): the recent chat-bubble change is bad
