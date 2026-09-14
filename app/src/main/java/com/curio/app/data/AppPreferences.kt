@@ -1165,7 +1165,7 @@ object AppPreferences {
     // hero, a take rail riding the bottom tray, pickers moved into a tools
     // bottom sheet, a live recording pulse and springy take switching. The
     // paper notes themselves are untouched; OFF = today's capture page.
-    var captureStudioState by mutableStateOf(false)
+    var captureStudioState by mutableStateOf(true)
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -1298,7 +1298,7 @@ object AppPreferences {
     var profileAvatarPathState by mutableStateOf("")
         internal set
 
-    // ── Online Mode + the Community tab (observable mirrors) ──────────
+    // ��─ Online Mode + the Community tab (observable mirrors) ──────────
     // Both are read from COMPOSITION (the bottom nav bar decides whether the
     // Community tab exists, and every online surface tests the gate), so the
     // stored prefs are mirrored into Compose state here. Without this the nav
@@ -2225,7 +2225,7 @@ object AppPreferences {
     /** Whether the Capture studio experiment is on (default OFF; see the
      *  state comment above). */
     fun isCaptureStudioEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, false)
+        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, true)
 
     fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
@@ -3421,7 +3421,7 @@ object AppPreferences {
     fun isCoverFetchEnabled(context: Context): Boolean {
         val p = prefs(context)
         if (p.contains(KEY_COVER_FETCH_ENABLED)) {
-            return p.getBoolean(KEY_COVER_FETCH_ENABLED, false)
+            return p.getBoolean(KEY_COVER_FETCH_ENABLED, true)
         }
         val legacy = p.getBoolean(KEY_BOOK_FETCH_ENABLED, false) ||
             p.getBoolean(KEY_ALBUM_FETCH_ENABLED, false) ||

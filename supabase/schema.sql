@@ -483,7 +483,62 @@ create policy rep_select_own on public.community_reports
     for select to authenticated
     using (reporter = auth.uid());
 
--- ────────────────────────────────────────────────��──────────────────────────
+-- 5a. Database-managed moderation admins. @jugnu is seeded below after
+-- resolving the account from profiles; subsequent admins can be added here.
+create table if not exists public.community_admins (
+    user_id uuid primary key references auth.users (id) on delete cascade,
+    added_by uuid references auth.users (id) on delete set null,
+    created_at timestamptz not null default now()
+);
+
+alter table public.community_admins enable row level security;
+
+create or replace function public.curio_is_community_admin(subject uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select exists (select 1 from public.community_admins where user_id = subject)
+$$;
+
+revoke all on function public.curio_is_community_admin(uuid) from public;
+grant execute on function public.curio_is_community_admin(uuid) to authenticated;
+
+drop policy if exists community_admins_select_admin on public.community_admins;
+create policy community_admins_select_admin on public.community_admins
+    for select to authenticated
+    using (public.curio_is_community_admin());
+
+drop policy if exists rep_select_admin on public.community_reports;
+create policy rep_select_admin on public.community_reports
+    for select to authenticated
+    using (public.curio_is_community_admin());
+
+drop policy if exists cards_delete_admin on public.community_cards;
+create policy cards_delete_admin on public.community_cards
+    for delete to authenticated
+    using (public.curio_is_community_admin());
+
+drop policy if exists community_admins_insert_admin on public.community_admins;
+create policy community_admins_insert_admin on public.community_admins
+    for insert to authenticated
+    with check (public.curio_is_community_admin());
+
+drop policy if exists community_admins_delete_admin on public.community_admins;
+create policy community_admins_delete_admin on public.community_admins
+    for delete to authenticated
+    using (public.curio_is_community_admin());
+
+-- Seed @jugnu when that handle exists. This is idempotent and keeps the
+-- privilege database-managed rather than embedding a UUID in the client.
+insert into public.community_admins (user_id)
+select p.id from public.profiles p
+where lower(trim(leading '@' from coalesce(p.username, ''))) = 'jugnu'
+on conflict (user_id) do nothing;
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 5b. profile discoverability
 -- ───────────────────────────────────────────────────────────────────────────
 alter table public.profiles add column if not exists discoverable boolean not null default true;

@@ -101,6 +101,15 @@ data class CommunityCard(
  * style/aspect/scale), which is why a card can be rebuilt on another device
  * without ever uploading an image. Anything media-backed stays local.
  */
+data class CommunityReport(
+    val id: String,
+    val cardId: String,
+    val reporterId: String,
+    val reason: String,
+    val note: String?,
+    val createdAtMillis: Long
+)
+
 data class CommunityCardDraft(
     val topicName: String,
     val categoryName: String,
@@ -497,17 +506,62 @@ object CommunityApi {
         unlike(accessToken, cardId, myUserId)
 
     /** Files a report. One per card per user (the DB's unique constraint). */
-    suspend fun report(accessToken: String, cardId: String, reason: String): Result<Unit> =
+    suspend fun report(
+        accessToken: String,
+        cardId: String,
+        reason: String,
+        note: String? = null
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject().put("card_id", cardId).put("reason", reason)
+            note?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put("note", it) }
+            val request = SupabaseClient.requestBuilder(REPORTS, accessToken)
+                .header("Prefer", "return=minimal")
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** Reads the moderation queue; RLS exposes it only to database admins. */
+    suspend fun reported(accessToken: String): Result<List<CommunityReport>> =
         withContext(Dispatchers.IO) {
-            mappedUnit {
-                val payload = JSONObject().put("card_id", cardId).put("reason", reason)
-                val request = SupabaseClient.requestBuilder(REPORTS, accessToken)
-                    .header("Prefer", "return=minimal")
-                    .post(payload.toString().toRequestBody(jsonMediaType))
-                    .build()
-                SupabaseClient.executeBody(request)
+            mapped {
+                val request = SupabaseClient.requestBuilder(
+                    "$REPORTS?select=id,card_id,reporter,reason,note,created_at&order=created_at.desc",
+                    accessToken
+                ).get().build()
+                val rows = JSONArray(SupabaseClient.executeBody(request))
+                buildList(rows.length()) {
+                    for (index in 0 until rows.length()) {
+                        val row = rows.optJSONObject(index) ?: continue
+                        add(CommunityReport(
+                            id = row.optString("id"),
+                            cardId = row.optString("card_id"),
+                            reporterId = row.optString("reporter"),
+                            reason = row.optString("reason"),
+                            note = row.optString("note").takeIf { it.isNotBlank() && it != "null" },
+                            createdAtMillis = epochMillis(row.optString("created_at"))
+                        ))
+                    }
+                }
             }
         }
+
+    suspend fun isAdmin(accessToken: String, userId: String): Result<Boolean> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val request = SupabaseClient.requestBuilder(
+                    "/rest/v1/community_admins?user_id=eq.$userId&select=user_id&limit=1",
+                    accessToken
+                ).get().build()
+                JSONArray(SupabaseClient.executeBody(request)).length() > 0
+            }
+        }
+
+    /** Admin-only deletion; the database policy is the final authority. */
+    suspend fun deleteAny(accessToken: String, cardId: String): Result<Unit> =
+        delete(accessToken, cardId)
 
     /** Pulls your own card early (the author is the only one who can). */
     suspend fun delete(accessToken: String, cardId: String): Result<Unit> =
@@ -521,7 +575,7 @@ object CommunityApi {
             }
         }
 
-    // ── internals ────────────────────────────────────────────────────────
+    // ── internals ──────���─────────────────────────────────────────────────
 
     private fun <T> mapped(block: () -> T): Result<T> = try {
         Result.success(block())
