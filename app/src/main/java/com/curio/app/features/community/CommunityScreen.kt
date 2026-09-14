@@ -298,7 +298,7 @@ fun CommunityScreen(navController: NavController) {
                 item(key = "hero", contentType = "hero") {
                     SettingsHeroHeader(
                         title = "Social",
-                        subtitle = "Text cards — gone in 24 hours",
+                        subtitle = "",
                         onBack = if (asTab) null else ({ navController.popBackStack() })
                     )
                 }
@@ -550,7 +550,7 @@ fun CommunityScreen(navController: NavController) {
         if (!wide) {
             SettingsHeroHeader(
                 title = "Social",
-                subtitle = "Text cards — gone in 24 hours",
+                subtitle = "",
                 onBack = if (asTab) null else ({ navController.popBackStack() }),
                 glassBackdrop = glassBackdrop
             )
@@ -570,7 +570,7 @@ fun CommunityScreen(navController: NavController) {
                     ).fold(
                         onSuccess = { posted ->
                             composing = false
-                            notice = "Posted — it disappears in 24 hours."
+                            notice = "Posted."
                             // On the wall before the sheet is even gone, in
                             // this device's own name and portrait: the row the
                             // server stored IS the card. The rest of the feed

@@ -1,5 +1,29 @@
 # Prompt Log — current request
 
+## Request (2026-09-14, COMPLETE — CI fix + DM header/ticks/scroll polish)
+
+User pasted the CI log (Unresolved 'mineGlyph'/'others' — my MessageBubble
+rewrite dropped the two vals while moving the color logic) and asked: remove
+the em dash + the "gone in 24 hours" hint from the Social/Chats heroes; the DM
+header must show the peer's @username under the name; the Seen mark lies (says
+Seen before a read) — make it WhatsApp-style ticks; the thread must stay
+pinned to the bottom as messages send.
+
+Shipped (one commit):
+- DirectMessageScreen: mineGlyph/others restored (the CI fix); per-row tick
+  language (1 tick = sent, ✓✓ in accent = read; receipt passed per-row, the
+  newest-row seenIndex inference deleted); hero subtitle = the peer's
+  @handleLabel (Typing… keeps priority, wide + narrow paths); auto-scroll
+  pinned to newest with the yank guard (no scroll while the member has
+  scrolled up to read history).
+- CommunityScreen + ChatsScreen: expiry hint subtitles emptied, the "Posted"
+  notice shortened, em-dash phrasing cleaned in the changelog.
+- Changelog updated (ticks + header + auto-scroll + cleaner headers).
+
+Lesson (repeat of the brace lesson): deleting a line that carries vals while
+restructuring a composable body must be re-verified against the body's own
+reads — count braces AND grep every symbol the old body named.
+
 ## Request (2026-09-14, COMPLETE — composer remake + DM Instagram pass)
 
 User asks (post-PR-129 review): the new post screen — is it good and wired?

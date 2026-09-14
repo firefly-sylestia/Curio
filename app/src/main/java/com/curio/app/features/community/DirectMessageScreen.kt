@@ -883,16 +883,20 @@ fun DirectMessageScreen(
         (if (error != null) 1 else 0) +
         (if (thread.isEmpty() && !loading && loadedOnce) 1 else 0)
 
-    // Keep the newest line in view — on open, after every send, and when the
-    // other side starts typing under us.
+    // Keep the newest line in view — on open, after every send, on an edit
+    // or a reaction (both change a row's height), and when the other side
+    // starts typing under us. The jump is suppressed while the member has
+    // scrolled UP to read history; a message arriving mid-scroll must never
+    // yank the list out from under their finger.
     var hasPresentedThread by remember(otherUserId) { mutableStateOf(false) }
+    val pinnedToNewest = !listState.canScrollForward || !hasPresentedThread
     LaunchedEffect(thread.size, peerTyping, headerRows) {
         if (thread.isEmpty()) return@LaunchedEffect
         val newest = headerRows + thread.lastIndex + if (peerTyping) 1 else 0
         if (!hasPresentedThread) {
             listState.scrollToItem(newest)
             hasPresentedThread = true
-        } else {
+        } else if (pinnedToNewest) {
             listState.animateScrollToItem(newest)
         }
     }
@@ -907,11 +911,9 @@ fun DirectMessageScreen(
     // and the presence line sit on the peer card beneath it.
     val title = fallback
 
-    // "Seen" belongs on the newest of MY messages the other person actually
-    // READ — not simply on my newest one. Stamping the latest line whatever
-    // the receipt said is how a thread ends up claiming a message was seen
-    // when it never was; a message with no receipt shows no receipt.
-    val seenIndex = thread.indexOfLast { it.mine && it.readAtMillis != null }
+    // Read receipts are per-row now: a bubble shows ticks only when THAT row
+    // carries the other side's read stamp — no newest-row inference that can
+    // claim a reading that never happened.
 
     Box(
         modifier = Modifier
@@ -994,7 +996,7 @@ fun DirectMessageScreen(
                         item(key = "hero", contentType = "hero") {
                             SettingsHeroHeader(
                                 title = title,
-                                subtitle = "Private messages",
+                                subtitle = if (peerTyping) "Typing…" else person?.handleLabel.orEmpty(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
@@ -1067,10 +1069,9 @@ fun DirectMessageScreen(
                                 message = message,
                                 firstOfRun = firstOfRun,
                                 lastOfRun = lastOfRun,
-                                // Only the newest of MY messages can be seen:
-                                // an older receipt would be a lie if a newer
-                                // message was still unread.
-                                receipt = if (index == seenIndex) message.readAtMillis else null,
+                                // Per-row truth: a tick pair only when THIS
+                                // row carries the other side's read stamp.
+                                receipt = message.readAtMillis,
                                 actionSheet = actionTarget?.id == message.id,
                                 reactions = reactions[message.id].orEmpty(),
                                 myUserId = activeUserId,
@@ -1244,7 +1245,7 @@ fun DirectMessageScreen(
             // below the fold.
             SettingsHeroHeader(
                 title = person?.label ?: fallback,
-                subtitle = if (peerTyping) "Typing…" else "",
+                subtitle = if (peerTyping) "Typing…" else person?.handleLabel.orEmpty(),
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop,
                 // The person LEADS the header — avatar first, then the name,
@@ -1514,6 +1515,8 @@ private fun MessageBubble(
     val mine = message.mine
     val dark = isCurioDarkTheme()
     val haptics = LocalHapticFeedback.current
+    val mineGlyph = reactions.firstOrNull { it.userId == myUserId }?.kind
+    val others = reactions.filterNot { it.userId == myUserId }
     val shape = if (mine) {
         RoundedCornerShape(
             topStart = 20.dp,
@@ -1559,13 +1562,15 @@ private fun MessageBubble(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (receipt != null) {
-                    Text(
-                        text = "Seen ${socialStamp(receipt)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = curioDialogActionColor()
-                    )
-                }
+                // WhatsApp's tick language: one tick is SENT, two (in the
+                // accent) are READ. The word "Seen" claimed a reading that
+                // the stamp could not honestly prove.
+                Text(
+                    text = if (receipt != null) "\u2713\u2713" else "\u2713",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (receipt != null) curioDialogActionColor()
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 

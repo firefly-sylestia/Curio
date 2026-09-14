@@ -250,7 +250,7 @@ fun ChatsScreen(navController: NavController) {
                     item(key = "hero", contentType = "hero") {
                         SettingsHeroHeader(
                             title = "Chats",
-                            subtitle = "Private — and gone in 24 hours",
+                            subtitle = "",
                             onBack = { navController.popBackStack() }
                         )
                     }
@@ -348,7 +348,7 @@ fun ChatsScreen(navController: NavController) {
         if (!wide) {
             SettingsHeroHeader(
                 title = "Chats",
-                subtitle = "Private — and gone in 24 hours",
+                subtitle = "",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
             )
