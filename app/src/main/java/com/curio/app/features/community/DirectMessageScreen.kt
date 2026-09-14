@@ -2,17 +2,20 @@ package com.curio.app.features.community
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,44 +27,50 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.draw.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.foundation.LocalIndication
+import androidx.compose.ui.input.pointer.consume
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -69,17 +78,16 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
+import com.curio.app.data.supabase.CurioDmCrypto
 import com.curio.app.data.supabase.CurioDmIdentity
 import com.curio.app.data.supabase.CurioDmReaction
-import com.curio.app.data.supabase.CurioDmCrypto
 import com.curio.app.data.supabase.DmCryptoDiagnostics
 import com.curio.app.data.supabase.CurioPerson
-import com.curio.app.data.supabase.dmConversationId
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.data.supabase.SupabaseRealtime
-import com.curio.app.ui.components.rememberCurioPressSource
+import com.curio.app.data.supabase.dmConversationId
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
@@ -93,12 +101,11 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.curioDialogActionColor
-import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -108,31 +115,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * A DIRECT CONVERSATION — one thread with one friend.
- *
- * Private by construction: `dm_messages` gives its two participants the only
- * read policy, and the INSERT policy additionally requires an ACCEPTED friend
- * request, so a stranger cannot be messaged even with the right id. Text only —
- * there is no media column to fill.
- *
- * What the surface does now, top to bottom:
- *
- *  - **It opens instantly and survives losing signal.** The thread renders the
- *    last messages kept on the device ([SocialMessageCache]) before the network
- *    is asked anything, then the server's copy replaces it. A message you
- *    already saw is never a blank screen again.
- *  - **A header you can act on** — portrait, live username, and one honest
- *    line about what "private" means here — plus a tap through to the profile.
- *  - **A read conversation**: day rules, grouped runs from one person, a single
- *    timestamp per run, and a read receipt on your last line.
- *  - **Reactions**: tap a bubble and a palette slides in under it. The emoji
- *    itself is what the server stores, so nothing is uploaded.
- *  - **"is typing…"**: a real, server-backed row that expires on its own, shown
- *    as a live line in the header and as a breathing bubble in the thread.
- *  - **A composer that sends the moment you tap**: the message appears
- *    immediately on a spring, the field clears, and the network catches up.
- */
+private const val LOCAL_ID_PREFIX = "local-"
+private const val LIVE_TICK_MS = 1_200L
+private const val SAFETY_TICK_MS = 20_000L
+private const val TYPING_TICK_MS = 1_500L
+private const val TYPING_SAFETY_TICK_MS = 5_000L
+private const val SWIPE_REPLY_THRESHOLD_DP = 62f
+private const val SWIPE_REPLY_MAX_DP = 82f
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DirectMessageScreen(
@@ -143,34 +133,25 @@ fun DirectMessageScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val account = OnlineAccount.state
+    val density = LocalDensity.current
     val wide = windowWidthSizeClass().isWide
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
+    val haptics = LocalHapticFeedback.current
 
-    val onlineMode = AppPreferences.onlineModeEnabledState
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
-    val eligible = account.signedIn && onlineMode && token != null && myUserId != null
+    val eligible = account.signedIn && AppPreferences.onlineModeEnabledState && token != null && myUserId != null
 
-    // Filled from the device's own copy the instant the account resolves, so
-    // a conversation you have already had is never a blank screen.
     var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
-    // Sent-but-not-yet-confirmed messages, drawn exactly like real ones.
     var pending by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
-    // Sent bubbles waiting for their server row: rendered exactly like a
-    // delivered message (same text, same clock), dropped the moment the real
-    // row arrives. This is what keeps a send from vanishing and returning.
     var sentShadow by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
     var person by remember {
-        // On screen from the FIRST frame: the device remembers every identity
-        // it has resolved, and the route carries the handle the caller already
-        // had (Friends, a thread row, a profile). The network only refines
-        // both — a conversation never opens on a placeholder.
         mutableStateOf(
             SocialPeopleCache.read(context, otherUserId)
-                ?: handle.trim()
-                    .takeIf { it.isNotBlank() }
-                    ?.let { CurioPerson(userId = otherUserId, displayName = it) }
+                ?: handle.trim().takeIf { it.isNotBlank() }?.let {
+                    CurioPerson(userId = otherUserId, displayName = it)
+                }
         )
     }
     var reactions by remember { mutableStateOf<Map<String, List<CurioDmReaction>>>(emptyMap()) }
@@ -179,45 +160,33 @@ fun DirectMessageScreen(
     var reactionTarget by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
-    // This is read from the server-owned conversation row. It is never a
-    // device preference: both participants see and use the same mode. It
-    // starts OFF, which is what a brand-new conversation is (see the schema),
-    // and a row that says otherwise replaces it as soon as it loads.
     var encryptionEnabled by remember(otherUserId) { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var loadedOnce by remember { mutableStateOf(false) }
-    // A server push bumps this, which re-runs the delta fetch below. It is a
-    // COUNTER rather than a flag so two pushes in a row are two fetches, and it
-    // is keyed on the thread so opening another conversation starts fresh.
     var pushed by remember(otherUserId) { mutableStateOf(0) }
-    // Set by a realtime UPDATE/DELETE push: the next delta pull re-reads the
-    // whole page once, so a peer's edit or recall is reflected even though it
-    // happened to a row OLDER than the newest one on screen.
     var pendingRealtimeRevisions by remember(otherUserId) { mutableStateOf(false) }
-
-    // An ENCRYPTED send that failed raises this instead of a dead error line:
-    // the dialog states the reason and offers the one-tap way out (turn the
-    // shared mode off for both, then send the same text). Keyed on the thread
-    // so another conversation never inherits a stale dialog.
+    var editing by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
+    var replyTarget by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
+    var actionTarget by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
+    var failedDraft by remember(otherUserId) { mutableStateOf("") }
     var encryptionIssue by remember(otherUserId) { mutableStateOf<String?>(null) }
 
-    /**
-     * Reacting to one message, from ANYWHERE on the screen (the bubbles and
-     * the hold-menu dialog both land here): optimistic glyph first, server
-     * confirm after, revert on failure. Guarded so a call without a live
-     * session is simply a no-op.
-     */
-    fun pickReactionScreen(messageId: String, kind: String, activeToken: String?, activeUserId: String?) {
-        if (activeToken == null || activeUserId == null) return
+    val anchorBounds = remember { mutableStateMapOf<String, androidx.compose.ui.geometry.Rect>() }
+    var actionAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    var actionWiggle by remember { mutableStateOf(false) }
+
+    fun pickReaction(messageId: String, kind: String) {
+        val activeToken = token ?: return
+        val activeUserId = myUserId ?: return
         scope.launch {
             val mine = reactions[messageId]?.firstOrNull { it.userId == activeUserId }
             reactionTarget = null
+            actionTarget = null
             val optimistic = if (mine?.kind == kind) {
                 reactions[messageId].orEmpty().filterNot { it.userId == activeUserId }
             } else {
                 reactions[messageId].orEmpty()
-                    .filterNot { it.userId == activeUserId } +
-                    CurioDmReaction(messageId, activeUserId, kind)
+                    .filterNot { it.userId == activeUserId } + CurioDmReaction(messageId, activeUserId, kind)
             }
             reactions = reactions + (messageId to optimistic)
             val result = if (mine?.kind == kind) {
@@ -227,20 +196,17 @@ fun DirectMessageScreen(
             }
             result.fold(
                 onSuccess = {
-                    SocialApi.reactions(activeToken, listOf(messageId))
-                        .onSuccess { fresh ->
-                            reactions = reactions + (messageId to fresh.getOrElse(messageId) { emptyList<CurioDmReaction>() })
-                        }
+                    SocialApi.reactions(activeToken, listOf(messageId)).onSuccess { fresh ->
+                        reactions = reactions + (messageId to fresh.getOrElse(messageId) { emptyList() })
+                    }
                 },
                 onFailure = {
-                    reactions = reactions + (messageId to (mine?.let { listOf(it) } ?: emptyList()))
+                    reactions = reactions + (messageId to (mine?.let(::listOf) ?: emptyList()))
                     error = it.message
                 }
             )
         }
     }
-
-    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
     suspend fun load(active: String, me: String) {
         loading = true
@@ -256,28 +222,17 @@ fun DirectMessageScreen(
                 }
                 var identityUsable = true
                 SocialApi.publishDmIdentity(active, identity, me).getOrElse { failure ->
-                    // Registration keeps the ENCRYPTED features honest, but it
-                    // must never take the conversation down with it: without
-                    // this row the device cannot receive wrapped keys, so
-                    // ciphertext stays sealed — and the error text says that
-                    // plainly instead of pretending the page is broken.
                     identityUsable = false
                     DmCryptoDiagnostics.failure("identity_publish", null, null, null, failure)
                 }
-                // The same self-heal the send path does: a stale identity of
-                // MINE (a previous install) is retired so the server counts
-                // exactly one active device per side. Best-effort — the send
-                // path retires again before wrapping.
                 if (identityUsable) {
                     SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
                         .filter { it.deviceId != identity.deviceId }
                         .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
                 }
-                // Get every envelope a page needs in ONE request. The former
-                // per-message sequential requests delayed arrivals and could
-                // leave a realtime row rendered before its key was available.
-                val requiredVersions = raw.mapNotNull { message ->
-                    CurioDmCrypto.messageKeyVersion(message.encryptionVersion.orEmpty())
+
+                val requiredVersions = raw.mapNotNull {
+                    CurioDmCrypto.messageKeyVersion(it.encryptionVersion.orEmpty())
                 }.toSet()
                 val envelopeResult = SocialApi.dmEnvelopes(
                     active, conversationId, identity.deviceId, requiredVersions
@@ -286,20 +241,15 @@ fun DirectMessageScreen(
                 val envelopes = envelopeResult.getOrDefault(emptyMap())
                 val installedVersions = mutableSetOf<Int>()
                 requiredVersions.forEach { version ->
-                    val envelope = envelopes[version]
-                    if (envelope == null) {
-                        DmCryptoDiagnostics.event(
-                            stage = "envelope_missing", conversationId = conversationId,
-                            keyVersion = version, deviceId = identity.deviceId,
-                            detail = "found=false installed=false"
-                        )
-                    } else {
+                    envelopes[version]?.let { envelope ->
                         runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
                             .onSuccess { key ->
                                 installedVersions += version
                                 DmCryptoDiagnostics.event(
-                                    stage = "envelope_install", conversationId = conversationId,
-                                    keyVersion = version, deviceId = identity.deviceId,
+                                    stage = "envelope_install",
+                                    conversationId = conversationId,
+                                    keyVersion = version,
+                                    deviceId = identity.deviceId,
                                     detail = "found=true installed=true keyLength=${key.size} rsaUnwrap=success"
                                 )
                             }
@@ -312,69 +262,39 @@ fun DirectMessageScreen(
                     }
                 }
                 val fresh = raw.map { message ->
-                    if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
-                    else if (message.migrationState == "plaintext") message
-                    else {
-                        val encrypted = com.curio.app.data.supabase.CurioEncryptedMessage(
-                            message.ciphertext.orEmpty(),
-                            message.nonce.orEmpty(),
-                            message.encryptionVersion.orEmpty()
-                        )
-                        // A thread can hold messages from multiple envelope
-                        // generations. The page's exact-version envelopes were
-                        // fetched and installed above before any AES-GCM read.
-                        val version = CurioDmCrypto.messageKeyVersion(encrypted.version)
-                        when {
-                            version == null -> message.copy(body = "Unsupported encrypted message format")
-                            envelopeFailure != null -> {
-                                DmCryptoDiagnostics.failure(
-                                    "envelope_fetch", conversationId, message.id, version, envelopeFailure,
-                                    "envelopeFound=unknown keyInstalled=false"
-                                )
-                                message.copy(body = "Message key could not be retrieved")
-                            }
-                            envelopes[version] == null -> {
-                                DmCryptoDiagnostics.event(
-                                    stage = "message_key_missing", conversationId = conversationId,
-                                    messageId = message.id, keyVersion = version,
-                                    deviceId = identity.deviceId,
-                                    detail = "envelopeFound=false keyInstalled=false"
-                                )
-                                message.copy(body = "Message key is unavailable on this device")
-                            }
-                            version !in installedVersions -> message.copy(body = "Message key envelope is invalid")
-                            else -> runCatching {
-                                CurioDmCrypto.decrypt(context, conversationId, encrypted)
-                            }.onSuccess { plaintext ->
-                                DmCryptoDiagnostics.event(
-                                    stage = "aes_decrypt", conversationId = conversationId,
-                                    messageId = message.id, keyVersion = version,
-                                    deviceId = identity.deviceId,
-                                    detail = "keyInstalled=true keyLength=32 nonceLength=${android.util.Base64.decode(encrypted.nonce, android.util.Base64.NO_WRAP).size} ciphertextLength=${android.util.Base64.decode(encrypted.ciphertext, android.util.Base64.NO_WRAP).size} aesDecrypt=success"
-                                )
-                            }.onFailure { failure ->
-                                DmCryptoDiagnostics.failure(
-                                    "aes_decrypt", conversationId, message.id, version, failure,
-                                    "keyInstalled=true aesDecrypt=failure"
-                                )
-                            }.fold(
-                                onSuccess = { plaintext -> message.copy(body = plaintext) },
-                                onFailure = { failure ->
-                                    val reason = if (failure is javax.crypto.AEADBadTagException) {
-                                        "Message authentication failed"
-                                    } else "Message key or encrypted data is invalid"
-                                    message.copy(body = reason)
-                                }
+                    when {
+                        message.migrationState == "legacy" -> message.copy(body = "Legacy message • re-encryption required")
+                        message.migrationState == "plaintext" -> message
+                        else -> {
+                            val encrypted = com.curio.app.data.supabase.CurioEncryptedMessage(
+                                message.ciphertext.orEmpty(),
+                                message.nonce.orEmpty(),
+                                message.encryptionVersion.orEmpty()
                             )
+                            val version = CurioDmCrypto.messageKeyVersion(encrypted.version)
+                            when {
+                                version == null -> message.copy(body = "Unsupported encrypted message format")
+                                envelopeFailure != null -> message.copy(body = "Message key could not be retrieved")
+                                envelopes[version] == null -> message.copy(body = "Message key is unavailable on this device")
+                                version !in installedVersions -> message.copy(body = "Message key envelope is invalid")
+                                else -> runCatching {
+                                    CurioDmCrypto.decrypt(context, conversationId, encrypted)
+                                }.fold(
+                                    onSuccess = { plaintext -> message.copy(body = plaintext) },
+                                    onFailure = { failure ->
+                                        message.copy(
+                                            body = if (failure is javax.crypto.AEADBadTagException) {
+                                                "Message authentication failed"
+                                            } else {
+                                                "Message key or encrypted data is invalid"
+                                            }
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-                // v3xx53 — the SERVER keeps 24 hours; the DEVICE keeps what it
-                // received. Merging (rather than replacing) is what makes "gone
-                // from the server" and "gone from Curio" two different things:
-                // opening a conversation can never lose a message this phone
-                // already had. Newest wins per id, so a cached row still gets
-                // its fresh read receipt.
                 val hidden = SocialMessageCache.hiddenIds(context, otherUserId)
                 val known = SocialMessageCache.read(context, otherUserId, me).filterNot { it.id in hidden }
                 val merged = (known + fresh.filterNot { it.id in hidden })
@@ -382,61 +302,22 @@ fun DirectMessageScreen(
                     .sortedBy { it.createdAtMillis }
                 messages = merged
                 SocialMessageCache.write(context, otherUserId, merged)
-                // Shadows whose words are now covered by a real server row
-                // (same text, mine, within ten seconds) retire here — the
-                // swap is invisible because both render the same bubble.
                 sentShadow = sentShadow.filterNot { shadow ->
                     merged.any { real ->
                         real.mine && real.body == shadow.body &&
                             kotlin.math.abs(real.createdAtMillis - shadow.createdAtMillis) < 10_000L
                     }
                 }
-                error = null
                 loadedOnce = true
+                error = null
             },
-            onFailure = { failure ->
-                // The cache already put something on screen; only speak up
-                // when there was nothing to fall back on.
-                if (messages.isEmpty()) error = failure.message
-            }
+            onFailure = { failure -> if (messages.isEmpty()) error = failure.message }
         )
         loading = false
-        // Reactions ride the same refresh, best-effort: a failure hides a
-        // glyph, it never blanks the conversation.
-        val ids = messages.map { it.id }
-        if (ids.isNotEmpty()) {
-            SocialApi.reactions(active, ids).onSuccess { reactions = it }
-        }
+        val ids = messages.map { it.id }.filterNot { it.startsWith(LOCAL_ID_PREFIX) }
+        if (ids.isNotEmpty()) SocialApi.reactions(active, ids).onSuccess { reactions = it }
     }
 
-    // Who this conversation is with — resolved here so the header shows a
-    // portrait and the LIVE username rather than the name the route carried.
-    suspend fun loadPerson(active: String) {
-        // `profile` rather than `people`: the peer card also draws the presence
-        // line, which only the wider privacy read carries — and it falls back
-        // to the base identity read on a project that has not been re-pasted.
-        SocialApi.profile(active, otherUserId).onSuccess { fresh ->
-            if (fresh != null) {
-                person = fresh
-                // Remembered so the NEXT open draws the real name instantly.
-                SocialPeopleCache.remember(context, fresh)
-            }
-        }
-    }
-
-    // The text an ENCRYPTED send was carrying when it failed, so the dialog's
-    // one-tap fallback can send the very words the member already typed.
-    var failedDraft by remember(otherUserId) { mutableStateOf("") }
-
-    // Long-press actions. A tap still opens reactions; a HOLD is the decided
-    // gesture: it alone reveals Remove (mine) and Edit (mine, plaintext) —
-    // nothing action-like sits under a message a finger is only reading.
-    var actionTarget by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
-    // The message being EDITED: its words load into the composer and the
-    // send button becomes Save until the edit is done or dropped.
-    var editing by remember(otherUserId) { mutableStateOf<CurioDirectMessage?>(null) }
-
-    /** Applies an edit from the composer; plaintext rows only. */
     suspend fun commitEdit(active: String, message: CurioDirectMessage) {
         val text = draft.trim()
         if (text.isEmpty() || sending) return
@@ -445,18 +326,16 @@ fun DirectMessageScreen(
             onSuccess = {
                 editing = null
                 draft = ""
-                load(active, message.senderId)
+                load(active, myUserId ?: message.senderId)
             },
-            onFailure = { failure -> error = failure.message ?: "Couldn't edit that message." }
+            onFailure = { error = it.message ?: "Couldn't edit that message." }
         )
         sending = false
     }
 
     suspend fun send(active: String, me: String, forcePlaintext: Boolean = false) {
-        // An edit in flight takes the composer over: Send IS Save until the
-        // edit is committed or dropped.
-        editing?.let { target ->
-            commitEdit(active, target)
+        editing?.let {
+            commitEdit(active, it)
             return
         }
         val text = draft.trim()
@@ -464,9 +343,6 @@ fun DirectMessageScreen(
         sending = true
         error = null
         encryptionIssue = null
-
-        // Optimistic: the bubble is on screen before the request leaves, and
-        // its id is local-only so a refresh can never show it twice.
         val optimistic = CurioDirectMessage(
             id = "local-${System.currentTimeMillis()}",
             senderId = me,
@@ -475,22 +351,19 @@ fun DirectMessageScreen(
             readAtMillis = null,
             mine = true
         )
-        pending = pending + optimistic
+        pending += optimistic
         draft = ""
-
+        replyTarget = null
         val conversationId = dmConversationId(me, otherUserId)
+
         if (!encryptionEnabled || forcePlaintext) {
-            // The dialog's promise, kept here: turning the shared mode off is
-            // part of the fallback send, for BOTH people — if the server
-            // refuses the change, the plain error line says why and nothing is
-            // sent in the wrong mode.
             if (forcePlaintext && encryptionEnabled) {
                 SocialApi.setDmEncryption(active, conversationId, me, otherUserId, false).fold(
                     onSuccess = { encryptionEnabled = false },
-                    onFailure = { failure ->
+                    onFailure = {
                         pending = pending.filterNot { it.id == optimistic.id }
                         draft = text
-                        error = failure.message ?: "Couldn't change message encryption."
+                        error = it.message ?: "Couldn't change message encryption."
                         sending = false
                         return
                     }
@@ -499,101 +372,56 @@ fun DirectMessageScreen(
             SocialApi.sendPlaintext(active, otherUserId, text, me).fold(
                 onSuccess = {
                     SocialApi.setTyping(active, otherUserId, false)
-                    // The bubble does NOT vanish while the thread re-reads: it
-                    // moves from [pending] to [sentShadow], a stand-in that
-                    // renders until the server's own copy of the same words
-                    // lands in [messages] — then it is dropped silently. The
-                    // old remove-then-load sequence was the flicker: gone for
-                    // a beat, then back.
                     pending = pending.filterNot { it.id == optimistic.id }
-                    sentShadow = sentShadow + optimistic
+                    sentShadow += optimistic
                     load(active, me)
                 },
-                onFailure = { failure ->
+                onFailure = {
                     pending = pending.filterNot { it.id == optimistic.id }
                     draft = text
-                    error = failure.message ?: "That message didn't send."
+                    error = it.message ?: "That message didn't send."
                 }
             )
             sending = false
             return
         }
+
         val encrypted = runCatching {
             val mine = CurioDmCrypto.identity(context)
-            // A reinstall leaves the PREVIOUS device row active on the server
-            // forever, and the envelope completeness check then demands a key
-            // be wrapped for hardware this account no longer owns — the exact
-            // "missing a device envelope for its key version" failure. Retire
-            // every other active identity of MINE first so only this device
-            // counts, then publish this one. The friend's rows are theirs to
-            // manage, and old envelopes stay historically valid for their
-            // devices.
             SocialApi.dmIdentities(active, listOf(me)).getOrDefault(emptyList())
                 .filter { it.deviceId != mine.deviceId }
                 .forEach { stale -> SocialApi.retireDmDevice(active, stale.deviceId) }
             SocialApi.publishDmIdentity(active, mine, me).getOrThrow()
-            val ownEnvelope = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
-                .getOrNull()
-            // A conversation from a previous install can carry an envelope
-            // that this device's replacement keypair cannot open. Keep that
-            // historical envelope for older messages and rotate a new version
-            // for the next send instead of failing the entire conversation.
-            val restoredKey = ownEnvelope?.let { envelope ->
-                runCatching { CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
-                    .getOrNull()
+            val ownEnvelope = SocialApi.dmEnvelope(active, conversationId, mine.deviceId).getOrNull()
+            val restoredKey = ownEnvelope?.let {
+                runCatching { CurioDmCrypto.installEnvelope(context, conversationId, it) }.getOrNull()
             }
-            val keyVersion = when {
-                restoredKey != null -> ownEnvelope!!.keyVersion
-                else -> SocialApi.dmHighestKeyVersion(active, conversationId).getOrThrow()
+            val keyVersion = if (restoredKey != null) ownEnvelope!!.keyVersion else {
+                SocialApi.dmHighestKeyVersion(active, conversationId).getOrThrow()
                     .coerceAtMost(Int.MAX_VALUE - 1) + 1
             }
             val key = restoredKey
                 ?: CurioDmCrypto.existingKey(context, conversationId, keyVersion)
                 ?: CurioDmCrypto.newKey(context, conversationId, keyVersion)
-            // The server is the bookkeeper: it names the devices that still
-            // lack an envelope for this version (its own trigger re-checks the
-            // same list on insert). The client could not compute this list —
-            // row-level security hides the friend's device rows from the
-            // sender on purpose, and an empty read once made every send look
-            // like a friend who never opened the app.
-            val missing = SocialApi.dmMissingEnvelopes(active, conversationId, keyVersion)
-                .getOrNull()
-            val peers: List<CurioDmIdentity> = when {
-                missing != null -> {
-                    // The authoritative path: every row the server named comes
-                    // WITH its public key, so the wrap list is built directly
-                    // from it — no second read that row-level security could
-                    // empty. Rows without a usable key are skipped; if that
-                    // leaves the friend uncovered, the send fails with the
-                    // clear message below rather than a rejected insert.
-                    missing.mapNotNull { it.toIdentity() }.ifEmpty {
-                        // The server named devices but none carried a usable
-                        // key: fall back to the identity read for whatever it
-                        // can still see.
-                        SocialApi.dmIdentities(active, listOf(otherUserId, me))
-                            .getOrDefault(emptyList())
-                            .filter(CurioDmCrypto::canWrapFor)
-                    }
+            val missing = SocialApi.dmMissingEnvelopes(active, conversationId, keyVersion).getOrNull()
+            val peers = when {
+                missing != null -> missing.mapNotNull { it.toIdentity() }.ifEmpty {
+                    SocialApi.dmIdentities(active, listOf(otherUserId, me))
+                        .getOrDefault(emptyList()).filter(CurioDmCrypto::canWrapFor)
                 }
-                else -> {
-                    // The RPC is not installed on this project yet: wrap for
-                    // every device the (possibly empty) identity read sees.
-                    // A stale row that should have been retired is healed by
-                    // the publish above; the rest is the server's grace.
-                    SocialApi.dmIdentities(active, listOf(otherUserId, me)).getOrDefault(emptyList())
-                        .filter(CurioDmCrypto::canWrapFor)
-                }
+                else -> SocialApi.dmIdentities(active, listOf(otherUserId, me))
+                    .getOrDefault(emptyList()).filter(CurioDmCrypto::canWrapFor)
             }
             check(peers.any { it.userId == otherUserId }) {
                 "This friend needs to open Curio once before encrypted messages can reach them."
             }
-            // Envelope writes are independent. Send them together instead of
-            // making the composer wait one network round trip per device.
             coroutineScope {
                 peers.map { peer ->
                     async {
                         SocialApi.saveDmEnvelope(
-                            active, conversationId, peer.userId,
+                            active,
+                            conversationId,
+                            peer.userId,
                             CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)
                         ).getOrThrow()
                     }
@@ -603,23 +431,12 @@ fun DirectMessageScreen(
         }.getOrElse { failure ->
             pending = pending.filterNot { it.id == optimistic.id }
             draft = text
-            // This preparation also contacts the server to exchange public
-            // keys. Do not misreport a friend/RLS/network failure as a broken
-            // keystore: that sent people looking for a device fix when the
-            // actionable problem was the server response.
-            val reason = failure.message
-                ?.takeIf { it.isNotBlank() }
-                ?: "Couldn't prepare this encrypted message. Please try again."
-            if (encryptionEnabled) {
-                error = null
-                failedDraft = text
-                encryptionIssue = reason
-            } else {
-                error = reason
-            }
+            failedDraft = text
+            encryptionIssue = failure.message ?: "Couldn't prepare this encrypted message."
             sending = false
             return
         }
+
         SocialApi.sendEncrypted(
             active,
             otherUserId,
@@ -630,29 +447,29 @@ fun DirectMessageScreen(
         ).fold(
             onSuccess = {
                 SocialApi.setTyping(active, otherUserId, false)
-                // Same shadow swap as the plaintext path: never remove the
-                // bubble before its replacement exists.
                 pending = pending.filterNot { it.id == optimistic.id }
-                sentShadow = sentShadow + optimistic
+                sentShadow += optimistic
                 load(active, me)
             },
-            onFailure = { failure ->
+            onFailure = {
                 pending = pending.filterNot { it.id == optimistic.id }
                 draft = text
-                val reason = failure.message ?: "That message didn't send."
-                if (encryptionEnabled) {
-                    error = null
-                    failedDraft = text
-                    encryptionIssue = reason
-                } else {
-                    error = reason
-                }
+                failedDraft = text
+                encryptionIssue = it.message ?: "That message didn't send."
             }
         )
         sending = false
     }
 
-    LaunchedEffect(eligible, token, myUserId) {
+    suspend fun refreshLiveBits(active: String, me: String) {
+        peerTyping = SocialApi.isTyping(active, me, otherUserId)
+        val ids = messages.map { it.id }.filterNot { it.startsWith(LOCAL_ID_PREFIX) }
+        if (ids.isNotEmpty()) SocialApi.reactions(active, ids).onSuccess { reactions = it }
+    }
+
+    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+
+    LaunchedEffect(eligible, token, myUserId, otherUserId) {
         if (!eligible || token == null || myUserId == null) {
             messages = emptyList()
             pending = emptyList()
@@ -661,23 +478,19 @@ fun DirectMessageScreen(
             peerTyping = false
             return@LaunchedEffect
         }
-        // The device's copy first — the account id is known here, so "mine"
-        // is labelled correctly — then the server's own record.
         SocialMessageCache.migrateIfNeeded(context)
-        val cached = SocialMessageCache.read(context, otherUserId, myUserId)
-        if (cached.isNotEmpty()) messages = cached
+        SocialMessageCache.read(context, otherUserId, myUserId).takeIf { it.isNotEmpty() }?.let { messages = it }
         load(token, myUserId)
-        loadPerson(token)
-        // A receipt is a courtesy, not a requirement: a failure here must never
-        // blank a thread that loaded fine.
+        SocialApi.profile(token, otherUserId).onSuccess { fresh ->
+            if (fresh != null) {
+                person = fresh
+                SocialPeopleCache.remember(context, fresh)
+            }
+        }
         SocialApi.markRead(token, otherUserId, myUserId)
     }
 
-    // "is typing…" — pushed by a `dm_typing` frame, and re-read on a timer as
-    // the safety net (the push shows it the instant the other side starts; the
-    // timer is what CLEARS a row whose writer stopped refreshing it). Fast only
-    // while the push channel is down.
-    LaunchedEffect(eligible, token, myUserId) {
+    LaunchedEffect(eligible, token, myUserId, otherUserId) {
         if (!eligible || token == null || myUserId == null) return@LaunchedEffect
         while (true) {
             peerTyping = SocialApi.isTyping(token, myUserId, otherUserId)
@@ -685,162 +498,6 @@ fun DirectMessageScreen(
         }
     }
 
-    // THE THREAD'S DELTA — one small pull, shared by the push and the timer.
-    //
-    // It asks only for what is NEWER than the newest message already on screen
-    // (a strict `created_at >` window, so a pull is a few hundred bytes),
-    // merges it in, keeps the device's copy current and stamps the receipt.
-    suspend fun pullDelta(active: String, me: String) {
-        // Only CONFIRMED messages anchor the window: an optimistic bubble
-        // carries the phone's own clock, and a fast phone would otherwise push
-        // the window past the very messages this pull exists to find.
-        val anchor = messages
-            .filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
-            .maxOfOrNull { it.createdAtMillis }
-            ?: return
-        val fresh = SocialApi.messagesSince(active, otherUserId, me, anchor)
-            .getOrNull()
-            .orEmpty()
-            .filter { row -> (messages + pending).none { it.id == row.id } }
-        // A realtime push can also be an EDIT or a DELETE on an OLDER row,
-        // which the created_at window above never sees. Edits are re-read in
-        // full at most once per push (cheap: one page read); deletes of rows
-        // we still hold are pruned locally.
-        if (pendingRealtimeRevisions) {
-            pendingRealtimeRevisions = false
-            SocialApi.messages(active, otherUserId, me).getOrNull()?.let { server ->
-                val hidden = SocialMessageCache.hiddenIds(context, otherUserId)
-                messages = messages.mapNotNull { held ->
-                    when {
-                        held.id in hidden -> null
-                        // Gone from the server: they recalled it.
-                        server.none { it.id == held.id } && !held.id.startsWith(LOCAL_ID_PREFIX) -> null
-                        // Changed on the server: their edit wins.
-                        else -> server.firstOrNull { it.id == held.id } ?: held
-                    }
-                }
-                SocialMessageCache.write(context, otherUserId, messages)
-            }
-        }
-        // The receipts ride the same pull, whether or not anything new arrived:
-        // they change when the other side READS, which is a different moment
-        // from when they write.
-        SocialApi.readStamps(active, otherUserId, me).onSuccess { stamps ->
-            if (stamps.isNotEmpty()) {
-                messages = messages.map { message ->
-                    val at = stamps[message.id] ?: return@map message
-                    if (message.readAtMillis == null || message.readAtMillis < at) {
-                        message.copy(readAtMillis = at)
-                    } else {
-                        message
-                    }
-                }
-            }
-        }
-        if (fresh.isEmpty()) return
-        // `messagesSince` returns transport rows. Route a real arrival through
-        // the same batched-envelope decrypt path as initial load; otherwise a
-        // realtime message can briefly keep its null body or stale ciphertext.
-        load(active, me)
-        // An arrival means the other side stopped writing.
-        peerTyping = false
-        if (fresh.any { !it.mine }) {
-            SocialApi.markRead(active, otherUserId, me)
-        }
-    }
-
-    /**
-     * The live bits that are NOT part of the message delta: the other side's
-     * "is typing…" row and their reactions on the messages already on screen.
-     *
-     * Both are tiny RLS-protected reads, driven by a realtime hint instead of a
-     * tick. Reactions are re-read whole (rather than merged) because a REMOVED
-     * reaction has no row to merge from — the other person taking their glyph
-     * back is exactly as live as them leaving one.
-     */
-    suspend fun refreshLiveBits(active: String, me: String) {
-        peerTyping = SocialApi.isTyping(active, me, otherUserId)
-        val ids = messages.map { it.id }.filterNot { it.startsWith(LOCAL_ID_PREFIX) }
-        if (ids.isEmpty()) return
-        SocialApi.reactions(active, ids).onSuccess { fresh -> reactions = fresh }
-    }
-
-    // REALTIME — the server tells this screen when the thread moved, instead of
-    // a timer asking. Four bindings, all SERVER-filtered: their new messages
-    // (INSERT), my own message being read (UPDATE on a row I sent them), their
-    // "is typing…" row (INSERT/UPDATE), and a reaction from them (the row's
-    // primary key carries the reactor, so INSERT/UPDATE/DELETE all match the
-    // filter). The subscription is released the moment the screen goes away.
-    DisposableEffect(eligible, token, myUserId, otherUserId) {
-        val active = token
-        val me = myUserId
-        val owner = "dm:$otherUserId"
-        if (eligible && active != null && me != null) {
-            SupabaseRealtime.watch(
-                owner = owner,
-                accessToken = active,
-                watches = listOf(
-                    RealtimeWatch(
-                        table = "dm_messages",
-                        // INSERT is their new message; UPDATE catches their
-                        // edit; DELETE their recall. The delta fetch then
-                        // re-reads the touched rows.
-                        filter = "sender=eq.$otherUserId",
-                        events = listOf("INSERT", "UPDATE", "DELETE")
-                    ),
-                    RealtimeWatch(
-                        table = "dm_messages",
-                        filter = "recipient=eq.$otherUserId",
-                        events = listOf("UPDATE")
-                    ),
-                    RealtimeWatch(
-                        table = "dm_typing",
-                        filter = "sender=eq.$otherUserId",
-                        events = listOf("INSERT", "UPDATE")
-                    ),
-                    RealtimeWatch(
-                        table = "dm_reactions",
-                        filter = "user_id=eq.$otherUserId",
-                        events = listOf("INSERT", "UPDATE", "DELETE")
-                    )
-                )
-            ) {
-                // The push may be an INSERT, or an UPDATE/DELETE on an older
-                // row (their edit, their recall). The next delta pull asks for
-                // the whole page once when any revision flag is set, so both
-                // shapes land. Compose state is written on the composition's
-                // own scope, never from the socket thread.
-                scope.launch { pendingRealtimeRevisions = true }
-                scope.launch { pushed++ }
-                // The live bits that are not part of the message delta — the
-                // typing row and their reactions — are re-read right away.
-                scope.launch { refreshLiveBits(active, me) }
-            }
-        }
-        onDispose { SupabaseRealtime.unwatch(owner) }
-    }
-
-    // A push means "fetch now". The very first run is skipped (pushed == 0):
-    // entry already loaded the thread, and this effect exists for arrivals.
-    LaunchedEffect(pushed, eligible, token, myUserId, otherUserId) {
-        if (!eligible || token == null || myUserId == null || pushed == 0) return@LaunchedEffect
-        pullDelta(token, myUserId)
-    }
-
-    // THE FALLBACK TIMER. With realtime linked this is only a safety net — a
-    // missed frame, a socket that dropped silently — so it stays deliberately
-    // slow. Without realtime it is the whole mechanism, at the original
-    // cadence, which is why a blocked WebSocket never freezes the thread.
-    LaunchedEffect(eligible, token, myUserId, otherUserId) {
-        if (!eligible || token == null || myUserId == null) return@LaunchedEffect
-        while (true) {
-            delay(if (SupabaseRealtime.isLinked) SAFETY_TICK_MS else LIVE_TICK_MS)
-            pullDelta(token, myUserId)
-        }
-    }
-
-    // Tell the other side when this side is writing: a short debounce stops a
-    // request per keystroke, and the row clears itself after a pause.
     LaunchedEffect(draft, eligible, token) {
         if (!eligible || token == null) return@LaunchedEffect
         if (draft.isBlank()) {
@@ -853,56 +510,61 @@ fun DirectMessageScreen(
         SocialApi.setTyping(token, otherUserId, false)
     }
 
-    val thread = remember(messages, pending, sentShadow) {
-        // Shadows sit BETWEEN the confirmed rows and the still-sending tail:
-        // they are delivered as far as anyone can see, and they sort by their
-        // own (phone) clock like the optimistic rows do.
-        messages + (sentShadow + pending).sortedBy { it.createdAtMillis }
-    }        // The rows that sit ABOVE the messages in the same LazyColumn. Scrolling
-    // needs the message's real index, not its index within the conversation.
-    val headerRows = (if (wide) 1 else 0) +
-        1 + // the peer card
-        (if (error != null) 1 else 0) +
-        (if (thread.isEmpty() && !loading && loadedOnce) 1 else 0)
+    DisposableEffect(eligible, token, myUserId, otherUserId) {
+        val active = token
+        val me = myUserId
+        val owner = "dm:$otherUserId"
+        if (eligible && active != null && me != null) {
+            SupabaseRealtime.watch(
+                owner = owner,
+                accessToken = active,
+                watches = listOf(
+                    RealtimeWatch("dm_messages", "sender=eq.$otherUserId", listOf("INSERT", "UPDATE", "DELETE")),
+                    RealtimeWatch("dm_messages", "recipient=eq.$otherUserId", listOf("UPDATE")),
+                    RealtimeWatch("dm_typing", "sender=eq.$otherUserId", listOf("INSERT", "UPDATE")),
+                    RealtimeWatch("dm_reactions", "user_id=eq.$otherUserId", listOf("INSERT", "UPDATE", "DELETE"))
+                )
+            ) {
+                scope.launch { pendingRealtimeRevisions = true; pushed++ }
+                scope.launch { refreshLiveBits(active, me) }
+            }
+        }
+        onDispose { SupabaseRealtime.unwatch(owner) }
+    }
 
-    // Keep the newest line in view — on open, after every send, and when the
-    // other side starts typing under us.
-    var hasPresentedThread by remember(otherUserId) { mutableStateOf(false) }
-    LaunchedEffect(thread.size, peerTyping, headerRows) {
-        if (thread.isEmpty()) return@LaunchedEffect
-        val newest = headerRows + thread.lastIndex + if (peerTyping) 1 else 0
-        if (!hasPresentedThread) {
-            listState.scrollToItem(newest)
-            hasPresentedThread = true
-        } else {
-            listState.animateScrollToItem(newest)
+    LaunchedEffect(pushed, eligible, token, myUserId, otherUserId) {
+        if (!eligible || token == null || myUserId == null || pushed == 0) return@LaunchedEffect
+        SocialApi.messages(token, otherUserId, myUserId).onSuccess { fresh ->
+            if (pendingRealtimeRevisions) {
+                pendingRealtimeRevisions = false
+                messages = fresh
+                    .filterNot { it.id in SocialMessageCache.hiddenIds(context, otherUserId) }
+                    .sortedBy { it.createdAtMillis }
+                SocialMessageCache.write(context, otherUserId, messages)
+            }
+            scope.launch { load(token, myUserId) }
         }
     }
 
-    // The DISPLAY name wins over the name the route carried, so a rename shows
-    // up in the conversation too. A locally remembered or route-carried person
-    // has no @username yet — the peer card then shows their name alone rather
-    // than a made-up handle.
-    val fallback = person?.label?.takeIf { it.isNotBlank() }
-        ?: handle.ifBlank { "Message" }
-    // The hero (and the collapsed bar) carry the display name; the @username
-    // and the presence line sit on the peer card beneath it.
-    val title = fallback
+    LaunchedEffect(eligible, token, myUserId, otherUserId) {
+        if (!eligible || token == null || myUserId == null) return@LaunchedEffect
+        while (true) {
+            delay(if (SupabaseRealtime.isLinked) SAFETY_TICK_MS else LIVE_TICK_MS)
+            load(token, myUserId)
+        }
+    }
 
-    // "Seen" belongs on the newest of MY messages the other person actually
-    // READ — not simply on my newest one. Stamping the latest line whatever
-    // the receipt said is how a thread ends up claiming a message was seen
-    // when it never was; a message with no receipt shows no receipt.
+    val thread = remember(messages, pending, sentShadow) {
+        messages + (sentShadow + pending).sortedBy { it.createdAtMillis }
+    }
+
+    val fallback = person?.label?.takeIf { it.isNotBlank() } ?: handle.ifBlank { "Message" }
     val seenIndex = thread.indexOfLast { it.mine && it.readAtMillis != null }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                heroPageBackground(
-                    lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)
-                )
-            )
+            .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
     ) {
         if (!wide) {
             CurioWatermarkBackdrop(
@@ -910,57 +572,39 @@ fun DirectMessageScreen(
                 alphaScale = 0.45f
             )
         }
-
         Column(
             modifier = Modifier
                 .layerBackdrop(glassBackdrop)
                 .fillMaxSize()
-
         ) {
             if (eligible && token != null && myUserId != null) {
                 val activeToken = token
                 val activeUserId = myUserId
-
-                fun openReactions(messageId: String) {
-                    reactionTarget = if (reactionTarget == messageId) null else messageId
-                }
-
-                // The real picker logic lives at SCREEN scope (see below), so
-                // the hold-menu dialog — which sits outside the eligible
-                // branch — can react on the member's behalf too.
-                fun pickReaction(messageId: String, kind: String) {
-                    pickReactionScreen(messageId, kind, activeToken, activeUserId)
-                }
-
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier = Modifier.fillMaxWidth().weight(1f),
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
                         top = if (wide) 0.dp else SettingsHeroTotalHeight,
                         bottom = 12.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     if (wide) {
-                        item(key = "hero", contentType = "hero") {
+                        item(key = "hero") {
                             SettingsHeroHeader(
-                                title = title,
+                                title = fallback,
                                 subtitle = "Private messages",
                                 onBack = { navController.popBackStack() }
                             )
                         }
                     }
-
                     item(key = "peer") {
                         MessagePeerHeader(
                             person = person,
                             fallback = fallback,
                             typing = peerTyping,
-                            activityAtMillis = thread.lastOrNull { !it.mine }?.createdAtMillis,
                             onOpenProfile = {
                                 navController.navigate(CurioRoutes.socialProfile(otherUserId)) {
                                     launchSingleTop = true
@@ -968,107 +612,86 @@ fun DirectMessageScreen(
                             }
                         )
                     }
-                    // The per-chat encryption toggle is EXPERIMENTAL and
-                    // opt-in at the device level: it only exists when the
-                    // member asked for it in Settings → Online mode. A
-                    // conversation whose shared mode is already ON keeps its
-                    // pill (and its encrypted behaviour) either way — the gate
-                    // hides the door, it never slams one that is open.
-                    val encryptionExposed = AppPreferences.dmEncryptionEnabledState || encryptionEnabled
-                    if (encryptionExposed) {
-                        item(key = "delivery-mode") {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                SocialPill(
-                                    label = if (encryptionEnabled) "Encrypted" else "Encryption off",
-                                    icon = if (encryptionEnabled) CurioIcons.Lock else CurioIcons.Warning,
-                                    tone = if (encryptionEnabled) SocialPillTone.ACCENT else SocialPillTone.NEUTRAL,
-                                    enabled = !sending,
-                                    onClick = {
-                                        scope.launch {
-                                            val conversationId = dmConversationId(activeUserId, otherUserId)
-                                            SocialApi.setDmEncryption(
-                                                activeToken, conversationId, activeUserId, otherUserId,
-                                                !encryptionEnabled
-                                            ).fold(
-                                                onSuccess = { encryptionEnabled = it.encryptionEnabled },
-                                                onFailure = { error = it.message ?: "Couldn't change message encryption." }
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    error?.let { message -> item(key = "error") { SocialNote(message, true) } }
-
+                    error?.let { note -> item(key = "error") { SocialNote(note, true) } }
                     if (thread.isEmpty() && !loading && loadedOnce) {
                         item(key = "empty") {
                             SocialEmptyCard(
                                 icon = CurioIcons.Notes,
                                 title = "Nothing said yet",
-                                body = "This thread is only the two of you — start it with a hello."
+                                body = "Start with a hello."
                             )
                         }
                     }
-
-                    itemsIndexedWithDays(thread) { index, message, dayLabel, firstOfRun, lastOfRun ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            if (dayLabel != null) SocialDayDivider(dayLabel)
-                            MessageEntry(
-                                message = message,
-                                firstOfRun = firstOfRun,
-                                lastOfRun = lastOfRun,
-                                // Only the newest of MY messages can be seen:
-                                // an older receipt would be a lie if a newer
-                                // message was still unread.
-                                receipt = if (index == seenIndex) message.readAtMillis else null,
-                                accent = reactionTarget == message.id,
-                                reactions = reactions[message.id].orEmpty(),
-                                myUserId = activeUserId,
-                                onTap = { openReactions(message.id) },
-                                onLongPress = { actionTarget = message },
-                                onPick = { kind -> pickReaction(message.id, kind) },
-                                onDeleteLocal = {
-                                    SocialMessageCache.hide(context, otherUserId, message.id)
-                                    messages = messages.filterNot { it.id == message.id }
-                                },
-                                onUnsend = if (message.mine && !message.id.startsWith(LOCAL_ID_PREFIX)) {
-                                    {
-                                        scope.launch {
-                                            SocialApi.deleteMessage(activeToken, message.id).fold(
-                                                onSuccess = {
-                                                    messages = messages.filterNot { it.id == message.id }
-                                                    SocialMessageCache.write(context, otherUserId, messages)
-                                                },
-                                                onFailure = { error = it.message ?: "Couldn't unsend that message." }
-                                            )
-                                        }
+                    dmItemsWithFraming(thread) { index, message, first, last ->
+                        MessageEntry(
+                            message = message,
+                            firstOfRun = first,
+                            lastOfRun = last,
+                            receipt = if (index == seenIndex) message.readAtMillis else null,
+                            accent = reactionTarget == message.id,
+                            reactions = reactions[message.id].orEmpty(),
+                            myUserId = activeUserId,
+                            anchorBounds = anchorBounds,
+                            onTap = {
+                                actionTarget = null
+                                reactionTarget = if (reactionTarget == message.id) null else message.id
+                            },
+                            onLongPress = {
+                                reactionTarget = null
+                                actionTarget = message
+                                actionAnchor = anchorBounds[message.id]
+                                actionWiggle = !actionWiggle
+                            },
+                            onSwipeReply = {
+                                actionTarget = null
+                                reactionTarget = null
+                                replyTarget = message
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            },
+                            onPick = ::pickReaction,
+                            onEdit = {
+                                if (message.mine && message.migrationState == "plaintext" && !message.id.startsWith(LOCAL_ID_PREFIX)) {
+                                    editing = message
+                                    draft = message.body
+                                    replyTarget = null
+                                    actionTarget = null
+                                }
+                            },
+                            onCopy = {
+                                val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                                clip?.setPrimaryClip(android.content.ClipData.newPlainText("message", message.body))
+                                actionTarget = null
+                            },
+                            onRemove = if (message.mine && !message.id.startsWith(LOCAL_ID_PREFIX)) {
+                                {
+                                    actionTarget = null
+                                    scope.launch {
+                                        SocialApi.deleteMessage(activeToken, message.id).fold(
+                                            onSuccess = {
+                                                messages = messages.filterNot { it.id == message.id }
+                                                SocialMessageCache.write(context, otherUserId, messages)
+                                            },
+                                            onFailure = { error = it.message ?: "Couldn't remove that message." }
+                                        )
                                     }
-                                } else null,
-                                animateIn = message.id.startsWith(LOCAL_ID_PREFIX)
-                            )
-                        }
+                                }
+                            } else null,
+                            animateIn = message.id.startsWith(LOCAL_ID_PREFIX)
+                        )
                     }
-
                     if (peerTyping && thread.isNotEmpty()) {
                         item(key = "typing") { TypingBubble(person) }
                     }
                 }
 
                 MessageComposer(
-                    modifier = Modifier,
                     draft = draft,
                     title = fallback,
                     sending = sending,
                     editTarget = editing,
-                    onDropEdit = {
-                        editing = null
-                        draft = ""
-                    },
+                    replyTarget = replyTarget,
+                    onDropEdit = { editing = null; draft = "" },
+                    onDropReply = { replyTarget = null },
                     onDraftChange = { if (it.length <= SocialApi.MAX_MESSAGE_CHARS) draft = it },
                     onSend = { scope.launch { send(activeToken, activeUserId) } }
                 )
@@ -1084,7 +707,7 @@ fun DirectMessageScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     if (wide) {
-                        item(key = "hero", contentType = "hero") {
+                        item(key = "hero") {
                             SettingsHeroHeader(
                                 title = fallback,
                                 subtitle = "Private messages",
@@ -1134,173 +757,99 @@ fun DirectMessageScreen(
             }
         }
 
-        // The HOLD menu for one message: the reaction palette rides at the
-        // top (the emoji choice used to require a second tap on the bubble —
-        // it lives here, where the finger already is), then Copy (any
-        // message), Edit (mine, plaintext only — an encrypted row is bound to
-        // its key version), Remove (mine). Nothing else: a menu is a
-        // decision, not a page.
-        actionTarget?.let { target ->
-            val canEdit = target.mine && target.migrationState == "plaintext" &&
-                !target.id.startsWith(LOCAL_ID_PREFIX)
-            val canRemove = target.mine && !target.id.startsWith(LOCAL_ID_PREFIX)
-            AlertDialog(
-                onDismissRequest = { actionTarget = null },
-                containerColor = curioDialogContainerColor(),
-                shape = CurioDialogShape,
-                title = {
-                    Text(
-                        text = "Message",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+        if (actionTarget != null && actionAnchor != null) {
+            val target = actionTarget!!
+            val screenWidthPx = with(density) { wideContentEdgePadding().toPx() * 2f }
+            val trayHeightPx = with(density) { 142.dp.toPx() }
+            val trayY = (actionAnchor!!.top - trayHeightPx - with(density) { 8.dp.toPx() }).coerceAtLeast(
+                with(density) { SettingsHeroTotalHeight.toPx() }
+            )
+            val trayX = actionAnchor!!.left.coerceAtLeast(screenWidthPx / 2f).coerceAtMost(
+                actionAnchor!!.right - with(density) { 220.dp.toPx() }
+            )
+            DmActionTray(
+                modifier = Modifier
+                    .offset {
+                        IntOffset(trayX.toInt(), trayY.toInt())
+                    }
+                    .animateContentPlacementCompat(actionWiggle),
+                target = target,
+                currentReaction = reactions[target.id]?.firstOrNull { it.userId == myUserId }?.kind,
+                onPickReaction = ::pickReaction,
+                onReply = {
+                    replyTarget = target
+                    actionTarget = null
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(
-                            text = target.body.take(160) + if (target.body.length > 160) "…" else "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        // The palette, inline: picking one reacts AND closes,
-                        // picking the one already on the message clears it.
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            val current = reactions[target.id]
-                                ?.firstOrNull { it.userId == myUserId }?.kind
-                            SocialReactions.PALETTE.forEach { (emoji, _) ->
-                                val chosen = current != null &&
-                                    SocialReactions.emojiFor(current) == emoji
-                                Surface(
-                                    onClick = {
-                                        actionTarget = null
-                                        pickReactionScreen(target.id, emoji, token, myUserId)
-                                    },
-                                    shape = RoundedCornerShape(50),
-                                    color = if (chosen) curioDialogActionColor().copy(alpha = 0.16f)
-                                    else MaterialTheme.colorScheme.surfaceContainerHigh
-                                ) {
-                                    Text(
-                                        text = emoji,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-                                    )
-                                }
-                            }
-                        }
+                onCopy = {
+                    val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                    clip?.setPrimaryClip(android.content.ClipData.newPlainText("message", target.body))
+                    actionTarget = null
+                },
+                onEdit = {
+                    if (target.mine && target.migrationState == "plaintext" && !target.id.startsWith(LOCAL_ID_PREFIX)) {
+                        editing = target
+                        draft = target.body
+                        replyTarget = null
+                        actionTarget = null
                     }
                 },
-                dismissButton = {
-                    TextButton(onClick = { actionTarget = null }) { Text("Close") }
-                },
-                confirmButton = {
-                    Row {
-                        TextButton(onClick = {
-                            val clip = context.getSystemService(Context.CLIPBOARD_SERVICE)
-                                as? android.content.ClipboardManager
-                            clip?.setPrimaryClip(
-                                android.content.ClipData.newPlainText("message", target.body)
-                            )
-                            actionTarget = null
-                        }) { Text("Copy") }
-                        if (canEdit) {
-                            TextButton(onClick = {
-                                editing = target
-                                draft = target.body
-                                actionTarget = null
-                            }) { Text("Edit") }
-                        }
-                        if (canRemove) {
-                            TextButton(onClick = {
-                                actionTarget = null
-                                val active = token
-                                if (active != null) {
-                                    scope.launch {
-                                        SocialApi.deleteMessage(active, target.id).fold(
-                                            onSuccess = {
-                                                messages = messages.filterNot { it.id == target.id }
-                                                SocialMessageCache.write(context, otherUserId, messages)
-                                            },
-                                            onFailure = { error = it.message ?: "Couldn't remove that message." }
-                                        )
-                                    }
-                                }
-                            }) {
-                                Text(
-                                    "Remove",
-                                    color = MaterialTheme.colorScheme.error,
-                                    fontWeight = FontWeight.SemiBold
+                onRemove = if (target.mine && !target.id.startsWith(LOCAL_ID_PREFIX)) {
+                    {
+                        val active = token
+                        if (active != null) {
+                            scope.launch {
+                                SocialApi.deleteMessage(active, target.id).fold(
+                                    onSuccess = {
+                                        messages = messages.filterNot { it.id == target.id }
+                                        SocialMessageCache.write(context, otherUserId, messages)
+                                    },
+                                    onFailure = { error = it.message ?: "Couldn't remove that message." }
                                 )
                             }
                         }
+                        actionTarget = null
                     }
-                }
+                } else null,
+                onDismiss = { actionTarget = null }
             )
         }
 
-        // An encrypted send that could not be delivered raises THIS instead of
-        // a dead error line: the reason is stated, the one-tap way out (turn
-        // the shared mode off for both, send as normal text) is offered, and
-        // the honest status of the feature is named once, in full.
         encryptionIssue?.let { reason ->
             SocialConfirmDialog(
                 title = "Encrypted message didn't send",
-                body = "$reason\n\nEncryption only works while you are both on a version that " +
-                    "supports it. You can send this message with encryption turned off for " +
-                    "this chat instead — either of you can switch it back on later. " +
-                    "Encrypted messages are experimental and may be changed or withdrawn.",
+                body = "$reason\n\nYou can send this message with encryption turned off for this chat instead.",
                 confirmLabel = "Send without encryption",
                 destructive = false,
                 busy = sending,
                 onDismiss = { if (!sending) encryptionIssue = null },
                 onConfirm = {
-                    // The dialog lives OUTSIDE the eligible branch, so the
-                    // session values are read from the screen's own state
-                    // here; without a session there is nothing to send.
                     val active = token
                     val me = myUserId
                     if (active == null || me == null) {
                         encryptionIssue = null
-                        return@SocialConfirmDialog
-                    }
-                    scope.launch {
-                        pending = pending.filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
-                        draft = failedDraft
-                        failedDraft = ""
-                        encryptionIssue = null
-                        send(active, me, forcePlaintext = true)
+                    } else {
+                        scope.launch {
+                            draft = failedDraft
+                            failedDraft = ""
+                            encryptionIssue = null
+                            send(active, me, forcePlaintext = true)
+                        }
                     }
                 }
             )
         }
 
         if (!wide) {
-            // The conversation's hero IS the peer: their portrait rides in the
-            // title slot and the @username (or a live Typing… line) rides as
-            // the subtitle, so the person you are writing to is named at the
-            // top — not stated as a standing label with the person listed
-            // below the fold.
             SettingsHeroHeader(
                 title = person?.label ?: fallback,
                 subtitle = if (peerTyping) "Typing…" else "",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop,
-                // The person LEADS the header — avatar first, then the name,
-                // exactly like a messenger. The old titleTrailing slot put
-                // them on the right edge, past the (empty) title.
-                titleLeading = { ink ->
+                titleLeading = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .clickable {
-                                navController.navigate(CurioRoutes.socialProfile(otherUserId)) {
-                                    launchSingleTop = true
-                                }
-                            }
-                            .padding(end = 2.dp)
+                        modifier = Modifier.padding(end = 2.dp)
                     ) {
                         SocialAvatar(
                             style = person?.avatarStyle ?: 0,
@@ -1314,123 +863,65 @@ fun DirectMessageScreen(
     }
 }
 
-/**
- * Walks a conversation once and hands each row its framing: the day rule it
- * opens, and whether it starts or ends a run from one person.
- *
- * Grouping is what makes a long thread readable — without it every line wears
- * its own timestamp and portrait and the conversation reads as a log rather
- * than as people talking. A run breaks on a change of sender, a gap of more
- * than five minutes, or a new day.
- */
-private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedWithDays(
+private fun LazyListScope.dmItemsWithFraming(
     thread: List<CurioDirectMessage>,
-    row: @Composable (index: Int, message: CurioDirectMessage, dayLabel: String?, first: Boolean, last: Boolean) -> Unit
+    row: @Composable (index: Int, message: CurioDirectMessage, first: Boolean, last: Boolean) -> Unit
 ) {
-    items(thread.size, key = { thread[it].id }) { index ->
-        val message = thread[index]
+    itemsIndexed(thread, key = { _, message -> message.id }) { index, message ->
         val previous = thread.getOrNull(index - 1)
         val next = thread.getOrNull(index + 1)
-        val newDay = previous == null ||
-            socialDayLabel(previous.createdAtMillis) != socialDayLabel(message.createdAtMillis)
-        val sameAsPrevious = !newDay && previous != null &&
-            previous.mine == message.mine &&
+        val samePrevious = previous != null && previous.mine == message.mine &&
             message.createdAtMillis - previous.createdAtMillis <= 5 * 60 * 1000
-        val sameAsNext = next != null &&
-            socialDayLabel(next.createdAtMillis) == socialDayLabel(message.createdAtMillis) &&
-            next.mine == message.mine &&
+        val sameNext = next != null && next.mine == message.mine &&
             next.createdAtMillis - message.createdAtMillis <= 5 * 60 * 1000
-        row(
-            index,
-            message,
-            if (newDay) socialDayLabel(message.createdAtMillis) else null,
-            !sameAsPrevious,
-            !sameAsNext
-        )
+        row(index, message, !samePrevious, !sameNext)
     }
 }
 
-/**
- * Who you are talking to: the portrait, the live username and a tap that opens
- * their profile. When they are writing the @username gives way to a live
- * "Typing…" line, so the header answers the question the thread is about to
- * ask without any standing paragraph about it.
- */
 @Composable
 private fun MessagePeerHeader(
     person: CurioPerson?,
     fallback: String,
     typing: Boolean,
-    activityAtMillis: Long?,
     onOpenProfile: () -> Unit
 ) {
     val dark = isCurioDarkTheme()
     Surface(
         shape = RoundedCornerShape(22.dp),
-        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.72f),
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.78f)
+        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.86f),
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.10f),
-                shape = RoundedCornerShape(22.dp)
-            )
+            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.10f), RoundedCornerShape(22.dp))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onOpenProfile)
-                .padding(14.dp)
+                .combinedClickable(onClick = onOpenProfile, onLongClick = {})
+                .padding(horizontal = 14.dp, vertical = 13.dp)
         ) {
             SocialAvatar(
                 style = person?.avatarStyle ?: 0,
                 avatarSize = 46.dp,
-                // The dot and the presence line under the name are the SAME
-                // fact, so they can never disagree.
                 online = person?.isActiveNow == true
             )
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 12.dp),
+                modifier = Modifier.weight(1f).padding(start = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
                     text = person?.label ?: fallback,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1
                 )
-                if (typing) {
-                    Text(
-                        text = "Typing…",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = curioDialogActionColor()
-                    )
-                } else {
-                    // The @username, and — only when the other member left
-                    // activity visible — a quiet presence line beside it.
-                    Text(
-text = listOfNotNull(
-                            person?.handleLabel,
-                            activityAtMillis?.let { sentAt ->
-                                val ageMinutes = ((System.currentTimeMillis() - sentAt).coerceAtLeast(0L) / 60_000L)
-                                when {
-                                    ageMinutes < 5L -> "Active now"
-                                    ageMinutes < 60L -> "Active ${ageMinutes}m ago"
-                                    ageMinutes < 24L * 60L -> "Active ${ageMinutes / 60L}h ago"
-                                    else -> null
-                                }
-                            }
-                        ).joinToString(" · ").ifBlank { "Open profile" },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = if (typing) "Typing…" else (person?.handleLabel ?: "Open profile"),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = if (typing) FontWeight.SemiBold else FontWeight.Normal
+                    ),
+                    color = if (typing) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             CurioIcon(
                 name = CurioIcons.ChevronRight,
@@ -1442,12 +933,6 @@ text = listOfNotNull(
     }
 }
 
-/**
- * One message, its framing and — when tapped — the reaction palette under it.
- *
- * [animateIn] is set only for messages this device just sent, so a bubble
- * a user wrote arrives on a spring while history arrives still.
- */
 @Composable
 private fun MessageEntry(
     message: CurioDirectMessage,
@@ -1457,180 +942,205 @@ private fun MessageEntry(
     accent: Boolean,
     reactions: List<CurioDmReaction>,
     myUserId: String,
+    anchorBounds: MutableMap<String, androidx.compose.ui.geometry.Rect>,
     onTap: () -> Unit,
     onLongPress: () -> Unit,
-    onPick: (String) -> Unit,
-    onDeleteLocal: () -> Unit,
-    onUnsend: (() -> Unit)?,
+    onSwipeReply: () -> Unit,
+    onPick: (String, String) -> Unit,
+    onEdit: () -> Unit,
+    onCopy: () -> Unit,
+    onRemove: (() -> Unit)?,
     animateIn: Boolean
 ) {
-    // `initial = !animateIn` is what makes this safe to use for EVERY row: a
-    // historic message starts already visible (no animation at all), while a
-    // message this device just sent starts hidden and springs in. A row never
-    // animates OUT — the optimistic bubble is replaced by the server's copy of
-    // the same text in the same frame, and an exit animation there would read
-    // as the message being taken away.
     val visible = remember {
         MutableTransitionState(!animateIn).apply { if (animateIn) targetState = true }
     }
     AnimatedVisibility(
         visibleState = visible,
-        enter = slideInVertically(initialOffsetY = { it / 2 }) +
-            fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)),
-        exit = ExitTransition.None
+        enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(tween(CurioMotion.Durations.Quick)),
+        exit = androidx.compose.animation.ExitTransition.None
     ) {
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            MessageBubble(
-                message = message,
-                firstOfRun = firstOfRun,
-                lastOfRun = lastOfRun,
-                receipt = receipt,
-                reactions = reactions,
-                myUserId = myUserId,
-                onTap = onTap,
-                onLongPress = onLongPress
+        SwipeReplyMessage(
+            message = message,
+            firstOfRun = firstOfRun,
+            lastOfRun = lastOfRun,
+            receipt = receipt,
+            reactions = reactions,
+            myUserId = myUserId,
+            anchorBounds = anchorBounds,
+            onTap = onTap,
+            onLongPress = onLongPress,
+            onSwipeReply = onSwipeReply,
+            animateIn = animateIn
+        )
+        if (accent) {
+            ReactionBar(
+                current = reactions.firstOrNull { it.userId == myUserId }?.kind,
+                mine = message.mine,
+                onPick = { onPick(message.id, it) }
             )
-            // The action row under a message is GONE: actions are decided on
-            // a HOLD now, so nothing crowds the message a finger is only
-            // reading. (Reactions still open on a tap.)
-            if (accent) {
-                ReactionBar(
-                    current = reactions.firstOrNull { it.userId == myUserId }?.kind,
-                    mine = message.mine,
-                    onPick = onPick
-                )
-            }
         }
     }
 }
 
-/**
- * One message. Yours sits on the right in the accent container, theirs on the
- * left on the raised surface — the reading direction of every messenger, so
- * who said what needs no label. Corners open up on the first line of a run
- * and only the last line of a run gets the full rounding and the timestamp.
- * Both fills are OPAQUE: a translucent bubble let the background bleed
- * through and read as unfinished. A plain TAP opens nothing destructive —
- * it is the reaction tap (with a soft press squish); every decision
- * (copy, edit, remove) lives behind the HOLD.
- */
 @Composable
-private fun MessageBubble(
+private fun SwipeReplyMessage(
     message: CurioDirectMessage,
     firstOfRun: Boolean,
     lastOfRun: Boolean,
     receipt: Long?,
     reactions: List<CurioDmReaction>,
     myUserId: String,
+    anchorBounds: MutableMap<String, androidx.compose.ui.geometry.Rect>,
     onTap: () -> Unit,
-    onLongPress: () -> Unit
+    onLongPress: () -> Unit,
+    onSwipeReply: () -> Unit,
+    animateIn: Boolean
 ) {
     val mine = message.mine
     val dark = isCurioDarkTheme()
-    val shape = if (mine) {
-        RoundedCornerShape(
-            topStart = 20.dp,
-            topEnd = if (firstOfRun) 20.dp else 7.dp,
-            bottomStart = 7.dp,
-            bottomEnd = if (lastOfRun) 20.dp else 7.dp
-        )
-    } else {
-        RoundedCornerShape(
-            topStart = if (firstOfRun) 20.dp else 7.dp,
-            topEnd = 20.dp,
-            bottomStart = if (lastOfRun) 20.dp else 7.dp,
-            bottomEnd = 7.dp
-        )
-    }
+    val haptics = LocalHapticFeedback.current
+    var dragPx by remember(message.id) { mutableStateOf(0f) }
+    var armed by remember(message.id) { mutableStateOf(false) }
+    val threshold = with(LocalDensity.current) { SWIPE_REPLY_THRESHOLD_DP.dp.toPx() }
+    val maxSwipe = with(LocalDensity.current) { SWIPE_REPLY_MAX_DP.dp.toPx() }
+    val swipeOffset by animateFloatAsState(
+        targetValue = dragPx,
+        animationSpec = spring(dampingRatio = 0.72f, stiffness = 700f),
+        label = "dmSwipe"
+    )
 
+    val shape = if (mine) {
+        RoundedCornerShape(20.dp, 20.dp, if (lastOfRun) 20.dp else 7.dp, 7.dp)
+    } else {
+        RoundedCornerShape(20.dp, 20.dp, 7.dp, if (lastOfRun) 20.dp else 7.dp)
+    }
     val mineGlyph = reactions.firstOrNull { it.userId == myUserId }?.kind
     val others = reactions.filterNot { it.userId == myUserId }
-    val haptics = LocalHapticFeedback.current
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
         horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
         if (mine && lastOfRun) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(end = 6.dp, bottom = 2.dp)
-            ) {
-                Text(
-                    text = socialStamp(message.createdAtMillis),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (receipt != null) {
-                    Text(
-                        text = "Seen ${socialStamp(receipt)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = curioDialogActionColor()
-                    )
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 6.dp, bottom = 2.dp)) {
+                Text(socialStamp(message.createdAtMillis), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                receipt?.let {
+                    Text("Seen ${socialStamp(it)}", style = MaterialTheme.typography.labelSmall, color = curioDialogActionColor())
                 }
             }
         }
 
-        Column(
-            horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
-            modifier = Modifier.weight(1f, fill = false)
+        Box(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .onGloballyPositioned { coordinates -> anchorBounds[message.id] = coordinates.boundsInParent() }
         ) {
-            val press = rememberCurioPressSource(pressedScale = 0.96f)
-            Box(
-                modifier = Modifier
-                    .then(press.modifier)
-                    .clip(shape)
-                    .background(
-                        when {
-                            mine -> if (dark) Color(0xFF3A2A33) else MaterialTheme.colorScheme.primary
-                            dark -> MaterialTheme.colorScheme.surfaceContainerHighest
-                            else -> Color(0xFFF3EDE7)
-                        }
-                    )
-                    .combinedClickable(
-                        interactionSource = press.interactionSource,
-                        indication = LocalIndication.current,
-                        onClickLabel = "React to this message",
-                        onLongClickLabel = "Message options",
-                        // The HOLD is the message's decision point: it opens
-                        // the action menu (copy, edit, remove, reactions). A
-                        // plain tap keeps opening reactions.
-                        onLongClick = {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onLongPress()
-                        },
-                        onClick = onTap
-                    )
-                    .padding(horizontal = 14.dp, vertical = 9.dp)
+            val bubbleStart = if (mine) Alignment.End else Alignment.Start
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = message.body,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (mine) Color.White
-                    else MaterialTheme.colorScheme.onSurface
-                )
-                if (message.editedAtMillis != null) {
-                    Text(
-                        text = "edited",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (mine) Color.White.copy(alpha = 0.7f)
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
+                val replyProgress = (kotlin.math.abs(swipeOffset) / threshold).coerceIn(0f, 1f)
+                val replySideIsVisible = (mine && swipeOffset < 0f) || (!mine && swipeOffset > 0f)
+                if (replySideIsVisible) {
+                    Surface(
+                        shape = CircleShape,
+                        color = curioDialogActionColor().copy(alpha = 0.10f + 0.14f * replyProgress),
+                        modifier = Modifier
+                            .size(34.dp)
+                            .alpha(0.6f + 0.4f * replyProgress)
+                            .scale(0.72f + 0.28f * replyProgress)
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                name = CurioIcons.Reply,
+                                contentDescription = "Reply",
+                                tint = curioDialogActionColor(),
+                                size = 17.dp
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                }
+                val press = rememberCurioPressSource(pressedScale = 0.96f)
+                Box(
+                    modifier = Modifier
+                        .then(press.modifier)
+                        .graphicsLayer { translationX = swipeOffset }
+                        .clip(shape)
+                        .background(
+                            when {
+                                mine -> if (dark) androidx.compose.ui.graphics.Color(0xFF3A2A33) else MaterialTheme.colorScheme.primary
+                                dark -> androidx.compose.ui.graphics.Color(0xFF3C3A3B)
+                                else -> androidx.compose.ui.graphics.Color(0xFFE9E1DA)
+                            }
+                        )
+                        .combinedClickable(
+                            interactionSource = press.interactionSource,
+                            indication = LocalIndication.current,
+                            onClickLabel = "React to this message",
+                            onLongClickLabel = "Message options",
+                            onLongClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onLongPress()
+                            },
+                            onClick = onTap
+                        )
+                        .pointerInput(message.id) {
+                            detectHorizontalDragGestures(
+                                onDragStart = { armed = false },
+                                onDragCancel = {
+                                    dragPx = 0f
+                                    armed = false
+                                },
+                                onDragEnd = {
+                                    val shouldReply = kotlin.math.abs(dragPx) >= threshold
+                                    if (shouldReply) onSwipeReply()
+                                    dragPx = 0f
+                                    armed = false
+                                },
+                                onHorizontalDrag = { change, amount ->
+                                    change.consume()
+                                    val next = (dragPx + amount).coerceIn(-maxSwipe, maxSwipe)
+                                    val correctDirection = (mine && next <= 0f) || (!mine && next >= 0f)
+                                    if (correctDirection) {
+                                        val wasArmed = armed
+                                        dragPx = next
+                                        armed = kotlin.math.abs(next) >= threshold
+                                        if (!wasArmed && armed) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                }
+                            )
+                        }
+                        .padding(horizontal = 14.dp, vertical = 9.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = message.body,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (mine) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                        if (message.editedAtMillis != null) {
+                            Text(
+                                text = "edited",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (mine) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
-
-            // The reaction chips sit OUTSIDE the bubble, on its tail corner, so
-            // the bubble keeps its own shape and a reaction never reflows the
-            // text it is attached to.
             if (mineGlyph != null || others.isNotEmpty()) {
-                ReactionChips(mineGlyph = mineGlyph, others = others)
+                ReactionChips(mineGlyph, others)
             }
         }
 
         if (!mine && lastOfRun) {
             Text(
-                text = socialStamp(message.createdAtMillis),
+                socialStamp(message.createdAtMillis),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
@@ -1639,20 +1149,11 @@ private fun MessageBubble(
     }
 }
 
-/** The reaction chips already on a message — mine first, then everyone else's. */
 @Composable
 private fun ReactionChips(mineGlyph: String?, others: List<CurioDmReaction>) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = 3.dp)
-    ) {
-        if (mineGlyph != null) {
-            ReactionChip(kind = mineGlyph, count = 1, mine = true)
-        }
-        others.groupBy { it.kind }.forEach { (kind, group) ->
-            ReactionChip(kind = kind, count = group.size, mine = false)
-        }
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 3.dp)) {
+        mineGlyph?.let { ReactionChip(it, 1, true) }
+        others.groupBy { it.kind }.forEach { (kind, group) -> ReactionChip(kind, group.size, false) }
     }
 }
 
@@ -1661,78 +1162,46 @@ private fun ReactionChip(kind: String, count: Int, mine: Boolean) {
     val ink = if (mine) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (mine) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        }
+        color = if (mine) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(3.dp),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
         ) {
-            Text(
-                text = SocialReactions.emojiFor(kind),
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
-                color = ink
-            )
-            if (count > 1) {
-                Text(
-                    text = count.toString(),
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = ink
-                )
-            }
+            Text(SocialReactions.emojiFor(kind), style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp), color = ink)
+            if (count > 1) Text(count.toString(), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = ink)
         }
     }
 }
 
-/**
- * The palette under a tapped message. Every glyph is a name from Curio's own
- * icon set, so a reaction is a word on the server and never an upload.
- */
 @Composable
-private fun ReactionBar(
-    current: String?,
-    mine: Boolean,
-    onPick: (String) -> Unit
-) {
-    val visible = remember { MutableTransitionState(false).apply { targetState = true } }
+private fun ReactionBar(current: String?, mine: Boolean, onPick: (String) -> Unit) {
     AnimatedVisibility(
-        visibleState = visible,
-        enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
-            slideInVertically(initialOffsetY = { it / 3 }),
-        exit = ExitTransition.None
+        visible = true,
+        enter = fadeIn(tween(CurioMotion.Durations.Quick)) + androidx.compose.animation.slideInVertically(initialOffsetY = { it / 3 }),
+        exit = fadeOut(tween(CurioMotion.Durations.Quick))
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = if (mine) 0.dp else 2.dp)
+                .padding(start = if (mine) 0.dp else 4.dp, top = 2.dp)
         ) {
             if (mine) Spacer(Modifier.weight(1f))
             SocialReactions.PALETTE.forEach { (emoji, meaning) ->
-                // The emoji IS the reaction: it is drawn as text, so what the
-                // picker shows is exactly what the server stores — and a
-                // legacy row's icon name still resolves to its emoji.
                 val chosen = current != null && SocialReactions.emojiFor(current) == emoji
                 Surface(
                     onClick = { onPick(emoji) },
                     shape = RoundedCornerShape(50),
-                    color = if (chosen) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
+                    color = if (chosen) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else MaterialTheme.colorScheme.surfaceContainerHigh,
                     modifier = Modifier.semantics { contentDescription = meaning }
                 ) {
                     Text(
-                        text = emoji,
+                        emoji,
                         style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
-                        color = if (chosen) curioDialogActionColor()
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (chosen) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
                     )
                 }
@@ -1742,188 +1211,190 @@ private fun ReactionBar(
     }
 }
 
-/** Three breathing dots — the other person is writing, shown in the thread. */
 @Composable
 private fun TypingBubble(person: CurioPerson?) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         SocialAvatar(style = person?.avatarStyle ?: 0, avatarSize = 26.dp)
         Spacer(Modifier.width(8.dp))
         Surface(
-            shape = RoundedCornerShape(topStart = 7.dp, topEnd = 18.dp, bottomStart = 7.dp, bottomEnd = 18.dp),
+            shape = RoundedCornerShape(7.dp, 18.dp, 7.dp, 18.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
-            ) {
-                (0..2).forEach { dot -> TypingDot(delayMillis = dot * 160L) }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+                repeat(3) { Text("•", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
     }
 }
 
-/** One dot of [TypingBubble], pulsing on its own offset so the row breathes. */
 @Composable
-private fun TypingDot(delayMillis: Long) {
-    var up by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(delayMillis)
-        while (true) {
-            up = true
-            delay(420)
-            up = false
-            delay(420)
+private fun DmActionTray(
+    modifier: Modifier,
+    target: CurioDirectMessage,
+    currentReaction: String?,
+    onPickReaction: (String, String) -> Unit,
+    onReply: () -> Unit,
+    onCopy: () -> Unit,
+    onEdit: () -> Unit,
+    onRemove: (() -> Unit)?,
+    onDismiss: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = true,
+        enter = scaleIn(animationSpec = spring(dampingRatio = 0.72f, stiffness = 550f), initialScale = 0.84f) + fadeIn(tween(130)),
+        exit = scaleOut(tween(100), targetScale = 0.92f) + fadeOut(tween(80)),
+        modifier = modifier
+    ) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.98f),
+            shadowElevation = 18.dp,
+            tonalElevation = 5.dp,
+            modifier = Modifier
+                .width(250.dp)
+                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.10f), RoundedCornerShape(22.dp))
+        ) {
+            Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                    SocialReactions.PALETTE.forEach { (emoji, _) ->
+                        val selected = currentReaction != null && SocialReactions.emojiFor(currentReaction) == emoji
+                        Surface(
+                            onClick = { onPickReaction(target.id, emoji) },
+                            shape = CircleShape,
+                            color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.20f) else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier.size(38.dp)
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(emoji, fontSize = 18.sp) }
+                        }
+                    }
+                }
+                Text(
+                    text = target.body.take(76) + if (target.body.length > 76) "…" else "",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                    DmTrayAction(CurioIcons.Reply, "Reply", onReply)
+                    DmTrayAction(CurioIcons.Copy, "Copy", onCopy)
+                    if (target.mine && target.migrationState == "plaintext" && !target.id.startsWith(LOCAL_ID_PREFIX)) {
+                        DmTrayAction(CurioIcons.Edit, "Edit", onEdit)
+                    }
+                    onRemove?.let { DmTrayAction(CurioIcons.Delete, "Remove", it, destructive = true) }
+                    DmTrayAction(CurioIcons.Close, "Close", onDismiss)
+                }
+            }
         }
     }
-    val lift by animateFloatAsState(
-        targetValue = if (up) 1f else 0.55f,
-        animationSpec = tween(400),
-        label = "typingDot"
-    )
-    Box(
-        modifier = Modifier
-            .size(6.dp)
-            .scale(lift)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f + 0.5f * lift))
-    )
 }
 
-/**
- * The composer: a frosted pill you write in and one circular accent button
- * that sends. The send control does not appear — it grows the moment there is
- * something to send, which is the feedback that says "this is ready".
- */
+@Composable
+private fun DmTrayAction(icon: String, label: String, onClick: () -> Unit, destructive: Boolean = false) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.weight(1f).semantics { contentDescription = label }
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 7.dp)) {
+            CurioIcon(
+                name = icon,
+                contentDescription = null,
+                tint = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
+    }
+}
+
 @Composable
 private fun MessageComposer(
-  modifier: Modifier = Modifier,
-  draft: String,
+    modifier: Modifier = Modifier,
+    draft: String,
     title: String,
     sending: Boolean,
-    /** When set, the composer is EDITING this message: Save replaces Send. */
     editTarget: CurioDirectMessage?,
+    replyTarget: CurioDirectMessage?,
     onDropEdit: () -> Unit,
+    onDropReply: () -> Unit,
     onDraftChange: (String) -> Unit,
     onSend: () -> Unit
 ) {
     val dark = isCurioDarkTheme()
-    // A direct message is deliberately NOT run through CurioContentFilter —
-    // this is a private conversation between two friends, and the filter
-    // guards the public surfaces instead. See SocialApi.send.
     val armed = draft.isNotBlank() && !sending
     val sendScale by animateFloatAsState(
         targetValue = if (armed) 1f else 0.86f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 900f),
+        animationSpec = spring(dampingRatio = 0.55f, stiffness = 850f),
         label = "sendScale"
     )
     val nearLimit = draft.length > SocialApi.MAX_MESSAGE_CHARS * 8 / 10
 
-  Column(
-  modifier = modifier
-  .fillMaxWidth()
-  // The keyboard sits ON TOP of the composer otherwise: the app is
-  // edge-to-edge (`setDecorFitsSystemWindows(false)`) and the NavHost only
-  // delivers the navigation-bar inset, never the IME one. This lifts the pill
-  // clear of the keyboard the moment it opens and returns it to the gesture
-  // bar when it closes.
-  .imePadding()
-  .padding(
-                start = wideContentEdgePadding(),
-                end = wideContentEdgePadding(),
-                bottom = 10.dp
-            ),
+    Column(
+        modifier = modifier.fillMaxWidth().imePadding().padding(start = wideContentEdgePadding(), end = wideContentEdgePadding(), bottom = 10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // The edit banner: what is being changed, and the way out. It sits
-        // above the field so the composer's own height never jumps.
-        androidx.compose.animation.AnimatedVisibility(visible = editTarget != null) {
-            Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 7.dp)
-                ) {
-                    CurioIcon(
-                        name = CurioIcons.Edit,
-                        contentDescription = null,
-                        tint = curioDialogActionColor(),
-                        size = 14.dp
-                    )
+        AnimatedVisibility(visible = editTarget != null) {
+            Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp)) {
+                    CurioIcon(CurioIcons.Edit, null, curioDialogActionColor(), 14.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Editing message",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "Cancel",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = curioDialogActionColor(),
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .clickable(onClick = onDropEdit)
-                            .padding(horizontal = 6.dp, vertical = 3.dp)
-                    )
+                    Text("Editing message", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), modifier = Modifier.weight(1f))
+                    Text("Cancel", color = curioDialogActionColor(), modifier = Modifier.combinedClickable(onClick = onDropEdit, onLongClick = {}).padding(6.dp))
                 }
             }
         }
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        AnimatedVisibility(visible = replyTarget != null) {
+            replyTarget?.let { target ->
+                Surface(
+                    shape = RoundedCornerShape(15.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                        Box(Modifier.width(3.dp).height(30.dp).clip(RoundedCornerShape(2.dp)).background(curioDialogActionColor()))
+                        Column(Modifier.weight(1f).padding(start = 9.dp)) {
+                            Text("Replying to ${if (target.mine) "yourself" else "them"}", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold), color = curioDialogActionColor())
+                            Text(target.body, style = MaterialTheme.typography.labelSmall, maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Surface(onClick = onDropReply, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHighest, modifier = Modifier.size(30.dp)) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CurioIcon(CurioIcons.Close, "Cancel reply", MaterialTheme.colorScheme.onSurfaceVariant, 15.dp)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp)
                     .clip(RoundedCornerShape(26.dp))
-                    .background(
-                        if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f)
-                        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(26.dp)
-                    )
+                    .background(if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.86f) else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.92f))
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f), RoundedCornerShape(26.dp))
                     .padding(horizontal = 16.dp)
             ) {
                 BasicTextField(
                     value = draft,
                     onValueChange = onDraftChange,
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-cursorBrush = SolidColor(curioDialogActionColor()),
-                singleLine = true,
-                // A message is a sentence, not a word: capitals and
-                    // sentence punctuation are the default here (the field is
-                    // unlabelled, so this is the only cue it needs).
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Send
-                    ),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(curioDialogActionColor()),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
                     modifier = Modifier.weight(1f)
                 ) { inner ->
                     Box(contentAlignment = Alignment.CenterStart) {
                         if (draft.isEmpty()) {
-                            Text(
-                                text = "Message $title",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
-                            )
+                            Text("Message $title", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
                         }
                         inner()
                     }
@@ -1932,20 +1403,14 @@ cursorBrush = SolidColor(curioDialogActionColor()),
             Surface(
                 onClick = { if (armed) onSend() },
                 shape = CircleShape,
-                color = if (armed) curioDialogActionColor()
-                else MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier
-                    .size(52.dp)
-                    .scale(sendScale)
+                color = if (armed) curioDialogActionColor() else MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier.size(52.dp).scale(sendScale)
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CurioIcon(
-                        // An edit in flight turns the arrow into a check: the
-                        // same button, a different verb.
                         name = if (editTarget != null) CurioIcons.Check else CurioIcons.ArrowForward,
                         contentDescription = if (editTarget != null) "Save edit" else "Send",
-                        tint = if (armed) androidx.compose.ui.graphics.Color.White
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = if (armed) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         size = 20.dp
                     )
                 }
@@ -1953,51 +1418,17 @@ cursorBrush = SolidColor(curioDialogActionColor()),
         }
         if (nearLimit) {
             Text(
-                text = "${draft.length}/${SocialApi.MAX_MESSAGE_CHARS}",
+                "${draft.length}/${SocialApi.MAX_MESSAGE_CHARS}",
                 style = MaterialTheme.typography.labelSmall,
-                color = if (draft.length >= SocialApi.MAX_MESSAGE_CHARS) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                color = if (draft.length >= SocialApi.MAX_MESSAGE_CHARS) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 6.dp)
             )
         }
     }
 }
 
-/**
- * How often an OPEN conversation asks whether anything new arrived.
- *
- * 1.2s is deliberately tighter than a "poll every few seconds" cadence: each
- * tick asks only for messages newer than the newest one on screen, so it is a
- * few hundred bytes, and the point of the live thread is that a reply lands
- * while you are looking at it rather than a beat later. The very first tick
- * after an arrival is also what turns the typing row off and stamps the read
- * receipt, so the whole exchange moves at this cadence.
- */
-private const val LIVE_TICK_MS = 1_200L
-
-/**
- * The safety-net cadence used once realtime is linked: a missed frame or a
- * socket that died without saying so is still picked up, but the timer is no
- * longer the thing that makes the thread feel live.
- */
-private const val SAFETY_TICK_MS = 20_000L
-
-/**
- * How often the "is typing…" row is re-read when realtime is NOT linked.
- *
- * 1.5s is the old whole mechanism: the row is one tiny read of a single
- * server-stamped timestamp, and an indicator that arrives after the message it
- * was announcing is worse than none. Once the push channel is linked a
- * `dm_typing` frame shows it immediately, so this becomes a slow safety tick —
- * it also has to clear a writer that vanished without deleting its row.
- */
-private const val TYPING_TICK_MS = 1_500L
-
-/** The typing row's safety-net cadence once realtime is linked. */
-private const val TYPING_SAFETY_TICK_MS = 5_000L
-
-/** The id prefix of a bubble that is sent but not yet confirmed. */
-private const val LOCAL_ID_PREFIX = "local-"
+@Composable
+private fun androidx.compose.ui.Modifier.animateContentPlacementCompat(trigger: Boolean): Modifier =
+    this.graphicsLayer {
+        alpha = if (trigger) 0.99f else 1f
+    }
