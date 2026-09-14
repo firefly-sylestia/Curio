@@ -44,7 +44,7 @@ Chat bubbles (left/right), the vertical scroll vs. swipe fix, the solid
 new `edited_at` path), the legacy-body fallback, the compact reply sheet
 (age instead of @username) and the app's own bordered typing box.
 
-### Shipped — this commit (the moderation system)
+### Shipped — commit 2 (`ad9a41b5`, pushed) — the moderation system
 
 - **Schema** (`supabase/schema.sql`): `community_reports` gains `comment_id` /
   `target_user` / `status` / `resolution` / `handled_by` / `handled_at` /
@@ -566,7 +566,7 @@ replace logic for edits in server".
 
 Status: DONE. Chat bubble/swipe/solid-chip/edit-path/reply-sheet work pushed as
 `ac53cf30`; the moderation system (schema + API + `ModerationScreen` + dialogs +
-report/hide/restore doors) pushed in this commit. Decided with ask_user: edit in
+report/hide/restore doors) pushed as `ad9a41b5`. Decided with ask_user: edit in
 place via a server function, the five granular permissions, hide-content-only
 bans, and a repeat report REFRESHES the reporter's own row.
 
