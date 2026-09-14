@@ -44,8 +44,14 @@ internal object SocialNotifications {
 
     private const val MESSAGE_CHANNEL = "curio_messages"
     private const val COMMUNITY_CHANNEL = "curio_community"
-    private const val MESSAGE_NOTIFICATION_ID = 7311
-    private const val COMMUNITY_NOTIFICATION_ID = 7312
+    private const val MESSAGE_NOTIFICATION_BASE = 7311
+    private const val COMMUNITY_NOTIFICATION_BASE = 7312
+
+    /** Stable, distinct shade entries per peer/card without unbounded ids. */
+    private fun notificationId(base: Int, stableKey: String): Int {
+        val hash = stableKey.hashCode() and 0x7fffffff
+        return base + (hash % 10_000)
+    }
 
     /**
      * "A friend wrote" — tapping it opens THAT conversation, not the front
@@ -55,7 +61,7 @@ internal object SocialNotifications {
     fun message(context: Context, person: CurioPerson, preview: String) {
         post(
             context = context,
-            notificationId = MESSAGE_NOTIFICATION_ID,
+            notificationId = notificationId(MESSAGE_NOTIFICATION_BASE, person.userId),
             channelId = MESSAGE_CHANNEL,
             channelName = "Messages",
             channelDescription = "New messages from your friends",
@@ -66,7 +72,7 @@ internal object SocialNotifications {
                 putExtra(PendingDirectMessageOpen.EXTRA_USER_ID, person.userId)
                 putExtra(PendingDirectMessageOpen.EXTRA_HANDLE, person.label)
             },
-            requestCode = MESSAGE_NOTIFICATION_ID
+            requestCode = notificationId(MESSAGE_NOTIFICATION_BASE, person.userId)
         )
     }
 
@@ -75,9 +81,10 @@ internal object SocialNotifications {
      * ([PendingCommunityOpen]), which is where the new card actually is.
      */
     fun community(context: Context, title: String, body: String) {
+        val notificationKey = "$title|$body"
         post(
             context = context,
-            notificationId = COMMUNITY_NOTIFICATION_ID,
+            notificationId = notificationId(COMMUNITY_NOTIFICATION_BASE, notificationKey),
             channelId = COMMUNITY_CHANNEL,
             channelName = "Social",
             channelDescription = "New posts on the 24-hour wall",
@@ -87,7 +94,7 @@ internal object SocialNotifications {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra(PendingCommunityOpen.EXTRA_OPEN_COMMUNITY, true)
             },
-            requestCode = COMMUNITY_NOTIFICATION_ID
+            requestCode = notificationId(COMMUNITY_NOTIFICATION_BASE, notificationKey)
         )
     }
 
@@ -194,8 +201,6 @@ internal fun SocialNotificationWatcher() {
                 val counts = threads.associate { it.person.userId to it.unread }
                 val before = baseline
                 baseline = counts
-                // Identities are remembered here too, so the inbox and any
-                // thread opened from a notification draw a real name at once.
                 SocialPeopleCache.remember(context, threads.map { it.person })
                 if (before == null) return@onSuccess
                 threads
@@ -217,8 +222,6 @@ internal fun SocialNotificationWatcher() {
             CommunityApi.feed(token, myUserId).onSuccess { cards ->
                 val previous = newestSeen
                 newestSeen = cards.firstOrNull()?.id
-                // The feed is newest-first, so everything ahead of the card we
-                // already saw is new. A `null` previous is the baseline pass.
                 val fresh = if (previous == null) emptyList()
                 else cards.takeWhile { it.id != previous }
                 val fromOthers = fresh.filterNot { it.mine }
@@ -245,11 +248,6 @@ internal fun SocialNotificationWatcher() {
     }
 
     // ── presence ────────────────────────────────────────────────────────
-    // NOT a notification: this publishes the member's OWN last-active stamp,
-    // the courtesy line a profile can draw. Gated on Online Mode + a session
-    // alone (the notifications switch has nothing to do with it), and skipped
-    // entirely when the member hid activity — SocialPresence checks that, and
-    // turning hiding ON clears the stamp through SocialApi.updatePrivacy.
     LaunchedEffect(token, onlineMode) {
         if (!onlineMode || token == null) return@LaunchedEffect
         while (true) {
@@ -259,12 +257,7 @@ internal fun SocialNotificationWatcher() {
     }
 }
 
-/**
- * How often the inbox and the wall are checked while the app is alive. Both
- * are deliberately unhurried: a message the user is actually waiting on lands
- * in the open thread instantly (the thread polls itself), so these only cover
- * "the phone is in your pocket and the app is still warm".
- */
+/** How often the inbox and the wall are checked while the app is alive. */
 private const val INBOX_MS = 8_000L
 private const val WALL_MS = 30_000L
 
