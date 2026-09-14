@@ -1010,8 +1010,6 @@ internal fun CommunityDoorTile(
     }
 }
 
-/**
-
 /** The report reasons the dialog offers — one tap, no free text. */
 @Composable
 internal fun ReportCardDialog(
