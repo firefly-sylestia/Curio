@@ -1,6 +1,6 @@
 package androidx.compose.ui.input.pointer
 
-/** Compatibility bridge for Compose versions where PointerInputChange.consume() is not exposed. */
-fun PointerInputChange.consume() {
-    consumePositionChange()
-}
+/**
+ * Compatibility namespace marker. The DM feature now owns its pointer bridge
+ * so this package no longer defines a second consume() extension.
+ */
