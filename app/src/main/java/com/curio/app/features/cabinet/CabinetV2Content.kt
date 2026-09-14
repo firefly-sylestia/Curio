@@ -332,7 +332,7 @@ fun CabinetV2Content(navController: NavController) {
             }
             if (!coverFetchConsent) return@withContext
             for (item in unwarmedLikes) {
-                if (newCovers >= 6) break
+                if (newCovers >= 30) break
                 if (CabinetCoverCache.localCoverFile(
                         context,
                         CabinetCoverCache.CoverKind.valueOf(item.kind.name),
@@ -1557,7 +1557,7 @@ private fun V2HeroTrailing(
     }
 }
 
-// ───────────────────────────────────���────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────
 // Collection cards
 // ───────────────────��──────────────────────��─────────────────────────────
 
