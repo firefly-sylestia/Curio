@@ -2210,7 +2210,7 @@ object AppPreferences {
     /** Whether the Capture studio experiment is on (default OFF; see the
      *  state comment above). */
     fun isCaptureStudioEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, true)
+        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, false)
 
   fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
   prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
