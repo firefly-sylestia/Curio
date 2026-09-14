@@ -1,36 +1,41 @@
 package com.curio.app.features.community
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,647 +44,280 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.curio.app.data.AppPreferences
-import com.curio.app.data.CurioCategories
-import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
-import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.KIND_NOTE
 import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.ui.components.ShareCardAspect
 import com.curio.app.ui.components.ShareCardStyle
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.themedAccent
-import kotlinx.coroutines.launch
 
 /**
- * Full-screen social composer. It deliberately behaves like a creation
- * destination rather than a bottom sheet: preview, writing, topic selection
- * and publishing are one continuous flow.
+ * Full-screen social composer.  The topic mode intentionally delegates the
+ * visual preview to CommunityCardCanvas, so the editor never grows a second
+ * approximation of the share-card renderer.
  */
 @Composable
 internal fun CommunityPostScreen(
     onDismiss: () -> Unit,
     onPost: (CommunityCardDraft) -> Unit
 ) {
-    val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
-    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
-    val writerRequester = remember { FocusRequester() }
-    val listState = rememberLazyListState()
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val index = remember { TopicJsonLoader.loadIndex() ?: emptyList() }
 
-    var kind by remember { mutableStateOf(KIND_NOTE) }
-    var text by remember { mutableStateOf("") }
+    var kind by remember { mutableStateOf("NOTE") }
+    var query by remember { mutableStateOf("") }
+    var selectedTopic by remember { mutableStateOf<TopicIndexEntry?>(null) }
+    var fact by remember { mutableStateOf("") }
     var caption by remember { mutableStateOf("") }
     var credit by remember { mutableStateOf("") }
-    var query by remember { mutableStateOf("") }
-    var topic by remember { mutableStateOf<CurioTopic?>(null) }
-    var index by remember { mutableStateOf<List<TopicIndexEntry>>(emptyList()) }
-    var topicOpen by remember { mutableStateOf(false) }
     var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
     var aspect by remember { mutableStateOf(ShareCardAspect.CLASSIC) }
     var bodyScale by remember { mutableStateOf(1f) }
-    var posting by remember { mutableStateOf(false) }
+    var showTopicPicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        index = TopicJsonLoader.loadIndex() ?: emptyList()
-        writerRequester.requestFocus()
+    val selectedCategory = selectedTopic?.category
+    val accentHex = remember(selectedCategory) {
+        selectedCategory?.let { category ->
+            category.themedAccent().toArgb().let { argb ->
+                String.format("#%08X", argb)
+            }
+        } ?: "#FF7A6B"
     }
 
-    BackHandler(onBack = onDismiss)
-
-    val topicResults = remember(index, query) {
-        val q = query.trim()
-        if (q.isBlank()) {
-            index.take(12)
-        } else {
-            index.asSequence()
-                .sortedWith(
-                    compareByDescending<TopicIndexEntry> { it.topic.name.contains(q, true) }
-                        .thenBy { it.topic.name }
-                )
-                .filter {
-                    it.topic.name.contains(q, true) ||
-                        it.topic.byline.contains(q, true) ||
-                        it.topic.tags.any { tag -> tag.contains(q, true) }
-                }
-                .take(18)
-                .toList()
-        }
+    val draft = remember(
+        kind, selectedTopic, fact, caption, credit, style, aspect, bodyScale, accentHex
+    ) {
+        CommunityCardDraft(
+            topicName = selectedTopic?.topic.orEmpty(),
+            categoryName = selectedTopic?.category?.displayName.orEmpty(),
+            categorySlug = selectedTopic?.category?.id.orEmpty(),
+            categoryGlyph = selectedTopic?.category?.iconGlyph.orEmpty(),
+            accentHex = accentHex,
+            factText = if (kind == "QUOTE") credit else fact,
+            caption = caption,
+            kind = when (kind) {
+                "QUOTE" -> KIND_QUOTE
+                "NOTE" -> KIND_NOTE
+                else -> "CARD"
+            },
+            style = style.name,
+            aspect = aspect.name,
+            bodyScale = bodyScale,
+            byline = if (kind == "QUOTE") credit else ""
+        )
     }
-
-    val selectedCategory = topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accentHex = selectedCategory?.let { category ->
-        "#%08X".format(category.themedAccent().toArgb())
-    }.orEmpty()
-
-    val draft = CommunityCardDraft(
-        topicName = if (kind == KIND_CARD) topic?.name.orEmpty() else "",
-        categoryName = if (kind == KIND_CARD) selectedCategory?.displayName.orEmpty() else "",
-        categorySlug = if (kind == KIND_CARD) topic?.categoryId?.name.orEmpty().lowercase() else "",
-        categoryGlyph = if (kind == KIND_CARD) selectedCategory?.iconGlyph.orEmpty() else "",
-        accentHex = if (kind == KIND_CARD) accentHex else "",
-        factText = if (kind == KIND_CARD) text else "",
-        caption = caption,
-        kind = kind,
-        style = style.name,
-        aspect = aspect.name,
-        bodyScale = bodyScale,
-        byline = credit
-    )
 
     val canPost = when (kind) {
-        KIND_CARD -> topic != null && (text.isNotBlank() || caption.isNotBlank())
-        KIND_QUOTE -> text.isNotBlank() && credit.isNotBlank()
-        else -> text.isNotBlank()
+        "TOPIC" -> selectedTopic != null && (fact.isNotBlank() || caption.isNotBlank())
+        "QUOTE" -> fact.isNotBlank() && credit.isNotBlank()
+        else -> fact.isNotBlank()
     }
+    val postScale by animateFloatAsState(
+        targetValue = if (canPost) 1f else .96f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "postReady"
+    )
 
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(Modifier.fillMaxSize()) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.fillMaxSize().imePadding()) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ComposerIconButton(CurioIcons.Close, "Close", onDismiss)
-                    Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        Text(
-                            "Create",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            when (kind) {
-                                KIND_CARD -> "A topic, made yours"
-                                KIND_QUOTE -> "Keep someone else's words close"
-                                else -> "Put the thought somewhere"
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    IconButton(onClick = onDismiss) {
+                        CurioIcon(CurioIcons.Close, null, size = 22.dp)
                     }
-                    ComposerPostButton(
-                        enabled = canPost && !posting,
-                        posting = posting,
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Create", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("Make something worth keeping", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Button(
                         onClick = {
-                            if (!canPost || posting) return@ComposerPostButton
-                            posting = true
-                            focusManager.clearFocus()
-                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                            scope.launch {
+                            if (canPost) {
+                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                keyboard?.hide()
                                 onPost(draft)
-                                posting = false
                             }
-                        }
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(androidx.compose.foundation.rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ComposerModeChip("Note", kind == KIND_NOTE) {
-                        kind = KIND_NOTE
-                        topicOpen = false
-                        credit = ""
-                    }
-                    ComposerModeChip("Topic", kind == KIND_CARD) {
-                        kind = KIND_CARD
-                        topicOpen = true
-                    }
-                    ComposerModeChip("Quote", kind == KIND_QUOTE) {
-                        kind = KIND_QUOTE
-                        topicOpen = false
-                    }
+                        },
+                        enabled = canPost,
+                        modifier = Modifier.graphicsLayer(scaleX = postScale, scaleY = postScale),
+                        contentPadding = ButtonDefaults.ContentPadding
+                    ) { Text("Post") }
                 }
 
                 LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize().imePadding(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 28.dp),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    item(key = "preview") {
-                        AnimatedContent(targetState = kind, label = "post-kind") { mode ->
-                            if (mode == KIND_CARD) {
-                                Surface(
-                                    shape = RoundedCornerShape(28.dp),
-                                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Column(
-                                        Modifier.padding(12.dp),
-                                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        if (topic != null) {
-                                            CommunityCardCanvas(
-                                                card = draftPreviewCard(draft),
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clip(RoundedCornerShape(20.dp)),
-                                                widthFraction = 1f
-                                            )
-                                        } else {
-                                            EmptyTopicPreview()
-                                        }
-                                        Text(
-                                            if (topic == null) "Choose a topic to build the card" else "Live share-card preview",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            } else {
-                                SocialComposerTextPreview(mode, text, credit)
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf("NOTE", "TOPIC", "QUOTE").forEach { option ->
+                                FilterChip(
+                                    selected = kind == option,
+                                    onClick = {
+                                        kind = option
+                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    },
+                                    label = { Text(option.lowercase().replaceFirstChar { it.uppercase() }) },
+                                    leadingIcon = if (kind == option) ({ CurioIcon(CurioIcons.Check, null, size = 16.dp) }) else null
+                                )
                             }
                         }
                     }
 
-                    item(key = "writer") {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                when (kind) {
-                                    KIND_CARD -> "Your fact"
-                                    KIND_QUOTE -> "The quote"
-                                    else -> "Your note"
-                                },
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-                            )
-                            BasicTextField(
-                                value = text,
-                                onValueChange = { text = it.take(if (kind == KIND_CARD) 700 else 1200) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(150.dp)
-                                    .clip(RoundedCornerShape(22.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                    .padding(16.dp)
-                                    .focusRequester(writerRequester),
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                cursorBrush = SolidColor(curioDialogActionColor()),
-                                decorationBox = { inner ->
-                                    Box {
-                                        if (text.isBlank()) {
-                                            Text(
-                                                when (kind) {
-                                                    KIND_CARD -> "Write the version of this fact you want people to remember…"
-                                                    KIND_QUOTE -> "Write the quote…"
-                                                    else -> "What are you thinking about?"
-                                                },
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                        inner()
-                                    }
-                                }
-                            )
-                            Text(
-                                "${text.length} / ${if (kind == KIND_CARD) 700 else 1200}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.align(Alignment.End)
-                            )
-                        }
-                    }
-
-                    if (kind == KIND_CARD) {
-                        item(key = "topic-picker") {
-                            Surface(
-                                shape = RoundedCornerShape(22.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(
-                                    Modifier.padding(14.dp),
-                                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Column(Modifier.weight(1f)) {
-                                            Text(
-                                                "Topic",
-                                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-                                            )
-                                            Text(
-                                                topic?.name ?: "Pick what this is about",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = if (topic == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                        TextButton(onClick = { topicOpen = !topicOpen }) {
-                                            Text(if (topicOpen) "Done" else "Change")
-                                        }
-                                    }
-                                    AnimatedVisibility(
-                                        visible = topicOpen,
-                                        enter = fadeIn() + slideInVertically { -it / 3 },
-                                        exit = fadeOut()
-                                    ) {
-                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            BasicTextField(
-                                                value = query,
-                                                onValueChange = { query = it },
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clip(RoundedCornerShape(16.dp))
-                                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                                                textStyle = MaterialTheme.typography.bodyMedium,
-                                                singleLine = true,
-                                                decorationBox = { inner ->
-                                                    Box {
-                                                        if (query.isBlank()) {
-                                                            Text("Search topics…", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                                        }
-                                                        inner()
-                                                    }
+                    item {
+                        AnimatedContent(
+                            targetState = kind,
+                            transitionSpec = { fadeIn() + scaleIn(initialScale = .98f) togetherWith fadeOut() },
+                            label = "composerMode"
+                        ) { mode ->
+                            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                                if (mode == "TOPIC") {
+                                    if (selectedTopic == null) {
+                                        Surface(
+                                            modifier = Modifier.fillMaxWidth().animateContentSize(),
+                                            shape = RoundedCornerShape(28.dp),
+                                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                        ) {
+                                            Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                Text("Choose a topic", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                                Text("The share card will be rebuilt from the same data in the feed and export.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                OutlinedTextField(
+                                                    value = query,
+                                                    onValueChange = { query = it },
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    singleLine = true,
+                                                    placeholder = { Text("Search topics") },
+                                                    leadingIcon = { CurioIcon(CurioIcons.Search, null, size = 18.dp) }
+                                                )
+                                                val results = remember(query, index) {
+                                                    val q = query.trim().lowercase()
+                                                    if (q.isBlank()) index.take(8) else index.filter {
+                                                        it.topic.lowercase().contains(q) || it.category.displayName.lowercase().contains(q)
+                                                    }.take(12)
                                                 }
-                                            )
-                                            Column(
-                                                modifier = Modifier.height(260.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()),
-                                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                                            ) {
-                                                topicResults.forEach { entry ->
-                                                    TopicResultRow(
-                                                        entry = entry,
-                                                        selected = entry.topic == topic,
+                                                results.forEach { topic ->
+                                                    TextButton(
                                                         onClick = {
-                                                            topic = entry.topic
-                                                            query = ""
-                                                            topicOpen = false
+                                                            selectedTopic = topic
+                                                            showTopicPicker = false
                                                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                        },
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Column(modifier = Modifier.fillMaxWidth()) {
+                                                            Text(topic.topic, fontWeight = FontWeight.SemiBold)
+                                                            Text(topic.category.displayName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                         }
-                                                    )
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
-                            }
-                        }
-                        item(key = "style") {
-                            ComposerChoiceRow(
-                                title = "Look",
-                                values = ShareCardStyle.entries.map { it.label },
-                                selected = style.label,
-                                onSelected = { selected ->
-                                    style = ShareCardStyle.entries.firstOrNull { it.label == selected } ?: style
-                                }
-                            )
-                        }
-                        item(key = "shape") {
-                            ComposerChoiceRow(
-                                title = "Shape",
-                                values = ShareCardAspect.entries.map { it.label },
-                                selected = aspect.label,
-                                onSelected = { selected ->
-                                    aspect = ShareCardAspect.entries.firstOrNull { it.label == selected } ?: aspect
-                                }
-                            )
-                        }
-                        item(key = "scale") {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Text("Text size", style = MaterialTheme.typography.labelMedium)
-                                listOf(0.9f, 1f, 1.1f).forEach { value ->
-                                    FilterChip(
-                                        selected = bodyScale == value,
-                                        onClick = { bodyScale = value },
-                                        label = {
-                                            Text(
-                                                when {
-                                                    value == 1f -> "Auto"
-                                                    value < 1f -> "Compact"
-                                                    else -> "Large"
-                                                }
+                                    } else {
+                                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                            CommunityCardCanvas(
+                                                card = draftPreviewCard(draft),
+                                                modifier = Modifier.fillMaxWidth()
                                             )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(selectedTopic!!.topic, fontWeight = FontWeight.Bold)
+                                                    Text(selectedTopic!!.category.displayName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                }
+                                                AssistChip(onClick = { selectedTopic = null; query = "" }, label = { Text("Change") })
+                                            }
                                         }
+                                    }
+                                } else {
+                                    Text(
+                                        text = if (mode == "QUOTE") "A quote, kept clean." else "A thought, without the noise.",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }
                         }
                     }
 
-                    if (kind == KIND_QUOTE) {
-                        item(key = "credit") {
-                            ComposerField("Credit", credit, "Who said it?") { credit = it.take(120) }
+                    item {
+                        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            BasicTextField(
+                                value = fact,
+                                onValueChange = { fact = it },
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 130.dp).clip(RoundedCornerShape(22.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(18.dp),
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, lineHeight = 26.sp),
+                                decorationBox = { inner ->
+                                    Box {
+                                        if (fact.isBlank()) Text(if (kind == "QUOTE") "Write the quote…" else "What do you want to say?", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        inner()
+                                    }
+                                }
+                            )
+                            if (kind == "QUOTE") {
+                                OutlinedTextField(value = credit, onValueChange = { credit = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Who said it?") })
+                            }
+                            OutlinedTextField(value = caption, onValueChange = { caption = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Caption · optional") })
                         }
                     }
 
-                    item(key = "caption") {
-                        ComposerField(
-                            title = if (kind == KIND_CARD) "Caption" else "Add a caption",
-                            value = caption,
-                            placeholder = "Optional"
-                        ) { caption = it.take(180) }
-                    }
-
-                    item(key = "tip") {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(18.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 18.dp
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                if (kind == KIND_CARD) {
-                                    "The card is rebuilt from these exact fields on every device."
-                                } else {
-                                    "Short, text-first posts stay lightweight and disappear with the wall."
-                                },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    if (kind == "TOPIC" && selectedTopic != null) {
+                        item {
+                            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Text("Card design", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    ShareCardStyle.entries.forEach { option ->
+                                        FilterChip(selected = style == option, onClick = { style = option }, label = { Text(option.label) })
+                                    }
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    ShareCardAspect.entries.forEach { option ->
+                                        FilterChip(selected = aspect == option, onClick = { aspect = option }, label = { Text(option.label) })
+                                    }
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    listOf("Compact" to .88f, "Auto" to 1f, "Large" to 1.12f).forEach { (label, value) ->
+                                        FilterChip(selected = bodyScale == value, onClick = { bodyScale = value }, label = { Text(label) })
+                                    }
+                                }
+                            }
                         }
                     }
+                    item { Spacer(Modifier.height(20.dp)) }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ComposerModeChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(selected = selected, onClick = onClick, label = { Text(label) })
-}
-
-@Composable
-private fun ComposerPostButton(enabled: Boolean, posting: Boolean, onClick: () -> Unit) {
-    val scale = remember { Animatable(1f) }
-    LaunchedEffect(enabled) {
-        if (enabled) {
-            scale.snapTo(0.94f)
-            scale.animateTo(1f, spring(dampingRatio = 0.45f, stiffness = 700f))
-        }
-    }
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = if (enabled) curioDialogActionColor() else MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .graphicsLayer(scaleX = scale.value, scaleY = scale.value)
-            .clip(RoundedCornerShape(50))
-            .clickable(enabled = enabled, onClick = onClick)
-    ) {
-        Text(
-            if (posting) "Posting…" else "Post",
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun ComposerIconButton(icon: String, label: String, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.size(42.dp).clickable(onClick = onClick)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            CurioIcon(
-                name = icon,
-                contentDescription = label,
-                tint = MaterialTheme.colorScheme.onSurface,
-                size = 20.dp
-            )
-        }
-    }
-}
-
-@Composable
-private fun SocialComposerTextPreview(kind: String, body: String, credit: String) {
-    Surface(
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text(
-                if (kind == KIND_QUOTE) "QUOTE" else "NOTE",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                body.ifBlank { "Your words will appear here" },
-                style = if (kind == KIND_QUOTE) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge,
-                color = if (body.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-            )
-            if (kind == KIND_QUOTE && credit.isNotBlank()) {
-                Text("$credit", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyTopicPreview() {
-    Surface(
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.fillMaxWidth().height(330.dp)
-    ) {
-        Column(
-            Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CurioIcon(
-                name = CurioIcons.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 28.dp
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                "Pick a topic",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-            )
-        }
-    }
-}
-
-@Composable
-private fun TopicResultRow(entry: TopicIndexEntry, selected: Boolean, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(14.dp),
-        color = if (selected) curioDialogActionColor().copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
-    ) {
-        Row(
-            Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    entry.topic.name,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    entry.topic.byline.ifBlank { entry.topic.subtype },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (selected) {
-                CurioIcon(
-                    name = CurioIcons.Check,
-                    contentDescription = null,
-                    tint = curioDialogActionColor(),
-                    size = 18.dp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ComposerChoiceRow(
-    title: String,
-    values: List<String>,
-    selected: String,
-    onSelected: (String) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            title,
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-        )
-        Row(
-            Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            values.forEach { value ->
-                FilterChip(
-                    selected = value == selected,
-                    onClick = { onSelected(value) },
-                    label = { Text(value) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ComposerField(
-    title: String,
-    value: String,
-    placeholder: String,
-    onChange: (String) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            title,
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-        )
-        BasicTextField(
-            value = value,
-            onValueChange = onChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                .padding(14.dp),
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium,
-            decorationBox = { inner ->
-                Box {
-                    if (value.isBlank()) {
-                        Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    inner()
-                }
-            }
-        )
     }
 }
 
@@ -690,7 +328,6 @@ private fun draftPreviewCard(draft: CommunityCardDraft): CommunityCard {
         id = "preview",
         topicName = draft.topicName,
         categoryName = draft.categoryName,
-        categorySlug = draft.categorySlug,
         categoryGlyph = draft.categoryGlyph,
         accentHex = draft.accentHex,
         factText = draft.factText,
