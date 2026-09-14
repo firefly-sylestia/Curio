@@ -71,6 +71,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -1464,42 +1466,31 @@ private fun MessageEntry(
         // A full-width invisible tap target sits above it so tapping
         // anywhere outside the pills dismisses the sheet.
         Box(modifier = Modifier.fillMaxWidth()) {
-            AnimatedVisibility(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = (-72).dp),
-                visible = actionSheet,
-                enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
-                    slideInVertically { -it / 3 },
-                exit = fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Invisible full-width dismiss target above the sheet
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .clickable { onHold() }
-                    )
-                    MessageActionSheet(
-                        mine = message.mine,
-                        current = reactions.firstOrNull { it.userId == myUserId }?.kind,
-                        canEdit = message.mine && message.migrationState == "plaintext" &&
-                            !message.id.startsWith(LOCAL_ID_PREFIX),
-                        canRemove = onRemove != null,
-                        onPick = onPick,
-                        onCopy = onCopy,
-                        onEdit = onEdit,
-                        onRemove = onRemove,
-                        onReply = onReply
-                    )
-                    // Invisible dismiss target below the sheet
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(32.dp)
-                            .clickable { onHold() }
-                    )
+            if (actionSheet) {
+                Popup(
+                    alignment = if (message.mine) Alignment.TopEnd else Alignment.TopStart,
+                    offset = IntOffset(0, with(LocalDensity.current) { (-96).dp.roundToPx() }),
+                    properties = PopupProperties(focusable = true, dismissOnClickOutside = true),
+                    onDismissRequest = onHold
+                ) {
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
+                            slideInVertically { -it / 3 }
+                    ) {
+                        MessageActionSheet(
+                            mine = message.mine,
+                            current = reactions.firstOrNull { it.userId == myUserId }?.kind,
+                            canEdit = message.mine && message.migrationState == "plaintext" &&
+                                !message.id.startsWith(LOCAL_ID_PREFIX),
+                            canRemove = onRemove != null,
+                            onPick = onPick,
+                            onCopy = onCopy,
+                            onEdit = onEdit,
+                            onRemove = onRemove,
+                            onReply = onReply
+                        )
+                    }
                 }
             }
             MessageBubble(
