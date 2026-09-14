@@ -1,9 +1,11 @@
 package com.curio.app.features.create
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -14,6 +16,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,15 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcons
 
-/** Presentation-only creation launcher. Navigation and persistence stay with the caller. */
+/** Fixed Home creation launcher. Its caller owns navigation and visibility. */
 @Composable
 fun CreateEntryLauncher(
     modifier: Modifier = Modifier,
@@ -51,85 +52,169 @@ fun CreateEntryLauncher(
     var expanded by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
         targetValue = if (expanded) 45f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
+        animationSpec = spring(dampingRatio = 1f, stiffness = 360f),
         label = "create-plus-rotation"
     )
 
     Box(
-        modifier = modifier.fillMaxSize().navigationBarsPadding(),
-        contentAlignment = Alignment.BottomCenter
+        modifier = modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        contentAlignment = Alignment.BottomEnd
     ) {
         AnimatedVisibility(
             visible = expanded,
-            enter = fadeIn() + scaleIn(initialScale = 0.94f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
-            exit = fadeOut() + scaleOut(targetScale = 0.94f, animationSpec = spring())
+            enter = fadeIn(animationSpec = tween(160, easing = FastOutSlowInEasing)),
+            exit = fadeOut(animationSpec = tween(120, easing = FastOutSlowInEasing))
         ) {
             Box(
-                Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.06f)).clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { expanded = false }
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.08f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { expanded = false }
             )
         }
 
         AnimatedVisibility(
             visible = expanded,
-            enter = fadeIn() + scaleIn(initialScale = 0.86f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)),
-            exit = fadeOut() + scaleOut(targetScale = 0.86f, animationSpec = spring()),
-            modifier = Modifier.padding(bottom = 86.dp)
+            enter = fadeIn(tween(180, easing = FastOutSlowInEasing)) +
+                scaleIn(
+                    initialScale = 0.92f,
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 420f)
+                ),
+            exit = fadeOut(tween(130, easing = FastOutSlowInEasing)) +
+                scaleOut(
+                    targetScale = 0.92f,
+                    animationSpec = tween(150, easing = FastOutSlowInEasing)
+                ),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 14.dp, bottom = 136.dp)
         ) {
             Surface(
-                modifier = Modifier.padding(horizontal = 18.dp),
-                shape = RoundedCornerShape(30.dp),
+                shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 tonalElevation = 5.dp,
-                shadowElevation = 12.dp
+                shadowElevation = 12.dp,
+                modifier = Modifier.padding(horizontal = 4.dp)
             ) {
-                Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CreateOption("Start a Journal", "A page for today", "✦", onJournal)
-                    CreateOption("Start a Book", "Chapters, pages, thoughts", "▤", onBook)
-                    CreateOption("Quick Note", "Capture it before it disappears", "✎", onQuickNote)
+                Column(
+                    modifier = Modifier.padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    CreateOption(
+                        title = "Start a Journal",
+                        subtitle = "A page for today",
+                        icon = CurioIcons.Note,
+                        onClick = {
+                            expanded = false
+                            onJournal()
+                        }
+                    )
+                    CreateOption(
+                        title = "Start a Book",
+                        subtitle = "Chapters, pages, thoughts",
+                        icon = CurioIcons.MenuBook,
+                        onClick = {
+                            expanded = false
+                            onBook()
+                        }
+                    )
+                    CreateOption(
+                        title = "Quick Note",
+                        subtitle = "Capture it before it disappears",
+                        icon = CurioIcons.Edit,
+                        onClick = {
+                            expanded = false
+                            onQuickNote()
+                        }
+                    )
                 }
             }
         }
 
-        Box(
+        Surface(
+            onClick = { expanded = !expanded },
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primary,
+            shadowElevation = 7.dp,
             modifier = Modifier
-                .padding(bottom = 12.dp)
-                .size(if (expanded) 62.dp else 58.dp)
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 68.dp)
+                .size(if (expanded) 60.dp else 56.dp)
                 .graphicsLayer {
                     rotationZ = rotation
-                    scaleX = if (expanded) 1.03f else 1f
-                    scaleY = if (expanded) 1.03f else 1f
+                    scaleX = if (expanded) 1.02f else 1f
+                    scaleY = if (expanded) 1.02f else 1f
                 }
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .clickable { expanded = !expanded }
-                .semantics { contentDescription = if (expanded) "Close creation menu" else "Create new entry" },
-            contentAlignment = Alignment.Center
+                .semantics {
+                    contentDescription = if (expanded) "Close creation menu" else "Create new entry"
+                }
         ) {
-            Text("+", fontSize = 32.sp, lineHeight = 32.sp, color = MaterialTheme.colorScheme.onPrimary)
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                CurioIcon(
+                    CurioIcons.Add,
+                    contentDescription = if (expanded) "Close creation menu" else "Create new entry",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    size = 28.dp
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CreateOption(title: String, subtitle: String, glyph: String, onClick: () -> Unit) {
-    androidx.compose.foundation.layout.Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).clickable(onClick = onClick).padding(horizontal = 13.dp, vertical = 11.dp),
-        verticalAlignment = Alignment.CenterVertically
+private fun CreateOption(
+    title: String,
+    subtitle: String,
+    icon: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(21.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Box(Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) {
-            Text(glyph, fontSize = 19.sp, color = MaterialTheme.colorScheme.primary)
+        Row(
+            modifier = Modifier.padding(horizontal = 11.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(11.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(13.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    CurioIcon(
+                        icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        size = 20.dp
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                androidx.compose.material3.Text(
+                    title,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                androidx.compose.material3.Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            CurioIcon(
+                CurioIcons.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 19.dp
+            )
         }
-        Spacer(Modifier.size(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Text("›", fontSize = 25.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
