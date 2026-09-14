@@ -692,9 +692,10 @@ fun DirectMessageScreen(
         if (cached.isNotEmpty()) messages = cached
         load(token, myUserId)
         loadPerson(token)
-        // A receipt is a courtesy, not a requirement: a failure here must never
-        // blank a thread that loaded fine.
-        SocialApi.markRead(token, otherUserId, myUserId)
+        // Existing incoming messages are marked only after the conversation
+        // has rendered and the user has entered this screen; new arrivals use
+        // the same rule in pullDelta below. Never mark a sender's messages
+        // read merely because the sender refreshed their own thread.
     }
 
     // "is typing…" — pushed by a `dm_typing` frame, and re-read on a timer as
@@ -1593,15 +1594,6 @@ private fun MessageBubble(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                // WhatsApp's tick language: one tick is SENT, two (in the
-                // accent) are READ. The word "Seen" claimed a reading that
-                // the stamp could not honestly prove.
-                Text(
-                    text = if (receipt != null) "\u2713\u2713" else "\u2713",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (receipt != null) curioDialogActionColor()
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
 
@@ -1678,6 +1670,19 @@ private fun MessageBubble(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (mine) Color.White.copy(alpha = 0.7f)
                                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                        if (mine && lastOfRun) {
+                            Text(
+                                text = if (receipt != null) "\u2713\u2713" else "\u2713",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 8.sp,
+                                    lineHeight = 8.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = if (receipt != null) Color.White.copy(alpha = 0.86f)
+                                else Color.White.copy(alpha = 0.62f),
+                                modifier = Modifier.align(Alignment.End)
                             )
                         }
                     }
