@@ -1149,7 +1149,7 @@ private fun MessageEntry(
  * One message. Yours sits on the right in the brand rose, theirs on the left
  * on the raised surface — the reading direction of every messenger, so who
  * said what needs no label. Corners open up on the first line of a run and
- * only the last line of a run gets the full rounding and the timestamp.
+ * only the last line of a run gets the full rounding and the compact time.
  * Both fills are OPAQUE: a translucent bubble let the background bleed
  * through and read as unfinished.
  *
@@ -1301,18 +1301,34 @@ private fun MessageBubble(
                                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
                         }
-                        if (mine && lastOfRun) {
-                            Text(
-                                text = if (receipt != null) "\u2713\u2713" else "\u2713",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 8.sp,
-                                    lineHeight = 8.sp,
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = if (receipt != null) Color.White.copy(alpha = 0.86f)
-                                else Color.White.copy(alpha = 0.62f),
+                        if (lastOfRun) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.align(Alignment.End)
-                            )
+                            ) {
+                                Text(
+                                    text = socialStamp(message.createdAtMillis),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 8.sp,
+                                        lineHeight = 8.sp
+                                    ),
+                                    color = if (mine) Color.White.copy(alpha = 0.68f)
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                                )
+                                if (mine) {
+                                    Text(
+                                        text = if (receipt != null) "\u2713\u2713" else "\u2713",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontSize = 8.sp,
+                                            lineHeight = 8.sp,
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        color = if (receipt != null) Color.White.copy(alpha = 0.86f)
+                                        else Color.White.copy(alpha = 0.62f)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1326,23 +1342,6 @@ private fun MessageBubble(
             }
         }
 
-        if (mine && lastOfRun) {
-            Text(
-                text = socialStamp(message.createdAtMillis),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
-            )
-        }
-
-        if (!mine && lastOfRun) {
-            Text(
-                text = socialStamp(message.createdAtMillis),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
-            )
-        }
     }
 }
 
