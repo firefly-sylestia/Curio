@@ -511,7 +511,7 @@ fun CabinetV2Content(navController: NavController) {
     var suggestionSeed by remember { mutableStateOf(0) }
     val suggestionCats = remember {
         listOf(CategoryId.BOOKS, CategoryId.SERIES, CategoryId.ALBUMS,
-            CategoryId.PLACES, CategoryId.PEOPLE, CategoryId.SCIENCE)
+            CategoryId.FILMS, CategoryId.SCIENTISTS, CategoryId.DISCOVERIES)
     }
     LaunchedEffect(suggestionSeed) {
         val grouped = mutableMapOf<CategoryId, MutableList<CurioTopic>>()

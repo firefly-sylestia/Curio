@@ -464,6 +464,11 @@ fun DirectMessageScreen(
         sending = false
     }
 
+    // Tracks outgoing messages so the auto-scroll LaunchedEffect can
+    // scroll to bottom after every send (even when the user has scrolled
+    // up to read history).
+    var pendingSends by remember(otherUserId) { mutableStateOf(0) }
+
     suspend fun send(active: String, me: String, forcePlaintext: Boolean = false) {
         // An edit in flight takes the composer over: Send IS Save until the
         // edit is committed or dropped.
@@ -905,7 +910,6 @@ fun DirectMessageScreen(
     // scrolled up to read history. The main LaunchedEffect above skips the
     // scroll when pinnedToNewest is false (reading history), so a send
     // while scrolled up used to drop the optimistic bubble off-screen.
-    var pendingSends by remember(otherUserId) { mutableStateOf(0) }
     LaunchedEffect(pendingSends) {
         if (pendingSends == 0) return@LaunchedEffect
         // +1 for the optimistic message that is about to enter [thread]
