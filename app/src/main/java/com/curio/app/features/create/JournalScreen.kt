@@ -4,17 +4,17 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,8 +45,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -60,9 +60,8 @@ import java.util.Locale
 /**
  * Writing-first journal composer.
  *
- * This is deliberately not a form. The page is a quiet writing canvas with
- * a large title, a ruled-paper body, optional details, and a tactile bottom
- * action tray that stays secondary to the words.
+ * The journal is intentionally a writing canvas rather than a form. Secondary
+ * metadata is tucked behind lightweight controls so the words stay primary.
  */
 @Composable
 fun JournalScreen(
@@ -78,12 +77,6 @@ fun JournalScreen(
     var showMoodPicker by rememberSaveable { mutableStateOf(false) }
     var showDetails by rememberSaveable { mutableStateOf(false) }
 
-    val moods = listOf(
-        "Calm" to CurioIcons.MoodCalm,
-        "Curious" to CurioIcons.MoodCurious,
-        "Happy" to CurioIcons.MoodHappy,
-        "Inspired" to CurioIcons.MoodInspired
-    )
     val dateLabel = remember {
         SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date())
     }
@@ -94,6 +87,17 @@ fun JournalScreen(
         label = "journal-save-scale"
     )
 
+    val ruleColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.10f)
+    val marginColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+
+    val moods = listOf(
+        "Calm" to CurioIcons.MoodCalm,
+        "Curious" to CurioIcons.MoodCurious,
+        "Happy" to CurioIcons.MoodHappy,
+        "Inspired" to CurioIcons.MoodInspired
+    )
+    val selectedMoodIcon = moods.firstOrNull { it.first == mood }?.second ?: CurioIcons.MoodCalm
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -103,7 +107,6 @@ fun JournalScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -115,15 +118,25 @@ fun JournalScreen(
                     shadowElevation = 1.dp,
                     modifier = Modifier.size(44.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        CurioIcon(CurioIcons.Close, "Close journal", tint = MaterialTheme.colorScheme.onSurface, size = 20.dp)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        CurioIcon(
+                            CurioIcons.Close,
+                            "Close journal",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            size = 20.dp
+                        )
                     }
                 }
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         "Journal",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        )
                     )
                     Text(
                         if (hasContent) "Draft" else "A quiet page",
@@ -142,8 +155,18 @@ fun JournalScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        CurioIcon(CurioIcons.CalendarToday, null, tint = MaterialTheme.colorScheme.primary, size = 15.dp)
-                        Text(dateLabel, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold))
+                        CurioIcon(
+                            CurioIcons.CalendarToday,
+                            null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            size = 15.dp
+                        )
+                        Text(
+                            dateLabel,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
                     }
                 }
             }
@@ -162,18 +185,21 @@ fun JournalScreen(
                         shadowElevation = 4.dp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateContentSize(tween(260, easing = FastOutSlowInEasing))
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    260,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
                     ) {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Canvas(modifier = Modifier.matchParentSize()) {
                                 val lineStep = 31.dp.toPx()
                                 val firstLine = 92.dp.toPx()
-                                val rule = MaterialTheme.colorScheme.outline.copy(alpha = 0.10f)
-                                val margin = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
                                 var y = firstLine
                                 while (y < size.height) {
                                     drawLine(
-                                        color = rule,
+                                        color = ruleColor,
                                         start = androidx.compose.ui.geometry.Offset(0f, y),
                                         end = androidx.compose.ui.geometry.Offset(size.width, y),
                                         strokeWidth = 1f
@@ -181,7 +207,7 @@ fun JournalScreen(
                                     y += lineStep
                                 }
                                 drawLine(
-                                    color = margin,
+                                    color = marginColor,
                                     start = androidx.compose.ui.geometry.Offset(34.dp.toPx(), 0f),
                                     end = androidx.compose.ui.geometry.Offset(34.dp.toPx(), size.height),
                                     strokeWidth = 1.5f
@@ -189,7 +215,12 @@ fun JournalScreen(
                             }
 
                             Column(
-                                modifier = Modifier.padding(start = 54.dp, end = 24.dp, top = 26.dp, bottom = 30.dp)
+                                modifier = Modifier.padding(
+                                    start = 54.dp,
+                                    end = 24.dp,
+                                    top = 26.dp,
+                                    bottom = 30.dp
+                                )
                             ) {
                                 Text(
                                     "NEW PAGE",
@@ -213,17 +244,19 @@ fun JournalScreen(
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                     modifier = Modifier.fillMaxWidth(),
                                     decorationBox = { innerTextField ->
-                                        if (title.isBlank()) {
-                                            Text(
-                                                "Give this page a name",
-                                                style = MaterialTheme.typography.displaySmall.copy(
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.24f),
-                                                    lineHeight = 44.sp
+                                        Box {
+                                            if (title.isBlank()) {
+                                                Text(
+                                                    "Give this page a name",
+                                                    style = MaterialTheme.typography.displaySmall.copy(
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.24f),
+                                                        lineHeight = 44.sp
+                                                    )
                                                 )
-                                            )
+                                            }
+                                            innerTextField()
                                         }
-                                        innerTextField()
                                     }
                                 )
 
@@ -232,13 +265,23 @@ fun JournalScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(7.dp)
                                 ) {
-                                    CurioIcon(CurioIcons.CalendarToday, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
+                                    CurioIcon(
+                                        CurioIcons.CalendarToday,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 15.dp
+                                    )
                                     Text(
                                         dateLabel,
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Medium
+                                        ),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Text("·", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f))
+                                    Text(
+                                        "·",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                                    )
                                     Text(
                                         "Write freely",
                                         style = MaterialTheme.typography.labelMedium,
@@ -260,24 +303,32 @@ fun JournalScreen(
                                         .fillMaxWidth()
                                         .heightIn(min = 520.dp),
                                     decorationBox = { innerTextField ->
-                                        if (body.isBlank()) {
-                                            Text(
-                                                "What happened today?\n\nWhat stayed with you?\n\nYou do not have to make it beautiful. Just make it yours.",
-                                                style = TextStyle(
-                                                    fontSize = 18.sp,
-                                                    lineHeight = 31.sp,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
+                                        Box {
+                                            if (body.isBlank()) {
+                                                Text(
+                                                    "What happened today?\n\nWhat stayed with you?\n\nYou do not have to make it beautiful. Just make it yours.",
+                                                    style = TextStyle(
+                                                        fontSize = 18.sp,
+                                                        lineHeight = 31.sp,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
+                                                    )
                                                 )
-                                            )
+                                            }
+                                            innerTextField()
                                         }
-                                        innerTextField()
                                     }
                                 )
 
                                 AnimatedVisibility(
                                     visible = showDetails,
-                                    enter = fadeIn(tween(180)) + slideInVertically(tween(220), initialOffsetY = { it / 2 }),
-                                    exit = fadeOut(tween(140)) + slideOutVertically(tween(180), targetOffsetY = { it / 2 })
+                                    enter = fadeIn(tween(180)) + slideInVertically(
+                                        tween(220),
+                                        initialOffsetY = { it / 2 }
+                                    ),
+                                    exit = fadeOut(tween(140)) + slideOutVertically(
+                                        tween(180),
+                                        targetOffsetY = { it / 2 }
+                                    )
                                 ) {
                                     Column(
                                         modifier = Modifier
@@ -293,7 +344,9 @@ fun JournalScreen(
                                             Column {
                                                 Text(
                                                     "A little context",
-                                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                                                    style = MaterialTheme.typography.titleSmall.copy(
+                                                        fontWeight = FontWeight.Bold
+                                                    )
                                                 )
                                                 Text(
                                                     "Optional. Add only what matters.",
@@ -301,13 +354,21 @@ fun JournalScreen(
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
-                                            CurioIcon(CurioIcons.Note, null, tint = MaterialTheme.colorScheme.primary, size = 20.dp)
+                                            CurioIcon(
+                                                CurioIcons.Note,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                size = 20.dp
+                                            )
                                         }
+
                                         BasicTextField(
                                             value = tags,
                                             onValueChange = { tags = it },
                                             singleLine = true,
-                                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            ),
                                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                             modifier = Modifier.fillMaxWidth(),
                                             decorationBox = { innerTextField ->
@@ -316,7 +377,12 @@ fun JournalScreen(
                                                     color = MaterialTheme.colorScheme.surfaceContainer,
                                                     modifier = Modifier.fillMaxWidth()
                                                 ) {
-                                                    Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp)) {
+                                                    Box(
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 14.dp,
+                                                            vertical = 11.dp
+                                                        )
+                                                    ) {
                                                         if (tags.isBlank()) {
                                                             Text(
                                                                 "Add a few tags",
@@ -339,8 +405,14 @@ fun JournalScreen(
 
             AnimatedVisibility(
                 visible = showMoodPicker,
-                enter = fadeIn(tween(170)) + slideInVertically(tween(210), initialOffsetY = { it / 2 }),
-                exit = fadeOut(tween(130)) + slideOutVertically(tween(160), targetOffsetY = { it / 2 })
+                enter = fadeIn(tween(170)) + slideInVertically(
+                    tween(210),
+                    initialOffsetY = { it / 2 }
+                ),
+                exit = fadeOut(tween(130)) + slideOutVertically(
+                    tween(160),
+                    targetOffsetY = { it / 2 }
+                )
             ) {
                 Surface(
                     shape = RoundedCornerShape(24.dp),
@@ -365,7 +437,11 @@ fun JournalScreen(
                                     showMoodPicker = false
                                 },
                                 shape = RoundedCornerShape(18.dp),
-                                color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+                                color = if (selected) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainer
+                                },
                                 modifier = Modifier.height(42.dp)
                             ) {
                                 Row(
@@ -376,10 +452,19 @@ fun JournalScreen(
                                     CurioIcon(
                                         icon,
                                         null,
-                                        tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = if (selected) {
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
                                         size = 18.dp
                                     )
-                                    Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold))
+                                    Text(
+                                        label,
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -406,7 +491,11 @@ fun JournalScreen(
                     Surface(
                         onClick = { showMoodPicker = !showMoodPicker },
                         shape = RoundedCornerShape(22.dp),
-                        color = if (showMoodPicker) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+                        color = if (showMoodPicker) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
                         modifier = Modifier.height(46.dp)
                     ) {
                         Row(
@@ -415,19 +504,30 @@ fun JournalScreen(
                             horizontalArrangement = Arrangement.spacedBy(7.dp)
                         ) {
                             CurioIcon(
-                                moods.firstOrNull { it.first == mood }?.second ?: CurioIcons.MoodCalm,
+                                selectedMoodIcon,
                                 "Mood: $mood",
                                 tint = MaterialTheme.colorScheme.primary,
                                 size = 19.dp
                             )
-                            Text(mood, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold))
+                            Text(
+                                mood,
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
                         }
                     }
+
                     Spacer(Modifier.width(8.dp))
+
                     Surface(
                         onClick = { showDetails = !showDetails },
                         shape = RoundedCornerShape(22.dp),
-                        color = if (showDetails) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+                        color = if (showDetails) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
                         modifier = Modifier.height(46.dp)
                     ) {
                         Row(
@@ -435,16 +535,32 @@ fun JournalScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(7.dp)
                         ) {
-                            CurioIcon(CurioIcons.Note, "Journal details", tint = MaterialTheme.colorScheme.primary, size = 18.dp)
-                            Text("Details", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold))
+                            CurioIcon(
+                                CurioIcons.Note,
+                                "Journal details",
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 18.dp
+                            )
+                            Text(
+                                "Details",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
                         }
                     }
+
                     Spacer(Modifier.weight(1f))
+
                     Surface(
                         onClick = onSaved,
                         enabled = hasContent,
                         shape = RoundedCornerShape(22.dp),
-                        color = if (hasContent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer,
+                        color = if (hasContent) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
                         shadowElevation = if (hasContent) 4.dp else 0.dp,
                         modifier = Modifier
                             .height(46.dp)
@@ -461,13 +577,23 @@ fun JournalScreen(
                             CurioIcon(
                                 CurioIcons.Check,
                                 "Save journal",
-                                tint = if (hasContent) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = if (hasContent) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                                 size = 19.dp
                             )
                             Text(
                                 "Save",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                color = if (hasContent) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = if (hasContent) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
                             )
                         }
                     }
