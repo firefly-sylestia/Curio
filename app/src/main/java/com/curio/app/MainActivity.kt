@@ -48,7 +48,7 @@ import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.features.community.SocialNotificationWatcher
 import com.curio.app.features.create.BookCreateScreen
 import com.curio.app.features.create.CreateEntryLauncher
-import com.curio.app.features.create.JournalScreen
+import com.curio.app.features.create.PersonalJournalScreen
 import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingCommunityOpen
@@ -59,103 +59,36 @@ import com.curio.app.ui.theme.CurioTheme
 import com.curio.app.ui.theme.CurioThemeTransitionHost
 
 class MainActivity : ComponentActivity() {
-
-    private companion object {
-        const val AUTO_BACKUP_INTERVAL_MILLIS = 24L * 60 * 60 * 1000
-    }
+    private companion object { const val AUTO_BACKUP_INTERVAL_MILLIS = 24L * 60 * 60 * 1000 }
 
     private fun runAutoBackupIfDue() {
         if (!AppPreferences.isAutoBackupEnabled(this)) return
         val autoUri = AppPreferences.getAutoBackupUri(this)
         if (autoUri.isBlank()) return
-        val interval = AppPreferences.getAutoBackupFrequencyDays(this)
-            .coerceAtLeast(1) * AUTO_BACKUP_INTERVAL_MILLIS
+        val interval = AppPreferences.getAutoBackupFrequencyDays(this).coerceAtLeast(1) * AUTO_BACKUP_INTERVAL_MILLIS
         val lastAuto = AppPreferences.getAutoBackupLastAtMillis(this)
         if (lastAuto != 0L && System.currentTimeMillis() - lastAuto < interval) return
-        lifecycleScope.launch {
-            withContext(kotlinx.coroutines.Dispatchers.IO) {
-                runCatching {
-                    CurioBackupManager.export(this@MainActivity, Uri.parse(autoUri))
-                    AppPreferences.setAutoBackupLastAtMillis(this@MainActivity, System.currentTimeMillis())
-                }
-            }
-        }
+        lifecycleScope.launch { withContext(kotlinx.coroutines.Dispatchers.IO) { runCatching { CurioBackupManager.export(this@MainActivity, Uri.parse(autoUri)); AppPreferences.setAutoBackupLastAtMillis(this@MainActivity, System.currentTimeMillis()) } } }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
-
-        if (savedInstanceState == null) {
-            PendingEntryOpen.capture(intent)
-            PendingSpinOpen.capture(intent)
-            PendingDirectMessageOpen.capture(intent)
-            PendingCommunityOpen.capture(intent)
-        }
-
+        enableEdgeToEdge(); super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) { PendingEntryOpen.capture(intent); PendingSpinOpen.capture(intent); PendingDirectMessageOpen.capture(intent); PendingCommunityOpen.capture(intent) }
         TopicJsonLoader.install(this)
-
         runCatching {
-            coil.Coil.setImageLoader(
-                coil.ImageLoader.Builder(this)
-                    .crossfade(true)
-                    .memoryCache {
-                        coil.memory.MemoryCache.Builder(this)
-                            .maxSizePercent(0.22)
-                            .build()
-                    }
-                    .diskCache {
-                        coil.disk.DiskCache.Builder()
-                            .directory(java.io.File(cacheDir, "curio_image_cache"))
-                            .maxSizePercent(0.03)
-                            .build()
-                    }
-                    .components { add(coil.decode.SvgDecoder.Factory()) }
-                    .build()
-            )
+            coil.Coil.setImageLoader(coil.ImageLoader.Builder(this).crossfade(true).memoryCache { coil.memory.MemoryCache.Builder(this).maxSizePercent(.22).build() }.diskCache { coil.disk.DiskCache.Builder().directory(java.io.File(cacheDir, "curio_image_cache")).maxSizePercent(.03).build() }.components { add(coil.decode.SvgDecoder.Factory()) }.build())
         }
-
-        if (!com.curio.app.data.TopicRepository.isInitialized()) {
-            lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                com.curio.app.data.TopicRepository.init(this@MainActivity)
-            }
-        }
-
+        if (!com.curio.app.data.TopicRepository.isInitialized()) lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) { com.curio.app.data.TopicRepository.init(this@MainActivity) }
         CurioCrashReporter.init(this)
-
         val db = CurioDatabase.getInstance(this)
         CurioRepositoryHolder.init(db.captureDao(), db.cachedTopicDao())
         lifecycleScope.launch { RecycleBinExpiry.purgeExpired(this@MainActivity) }
-
         VoskModels.pruneRemovedModels(this)
-
-        AppPreferences.initThemeMode(this)
-        ExploreSessionStore.seed(this)
-        TopicProgressStore.seed(this)
-        lifecycleScope.launch {
-            withContext(kotlinx.coroutines.Dispatchers.IO) {
-                com.curio.app.data.TopicRepository.init(this@MainActivity)
-            }
-            withContext(kotlinx.coroutines.NonCancellable) {
-                runCatching { TopicJsonLoader.loadIndex() }
-                runCatching { TopicJsonLoader.preloadAll() }
-            }
-        }
-        if (AppPreferences.isUpdateCheckerEnabled(this)) {
-            lifecycleScope.launch {
-                runCatching { UpdateChecker.notifyIfUpdateAvailable(this@MainActivity) }
-            }
-        }
-        runAutoBackupIfDue()
-        CurioQuests.seed(this)
-        CurioPet.wakeForMorning()
-        if (AppPreferences.isReminderEnabled(this)) {
-            com.curio.app.data.DailyReminderScheduler.schedule(
-                this,
-                AppPreferences.getReminderHour(this),
-                AppPreferences.getReminderMinute(this)
-            )
-        }
+        AppPreferences.initThemeMode(this); ExploreSessionStore.seed(this); TopicProgressStore.seed(this)
+        lifecycleScope.launch { withContext(kotlinx.coroutines.Dispatchers.IO) { com.curio.app.data.TopicRepository.init(this@MainActivity) }; withContext(kotlinx.coroutines.NonCancellable) { runCatching { TopicJsonLoader.loadIndex() }; runCatching { TopicJsonLoader.preloadAll() } } }
+        if (AppPreferences.isUpdateCheckerEnabled(this)) lifecycleScope.launch { runCatching { UpdateChecker.notifyIfUpdateAvailable(this@MainActivity) } }
+        runAutoBackupIfDue(); CurioQuests.seed(this); CurioPet.wakeForMorning()
+        if (AppPreferences.isReminderEnabled(this)) com.curio.app.data.DailyReminderScheduler.schedule(this, AppPreferences.getReminderHour(this), AppPreferences.getReminderMinute(this))
         setContent {
             CurioTheme {
                 CurioThemeTransitionHost {
@@ -165,70 +98,22 @@ class MainActivity : ComponentActivity() {
                     val onHome = currentRoute == CurioRoutes.HOME
                     var showCreateButton by remember(currentRoute) { mutableStateOf(true) }
                     var creationWorkspace by remember { mutableStateOf<String?>(null) }
-                    val createScrollConnection = remember(onHome) {
-                        object : NestedScrollConnection {
-                            override fun onPreScroll(
-                                available: Offset,
-                                source: NestedScrollSource
-                            ): Offset {
-                                if (!onHome || creationWorkspace != null) return Offset.Zero
-                                when {
-                                    available.y < -2f -> showCreateButton = false
-                                    available.y > 2f -> showCreateButton = true
-                                }
-                                return Offset.Zero
-                            }
+                    val createScrollConnection = remember(onHome) { object : NestedScrollConnection {
+                        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                            if (!onHome || creationWorkspace != null) return Offset.Zero
+                            when { available.y < -2f -> showCreateButton = false; available.y > 2f -> showCreateButton = true }
+                            return Offset.Zero
                         }
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .nestedScroll(createScrollConnection)
-                    ) {
+                    } }
+                    Box(Modifier.fillMaxSize().nestedScroll(createScrollConnection)) {
                         CurioNavHost(navController = navController)
-                        AnimatedVisibility(
-                            visible = onHome && showCreateButton && creationWorkspace == null,
-                            enter = slideInVertically(
-                                animationSpec = tween(220, easing = FastOutSlowInEasing),
-                                initialOffsetY = { it }
-                            ),
-                            exit = slideOutVertically(
-                                animationSpec = tween(180, easing = FastOutSlowInEasing),
-                                targetOffsetY = { it }
-                            ),
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxSize()
-                        ) {
-                            CreateEntryLauncher(
-                                onJournal = {
-                                    creationWorkspace = "journal"
-                                },
-                                onBook = {
-                                    creationWorkspace = "book"
-                                },
-                                onQuickNote = {
-                                    navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
-                                }
-                            )
+                        AnimatedVisibility(visible = onHome && showCreateButton && creationWorkspace == null, enter = slideInVertically(tween(220, easing = FastOutSlowInEasing), initialOffsetY = { it }), exit = slideOutVertically(tween(180, easing = FastOutSlowInEasing), targetOffsetY = { it }), modifier = Modifier.align(Alignment.BottomCenter).fillMaxSize()) {
+                            CreateEntryLauncher(onJournal = { creationWorkspace = "journal" }, onBook = { creationWorkspace = "book" }, onQuickNote = { navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true } })
                         }
-
-                        AnimatedVisibility(
-                            visible = creationWorkspace != null,
-                            enter = fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)),
-                            exit = fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
+                        AnimatedVisibility(visible = creationWorkspace != null, enter = fadeIn(tween(220, easing = FastOutSlowInEasing)), exit = fadeOut(tween(180, easing = FastOutSlowInEasing)), modifier = Modifier.fillMaxSize()) {
                             when (creationWorkspace) {
-                                "journal" -> JournalScreen(
-                                    onClose = { creationWorkspace = null },
-                                    onSaved = { creationWorkspace = null }
-                                )
-                                "book" -> BookCreateScreen(
-                                    onClose = { creationWorkspace = null },
-                                    onCreated = { creationWorkspace = null }
-                                )
+                                "journal" -> PersonalJournalScreen(onClose = { creationWorkspace = null }, onSaved = { creationWorkspace = null })
+                                "book" -> BookCreateScreen(onClose = { creationWorkspace = null }, onCreated = { creationWorkspace = null })
                             }
                         }
                     }
@@ -238,40 +123,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onTrimMemory(level: Int) {
-        super.onTrimMemory(level)
-        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
-            TopicJsonLoader.shedForMemory(level)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        runAutoBackupIfDue()
-        TopicProgressStore.seed(this)
-    }
-
+    override fun onTrimMemory(level: Int) { super.onTrimMemory(level); if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) TopicJsonLoader.shedForMemory(level) }
+    override fun onResume() { super.onResume(); runAutoBackupIfDue(); TopicProgressStore.seed(this) }
     override fun onDestroy() {
         super.onDestroy()
         if (!isChangingConfigurations) {
             val session = ExploreSessionStore.getActiveSession(this)
-            if (session != null && !session.paused) {
-                ExploreSessionStore.pauseSession(this)
-                ExploreSessionStore.getActiveSession(this)?.let { paused ->
-                    if (AppPreferences.exploreServiceShouldRun(this)) {
-                        ExploreSessionService.start(this, paused)
-                    }
-                }
-            }
+            if (session != null && !session.paused) { ExploreSessionStore.pauseSession(this); ExploreSessionStore.getActiveSession(this)?.let { paused -> if (AppPreferences.exploreServiceShouldRun(this)) ExploreSessionService.start(this, paused) } }
         }
     }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        PendingEntryOpen.capture(intent)
-        PendingSpinOpen.capture(intent)
-        PendingDirectMessageOpen.capture(intent)
-        PendingCommunityOpen.capture(intent)
-    }
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); PendingEntryOpen.capture(intent); PendingSpinOpen.capture(intent); PendingDirectMessageOpen.capture(intent); PendingCommunityOpen.capture(intent) }
 }
