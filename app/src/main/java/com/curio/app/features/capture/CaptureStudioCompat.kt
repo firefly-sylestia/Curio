@@ -76,7 +76,7 @@ internal fun CaptureStudio(
         tagInput = tagInput,
         onBack = onBack,
         onSave = onSave,
-        onAddTake = { onAddTake(defaultFormat) },
+        onAddTake = { _: Unit -> onAddTake(defaultFormat) },
         onRequestRemoveTake = onRequestRemoveTake,
         onPickFormat = onPickFormat,
         onPickMood = onPickMood,
