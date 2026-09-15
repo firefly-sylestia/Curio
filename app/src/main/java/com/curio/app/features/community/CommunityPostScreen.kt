@@ -26,10 +26,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -40,7 +38,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
@@ -120,7 +118,6 @@ internal fun CommunityPostScreen(
     val selectedCategory = topic?.categoryId?.let(CurioCategories::byId)
     val accent = selectedCategory?.themedAccent() ?: MaterialTheme.colorScheme.primary
     val accentSoft = lerp(MaterialTheme.colorScheme.surface, accent, 0.10f)
-    val accentMedium = lerp(MaterialTheme.colorScheme.surfaceContainer, accent, 0.20f)
     val onAccent = if (accent.luminance() > 0.60f) Color.Black else Color.White
 
     val topicResults = remember(index, query) {
@@ -195,23 +192,16 @@ internal fun CommunityPostScreen(
                         }
                     }
                 )
-
-                ComposerModeRail(
-                    selected = kind,
-                    accent = accent,
-                    onSelect = { selected ->
-                        kind = selected
-                        topicOpen = selected == KIND_CARD
-                        if (selected != KIND_QUOTE) credit = ""
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    }
-                )
+                ComposerModeRail(selected = kind, accent = accent, onSelect = { selected ->
+                    kind = selected
+                    topicOpen = selected == KIND_CARD
+                    if (selected != KIND_QUOTE) credit = ""
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                })
 
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .imePadding(),
+                    modifier = Modifier.fillMaxSize().imePadding(),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -225,7 +215,6 @@ internal fun CommunityPostScreen(
                             intro = intro.value
                         )
                     }
-
                     item(key = "writer") {
                         ComposerWriter(
                             kind = kind,
@@ -235,7 +224,6 @@ internal fun CommunityPostScreen(
                             onValueChange = { text = it.take(if (kind == KIND_CARD) 700 else 1200) }
                         )
                     }
-
                     item(key = "topic") {
                         AnimatedVisibility(
                             visible = kind == KIND_CARD,
@@ -259,11 +247,7 @@ internal fun CommunityPostScreen(
                                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     }
                                 )
-                                CaptionCard(
-                                    value = caption,
-                                    accent = accent,
-                                    onValueChange = { caption = it.take(180) }
-                                )
+                                CaptionCard(value = caption, accent = accent, onValueChange = { caption = it.take(180) })
                                 CardStyleControls(
                                     style = style,
                                     aspect = aspect,
@@ -276,7 +260,6 @@ internal fun CommunityPostScreen(
                             }
                         }
                     }
-
                     item(key = "credit") {
                         AnimatedVisibility(
                             visible = kind == KIND_QUOTE,
@@ -293,10 +276,7 @@ internal fun CommunityPostScreen(
                             )
                         }
                     }
-
-                    item(key = "hint") {
-                        ComposerFooterHint(kind = kind)
-                    }
+                    item(key = "hint") { ComposerFooterHint(kind) }
                 }
             }
         }
@@ -312,23 +292,10 @@ private fun ComposerHeader(
     onDismiss: () -> Unit,
     onPost: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         ComposerIconButton(onClick = onDismiss)
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                "Create a post",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-            )
+        Column(Modifier.weight(1f).padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text("Create a post", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
             Text(
                 when (kind) {
                     KIND_CARD -> "Share something you discovered"
@@ -344,19 +311,12 @@ private fun ComposerHeader(
             enabled = canPost && !posting,
             shape = RoundedCornerShape(16.dp),
             color = if (canPost && !posting) accent else MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = if (canPost && !posting) (if (accent.luminance() > 0.60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant
+            contentColor = if (canPost && !posting) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(7.dp)
-            ) {
-                Text(
-                    if (posting) "Posting" else "Post",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                )
+            Row(Modifier.padding(horizontal = 15.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text(if (posting) "Posting" else "Post", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                 if (!posting) {
-                    CurioIcon(name = CurioIcons.Check, contentDescription = null, tint = if (canPost) (if (accent.luminance() > 0.60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
+                    CurioIcon(name = CurioIcons.Check, contentDescription = null, tint = if (canPost) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
                 }
             }
         }
@@ -365,34 +325,14 @@ private fun ComposerHeader(
 
 @Composable
 private fun ComposerIconButton(onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
-    ) {
-        CurioIcon(
-            name = CurioIcons.Close,
-            contentDescription = "Close",
-            tint = MaterialTheme.colorScheme.onSurface,
-            size = 19.dp,
-            modifier = Modifier.padding(10.dp)
-        )
+    Surface(onClick = onClick, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        CurioIcon(name = CurioIcons.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurface, size = 19.dp, modifier = Modifier.padding(10.dp))
     }
 }
 
 @Composable
-private fun ComposerModeRail(
-    selected: String,
-    accent: Color,
-    onSelect: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+private fun ComposerModeRail(selected: String, accent: Color, onSelect: (String) -> Unit) {
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         PostModePill("Note", KIND_NOTE, selected, accent, "A thought") { onSelect(KIND_NOTE) }
         PostModePill("Topic", KIND_CARD, selected, accent, "A discovery") { onSelect(KIND_CARD) }
         PostModePill("Quote", KIND_QUOTE, selected, accent, "Words worth keeping") { onSelect(KIND_QUOTE) }
@@ -400,298 +340,91 @@ private fun ComposerModeRail(
 }
 
 @Composable
-private fun PostModePill(
-    title: String,
-    value: String,
-    selected: String,
-    accent: Color,
-    subtitle: String,
-    onClick: () -> Unit
-) {
+private fun PostModePill(title: String, value: String, selected: String, accent: Color, subtitle: String, onClick: () -> Unit) {
     val active = selected == value
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(15.dp),
-        color = if (active) accent else MaterialTheme.colorScheme.surfaceContainerLow,
-        tonalElevation = if (active) 2.dp else 0.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-            verticalArrangement = Arrangement.spacedBy(1.dp)
-        ) {
-            Text(
-                title,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (active) (if (accent.luminance() > 0.60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                subtitle,
-                style = MaterialTheme.typography.labelSmall,
-                color = if (active) (if (accent.luminance() > 0.60f) Color.Black.copy(alpha = .72f) else Color.White.copy(alpha = .78f)) else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+    Surface(onClick = onClick, shape = RoundedCornerShape(15.dp), color = if (active) accent else MaterialTheme.colorScheme.surfaceContainerLow, tonalElevation = if (active) 2.dp else 0.dp) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Text(title, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = if (active) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurface)
+            Text(subtitle, style = MaterialTheme.typography.labelSmall, color = if (active) (if (accent.luminance() > .60f) Color.Black.copy(alpha = .72f) else Color.White.copy(alpha = .78f)) else MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
-private fun ComposerHero(
-    kind: String,
-    topic: CurioTopic?,
-    category: com.curio.app.data.CurioCategory?,
-    accent: Color,
-    accentSoft: Color,
-    intro: Float
-) {
+private fun ComposerHero(kind: String, topic: CurioTopic?, category: com.curio.app.data.CurioCategory?, accent: Color, accentSoft: Color, intro: Float) {
     val scale by animateFloatAsState(targetValue = 0.96f + intro * 0.04f, animationSpec = spring(dampingRatio = .82f), label = "composerHeroScale")
     val title = when (kind) {
         KIND_CARD -> topic?.name ?: "A little piece of knowledge"
         KIND_QUOTE -> "Words worth keeping"
         else -> "Something on your mind"
     }
-    Surface(
-        shape = RoundedCornerShape(28.dp),
-        color = if (kind == KIND_CARD && topic != null) accentSoft else MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer(scaleX = scale, scaleY = scale)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
+    Surface(shape = RoundedCornerShape(28.dp), color = if (kind == KIND_CARD && topic != null) accentSoft else MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth().graphicsLayer(scaleX = scale, scaleY = scale)) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(shape = CircleShape, color = if (kind == KIND_CARD && topic != null) accent else MaterialTheme.colorScheme.surfaceContainerHighest) {
-                    CurioIcon(
-                        name = when (kind) {
-                            KIND_CARD -> category?.iconGlyph ?: CurioIcons.Note
-                            KIND_QUOTE -> CurioIcons.MenuBook
-                            else -> CurioIcons.Note
-                        },
-                        contentDescription = null,
-                        tint = if (kind == KIND_CARD && topic != null) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurface,
-                        size = 20.dp,
-                        modifier = Modifier.padding(10.dp)
-                    )
+                    CurioIcon(name = when (kind) { KIND_CARD -> category?.iconGlyph ?: CurioIcons.Note; KIND_QUOTE -> CurioIcons.MenuBook; else -> CurioIcons.Note }, contentDescription = null, tint = if (kind == KIND_CARD && topic != null) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurface, size = 20.dp, modifier = Modifier.padding(10.dp))
                 }
-                Column(modifier = Modifier.padding(start = 10.dp)) {
-                    Text(
-                        when (kind) {
-                            KIND_CARD -> if (topic == null) "Topic post" else category?.displayName ?: "Topic"
-                            KIND_QUOTE -> "Quote"
-                            else -> "Note"
-                        },
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        "The preview follows your writing",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Column(Modifier.padding(start = 10.dp)) {
+                    Text(when (kind) { KIND_CARD -> if (topic == null) "Topic post" else category?.displayName ?: "Topic"; KIND_QUOTE -> "Quote"; else -> "Note" }, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("The preview follows your writing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            AnimatedContent(
-                targetState = title,
-                label = "composerHeroTitle",
-                transitionSpec = { (fadeIn() + slideInVertically { it / 6 }).togetherWith(fadeOut()) }
-            ) { value ->
-                Text(
-                    value,
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
+            AnimatedContent(targetState = title, label = "composerHeroTitle", transitionSpec = { (fadeIn() + slideInVertically { it / 6 }).togetherWith(fadeOut()) }) { value ->
+                Text(value, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
             if (kind == KIND_CARD && topic != null) {
-                Text(
-                    topic.teaser,
-                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = .88f),
-                    maxLines = 4,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Text(topic.teaser, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = .88f), maxLines = 4, overflow = TextOverflow.Ellipsis)
             } else {
-                Text(
-                    when (kind) {
-                        KIND_QUOTE -> "Add your quote below, then give its voice a little credit."
-                        else -> "Start with the sentence you would actually want another curious person to read."
-                    },
-                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3
-                )
+                Text(when (kind) { KIND_QUOTE -> "Add your quote below, then give its voice a little credit."; else -> "Start with the sentence you would actually want another curious person to read." }, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3)
             }
         }
     }
 }
 
 @Composable
-private fun ComposerWriter(
-    kind: String,
-    value: String,
-    accent: Color,
-    focusRequester: FocusRequester,
-    onValueChange: (String) -> Unit
-) {
-    val placeholder = when (kind) {
-        KIND_CARD -> "Write the fact in your own words…"
-        KIND_QUOTE -> "Write the quote…"
-        else -> "What are you thinking about?"
-    }
-    val label = when (kind) {
-        KIND_CARD -> "Your version"
-        KIND_QUOTE -> "The quote"
-        else -> "Your note"
-    }
-    Surface(
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp)
-        ) {
+private fun ComposerWriter(kind: String, value: String, accent: Color, focusRequester: FocusRequester, onValueChange: (String) -> Unit) {
+    val placeholder = when (kind) { KIND_CARD -> "Write the fact in your own words…"; KIND_QUOTE -> "Write the quote…"; else -> "What are you thinking about?" }
+    val label = when (kind) { KIND_CARD -> "Your version"; KIND_QUOTE -> "The quote"; else -> "Your note" }
+    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 1.dp) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    "${value.length}/${if (kind == KIND_CARD) 700 else 1200}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
+                Text("${value.length}/${if (kind == KIND_CARD) 700 else 1200}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(190.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                    .padding(16.dp)
-                    .focusRequester(focusRequester),
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    lineHeight = 27.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                ),
-                cursorBrush = SolidColor(accent),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Default
-                ),
-                decorationBox = { inner ->
-                    Box {
-                        if (value.isBlank()) {
-                            Text(
-                                placeholder,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        inner()
-                    }
+            BasicTextField(value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(16.dp).focusRequester(focusRequester), textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 27.sp, color = MaterialTheme.colorScheme.onSurface), cursorBrush = SolidColor(accent), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default), decorationBox = { inner ->
+                Box {
+                    if (value.isBlank()) Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    inner()
                 }
-            )
+            })
         }
     }
 }
 
 @Composable
-private fun TopicPickerCard(
-    topic: CurioTopic?,
-    topicOpen: Boolean,
-    query: String,
-    accent: Color,
-    results: List<TopicIndexEntry>,
-    onToggle: () -> Unit,
-    onQueryChange: (String) -> Unit,
-    onPick: (CurioTopic) -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+private fun TopicPickerCard(topic: CurioTopic?, topicOpen: Boolean, query: String, accent: Color, results: List<TopicIndexEntry>, onToggle: () -> Unit, onQueryChange: (String) -> Unit, onPick: (CurioTopic) -> Unit) {
+    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(Modifier.weight(1f)) {
                     Text("Topic", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
-                    Text(
-                        topic?.name ?: "Choose a topic",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (topic == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Text(topic?.name ?: "Choose a topic", style = MaterialTheme.typography.bodyMedium, color = if (topic == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                Surface(
-                    onClick = onToggle,
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (topic != null) lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, .14f) else accent,
-                    contentColor = if (topic != null) MaterialTheme.colorScheme.onSurface else if (accent.luminance() > .60f) Color.Black else Color.White
-                ) {
-                    Text(
-                        if (topicOpen) "Done" else if (topic == null) "Choose" else "Change",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                    )
+                Surface(onClick = onToggle, shape = RoundedCornerShape(12.dp), color = if (topic != null) lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, .14f) else accent, contentColor = if (topic != null) MaterialTheme.colorScheme.onSurface else if (accent.luminance() > .60f) Color.Black else Color.White) {
+                    Text(if (topicOpen) "Done" else if (topic == null) "Choose" else "Change", modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                 }
             }
-            AnimatedVisibility(
-                visible = topicOpen,
-                enter = fadeIn() + slideInVertically { -it / 4 } + scaleIn(initialScale = .98f),
-                exit = fadeOut() + slideInVertically { -it / 4 }
-            ) {
+            AnimatedVisibility(visible = topicOpen, enter = fadeIn() + slideInVertically { -it / 4 } + scaleIn(initialScale = .98f), exit = fadeOut() + slideInVertically { -it / 4 }) {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    BasicTextField(
-                        value = query,
-                        onValueChange = onQueryChange,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                            .padding(horizontal = 14.dp, vertical = 12.dp),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        singleLine = true,
-                        decorationBox = { inner ->
-                            Box {
-                                if (query.isBlank()) Text("Search topics…", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                inner()
-                            }
-                        }
-                    )
-                    Column(
-                        modifier = Modifier.height(244.dp).verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
+                    BasicTextField(value = query, onValueChange = onQueryChange, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(horizontal = 14.dp, vertical = 12.dp), textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface), singleLine = true, decorationBox = { inner -> Box { if (query.isBlank()) Text("Search topics…", color = MaterialTheme.colorScheme.onSurfaceVariant); inner() } })
+                    Column(Modifier.height(244.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         results.forEach { entry ->
-                            Surface(
-                                onClick = { onPick(entry.topic) },
-                                shape = RoundedCornerShape(15.dp),
-                                color = if (entry.topic == topic) lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, .18f) else MaterialTheme.colorScheme.surface,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                            Surface(onClick = { onPick(entry.topic) }, shape = RoundedCornerShape(15.dp), color = if (entry.topic == topic) lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, .18f) else MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+                                Row(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Surface(shape = CircleShape, color = lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, .12f)) {
-                                        CurioIcon(
-                                            name = CurioIcons.Note,
-                                            contentDescription = null,
-                                            tint = accent,
-                                            size = 17.dp,
-                                            modifier = Modifier.padding(8.dp)
-                                        )
+                                        CurioIcon(name = CurioIcons.Note, contentDescription = null, tint = accent, size = 17.dp, modifier = Modifier.padding(8.dp))
                                     }
-                                    Column(modifier = Modifier.padding(start = 10.dp).weight(1f)) {
+                                    Column(Modifier.padding(start = 10.dp).weight(1f)) {
                                         Text(entry.topic.name, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                         Text(entry.topic.byline, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     }
@@ -706,126 +439,43 @@ private fun TopicPickerCard(
 }
 
 @Composable
-private fun CaptionCard(
-    value: String,
-    accent: Color,
-    onValueChange: (String) -> Unit
-) {
-    ComposerTextFieldCard(
-        label = "Caption",
-        value = value,
-        hint = "Give the post a little context…",
-        accent = accent,
-        maxChars = 180,
-        onValueChange = onValueChange
-    )
+private fun CaptionCard(value: String, accent: Color, onValueChange: (String) -> Unit) {
+    ComposerTextFieldCard(label = "Caption", value = value, hint = "Give the post a little context…", accent = accent, maxChars = 180, onValueChange = onValueChange)
 }
 
 @Composable
-private fun ComposerTextFieldCard(
-    label: String,
-    value: String,
-    hint: String,
-    accent: Color,
-    maxChars: Int,
-    onValueChange: (String) -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            modifier = Modifier.padding(15.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+private fun ComposerTextFieldCard(label: String, value: String, hint: String, accent: Color, maxChars: Int, onValueChange: (String) -> Unit) {
+    Surface(shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface) {
+        Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
                 Text("${value.length}/$maxChars", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            BasicTextField(
-                value = value,
-                onValueChange = { onValueChange(it.take(maxChars)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                    .padding(horizontal = 13.dp, vertical = 12.dp),
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(accent),
-                singleLine = true,
-                decorationBox = { inner ->
-                    Box {
-                        if (value.isBlank()) Text(hint, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        inner()
-                    }
-                }
-            )
+            BasicTextField(value = value, onValueChange = { onValueChange(it.take(maxChars)) }, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(horizontal = 13.dp, vertical = 12.dp), textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface), cursorBrush = SolidColor(accent), singleLine = true, decorationBox = { inner -> Box { if (value.isBlank()) Text(hint, color = MaterialTheme.colorScheme.onSurfaceVariant); inner() } })
         }
     }
 }
 
 @Composable
-private fun CardStyleControls(
-    style: ShareCardStyle,
-    aspect: ShareCardAspect,
-    bodyScale: Float,
-    accent: Color,
-    onStyle: (ShareCardStyle) -> Unit,
-    onAspect: (ShareCardAspect) -> Unit,
-    onScale: (Float) -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(
-            modifier = Modifier.padding(15.dp),
-            verticalArrangement = Arrangement.spacedBy(13.dp)
-        ) {
-            ChoiceRail("Look", ShareCardStyle.entries.map { it.label }, style.label, accent) { label ->
-                onStyle(ShareCardStyle.entries.firstOrNull { it.label == label } ?: style)
-            }
-            ChoiceRail("Shape", ShareCardAspect.entries.map { it.label }, aspect.label, accent) { label ->
-                onAspect(ShareCardAspect.entries.firstOrNull { it.label == label } ?: aspect)
-            }
-            ChoiceRail("Text", listOf("Compact", "Auto", "Large"), when {
-                bodyScale < 1f -> "Compact"
-                bodyScale > 1f -> "Large"
-                else -> "Auto"
-            }, accent) { label ->
-                onScale(when (label) { "Compact" -> .9f; "Large" -> 1.1f; else -> 1f })
-            }
+private fun CardStyleControls(style: ShareCardStyle, aspect: ShareCardAspect, bodyScale: Float, accent: Color, onStyle: (ShareCardStyle) -> Unit, onAspect: (ShareCardAspect) -> Unit, onScale: (Float) -> Unit) {
+    Surface(shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
+            ChoiceRail("Look", ShareCardStyle.entries.map { it.label }, style.label, accent) { label -> onStyle(ShareCardStyle.entries.firstOrNull { it.label == label } ?: style) }
+            ChoiceRail("Shape", ShareCardAspect.entries.map { it.label }, aspect.label, accent) { label -> onAspect(ShareCardAspect.entries.firstOrNull { it.label == label } ?: aspect) }
+            ChoiceRail("Text", listOf("Compact", "Auto", "Large"), when { bodyScale < 1f -> "Compact"; bodyScale > 1f -> "Large"; else -> "Auto" }, accent) { label -> onScale(when (label) { "Compact" -> .9f; "Large" -> 1.1f; else -> 1f }) }
         }
     }
 }
 
 @Composable
-private fun ChoiceRail(
-    label: String,
-    values: List<String>,
-    selected: String,
-    accent: Color,
-    onSelected: (String) -> Unit
-) {
+private fun ChoiceRail(label: String, values: List<String>, selected: String, accent: Color, onSelected: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
         Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(7.dp)
-        ) {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             values.forEach { value ->
                 val active = value == selected
-                Surface(
-                    onClick = { onSelected(value) },
-                    shape = RoundedCornerShape(13.dp),
-                    color = if (active) accent else MaterialTheme.colorScheme.surface,
-                    contentColor = if (active) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurface
-                ) {
-                    Text(
-                        value,
-                        modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (active) FontWeight.Bold else FontWeight.Medium)
-                    )
+                Surface(onClick = { onSelected(value) }, shape = RoundedCornerShape(13.dp), color = if (active) accent else MaterialTheme.colorScheme.surface, contentColor = if (active) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurface) {
+                    Text(value, modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp), style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (active) FontWeight.Bold else FontWeight.Medium))
                 }
             }
         }
@@ -834,19 +484,7 @@ private fun ChoiceRail(
 
 @Composable
 private fun ComposerFooterHint(kind: String) {
-    Surface(
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Text(
-            when (kind) {
-                KIND_CARD -> "Tip: the topic becomes the identity of the post. Keep your fact specific and readable."
-                KIND_QUOTE -> "Tip: short quotes tend to breathe better in the feed."
-                else -> "Tip: one clear thought usually makes a stronger post than three half-finished ones."
-            },
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(13.dp)
-        )
+    Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Text(when (kind) { KIND_CARD -> "Tip: the topic becomes the identity of the post. Keep your fact specific and readable."; KIND_QUOTE -> "Tip: short quotes tend to breathe better in the feed."; else -> "Tip: one clear thought usually makes a stronger post than three half-finished ones." }, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(13.dp))
     }
 }
