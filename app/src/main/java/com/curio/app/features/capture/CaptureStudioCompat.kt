@@ -76,7 +76,10 @@ internal fun CaptureStudio(
         tagInput = tagInput,
         onBack = onBack,
         onSave = onSave,
-        onAddTake = { _: Unit -> onAddTake(defaultFormat) },
+        // The explicit CaptureFormat parameter makes this call unambiguously
+        // select the legacy compatibility overload instead of the Studio's
+        // parameterless Add-take overload.
+        onAddTake = { _: CaptureFormat -> onAddTake(defaultFormat) },
         onRequestRemoveTake = onRequestRemoveTake,
         onPickFormat = onPickFormat,
         onPickMood = onPickMood,
