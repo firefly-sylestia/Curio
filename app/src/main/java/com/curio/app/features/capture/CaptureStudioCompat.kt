@@ -76,10 +76,10 @@ internal fun CaptureStudio(
         tagInput = tagInput,
         onBack = onBack,
         onSave = onSave,
-        // The explicit CaptureFormat parameter makes this call unambiguously
-        // select the legacy compatibility overload instead of the Studio's
-        // parameterless Add-take overload.
-        onAddTake = { _: CaptureFormat -> onAddTake(defaultFormat) },
+        // Keep this lambda's static type on the Studio signature. Without
+        // the cast, Kotlin sees both CaptureStudio overloads as candidates
+        // at this call site and reports OVERLOAD_RESOLUTION_AMBIGUITY.
+        onAddTake = ({ onAddTake(defaultFormat) } as () -> Unit),
         onRequestRemoveTake = onRequestRemoveTake,
         onPickFormat = onPickFormat,
         onPickMood = onPickMood,
