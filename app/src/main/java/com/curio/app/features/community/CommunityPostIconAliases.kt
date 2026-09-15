@@ -6,8 +6,8 @@ import com.curio.app.ui.theme.CurioIcons
  * Local compatibility aliases for the community composer.
  * Keep the composer dependent only on glyphs already defined by CurioIcons.
  */
-private val CurioIcons.ChevronUp: String
+val CurioIcons.ChevronUp: String
     get() = CurioIcons.KeyboardArrowUp
 
-private val CurioIcons.ChevronDown: String
+val CurioIcons.ChevronDown: String
     get() = CurioIcons.KeyboardArrowDown
