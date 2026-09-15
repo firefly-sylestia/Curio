@@ -9,7 +9,9 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -52,6 +54,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -114,7 +117,6 @@ internal fun CommunityPostScreen(
     val selectedCategory = topic?.categoryId?.let(CurioCategories::byId)
     val accent = selectedCategory?.themedAccent() ?: MaterialTheme.colorScheme.primary
     val accentSoft = lerp(MaterialTheme.colorScheme.surface, accent, 0.10f)
-    val onAccent = if (accent.luminance() > 0.60f) Color.Black else Color.White
 
     val topicResults = remember(index, query) {
         val q = query.trim()
@@ -175,7 +177,11 @@ internal fun CommunityPostScreen(
                     item(key = "hero") { ComposerHero(kind, topic, selectedCategory, accent, accentSoft, intro.value) }
                     item(key = "writer") { ComposerWriter(kind, text, accent, writerRequester) { text = it.take(if (kind == KIND_CARD) 700 else 1200) } }
                     item(key = "topic") {
-                        AnimatedVisibility(visible = kind == KIND_CARD, enter = fadeIn() + slideInVertically { it / 5 }, exit = fadeOut() + slideInVertically { -it / 5 }) {
+                        AnimatedVisibility(
+                            visible = kind == KIND_CARD,
+                            enter = fadeIn() + slideInVertically { it / 5 },
+                            exit = fadeOut() + slideOutVertically { -it / 5 }
+                        ) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 TopicPickerCard(topic, topicOpen, query, accent, topicResults, { topicOpen = !topicOpen }, { query = it }) { picked ->
                                     topic = picked
@@ -190,7 +196,11 @@ internal fun CommunityPostScreen(
                         }
                     }
                     item(key = "credit") {
-                        AnimatedVisibility(visible = kind == KIND_QUOTE, enter = fadeIn() + slideInVertically { it / 5 }, exit = fadeOut() + slideInVertically { -it / 5 }) {
+                        AnimatedVisibility(
+                            visible = kind == KIND_QUOTE,
+                            enter = fadeIn() + slideInVertically { it / 5 },
+                            exit = fadeOut() + slideOutVertically { -it / 5 }
+                        ) {
                             ComposerTextFieldCard("Credit", credit, "Who said it?", accent, 120) { credit = it }
                         }
                     }
@@ -260,7 +270,7 @@ private fun ComposerHero(kind: String, topic: CurioTopic?, category: com.curio.a
                     Text("The preview follows your writing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            AnimatedContent(targetState = title, label = "composerHeroTitle", transitionSpec = { (fadeIn() + slideInVertically { it / 6 }).togetherWith(fadeOut()) }) { value -> Text(value, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis) }
+            AnimatedContent(targetState = title, label = "composerHeroTitle", transitionSpec = { (fadeIn() + slideInVertically { it / 6 }).togetherWith(fadeOut() + slideOutVertically { -it / 6 }) }) { value -> Text(value, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis) }
             if (kind == KIND_CARD && topic != null) Text(topic.teaser, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = .88f), maxLines = 4, overflow = TextOverflow.Ellipsis)
             else Text(when (kind) { KIND_QUOTE -> "Add your quote below, then give its voice a little credit."; else -> "Start with the sentence you would actually want another curious person to read." }, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3)
         }
@@ -295,7 +305,7 @@ private fun TopicPickerCard(topic: CurioTopic?, topicOpen: Boolean, query: Strin
                     Text(if (topicOpen) "Done" else if (topic == null) "Choose" else "Change", modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                 }
             }
-            AnimatedVisibility(visible = topicOpen, enter = fadeIn() + slideInVertically { -it / 4 } + scaleIn(initialScale = .98f), exit = fadeOut() + slideInVertically { -it / 4 }) {
+            AnimatedVisibility(visible = topicOpen, enter = fadeIn() + slideInVertically { -it / 4 } + scaleIn(initialScale = .98f), exit = fadeOut() + slideOutVertically { -it / 4 } + scaleOut(targetScale = .98f)) {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     BasicTextField(value = query, onValueChange = onQueryChange, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(horizontal = 14.dp, vertical = 12.dp), textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface), singleLine = true, decorationBox = { inner -> Box { if (query.isBlank()) Text("Search topics…", color = MaterialTheme.colorScheme.onSurfaceVariant); inner() } })
                     Column(Modifier.height(244.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
