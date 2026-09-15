@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -89,9 +88,8 @@ internal fun CommunityPostScreen(
     val focusManager = LocalFocusManager.current
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     val writerRequester = remember { FocusRequester() }
-
     var kind by remember { mutableStateOf(KIND_NOTE) }
     var text by remember { mutableStateOf("") }
     var caption by remember { mutableStateOf("") }
@@ -104,7 +102,6 @@ internal fun CommunityPostScreen(
     var aspect by remember { mutableStateOf(ShareCardAspect.CLASSIC) }
     var bodyScale by remember { mutableStateOf(1f) }
     var posting by remember { mutableStateOf(false) }
-
     val intro = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
@@ -112,7 +109,6 @@ internal fun CommunityPostScreen(
         intro.animateTo(1f, spring(dampingRatio = 0.78f, stiffness = 420f))
         writerRequester.requestFocus()
     }
-
     BackHandler(onBack = onDismiss)
 
     val selectedCategory = topic?.categoryId?.let(CurioCategories::byId)
@@ -122,22 +118,11 @@ internal fun CommunityPostScreen(
 
     val topicResults = remember(index, query) {
         val q = query.trim()
-        if (q.isBlank()) {
-            index.take(18)
-        } else {
-            index.asSequence()
-                .sortedWith(
-                    compareByDescending<TopicIndexEntry> { it.topic.name.contains(q, ignoreCase = true) }
-                        .thenBy { it.topic.name }
-                )
-                .filter {
-                    it.topic.name.contains(q, ignoreCase = true) ||
-                        it.topic.byline.contains(q, ignoreCase = true) ||
-                        it.topic.tags.any { tag -> tag.contains(q, ignoreCase = true) }
-                }
-                .take(18)
-                .toList()
-        }
+        if (q.isBlank()) index.take(18) else index.asSequence()
+            .sortedWith(compareByDescending<TopicIndexEntry> { it.topic.name.contains(q, true) }.thenBy { it.topic.name })
+            .filter { it.topic.name.contains(q, true) || it.topic.byline.contains(q, true) || it.topic.tags.any { tag -> tag.contains(q, true) } }
+            .take(18)
+            .toList()
     }
 
     val accentHex = selectedCategory?.let { "%08X".format(it.themedAccent().toArgb()) }.orEmpty()
@@ -155,34 +140,17 @@ internal fun CommunityPostScreen(
         bodyScale = bodyScale,
         byline = credit
     )
-
     val canPost = when (kind) {
         KIND_CARD -> topic != null && (text.isNotBlank() || caption.isNotBlank())
         KIND_QUOTE -> text.isNotBlank() && credit.isNotBlank()
         else -> text.isNotBlank()
     }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(WindowInsets.statusBars.asPaddingValues())
-            ) {
-                ComposerHeader(
-                    kind = kind,
-                    posting = posting,
-                    canPost = canPost,
-                    accent = accent,
-                    onDismiss = onDismiss,
-                    onPost = {
-                        if (!canPost || posting) return@ComposerHeader
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(Modifier.fillMaxSize().padding(WindowInsets.statusBars.asPaddingValues())) {
+                ComposerHeader(kind, posting, canPost, accent, onDismiss) {
+                    if (canPost && !posting) {
                         posting = true
                         focusManager.clearFocus(force = true)
                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -191,89 +159,39 @@ internal fun CommunityPostScreen(
                             posting = false
                         }
                     }
-                )
-                ComposerModeRail(selected = kind, accent = accent, onSelect = { selected ->
+                }
+                ComposerModeRail(kind, accent) { selected ->
                     kind = selected
                     topicOpen = selected == KIND_CARD
                     if (selected != KIND_QUOTE) credit = ""
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                })
-
+                }
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize().imePadding(),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item(key = "hero") {
-                        ComposerHero(
-                            kind = kind,
-                            topic = topic,
-                            category = selectedCategory,
-                            accent = accent,
-                            accentSoft = accentSoft,
-                            intro = intro.value
-                        )
-                    }
-                    item(key = "writer") {
-                        ComposerWriter(
-                            kind = kind,
-                            value = text,
-                            accent = accent,
-                            focusRequester = writerRequester,
-                            onValueChange = { text = it.take(if (kind == KIND_CARD) 700 else 1200) }
-                        )
-                    }
+                    item(key = "hero") { ComposerHero(kind, topic, selectedCategory, accent, accentSoft, intro.value) }
+                    item(key = "writer") { ComposerWriter(kind, text, accent, writerRequester) { text = it.take(if (kind == KIND_CARD) 700 else 1200) } }
                     item(key = "topic") {
-                        AnimatedVisibility(
-                            visible = kind == KIND_CARD,
-                            enter = fadeIn() + slideInVertically { it / 5 },
-                            exit = fadeOut() + slideInVertically { -it / 5 }
-                        ) {
+                        AnimatedVisibility(visible = kind == KIND_CARD, enter = fadeIn() + slideInVertically { it / 5 }, exit = fadeOut() + slideInVertically { -it / 5 }) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                TopicPickerCard(
-                                    topic = topic,
-                                    topicOpen = topicOpen,
-                                    query = query,
-                                    accent = accent,
-                                    results = topicResults,
-                                    onToggle = { topicOpen = !topicOpen },
-                                    onQueryChange = { query = it },
-                                    onPick = {
-                                        topic = it
-                                        if (text.isBlank()) text = it.teaser
-                                        query = ""
-                                        topicOpen = false
-                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    }
-                                )
-                                CaptionCard(value = caption, accent = accent, onValueChange = { caption = it.take(180) })
-                                CardStyleControls(
-                                    style = style,
-                                    aspect = aspect,
-                                    bodyScale = bodyScale,
-                                    accent = accent,
-                                    onStyle = { style = it },
-                                    onAspect = { aspect = it },
-                                    onScale = { bodyScale = it }
-                                )
+                                TopicPickerCard(topic, topicOpen, query, accent, topicResults, { topicOpen = !topicOpen }, { query = it }) { picked ->
+                                    topic = picked
+                                    if (text.isBlank()) text = picked.teaser
+                                    query = ""
+                                    topicOpen = false
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                }
+                                CaptionCard(caption, accent) { caption = it.take(180) }
+                                CardStyleControls(style, aspect, bodyScale, accent, { style = it }, { aspect = it }, { bodyScale = it })
                             }
                         }
                     }
                     item(key = "credit") {
-                        AnimatedVisibility(
-                            visible = kind == KIND_QUOTE,
-                            enter = fadeIn() + slideInVertically { it / 5 },
-                            exit = fadeOut() + slideInVertically { -it / 5 }
-                        ) {
-                            ComposerTextFieldCard(
-                                label = "Credit",
-                                value = credit,
-                                hint = "Who said it?",
-                                accent = accent,
-                                maxChars = 120,
-                                onValueChange = { credit = it }
-                            )
+                        AnimatedVisibility(visible = kind == KIND_QUOTE, enter = fadeIn() + slideInVertically { it / 5 }, exit = fadeOut() + slideInVertically { -it / 5 }) {
+                            ComposerTextFieldCard("Credit", credit, "Who said it?", accent, 120) { credit = it }
                         }
                     }
                     item(key = "hint") { ComposerFooterHint(kind) }
@@ -284,40 +202,17 @@ internal fun CommunityPostScreen(
 }
 
 @Composable
-private fun ComposerHeader(
-    kind: String,
-    posting: Boolean,
-    canPost: Boolean,
-    accent: Color,
-    onDismiss: () -> Unit,
-    onPost: () -> Unit
-) {
+private fun ComposerHeader(kind: String, posting: Boolean, canPost: Boolean, accent: Color, onDismiss: () -> Unit, onPost: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        ComposerIconButton(onClick = onDismiss)
+        ComposerIconButton(onDismiss)
         Column(Modifier.weight(1f).padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text("Create a post", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
-            Text(
-                when (kind) {
-                    KIND_CARD -> "Share something you discovered"
-                    KIND_QUOTE -> "Keep someone else's words close"
-                    else -> "Put a thought somewhere"
-                },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(when (kind) { KIND_CARD -> "Share something you discovered"; KIND_QUOTE -> "Keep someone else's words close"; else -> "Put a thought somewhere" }, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Surface(
-            onClick = onPost,
-            enabled = canPost && !posting,
-            shape = RoundedCornerShape(16.dp),
-            color = if (canPost && !posting) accent else MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = if (canPost && !posting) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant
-        ) {
+        Surface(onClick = onPost, enabled = canPost && !posting, shape = RoundedCornerShape(16.dp), color = if (canPost && !posting) accent else MaterialTheme.colorScheme.surfaceContainerHigh, contentColor = if (canPost && !posting) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant) {
             Row(Modifier.padding(horizontal = 15.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                 Text(if (posting) "Posting" else "Post", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
-                if (!posting) {
-                    CurioIcon(name = CurioIcons.Check, contentDescription = null, tint = if (canPost) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
-                }
+                if (!posting) CurioIcon(name = CurioIcons.Check, contentDescription = null, tint = if (canPost) (if (accent.luminance() > .60f) Color.Black else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
             }
         }
     }
@@ -353,11 +248,7 @@ private fun PostModePill(title: String, value: String, selected: String, accent:
 @Composable
 private fun ComposerHero(kind: String, topic: CurioTopic?, category: com.curio.app.data.CurioCategory?, accent: Color, accentSoft: Color, intro: Float) {
     val scale by animateFloatAsState(targetValue = 0.96f + intro * 0.04f, animationSpec = spring(dampingRatio = .82f), label = "composerHeroScale")
-    val title = when (kind) {
-        KIND_CARD -> topic?.name ?: "A little piece of knowledge"
-        KIND_QUOTE -> "Words worth keeping"
-        else -> "Something on your mind"
-    }
+    val title = when (kind) { KIND_CARD -> topic?.name ?: "A little piece of knowledge"; KIND_QUOTE -> "Words worth keeping"; else -> "Something on your mind" }
     Surface(shape = RoundedCornerShape(28.dp), color = if (kind == KIND_CARD && topic != null) accentSoft else MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth().graphicsLayer(scaleX = scale, scaleY = scale)) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -369,14 +260,9 @@ private fun ComposerHero(kind: String, topic: CurioTopic?, category: com.curio.a
                     Text("The preview follows your writing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            AnimatedContent(targetState = title, label = "composerHeroTitle", transitionSpec = { (fadeIn() + slideInVertically { it / 6 }).togetherWith(fadeOut()) }) { value ->
-                Text(value, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis)
-            }
-            if (kind == KIND_CARD && topic != null) {
-                Text(topic.teaser, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = .88f), maxLines = 4, overflow = TextOverflow.Ellipsis)
-            } else {
-                Text(when (kind) { KIND_QUOTE -> "Add your quote below, then give its voice a little credit."; else -> "Start with the sentence you would actually want another curious person to read." }, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3)
-            }
+            AnimatedContent(targetState = title, label = "composerHeroTitle", transitionSpec = { (fadeIn() + slideInVertically { it / 6 }).togetherWith(fadeOut()) }) { value -> Text(value, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis) }
+            if (kind == KIND_CARD && topic != null) Text(topic.teaser, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = .88f), maxLines = 4, overflow = TextOverflow.Ellipsis)
+            else Text(when (kind) { KIND_QUOTE -> "Add your quote below, then give its voice a little credit."; else -> "Start with the sentence you would actually want another curious person to read." }, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3)
         }
     }
 }
@@ -391,12 +277,7 @@ private fun ComposerWriter(kind: String, value: String, accent: Color, focusRequ
                 Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
                 Text("${value.length}/${if (kind == KIND_CARD) 700 else 1200}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            BasicTextField(value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(16.dp).focusRequester(focusRequester), textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 27.sp, color = MaterialTheme.colorScheme.onSurface), cursorBrush = SolidColor(accent), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default), decorationBox = { inner ->
-                Box {
-                    if (value.isBlank()) Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    inner()
-                }
-            })
+            BasicTextField(value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(16.dp).focusRequester(focusRequester), textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 27.sp, color = MaterialTheme.colorScheme.onSurface), cursorBrush = SolidColor(accent), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default), decorationBox = { inner -> Box { if (value.isBlank()) Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant); inner() } })
         }
     }
 }
@@ -439,9 +320,7 @@ private fun TopicPickerCard(topic: CurioTopic?, topicOpen: Boolean, query: Strin
 }
 
 @Composable
-private fun CaptionCard(value: String, accent: Color, onValueChange: (String) -> Unit) {
-    ComposerTextFieldCard(label = "Caption", value = value, hint = "Give the post a little context…", accent = accent, maxChars = 180, onValueChange = onValueChange)
-}
+private fun CaptionCard(value: String, accent: Color, onValueChange: (String) -> Unit) = ComposerTextFieldCard("Caption", value, "Give the post a little context…", accent, 180, onValueChange)
 
 @Composable
 private fun ComposerTextFieldCard(label: String, value: String, hint: String, accent: Color, maxChars: Int, onValueChange: (String) -> Unit) {
