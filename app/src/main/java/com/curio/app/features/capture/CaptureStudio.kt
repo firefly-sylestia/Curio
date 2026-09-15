@@ -77,11 +77,14 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.glyph
+import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import kotlinx.coroutines.launch
 
 private val StudioRecordRed = Color(0xFFE5484D)
 
+/** Take Studio: a polished shell around the same capture state and editor used by the classic flow. */
 @Composable
 internal fun CaptureStudio(
     modifier: Modifier,
@@ -106,7 +109,7 @@ internal fun CaptureStudio(
     tagInput: String,
     onBack: () -> Unit,
     onSave: () -> Unit,
-    onAddTake: (CaptureFormat) -> Unit,
+    onAddTake: () -> Unit,
     onRequestRemoveTake: (Int) -> Unit,
     onPickFormat: (CaptureFormat) -> Unit,
     onPickMood: (JournalMood?) -> Unit,
@@ -118,12 +121,20 @@ internal fun CaptureStudio(
     onImageTap: (String) -> Unit
 ) {
     var toolsOpen by remember { mutableStateOf(false) }
-    val active = sections.getOrNull(activeIndex)
-    val defaultFormat = if (cat.defaultFormat == CaptureFormat.OpenNotebook) CaptureFormat.SoundBite else cat.defaultFormat
+    val activeSection = sections.getOrNull(activeIndex)
+    val activeFormat = activeSection?.format ?: CaptureFormat.SoundBite
 
     Column(modifier = modifier) {
-        StudioTopBar(editMode, onBack) { toolsOpen = true }
-        StudioHero(cat, topicName, sessionMillis, activeMood, recording, tintWash, onPickMood)
+        StudioTopBar(editMode = editMode, onBack = onBack, onOpenTools = { toolsOpen = true })
+        StudioHero(
+            cat = cat,
+            topicName = topicName,
+            sessionMillis = sessionMillis,
+            mood = activeMood,
+            recording = recording,
+            tintWash = tintWash,
+            onPickMood = onPickMood
+        )
         StudioCanvas(
             cat = cat,
             sections = sections,
@@ -147,13 +158,13 @@ internal fun CaptureStudio(
             cat = cat,
             sections = sections,
             activeIndex = activeIndex,
-            activeFormat = active?.format ?: CaptureFormat.SoundBite,
+            activeFormat = activeFormat,
             tintWash = tintWash,
             editMode = editMode,
             canSave = canSave,
             saveInProgress = saveInProgress,
             saveError = saveError,
-            onAddTake = { onAddTake(defaultFormat) },
+            onAddTake = onAddTake,
             onRequestRemoveTake = onRequestRemoveTake,
             onOpenTools = { toolsOpen = true },
             onSave = onSave
@@ -196,7 +207,8 @@ private fun StudioTopBar(editMode: Boolean, onBack: () -> Unit, onOpenTools: () 
             onClick = onOpenTools,
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            modifier = Modifier.curioDarkGlow(2.dp, CircleShape)
         ) {
             CurioIcon(name = CurioIcons.Tune, contentDescription = "Take tools", tint = MaterialTheme.colorScheme.onSurface, size = 20.dp, modifier = Modifier.padding(9.dp))
         }
@@ -225,7 +237,7 @@ private fun StudioHero(
         color = surface,
         shape = RoundedCornerShape(24.dp),
         shadowElevation = 4.dp,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).curioDarkGlow(4.dp, RoundedCornerShape(24.dp)).graphicsLayer {
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).graphicsLayer {
             alpha = appear.value
             translationY = (1f - appear.value) * 20f
         }
@@ -381,7 +393,7 @@ private fun StudioTray(
     }
 }
 
-/** The classic take row, brought into the Studio tray. */
+/** Same take row as the classic capture flow, moved into the studio tray. */
 @Composable
 private fun StudioTakeRail(
     cat: CurioCategory,
@@ -478,7 +490,7 @@ private fun CaptureToolsSheet(
     val scope = rememberCoroutineScope()
     val accent = cat.themedAccent()
     val active = sections.getOrNull(activeIndex)
-    val closeThen: (() -> Unit) -> Unit = { action ->
+    val closeThen: ((() -> Unit)) -> Unit = { action ->
         scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss(); action() }
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = curioDialogContainerColor(), dragHandle = { BottomSheetDefaults.DragHandle() }, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
@@ -508,9 +520,16 @@ private fun CaptureToolsSheet(
 private fun StudioFormatCard(format: CaptureFormat, selected: Boolean, cat: CurioCategory, onClick: () -> Unit, modifier: Modifier) {
     val accent = cat.themedAccent()
     val pressed = rememberCurioPressSource(pressedScale = 0.96f)
-    val scale by animateFloatAsState(if (selected) 1f else 0.985f, CurioMotion.Springs.Press, label = "studioFormatScale")
-    val fill by animateColorAsState(if (selected) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.16f) else MaterialTheme.colorScheme.surfaceContainerLow, tween(CurioMotion.Durations.Quick), label = "studioFormatFill")
-    Surface(onClick = onClick, shape = RoundedCornerShape(20.dp), color = fill, border = BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) accent else MaterialTheme.colorScheme.outlineVariant), interactionSource = pressed.interactionSource, modifier = modifier.then(pressed.modifier).graphicsLayer { scaleX = scale; scaleY = scale }) {
+    val selectedScale by animateFloatAsState(targetValue = if (selected) 1f else 0.985f, animationSpec = CurioMotion.Springs.Press, label = "studioFormatScale")
+    val fill by animateColorAsState(targetValue = if (selected) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.16f) else MaterialTheme.colorScheme.surfaceContainerLow, animationSpec = tween(CurioMotion.Durations.Quick), label = "studioFormatFill")
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = fill,
+        border = BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) accent else MaterialTheme.colorScheme.outlineVariant),
+        interactionSource = pressed.interactionSource,
+        modifier = modifier.then(pressed.modifier).graphicsLayer { scaleX = selectedScale; scaleY = selectedScale }
+    ) {
         Column(modifier = Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(shape = RoundedCornerShape(13.dp), color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, if (selected) 0.30f else 0.14f)) {
@@ -520,6 +539,16 @@ private fun StudioFormatCard(format: CaptureFormat, selected: Boolean, cat: Curi
                 if (selected) CurioIcon(name = CurioIcons.Check, contentDescription = null, tint = accent, size = 18.dp)
             }
             Text(format.shortName, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+            Text(formatBlurb(format), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
     }
+}
+
+private fun formatBlurb(format: CaptureFormat): String = when (format) {
+    CaptureFormat.SoundBite -> "A voice take you can trim, title and note"
+    CaptureFormat.ReelNotes -> "A rating, your review and a photo collage"
+    CaptureFormat.Marginalia -> "Written thoughts, quote cards and a voice note"
+    CaptureFormat.GalleryWall -> "A wall of images with captions and quotes"
+    CaptureFormat.FieldNotes -> "Observed, surprised, and what's next"
+    CaptureFormat.OpenNotebook -> "Pick the note yourself"
 }
