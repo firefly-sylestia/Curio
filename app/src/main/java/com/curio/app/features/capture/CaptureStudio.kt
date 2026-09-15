@@ -124,15 +124,7 @@ internal fun CaptureStudio(
 
     Column(modifier = modifier) {
         StudioTopBar(editMode = editMode, onBack = onBack, onOpenTools = { toolsOpen = true })
-        StudioHero(
-            cat = cat,
-            topicName = topicName,
-            sessionMillis = sessionMillis,
-            mood = activeMood,
-            recording = recording,
-            tintWash = tintWash,
-            onPickMood = onPickMood
-        )
+        StudioHero(cat = cat, topicName = topicName, sessionMillis = sessionMillis, mood = activeMood, recording = recording, tintWash = tintWash, onPickMood = onPickMood)
         StudioCanvas(
             cat = cat,
             sections = sections,
@@ -209,7 +201,7 @@ private fun StudioTopBar(editMode: Boolean, onBack: () -> Unit, onOpenTools: () 
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.curioDarkGlow(2.dp, CircleShape)
         ) {
-            CurioIcon(CurioIcons.Tune, "Take tools", MaterialTheme.colorScheme.onSurface, 20.dp, Modifier.padding(9.dp))
+            CurioIcon(name = CurioIcons.Tune, contentDescription = "Take tools", tint = MaterialTheme.colorScheme.onSurface, size = 20.dp, modifier = Modifier.padding(9.dp))
         }
     }
 }
@@ -233,7 +225,6 @@ private fun StudioHero(
     LaunchedEffect(Unit) {
         appear.animateTo(1f, tween(CurioMotion.Durations.Standard, easing = FastOutSlowInEasing))
     }
-
     Surface(
         color = heroColor,
         shape = RoundedCornerShape(24.dp),
@@ -246,7 +237,7 @@ private fun StudioHero(
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Surface(shape = RoundedCornerShape(18.dp), color = lerp(heroColor, accent, if (tintWash) 0.24f else 0.18f)) {
-                    CurioIcon(cat.iconGlyph, null, ink, 26.dp, Modifier.padding(12.dp))
+                    CurioIcon(name = cat.iconGlyph, contentDescription = null, tint = ink, size = 26.dp, modifier = Modifier.padding(12.dp))
                 }
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(topicName ?: "Loading…", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -254,7 +245,7 @@ private fun StudioHero(
                         Text(cat.displayName, style = MaterialTheme.typography.labelSmall, color = quietInk.copy(alpha = 0.85f))
                         if (sessionMillis > 0L) {
                             Text("·", style = MaterialTheme.typography.labelSmall, color = quietInk.copy(alpha = 0.5f))
-                            CurioIcon(CurioIcons.Timer, null, quietInk.copy(alpha = 0.7f), 12.dp)
+                            CurioIcon(name = CurioIcons.Timer, contentDescription = null, tint = quietInk.copy(alpha = 0.7f), size = 12.dp)
                             Text(formatSessionShort(sessionMillis), style = MaterialTheme.typography.labelSmall, color = quietInk.copy(alpha = 0.8f))
                         }
                     }
@@ -269,23 +260,15 @@ private fun StudioHero(
                         border = BorderStroke(1.dp, if (moodOpen) accent else MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Row(modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                            CurioIcon(mood?.glyph ?: CurioIcons.MoodHappy, "Mood", ink, 16.dp)
+                            CurioIcon(name = mood?.glyph ?: CurioIcons.MoodHappy, contentDescription = "Mood", tint = ink, size = 16.dp)
                             Text(mood?.label ?: "Mood", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = ink)
-                            if (mood == null) CurioIcon(CurioIcons.Add, null, ink, 13.dp)
+                            if (mood == null) CurioIcon(name = CurioIcons.Add, contentDescription = null, tint = ink, size = 13.dp)
                         }
                     }
                 }
             }
             AnimatedVisibility(visible = moodOpen, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
-                MoodChipsRow(
-                    mood = mood,
-                    accent = accent,
-                    onMoodChange = { picked ->
-                        onPickMood(picked)
-                        moodOpen = false
-                    },
-                    header = null
-                )
+                MoodChipsRow(mood = mood, accent = accent, onMoodChange = { picked -> onPickMood(picked); moodOpen = false }, header = null)
             }
         }
     }
@@ -394,40 +377,24 @@ private fun StudioTray(
     val ink = if (tintWash) cat.categoryInk() else MaterialTheme.colorScheme.onSurface
     val accentContent = if (tintWash) cat.categoryInk() else cat.onAccent()
     val trayColor = if (tintWash) cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow) else MaterialTheme.colorScheme.surfaceContainerLow
-
     Surface(color = trayColor, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), shadowElevation = 14.dp, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            StudioTakeRail(
-                cat = cat,
-                sections = sections,
-                activeIndex = activeIndex,
-                tintWash = tintWash,
-                onAddTake = onAddTake,
-                onRequestRemoveTake = onRequestRemoveTake
-            )
+            StudioTakeRail(cat = cat, sections = sections, activeIndex = activeIndex, tintWash = tintWash, onAddTake = onAddTake, onRequestRemoveTake = onRequestRemoveTake)
             saveError?.let { message -> Text(message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Surface(onClick = onOpenTools, shape = RoundedCornerShape(20.dp), color = lerp(trayColor, accent, 0.16f), border = BorderStroke(1.dp, accent.copy(alpha = 0.45f))) {
                     Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                        CurioIcon(formatGlyph(activeFormat), null, ink, 17.dp)
+                        CurioIcon(name = formatGlyph(activeFormat), contentDescription = null, tint = ink, size = 17.dp)
                         Text(activeFormat.shortName, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold), color = ink, maxLines = 1)
                     }
                 }
-                StudioSaveButton(
-                    editMode = editMode,
-                    canSave = canSave,
-                    saveInProgress = saveInProgress,
-                    containerColor = if (tintWash) cat.tint else accent,
-                    contentColor = accentContent,
-                    onSave = onSave,
-                    modifier = Modifier.weight(1f)
-                )
+                StudioSaveButton(editMode = editMode, canSave = canSave, saveInProgress = saveInProgress, containerColor = if (tintWash) cat.tint else accent, contentColor = accentContent, onSave = onSave, modifier = Modifier.weight(1f))
             }
         }
     }
 }
 
-/** Same row semantics as the classic Add take flow: real take pills + Add take. */
+/** Mirrors the classic Add take row: existing take pills followed by Add take. */
 @Composable
 private fun StudioTakeRail(
     cat: CurioCategory,
@@ -440,37 +407,18 @@ private fun StudioTakeRail(
     Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         sections.forEachIndexed { index, section ->
             Surface(
-                onClick = { /* Current active index remains owned by SaveCaptureScreen. */ },
+                onClick = { },
                 shape = RoundedCornerShape(50),
                 color = if (index == activeIndex) cat.themedAccent() else cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
                 shadowElevation = 2.dp,
                 modifier = Modifier.padding(vertical = 2.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(start = 12.dp, end = if (sections.size > 1) 4.dp else 12.dp, top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    CurioIcon(
-                        name = formatGlyph(section.format),
-                        contentDescription = null,
-                        tint = if (index == activeIndex) cat.onAccent() else MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 14.dp
-                    )
-                    Text(
-                        text = "${index + 1} · ${section.format.shortName}",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = if (index == activeIndex) cat.onAccent() else MaterialTheme.colorScheme.onSurface
-                    )
+                Row(modifier = Modifier.padding(start = 12.dp, end = if (sections.size > 1) 4.dp else 12.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    CurioIcon(name = formatGlyph(section.format), contentDescription = null, tint = if (index == activeIndex) cat.onAccent() else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                    Text("${index + 1} · ${section.format.shortName}", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold), color = if (index == activeIndex) cat.onAccent() else MaterialTheme.colorScheme.onSurface)
                     if (sections.size > 1) {
                         Surface(onClick = { onRequestRemoveTake(index) }, shape = CircleShape, color = Color.Transparent) {
-                            CurioIcon(
-                                name = CurioIcons.Close,
-                                contentDescription = "Remove take",
-                                tint = if (index == activeIndex) cat.onAccent() else MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp,
-                                modifier = Modifier.padding(4.dp)
-                            )
+                            CurioIcon(name = CurioIcons.Close, contentDescription = "Remove take", tint = if (index == activeIndex) cat.onAccent() else MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp, modifier = Modifier.padding(4.dp))
                         }
                     }
                 }
@@ -478,7 +426,7 @@ private fun StudioTakeRail(
         }
         Surface(onClick = onAddTake, shape = RoundedCornerShape(50), color = if (tintWash) cat.tint else cat.themedAccent(), modifier = Modifier.padding(vertical = 2.dp)) {
             Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                CurioIcon(CurioIcons.Add, "Add take", if (tintWash) cat.categoryInk() else cat.onAccent(), 16.dp)
+                CurioIcon(name = CurioIcons.Add, contentDescription = "Add take", tint = if (tintWash) cat.categoryInk() else cat.onAccent(), size = 16.dp)
                 Text("Add take", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold), color = if (tintWash) cat.categoryInk() else cat.onAccent())
             }
         }
@@ -503,19 +451,17 @@ private fun StudioSaveButton(
         } else pop.snapTo(1f)
     }
     val settle by animateFloatAsState(targetValue = if (saveInProgress) 0.97f else 1f, animationSpec = CurioMotion.Springs.Snappy, label = "studioSaveSettle")
-    val enabled = canSave && !saveInProgress
     Button(
         onClick = onSave,
-        enabled = enabled,
+        enabled = canSave && !saveInProgress,
         shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
+        colors = ButtonDefaults.buttonColors(containerColor = containerColor, contentColor = contentColor, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant),
         contentPadding = PaddingValues(vertical = 16.dp),
-        modifier = modifier.graphicsLayer { val scale = pop.value * settle; scaleX = scale; scaleY = scale }
+        modifier = modifier.graphicsLayer {
+            val scale = pop.value * settle
+            scaleX = scale
+            scaleY = scale
+        }
     ) {
         if (saveInProgress) {
             CircularProgressIndicator(color = contentColor, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
@@ -552,7 +498,6 @@ private fun CaptureToolsSheet(
             action()
         }
     }
-
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = curioDialogContainerColor(), dragHandle = { BottomSheetDefaults.DragHandle() }, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -615,10 +560,10 @@ private fun StudioFormatCard(
         Column(modifier = Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(shape = RoundedCornerShape(13.dp), color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, if (selected) 0.30f else 0.14f)) {
-                    CurioIcon(formatGlyph(format), null, if (selected) cat.categoryInk() else MaterialTheme.colorScheme.onSurfaceVariant, 20.dp, Modifier.padding(9.dp))
+                    CurioIcon(name = formatGlyph(format), contentDescription = null, tint = if (selected) cat.categoryInk() else MaterialTheme.colorScheme.onSurfaceVariant, size = 20.dp, modifier = Modifier.padding(9.dp))
                 }
                 Spacer(Modifier.weight(1f))
-                if (selected) CurioIcon(CurioIcons.Check, null, accent, 18.dp)
+                if (selected) CurioIcon(name = CurioIcons.Check, contentDescription = null, tint = accent, size = 18.dp)
             }
             Text(format.shortName, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
             Text(formatBlurb(format), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
