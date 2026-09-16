@@ -1250,7 +1250,7 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp)
-                    .padding(bottom = 76.dp + navInsets.calculateBottomPadding())
+                    .padding(bottom = 92.dp + navInsets.calculateBottomPadding())
             )
 
             if (writeSheetOpen) {
@@ -2107,7 +2107,7 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
     else -> "${d}d ago"
 }
 
-// ═══════════════════════════════════════════════════════════════════════
+// ════════════════���══════════════════════════════════════════════════════
 // First-time empty state
 // ═══════════════════════════════════════════════════════���═══════════════
 
@@ -3334,7 +3334,7 @@ private fun greetingWordForNow(): String {
 
 // ═══════════════════════════════════════════════════════════════════════
 // Explore-session topic row (recently explored / recently unexplored)
-// ═══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════��════════════════════════
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -3500,7 +3500,7 @@ private fun CurrentlyExploringCard(
                     .align(Alignment.CenterEnd)
                     .padding(end = 10.dp)
             )
-            // ── End session ��� the card's top corner ─────────────────
+            // ─��� End session ��� the card's top corner ─────────────────
             // The floating bubble no longer carries a Stop button; the end
             // control lives here, at the session card's top-end corner,
             // where it's reachable the moment a session starts.

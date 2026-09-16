@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -488,7 +487,6 @@ private fun BookChip(
     onClick: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = personalAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
@@ -516,16 +514,7 @@ private fun BookChip(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.weight(1f))
-            LinearProgressIndicator(
-                progress = { book.progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .clip(RoundedCornerShape(50)),
-                color = accent,
-                trackColor = accent.copy(alpha = 0.16f)
-            )
+            Spacer(Modifier.height(4.dp))
         }
     }
 }

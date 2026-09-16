@@ -40,6 +40,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -413,7 +414,15 @@ DatePickerDialog(
                 ) { Text("Cancel") }
             }
         ) {
-            DatePicker(state = pickerState)
+            DatePicker(
+                state = pickerState,
+                colors = DatePickerDefaults.colors(
+                    selectedDayContainerColor = personalAccentInk(),
+                    selectedDayContentColor = personalOnAccent(),
+                    todayDateBorderColor = personalAccentInk(),
+                    todayContentColor = personalAccentInk()
+                )
+            )
         }
     }
 }
