@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create your account · Curio</title>
+<meta name="description" content="Create a Curio account with an email and a password, then confirm the address we email you.">
+<meta name="theme-color" content="#100c11">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+<body data-page="signup">
+<div class="aurora" aria-hidden="true"></div>
+<a class="skip" href="#page">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
+  <nav class="topnav" aria-label="Account">
+    <a href="/signin">Sign in</a>
+    <a href="/signup" aria-current="page">Create account</a>
+    <a href="/reset">Password</a>
+    <a href="/account">Account</a>
+    <a href="/support">Support</a>
+  </nav>
+</header>
+
+<main id="page" class="shell">
+  <div class="rise">
+    <span class="eyebrow">Curio account</span>
+    <h1>Create your account</h1>
+    <p class="lede">
+      Pick an email and a password. A password is what makes this account yours, here and in the
+      app, so it is chosen now. Then one link confirms the address.
+    </p>
+  </div>
+
+  <p class="notice" id="page-status" role="status"></p>
+
+  <section class="state show" data-state="form">
+    <div class="card rise-1">
+      <h2>Your details</h2>
+      <form id="signup-form" class="stack" novalidate>
+        <div class="field">
+          <label for="signup-email">Email</label>
+          <input id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="signup-password">Password</label>
+          <input id="signup-password" name="password" type="password" autocomplete="new-password" required>
+          <span class="hint">6 characters or more.</span>
+        </div>
+        <div class="field">
+          <label for="signup-password-2">Repeat it</label>
+          <input id="signup-password-2" name="password-2" type="password" autocomplete="new-password" required>
+        </div>
+        <label class="check" for="signup-terms">
+          <input id="signup-terms" name="terms" type="checkbox">
+          <span>I agree to the <a href="/terms">Terms</a> and the <a href="/privacy">Privacy Notice</a>.</span>
+        </label>
+        <div class="row">
+          <button class="btn btn-primary" id="signup-button" type="submit">Create my account</button>
+          <a class="btn btn-quiet" href="/signin">I already have an account</a>
+        </div>
+      </form>
+      <p class="notice" id="signup-status" role="status"></p>
+    </div>
+  </section>
+
+  <section class="state" data-state="sent">
+    <div class="card rise-1">
+      <h2>Confirm your email</h2>
+      <p class="muted">
+        The account is made, and a confirmation link is on its way to
+        <span id="signup-sent" class="faint"></span>. Open it and the address is confirmed.
+      </p>
+      <p class="faint mt-2">
+        Then sign in with the email and password you just chose. Nothing after a minute? Look in
+        spam. If that address already had a Curio account, no new email is sent: sign in with your
+        password instead.
+      </p>
+      <div class="row mt-2">
+        <a class="btn btn-primary" href="/signin">Sign in</a>
+        <a class="btn btn-ghost" href="/confirm">Send a new confirmation email</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <span>Curio account desk</span>
+    <span class="dot" aria-hidden="true">•</span>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/support">Support</a>
+    <a href="/account">Account</a>
+  </div>
+</footer>
+
+<script type="module" src="/assets/curio.js"></script>
+</body>
+</html>

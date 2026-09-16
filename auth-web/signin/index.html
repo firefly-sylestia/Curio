@@ -20,6 +20,7 @@
   <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
   <nav class="topnav" aria-label="Account">
     <a href="/signin" aria-current="page">Sign in</a>
+    <a href="/signup">Create account</a>
     <a href="/reset">Password</a>
     <a href="/account">Account</a>
     <a href="/support">Support</a>
@@ -48,7 +49,7 @@
           <input id="link-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
         </div>
         <label class="check" for="link-create">
-          <input id="link-create" name="create" type="checkbox" checked>
+          <input id="link-create" name="create" type="checkbox">
           <span>Create a Curio account if this address is new.</span>
         </label>
         <div class="row">
@@ -75,6 +76,7 @@
         </div>
       </form>
       <p class="notice" id="password-status" role="status"></p>
+      <p class="faint mt-2">New here? <a href="/signup">Create an account with a password</a>.</p>
     </div>
   </section>
 
@@ -90,6 +92,7 @@
       </p>
       <div class="row mt-2">
         <a class="btn btn-ghost" href="/account">Already signed in?</a>
+        <a class="btn btn-quiet" href="/signup">No account yet? Create one</a>
         <a class="btn btn-quiet" href="/support">It did not arrive</a>
       </div>
     </div>

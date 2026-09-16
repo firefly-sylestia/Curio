@@ -4,6 +4,11 @@ The web side of Curio's online accounts: the pages Supabase email links land on,
 plus a small account desk. It is a **static site with two tiny serverless
 functions** (no build step, no framework, no npm dependencies).
 
+Accounts are created on `/signup` with an email and a password, the same way
+the app creates them, and the confirmation link lands on `/confirm`. A sign-in
+link never creates an account: it is a door for an account that already has a
+password.
+
 ## Why it exists
 
 The Android app calls `POST /auth/v1/signup` with no redirect, so Supabase sends
@@ -17,10 +22,11 @@ set or an account deleted without touching the app.
 | URL | What it does |
 | --- | --- |
 | `/` | Landing page: every flow, one tap away. |
+| `/signup` | **Create an account with a password.** Email, password twice, terms; then the confirmation email is sent and `/confirm` finishes the job. |
 | `/confirm` | Where a **signup confirmation** email lands. Verifies the token, says so, offers a new link when it expired. |
 | `/link` | Where a **sign-in link** (magic link) lands. Consumes the token and hands you to `/account`. |
 | `/reset` | Two modes: request a reset email, and set the new password from that email's link. |
-| `/signin` | Email sign-in link (optionally creating the account), or password sign-in. |
+| `/signin` | Password sign-in, or a sign-in link for an account that already exists. Its "this address is new" checkbox hands you to `/signup`. |
 | `/account` | Your profile, your counts, sign out, and **delete my account**. |
 | `/support` | Link problems, password help, data questions, where to report things. |
 | `/privacy`, `/terms` | The online notice and terms from `docs/ONLINE_PRIVACY.md` and `docs/ONLINE_TERMS.md`. |

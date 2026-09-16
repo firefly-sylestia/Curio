@@ -19,9 +19,9 @@ can never break the Android CI and can be deployed straight from the repo.
 
 ## Ownership
 
-- `index.html`, `confirm/`, `link/`, `reset/`, `signin/`, `account/`, `support/`,
-  `privacy/`, `terms/` — the pages. Each one is a complete HTML document that
-  links the two shared assets and declares which flow it is with
+- `index.html`, `confirm/`, `link/`, `reset/`, `signup/`, `signin/`, `account/`,
+  `support/`, `privacy/`, `terms/` — the pages. Each one is a complete HTML
+  document that links the two shared assets and declares which flow it is with
   `<body data-page="...">`.
 - `assets/theme.css` — the whole design system (tokens, glass surfaces, buttons,
   fields, notices, the aurora backdrop, motion, and a light-mode override).
@@ -46,6 +46,13 @@ can never break the Android CI and can be deployed straight from the repo.
   `api/delete-account.js` only. `/api/config` returns the anon key alone. Never
   add an endpoint that echoes a server-only variable, and never inline a secret
   into a page.
+- **An account's first password is set on `/signup`; a link never creates
+  one.** `signin/`'s "this address is new" checkbox carries the address to
+  `/signup` (sessionStorage, not the URL) and the link form sends
+  `create_user: false`, so a magic link can only sign an existing account in.
+  `/signup` requires the email, the password twice, and the terms acceptance
+  the app's create mode requires, then sends the account to `/confirm` for the
+  address to be proved.
 - **`/api/delete-account` trusts nothing from the request body.** The caller's
   `Authorization: Bearer <access token>` is verified against GoTrue
   (`GET /auth/v1/user`), and the id that call returns is the one deleted. A

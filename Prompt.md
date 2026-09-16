@@ -1,5 +1,88 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — account site: create an account WITH a password)
+
+Verbatim: the auth web has no create-account-with-password page, it just sends a
+link that creates the account and logs in with no password. Fix that.
+
+### Decisions (ask_user, before building)
+
+1. **The sign-in page's "Create a Curio account if this address is new"
+   checkbox stays**, but ticking it no longer mails a passwordless account: it
+   hands the address to the new `/signup` page. Existing accounts keep the link
+   form; the address travels in `sessionStorage` (`curio.signup.email`), never
+   in the URL.
+2. **A dedicated `/signup` page** (the site's one-URL-per-flow shape: a new
+   folder, its own `data-page`, its own ids in the `PAGES` switch), not mode
+   pills on `/signin`.
+3. **6-character minimum**, the rule the app's create mode states.
+4. **The terms acceptance is required**, the same gate the app's create mode
+   applies (`canSubmit` includes `termsAccepted`), linking the existing
+   `/terms` and `/privacy` pages.
+
+### What was wrong (in the code, not guessed)
+
+`Auth.signUp(email, password, redirectTo)` already existed in
+`assets/curio.js` and had **no caller**: the only way to get an account on the
+site was `signin/`'s link form, which called `POST /auth/v1/otp` with
+`create_user: true` (checkbox `checked` by default). GoTrue creates the account
+and signs it in from the emailed link, so the account ended up with **no
+password at all** and could only ever be entered through another link. The
+Android app has always created an account with email + password (confirmed via
+`/auth/v1/signup` with `redirect_to=<site>/confirm`), so the site was the odd
+one out.
+
+### Shipped
+
+- **New `auth-web/signup/index.html`** (`data-page="signup"`): email, password,
+  repeat, terms acceptance, one primary action; a `sent` state that says the
+  account exists and the confirmation link is the next step (with a door to
+  `/confirm` for a fresh email, and the honest note that an address which
+  already had an account gets no second email).
+- **`initSignup(auth)`** in `assets/curio.js`: validates locally first (address,
+  6 characters, the two passwords match, terms agreed), calls
+  `auth.signUp(email, password, siteUrl('/confirm'))`, writes the session and
+  lands on `/account` when the project has email confirmation OFF, and shows the
+  `sent` state when a confirmation email is required. Registered as `signup` in
+  the `PAGES` switch, so the unconfigured-deployment notice covers it like every
+  other flow page.
+- **`initSignin`**: the create checkbox drives the button label (`Send me a
+  link` / `Create my account`) and carries the address to `/signup`;
+  `magicLink(..., false)` now pins `create_user: false`, so a link can only sign
+  an existing account in. The checkbox is unchecked by default (a sign-in page
+  should not pre-answer "is this address new?"), and the method card gained a
+  "New here? Create an account with a password" row plus an escape hatch in the
+  `sent` state.
+- **Discoverability**: a `Create account` entry in the top bar of all 10 pages
+  (`flex-wrap` added to `.topnav`, which five destinations no longer fit beside
+  the brand on a narrow phone), a hero button and a first tile on the landing
+  page, and a support-page paragraph that now says an address with no account is
+  the one to create.
+- **Docs**: `auth-web/AGENTS.md` (page list + the new local contract "an
+  account's first password is set on /signup; a link never creates one"),
+  `auth-web/README.md` (page table + the create-account explanation), root
+  `AGENTS.md` (auth-web purpose + page folders), this log.
+
+### Verified
+
+- `node --check` on all three JavaScript files.
+- A throwaway site checker (`.tmp-auth-web-check.mjs`, deleted after the run):
+  tag balance on all 10 pages, `data-page` and `PAGES` coverage, every
+  `need()`/`value()` id present on the page that needs it, every `showState()`
+  value backed by a `data-state`, no inline `<script>`/`style=`, no baked-in
+  Supabase value, and the magic-link/signup flags. All checks pass.
+- Not the Android module: nothing under `app/` changed, so CI's build is
+  unaffected; a Vercel preview deploy is the real check for the site.
+
+### Notes for the next pass
+
+- The `/reset` page still requires 8 characters while `/signup` (matching the
+  app) requires 6. Left alone: it is a stricter pre-existing rule, not part of
+  this request.
+- `Auth.magicLink`'s `createUser` parameter is now only ever called with
+  `false`. Kept (the client mirrors GoTrue's endpoint) but it has no live
+  caller that passes `true`.
+
 ### CI fix (same request, 2026-09-16)
 
 The first push failed CI: the KDoc on the new `roomFallback` contained the glob

@@ -19,6 +19,7 @@
   <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
   <nav class="topnav" aria-label="Account">
     <a href="/signin">Sign in</a>
+    <a href="/signup">Create account</a>
     <a href="/reset">Password</a>
     <a href="/account">Account</a>
     <a href="/support">Support</a>
@@ -30,12 +31,13 @@
     <span class="eyebrow">Account desk</span>
     <h1>Everything to do with your Curio account, on the web.</h1>
     <p class="lede">
-      Email links from Curio land here, so confirming your address, choosing a new password and
-      leaving the community all work in a browser. Your saved discoveries stay on your phone, and
+      Email links from Curio land here, so creating an account, confirming your address, choosing
+      a new password and leaving the community all work in a browser. Your saved discoveries stay on your phone, and
       the app keeps working offline exactly as it did.
     </p>
     <div class="row mt-2">
       <a class="btn btn-primary" href="/signin">Sign in</a>
+      <a class="btn btn-ghost" href="/signup">Create account</a>
       <a class="btn btn-ghost" href="/reset">Reset password</a>
     </div>
   </div>
@@ -43,17 +45,22 @@
   <p class="notice" id="page-status" role="status"></p>
 
   <div class="grid">
-    <a class="tile rise rise-1" href="/confirm">
+    <a class="tile rise rise-1" href="/signup">
+      <strong>Create your account</strong>
+      <span>Choose an email and a password, then confirm the address we email you.</span>
+      <span class="arrow">Create account</span>
+    </a>
+    <a class="tile rise rise-2" href="/confirm">
       <strong>Confirm your email</strong>
       <span>A confirmation link lands here. If yours has expired, send yourself a fresh one.</span>
       <span class="arrow">Open confirmation</span>
     </a>
-    <a class="tile rise rise-2" href="/reset">
+    <a class="tile rise rise-3" href="/reset">
       <strong>Set a new password</strong>
       <span>Ask for a reset link, then choose a password only you know.</span>
       <span class="arrow">Reset password</span>
     </a>
-    <a class="tile rise rise-3" href="/account">
+    <a class="tile rise rise-4" href="/account">
       <strong>Your account</strong>
       <span>See your profile and what you have posted, or delete the account for good.</span>
       <span class="arrow">Open account</span>

@@ -390,6 +390,33 @@ function cleanUrl() {
 /** The address a link in an email should come back to. */
 const siteUrl = (path) => location.origin + path;
 
+/* ── carrying an address between pages ───────────────────────────────────── */
+
+/**
+ * The sign-in page's "this address is new" path continues on /signup, and the
+ * address already typed travels with it. sessionStorage rather than the URL:
+ * an email in a query string ends up in history and in bookmarks.
+ */
+const HANDOFF_KEY = 'curio.signup.email';
+
+function carryToSignup(email) {
+  try {
+    sessionStorage.setItem(HANDOFF_KEY, email);
+  } catch (error) {
+    /* the create page simply starts with an empty field */
+  }
+}
+
+function takeCarriedEmail() {
+  try {
+    const email = sessionStorage.getItem(HANDOFF_KEY) || '';
+    sessionStorage.removeItem(HANDOFF_KEY);
+    return email;
+  } catch (error) {
+    return '';
+  }
+}
+
 /* ── small UI helpers ────────────────────────────────────────────────────── */
 
 /** Shows one state and hides its siblings. Every state lives in the markup. */
@@ -673,28 +700,42 @@ async function initSignin(auth) {
 
   const next = new URLSearchParams(location.search).get('next') || '/account';
 
-  // Link sign-in.
+  // Link sign-in. Ticking "this address is new" hands the member to /signup,
+  // where the password is chosen: a link that signs someone in has no password
+  // to set, so it must never be how an account starts.
   const linkForm = need('link-form');
+  const createToggle = need('link-create');
+  const linkButton = need('link-button');
+  const paintLinkButton = () => {
+    if (!linkButton) return;
+    linkButton.textContent = createToggle && createToggle.checked ? 'Create my account' : 'Send me a link';
+  };
+  if (createToggle) createToggle.addEventListener('change', paintLinkButton);
+  paintLinkButton();
+
   linkForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const button = need('link-button');
     const email = value('link-email');
-    const create = need('link-create').checked;
     if (!emailLooksReal(email)) {
       notice(need('link-status'), 'warn', 'Check that email address.');
       return;
     }
-    busy(button, true, 'Sending…');
+    if (createToggle && createToggle.checked) {
+      carryToSignup(email);
+      location.assign('/signup');
+      return;
+    }
+    busy(linkButton, true, 'Sending…');
     notice(need('link-status'), null);
     try {
-      await auth.magicLink(email, siteUrl('/link'), create);
+      await auth.magicLink(email, siteUrl('/link'), false);
       const sent = need('link-sent');
       if (sent) sent.textContent = email;
       showState('sent');
     } catch (error) {
       notice(need('link-status'), 'bad', friendly(error, 'magiclink'));
     } finally {
-      busy(button, false);
+      busy(linkButton, false);
     }
   });
 
@@ -717,6 +758,67 @@ async function initSignin(auth) {
       location.assign(next);
     } catch (error) {
       notice(need('password-status'), 'bad', friendly(error, 'signin'));
+      busy(button, false);
+    }
+  });
+}
+
+/**
+ * Creating an account: email, password, repeat, terms. The password is set
+ * HERE, before any email goes out, so a confirmed account already has one and
+ * the sign-in page's password form (and the app) can use it from the start.
+ */
+async function initSignup(auth) {
+  showState('form');
+
+  const emailField = need('signup-email');
+  const carried = takeCarriedEmail();
+  if (emailField && carried) emailField.value = carried;
+
+  const form = need('signup-form');
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = need('signup-button');
+    const status = need('signup-status');
+    const email = value('signup-email');
+    const password = need('signup-password').value;
+    const again = need('signup-password-2').value;
+    const agreed = need('signup-terms').checked;
+
+    if (!emailLooksReal(email)) {
+      notice(status, 'warn', 'Check that email address.');
+      return;
+    }
+    if (password.length < 6) {
+      notice(status, 'warn', 'Use a password of at least 6 characters.');
+      return;
+    }
+    if (password !== again) {
+      notice(status, 'warn', 'Those two passwords are not the same.');
+      return;
+    }
+    if (!agreed) {
+      notice(status, 'warn', 'Agree to the terms before creating your account.');
+      return;
+    }
+
+    busy(button, true, 'Creating…');
+    notice(status, null);
+    try {
+      const data = await auth.signUp(email, password, siteUrl('/confirm'));
+      // A project with email confirmation off answers with a session, so the
+      // account is ready to use the moment it exists.
+      if (data && data.access_token) {
+        session.write(data);
+        location.assign('/account');
+        return;
+      }
+      const sent = need('signup-sent');
+      if (sent) sent.textContent = email;
+      showState('sent');
+    } catch (error) {
+      notice(status, 'bad', friendly(error, 'signup'));
+    } finally {
       busy(button, false);
     }
   });
@@ -904,6 +1006,7 @@ const PAGES = {
   link: initLink,
   reset: initReset,
   signin: initSignin,
+  signup: initSignup,
   account: initAccount,
   // The legal pages and support must render even without a config: a privacy
   // URL that depends on an API key is not a privacy URL.

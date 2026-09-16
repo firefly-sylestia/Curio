@@ -191,6 +191,10 @@ body::before {
 .topnav {
   margin-left: auto;
   display: flex;
+  /* Five destinations do not fit beside the brand on a narrow phone, and a
+     bar that scrolls sideways takes the whole page with it. */
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: center;
   gap: 0.35rem;
 }

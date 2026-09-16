@@ -402,17 +402,15 @@ npm run dev
 
 The `auth-web/` directory is **the web side of Curio's online accounts**: the
 pages Supabase email links land on (email confirmation, sign-in link, password
-reset) plus a small account desk that can sign in, review the account and delete
-it. It exists because a Supabase email link has to open somewhere, and without a
+reset) plus a small account desk that can create an account with a password,
+sign in, review the account and delete it. It exists because a Supabase email link has to open somewhere, and without a
 real destination the project's Site URL answers instead, whose default is
 `http://localhost:3000`.
 
-**Key facts:**
-
-- **A static site with two serverless functions and no build step.** Plain
+**Key facts:**- **A static site with two serverless functions and no build step.** Plain
   HTML/CSS/JS, no framework, no npm dependencies: `index.html`, one folder per
-  page (`confirm/`, `link/`, `reset/`, `signin/`, `account/`, `support/`,
-  `privacy/`, `terms/`), `assets/theme.css`, `assets/curio.js`,
+  page (`confirm/`, `link/`, `reset/`, `signup/`, `signin/`, `account/`,
+  `support/`, `privacy/`, `terms/`), `assets/theme.css`, `assets/curio.js`,
   `api/config.js`, `api/delete-account.js`. Nothing here participates in the
   Android, desktop or `web/` builds.
 - **The one secret is server-side.** `/api/config` serves only the public project
