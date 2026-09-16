@@ -387,6 +387,24 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * the whole line otherwise. An empty line arms the tool instead, so the
      * first words typed arrive already styled.
      */
+    fun toggleListStyle(flag: Int) {
+        val id = focusedId ?: return
+        val mask = mask(id)
+        val selection = selections[id]
+        val range = if (selection != null && !selection.collapsed) selection.min to selection.max else 0 to text(id).length
+        if (range.second <= range.first) {
+            armed = if (armed and flag != 0) armed and flag.inv() else (armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()) or flag
+        } else {
+            val current = maskCovers(mask, range.first, range.second, flag)
+            var updated = maskApply(mask, range.first, range.second, flag, !current)
+            val other = if (flag == FLAG_BULLET) FLAG_CHECKBOX else FLAG_BULLET
+            if (!current) updated = maskApply(updated, range.first, range.second, other, false)
+            masks[id] = updated
+            armed = armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()
+        }
+        onDocChanged(doc())
+    }
+
     fun toggle(flag: Int) {
         val id = focusedId ?: return
         val blockMask = mask(id)
@@ -596,6 +614,7 @@ private fun PersonalTextBlock(
     val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+    val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
     // ONE hint for the whole page: the empty-line "Write…" on every new
     // paragraph read as a page full of the word "write".
     val showHint = text.isEmpty() && !state.hasText()
@@ -657,6 +676,17 @@ private fun PersonalTextBlock(
                             )
                         }
                         .padding(start = 13.dp)
+                    isCheckbox -> Modifier
+                        .drawBehind {
+                            drawRoundRect(
+                                color = bulletInk,
+                                topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
+                                size = Size(11.dp.toPx(), 11.dp.toPx()),
+                                cornerRadius = CornerRadius(2.dp.toPx()),
+                                style = Stroke(width = 1.6.dp.toPx())
+                            )
+                        }
+                        .padding(start = 19.dp)
                     isBullet -> Modifier
                         .drawBehind {
                             drawCircle(
@@ -866,6 +896,7 @@ internal fun PersonalDocView(
                 val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
                 val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
                 val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+                val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
                 val alignOf = if (block.align == PersonalAlign.CENTER) TextAlign.Center
                 else TextAlign.Start
                 Box(
@@ -883,6 +914,17 @@ internal fun PersonalDocView(
                                         )
                                     }
                                     .padding(start = 13.dp)
+                                isCheckbox -> Modifier
+                                    .drawBehind {
+                                        drawRoundRect(
+                                            color = bulletInk,
+                                            topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
+                                            size = Size(11.dp.toPx(), 11.dp.toPx()),
+                                            cornerRadius = CornerRadius(2.dp.toPx()),
+                                            style = Stroke(width = 1.6.dp.toPx())
+                                        )
+                                    }
+                                    .padding(start = 19.dp)
                                 isBullet -> Modifier
                                     .drawBehind {
                                         drawCircle(
@@ -1028,12 +1070,12 @@ internal fun PersonalToolDock(
                 Text("T", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 19.sp))
             }
             PersonalToolButton(
-                label = "Todo checkbox",
-                active = active and FLAG_BULLET != 0,
-                accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_BULLET) }
-            ) {
-                Text("□", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 19.sp))
+label = "Todo checkbox",
+  active = active and FLAG_CHECKBOX != 0,
+  accent = accentInk, ink = ink,
+  onClick = { state.toggleListStyle(FLAG_CHECKBOX) }
+  ) {
+  Text("☐", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 19.sp))
             }
             PersonalToolButton(
                 label = "Small text",
@@ -1050,7 +1092,7 @@ internal fun PersonalToolDock(
                 label = "Bullet",
                 active = active and FLAG_BULLET != 0,
                 accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_BULLET) }
+                onClick = { state.toggleListStyle(FLAG_BULLET) }
             ) {
                 BulletGlyph()
             }

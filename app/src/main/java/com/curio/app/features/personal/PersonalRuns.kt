@@ -34,11 +34,12 @@ internal const val FLAG_QUOTE = 16
 internal const val FLAG_TITLE = 32
 internal const val FLAG_SMALL = 64
 internal const val FLAG_BULLET = 128
+internal const val FLAG_CHECKBOX = 256
 
 /** Every style bit, in toolbar order. */
 internal val ALL_FLAGS = intArrayOf(
     FLAG_BOLD, FLAG_ITALIC, FLAG_UNDERLINE, FLAG_STRIKE, FLAG_QUOTE,
-    FLAG_TITLE, FLAG_SMALL, FLAG_BULLET
+    FLAG_TITLE, FLAG_SMALL, FLAG_BULLET, FLAG_CHECKBOX
 )
 
 /** An empty mask of [length] characters. */
@@ -59,6 +60,7 @@ internal fun runsToMask(textLength: Int, runs: List<PersonalRun>): IntArray {
         if (run.title) flags = flags or FLAG_TITLE
         if (run.small) flags = flags or FLAG_SMALL
         if (run.bullet) flags = flags or FLAG_BULLET
+        if (run.checkbox) flags = flags or FLAG_CHECKBOX
         if (flags == 0) return@forEach
         for (i in start until end) mask[i] = mask[i] or flags
     }
@@ -89,7 +91,8 @@ internal fun maskToRuns(mask: IntArray): List<PersonalRun> {
                 quote = flags and FLAG_QUOTE != 0,
                 title = flags and FLAG_TITLE != 0,
                 small = flags and FLAG_SMALL != 0,
-                bullet = flags and FLAG_BULLET != 0
+                bullet = flags and FLAG_BULLET != 0,
+                checkbox = flags and FLAG_CHECKBOX != 0
             )
         )
         i = j

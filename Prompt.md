@@ -7,7 +7,8 @@ Verbatim: "the accent fix is still remaining ... also add the similiar series bu
 ### Current pass
 
 - Repaired the journal editor parser issue that caused the cascading unresolved-reference CI errors, and removed the unsupported DatePickerDialog color argument.
-- The requested contrast, floating shelf/journal actions, todo/editor controls, and cross-media similar sheets remain the active implementation scope; they are not being marked complete until each path is implemented and reviewed.
+- Personal shelf/journal create actions now float above the bottom inset, and the personal editor now has a persisted checklist style distinct from bullets; list-style toggles prevent checkbox rows from becoming bullet rows.
+- Remaining active editor work is bullet-style cycling on long press and the final toolbar interaction polish; cross-media similar sheets still require a dedicated implementation pass.
 - The garbled `���` text in the pasted report is CI/log encoding noise, not an intentional app label. The compiler diagnostics are build output and should not be rendered in the app UI.
 
 

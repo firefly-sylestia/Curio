@@ -50,7 +50,9 @@ data class PersonalRun(
     /** A footnote-sized line. */
     val small: Boolean = false,
     /** A bulleted line (the dot is drawn, never typed). */
-    val bullet: Boolean = false
+    val bullet: Boolean = false,
+    /** A checklist line (the box is drawn, never typed). */
+    val checkbox: Boolean = false
 )
 
 /** Alignment of one block's paragraph. */
@@ -146,6 +148,7 @@ object PersonalDocCodec {
                 if (run.title) r.addProperty("h", true)
                 if (run.small) r.addProperty("m", true)
                 if (run.bullet) r.addProperty("l", true)
+                if (run.checkbox) r.addProperty("c", true)
                 runs.add(r)
             }
             b.add("runs", runs)
@@ -177,7 +180,8 @@ object PersonalDocCodec {
                     quote = r.flag("q"),
                     title = r.flag("h"),
                     small = r.flag("m"),
-                    bullet = r.flag("l")
+                    bullet = r.flag("l"),
+                    checkbox = r.flag("c")
                 ).takeIf { it.end > it.start }
             }.orEmpty()
             PersonalBlock(
