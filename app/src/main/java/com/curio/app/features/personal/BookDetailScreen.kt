@@ -633,7 +633,7 @@ private fun ChapterCard(
                         Text(
                             chapter.toString(),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = ink
+                            color = if (review != null) personalAccentInk() else ink.copy(alpha = 0.62f)
                         )
                     }
                 }
@@ -798,6 +798,11 @@ private fun DownloadHelpSheet(
                 label = "Search for an EPUB",
                 accent = accent
             ) { openDownloadSearch(context, title, author, "epub"); onDismiss() }
+            DownloadFormatRow(
+                tile = "FREE",
+                label = "Search free public-domain copies",
+                accent = accent
+            ) { openDownloadSearch(context, title, author, "gutenberg"); onDismiss() }
         }
     }
 }

@@ -392,7 +392,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val id = focusedId ?: return
         val current = activeFlags()
         val next = when {
-            current and FLAG_BULLET != 0 -> FLAG_BULLET
+            current and FLAG_BULLET != 0 -> FLAG_CHECKBOX
             current and FLAG_CHECKBOX != 0 -> FLAG_BULLET
             else -> FLAG_BULLET
         }

@@ -309,8 +309,12 @@ dependencies {
     // Vosk — on-device speech-to-text for pre-recorded sound bites (offline
     // transcription in the entry detail page; model downloaded in Settings).
     implementation(libs.com.alphacephei.vosk.android)
-    implementation(libs.mlkit.barcode.scanning)
-    implementation(libs.kotlinx.coroutines.play.services)
+  implementation(libs.mlkit.barcode.scanning)
+  implementation(libs.androidx.camera.core)
+  implementation(libs.androidx.camera.camera2)
+  implementation(libs.androidx.camera.lifecycle)
+  implementation(libs.androidx.camera.view)
+  implementation(libs.kotlinx.coroutines.play.services)
 
 
     testImplementation(libs.junit)
