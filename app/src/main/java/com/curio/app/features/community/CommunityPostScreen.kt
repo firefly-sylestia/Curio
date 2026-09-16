@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,9 +31,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,6 +63,13 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.curio.app.data.SocialPostArchive
+import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.curio.app.data.AppPreferences
@@ -166,12 +176,18 @@ private fun topicMatchRank(entry: TopicIndexEntry, q: String): Int {
 @Composable
 internal fun CommunityPostScreen(
     onDismiss: () -> Unit,
-    onPost: (CommunityCardDraft) -> Unit
+    /**
+     * Posts the draft. [repostOf] is the id of a locally-kept deleted post when
+     * the writer is putting one back on the wall — the caller drops it from the
+     * archive once the server has accepted it.
+     */
+    onPost: (CommunityCardDraft, repostOf: String?) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
+    val context = LocalContext.current
 
     var kind by remember { mutableStateOf(KIND_NOTE) }
     var text by remember { mutableStateOf("") }
@@ -193,9 +209,58 @@ internal fun CommunityPostScreen(
     var bodyScale by remember { mutableStateOf(1f) }
     var posting by remember { mutableStateOf(false) }
 
+    // ── THE COMPOSER'S OWN MEMORY ──────────────────────────────────────────
+    // What you have typed but not posted, and what you deleted, both kept on
+    // the device (see [SocialPostArchive]). Writing on a phone happens in
+    // interruptions: leaving the composer mid-sentence used to destroy the
+    // sentence, and deleting a post used to be final the instant it left the
+    // server. Neither is true now.
+    var keptPosts by remember { mutableStateOf<List<SocialPostArchive.DeletedPost>>(emptyList()) }
+    var keptOpen by remember { mutableStateOf(false) }
+    // Set while a kept post is going back up, so the caller can clear it from
+    // the archive once the server has taken it.
+    var repostOf by remember { mutableStateOf<String?>(null) }
+    // Kinds whose draft has already been offered once, so switching kinds never
+    // overwrites what has been typed since.
+    var draftOffered by remember { mutableStateOf(emptySet<String>()) }
+
     LaunchedEffect(Unit) {
         if (index.isEmpty()) index = TopicJsonLoader.loadIndex() ?: emptyList()
         if (kind != KIND_CARD) focusManager.clearFocus(force = false)
+        keptPosts = withContext(Dispatchers.IO) { SocialPostArchive.deleted(context) }
+    }
+
+    // The draft for the kind being written is offered ONCE, the moment that
+    // kind is opened: a note you left half-written comes back when you return
+    // to a note, and never on top of words you have typed since.
+    LaunchedEffect(kind) {
+        if (kind in draftOffered) return@LaunchedEffect
+        val saved = withContext(Dispatchers.IO) { SocialPostArchive.draft(context, kind) }
+        if (saved != null && text.isBlank() && caption.isBlank()) {
+            text = saved.text
+            caption = saved.caption
+            credit = saved.credit
+            // The card's topic comes back too, when the index still knows it —
+            // a draft that lost its topic would be a post that cannot be made.
+            if (saved.topicId.isNotBlank() && topic == null) {
+                topic = index.firstOrNull { it.topic.id == saved.topicId }?.topic
+            }
+        }
+        draftOffered = draftOffered + kind
+    }
+
+    // Kept as you type — 800ms after the last keystroke, never per character.
+    LaunchedEffect(kind, text, caption, credit, topic) {
+        val pending = SocialPostArchive.Draft(
+            kind = kind,
+            text = text,
+            caption = caption,
+            credit = credit,
+            topicId = topic?.id.orEmpty()
+        )
+        if (pending.isBlank) return@LaunchedEffect
+        delay(800)
+        withContext(Dispatchers.IO) { SocialPostArchive.saveDraft(context, pending) }
     }
     BackHandler(onBack = onDismiss)
 
@@ -269,7 +334,7 @@ internal fun CommunityPostScreen(
                             focusManager.clearFocus(force = true)
                             haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                             scope.launch {
-                                onPost(draft)
+                                onPost(draft, repostOf)
                                 posting = false
                             }
                         }
@@ -379,10 +444,180 @@ internal fun CommunityPostScreen(
                             onValueChange = { caption = it.take(180) }
                         )
                     }
+
+                    // ── Kept on this device ─────────────────────────────────
+                    // The posts you took down, one tap from going back up. A
+                    // small door at the FOOT of the composer: it is a way out
+                    // of a mistake, not a feature begging for attention, and it
+                    // only exists once there is something behind it.
+                    if (keptPosts.isNotEmpty()) {
+                        item(key = "kept") {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                TextButton(
+                                    onClick = { keptOpen = true },
+                                    colors = curioDialogActionButtonColors()
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.Restore,
+                                        contentDescription = null,
+                                        tint = accent,
+                                        size = 16.dp
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = "Deleted posts · ${keptPosts.size}",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+
+    if (keptOpen) {
+        DeletedPostsDialog(
+            posts = keptPosts,
+            accent = accent,
+            posting = posting,
+            onDismiss = { keptOpen = false },
+            onRepost = { kept ->
+                keptOpen = false
+                repostOf = kept.id
+                posting = true
+                focusManager.clearFocus(force = true)
+                scope.launch {
+                    onPost(kept.draft, kept.id)
+                    posting = false
+                }
+            },
+            onForget = { kept ->
+                keptPosts = keptPosts.filterNot { it.id == kept.id }
+                scope.launch {
+                    withContext(Dispatchers.IO) { SocialPostArchive.forgetDeleted(context, kept.id) }
+                }
+            }
+        )
+    }
+}
+
+/**
+ * THE POSTS KEPT ON THIS DEVICE — what you deleted, with the two things you can
+ * do about it: put it back on the wall, or forget it here for good.
+ *
+ * Deliberately a plain list with no counts, no times-ago and no card art: these
+ * are your own words that you took down, and the only question worth answering
+ * is which one you meant.
+ */
+@Composable
+private fun DeletedPostsDialog(
+    posts: List<SocialPostArchive.DeletedPost>,
+    accent: Color,
+    posting: Boolean,
+    onDismiss: () -> Unit,
+    onRepost: (SocialPostArchive.DeletedPost) -> Unit,
+    onForget: (SocialPostArchive.DeletedPost) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { if (!posting) onDismiss() },
+        containerColor = curioDialogContainerColor(),
+        shape = CurioDialogShape,
+        title = {
+            Text(
+                "Your deleted posts",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 400.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "They were removed from Curio's servers the moment you deleted them — " +
+                        "these copies are on this phone, and nothing is shared unless you post one again.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                posts.forEach { kept ->
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = kept.title.ifBlank { "A deleted post" },
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            kept.draft.factText.takeIf { it.isNotBlank() }?.let { words ->
+                                Text(
+                                    text = words,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                TextButton(
+                                    onClick = { onRepost(kept) },
+                                    enabled = !posting,
+                                    colors = curioDialogActionButtonColors()
+                                ) {
+                                    Text(
+                                        text = "Post again",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        color = accent
+                                    )
+                                }
+                                TextButton(
+                                    onClick = { onForget(kept) },
+                                    enabled = !posting,
+                                    colors = curioDialogActionButtonColors()
+                                ) {
+                                    Text(
+                                        text = "Forget it",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) {
+                Text("Done", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+            }
+        }
+    )
 }
 
 private enum class TopicPresentation {
@@ -586,13 +821,15 @@ private fun LivePostPreview(
                     TextPostPreview(
                         label = "QUOTE",
                         body = draft.factText,
-                        credit = draft.byline
+                        credit = draft.byline,
+                        accent = accent
                     )
                 } else {
                     TextPostPreview(
                         label = "NOTE",
                         body = draft.factText,
-                        credit = ""
+                        credit = "",
+                        accent = accent
                     )
                 }
             }
@@ -659,7 +896,9 @@ private fun EmptyPreviewState(title: String, body: String) {
 private fun TextPostPreview(
     label: String,
     body: String,
-    credit: String
+    credit: String,
+    /** The post's own accent — a quote is pulled in the colour it will wear. */
+    accent: Color
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -675,19 +914,25 @@ private fun TextPostPreview(
                 style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp, fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (label == "QUOTE") {
+                // THE SAME PULL-QUOTE THE WALL DRAWS (see [SocialPullQuote]):
+                // the rule, the mark, the serif words and the dashed credit. The
+                // preview used to be its own design — a centred sentence — so
+                // what a writer approved here was not what appeared on the wall.
+                SocialPullQuote(
+                    words = body.ifBlank { "The words you keep will be set like this" },
+                    credit = credit.ifBlank { "Who said it" },
+                    accent = accent,
+                    placeholder = body.isBlank() && credit.isBlank()
+                )
+                return@Column
+            }
             Text(
                 text = body.ifBlank { "Your words will appear here" },
-                style = if (label == "QUOTE") MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge,
                 color = if (body.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                 lineHeight = 29.sp
             )
-            if (label == "QUOTE" && credit.isNotBlank()) {
-                Text(
-                    text = credit,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }

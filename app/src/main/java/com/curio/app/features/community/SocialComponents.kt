@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -41,6 +43,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.CurioDirectMessage
@@ -55,6 +58,7 @@ import com.curio.app.data.supabase.SOCIAL_CACHE_PREFS
 import com.curio.app.data.supabase.SocialCache
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.rememberCurioPressSource
@@ -472,19 +476,111 @@ internal fun SocialTextPost(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            if (card.kind == KIND_QUOTE) {
+                // A QUOTE IS ITS OWN THING — see [SocialPullQuote]. The old
+                // rendering was the same paragraph as a note with a “— name”
+                // line under it, which is not what a quote looks like anywhere.
+                SocialPullQuote(
+                    words = card.factText,
+                    credit = card.byline,
+                    accent = parseAccent(card.accentHex)
+                )
+                return@Column
+            }
             Text(
                 text = card.factText,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            if (card.kind == KIND_QUOTE && card.byline.isNotBlank()) {
-                Text(
-                    text = "— ${card.byline}",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        }
+    }
+}
+
+/**
+ * A PULL-QUOTE — the shape a quote has in print, used by BOTH the composer's
+ * preview and the post on the wall.
+ *
+ * Two renderings existed and they disagreed: the composer drew a big centred
+ * sentence with the credit under it, the wall drew a normal paragraph with a
+ * dash. One composable now draws both, so what the writer sees before posting
+ * is what the wall shows afterwards — which is the only reason a preview is
+ * worth having.
+ *
+ * What makes it read as a quote rather than a paragraph: an ACCENT RULE down
+ * the left carrying the whole block, an oversized opening mark, the words set
+ * in the serif face the app reserves for writing, and the credit attached by a
+ * short dash rather than floating under the text as a caption.
+ *
+ * @param placeholder the composer's empty state: the words shown are an
+ *   invitation, not somebody's words, so they stay quiet.
+ */
+@Composable
+internal fun SocialPullQuote(
+    words: String,
+    credit: String,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    placeholder: Boolean = false
+) {
+    Row(
+        // IntrinsicSize.Min makes the rule exactly as tall as the words beside
+        // it — a fixed height would leave the rule hanging past a short quote.
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(13.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(2.dp))
+                .background(accent.copy(alpha = if (placeholder) 0.35f else 0.85f))
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = "\u201C",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    // A tight line height: the mark is a mark, not a line of text
+                    // that happens to hold one character.
+                    lineHeight = 20.sp
+                ),
+                color = accent.copy(alpha = if (placeholder) 0.30f else 0.55f)
+            )
+            Text(
+                text = words,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FrauncesFontFamily,
+                    lineHeight = 30.sp
+                ),
+                color = if (placeholder) MaterialTheme.colorScheme.onSurfaceVariant
+                        else MaterialTheme.colorScheme.onSurface
+            )
+            if (credit.isNotBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(top = 6.dp)
+                ) {
+                    // The dash that ties the words to their author: short, thick,
+                    // in the accent, so the credit reads as part of the quote
+                    // instead of a caption somebody added afterwards.
+                    Box(
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(1.5.dp)
+                            .background(accent.copy(alpha = 0.6f))
+                    )
+                    Text(
+                        text = credit,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = accent
+                    )
+                }
             }
         }
     }

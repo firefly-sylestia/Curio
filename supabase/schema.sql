@@ -2455,6 +2455,410 @@ exception
         raise notice 'NOTE  add these tables to the supabase_realtime publication from the dashboard';
 end $$;
 
+-- ───────────────────────────────────────────────────────────────────────────
+-- 6e. THE BAN LADDER — four tiers, one clock, and a record that outlives both
+--
+-- The first ban was one boolean: content hidden and posting refused. Real
+-- moderation is proportional, so a tier is now picked per ban:
+--
+--   ''          not banned.
+--   'content'   their content is HIDDEN and they cannot post or reply. The
+--               classic ban; friends and messages still work.
+--   'read_only' the wall stays up and readable; they cannot post, reply,
+--               react, edit their profile — or use friends and messages.
+--               The "they can only view" tier.
+--   'social'    the wall works exactly as before, but friends, requests and
+--               messages are paused. The "banned from the social side" tier.
+--   'account'   the whole account is locked: content hidden, no write
+--               anywhere in the online layer, and the app shows them the
+--               lock instead of pretending nothing happened.
+--
+-- `banned` stays the boolean the app and the older clients read (it means
+-- "hidden", i.e. the content and account tiers), and `banned_until` is the
+-- clock: NULL beside a tier = permanent, a stamp in the past = the ban has
+-- LAPSED and reads as no ban on its own. Nothing is deleted when it lapses or
+-- is lifted — moderation_actions keeps the record, and the ban list still
+-- shows the row as history.
+--
+-- ENFORCEMENT IS A TRIGGER, deliberately. A member's write reaches the
+-- database either as a direct REST call (RLS decides) or through a
+-- security-definer RPC (RLS is bypassed by construction), and a tier that
+-- only holds on one of those paths is decoration. A row trigger fires either
+-- way, so `curio_ban_guard` below is the real guard; the restrictive select
+-- policies above stay as they are, because hiding content is a READ rule.
+-- ───────────────────────────────────────────────────────────────────────────
+
+alter table public.profiles add column if not exists ban_kind text not null default '';
+alter table public.profiles add column if not exists banned_until timestamptz;
+
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'profiles_ban_kind_values') then
+        alter table public.profiles add constraint profiles_ban_kind_values
+            check (ban_kind in ('', 'content', 'read_only', 'social', 'account'));
+    end if;
+end $$;
+
+/**
+ * The member's ACTIVE tier, '' when they are not banned.
+ *
+ * A lapsed timed ban reads as no ban, so it lifts itself the moment its clock
+ * runs out — no moderator action, no cron job, and no difference between the
+ * app's answer and the database's. A row that predates the ladder (`banned`
+ * with no kind) reads as the content tier.
+ */
+create or replace function public.curio_ban_kind(subject uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select coalesce((
+        select case
+            when p.banned_until is not null and p.banned_until <= now() then ''
+            when p.ban_kind <> '' then p.ban_kind
+            when p.banned then 'content'
+            else ''
+        end
+        from public.profiles p
+        where p.id = subject
+    ), '')
+$$;
+
+revoke all on function public.curio_ban_kind(uuid) from public, anon;
+grant execute on function public.curio_ban_kind(uuid) to authenticated;
+
+-- "Is this member's content hidden?" — now the LADDER's answer rather than the
+-- raw boolean, so a read-only or social ban leaves the wall alone while the
+-- content and account tiers still disappear from everyone's feed. Every
+-- restrictive policy added in section 6b calls this, unchanged.
+create or replace function public.curio_member_hidden(subject uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select public.curio_ban_kind(subject) in ('content', 'account')
+$$;
+
+/** Who may still post on the wall: the un-banned and the social tier (the wall
+ *  is exactly what a social ban leaves them). */
+create or replace function public.curio_can_post(subject uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select public.curio_ban_kind(subject) in ('', 'social')
+$$;
+
+revoke all on function public.curio_can_post(uuid) from public, anon;
+grant execute on function public.curio_can_post(uuid) to authenticated;
+
+/** Who may still use friends and messages: a CONTENT ban keeps them (it is a
+ *  wall punishment); the read-only and social tiers lose them. */
+create or replace function public.curio_can_social(subject uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select public.curio_ban_kind(subject) in ('', 'content')
+$$;
+
+revoke all on function public.curio_can_social(uuid) from public, anon;
+grant execute on function public.curio_can_social(uuid) to authenticated;
+
+/**
+ * The guard itself. Attached to every writable table in the online layer.
+ *
+ * It refuses by TIER, not by table: the account tier refuses everything, the
+ * wall tables refuse the read-only and content tiers, and the social tables
+ * (friends, requests, messages, typing, blocks, the profile row itself)
+ * refuse the read-only and social tiers. Blanket-account bans are checked
+ * first so an account ban cannot post into the wall through a table nobody
+ * remembered to list.
+ */
+create or replace function public.curio_ban_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    subject uuid := auth.uid();
+    tier    text;
+    v_wall  boolean;
+begin
+    if subject is null then
+        return new;
+    end if;
+    tier := public.curio_ban_kind(subject);
+    if tier = '' then
+        return new;
+    end if;
+    if tier = 'account' then
+        raise exception 'curio: this account is banned';
+    end if;
+    -- The profile row is the exception below the account tier: the app writes
+    -- presence and `last_active_at` into it in the background, and a ban that
+    -- makes a routine heartbeat fail would fill the logs with errors that
+    -- have nothing to do with the ban. The tiers below still lose every
+    -- WRITE the wall and the social side own.
+    if tg_table_name = 'profiles' then
+        return new;
+    end if;
+    v_wall := tg_table_name in ('community_cards', 'community_comments',
+                                'community_reactions', 'community_comment_reactions');
+    if v_wall and not public.curio_can_post(subject) then
+        raise exception 'curio: your account is read-only right now';
+    end if;
+    if not v_wall and not public.curio_can_social(subject) then
+        raise exception 'curio: friends and messages are paused on this account';
+    end if;
+    return new;
+end $$;
+
+do $$
+declare
+    t text;
+begin
+    foreach t in array array['community_cards', 'community_comments',
+                             'community_reactions', 'community_comment_reactions',
+                             'friend_requests', 'dm_messages', 'dm_typing',
+                             'dm_reactions', 'member_blocks', 'profiles']
+    loop
+        execute format('drop trigger if exists curio_ban_guard_%1$s on public.%1$s', t);
+        execute format(
+            'create trigger curio_ban_guard_%1$s before insert or update on public.%1$s ' ||
+            'for each row execute function public.curio_ban_guard()', t);
+    end loop;
+end $$;
+
+/**
+ * Bans a member at a tier, for a while or for good.
+ *
+ * `p_hours` null (or 0) is permanent — the tier is what decides how far the
+ * ban reaches and the clock is what decides how long it lasts, so the two are
+ * deliberately separate arguments. The owned rules are the same as the old
+ * hide: a reason is required, the owner can never be banned, and a moderator
+ * cannot ban themselves.
+ */
+create or replace function public.curio_moderate_ban_member(
+    p_user_id uuid,
+    p_kind text,
+    p_reason text default null,
+    p_hours integer default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_kind text := lower(btrim(coalesce(p_kind, '')));
+    v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+    v_until timestamptz;
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('bans') then
+        raise exception 'curio: you do not have permission to ban members';
+    end if;
+    if v_kind not in ('content', 'read_only', 'social', 'account') then
+        raise exception 'curio: unknown ban tier';
+    end if;
+    if v_reason is null then
+        raise exception 'curio: a reason is required';
+    end if;
+    if p_user_id is null then
+        raise exception 'curio: nobody to ban';
+    end if;
+    if p_user_id = actor then
+        raise exception 'curio: you cannot ban yourself';
+    end if;
+    if exists (select 1 from public.community_admins a
+                where a.user_id = p_user_id and a.role = 'owner') then
+        raise exception 'curio: the owner cannot be banned';
+    end if;
+    if p_hours is not null and p_hours > 0 then
+        -- Ten years is the ceiling; anything longer is a permanent ban said
+        -- the long way, and keeping the stamp honest beats an overflow.
+        v_until := now() + make_interval(hours => least(p_hours, 87600));
+    end if;
+    update public.profiles
+       set banned       = v_kind in ('content', 'account'),
+           banned_at    = now(),
+           banned_by    = actor,
+           ban_reason   = left(v_reason, 300),
+           ban_kind     = v_kind,
+           banned_until = v_until
+     where id = p_user_id;
+    if not found then
+        raise exception 'curio: that member is gone';
+    end if;
+    insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner, reason)
+    values (actor, 'ban_' || v_kind, 'user', p_user_id, p_user_id, left(v_reason, 300));
+end $$;
+
+/** Lifts whatever tier is in force. The profile row goes back to clean; the
+ *  audit row stays, which is the only place the record needs to live. */
+create or replace function public.curio_moderate_lift_ban(
+    p_user_id uuid,
+    p_note text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_note text := nullif(btrim(coalesce(p_note, '')), '');
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('bans') then
+        raise exception 'curio: you do not have permission to lift bans';
+    end if;
+    update public.profiles
+       set banned       = false,
+           banned_at    = null,
+           banned_by    = null,
+           ban_reason   = null,
+           ban_kind     = '',
+           banned_until = null
+     where id = p_user_id;
+    if not found then
+        raise exception 'curio: that member is gone';
+    end if;
+    insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner, reason)
+    values (actor, 'unban', 'user', p_user_id, p_user_id, v_note);
+end $$;
+
+/**
+ * The old one-boolean hide, kept working for any client that still calls it:
+ * it is now the content tier of the ladder, so a build in the wild and a new
+ * build write the same state.
+ */
+create or replace function public.curio_moderate_hide_member(
+    p_user_id uuid,
+    p_hidden boolean,
+    p_reason text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if p_hidden then
+        perform public.curio_moderate_ban_member(p_user_id, 'content', p_reason, null);
+    else
+        perform public.curio_moderate_lift_ban(p_user_id, p_reason);
+    end if;
+end $$;
+
+/**
+ * Every member carrying a ban stamp, live bans first — the moderation page's
+ * own list, and the only place a lifted-again member's lapsed ban is still
+ * visible as a row (`active` false). Gated by the 'bans' permission, since a
+ * ban list is itself sensitive.
+ */
+create or replace function public.curio_moderate_list_bans()
+returns table (
+    user_id       uuid,
+    display_name  text,
+    username      text,
+    avatar_style  smallint,
+    kind          text,
+    reason        text,
+    banned_at     timestamptz,
+    banned_until  timestamptz,
+    banned_by     uuid,
+    banned_by_name text,
+    active        boolean
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+    if not public.curio_admin_can('bans') then
+        raise exception 'curio: you do not have permission to read the ban list';
+    end if;
+    return query
+        select p.id, p.display_name, p.username, p.avatar_style,
+               k.tier, p.ban_reason, p.banned_at, p.banned_until, p.banned_by,
+               b.display_name,
+               k.tier <> ''
+          from public.profiles p
+          cross join lateral (select public.curio_ban_kind(p.id) as tier) k
+          left join public.profiles b on b.id = p.banned_by
+         where p.banned or p.ban_kind <> ''
+         order by (k.tier <> '') desc, p.banned_at desc nulls last
+         limit 200;
+end $$;
+
+/**
+ * One member's moderation record, newest first: what was done, to what, why,
+ * by whom. A member may read their OWN record (a ban they cannot look up is
+ * just a mystery), and the team may read anyone's.
+ */
+create or replace function public.curio_moderate_member_history(p_user_id uuid)
+returns table (
+    id         uuid,
+    action     text,
+    reason     text,
+    note       text,
+    created_at timestamptz,
+    actor      uuid,
+    actor_name text,
+    actor_username text
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+    if auth.uid() is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if p_user_id is null then
+        raise exception 'curio: no member';
+    end if;
+    if p_user_id <> auth.uid() and not public.curio_admin_can('bans') then
+        raise exception 'curio: that record is the moderation team''s';
+    end if;
+    return query
+        select m.id, m.action, m.reason, m.note, m.created_at,
+               m.actor, a.display_name, a.username
+          from public.moderation_actions m
+          left join public.profiles a on a.id = m.actor
+         where m.target_owner = p_user_id
+            or (m.target_kind = 'user' and m.target_id = p_user_id)
+         order by m.created_at desc
+         limit 60;
+end $$;
+
+revoke all on function public.curio_moderate_ban_member(uuid, text, text, integer) from public, anon;
+grant execute on function public.curio_moderate_ban_member(uuid, text, text, integer) to authenticated;
+revoke all on function public.curio_moderate_lift_ban(uuid, text) from public, anon;
+grant execute on function public.curio_moderate_lift_ban(uuid, text) to authenticated;
+revoke all on function public.curio_moderate_list_bans() from public, anon;
+grant execute on function public.curio_moderate_list_bans() to authenticated;
+revoke all on function public.curio_moderate_member_history(uuid) from public, anon;
+grant execute on function public.curio_moderate_member_history(uuid) to authenticated;
+
 -- ─────────────────────────────────────────────────────────────────�����────────
 -- 8. Self-check
 -- ───────────────────────────────────────────────────────────────────────────

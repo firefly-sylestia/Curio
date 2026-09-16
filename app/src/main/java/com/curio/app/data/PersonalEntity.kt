@@ -67,6 +67,17 @@ data class PersonalBookEntity(
     /** 0 = the member has not said how long the book is; the chapter list
      *  then offers "add a chapter" instead of numbered rows. */
     val totalChapters: Int = 0,
+    /**
+     * v388 — the APP CATALOG's topic id, e.g. `book-iliad`, when the book was
+     * added from Curio's own ~800-book lane rather than typed in or found on
+     * Open Library. It is the handle the book's page uses to read the real
+     * chapter names, page ranges and summaries back out of the topic JSON.
+     * Blank for a book the catalog does not have. */
+    val catalogId: String = "",
+    /** The catalog's page count for this edition (0 when unknown) — shown
+     *  beside the chapter list so "how long is this book" has an answer that
+     *  comes from Curio rather than from a guess. */
+    val pageCount: Int = 0,
     /** How far they are (1-based; 0 = not started). */
     val currentChapter: Int = 0,
     /** The book's own note — why they picked it up. */

@@ -209,6 +209,35 @@ object ModerationReasons {
         "Repeated policy breaks",
         "Something else"
     )
+
+    /**
+     * The reasons a BAN is set at a tier. The ladder is what makes these
+     * different from [HIDE]: a view-only week and a locked account are the same
+     * paperwork, so the list is one list and the tier carries the severity.
+     */
+    val BAN = listOf(
+        "Repeated harassment",
+        "Hate speech",
+        "Threats or doxxing",
+        "Sexual content involving minors",
+        "Spam or scam account",
+        "Ban evasion",
+        "Repeated policy breaks",
+        "Something else"
+    )
+
+    /**
+     * The reasons a ban comes OFF. A lift is a decision too — "time served",
+     * "appeal accepted", "set by mistake" — and it is the one a member is most
+     * likely to ask about months later, when the ban itself is only history.
+     */
+    val LIFT = listOf(
+        "Time served",
+        "Appeal accepted",
+        "Set by mistake",
+        "Context was missing",
+        "Something else"
+    )
 }
 
 data class CommunityCardDraft(
@@ -239,6 +268,91 @@ const val KIND_NOTE = "NOTE"
 
 /** A line someone else said, credited to them. */
 const val KIND_QUOTE = "QUOTE"
+
+// ── the ban ladder ──────────────────────────────────────────────────────────
+// The four tiers a moderator can pick, mirroring `ban_kind` in schema.sql.
+// They are strings rather than an enum because the value round-trips through
+// the database and an older client must never fail to READ a tier that a newer
+// server wrote.
+
+/** Their content is hidden and they cannot post. The classic ban. */
+const val BAN_CONTENT = "content"
+
+/** View only: the wall stays readable, but no posting, reactions, friends or
+ *  messages — and no profile edits. */
+const val BAN_READ_ONLY = "read_only"
+
+/** The wall works; friends, requests and messages are paused. */
+const val BAN_SOCIAL = "social"
+
+/** The whole account is locked: hidden content and no write anywhere. */
+const val BAN_ACCOUNT = "account"
+
+/** The tiers in the order the picker offers them, mildest first. */
+val BAN_TIERS = listOf(BAN_CONTENT, BAN_READ_ONLY, BAN_SOCIAL, BAN_ACCOUNT)
+
+/** What a tier is CALLED — the label its row wears everywhere. */
+fun banTierLabel(kind: String): String = when (kind) {
+    BAN_CONTENT -> "Hide their content"
+    BAN_READ_ONLY -> "View only"
+    BAN_SOCIAL -> "Social features"
+    BAN_ACCOUNT -> "Account"
+    else -> "Not banned"
+}
+
+/**
+ * One sentence on what a tier actually does, in the member's own terms. Written
+ * once and read by the picker, the ban list and the member's own notice, so the
+ * promise made when banning is the same sentence they are told afterwards.
+ */
+fun banTierBlurb(kind: String): String = when (kind) {
+    BAN_CONTENT ->
+        "Their posts and replies disappear from the wall and they cannot post, " +
+            "reply or react. Friends and messages keep working, and it can be lifted."
+    BAN_READ_ONLY ->
+        "The wall stays up and readable, but they cannot post, reply, react, edit " +
+            "their profile or use friends and messages."
+    BAN_SOCIAL ->
+        "The wall works exactly as before; friends, friend requests and messages " +
+            "are paused."
+    BAN_ACCOUNT ->
+        "The whole account is locked: content hidden, and no post, reply, reaction, " +
+            "message or edit is accepted anywhere online."
+    else -> "Nothing is paused."
+}
+
+/** One member carrying a ban, as the moderation page's ban list reads them. */
+data class CommunityBan(
+    val userId: String,
+    val displayName: String,
+    val username: String,
+    val avatarStyle: Int,
+    /** The tier the ban was set at; blank once it has been lifted. */
+    val kind: String,
+    val reason: String?,
+    val bannedAtMillis: Long,
+    /** When a timed ban runs out — null means permanent. */
+    val untilMillis: Long?,
+    val bannedByName: String,
+    /** False for a ban that has lapsed or been lifted: kept as history. */
+    val active: Boolean
+) {
+    val label: String get() = displayName.trim().ifBlank { username.trim() }
+
+    val permanent: Boolean get() = untilMillis == null
+}
+
+/** One line of a member's moderation record. */
+data class ModerationRecord(
+    val id: String,
+    /** The `moderation_actions.action` verb, e.g. `ban_social`, `unban`. */
+    val action: String,
+    val reason: String?,
+    val note: String?,
+    val createdAtMillis: Long,
+    val actorName: String,
+    val actorUsername: String
+)
 
 /** One reply under a card. Text only, and it dies with the card. */
 data class CommunityComment(
@@ -349,6 +463,10 @@ object CommunityApi {
     private const val RPC_REMOVE_CARD = "/rest/v1/rpc/curio_moderate_remove_card"
     private const val RPC_REMOVE_COMMENT = "/rest/v1/rpc/curio_moderate_remove_comment"
     private const val RPC_HIDE_MEMBER = "/rest/v1/rpc/curio_moderate_hide_member"
+    private const val RPC_BAN_MEMBER = "/rest/v1/rpc/curio_moderate_ban_member"
+    private const val RPC_LIFT_BAN = "/rest/v1/rpc/curio_moderate_lift_ban"
+    private const val RPC_LIST_BANS = "/rest/v1/rpc/curio_moderate_list_bans"
+    private const val RPC_MEMBER_HISTORY = "/rest/v1/rpc/curio_moderate_member_history"
     private const val RPC_SET_ADMIN = "/rest/v1/rpc/curio_set_community_admin"
     private const val RPC_REMOVE_ADMIN = "/rest/v1/rpc/curio_remove_community_admin"
 
@@ -958,6 +1076,125 @@ object CommunityApi {
                 .post(payload.toString().toRequestBody(jsonMediaType))
                 .build()
             SupabaseClient.executeBody(request)
+        }
+    }
+
+    /**
+     * Bans a member at ONE tier, for `hours` or for good (null = permanent).
+     *
+     * The server validates the tier, refuses a ban without a reason, refuses a
+     * self-ban and refuses the community's owner — the client's own copy of
+     * those rules only decides what to SHOW.
+     */
+    suspend fun banMember(
+        accessToken: String,
+        userId: String,
+        kind: String,
+        reason: String,
+        hours: Int? = null
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject()
+                .put("p_user_id", userId)
+                .put("p_kind", kind)
+                .put("p_reason", reason.trim())
+            if (hours != null && hours > 0) payload.put("p_hours", hours)
+            val request = SupabaseClient.requestBuilder(RPC_BAN_MEMBER, accessToken)
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** Lifts whatever tier is in force on a member. */
+    suspend fun liftBan(
+        accessToken: String,
+        userId: String,
+        note: String? = null
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject().put("p_user_id", userId)
+            note?.trim()?.takeIf { it.isNotEmpty() }?.let { payload.put("p_note", it) }
+            val request = SupabaseClient.requestBuilder(RPC_LIFT_BAN, accessToken)
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /**
+     * The ban list: live bans first, then the ones that lapsed or were lifted.
+     * Only a moderator with the 'bans' permission is answered at all.
+     */
+    suspend fun bans(accessToken: String): Result<List<CommunityBan>> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val request = SupabaseClient.requestBuilder(RPC_LIST_BANS, accessToken)
+                    .post("{}".toRequestBody(jsonMediaType))
+                    .build()
+                val rows = JSONArray(SupabaseClient.executeBody(request))
+                buildList(rows.length()) {
+                    for (index in 0 until rows.length()) {
+                        val row = rows.optJSONObject(index) ?: continue
+                        val until = row.optString("banned_until")
+                            .takeIf { it.isNotBlank() && it != "null" }
+                            ?.let { epochMillis(it) }
+                        add(
+                            CommunityBan(
+                                userId = row.optString("user_id"),
+                                displayName = row.optString("display_name")
+                                    .takeIf { it != "null" }.orEmpty(),
+                                username = row.optString("username")
+                                    .takeIf { it != "null" }.orEmpty(),
+                                avatarStyle = row.optInt("avatar_style", 0),
+                                kind = row.optString("kind").takeIf { it != "null" }.orEmpty(),
+                                reason = row.optString("reason")
+                                    .takeIf { it.isNotBlank() && it != "null" },
+                                bannedAtMillis = epochMillis(row.optString("banned_at")),
+                                untilMillis = until,
+                                bannedByName = row.optString("banned_by_name")
+                                    .takeIf { it != "null" }.orEmpty(),
+                                active = row.optBoolean("active", false)
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+    /**
+     * One member's moderation record, newest first. Any signed-in member can
+     * read their OWN; the team can read anyone's.
+     */
+    suspend fun memberHistory(
+        accessToken: String,
+        userId: String
+    ): Result<List<ModerationRecord>> = withContext(Dispatchers.IO) {
+        mapped {
+            val request = SupabaseClient.requestBuilder(RPC_MEMBER_HISTORY, accessToken)
+                .post(JSONObject().put("p_user_id", userId).toString().toRequestBody(jsonMediaType))
+                .build()
+            val rows = JSONArray(SupabaseClient.executeBody(request))
+            buildList(rows.length()) {
+                for (index in 0 until rows.length()) {
+                    val row = rows.optJSONObject(index) ?: continue
+                    add(
+                        ModerationRecord(
+                            id = row.optString("id"),
+                            action = row.optString("action"),
+                            reason = row.optString("reason")
+                                .takeIf { it.isNotBlank() && it != "null" },
+                            note = row.optString("note")
+                                .takeIf { it.isNotBlank() && it != "null" },
+                            createdAtMillis = epochMillis(row.optString("created_at")),
+                            actorName = row.optString("actor_name")
+                                .takeIf { it != "null" }.orEmpty(),
+                            actorUsername = row.optString("actor_username")
+                                .takeIf { it != "null" }.orEmpty()
+                        )
+                    )
+                }
+            }
         }
     }
 

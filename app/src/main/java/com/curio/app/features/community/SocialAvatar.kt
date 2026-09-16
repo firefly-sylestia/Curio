@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -148,6 +149,21 @@ private fun Path.qd(cx: Float, cy: Float, x: Float, y: Float, u: Float) =
 private fun Path.cu(
     x1: Float, y1: Float, x2: Float, y2: Float, x: Float, y: Float, u: Float
 ) = cubicTo(x1 * u, y1 * u, x2 * u, y2 * u, x * u, y * u)
+
+/**
+ * A WARM SHADOW of a skin tone.
+ *
+ * The channels are SCALED (red least, blue most), never mixed toward [INK]:
+ * mixing skin with a near-black desaturates it, and a pale face's neck came out
+ * grey — a different-coloured neck on the same head. Scaling keeps the hue and
+ * only deepens the tone, which is what skin in shadow actually does.
+ */
+private fun shadeSkin(color: Color, amount: Float): Color = Color(
+    red = color.red * (1f - 0.10f * amount),
+    green = color.green * (1f - 0.17f * amount),
+    blue = color.blue * (1f - 0.26f * amount),
+    alpha = color.alpha
+)
 
 /** Darken a tone toward the portrait's ink (hair roots, jaw shadow, folds). */
 private fun darken(color: Color, amount: Float) = lerp(color, INK, amount)
@@ -345,17 +361,19 @@ private fun DrawScope.drawNeck(art: AvatarArt, u: Float) {
         cu(39f, 72f, 40f, 66f, 40.5f, 57f, u)
         close()
     }
-    drawPath(neck, darken(skin, 0.22f))
-    // The jaw's shadow across the top of the neck.
+    drawPath(neck, shadeSkin(skin, 0.62f))
+    // The jaw's shadow across the top of the neck: the neck's OWN deeper tone
+    // rather than an ink wash, and a thinner stroke — a 3.6-unit black band was
+    // the "weird tint" running under every chin.
     drawPath(
-        Path().apply { mv(39f, 62f, u); cu(44f, 66.5f, 56f, 66.5f, 61f, 62f, u) },
-        INK.copy(alpha = 0.22f),
-        style = Stroke(width = s(3.6f, u), cap = StrokeCap.Round)
+        Path().apply { mv(39.5f, 62f, u); cu(44f, 66f, 56f, 66f, 60.5f, 62f, u) },
+        shadeSkin(skin, 1f).copy(alpha = 0.75f),
+        style = Stroke(width = s(2.6f, u), cap = StrokeCap.Round)
     )
     // Light down the throat.
     drawPath(
         Path().apply { mv(47f, 62f, u); cu(46f, 68f, 46f, 73f, 47f, 77f, u) },
-        lighten(skin, 0.20f).copy(alpha = 0.65f),
+        lighten(skin, 0.20f).copy(alpha = 0.55f),
         style = Stroke(width = s(2f, u), cap = StrokeCap.Round)
     )
 }
@@ -367,7 +385,7 @@ private fun DrawScope.drawNeck(art: AvatarArt, u: Float) {
  */
 private fun DrawScope.drawHead(art: AvatarArt, u: Float) {
     val skin = art.skin
-    val earShade = darken(skin, 0.20f)
+    val earShade = shadeSkin(skin, 0.7f)
     // Ears first — the head covers their inner halves.
     listOf(25.2f to false, 68.6f to true).forEach { (x, right) ->
         drawOval(skin, topLeft = o(x, 41.5f, u), size = Size(s(6.2f, u), s(10.6f, u)))
@@ -399,7 +417,7 @@ private fun DrawScope.drawHead(art: AvatarArt, u: Float) {
     // The jaw's shadow on the lit side's far edge, so the head has a back.
     drawPath(
         Path().apply { mv(70f, 46f, u); cu(68.5f, 55f, 63f, 62f, 55f, 65.4f, u) },
-        INK.copy(alpha = 0.10f),
+        shadeSkin(skin, 1f).copy(alpha = 0.30f),
         style = Stroke(width = s(2.6f, u), cap = StrokeCap.Round)
     )
     // The forehead sits in the hair's shade.
@@ -424,96 +442,100 @@ private fun DrawScope.drawHead(art: AvatarArt, u: Float) {
  * the face would stamp dark arcs on top of a hat, or across a light fringe.
  */
 private fun DrawScope.drawBrows(art: AvatarArt, u: Float) {
-    val brow = darken(art.hair, 0.25f).copy(alpha = 0.92f)
-    listOf(42f to 1f, 58f to -1f).forEach { (ex, side) ->
+    // A BROW is a short warm mark, not a hair-coloured arc: mixing the hair
+    // toward the ink turned light-haired characters grey, and the two arcs were
+    // mirrored in X only, so one brow rose toward the nose while the other fell
+    // away from it — the "not matching eyebrows". Both brows are now built from
+    // the SAME three points mirrored about the face's midline, and they end at
+    // the same height.
+    val brow = if (art.hair.luminance() > 0.62f) {
+        // Light hair (white, platinum, silver) needs a brow that reads AGAINST
+        // the skin and still belongs to the hair.
+        lerp(art.hair, INK, 0.55f)
+    } else {
+        lerp(art.hair, INK, 0.18f)
+    }.copy(alpha = 0.92f)
+    listOf(42.6f to -1f, 57.4f to 1f).forEach { (ex, side) ->
         drawPath(
             Path().apply {
-                mv(ex - 5.6f, 40f, u)
-                qd(ex + side * 0.4f, 35.4f, ex + 5.6f, 37.4f, u)
+                // Outer end, a whisper lower than the inner one — the gentlest
+                // lift — mirrored through `side` so both brows agree.
+                mv(ex + side * 5.2f, 39.6f, u)
+                qd(ex + side * 0.6f, 36.4f, ex - side * 5.2f, 39.2f, u)
             },
             brow,
-            style = Stroke(width = s(2.1f, u), cap = StrokeCap.Round)
+            style = Stroke(width = s(2.2f, u), cap = StrokeCap.Round)
         )
     }
 }
 
 private fun DrawScope.drawFace(art: AvatarArt, u: Float, withMouth: Boolean = true) {
-    val hair = art.hair
-    val iris = darken(hair, 0.45f)
+    val iris = darken(art.hair, 0.45f)
     // ── eyes ──────────────────────────────────────────────────────────────
-    listOf(42f to -1f, 58f to 1f).forEach { (ex, side) ->
-        val cx = ex + side * 0.4f
+    // CHIBI EYES. The detailed pair — a white sclera, a lash line, a lid crease
+    // and a lower lid — was four grey lines smeared together at 40dp, and the
+    // whites made every face read startled at hero size. A chibi eye is ONE big
+    // dark shape with two highlights; its character comes from the size and the
+    // tilt, not from the number of lines inside it.
+    listOf(42.6f to -1f, 57.4f to 1f).forEach { (ex, side) ->
+        val cy = 47.4f
+        // Taller than wide, tilted a touch outward: open, friendly, and still
+        // exactly the shape the glasses' round lenses expect.
         drawOval(
-            color = Color.White.copy(alpha = 0.95f),
-            topLeft = o(ex - 5.4f, 42f, u),
-            size = Size(s(10.8f, u), s(9.2f, u))
+            color = iris,
+            topLeft = o(ex - 4.6f, cy - 6.6f, u),
+            size = Size(s(9.2f, u), s(13.2f, u))
         )
-        drawCircle(iris, s(4.4f, u), o(cx, 46.6f, u))
-        drawCircle(INK, s(2.3f, u), o(cx, 46.6f, u))
-        drawCircle(Color.White.copy(alpha = 0.95f), s(1.35f, u), o(ex - 1.6f, 44.9f, u))
-        drawCircle(Color.White.copy(alpha = 0.40f), s(0.8f, u), o(ex + 1.7f, 48.4f, u))
-        // Lash line (thicker toward the outer corner) + the lid crease.
+        // A deeper centre, so the eye has an inside rather than reading flat.
+        drawCircle(INK, s(3.1f, u), o(ex, cy + 0.6f, u))
+        // The big top highlight and one lower spark: two is the chibi
+        // signature, and at chip size they are what keeps the eye from closing.
+        drawCircle(Color.White.copy(alpha = 0.95f), s(2.7f, u), o(ex - 1.5f, cy - 3.4f, u))
+        drawCircle(Color.White.copy(alpha = 0.72f), s(1.25f, u), o(ex + 1.5f, cy + 3.2f, u))
+        // The upper lid: ONE stroke, the outer corner a little heavier (the
+        // `side` swing), so the eye stays defined when the whole portrait is
+        // 24dp in a chat row.
         drawArc(
-            color = INK.copy(alpha = 0.92f),
-            startAngle = 196f, sweepAngle = 148f, useCenter = false,
-            topLeft = o(ex - 5.6f, 41.4f, u), size = Size(s(11.2f, u), s(9f, u)),
-            style = Stroke(width = s(1.6f, u), cap = StrokeCap.Round)
-        )
-        drawArc(
-            color = INK.copy(alpha = 0.26f),
-            startAngle = 200f, sweepAngle = 140f, useCenter = false,
-            topLeft = o(ex - 5.2f, 39.6f, u), size = Size(s(10.4f, u), s(8.4f, u)),
-            style = Stroke(width = s(1f, u), cap = StrokeCap.Round)
-        )
-        // Lower lid — a short warm line, what stops an eye reading as a dot.
-        drawArc(
-            color = darken(art.skin, 0.30f).copy(alpha = 0.55f),
-            startAngle = 18f, sweepAngle = 120f, useCenter = false,
-            topLeft = o(ex - 4.6f, 45.4f, u), size = Size(s(9.2f, u), s(8f, u)),
-            style = Stroke(width = s(1f, u), cap = StrokeCap.Round)
+            color = INK.copy(alpha = 0.80f),
+            startAngle = if (side < 0f) 206f else 194f,
+            sweepAngle = 140f,
+            useCenter = false,
+            topLeft = o(ex - 4.9f, cy - 7.2f, u),
+            size = Size(s(9.8f, u), s(8.6f, u)),
+            style = Stroke(width = s(1.5f, u), cap = StrokeCap.Round)
         )
     }
-    // ── nose — a bridge shade, the tip, two nostrils ───────────────────────
+    // ── nose ──────────────────────────────────────────────────────────────
+    // A chibi nose is a hint: one short warm shadow under the tip. The bridge
+    // line and the two nostril dots were three more marks that only ever
+    // muddied a small portrait.
     drawPath(
-        Path().apply { mv(51.6f, 46.6f, u); qd(53.4f, 50.6f, 51.6f, 53.4f, u) },
-        INK.copy(alpha = 0.15f),
+        Path().apply { mv(47.8f, 55.2f, u); qd(50f, 56.8f, 52.2f, 55.2f, u) },
+        shadeSkin(art.skin, 1f).copy(alpha = 0.55f),
         style = Stroke(width = s(1.3f, u), cap = StrokeCap.Round)
     )
-    drawPath(
-        Path().apply { mv(46.8f, 54.6f, u); qd(50f, 56.6f, 53.2f, 54.6f, u) },
-        INK.copy(alpha = 0.22f),
-        style = Stroke(width = s(1.4f, u), cap = StrokeCap.Round)
-    )
-    drawCircle(INK.copy(alpha = 0.22f), s(0.85f, u), o(47.8f, 55.1f, u))
-    drawCircle(INK.copy(alpha = 0.22f), s(0.85f, u), o(52.2f, 55.1f, u))
     // ── mouth ─────────────────────────────────────────────────────────────
     if (!withMouth) return
     // Lower lip, filled.
     drawPath(
         Path().apply {
-            mv(45.6f, 59.6f, u)
-            cu(47.4f, 62.9f, 52.6f, 62.9f, 54.4f, 59.6f, u)
-            cu(52.5f, 61f, 47.5f, 61f, 45.6f, 59.6f, u)
+            mv(45.8f, 59.8f, u)
+            cu(47.5f, 62.9f, 52.5f, 62.9f, 54.2f, 59.8f, u)
+            cu(52.4f, 61.1f, 47.6f, 61.1f, 45.8f, 59.8f, u)
             close()
         },
         lerp(art.skin, LIP, 0.55f)
     )
-    drawCircle(Color.White.copy(alpha = 0.32f), s(1.1f, u), o(49.4f, 60.6f, u))
+    drawCircle(Color.White.copy(alpha = 0.32f), s(1.1f, u), o(49.4f, 60.7f, u))
     // Upper lip line with its cupid's bow.
     drawPath(
         Path().apply {
-            mv(44.4f, 59.2f, u)
-            qd(47.2f, 57.9f, 50f, 58.8f, u)
-            qd(52.8f, 57.9f, 55.6f, 59.2f, u)
+            mv(44.8f, 59.4f, u)
+            qd(47.3f, 58.2f, 50f, 59f, u)
+            qd(52.7f, 58.2f, 55.2f, 59.4f, u)
         },
-        INK.copy(alpha = 0.78f),
-        style = Stroke(width = s(1.5f, u), cap = StrokeCap.Round)
-    )
-    // A soft crease under the lip, on the chin.
-    drawPath(
-        Path().apply { mv(47.6f, 64.4f, u); qd(50f, 65.4f, 52.4f, 64.4f, u) },
-        INK.copy(alpha = 0.09f),
-        style = Stroke(width = s(1.2f, u), cap = StrokeCap.Round)
+        INK.copy(alpha = 0.72f),
+        style = Stroke(width = s(1.4f, u), cap = StrokeCap.Round)
     )
 }
 

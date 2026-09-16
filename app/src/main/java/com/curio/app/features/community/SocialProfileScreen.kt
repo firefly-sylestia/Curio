@@ -45,23 +45,28 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.supabase.BAN_CONTENT
 import com.curio.app.data.supabase.CommunityAdminRow
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityReportReasons
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.ModerationReasons
+import com.curio.app.data.supabase.ModerationRecord
+import com.curio.app.data.supabase.banTierLabel
+import com.curio.app.data.supabase.communityMessage
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
 import com.curio.app.features.settings.SettingsOptionRow
 import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.settingsHeroPillFill
+import com.curio.app.features.settings.settingsHeroTotalHeight
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.StreakTracker
 import com.curio.app.navigation.CurioRoutes
@@ -124,14 +129,21 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
     var error by remember { mutableStateOf<String?>(null) }
     var confirmBlock by remember { mutableStateOf(false) }
     var blocking by remember { mutableStateOf(false) }
-    // Reporting a member, and a moderator's hide / restore — three different
-    // doors into the same queue.
+    // Reporting a member, and a moderator's BAN — the ladder's sheet replaced
+    // the old yes/no hide, so a moderator picks how far the ban reaches from
+    // the page they are looking at.
     var reporting by remember { mutableStateOf(false) }
-    var hideMember by remember { mutableStateOf(false) }
-    var restoreMember by remember { mutableStateOf(false) }
+    var banSheet by remember { mutableStateOf(false) }
+    var liftingBan by remember { mutableStateOf(false) }
     var moderationBusy by remember { mutableStateOf(false) }
-    var targetHidden by remember { mutableStateOf(false) }
+    // The tier in force on this member (blank = not banned), read from their
+    // own profile row. The menu, the ban chip and the sheet all read it, so a
+    // moderator can never act on a stale guess about what is already set.
+    var targetKind by remember { mutableStateOf("") }
     var myAdmin by remember { mutableStateOf<CommunityAdminRow?>(null) }
+    // The moderation record: the team sees anyone's, and a member sees their
+    // own (the server allows exactly those two readers).
+    var history by remember { mutableStateOf<List<ModerationRecord>>(emptyList()) }
 
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
@@ -160,11 +172,13 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             onFailure = { error = it.message }
         )
         if (!isMe && myUserId != null) {
-            // Is this member hidden right now? Read from their own profile row,
-            // so a moderator's menu can offer Hide or Restore rather than a
-            // one-way door. Best-effort: not discoverable simply reads as not
-            // hidden, and no action is lost by that.
-            SocialApi.moderationStatus(active, userId).onSuccess { targetHidden = it.hidden }
+            // Which TIER is in force on this member right now? Read from their
+            // own profile row, so a moderator's menu can offer Ban or Change
+            // ban or Lift rather than a one-way door. Best-effort: not
+            // discoverable simply reads as not banned, and no action is lost.
+            SocialApi.moderationStatus(active, userId).onSuccess { status ->
+                targetKind = status.kind.ifBlank { if (status.hidden) BAN_CONTENT else "" }
+            }
             CommunityApi.myAdminRow(active, myUserId).onSuccess { myAdmin = it }
             // Are we already friends? Decides Message vs Add friend.
             SocialApi.friends(active, myUserId).fold(
@@ -174,10 +188,62 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 onFailure = { /* friendship stays unknown; the pill offers the ask */ }
             )
         }
+        // The record: anyone may read their OWN, and the team may read this
+        // member's. Anything else is refused by the server, so the call is made
+        // only when one of those two is true.
+        if (isMe || myAdmin?.allows("bans") == true) {
+            CommunityApi.memberHistory(active, userId).onSuccess { history = it }
+        }
         loading = false
     }
 
     LaunchedEffect(userId, token) { if (token != null) load() }
+
+    val hasBio = person?.bio?.isNullOrBlank() == false
+
+    /**
+     * THE TEAR, built once and handed to the hero by both layouts — the wide
+     * list item and the pinned phone banner — so a tablet and a phone can never
+     * drift apart on what a profile's header contains.
+     */
+    val profileTear: @Composable (Color) -> Unit = { ink ->
+        SocialProfileHeroBlock(
+            ink = ink,
+            height = profileTearHeight(hasBio),
+            person = person,
+            isMe = isMe,
+            loading = loading,
+            cards = cards,
+            friendRequestId = friendRequestId,
+            asked = asked,
+            bannedKind = targetKind,
+            canModerate = myAdmin?.allows("bans") == true,
+            onAsk = {
+                if (myUserId != null) {
+                    scope.launch {
+                        SocialApi.ask(token, userId, myUserId).fold(
+                            onSuccess = { asked = true },
+                            onFailure = { error = it.message }
+                        )
+                    }
+                }
+            },
+            onMessage = {
+                navController.navigate(CurioRoutes.directMessage(userId)) {
+                    launchSingleTop = true
+                }
+            },
+            onEdit = {
+                // The profile's own door back into the editor — the same dialog
+                // "You" opens, without a detour through Settings.
+                navController.navigate(CurioRoutes.PROFILE) { launchSingleTop = true }
+            },
+            onReport = { reporting = true },
+            onBan = { banSheet = true },
+            onLiftBan = { liftingBan = true },
+            onBlock = { confirmBlock = true }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -202,7 +268,10 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = if (wide) 0.dp else SettingsHeroTotalHeight,
+                // The identity block lives INSIDE the hero now, so the tear is
+                // extended by its height and the grid starts below it — the
+                // same reservation the Social wall does for its doors row.
+                top = if (wide) 0.dp else settingsHeroTotalHeight(profileTearHeight(hasBio)),
                 bottom = 28.dp
             ),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -214,9 +283,11 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             if (wide) {
                 item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
                     SettingsHeroHeader(
-                        title = "Profile",
-                        subtitle = "A member of the community",
-                        onBack = { navController.popBackStack() }
+                        title = person?.label ?: "Profile",
+                        subtitle = person?.handleLabel.orEmpty(),
+                        onBack = { navController.popBackStack() },
+                        footer = profileTear,
+                        footerHeight = profileTearHeight(hasBio)
                     )
                 }
             }
@@ -249,48 +320,6 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 return@LazyVerticalGrid
             }
 
-            item(key = "identity", span = { GridItemSpan(maxLineSpan) }, contentType = "identity") {
-                SocialProfileHeader(
-                    person = person,
-                    isMe = isMe,
-                    loading = loading,
-                    cards = cards,
-                    friendRequestId = friendRequestId,
-                    asked = asked,
-                    onBlock = { confirmBlock = true },
-                    onReport = { reporting = true },
-                    onHide = if (myAdmin?.allows("bans") == true && !targetHidden) {
-                        { hideMember = true }
-                    } else null,
-                    onRestore = if (myAdmin?.allows("bans") == true && targetHidden) {
-                        { restoreMember = true }
-                    } else null,
-                    onEdit = {
-                        // The profile's own door back into the editor — the
-                        // same dialog "You" opens, without a detour through
-                        // Settings.
-                        navController.navigate(CurioRoutes.PROFILE) {
-                            launchSingleTop = true
-                        }
-                    },
-                    onAsk = {
-                        if (myUserId != null) {
-                            scope.launch {
-                                SocialApi.ask(token, userId, myUserId).fold(
-                                    onSuccess = { asked = true },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        }
-                    },
-                    onMessage = {
-                        navController.navigate(CurioRoutes.directMessage(userId)) {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-
             error?.let { message ->
                 item(key = "error", span = { GridItemSpan(maxLineSpan) }) {
                     Text(
@@ -298,6 +327,20 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+
+            // The record, above the posts: a member who has been moderated
+            // should find the reason on their own page without asking, and a
+            // moderator should find it before they act rather than after.
+            if (history.isNotEmpty()) {
+                item(key = "history-heading", span = { GridItemSpan(maxLineSpan) }) {
+                    SettingsSectionHeading(
+                        if (isMe) "Your moderation history" else "Moderation history"
+                    )
+                }
+                item(key = "history", span = { GridItemSpan(maxLineSpan) }) {
+                    SocialModerationHistoryCard(records = history, isMe = isMe)
                 }
             }
 
@@ -331,9 +374,11 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
 
         if (!wide) {
             SettingsHeroHeader(
-                title = "Profile",
-                subtitle = "A member of the community",
+                title = person?.label ?: "Profile",
+                subtitle = person?.handleLabel.orEmpty(),
                 onBack = { navController.popBackStack() },
+                footer = profileTear,
+                footerHeight = profileTearHeight(hasBio),
                 glassBackdrop = glassBackdrop
             )
         }
@@ -359,53 +404,58 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
         }
     }
 
-    if (hideMember) {
+    if (banSheet) {
         val active = token
         if (active != null) {
-            ModerationReasonDialog(
-                title = "Hide ${person?.label ?: "this member"}?",
-                subtitle = "Their content disappears and they cannot post. Their account keeps " +
-                    "working, and you can restore them at any time.",
-                reasons = ModerationReasons.HIDE,
-                confirmLabel = "Hide",
+            ModerationBanDialog(
+                memberName = person?.label ?: "this member",
+                currentKind = targetKind,
                 busy = moderationBusy,
-                onDismiss = { if (!moderationBusy) hideMember = false },
-                onConfirm = { reason, _ ->
+                onDismiss = { if (!moderationBusy) banSheet = false },
+                onConfirm = { kind, reason, hours ->
                     moderationBusy = true
                     scope.launch {
-                        CommunityApi.hideMember(active, userId, true, reason).fold(
+                        CommunityApi.banMember(active, userId, kind, reason, hours).fold(
                             onSuccess = {
-                                targetHidden = true
-                                hideMember = false
+                                targetKind = kind
+                                banSheet = false
+                                load()
                             },
-                            onFailure = { error = it.message }
+                            onFailure = { error = communityMessage(it) }
                         )
                         moderationBusy = false
                     }
-                }
+                },
+                onLift = if (targetKind.isNotBlank()) {
+                    { liftingBan = true }
+                } else null
             )
         }
     }
 
-    if (restoreMember) {
+    if (liftingBan) {
         val active = token
         if (active != null) {
-            SocialConfirmDialog(
-                title = "Restore ${person?.label ?: "this member"}?",
-                body = "Their content becomes visible again and they can post and reply.",
-                confirmLabel = "Restore",
+            ModerationReasonDialog(
+                title = "Lift the ban on ${person?.label ?: "this member"}?",
+                subtitle = "Nothing stays paused for them. The record of the ban remains in their " +
+                    "moderation history, which is what stops a lift from erasing what happened.",
+                reasons = ModerationReasons.LIFT,
+                confirmLabel = "Lift ban",
                 destructive = false,
                 busy = moderationBusy,
-                onDismiss = { if (!moderationBusy) restoreMember = false },
-                onConfirm = {
+                onDismiss = { if (!moderationBusy) liftingBan = false },
+                onConfirm = { reason, _ ->
                     moderationBusy = true
                     scope.launch {
-                        CommunityApi.hideMember(active, userId, false).fold(
+                        CommunityApi.liftBan(active, userId, reason).fold(
                             onSuccess = {
-                                targetHidden = false
-                                restoreMember = false
+                                targetKind = ""
+                                liftingBan = false
+                                banSheet = false
+                                load()
                             },
-                            onFailure = { error = it.message }
+                            onFailure = { error = communityMessage(it) }
                         )
                         moderationBusy = false
                     }
@@ -443,214 +493,221 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
 }
 
 /**
- * The identity block — Instagram's shape, Curio's materials.
+ * THE PROFILE IN THE TEAR — the identity block, drawn INSIDE the hero banner.
  *
- * One row: the portrait at its largest, then the name, the @handle and the
- * three counts laid out as equal columns BENEATH each other (a number over
- * its label, like a profile that respects scanning), then the bio and the
- * single action that fits the relationship. Everything that was explanation
- * has been cut: a profile states who this is and shows their work — it does
- * not narrate its own privacy rules, which live in Settings → Online mode.
+ * It used to be a card UNDER the banner ("Profile · A member of the
+ * community", then a surface carrying the portrait), which made the top of a
+ * person's page read as a header that belonged to nobody. The Social wall's
+ * doors row had already proved the better shape: content that belongs to the
+ * header rides INSIDE the torn banner, on the hero's own glass. The identity
+ * does exactly that now — the tear is extended by [profileTearHeight], the
+ * banner's own title carries the display name and the @handle, and the block
+ * beneath it carries the three honest counts, the bio and the one action that
+ * fits the relationship.
  *
- * The counts are computed from the SAME list the grid renders, so the page
- * can never claim a number it is not showing: "posts" is what is on screen,
- * "likes" and "replies" are what those posts received.
+ * Everything here paints in the hero's readable [ink] on hero glass, never in
+ * page colours: a block sitting on a coloured banner has exactly one palette
+ * that can be read on it, and this is it.
+ *
+ * @param height the SAME number the caller passed as `footerHeight`. The block
+ *   is GIVEN its space rather than measuring itself, so the banner and its
+ *   content can never disagree by a pixel — the reservation is the layout.
  */
 @Composable
-private fun SocialProfileHeader(
+private fun SocialProfileHeroBlock(
+    ink: Color,
+    height: Dp,
     person: CurioPerson?,
     isMe: Boolean,
     loading: Boolean,
     cards: List<CommunityCard>,
     friendRequestId: String?,
     asked: Boolean,
+    /** The tier in force on this member, blank when they are not banned. */
+    bannedKind: String,
+    /** True for a moderator with the 'bans' permission. */
+    canModerate: Boolean,
+    /** Asked when there is no friendship yet. */
     onAsk: () -> Unit,
     onMessage: () -> Unit,
-    /** Opens the member's own editor (only offered on your own profile). */
     onEdit: () -> Unit = {},
-    /** Blocks this member — the one destructive move a profile offers. */
-    onBlock: () -> Unit,
-    /** Files a member report — the reason list is the MEMBER one. */
     onReport: () -> Unit = {},
-    /** A moderator's hide, offered only while the member is visible. */
-    onHide: (() -> Unit)? = null,
-    /** …and the way back, offered only while they are hidden. */
-    onRestore: (() -> Unit)? = null
+    onBan: () -> Unit = {},
+    onLiftBan: () -> Unit = {},
+    onBlock: () -> Unit
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val likes = remember(cards) { cards.sumOf { it.likeCount } }
     val replies = remember(cards) { cards.sumOf { it.commentCount } }
-    val context = LocalContext.current
+    // A streak is device-local, so it can only ever be YOURS: another member's
+    // flame would be this phone's habit wearing their name.
     val streak = remember(isMe) { if (isMe) StreakTracker.getStreak(context) else 0 }
 
-    Surface(
-        shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+        // ── Row one: the portrait, and the numbers beside it ───────────────
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ── Row one: portrait + identity ────────────────────────────
+            SocialAvatar(
+                style = person?.avatarStyle ?: 0,
+                avatarSize = 60.dp,
+                onClick = null,
+                // On the banner the disc's own rim would double the tear's
+                // edge, so the portrait drops it and lets the hero frame it.
+                ring = false
+            )
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(18.dp)
-            ) {
-                SocialAvatar(
-                    style = person?.avatarStyle ?: 0,
-                    avatarSize = 84.dp,
-                    onClick = null
-                )
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    // The DISPLAY name LEADS; the @username reads beneath it.
-                    // Presence is deliberately NOT drawn here — Curio's
-                    // activity status is only ever shown inside a direct chat
-                    // (see `docs/ONLINE_PRIVACY.md`).
-                    Text(
-                        text = person?.label
-                            ?: if (loading) "Loading…" else "This profile isn't visible",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = person?.handleLabel?.ifBlank { "@…" } ?: "@…",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (loading) {
-                        CircularProgressIndicator(
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                }
-            }
-
-            // ── Row two: the counts, as equal columns under the identity ──
-            // The APP profile's stat language: big number over a small label,
-            // the number wearing the rose accent the hero uses — a member's
-            // page reads like the page they already know. On your OWN page the
-            // streak (flame + days) joins the columns; another member's
-            // streak is device-local, so it is simply absent rather than zero.
-            Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                SocialProfileStat(value = cards.size, label = "posts")
-                SocialProfileStat(value = likes, label = "likes")
-                SocialProfileStat(value = replies, label = "replies")
-                if (isMe) {
-                    SocialProfileStreak(value = streak)
-                }
+                SocialProfileStat(value = cards.size, label = "posts", ink = ink)
+                SocialProfileStat(value = likes, label = "likes", ink = ink)
+                SocialProfileStat(value = replies, label = "replies", ink = ink)
+                if (isMe) SocialProfileStreak(value = streak, ink = ink)
             }
+        }
 
+        if (loading) {
+            CircularProgressIndicator(
+                strokeWidth = 2.dp,
+                color = ink,
+                modifier = Modifier.size(14.dp)
+            )
+        }
+
+        // A ban in force is stated ON THE PAGE, in the tier's own words: a
+        // moderator arriving here has to know what is already set before they
+        // touch anything. It takes the bio's line while it is up — a ban is
+        // the more urgent sentence, and one line is what there is room for.
+        if (bannedKind.isNotBlank()) {
+            Text(
+                text = "Banned: ${banTierLabel(bannedKind)}",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        } else {
             // Their own words, and NOTHING when they wrote none — a profile
             // must never pad itself with a placeholder line.
             person?.bio?.trim()?.takeIf { it.isNotEmpty() }?.let { bio ->
                 Text(
                     text = bio,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ink.copy(alpha = 0.88f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+        }
 
-            // ── Row three: the one action that fits, and the ⋮ ───────────
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // The action (or the line that replaces it) claims the row, so
-                // the ⋮ below always sits at the end of it.
-                Box(Modifier.weight(1f)) {
-                    when {
-                        isMe -> SocialProfileAction(
-                            label = "Edit profile",
-                            glyph = CurioIcons.Edit,
-                            onClick = onEdit
-                        )
-                        friendRequestId != null -> SocialProfileAction(
-                            label = "Message",
-                            glyph = CurioIcons.Notes,
-                            onClick = onMessage
-                        )
-                        asked -> SocialProfileAction(
-                            label = "Request sent",
-                            glyph = CurioIcons.Person,
-                            onClick = {}
-                        )
-                        else -> SocialProfileAction(
-                            label = "Add friend",
-                            glyph = CurioIcons.Person,
-                            onClick = onAsk
-                        )
-                    }
+        // ── Row two: the one action that fits, and the ⋮ ───────────────────
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(Modifier.weight(1f)) {
+                when {
+                    isMe -> SocialProfileHeroAction(
+                        label = "Edit profile",
+                        glyph = CurioIcons.Edit,
+                        ink = ink,
+                        onClick = onEdit
+                    )
+                    friendRequestId != null -> SocialProfileHeroAction(
+                        label = "Message",
+                        glyph = CurioIcons.Chats,
+                        ink = ink,
+                        onClick = onMessage
+                    )
+                    asked -> SocialProfileHeroAction(
+                        label = "Request sent",
+                        glyph = CurioIcons.TaskAlt,
+                        ink = ink,
+                        onClick = {}
+                    )
+                    else -> SocialProfileHeroAction(
+                        label = "Add friend",
+                        glyph = CurioIcons.Person,
+                        ink = ink,
+                        onClick = onAsk
+                    )
                 }
-                if (!isMe) {
-                    // Blocking is rare and irreversible, so it sits behind the
-                    // page's own ⋮ rather than under a finger that is only
-                    // reading.
-                    Box {
-                        CurioIcon(
-                            name = CurioIcons.MoreVert,
-                            contentDescription = "More profile actions",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 20.dp,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .clickable { menuOpen = true }
-                                .padding(6.dp)
+            }
+            if (!isMe) {
+                // Blocking and banning are rare and irreversible, so they live
+                // behind the page's own ⋮ rather than under a finger that is
+                // only reading.
+                Box {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = settingsHeroPillFill(),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(50))
+                            .clickable { menuOpen = true }
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                name = CurioIcons.MoreVert,
+                                contentDescription = "More profile actions",
+                                tint = ink,
+                                size = 20.dp
+                            )
+                        }
+                    }
+                    CurioDropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        accent = settingsRoseAccent()
+                    ) {
+                        CurioDropdownItem(
+                            text = { Text("Report member", style = MaterialTheme.typography.bodyMedium) },
+                            onClick = {
+                                menuOpen = false
+                                onReport()
+                            }
                         )
-                        CurioDropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false },
-                            accent = settingsRoseAccent()
-                        ) {
+                        if (canModerate) {
                             CurioDropdownItem(
-                                text = { Text("Report member", style = MaterialTheme.typography.bodyMedium) },
+                                text = {
+                                    Text(
+                                        text = if (bannedKind.isBlank()) "Ban member…" else "Change ban…",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                },
                                 onClick = {
                                     menuOpen = false
-                                    onReport()
-                                }
+                                    onBan()
+                                },
+                                danger = bannedKind.isBlank()
                             )
-                            onHide?.let { hide ->
+                            if (bannedKind.isNotBlank()) {
                                 CurioDropdownItem(
-                                    text = { Text("Hide member", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Lift ban", style = MaterialTheme.typography.bodyMedium) },
                                     onClick = {
                                         menuOpen = false
-                                        hide()
-                                    },
-                                    danger = true
-                                )
-                            }
-                            onRestore?.let { restore ->
-                                CurioDropdownItem(
-                                    text = { Text("Restore member", style = MaterialTheme.typography.bodyMedium) },
-                                    onClick = {
-                                        menuOpen = false
-                                        restore()
+                                        onLiftBan()
                                     }
                                 )
                             }
-                            CurioDropdownItem(
-                                text = { Text("Block", style = MaterialTheme.typography.bodyMedium) },
-                                onClick = {
-                                    menuOpen = false
-                                    onBlock()
-                                },
-                                danger = true
-                            )
                         }
+                        CurioDropdownItem(
+                            text = { Text("Block", style = MaterialTheme.typography.bodyMedium) },
+                            onClick = {
+                                menuOpen = false
+                                onBlock()
+                            },
+                            danger = true
+                        )
                     }
                 }
             }
@@ -658,78 +715,189 @@ private fun SocialProfileHeader(
     }
 }
 
-/** One count in the identity block: the number OVER its label, centred —
- *  a column reads at a glance where a run of inline numbers does not. The
- *  number wears ON-SURFACE ink: the rose accent only had real contrast
- *  against the hero's tint, and on the plain page background it washed out
- *  (the "can't read the post counts" failure). The label stays quiet. */
+/**
+ * The tear's height for a member WITH or WITHOUT a bio.
+ *
+ * One function because two numbers must agree: the height the banner extends by
+ * and the height the grid reserves. A bio adds exactly one line's worth.
+ */
+private fun profileTearHeight(hasBio: Boolean): Dp =
+    if (hasBio) 176.dp else 134.dp
+
+/**
+ * THE MODERATION RECORD — what was done to this member, when, why and by whom.
+ *
+ * Shown to the team on any profile and to a member on their own, because the
+ * server allows exactly those two readers. Only drawn when there IS a record:
+ * an empty "you have never been moderated" card would be a promise nobody asked
+ * for.
+ */
 @Composable
-private fun SocialProfileStat(value: Int, label: String) {
+internal fun SocialModerationHistoryCard(records: List<ModerationRecord>, isMe: Boolean) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = if (isMe) {
+                    "Nothing here is a surprise: this is what the moderation team has on you."
+                } else {
+                    "The team's record for this member. Only moderators can see it."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            records.forEach { record ->
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = moderationActionLabel(record.action),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    val tail = listOfNotNull(
+                        record.reason?.let { "“$it”" },
+                        record.actorName.trim().takeIf { it.isNotEmpty() }?.let { "by $it" },
+                        record.createdAtMillis.takeIf { it > 0L }?.let { stamp(it) }
+                    ).joinToString(" · ")
+                    if (tail.isNotBlank()) {
+                        Text(
+                            text = tail,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A moderation verb, said the way a person would say it. The database stores
+ * the machine name (`ban_read_only`, `unban`) — the screen is not the place to
+ * make somebody decode it.
+ */
+private fun moderationActionLabel(action: String): String = when (action) {
+    "ban_content" -> "Content hidden"
+    "ban_read_only" -> "Set to view only"
+    "ban_social" -> "Banned from friends and messages"
+    "ban_account" -> "Account banned"
+    "unban" -> "Ban lifted"
+    "hide_member" -> "Content hidden"
+    "unhide_member" -> "Ban lifted"
+    "remove_card" -> "A post was removed"
+    "remove_comment" -> "A reply was removed"
+    "dismiss" -> "A report was closed"
+    else -> action.replace('_', ' ').replaceFirstChar { it.uppercase() }
+}
+
+/** "12 Sep, 14:03" — short, local, and only what a record needs. */
+private fun stamp(millis: Long): String =
+    java.time.Instant.ofEpochMilli(millis)
+        .atZone(java.time.ZoneId.systemDefault())
+        .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
+
+
+/** One count in the tear: the number OVER its label, centred — a column reads
+ *  at a glance where a run of inline numbers does not. Both lines wear the
+ *  HERO's own ink, because the counts now sit on the banner: page colours on a
+ *  rose banner were the "can't read the post counts" failure all over again. */
+@Composable
+private fun SocialProfileStat(value: Int, label: String, ink: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value.toString(),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurface
+            color = ink
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = ink.copy(alpha = 0.78f)
         )
     }
 }
 
 /** The streak column: the flame over the days, the icon doing the labelling. */
 @Composable
-private fun SocialProfileStreak(value: Int) {
+private fun SocialProfileStreak(value: Int, ink: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             CurioIcon(
                 name = CurioIcons.LocalFire,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = ink,
                 size = 16.dp
             )
             Spacer(Modifier.width(3.dp))
             Text(
                 text = value.toString(),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
+                color = ink
             )
         }
         Text(
             text = "streak",
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = ink.copy(alpha = 0.78f)
         )
     }
 }
 
 /**
- * The profile's primary action, as a filled pill — the same door the wall and a
- * conversation use, so "Message" and "Add friend" can never look like two
- * different kinds of thing depending on where you are. It fills the row's
+ * The profile's one primary action, ON THE BANNER: the hero's ink as the FILL
+ * and the hero's own colour as the content — the exact inverse of the banner,
+ * which is the strongest contrast a button on it can have. It fills the row's
  * width, the way a profile's primary action should.
+ *
+ * The same door every other surface uses, so "Message" and "Add friend" can
+ * never look like two different kinds of thing depending on where you are.
  */
 @Composable
-private fun SocialProfileAction(label: String, glyph: String, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        colors = curioDialogActionButtonColors(),
-        modifier = Modifier.fillMaxWidth()
+private fun SocialProfileHeroAction(
+    label: String,
+    glyph: String,
+    ink: Color,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(50)
+    val content = settingsRoseAccent()
+    Surface(
+        shape = shape,
+        color = ink,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .clickable(onClick = onClick)
     ) {
-        CurioIcon(
-            name = glyph,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimary,
-            size = 16.dp
-        )
-        Spacer(Modifier.width(7.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+        ) {
+            CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = content,
+                size = 16.dp
+            )
+            Spacer(Modifier.width(7.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = content,
+                maxLines = 1
+            )
+        }
     }
 }
 

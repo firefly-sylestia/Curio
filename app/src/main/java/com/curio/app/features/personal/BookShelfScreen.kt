@@ -375,6 +375,9 @@ private fun AddBookSheet(
     val scope = rememberCoroutineScope()
     var query by remember { mutableStateOf("") }
     var hits by remember { mutableStateOf<List<BookHit>>(emptyList()) }
+    // The hits from Curio's OWN catalog, kept apart from the network ones: they
+    // carry a chapter list and a page count, they never fail, and they lead.
+    var catalogHits by remember { mutableStateOf<List<BookCatalog.Hit>>(emptyList()) }
     var searching by remember { mutableStateOf(false) }
     var searched by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
@@ -383,7 +386,22 @@ private fun AddBookSheet(
     var manualAuthor by remember { mutableStateOf("") }
     var manualChapters by remember { mutableIntStateOf(0) }
 
-    fun addBook(title: String, author: String, cover: String, chapters: Int) {
+    /**
+     * Puts the book on the shelf.
+     *
+     * [catalogId] and [pages] are filled when the book came from Curio's own
+     * catalog: the id is what lets the book's page read the real chapter names,
+     * page ranges and summaries back out of the topic JSON, and the page count
+     * gives "how long is this book" an answer that did not come from a guess.
+     */
+    fun addBook(
+        title: String,
+        author: String,
+        cover: String,
+        chapters: Int,
+        catalogId: String = "",
+        pages: Int = 0
+    ) {
         val trimmed = title.trim()
         if (trimmed.isEmpty()) return
         val id = newPersonalBookId()
@@ -397,7 +415,9 @@ private fun AddBookSheet(
                             author = author.trim(),
                             coverUrl = cover,
                             totalChapters = chapters.coerceAtLeast(0),
-                            currentChapter = 0
+                            currentChapter = 0,
+                            catalogId = catalogId,
+                            pageCount = pages.coerceAtLeast(0)
                         )
                     )
                 }
@@ -461,14 +481,25 @@ private fun AddBookSheet(
                 accent = accent,
                 imeAction = ImeAction.Search,
                 onSearch = {
-                    if (query.isBlank()) return@BookField
+                    val text = query.trim()
+                    if (text.isEmpty()) return@BookField
                     searching = true
                     failed = false
                     scope.launch {
-                        val result = withContext(Dispatchers.IO) { searchOpenLibrary(query) }
+                        // CURIOS'S OWN CATALOG FIRST: instant, offline, and the
+                        // only source that also carries the chapter list — so
+                        // the book arrives with its real table of contents.
+                        val local = withContext(Dispatchers.IO) { BookCatalog.search(text) }
+                        catalogHits = local
+                        // …THEN the wider catalogue, for anything Curio does not
+                        // have. Its failure only matters when the app's own
+                        // shelf came up empty, so an offline phone still gets a
+                        // useful answer instead of an apology.
+                        val remote = withContext(Dispatchers.IO) { searchOpenLibrary(text) }
                         searching = false
                         searched = true
-                        if (result == null) failed = true else hits = result
+                        failed = remote == null && local.isEmpty()
+                        hits = remote.orEmpty()
                     }
                 }
             )
@@ -487,6 +518,72 @@ private fun AddBookSheet(
                     color = ink.copy(alpha = 0.62f)
                 )
             }
+            // The app's own books, with what they bring: chapters and pages.
+            catalogHits.forEach { hit ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable {
+                            addBook(
+                                title = hit.title,
+                                author = hit.author,
+                                cover = hit.coverUrl,
+                                chapters = hit.chapterCount,
+                                catalogId = hit.topicId,
+                                pages = hit.pageCount
+                            )
+                        }
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    BookCover(
+                        title = hit.title,
+                        author = "",
+                        coverUrl = hit.coverUrl,
+                        corner = 8.dp,
+                        modifier = Modifier
+                            .width(42.dp)
+                            .height(62.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            hit.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = ink,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (hit.author.isNotBlank()) {
+                            Text(
+                                hit.author,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = ink.copy(alpha = 0.58f),
+                                maxLines = 1
+                            )
+                        }
+                        // What the catalog adds over a bare search result: the
+                        // book's own length and its chapters, in advance.
+                        val facts = listOfNotNull(
+                            hit.genre.takeIf { it.isNotBlank() },
+                            hit.chapterCount.takeIf { it > 0 }?.let { "$it chapters" },
+                            hit.pageCount.takeIf { it > 0 }?.let { "$it pp." }
+                        ).joinToString(" · ")
+                        if (facts.isNotBlank()) {
+                            Text(
+                                facts,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = accent.copy(alpha = 0.85f),
+                                maxLines = 1
+                            )
+                        }
+                    }
+                    CurioIcon(CurioIcons.Add, "Add ${hit.title}", tint = accent, size = 18.dp)
+                }
+            }
+
             hits.take(8).forEach { hit ->
                 Row(
                     modifier = Modifier
@@ -529,7 +626,7 @@ private fun AddBookSheet(
                     CurioIcon(CurioIcons.Add, "Add ${hit.title}", tint = accent, size = 18.dp)
                 }
             }
-            if (searched && !searching && !failed && hits.isEmpty()) {
+            if (searched && !searching && !failed && hits.isEmpty() && catalogHits.isEmpty()) {
                 Text(
                     "Nothing in the catalogue. Add the book yourself instead.",
                     style = MaterialTheme.typography.bodySmall,
@@ -537,7 +634,12 @@ private fun AddBookSheet(
                 )
             }
 
-            TextButton(onClick = { manual = true; manualTitle = query }) {
+            TextButton(onClick = {
+                manual = true
+                manualTitle = query
+                catalogHits = emptyList()
+                hits = emptyList()
+            }) {
                 Text("Add the book myself", color = accent)
             }
         }

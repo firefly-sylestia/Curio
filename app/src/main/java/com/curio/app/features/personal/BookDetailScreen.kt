@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.curio.app.data.BookChapter
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
@@ -90,6 +91,18 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     }
     var notesLoaded by remember { mutableStateOf(false) }
     LaunchedEffect(notes) { notesLoaded = true }
+
+    // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
+    // topic id, so its chapter rows can wear the book's REAL chapter names, page
+    // ranges and summaries instead of "Chapter 7" — the catalog is the reason
+    // the shelf can be more than a list of titles.
+    val catalogId by produceState(initialValue = "", book) { value = book?.catalogId.orEmpty() }
+    val catalogChapters by produceState(
+        initialValue = emptyList<BookChapter>(),
+        catalogId
+    ) {
+        value = if (catalogId.isBlank()) emptyList() else BookCatalog.chapters(catalogId)
+    }
 
     val scope = rememberCoroutineScope()
 
@@ -291,6 +304,12 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 ChapterCard(
                     bookId = bookId,
                     chapter = chapter,
+                    // The catalog's own words for this chapter, when the book came
+                    // from Curio's lane: a name, and the pages it spans.
+                    catalogTitle = catalogChapters.getOrNull(chapter - 1)?.title.orEmpty(),
+                    catalogPages = catalogChapters.getOrNull(chapter - 1)
+                        ?.let { "pp. ${it.pageStart}\u2013${it.pageEnd}" }
+                        .orEmpty(),
                     review = review,
                     isOpen = expanded == chapter,
                     openState = if (expanded == chapter) activeState else null,
@@ -559,6 +578,10 @@ private fun BlurbField(
 private fun ChapterCard(
     bookId: String,
     chapter: Int,
+    /** The catalog's name for this chapter (blank for a book added by hand). */
+    catalogTitle: String = "",
+    /** The pages this chapter spans, e.g. "pp. 121–154". */
+    catalogPages: String = "",
     review: PersonalNoteEntity?,
     isOpen: Boolean,
     openState: PersonalEditorState?,
@@ -596,21 +619,30 @@ private fun ChapterCard(
                 Spacer(Modifier.width(11.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "Chapter $chapter",
+                        // The book's OWN chapter name leads when the catalog has
+                        // one; the number stays for the ones it does not.
+                        text = catalogTitle.takeIf { it.isNotBlank() } ?: "Chapter $chapter",
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontFamily = FrauncesFontFamily,
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = ink
+                        color = ink,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        when {
-                            review == null -> "Nothing written yet"
-                            review.preview.isBlank() -> "Open to keep writing"
-                            else -> words
-                        },
+                        text = listOfNotNull(
+                            catalogPages.takeIf { it.isNotBlank() },
+                            when {
+                                review == null -> "Nothing written yet"
+                                review.preview.isBlank() -> "Open to keep writing"
+                                else -> words
+                            }
+                        ).joinToString(" · "),
                         style = MaterialTheme.typography.labelSmall,
-                        color = ink.copy(alpha = 0.5f)
+                        color = ink.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 if (review != null && !isOpen) {

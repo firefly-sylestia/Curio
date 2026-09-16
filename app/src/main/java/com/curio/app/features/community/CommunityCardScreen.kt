@@ -45,6 +45,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioContentFilter
+import com.curio.app.data.SocialPostArchive
 import com.curio.app.data.supabase.CommunityAdminRow
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
@@ -78,7 +79,9 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Full community post page: card, author, reactions and inline replies. */
 @Composable
@@ -401,7 +404,8 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         token?.let { active ->
             SocialConfirmDialog(
                 title = "Take this card down?",
-                body = "It disappears from the wall for everyone right away. Its replies go with it.",
+                body = "It disappears from the wall for everyone right away, and its replies go " +
+                    "with it. A copy is kept on this phone so you can post it again.",
                 confirmLabel = "Take down",
                 busy = busy,
                 onDismiss = { if (!busy) takingDown = false },
@@ -410,6 +414,24 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                     scope.launch {
                         CommunityApi.delete(active, cardId).fold(
                             onSuccess = {
+                                // A copy stays on the device before the page
+                                // closes: the words are the author's own, and
+                                // the composer offers them back if they change
+                                // their mind (see [SocialPostArchive]).
+                                card?.let { gone ->
+                                    withContext(Dispatchers.IO) {
+                                        SocialPostArchive.rememberDeleted(
+                                            context,
+                                            SocialPostArchive.DeletedPost(
+                                                id = gone.id,
+                                                title = "",
+                                                draft = SocialPostArchive.draftOf(gone),
+                                                postedAtMillis = gone.createdAtMillis,
+                                                deletedAtMillis = System.currentTimeMillis()
+                                            )
+                                        )
+                                    }
+                                }
                                 takingDown = false
                                 busy = false
                                 navController.popBackStack()

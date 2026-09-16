@@ -1,5 +1,10 @@
 package com.curio.app.features.community
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -38,11 +44,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.SocialPostArchive
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CommunityApi
@@ -70,6 +82,7 @@ import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsHeroPillFill
 import com.curio.app.features.settings.settingsHeroTotalHeight
 import com.curio.app.features.settings.settingsRoseAccent
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.navigation.CurioRoutes
@@ -89,8 +102,10 @@ import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * COMMUNITY — the 24-hour wall of text share cards.
@@ -150,6 +165,23 @@ fun CommunityScreen(navController: NavController) {
     // the person it applies to.
     var moderation by remember { mutableStateOf<CurioModerationStatus?>(null) }
 
+    // The post button slips away while the wall is being scrolled DOWN and
+    // comes back the moment the finger goes up or the wall reaches the top —
+    // the Home "+" behaviour, applied to the wall's own list. A wall is a long
+    // read, and a button nobody asked for must not sit on top of it.
+    var postVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(listState) {
+        var previous = listState.firstVisibleItemIndex * 100_000 + listState.firstVisibleItemScrollOffset
+        snapshotFlow {
+            listState.firstVisibleItemIndex * 100_000 + listState.firstVisibleItemScrollOffset
+        }.collect { now ->
+            val delta = now - previous
+            if (delta > 6) postVisible = false
+            else if (delta < -6 || now <= 0) postVisible = true
+            previous = now
+        }
+    }
+
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
     LaunchedEffect(token, account.session?.userId) {
         val active = token
@@ -168,6 +200,10 @@ fun CommunityScreen(navController: NavController) {
     }
 
     val eligible = account.signedIn && onlineMode && token != null
+    // A ban with a wall tier takes the compose door away: the server refuses
+    // the write anyway, and offering a button that can only fail is worse than
+    // not offering it. Until my own status has been read, the door is open.
+    val canWriteWall = moderation?.let { !it.readOnly && !it.locked } ?: true
 
     suspend fun load() {
         val active = token ?: return
@@ -374,14 +410,49 @@ fun CommunityScreen(navController: NavController) {
             // A hidden member is told WHY, in their own words: the ban lives on
             // their profile row, so the app can explain it instead of letting
             // posting fail with a raw server error.
-            moderation?.takeIf { it.hidden }?.let { status ->
+            // A ban, explained in the TIER's own words. The member is told
+            // exactly how far it reaches and — when it is on a clock — when it
+            // lifts itself, instead of being left to guess at a raw refusal.
+            moderation?.takeIf { it.banned }?.let { status ->
                 item(key = "hidden-notice") {
                     SettingsOptionCard {
                         SettingsOptionInfoRow(
-                            CurioIcons.VisibilityOff,
-                            "Your account is hidden",
-                            status.reason ?: "A moderator hid your content. Posting and replies are " +
-                                "paused meanwhile — reach out if you think this is a mistake."
+                            if (status.locked) CurioIcons.Lock else CurioIcons.VisibilityOff,
+                            when {
+                                status.locked -> "This account is banned"
+                                status.readOnly -> "Your account is read-only"
+                                status.socialOnly -> "Friends and messages are paused"
+                                else -> "Your account is hidden"
+                            },
+                            buildString {
+                                append(status.reason ?: "A moderator acted on this account.")
+                                append(' ')
+                                append(
+                                    when {
+                                        status.locked ->
+                                            "No post, reply, reaction, message or edit is accepted " +
+                                                "while it stands — reach out if you think this is a mistake."
+                                        status.readOnly ->
+                                            "You can still read the wall, but posting, replying, " +
+                                                "reacting, friends and messages are paused meanwhile."
+                                        status.socialOnly ->
+                                            "The wall works as usual; friends, requests and messages " +
+                                                "are paused meanwhile."
+                                        else ->
+                                            "Your posts and replies are hidden and you cannot post " +
+                                                "meanwhile — reach out if you think this is a mistake."
+                                    }
+                                )
+                                status.untilMillis?.let { until ->
+                                    append(" It lifts by itself on ")
+                                    append(
+                                        java.time.Instant.ofEpochMilli(until)
+                                            .atZone(java.time.ZoneId.systemDefault())
+                                            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
+                                    )
+                                    append('.')
+                                }
+                            }
                         )
                     }
                 }
@@ -481,6 +552,7 @@ fun CommunityScreen(navController: NavController) {
                     Box(Modifier.animateItem()) {
                         CommunityCardItem(
                             card = card,
+                            compact = !AppPreferences.communityRoomyWallState,
                             onOpen = { navController.navigate(CurioRoutes.communityCard(card.id)) },
                             onAuthor = {
                                 if (card.authorId.isNotBlank()) {
@@ -547,13 +619,13 @@ fun CommunityScreen(navController: NavController) {
 
         // The one way to post: a floating pill above the wall, labelled with
         // what it actually does (sharing a TOPIC as a card). It clears the
-        // floating nav bar when this page is a tab root.
-        if (eligible) {
-            ExtendedFloatingActionButton(
-                onClick = { composing = true },
-                containerColor = curioDialogActionColor(),
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(50),
+        // floating nav bar when this page is a tab root, and it leaves while
+        // the wall is scrolling down.
+        if (eligible && canWriteWall) {
+            AnimatedVisibility(
+                visible = postVisible,
+                enter = fadeIn() + slideInVertically { it / 2 },
+                exit = fadeOut() + slideOutVertically { it / 2 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(
@@ -563,6 +635,12 @@ fun CommunityScreen(navController: NavController) {
                                 .calculateBottomPadding()
                         } else 0.dp
                     )
+            ) {
+            ExtendedFloatingActionButton(
+                onClick = { composing = true },
+                containerColor = curioDialogActionColor(),
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(50)
             ) {
                 CurioIcon(
                     name = CurioIcons.Add,
@@ -577,6 +655,7 @@ fun CommunityScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                 )
+            }
             }
         }
 
@@ -595,7 +674,7 @@ fun CommunityScreen(navController: NavController) {
     if (composing && token != null) {
         CommunityPostScreen(
             onDismiss = { composing = false },
-            onPost = { draft ->
+            onPost = { draft, repostOf ->
                 scope.launch {
                     CommunityApi.post(
                         token,
@@ -605,7 +684,16 @@ fun CommunityScreen(navController: NavController) {
                     ).fold(
                         onSuccess = { posted ->
                             composing = false
-                            notice = "Posted."
+                            notice = if (repostOf != null) "Posted again." else "Posted."
+                            // The composer's own memory follows the post: the
+                            // draft is finished with, and a kept post that has
+                            // gone back up leaves the local archive (it is on
+                            // the wall again — keeping it would be a duplicate
+                            // waiting to happen).
+                            withContext(Dispatchers.IO) {
+                                SocialPostArchive.clearDraft(context, draft.kind)
+                                repostOf?.let { SocialPostArchive.forgetDeleted(context, it) }
+                            }
                             // On the wall before the sheet is even gone, in
                             // this device's own name and portrait: the row the
                             // server stored IS the card. The rest of the feed
@@ -668,7 +756,12 @@ fun CommunityScreen(navController: NavController) {
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
             title = { Text("Delete post?") },
-            text = { Text("This will permanently remove your post from the community wall.") },
+            text = {
+                Text(
+                    "It leaves the community wall right away. A copy is kept on this phone, so " +
+                        "you can post it again from the composer if you change your mind."
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     val active = token ?: return@TextButton
@@ -676,7 +769,24 @@ fun CommunityScreen(navController: NavController) {
                     scope.launch {
                         CommunityApi.delete(active, card.id).fold(
                             onSuccess = {
-                                notice = "Your card was taken down."
+                                // Deleting a post used to be final the instant the
+                                // server was told. The words are the member's
+                                // own, so a copy stays on this phone — never
+                                // re-uploaded unless they ask — and the composer
+                                // offers it back at the foot of the page.
+                                withContext(Dispatchers.IO) {
+                                    SocialPostArchive.rememberDeleted(
+                                        context,
+                                        SocialPostArchive.DeletedPost(
+                                            id = card.id,
+                                            title = "",
+                                            draft = SocialPostArchive.draftOf(card),
+                                            postedAtMillis = card.createdAtMillis,
+                                            deletedAtMillis = System.currentTimeMillis()
+                                        )
+                                    )
+                                }
+                                notice = "Taken down — it is kept on this phone if you change your mind."
                                 load()
                             },
                             onFailure = { error = it.message }
@@ -694,12 +804,25 @@ fun CommunityScreen(navController: NavController) {
 /**
  * A community card drawn at whatever width it is given.
  *
- * The REAL share card is rendered (never a simplified lookalike), laid out
- * DIRECTLY at the width its row offers — the same way the card editor draws
- * its own preview (a 280dp base). The card's own layout and smart fit size the
- * title, the fact box and the text for the size they are handed, so a post
- * shows the WHOLE card, crisp: nothing is scaled as a layer, nothing is
- * cropped, and no row reserves height the art does not use.
+ * v388 — ONE CARD, ONE RATIO, EVERYWHERE. The card used to be laid out at
+ * whatever width the caller offered, so its own "smart fit" re-sized the
+ * title, the fact box and the body for each surface: a post on the wall, the
+ * composer's preview and the post's full page each showed the same card with
+ * DIFFERENT proportions — text that filled the card in a preview came out
+ * small and lost on the full page, and a reviewer comparing the two could not
+ * tell whether the difference was theirs or the renderer's.
+ *
+ * The card is now always laid out at its own DESIGN size (the aspect's width)
+ * and the whole drawing is scaled to the width it is given, as one object. So
+ * every proportion inside it — margins, the title's size against the fact
+ * box, the byline's weight — is identical in the wall's row, the composer's
+ * preview and the full page, at any screen width and at any system font scale
+ * (the design layout pins the font scale too, because the card is a poster:
+ * it scales as one image rather than re-flowing).
+ *
+ * Nothing is cropped and no row reserves height the art does not use: the
+ * scaled footprint is computed from the same scale, so the layout still knows
+ * exactly how much room the card takes.
  */
 @Composable
 internal fun CommunityCardCanvas(
@@ -728,27 +851,48 @@ internal fun CommunityCardCanvas(
             modifier = Modifier.fillMaxWidth(widthFraction.coerceIn(0.2f, 1f)),
             contentAlignment = Alignment.Center
         ) {
-            // The card keeps its own aspect ratio and is capped at its design
-            // width, so a wide window shows it at its natural size instead of
-            // inflating the art.
-            val targetWidth = minOf(maxWidth, aspect.widthDp.dp)
-            TopicShareCard(
-                topicName = card.topicName,
-                categoryName = card.categoryName,
-                categoryGlyph = card.categoryGlyph,
-                accent = accent,
-                factText = card.factText,
-                // The card wears the author's CURRENT username, so renaming
-                // yourself updates everything you ever posted.
-                sharerName = card.authorLabel,
-                aspect = aspect,
-                style = style,
-                byline = card.byline,
-                bodyScale = card.bodyScale,
+            // The card's own design size: the ONE layout every surface shares.
+            val designWidth = aspect.widthDp.dp
+            val designHeight = aspect.heightDp.dp
+            // What we are handed decides only the SCALE, never the layout.
+            val scale = maxWidth.value / designWidth.value
+            Box(
                 modifier = Modifier
-                    .width(targetWidth)
-                    .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
-            )
+                    .width(maxWidth)
+                    .height(designHeight * scale)
+            ) {
+                CompositionLocalProvider(
+                    // A poster does not re-flow: pinning the font scale means a
+                    // member browsing with large text gets the same card as
+                    // everybody else, just bigger with the screen.
+                    LocalDensity provides LocalDensity.current.run {
+                        Density(density = density, fontScale = 1f)
+                    }
+                ) {
+                    TopicShareCard(
+                        topicName = card.topicName,
+                        categoryName = card.categoryName,
+                        categoryGlyph = card.categoryGlyph,
+                        accent = accent,
+                        factText = card.factText,
+                        // The card wears the author's CURRENT username, so
+                        // renaming yourself updates everything you ever posted.
+                        sharerName = card.authorLabel,
+                        aspect = aspect,
+                        style = style,
+                        byline = card.byline,
+                        bodyScale = card.bodyScale,
+                        modifier = Modifier
+                            .width(designWidth)
+                            .height(designHeight)
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                                transformOrigin = TransformOrigin(0f, 0f)
+                            }
+                    )
+                }
+            }
         }
     }
 }
@@ -768,14 +912,23 @@ private fun CommunityCardItem(
   onLike: () -> Unit,
   onDislike: () -> Unit,
   onReport: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    /**
+     * The DENSE row (the shipped default): tighter padding, a smaller
+     * portrait, closer seams. The Experiments switch "Roomy social wall" flips
+     * this back to the airier spacing so the two can be compared live.
+     */
+    compact: Boolean = true
 ) {
     Surface(
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(if (compact) 22.dp else 24.dp),
+        // The ACCENT's own tint, never the plain cream container: the wall is
+        // the community's surface, and it should wear the app's colour the way
+        // every other surface does.
+        color = communityCardFill(),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(if (compact) 10.dp else 12.dp)) {
             // ── Who posted it ────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -785,11 +938,14 @@ private fun CommunityCardItem(
                     .clickable(onClick = onAuthor)
                     .padding(vertical = 2.dp)
             ) {
-                SocialAvatar(style = card.authorAvatar, avatarSize = 36.dp)
+                SocialAvatar(
+                    style = card.authorAvatar,
+                    avatarSize = if (compact) 32.dp else 36.dp
+                )
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 10.dp)
+                        .padding(start = if (compact) 8.dp else 10.dp)
                 ) {
                     // The DISPLAY name leads and the @username rides the line
                     // beneath it, beside the card's age: a name and a handle
@@ -822,7 +978,7 @@ private fun CommunityCardItem(
             }
 
             if (card.caption.isNotBlank()) {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(if (compact) 5.dp else 8.dp))
                 Text(
                     text = card.caption,
                     style = MaterialTheme.typography.bodyMedium,
@@ -831,7 +987,7 @@ private fun CommunityCardItem(
                 )
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(if (compact) 6.dp else 8.dp))
             if (card.kind == KIND_CARD) {
                 CommunityCardCanvas(
                     card = card,
@@ -887,6 +1043,26 @@ private fun CommunityCardItem(
             }
         }
     }
+}
+
+/**
+ * The fill one WALL card wears.
+ *
+ * The wall's rows used to sit on the plain `surfaceContainerLow` — the app's
+ * warm cream — which made the community's own surface the only one in the app
+ * that ignored the accent entirely. The accent now tints the container: a
+ * whisper in light mode (the cream is still the base, so text contrast is
+ * untouched), a little more in the dark, where the surface needs the lift to
+ * read as a card at all.
+ *
+ * The SAME fill is used by every community surface that draws a panel, so the
+ * wall, a post's page and a profile's cards stay one family.
+ */
+@Composable
+internal fun communityCardFill(): Color {
+    val accent = settingsRoseAccent()
+    val base = MaterialTheme.colorScheme.surfaceContainerLow
+    return if (isCurioDarkTheme()) lerp(base, accent, 0.16f) else lerp(base, accent, 0.10f)
 }
 
 /**

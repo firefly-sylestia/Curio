@@ -219,6 +219,10 @@ object OnlineAccount {
         // readable by whoever opens the app next, so the whole directory is
         // deleted — not just the newest account's entries.
         SocialCache.clear(context)
+        // The composer's own memory goes with it: an unfinished draft and the
+        // posts this account deleted are that member's words, and the next
+        // person to open the app must not be able to read — or post — them.
+        com.curio.app.data.SocialPostArchive.clear(context)
         // Realtime channels are authorised by the token that just went away:
         // they are dropped here rather than left open against a dead session.
         SupabaseRealtime.reset()

@@ -169,8 +169,28 @@ data class CurioDirectMessage(
  */
 data class CurioModerationStatus(
     val hidden: Boolean = false,
-    val reason: String? = null
-)
+    val reason: String? = null,
+    /**
+     * The ACTIVE tier of the ban ladder (see [BAN_TIERS]), blank when the
+     * account is not banned. A tier the server wrote that this build does not
+     * know still reads as a ban — never as freedom.
+     */
+    val kind: String = "",
+    /** When a timed ban runs out; null beside a [kind] means permanent. */
+    val untilMillis: Long? = null
+) {
+    /** True while ANY tier is in force (a legacy boolean counts). */
+    val banned: Boolean get() = kind.isNotBlank() || hidden
+
+    /** The lock-everything tier — the app draws a locked account, not a notice. */
+    val locked: Boolean get() = kind == BAN_ACCOUNT
+
+    /** The view-only tier: the wall works as a READER, nowhere else. */
+    val readOnly: Boolean get() = kind == BAN_READ_ONLY
+
+    /** The social-only tier: the wall works as before, friends do not. */
+    val socialOnly: Boolean get() = kind == BAN_SOCIAL
+}
 
 /**
  * One reaction somebody left on one message. [kind] is the reaction itself —
@@ -228,6 +248,10 @@ object SocialApi {
      * so an id is validated before it is used rather than trusted.
      */
     private val ID_PATTERN = Regex("[A-Za-z0-9_-]{1,64}")
+
+    /** The ban ladder's columns, and the shape a server that predates it has. */
+    private const val STATUS_COLUMNS_LADDER = "banned,ban_reason,ban_kind,banned_until"
+    private const val STATUS_COLUMNS_LEGACY = "banned,ban_reason"
 
     private fun id(value: String): String {
         require(value.matches(ID_PATTERN)) { "That reference is not valid." }
@@ -448,27 +472,50 @@ private const val PERSON_COLUMNS_PRIVACY =
         }
 
     /**
-     * MY OWN moderation state — is this account hidden, and why.
+     * MY OWN moderation state — is this account banned, at which tier, and why.
      *
      * A ban never touches the account (`banned` lives on the member's own
      * profile), so this is the one read that lets the app SAY so: content is
-     * hidden and posting is refused, and the member deserves the sentence that
-     * explains it instead of a raw server error.
+     * hidden, posting is refused, friends are paused — and the member deserves
+     * the sentence that explains it instead of a raw server error.
+     *
+     * The ladder's columns are asked for first and the pre-ladder shape is the
+     * fallback, so a build pointing at a server that has not been re-pasted yet
+     * still reads the one boolean it does have instead of failing outright.
      */
     suspend fun moderationStatus(accessToken: String, userId: String): Result<CurioModerationStatus> =
         withContext(Dispatchers.IO) {
             mapped {
                 if (!userId.matches(ID_PATTERN)) return@mapped CurioModerationStatus()
-                val path = "$PROFILES?select=banned,ban_reason&id=eq.$userId&limit=1"
-                val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
-                val rows = JSONArray(SupabaseClient.executeBody(request))
-                val row = rows.optJSONObject(0) ?: return@mapped CurioModerationStatus()
+                val row = runCatching {
+                    statusRow(accessToken, userId, STATUS_COLUMNS_LADDER)
+                }.getOrElse {
+                    statusRow(accessToken, userId, STATUS_COLUMNS_LEGACY)
+                }
+                val until = row.optString("banned_until")
+                    .takeIf { it.isNotBlank() && it != "null" }
+                    ?.let { epochMillis(it) }
                 CurioModerationStatus(
                     hidden = row.optBoolean("banned", false),
-                    reason = row.optString("ban_reason").takeIf { it.isNotBlank() && it != "null" }
+                    reason = row.optString("ban_reason")
+                        .takeIf { it.isNotBlank() && it != "null" },
+                    kind = row.optString("ban_kind")
+                        .takeIf { it.isNotBlank() && it != "null" }.orEmpty(),
+                    // A lapsed ban is not a ban: the stamp is kept as history,
+                    // but the app must not tell a member they are still banned.
+                    untilMillis = until?.takeIf { it > System.currentTimeMillis() }
                 )
             }
         }
+
+    /** One read of my own profile row, for the columns [moderationStatus]
+     *  needs — either shape. */
+    private fun statusRow(accessToken: String, userId: String, columns: String): JSONObject {
+        val path = "$PROFILES?select=$columns&id=eq.$userId&limit=1"
+        val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+        val rows = JSONArray(SupabaseClient.executeBody(request))
+        return rows.optJSONObject(0) ?: JSONObject()
+    }
 
     /**
      * Saves the display name — the name a member is SEEN by. The username is a

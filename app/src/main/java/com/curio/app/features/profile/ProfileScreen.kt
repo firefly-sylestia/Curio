@@ -109,6 +109,8 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.StreakTracker
+import com.curio.app.data.supabase.CommunityApi
+import com.curio.app.data.supabase.ModerationRecord
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.infrastructure.CurioCrashReporter
@@ -341,6 +343,26 @@ fun ProfileScreen(navController: NavController) {
                 categoryCounts = entries.groupingBy { it.topic.categoryId }.eachCount()
             }.onFailure { android.util.Log.e("ProfileScreen", "Failed to load entries", it) }
             crashCount = CurioCrashReporter.getCrashHistory(context).size
+        }
+    }
+
+    // v387 — MY OWN MODERATION RECORD. A member is allowed to read exactly
+    // their own history, and this is the page where they look for it: if a
+    // moderator has ever acted on this account, the reason is here in plain
+    // words instead of a vague "you broke the rules" notice. Empty for the
+    // overwhelming majority, and then the card is simply not drawn.
+    var moderationHistory by remember { mutableStateOf<List<ModerationRecord>>(emptyList()) }
+    val accountToken = OnlineAccount.state.session?.accessToken
+    val accountUserId = OnlineAccount.state.session?.userId
+    LaunchedEffect(accountToken, accountUserId) {
+        val active = accountToken
+        val me = accountUserId
+        if (active != null && me != null) {
+            CommunityApi.memberHistory(active, me).onSuccess { rows ->
+                moderationHistory = rows
+            }
+        } else {
+            moderationHistory = emptyList()
         }
     }
 
@@ -610,6 +632,17 @@ fun ProfileScreen(navController: NavController) {
                     }
                 }
             }
+            // My own moderation record, when there is one — the same card the
+            // team sees on a member's profile, shown here so a member never has
+            // to open somebody else's page to find out what happened to them.
+            if (moderationHistory.isNotEmpty()) {
+                item {
+                    Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
+                        SocialModerationHistoryCard(records = moderationHistory, isMe = true)
+                    }
+                }
+            }
+
             // The bio and the streak used to repeat themselves in a card under
             // the achievements. The HERO already carries both (the tagline is
             // the bio, the streak rides its own pill), so the card was saying

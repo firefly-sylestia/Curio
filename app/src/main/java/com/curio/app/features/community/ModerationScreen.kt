@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,13 +36,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.curio.app.data.supabase.BAN_CONTENT
 import com.curio.app.data.supabase.CommunityAdminRow
 import com.curio.app.data.supabase.CommunityApi
+import com.curio.app.data.supabase.CommunityBan
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.CommunityReport
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.ModerationReasons
+import com.curio.app.data.supabase.banTierBlurb
+import com.curio.app.data.supabase.banTierLabel
+import com.curio.app.data.supabase.communityMessage
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -97,8 +103,17 @@ fun ModerationScreen(navController: NavController) {
     var notice by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
 
-    // Queue is the default face; the team half only exists for a manager.
-    var showTeam by remember { mutableStateOf(false) }
+    // Three faces now: the queue, the team (managers only) and the BAN LIST —
+    // the ladder's own page, so a ban made from a profile or from the queue can
+    // be found again, read, softened or lifted from one place.
+    var tab by remember { mutableIntStateOf(0) }
+    var bans by remember { mutableStateOf<List<CommunityBan>>(emptyList()) }
+    var bansLoading by remember { mutableStateOf(false) }
+    var bansLoaded by remember { mutableStateOf(false) }
+    // The member whose ban sheet is open: id, the name to show, and the tier
+    // already in force (blank when there is none).
+    var banTarget by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    var lifting by remember { mutableStateOf<CommunityBan?>(null) }
     // Open reports lead; "everything" is one tap away.
     var openOnly by remember { mutableStateOf(true) }
     // The report + action a reason sheet is open for.
@@ -166,6 +181,70 @@ fun ModerationScreen(navController: NavController) {
         val active = token
         val me = myUserId
         if (active != null && me != null) load(active, me) else loading = false
+    }
+
+    /**
+     * The ban list, read when the tab is first opened and after every change.
+     * It is a separate read from the queue on purpose: a moderator looking at
+     * reports does not need the whole ban list in memory, and a ban list read
+     * must never slow the queue down.
+     */
+    fun loadBans() {
+        val active = token ?: return
+        bansLoading = true
+        scope.launch {
+            CommunityApi.bans(active).fold(
+                onSuccess = { rows ->
+                    bans = rows
+                    bansLoaded = true
+                    error = null
+                },
+                onFailure = { failure -> error = communityMessage(failure) }
+            )
+            bansLoading = false
+        }
+    }
+
+    LaunchedEffect(tab, token) {
+        if (tab == 2 && token != null && !bansLoaded) loadBans()
+    }
+
+    /** Bans at a tier (or re-bans at a new one), then refreshes the list. */
+    fun applyBan(userId: String, kind: String, reason: String, hours: Int?) {
+        val active = token ?: return
+        busy = true
+        scope.launch {
+            CommunityApi.banMember(active, userId, kind, reason, hours).fold(
+                onSuccess = {
+                    notice = "Banned: ${banTierLabel(kind)}" +
+                        if (hours == null) " until it is lifted." else " for a while."
+                    banTarget = null
+                    loadBans()
+                    load(active, myUserId.orEmpty())
+                },
+                onFailure = { failure -> error = communityMessage(failure) }
+            )
+            busy = false
+        }
+    }
+
+    /** Lifts whatever tier is in force. */
+    fun applyLift(userId: String, note: String?) {
+        val active = token ?: return
+        busy = true
+        scope.launch {
+            CommunityApi.liftBan(active, userId, note).fold(
+                onSuccess = {
+                    notice = "Ban lifted."
+                    lifting = null
+                    banTarget = null
+                    loadBans()
+                    load(active, myUserId.orEmpty())
+                },
+                onFailure = { failure -> error = communityMessage(failure) }
+            )
+            busy = false
+        }
     }
 
     val canPosts = myRow?.allows("posts") == true
@@ -245,17 +324,25 @@ fun ModerationScreen(navController: NavController) {
                     ) {
                         ModerationTabPill(
                             label = if (openCount > 0) "Queue · $openCount" else "Queue",
-                            selected = !showTeam,
-                            onClick = { showTeam = false }
+                            selected = tab == 0,
+                            onClick = { tab = 0 }
                         )
                         if (canAdmins) {
                             ModerationTabPill(
                                 label = "Team",
-                                selected = showTeam,
-                                onClick = { showTeam = true }
+                                selected = tab == 1,
+                                onClick = { tab = 1 }
                             )
                         }
-                        if (!showTeam) {
+                        if (canBans) {
+                            val live = bans.count { it.active }
+                            ModerationTabPill(
+                                label = if (live > 0) "Bans · $live" else "Bans",
+                                selected = tab == 2,
+                                onClick = { tab = 2 }
+                            )
+                        }
+                        if (tab == 0) {
                             ModerationTabPill(
                                 label = if (openOnly) "Open only" else "All reports",
                                 selected = false,
@@ -263,13 +350,13 @@ fun ModerationScreen(navController: NavController) {
                             )
                         }
                         Spacer(Modifier.weight(1f))
-                        if (loading) {
+                        if (loading || bansLoading) {
                             CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.width(16.dp))
                         }
                     }
                 }
 
-                if (!showTeam) {
+                if (tab == 0) {
                     item(key = "queue-heading") { SettingsSectionHeading("Reports") }
 
                     notice?.let { line ->
@@ -315,7 +402,7 @@ fun ModerationScreen(navController: NavController) {
                             onReopen = { applyReportAction("reopen", report, null, null) }
                         )
                     }
-                } else {
+                } else if (tab == 1) {
                     item(key = "team-heading") { SettingsSectionHeading("The team") }
                     notice?.let { line ->
                         item(key = "notice") { SocialNote(line, false) }
@@ -359,13 +446,53 @@ fun ModerationScreen(navController: NavController) {
                             }
                         )
                     }
+                } else {
+                    // ── The ban list ────────────────────────────────────────
+                    // Every member carrying a ban stamp: the live ones first,
+                    // then the bans that lapsed or were lifted, because "who is
+                    // banned" and "who WAS banned" are the same question asked
+                    // at two different times.
+                    item(key = "bans-heading") { SettingsSectionHeading("Bans") }
+                    notice?.let { line ->
+                        item(key = "notice") { SocialNote(line, false) }
+                    }
+                    error?.let { line ->
+                        item(key = "error") { SocialNote(line, true) }
+                    }
+
+                    if (bans.isEmpty() && !bansLoading) {
+                        item(key = "bans-empty") {
+                            SettingsOptionCard {
+                                SettingsOptionInfoRow(
+                                    CurioIcons.TaskAlt,
+                                    "Nobody is banned",
+                                    "A ban set from a member's profile lands here, with its tier, " +
+                                        "its clock and the reason it was set for."
+                                )
+                            }
+                        }
+                    }
+
+                    items(bans, key = { it.userId }) { ban ->
+                        ModerationBanRow(
+                            ban = ban,
+                            busy = busy,
+                            onOpen = {
+                                navController.navigate(CurioRoutes.socialProfile(ban.userId)) {
+                                    launchSingleTop = true
+                                }
+                            },
+                            onChange = { banTarget = Triple(ban.userId, ban.label, ban.kind) },
+                            onLift = { lifting = ban }
+                        )
+                    }
                 }
             }
         }
 
         SettingsHeroHeader(
             title = "Moderation",
-            subtitle = "Reports and the team",
+            subtitle = "Reports, bans and the team",
             onBack = { navController.popBackStack() }
         )
     }
@@ -387,15 +514,60 @@ fun ModerationScreen(navController: NavController) {
                 onDismiss = { if (!busy) acting = null },
                 onConfirm = { reason, note -> applyReportAction(action, report, reason, note) }
             )
-            "hide_author" -> ModerationReasonDialog(
-                title = "Hide ${author ?: "this member"}?",
-                subtitle = "Their content disappears and they cannot post. Their account keeps working, " +
-                    "and you can lift this at any time.",
-                reasons = ModerationReasons.HIDE,
-                confirmLabel = "Hide",
+            // The queue's member action opens the LADDER, not a yes/no hide:
+            // the content tier is the default it always was, and the three
+            // harder tiers are one tap away instead of a trip to a profile.
+            "hide_author" -> ModerationBanDialog(
+                memberName = author ?: "this member",
                 busy = busy,
                 onDismiss = { if (!busy) acting = null },
-                onConfirm = { reason, note -> applyReportAction(action, report, reason, note) }
+                onConfirm = { kind, reason, hours ->
+                    val active = token ?: return@ModerationBanDialog
+                    val target = report.targetUserId
+                        ?: report.cardId?.let { cardsById[it]?.authorId }
+                        ?: report.commentId?.let { repliesById[it]?.authorId }
+                    if (target.isNullOrBlank()) {
+                        error = "That member is no longer readable."
+                        acting = null
+                        return@ModerationBanDialog
+                    }
+                    busy = true
+                    scope.launch {
+                        if (kind == BAN_CONTENT) {
+                            // The queue's own action, unchanged: the content
+                            // tier and the report close together, so the queue
+                            // still records WHICH report the ban came from.
+                            CommunityApi.handleReport(
+                                active, report.id, "hide_author", reason, banNote(kind, hours)
+                            ).fold(
+                                onSuccess = {
+                                    notice = "Banned: ${banTierLabel(kind)}."
+                                    acting = null
+                                    loadBans()
+                                    load(active, myUserId.orEmpty())
+                                },
+                                onFailure = { error = communityMessage(it) }
+                            )
+                        } else {
+                            CommunityApi.banMember(active, target, kind, reason, hours).fold(
+                                onSuccess = {
+                                    // The report is then closed behind the ban,
+                                    // with the tier written into the note so the
+                                    // queue does not look like it shrugged.
+                                    CommunityApi.handleReport(
+                                        active, report.id, "dismiss", reason, banNote(kind, hours)
+                                    )
+                                    notice = "Banned: ${banTierLabel(kind)}."
+                                    acting = null
+                                    loadBans()
+                                    load(active, myUserId.orEmpty())
+                                },
+                                onFailure = { error = communityMessage(it) }
+                            )
+                        }
+                        busy = false
+                    }
+                }
             )
             else -> ModerationReasonDialog(
                 title = "Dismiss this report?",
@@ -415,6 +587,36 @@ fun ModerationScreen(navController: NavController) {
                 onConfirm = { reason, note -> applyReportAction("dismiss", report, reason, note) }
             )
         }
+    }
+
+    // ── The ban sheet, and the way back out ──────────────────────────────
+    banTarget?.let { (userId, name, currentKind) ->
+        ModerationBanDialog(
+            memberName = name,
+            currentKind = currentKind,
+            busy = busy,
+            onDismiss = { if (!busy) banTarget = null },
+            onConfirm = { kind, reason, hours -> applyBan(userId, kind, reason, hours) },
+            // Only while a tier is actually in force: “lift the ban instead”
+            // makes no sense on a member who is not banned.
+            onLift = if (currentKind.isNotBlank()) {
+                { lifting = bans.firstOrNull { it.userId == userId } }
+            } else null
+        )
+    }
+
+    lifting?.let { ban ->
+        ModerationReasonDialog(
+            title = "Lift the ban on ${ban.label}?",
+            subtitle = "Nothing stays paused for them. The record of the ban remains in their " +
+                "moderation history, which is what stops a lift from erasing what happened.",
+            reasons = ModerationReasons.LIFT,
+            confirmLabel = "Lift ban",
+            destructive = false,
+            busy = busy,
+            onDismiss = { if (!busy) lifting = null },
+            onConfirm = { reason, _ -> applyLift(ban.userId, reason) }
+        )
     }
 
     // ── Permissions ──────────────────────────────────────────────────────
@@ -448,6 +650,203 @@ fun ModerationScreen(navController: NavController) {
                     busy = false
                 }
             }
+        )
+    }
+}
+
+/** The line a ban's record keeps: which tier, and for how long. Written once
+ *  here so the queue's own action and the ladder describe a ban identically. */
+private fun banNote(kind: String, hours: Int?): String =
+    "${banTierLabel(kind)} — " + when {
+        hours == null -> "until it is lifted"
+        hours == 24 -> "24 hours"
+        else -> "${hours / 24} days"
+    }
+
+/**
+ * One row of the BAN LIST: who, at which tier, why, by whom — and the two
+ * moves a moderator can make from here (change the tier, lift it).
+ *
+ * A lapsed or lifted ban keeps its row, drawn quiet and without actions: the
+ * list is a record as much as a control panel, and a member who was banned for
+ * a week should still be findable the day after it expired.
+ */
+@Composable
+private fun ModerationBanRow(
+    ban: CommunityBan,
+    busy: Boolean,
+    onOpen: () -> Unit,
+    onChange: () -> Unit,
+    onLift: () -> Unit
+) {
+    val accent = if (ban.active) settingsRoseAccent()
+                 else MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(11.dp)
+            ) {
+                SocialAvatar(
+                    style = ban.avatarStyle,
+                    avatarSize = 40.dp,
+                    onClick = onOpen
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = ban.label.ifBlank { "A member" },
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = "@${ban.username.ifBlank { "—" }}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
+                // The tier chip: the tier's own name, so the list answers
+                // "how far does this reach" without a second tap.
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = accent.copy(alpha = if (ban.active) 0.16f else 0.10f)
+                ) {
+                    Text(
+                        text = if (ban.active) banTierLabel(ban.kind) else "Lifted",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = accent,
+                        maxLines = 1,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                }
+            }
+
+            if (ban.active) {
+                Text(
+                    text = banTierBlurb(ban.kind),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = banClockLine(ban),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            ban.reason?.let { why ->
+                Text(
+                    text = "“$why”",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            if (ban.active) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ModerationRowAction(
+                        label = "Change tier",
+                        primary = false,
+                        enabled = !busy,
+                        onClick = onChange
+                    )
+                    ModerationRowAction(
+                        label = "Lift ban",
+                        primary = true,
+                        enabled = !busy,
+                        onClick = onLift
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "Open profile",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = curioDialogActionColor(),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable(onClick = onOpen)
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** "Set 3 days ago by Jugnu · lifts in 4 days" — the clock in one line. */
+private fun banClockLine(ban: CommunityBan): String {
+    val set = ban.bannedAtMillis.takeIf { it > 0L }?.let { "Set ${relativeStamp(it)}" }
+    val by = ban.bannedByName.trim().takeIf { it.isNotEmpty() }
+    val head = listOfNotNull(set, by?.let { "by $it" }).joinToString(" ")
+    if (!ban.active) return if (head.isBlank()) "Lifted" else "$head · lifted"
+    val tail = ban.untilMillis?.let { until ->
+        val left = until - System.currentTimeMillis()
+        if (left <= 0L) "expiring now" else "lifts ${relativeStamp(until, future = true)}"
+    } ?: "until lifted"
+    return if (head.isBlank()) tail else "$head · $tail"
+}
+
+/** A compact "3 days ago" / "in 4 days" for the ban list. */
+private fun relativeStamp(millis: Long, future: Boolean = false): String {
+    val delta = if (future) millis - System.currentTimeMillis()
+                else System.currentTimeMillis() - millis
+    val minutes = (delta / 60_000L).coerceAtLeast(0L)
+    val text = when {
+        minutes < 2L -> "just now"
+        minutes < 60L -> "$minutes min"
+        minutes < 60L * 24L -> "${minutes / 60L} h"
+        else -> "${minutes / (60L * 24L)} days"
+    }
+    return when {
+        text == "just now" -> text
+        future -> "in $text"
+        else -> "$text ago"
+    }
+}
+
+/** One small action in a ban row: filled = the main move, outlined = the other. */
+@Composable
+private fun ModerationRowAction(
+    label: String,
+    primary: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    val accent = curioDialogActionColor()
+    val shape = RoundedCornerShape(50)
+    Surface(
+        shape = shape,
+        color = if (primary) accent else MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier
+            .clip(shape)
+            .border(
+                width = 1.dp,
+                color = if (primary) accent else MaterialTheme.colorScheme.outlineVariant,
+                shape = shape
+            )
+            .clickable(enabled = enabled, onClick = onClick)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = if (primary) androidx.compose.ui.graphics.Color.White
+                    else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
         )
     }
 }

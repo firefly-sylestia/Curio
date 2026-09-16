@@ -25,9 +25,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Row
+import com.curio.app.data.supabase.BAN_TIERS
+import com.curio.app.data.supabase.ModerationReasons
+import com.curio.app.data.supabase.banTierBlurb
+import com.curio.app.data.supabase.banTierLabel
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
@@ -214,6 +220,249 @@ internal fun ReportTargetDialog(
             }
         }
     )
+}
+
+/**
+ * THE BAN SHEET — a tier, a clock and a reason, chosen in one place.
+ *
+ * One dialog rather than four, because the tiers differ only in how far the ban
+ * reaches: the moderator picks the reach, then how long it lasts, then says
+ * why. Every tier's sentence comes from [banTierBlurb], so the promise made
+ * here is the same sentence the member is shown afterwards, and the same one
+ * the ban list repeats — a moderation surface that describes itself
+ * differently in three places is a moderation surface nobody can trust.
+ *
+ * A ban already in force opens the same sheet with its tier pre-picked (so a
+ * ban can be softened or hardened without being lifted first) and offers the
+ * way out at the foot of it.
+ */
+@Composable
+internal fun ModerationBanDialog(
+    memberName: String,
+    /** The tier already in force, blank when the member is not banned. */
+    currentKind: String = "",
+    busy: Boolean = false,
+    onDismiss: () -> Unit,
+    onConfirm: (kind: String, reason: String, hours: Int?) -> Unit,
+    /** Offered only while a ban is in force. */
+    onLift: (() -> Unit)? = null
+) {
+    val alreadyBanned = currentKind.isNotBlank()
+    var kind by remember(currentKind) { mutableStateOf(currentKind.ifBlank { BAN_CONTENT }) }
+    // Picked fresh each time: a ban that is already permanent must not look
+    // like it was set for a day, and a new ban defaults to the gentlest clock
+    // a moderator can walk away from (a week, not forever).
+    var hours by remember(currentKind) { mutableStateOf<Int?>(if (alreadyBanned) null else WEEK_HOURS) }
+    var chosen by remember { mutableStateOf<String?>(null) }
+    var note by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = { if (!busy) onDismiss() },
+        containerColor = curioDialogContainerColor(),
+        shape = CurioDialogShape,
+        title = {
+            Text(
+                text = if (alreadyBanned) "Change the ban on $memberName" else "Ban $memberName?",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 430.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                Text(
+                    text = "How far should this ban reach?",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                BAN_TIERS.forEach { tier ->
+                    BanTierRow(
+                        kind = tier,
+                        selected = kind == tier,
+                        onClick = { kind = tier }
+                    )
+                }
+
+                Text(
+                    text = "How long?",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    BAN_DURATIONS.forEach { (label, value) ->
+                        BanDurationChip(
+                            label = label,
+                            selected = hours == value,
+                            onClick = { hours = value },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                Text(
+                    text = if (hours == null) {
+                        "The ban holds until a moderator lifts it."
+                    } else {
+                        "It lifts itself when the time is up, and the record stays."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Text(
+                    text = "Why (required)",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                ModerationReasons.BAN.forEach { reason ->
+                    ReasonChoiceRow(
+                        label = reason,
+                        selected = chosen == reason,
+                        onClick = { chosen = reason }
+                    )
+                }
+                ModerationNoteField(
+                    value = note,
+                    onValueChange = { note = it },
+                    placeholder = "What happened, in your own words (optional)"
+                )
+
+                if (alreadyBanned && onLift != null) {
+                    TextButton(
+                        onClick = { if (!busy) onLift() },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Lift the ban instead",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val reason = chosen ?: return@TextButton
+                    onConfirm(kind, reason, hours)
+                },
+                enabled = chosen != null && !busy,
+                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text(
+                    text = if (busy) "Working…" else if (alreadyBanned) "Update ban" else "Ban",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) {
+                Text("Cancel", style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    )
+}
+
+/** The clocks a ban can be set to. `null` hours = until lifted. */
+private val BAN_DURATIONS: List<Pair<String, Int?>> = listOf(
+    "24 h" to 24,
+    "7 days" to 24 * 7,
+    "30 days" to 24 * 30,
+    "Forever" to null
+)
+
+/** The default clock a fresh ban opens on — a week, so the gentlest ban is
+ *  also the one a hurried moderator sets by accident. */
+private const val WEEK_HOURS = 24 * 7
+
+/** One clock choice: a small filled pill, equal weight so the four fit one row
+ *  on a 320dp screen without ellipsizing. */
+@Composable
+private fun BanDurationChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val accent = curioDialogActionColor()
+    val shape = RoundedCornerShape(50)
+    Surface(
+        shape = shape,
+        color = if (selected) accent else MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = modifier
+            .clip(shape)
+            .border(
+                width = 1.dp,
+                color = if (selected) accent else MaterialTheme.colorScheme.outlineVariant,
+                shape = shape
+            )
+            .clickable(onClick = onClick)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp)
+        )
+    }
+}
+
+/**
+ * One tier of the ladder: its name, and one sentence on what it does — the
+ * sentence is the point of the row, so it is never truncated away.
+ */
+@Composable
+private fun BanTierRow(
+    kind: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val accent = curioDialogActionColor()
+    val shape = RoundedCornerShape(16.dp)
+    Surface(
+        shape = shape,
+        color = if (selected) accent.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(
+                width = if (selected) 1.5.dp else 1.dp,
+                color = if (selected) accent else MaterialTheme.colorScheme.outlineVariant,
+                shape = shape
+            )
+            .clickable(onClick = onClick)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 13.dp, vertical = 11.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = banTierLabel(kind),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold
+                ),
+                color = if (selected) accent else MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = banTierBlurb(kind),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }
 
 /**

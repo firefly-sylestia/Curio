@@ -1,6 +1,81 @@
 # Prompt Log — current request
 
-## Request (2026-09-16, AWAITING VERIFICATION — journals & books, Add take, the browser lag)
+## Request (2026-09-16, AWAITING VERIFICATION — the ban ladder, the wall's look, profiles in the tear)
+
+Verbatim (one message, landed AFTER the previous request shipped as `477e0d08`): "when i ban a member it should show inside the moderation page, also permanent account ban option too, they can only view posts, and another where i can ban them from social feature too, also similiar to the home + button hide when scroll add similiar for the post button too hides when scrolled down reappears when srolled above. and also suggest more features, refine quote post and preview both, properly refine so it looks proper quote, and more features suggestions and reifnements. and before pushing ask me also the book select and read use the app book catalog too. first the app books if not then openlibrary, also the new redrawns are bad, i want cute chibby style but rn the new avatars are weird eyes and specially weird not matching eyebrows and also weird neck tint fix it, also similiar to the socail page inside tears chat friends you, i want you to move the profile inisde the headrer tears too, remove the profile a memeber of the community text, and full put the profile with the similiar hero accent insid ethe tear by expanding the tear. proper messege button too. also the posts below, make them more compact its too much space taking, also give it proper accent color too not cream."
+
+### Status: BUILT (unpushed) — ask_user sent, push held until the user answers
+
+### What the request turned into (the decisions, all ask_user-answered)
+
+1. **Ban levels: "Four levels, picked per ban"** — content (hide + no posting),
+   read_only (view the wall only), social (wall works, friends/messages
+   paused), account (permanent lock). Each ban also carries its own clock
+   (24h / 7d / 30d / forever), because "permanent account ban" was named
+   beside two obviously reversible tiers — the reach and the duration are
+   separate choices.
+2. **Scope: "Everything in one pass"**, database "**App + database, no new
+   server function**" for the *mechanism* — the ladder still needed its RPCs
+   (ban / lift / list / history) because RPCs are how every moderation action
+   already reaches the DB; nothing else about the deployment changed.
+3. **Also asked in the same answers** (all built): moderation history per
+   member + on your own Profile tab; compact wall cards; wall accent instead
+   of cream; proper pull-quote post (preview + wall through ONE renderer);
+   profile identity inside the hero tear; avatar chibi correction; app book
+   catalog searched BEFORE Open Library; composer drafts; locally-kept deleted
+   posts that can be re-posted; the Post button hiding on scroll.
+
+### Shipped (the build, all unpushed)
+
+- **The ban ladder (v388).** `profiles.ban_kind` ('' | content | read_only |
+  social | account) + `banned_until`; `curio_ban_kind()` (lapsed = no ban),
+  `curio_member_hidden` (content/account), `curio_can_post` ('' / social),
+  `curio_can_social` ('' / content). **Enforcement is a BEFORE trigger**
+  (`curio_ban_guard`) on every writable table — RPCs bypass RLS, so a
+  policy-only tier would have been decoration. The moderation page's third
+  tab is the BAN LIST (live first, then lifted/lapsed as quiet history rows
+  with tier chip, clock, reason, setter, Change-tier / Lift). The ban sheet
+  (`ModerationBanDialog`) picks tier + clock + required reason in one place,
+  pre-picks the tier in force, and offers the lift at its foot; it is opened
+  from the queue's hide action, from the ban list's Change tier, and from a
+  profile's ⋮. `curio_moderate_member_history` feeds the member's own
+  moderation record on their profile AND on your Profile tab.
+- **The wall (v388).** Post pill hides while scrolling down, returns on the
+  way up / at the top (the Home `+` pattern). Cards are COMPACT by default
+  (`communityRoomyWall` in User experiments is the roomy A/B escape) and wear
+  the rose accent family instead of the capture creams. Quotes render through
+  `SocialPullQuote` on BOTH the composer preview and the wall — one shape: an
+  accent rule, an oversized opening mark, the serif face, the credit tied on
+  by a dash.
+- **Profiles in the tear (v388).** `SocialProfileScreen` extends the hero
+  tear (`profileTearHeight`) and draws the portrait, name, @handle, counts,
+  bio and action pills on the banner; the "a member of the community" line is
+  gone; Message is a proper hero pill. Own Profile tab keeps the same record.
+- **Chibi avatars (v388 correction).** One big dark chibi eye (deep centre +
+  two highlights + one lid stroke), brows mirrored from the SAME points about
+  the midline so they always match, and a neck in the skin's own shade with a
+  thinner jaw shadow — the ink-wash "weird neck tint" is gone.
+- **Books: app catalog first (v388).** `BookCatalog` (~370 curated entries,
+  by-title and by-author indexes, `matchQuality` ranking) is searched BEFORE
+  Open Library in the add-book sheet; the section header says where each hit
+  came from, and the manual door stays.
+- **Composer memory (v388).** Drafts are kept per-kind locally and offered
+  back once per kind; deleted posts are remembered locally, listed behind a
+  small door at the foot of the wall, re-postable through the normal pipeline
+  or forgettable; both are wiped on sign-out (`OnlineAccount.signOut` →
+  `SocialPostArchive.clear`).
+
+### Verification status
+
+This environment has no Android SDK — CI is the first real compile. Static:
+`scripts/check_braces.js` on all 22 touched Kotlin files (OK),
+`git diff --check` clean, every new import/symbol traced. **Push is held for
+the user's answer**; the feature commit + Prompt.md log go out together when
+they say go.
+
+---
+
+## Request (2026-09-16, SHIPPED (pushed `477e0d08` + `f9927f6c`) — journals & books, Add take, the browser lag)
 
 Verbatim (one message): take the create-entry-flow ideas from
 `feature/create-entry-flow` "but our design" — a **+** on Home that disappears on
@@ -1299,6 +1374,13 @@ edited_at + edit guard/policy are all in the file but NOT live until pasted.
 
 ## User prompts
 
+### Prompt (2026-09-16, ANSWERED — push approved; Follow members + Quote-repost chosen as the next build)
+
+The verification ask came back: **"Push everything now"**, **Follow members**
+and **Quote-repost any post** (bookmark, wall search, notifications, pin,
+ban-list search and the draft pulse were offered and not picked). Push first,
+then build the two picks on top.
+
 ### Prompt (2026-09-16, DONE in this push — `477e0d08`) — your own writing: journals, books, the writing canvas, Add take
 
 Verbatim: take the `feature/create-entry-flow` ideas "but our design" — a **+**
@@ -1429,4 +1511,4 @@ tests.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
 
-_No pending prompt._
+now lets fix the chat messege notifications, with proper avatar view and like reply and mute options. and reply opens in notification messege box which sends the messege too with reply attached with the last messege, and now the journal and book the new pages th journals saved page too and books sheleve too. they all are rechiing the statsus bar, every new page u added in that check and fix, then the bold option doesnt work it works with italic but doesnt show as working on its own, the quote just hihglights the text instead it should show the quote style a little smaller text with bold look if user wants, also fix its buttons accent and colors they dont match the theme and colors of the hero, also per new line it says write write which is bad view fix that too. also the button sheet of the + fix colors and proper darker accent for icons in ligh mode, and then for chapter write open a page like journal style for chapters not inside editing, show previe in inline also in the saved view, dont show all the mood icons or the fomat icons show a proper view olny and when editing smoothly show the options in the same page with animations and fix the colors and all too also the book chapters auto fetch if possible with pages if thats possible too. and its synopsis too if any provides, or if its in app then use that info. fully refine it and make it professional. also fix icons cutting

@@ -1,4 +1,14 @@
 ADD:
+- Community: bans now come in four reaches — hide content, view-only, social-only, or a full account lock — each with its own clock (a day, a week, a month, or until lifted), and the moderation page keeps a living ban list you can soften or lift.
+- Community: every moderation action is remembered — a member's page and your own profile now carry the record of bans, lifts and removals.
+- Community: deleted posts wait locally behind a small door at the foot of the wall, where they can be re-posted or let go.
+- Community: an unfinished post is kept as a draft and offered back the next time you open the composer.
+- Books: the add-book sheet searches Curio's own book shelf first, then the open library — and says which one it found the book in.
+- Profile: your profile (and every member's) now lives inside the header itself — portrait, counts, bio and actions on the banner, with a proper Message pill.
+FIX:
+- Social: the portraits are redrawn cute — matching brows, big friendly chibi eyes, and no more odd tint under the chin.
+- Community: wall cards are tighter, wear the app's accent instead of paper cream, and the Post button steps out of the way while you scroll down.
+- Community: quotes now look like quotes — one proper pull-quote shape shared by the composer preview and the wall.
 - Writing: a journal of your own — a page per day with its date, how the day felt, a title and the writing, with bold / italic / underline / strikethrough / quote / alignment tools that ride above the keyboard and apply to the line you are on. Photos drop into the writing itself.
 - Writing: a book shelf — add a book (or find it and its cover), keep your progress, and write a review for any chapter in the page you are reading it from. Everything saves itself as you write.
 - Home: a "+" that starts a journal page or a book, and a small row of chips showing your newest journals and books, each one tapping straight into it.
