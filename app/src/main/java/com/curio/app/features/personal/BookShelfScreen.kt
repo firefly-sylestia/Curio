@@ -907,7 +907,7 @@ private fun ScanDoor(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) accent.copy(alpha = 0.14f)
+        color = if (selected) accent.copy(alpha = 0.22f)
         else MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Row(

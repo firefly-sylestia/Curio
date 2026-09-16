@@ -492,8 +492,8 @@ private fun JournalTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                ModeButton(label = "Reading", active = !editing) { EyeGlyph(active = !editing) }
-                ModeButton(label = "Writing", active = editing) {
+                ModeButton(label = "Reading", active = !editing, onClick = { onToggleMode(false) }) { EyeGlyph(active = !editing) }
+                ModeButton(label = "Writing", active = editing, onClick = { onToggleMode(true) }) {
                     CurioIcon(
                         CurioIcons.Edit,
                         null,
@@ -552,7 +552,7 @@ private fun MoodSelector(
         Surface(
             onClick = { open = !open },
             shape = RoundedCornerShape(50),
-            color = if (selected != null) personalAccent().copy(alpha = 0.16f)
+            color = if (selected != null) personalAccent().copy(alpha = 0.24f)
             else MaterialTheme.colorScheme.surfaceContainer
         ) {
             Row(
@@ -623,11 +623,12 @@ private fun MoodSelector(
 
 /** One half of the eye/pen switch. */
 @Composable
-private fun ModeButton(label: String, active: Boolean, content: @Composable () -> Unit) {
+private fun ModeButton(label: String, active: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) {
     val accent = personalAccent()
     Surface(
+        onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (active) accent.copy(alpha = 0.18f) else Color.Transparent,
+        color = if (active) accent.copy(alpha = 0.26f) else Color.Transparent,
         modifier = Modifier.size(34.dp)
     ) {
         Box(

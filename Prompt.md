@@ -1854,4 +1854,13 @@ Done in this push:
 - **`CurioRoutes.journalEditor`**: optional `topicId` / `topicName` / `categoryId` / `pageKind` query params; `CurioNavHost` extracts them and passes them to `JournalEditorScreen`, which stores them on the saved entity.
 - **Accent sweep**: darker ink shades across Cabinet V2 content, personal shelf, recycle bin, Stats, Manage categories, the category picker, book-cover hub, Settings/account components, FieldMind, Topic Database, composer and Spin.
 
+### Prompt (2026-09-16, DONE on branch feat/book-by-cover-isbn) — ISBN scanner
+
+Verbatim: "add book by cover isbn scanner but in a new branch"
+
+Done on branch `feat/book-by-cover-isbn`:
+- **`IsbnScannerSheet.kt`**: opens the device camera via `TakePicture` + `FileProvider`, scans the captured photo for ISBN-10/ISBN-13 barcodes using ML Kit's `BarcodeScanning`, looks up the ISBN on Open Library (edition's own title, author, cover and page count), and adds the book to the shelf immediately.
+- **`BookShelfScreen.kt`**: the add-book sheet now has three doors — Search, Scan ISBN, and Type — so the scanner is one tap away when the book is at hand.
+- **Dependencies**: `mlkit-barcode-scanning` 17.3.0 + `kotlinx-coroutines-play-services` (for `Task.await`). CAMERA permission added to the manifest; `isbn/` cache path added to `file_paths.xml` for the FileProvider.
+
 ### Next prompt (the next instruction goes here — never cleared by an agent)

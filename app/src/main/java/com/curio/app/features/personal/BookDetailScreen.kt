@@ -118,9 +118,18 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // used to be silent: the pass ran, learned nothing, and the button looked
     // broken. Now it reports — found what, or why it found nothing.
     var lookupNote by remember(bookId) { mutableStateOf<String?>(null) }
+    // Auto-fetch: skip if the book already has chapters, pages, AND synopsis
+    // (everything is filled in — nothing to learn).
+    val alreadyComplete = book?.let {
+        it.totalChapters > 0 && it.pageCount > 0 &&
+        (it.synopsis.isNotBlank() || catalogSynopsis.isNotBlank())
+    } ?: false
     LaunchedEffect(book, lookupTick) {
         val current = book ?: return@LaunchedEffect
         if (enrichedTick == lookupTick) return@LaunchedEffect
+        // Skip auto-fetch when the book is already complete and this is
+        // the initial pass (lookupTick == 0). Manual taps still run.
+        if (lookupTick == 0 && alreadyComplete) return@LaunchedEffect
         val manual = lookupTick > 0
         enrichedTick = lookupTick
         lookingUp = true
@@ -453,7 +462,7 @@ private fun ProgressCard(
                     Surface(
                         onClick = { onFinished(true) },
                         shape = RoundedCornerShape(50),
-                        color = accent.copy(alpha = 0.14f)
+                        color = accent.copy(alpha = 0.22f)
                     ) {
                         Text(
                             "Mark finished",
@@ -465,17 +474,6 @@ private fun ProgressCard(
                 }
             }
             Spacer(Modifier.height(12.dp))
-            LinearProgressIndicator(
-                progress = {
-                    if (total <= 0) 0f else (current.toFloat() / total.toFloat()).coerceIn(0f, 1f)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(50)),
-                color = accent,
-                trackColor = accent.copy(alpha = 0.16f)
-            )
             // One tick per chapter, so the number is a PLACE and not a figure:
             // you can see the run you are in and how much is left at a glance.
             if (total in 1..MAX_TICKS) {
@@ -627,7 +625,7 @@ private fun ChapterCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     shape = CircleShape,
-                    color = if (review != null) accent.copy(alpha = 0.16f)
+                    color = if (review != null) accent.copy(alpha = 0.24f)
                     else MaterialTheme.colorScheme.surfaceContainerHigh,
                     modifier = Modifier.size(30.dp)
                 ) {
@@ -689,7 +687,7 @@ private fun ChapterCard(
                 Surface(
                     onClick = onOpen,
                     shape = RoundedCornerShape(50),
-                    color = if (review == null) accent.copy(alpha = 0.16f)
+                    color = if (review == null) accent.copy(alpha = 0.24f)
                     else MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
                     Text(
@@ -725,7 +723,7 @@ private fun DownloadPill(enabled: Boolean, onClick: () -> Unit) {
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
-        color = accent.copy(alpha = 0.12f)
+        color = accent.copy(alpha = 0.18f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
@@ -828,7 +826,7 @@ private fun DownloadFormatRow(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(accent.copy(alpha = 0.14f)),
+                    .background(accent.copy(alpha = 0.22f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -891,7 +889,7 @@ private fun LookUpPill(lookingUp: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = accent.copy(alpha = 0.12f)
+        color = accent.copy(alpha = 0.18f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
