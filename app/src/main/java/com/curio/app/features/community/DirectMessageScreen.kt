@@ -438,6 +438,30 @@ onSuccess = {
         return true
     }
 
+    /**
+     * One full page of the conversation, applied as the server's truth.
+     *
+     * The only paths that need it are the two a stamp window cannot express:
+     * a RECALL (the row is gone, so nothing moved to find) and a delta the
+     * server refused. It is deliberately not the normal tick.
+     */
+    suspend fun rereadPage(active: String, me: String) {
+        SocialApi.messages(active, otherUserId, me).getOrNull()?.let { server ->
+            val hidden = SocialMessageCache.hiddenIds(context, otherUserId)
+            messages = messages.mapNotNull { held ->
+                when {
+                    held.id in hidden -> null
+                    held.id.startsWith(LOCAL_ID_PREFIX) -> held
+                    // Gone from the server: they recalled it.
+                    server.none { it.id == held.id } -> null
+                    // Changed on the server: their edit wins.
+                    else -> server.first { it.id == held.id }
+                }
+            }
+            SocialMessageCache.write(context, otherUserId, messages)
+        }
+    }
+
     suspend fun send(active: String, me: String) {
         // An edit in flight takes the composer over: Send IS Save until the
         // edit is committed or dropped.
@@ -562,33 +586,18 @@ onSuccess = {
             .filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
             .maxOfOrNull { it.createdAtMillis }
             ?: return
-        val moved = SocialApi.messagesSince(active, otherUserId, me, anchor)
-            .getOrNull()
-            .orEmpty()
+        val delta = SocialApi.messagesSince(active, otherUserId, me, anchor)
+        val moved = delta.getOrNull().orEmpty()
         val arrived = if (moved.isEmpty()) false else applyMoved(moved)
         // A realtime hint can also be a DELETE, which no stamp window can see
         // (the row is simply gone). One page read per hint is what keeps a
-        // recall honest; edits and arrivals no longer need it.
-        if (pendingRealtimeRevisions) {
+        // recall honest; edits and arrivals no longer need it. A delta the
+        // server REFUSED degrades to the same read instead of leaving the
+        // thread silent - the chat must never depend on one query shape.
+        if (pendingRealtimeRevisions || delta.isFailure) {
             pendingRealtimeRevisions = false
-            SocialApi.messages(active, otherUserId, me).getOrNull()?.let { server ->
-                val hidden = SocialMessageCache.hiddenIds(context, otherUserId)
-                messages = messages.mapNotNull { held ->
-                    when {
-                        held.id in hidden -> null
-                        held.id.startsWith(LOCAL_ID_PREFIX) -> held
-                        // Gone from the server: they recalled it.
-                        server.none { it.id == held.id } -> null
-                        // Changed on the server: their edit wins.
-                        else -> server.first { it.id == held.id }
-                    }
-                }
-                SocialMessageCache.write(context, otherUserId, messages)
-            }
+            rereadPage(active, me)
         }
-        // An arrival means the other side stopped writing. Anything unread is
-        // stamped on every tick rather than only on that arrival, which is what
-        // makes a stamp that failed (offline, a stale session) heal itself.
         if (arrived) peerTyping = false
         markThreadRead(active, me)
     }
