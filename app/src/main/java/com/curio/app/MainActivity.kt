@@ -198,7 +198,10 @@ class MainActivity : ComponentActivity() {
         // process that dies mid-warm simply re-reads on the next open.
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             runCatching {
-                CurioRepositoryHolder.repo.observeLight().collect()
+                // The warm-up's effect lives inside the flow's map (the
+                // repository caches each emission); the collector body is
+                // deliberately empty.
+                CurioRepositoryHolder.repo.observeLight().collect { }
             }
         }
         // v53 — update notifier on app start: a toast whenever a check finds

@@ -1,5 +1,19 @@
 # Prompt Log — current request
 
+### CI fix (same request, 2026-09-16)
+
+The first push failed CI: the KDoc on the new `roomFallback` contained the glob
+`` `assets/topics/*.json` `` — in Kotlin, `/*` inside a block comment opens a
+NESTED comment, so the doc's own closer only closed that one and the rest of
+`TopicJsonLoader.kt` was swallowed ("Missing '}' at 162" + "Unclosed comment at
+695"). Every other compile error in the log (14 files: `cached`, `loadIndex`,
+`TopicIndexEntry`, `countFor`, `shedForMemory`, …) was a cascade of the loader
+not resolving. Fixed the doc text, left a NOTE in it about the trap, and gave
+MainActivity's Cabinet warm-collector an explicit empty lambda
+(`collect { }` — parameterless `collect()` needs the CollectSubscriber overload
+the project doesn't import). A scanner for nested-`/*` hazards now runs before
+every push.
+
 ## Request (2026-09-16, COMPLETE — instant open + the create-entry composer)
 
 Verbatim: compare `v1.1.1-beta5` and `feature/create-entry-flow` with current

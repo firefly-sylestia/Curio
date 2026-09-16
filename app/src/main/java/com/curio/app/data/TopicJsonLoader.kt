@@ -163,8 +163,13 @@ object TopicJsonLoader {
 
     /**
      * v348 — the lane read back from Room, used ONLY when the bundled JSON
-     * produced nothing (a build shipped without `assets/topics/*.json`). Heavy
+     * produced nothing (a build shipped without its topic JSON assets). Heavy
      * by nature, which is exactly why it is no longer on the primary path.
+     *
+     * NOTE: never write a glob like "star-dot-json" inside a Kotlin block
+     * comment here — slash-star opens a NESTED comment (Kotlin block comments
+     * nest), and the doc's own closer only closed that one, swallowing the
+     * rest of the file. That is exactly how CI broke once already.
      */
     private suspend fun roomFallback(id: CategoryId): List<CurioTopic> = try {
         if (com.curio.app.data.TopicRepository.isInitialized()) {
