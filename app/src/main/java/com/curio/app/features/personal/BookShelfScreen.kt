@@ -274,6 +274,7 @@ private fun BookShelfCard(
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     val accent = personalAccent()
+    val accentInk = personalAccentInk()
     val press = rememberCurioPressSource(pressedScale = 0.97f)
     Column(
         modifier = Modifier
@@ -318,17 +319,25 @@ private fun BookShelfCard(
             }
         }
         Spacer(Modifier.height(8.dp))
-        Text(
-            book.title,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontFamily = FrauncesFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                lineHeight = 17.sp
-            ),
-            color = ink,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(38.dp),
+            contentAlignment = Alignment.TopStart
+        ) {
+            Text(
+                book.title,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp
+                ),
+                color = ink,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         Spacer(Modifier.height(6.dp))
         // The rail is the card's quiet sentence: how far in, out of how long.
         LinearProgressIndicator(
@@ -342,8 +351,8 @@ private fun BookShelfCard(
                 .fillMaxWidth()
                 .height(3.dp)
                 .clip(RoundedCornerShape(50)),
-            color = accent,
-            trackColor = accent.copy(alpha = 0.16f)
+                color = accentInk,
+                trackColor = accentInk.copy(alpha = 0.16f)
         )
         Spacer(Modifier.height(5.dp))
         Text(
@@ -354,7 +363,7 @@ private fun BookShelfCard(
                 else -> "Ch ${book.currentChapter} of ${book.totalChapters}"
             },
             style = MaterialTheme.typography.labelSmall,
-            color = ink.copy(alpha = 0.58f),
+            color = accentInk,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

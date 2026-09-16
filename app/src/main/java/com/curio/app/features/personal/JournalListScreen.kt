@@ -256,7 +256,7 @@ private fun JournalRow(
                         fontFamily = FrauncesFontFamily,
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = accent
+                    color = personalAccentInk()
                 )
                 Text(
                     journal.dateMillis.toLocalDate()

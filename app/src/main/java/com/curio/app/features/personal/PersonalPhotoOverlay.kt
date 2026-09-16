@@ -216,7 +216,7 @@ fun PersonalPhotoOverlay(state: PersonalPhotoOverlayState) {
                         width = with(density) { fit.width.toDp() },
                         height = with(density) { fit.height.toDp() }
                     )
-                    .clip(RoundedCornerShape((FROM_CORNER_DP * (1f - progress)).dp))
+                    .clip(RoundedCornerShape((FROM_CORNER_DP * (1f - progress)).coerceAtLeast(0f).dp))
                     .graphicsLayer {
                         scaleX = scale
                         scaleY = scale

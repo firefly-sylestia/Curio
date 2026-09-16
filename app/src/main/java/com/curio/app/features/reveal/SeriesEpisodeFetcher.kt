@@ -100,31 +100,27 @@ object SeriesEpisodeFetcher {
      */
     suspend fun fetchAll(showName: String): List<SeriesEpisode> = withContext(Dispatchers.IO) {
         val title = showName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
-        val json = httpGet(
-            "https://api.tvmaze.com/singlesearch/shows?q=${Uri.encode(title)}"
-        ) ?: return@withContext emptyList()
-        val showId = try {
-            JSONObject(json).optInt("id", 0).takeIf { it > 0 }
-        } catch (_: Exception) { null } ?: return@withContext emptyList()
-        val episodesJson = httpGet("https://api.tvmaze.com/shows/$showId/episodes")
-            ?: return@withContext emptyList()
+        // Reuse the same memoized episode payload as enrichment. The previous
+        // path bypassed this cache, so opening the series sheet fetched again.
+        val cachedEpisodes = fetchEpisodes(title)
+        if (cachedEpisodes.isEmpty()) return@withContext emptyList()
         try {
-            val arr = org.json.JSONArray(episodesJson)
-            (0 until arr.length()).mapNotNull { i ->
-                val ep = arr.optJSONObject(i) ?: return@mapNotNull null
-                val season = ep.optInt("season", 0)
-                val number = ep.optInt("number", 0)
-                if (season <= 0 || number <= 0) return@mapNotNull null
-                SeriesEpisode(
-                    season = season,
-                    number = number,
-                    title = ep.optString("name", ""),
-                    summary = ep.optString("summary", "").replace(Regex("<[^>]+>"), "").trim(),
-                    airdate = ep.optString("airdate", ""),
-                    runtime = ep.optInt("runtime", 0),
-                    rating = ep.optJSONObject("rating")?.optDouble("average", 0.0)?.toFloat() ?: 0f,
-                    stillUrl = ep.optJSONObject("image")?.optString("original", "") ?: ""
-                )
+            cachedEpisodes.mapNotNull { ep ->
+                run {
+                    val season = ep.optInt("season", 0)
+                    val number = ep.optInt("number", 0)
+                    if (season <= 0 || number <= 0) return@run null
+                    SeriesEpisode(
+                        season = season,
+                        number = number,
+                        title = ep.optString("name", ""),
+                        summary = ep.optString("summary", "").replace(Regex("<[^>]+>"), "").trim(),
+                        airdate = ep.optString("airdate", ""),
+                        runtime = ep.optInt("runtime", 0),
+                        rating = ep.optJSONObject("rating")?.optDouble("average", 0.0)?.toFloat() ?: 0f,
+                        stillUrl = ep.optJSONObject("image")?.optString("original", "") ?: ""
+                    )
+                }
             }
         } catch (_: Exception) {
             emptyList()

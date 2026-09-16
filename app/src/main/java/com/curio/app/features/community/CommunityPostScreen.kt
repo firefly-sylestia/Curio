@@ -1,5 +1,6 @@
 package com.curio.app.features.community
 
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import androidx.activity.compose.BackHandler
@@ -269,7 +270,7 @@ internal fun CommunityPostScreen(
 
     val category = topic?.categoryId?.let(CurioCategories::byId)
     val accent = category?.themedAccent() ?: settingsRoseAccent()
-    val accentInk = if (accent.luminance() > 0.55f) Color.Black else Color.White
+    val accentInk = settingsAccentInk()
 
     val topicResults = remember(index, query) {
         searchTopics(

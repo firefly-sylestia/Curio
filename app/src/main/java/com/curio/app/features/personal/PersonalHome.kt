@@ -343,9 +343,6 @@ fun PersonalChipsRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        item("new") {
-            NewChip(onClick = onWrite)
-        }
         items(items = journals.take(3), key = { it.id }) { journal ->
             JournalChip(
                 journal = journal,
