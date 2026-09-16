@@ -50,9 +50,6 @@ import com.curio.app.data.newPersonalBookId
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
-import com.curio.app.ui.theme.personalAccent
-import com.curio.app.ui.theme.personalIconTint
-import com.curio.app.ui.theme.personalOnAccent
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
@@ -370,8 +367,8 @@ private suspend fun scanIsbn(
         // Find the first ISBN barcode (format ISBN_10 or ISBN_13).
         val isbn = barcodes.firstNotNullOfOrNull { barcode ->
             when (barcode.format) {
-                Barcode.FORMATISBN_13 -> barcode.rawValue
-                Barcode.FORMATISBN_10 -> barcode.rawValue
+                Barcode.FORMAT_EAN_13,
+                Barcode.FORMAT_EAN_8 -> barcode.rawValue
                 else -> null
             }
         }
