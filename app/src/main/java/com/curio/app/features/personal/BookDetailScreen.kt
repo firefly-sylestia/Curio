@@ -633,7 +633,7 @@ private fun ChapterCard(
                         Text(
                             chapter.toString(),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (review != null) accent else ink.copy(alpha = 0.6f)
+                            color = ink
                         )
                     }
                 }

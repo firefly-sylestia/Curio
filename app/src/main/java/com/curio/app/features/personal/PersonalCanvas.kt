@@ -123,7 +123,7 @@ private val SMALL_VIEW_SIZE = 12.5.sp
  * coffee twin, because the deep one would vanish into a dark page.
  */
 @Composable
-internal fun personalQuoteColor(): Color = personalAccentInk()
+internal fun personalQuoteColor(): Color = Color(0xFF9A6A43)
 
 /** The rule beside a quoted block: the same coffee, at rule strength. */
 @Composable
@@ -391,7 +391,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun cycleListStyle() {
         val id = focusedId ?: return
         val current = activeFlags()
-        val next = if (current and FLAG_BULLET != 0) FLAG_CHECKBOX else FLAG_BULLET
+        val next = when {
+            current and FLAG_BULLET != 0 -> FLAG_BULLET
+            current and FLAG_CHECKBOX != 0 -> FLAG_BULLET
+            else -> FLAG_BULLET
+        }
         toggleListStyle(next)
     }
 
@@ -1082,8 +1086,7 @@ internal fun PersonalToolDock(
                 active = active and FLAG_CHECKBOX != 0,
                 accent = accentInk,
                 ink = ink,
-                onClick = { state.toggleListStyle(FLAG_CHECKBOX) },
-                onLongClick = { state.cycleListStyle() }
+                onClick = { state.toggleListStyle(FLAG_CHECKBOX) }
             ) {
                 CurioIcon(CurioIcons.TaskAlt, null, size = 19.dp)
             }
@@ -1102,8 +1105,7 @@ internal fun PersonalToolDock(
                 label = "Bullet",
                 active = active and FLAG_BULLET != 0,
                 accent = accentInk, ink = ink,
-                onClick = { state.toggleListStyle(FLAG_BULLET) },
-                onLongClick = { state.cycleListStyle() }
+                onClick = { state.toggleListStyle(FLAG_BULLET) }
             ) {
                 BulletGlyph()
             }
