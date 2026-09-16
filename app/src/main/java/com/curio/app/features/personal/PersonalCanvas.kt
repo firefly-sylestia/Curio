@@ -48,7 +48,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
@@ -756,7 +755,6 @@ private fun PersonalPhotoBlock(
                 painter = rememberAsyncImagePainter(uri),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                filterQuality = FilterQuality.High,
                 modifier = Modifier.fillMaxWidth().height(172.dp)
             )
             if (enabled) {
@@ -848,7 +846,6 @@ internal fun PersonalDocView(
                         painter = rememberAsyncImagePainter(block.photo.orEmpty()),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        filterQuality = FilterQuality.High,
                         modifier = Modifier.fillMaxWidth().height(156.dp)
                     )
                     if (block.caption.isNotBlank()) {

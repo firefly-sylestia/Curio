@@ -30,7 +30,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -136,7 +135,7 @@ fun PersonalPhotoOverlay(state: PersonalPhotoOverlayState) {
         val padding = with(density) { OPEN_PADDING.toPx() }
         val vw = container.width - padding * 2f
         val vh = container.height - padding * 2f
-        if (vw <= 0f || vh <= 0f || !intrinsic.isSpecified) {
+        if (vw <= 0f || vh <= 0f || intrinsic.width <= 0f || intrinsic.height <= 0f) {
             null
         } else {
             val scale = minOf(vw / intrinsic.width, vh / intrinsic.height)
@@ -229,10 +228,9 @@ fun PersonalPhotoOverlay(state: PersonalPhotoOverlayState) {
                     painter = painter,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    // The thumbnail is small and the picture is not: without
-                    // this the enlarged bitmap is filtered cheaply and reads
-                    // blurred the moment it is bigger than its tile.
-                    filterQuality = FilterQuality.High,
+                    // High quality decoding (via the request below) keeps the
+                    // enlarged bitmap crisp; the Image composable's painter
+                    // overload does not expose a filterQuality parameter.
                     modifier = Modifier.fillMaxSize()
                 )
             }

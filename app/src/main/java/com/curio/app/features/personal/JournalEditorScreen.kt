@@ -60,6 +60,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
@@ -673,7 +674,7 @@ private fun JournalReadView(
     doc: PersonalDoc,
     ink: Color,
     accent: Color,
-    onOpenPhoto: (String) -> Unit
+    onOpenPhoto: (String, Rect?) -> Unit
 ) {
     Column(
         modifier = Modifier
