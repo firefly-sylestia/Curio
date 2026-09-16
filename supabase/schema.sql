@@ -156,7 +156,7 @@ create table if not exists public.community_cards (
     constraint community_cards_fact_len_v2 check (
         char_length(fact_text) <= 600 and char_length(fact_text) >= 1
     ),
-    constraint community_cards_kind check (kind in ('CARD', 'NOTE', 'QUOTE')),
+    constraint community_cards_kind check (kind in ('CARD', 'NOTE', 'QUOTE', 'REPOST')),
     constraint community_cards_scale check (body_scale between 0.5 and 2.0),
     constraint community_cards_style check (style in
         ('PAPER','VINYL','COLLAGE','NEUMORPHIC','EDITORIAL','MINIMAL','SIGNATURE')),
@@ -165,7 +165,24 @@ create table if not exists public.community_cards (
 
 alter table public.community_cards add column if not exists caption text not null default '';
 alter table public.community_cards add column if not exists kind text not null default 'CARD';
+alter table public.community_cards add column if not exists quote_source_id uuid references public.community_cards (id) on delete set null;
+alter table public.community_cards add column if not exists quote_words text not null default '';
 alter table public.community_cards alter column topic_name set default '';
+
+do $$
+begin
+    -- The REPOST kind (a member's words above somebody's post) needs its two
+    -- carrying columns; the kind CHECK is widened in the same breath, because
+    -- a client that inserts REPOST before the constraint is replaced would
+    -- fail on the old one.
+    if not exists (
+        select 1 from pg_constraint where conname = 'community_cards_kind_v2'
+    ) then
+        alter table public.community_cards drop constraint if exists community_cards_kind;
+        alter table public.community_cards add constraint community_cards_kind_v2
+            check (kind in ('CARD', 'NOTE', 'QUOTE', 'REPOST'));
+    end if;
+end $$;
 
 -- Upgrade path for a project that already ran an earlier version of this
 -- file: the original fact constraint demanded at least one character of a
@@ -2231,6 +2248,47 @@ create table if not exists public.member_blocks (
     constraint member_blocks_not_self check (blocker <> blocked)
 );
 
+-- ───────────────────────────────────────────────────────────────────────────
+-- member_follows (v389) — one row per follow, the Follow button's whole
+-- server side. A block outranks a follow (the insert is refused if the target
+-- blocks the follower), self-follows are refused, and the ban guard covers
+-- the table like every other social one (a read-only or social ban refuses
+-- new follows; existing rows just sit there until the ban lapses).
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.member_follows (
+    follower   uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    followed   uuid not null references auth.users (id) on delete cascade,
+    created_at timestamptz not null default now(),
+    primary key (follower, followed),
+    constraint member_follows_not_self check (follower <> followed)
+);
+
+create index if not exists member_follows_followed_idx on public.member_follows (followed);
+
+alter table public.member_follows enable row level security;
+
+drop policy if exists follow_select_all on public.member_follows;
+create policy follow_select_all on public.member_follows
+    for select to authenticated
+    using (true);
+
+drop policy if exists follow_insert_own on public.member_follows;
+create policy follow_insert_own on public.member_follows
+    for insert to authenticated
+    with check (
+        follower = auth.uid()
+        and follower <> followed
+        and not exists (
+            select 1 from public.member_blocks b
+            where b.blocker = followed and b.blocked = auth.uid()
+        )
+    );
+
+drop policy if exists follow_delete_own on public.member_follows;
+create policy follow_delete_own on public.member_follows
+    for delete to authenticated
+    using (follower = auth.uid());
+
 create index if not exists member_blocks_blocked_idx on public.member_blocks (blocked);
 
 alter table public.member_blocks enable row level security;
@@ -2626,11 +2684,10 @@ end $$;
 do $$
 declare
     t text;
-begin
-    foreach t in array array['community_cards', 'community_comments',
+begin        foreach t in array array['community_cards', 'community_comments',
                              'community_reactions', 'community_comment_reactions',
                              'friend_requests', 'dm_messages', 'dm_typing',
-                             'dm_reactions', 'member_blocks', 'profiles']
+                             'dm_reactions', 'member_blocks', 'member_follows', 'profiles']
     loop
         execute format('drop trigger if exists curio_ban_guard_%1$s on public.%1$s', t);
         execute format(

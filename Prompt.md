@@ -1,6 +1,40 @@
 # Prompt Log — current request
 
-## Request (2026-09-16, AWAITING VERIFICATION — the ban ladder, the wall's look, profiles in the tear)
+## Request (2026-09-16, SHIPPED (`736cdb9b`) — the compile fix, then FOLLOW MEMBERS + QUOTE-REPOST built on top)
+
+The CI log the user pasted listed eight broken files; every one was a real
+missing symbol in the feature commit: a lost newline in AppPreferences that
+merged two statements, `routeSlug` living on `CurioCategory.id` not the
+category, missing imports (`TextButton` — whose absence caused the whole
+"@Composable invocations" cascade — `lerp`, `BAN_CONTENT`, `CurioRoutes`,
+`Dp`, `SocialModerationHistoryCard`), `LivePostPreview` missing its `accent`
+parameter, and the ask-friend call reading the nullable token straight into a
+String parameter. Fixed, pushed as `736cdb9b`.
+
+Then the two picks the user approved (Follow members, Quote-repost) were
+built in the same pass:
+
+- **Follows:** `member_follows` (schema, RLS, ban-guarded),
+  `CommunityApi.follow/unfollow/followingIds/followerCount`, a second hero
+  pill on member profiles (optimistic, rolls back on refusal), and a
+  Following/Everyone chip on the wall that filters the feed client-side.
+- **Quote-repost:** a fourth post KIND (`REPOST`) with `quote_source_id` +
+  `quote_words` columns (the kind CHECK widened through a guarded
+  constraint replacement), a PostgREST self-join in `CARD_COLUMNS` so the
+  quoted card arrives with the row (`parseOneCard` split out to parse it
+  with a null viewer), the wall's quote icon opening the composer with the
+  card attached, a Repost pill in the kind rail, a quiet quoted-post chip,
+  and preview + wall rendering through the same nested shape (a quoted
+  QUOTE keeps its pull-quote).
+
+Verification this pass: brace balance on all five touched Kotlin files,
+`git diff --check`, an import sweep over every new symbol, and the schema
+edited alongside (the guard's table list gained `member_follows`). CI is
+the first real compile again — if it reports, send the log.
+
+---
+
+## Request (2026-09-16, AWAITING VERIFICATION → SHIPPED `6ffb0272` — the ban ladder, the wall's look, profiles in the tear)
 
 Verbatim (one message, landed AFTER the previous request shipped as `477e0d08`): "when i ban a member it should show inside the moderation page, also permanent account ban option too, they can only view posts, and another where i can ban them from social feature too, also similiar to the home + button hide when scroll add similiar for the post button too hides when scrolled down reappears when srolled above. and also suggest more features, refine quote post and preview both, properly refine so it looks proper quote, and more features suggestions and reifnements. and before pushing ask me also the book select and read use the app book catalog too. first the app books if not then openlibrary, also the new redrawns are bad, i want cute chibby style but rn the new avatars are weird eyes and specially weird not matching eyebrows and also weird neck tint fix it, also similiar to the socail page inside tears chat friends you, i want you to move the profile inisde the headrer tears too, remove the profile a memeber of the community text, and full put the profile with the similiar hero accent insid ethe tear by expanding the tear. proper messege button too. also the posts below, make them more compact its too much space taking, also give it proper accent color too not cream."
 

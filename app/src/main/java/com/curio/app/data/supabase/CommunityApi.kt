@@ -36,7 +36,8 @@ data class CommunityCard(
     val authorDisplayName: String = "",
     /** The author's chosen portrait (0–15). */
     val authorAvatar: Int = 0,
-    /** CARD (a topic share card), NOTE (a text-only post) or QUOTE. */
+    /** CARD (a topic share card), NOTE (a text-only post), QUOTE, or REPOST
+     *  (the member's words above somebody else's post). */
     val kind: String = "CARD",
     val topicName: String,
     val categoryName: String,
@@ -58,7 +59,13 @@ data class CommunityCard(
   /** How many replies hang under the card. */
     val commentCount: Int,
     /** True when this device's account posted the card. */
-    val mine: Boolean
+    val mine: Boolean,
+    /** For a REPOST: the id of the post being quoted (null otherwise). */
+    val quoteSourceId: String? = null,
+    /** For a REPOST: the member's own words above the quoted post. */
+    val quoteWords: String = "",
+    /** For a REPOST: the quoted post itself, fully joined at read time. */
+    val quoteSource: CommunityCard? = null
 ) {
     /** Hours left before the card disappears, floored at 0. */
     val hoursLeft: Long
@@ -249,22 +256,28 @@ data class CommunityCardDraft(
     val factText: String,
     /** The poster's own line above the card — optional, never media. */
     val caption: String = "",
-    /** CARD, NOTE or QUOTE — the renderer a card is rebuilt with. */
+    /** CARD, NOTE, QUOTE or REPOST — the renderer a card is rebuilt with. */
     val kind: String = KIND_CARD,
     val style: String = "PAPER",
     val aspect: String = "CLASSIC",
     val bodyScale: Float = 1f,
-    val byline: String = ""
+    val byline: String = "",
+    /** REPOST only: the id of the post being quoted. */
+    val quoteSourceId: String? = null,
+    /** REPOST only: the member's own words above the quoted post. */
+    val quoteWords: String = ""
 ) {
     /** True for the text-only posts that carry no topic and no card art. */
-    val isTextOnly: Boolean get() = kind == KIND_NOTE || kind == KIND_QUOTE
+    val isTextOnly: Boolean get() = kind == KIND_NOTE || kind == KIND_QUOTE || kind == KIND_REPOST
 }
 
 /** A topic share card. */
-const val KIND_CARD = "CARD"
-
-/** A tweet-style text post — words and nothing else. */
+const val KIND_CARD = "CARD"    /** A tweet-style text post — words and nothing else. */
 const val KIND_NOTE = "NOTE"
+
+/** The member's words ABOVE somebody else's post, kept in [CommunityCard.quoteWords];
+ *  the quoted post itself rides in [CommunityCard.quoteSource]. */
+const val KIND_REPOST = "REPOST"
 
 /** A line someone else said, credited to them. */
 const val KIND_QUOTE = "QUOTE"
@@ -478,6 +491,10 @@ object CommunityApi {
     private const val CARD_COLUMNS =
         "id,owner,author_handle,kind,topic_name,category_name,category_glyph,accent_hex," +
             "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at," +
+            "quote_source_id,quote_words," +
+            "quote_source:community_cards!community_cards_quote_source_id_fkey(" +
+            "id,owner,author_handle,kind,topic_name,category_name,category_glyph,accent_hex," +
+            "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at)," +
             "community_reactions(user_id,kind),community_comments(id)"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
@@ -512,9 +529,12 @@ object CommunityApi {
         // A text-only post has no topic BY DESIGN (that is the point of it),
         // so the topic requirement applies to topic cards alone.
         draft.kind == KIND_CARD && draft.topicName.isBlank() -> "What is your card about?"
+        draft.kind == KIND_REPOST && draft.quoteSourceId.isNullOrBlank() ->
+            "The post you were quoting is gone."
         draft.factText.isBlank() -> when (draft.kind) {
             KIND_QUOTE -> "Write the quote first."
             KIND_NOTE -> "Write something first."
+            KIND_REPOST -> "Add your words above the post you're quoting."
             else -> "Add the words you want on the card."
         }
         draft.factText.length > MAX_FACT_CHARS ->
@@ -801,6 +821,10 @@ object CommunityApi {
                 .put("aspect", draft.aspect)
                 .put("body_scale", draft.bodyScale.toDouble())
                 .put("byline", draft.byline.trim())
+            if (draft.kind == KIND_REPOST) {
+                payload.put("quote_source_id", draft.quoteSourceId)
+                payload.put("quote_words", draft.quoteWords.trim())
+            }
             val request = SupabaseClient.requestBuilder(CARDS, accessToken)
                 .header("Prefer", "return=representation")
                 .post(payload.toString().toRequestBody(jsonMediaType))
@@ -1198,6 +1222,71 @@ object CommunityApi {
         }
     }
 
+    /** The follow table, addressed directly (RLS owns the rules server-side). */
+    private const val FOLLOWS = "/rest/v1/member_follows"
+
+    /**
+     * FOLLOWS. A Follow is one row; an unfollow deletes it; `followingIds` is
+     * the one read the wall's Following filter needs, and `followerCounts`
+     * covers a profile's follower/following numbers in a single request pair.
+     * Every rule (no self-follow, no following someone who blocked you, ban
+     * tiers) is enforced by RLS and the ban guard — the client only decides
+     * what to OFFER.
+     */
+    suspend fun follow(accessToken: String, userId: String, myUserId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val request = SupabaseClient.requestBuilder(FOLLOWS, accessToken)
+                    .post(
+                        JSONObject()
+                            .put("follower", myUserId)
+                            .put("followed", userId)
+                            .toString().toRequestBody(jsonMediaType)
+                    )
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    suspend fun unfollow(accessToken: String, userId: String, myUserId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val request = SupabaseClient.requestBuilder(
+                    "$FOLLOWS?follower=eq.$myUserId&followed=eq.$userId", accessToken
+                ).delete().build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    /** The ids this account follows — the wall's Following filter reads it. */
+    suspend fun followingIds(accessToken: String, myUserId: String): Result<Set<String>> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val request = SupabaseClient.requestBuilder(
+                    "$FOLLOWS?follower=eq.$myUserId&select=followed", accessToken
+                ).get().build()
+                val array = JSONArray(SupabaseClient.executeBody(request))
+                buildSet(array.length()) {
+                    for (i in 0 until array.length()) {
+                        array.optJSONObject(i)?.optString("followed")
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { add(it) }
+                    }
+                }
+            }
+        }
+
+    /** How many members follow this account — one row per follower. */
+    suspend fun followerCount(accessToken: String, userId: String): Result<Int> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val request = SupabaseClient.requestBuilder(
+                    "$FOLLOWS?followed=eq.$userId&select=follower", accessToken
+                ).get().build()
+                JSONArray(SupabaseClient.executeBody(request)).length()
+            }
+        }
+
     /** Shared shape for the two removal calls: same payload rules, same errors. */
     private suspend fun moderate(
         rpc: String,
@@ -1329,7 +1418,13 @@ object CommunityApi {
         val cards = ArrayList<CommunityCard>(array.length())
         for (index in 0 until array.length()) {
             val row = array.optJSONObject(index) ?: continue
-            val owner = row.optString("owner")
+            parseOneCard(row, myUserId)?.let { cards += it }
+        }
+        return cards
+    }
+
+    /** One REST row → one card. Null when the row is not a card at all. */
+    private fun parseOneCard(row: JSONObject, myUserId: String?): CommunityCard? {
             val reactions = row.optJSONArray("community_reactions")
   var likes = 0
   var dislikes = 0
@@ -1345,9 +1440,9 @@ object CommunityApi {
   }
   }
   }
-            cards += CommunityCard(
+            return CommunityCard(
                 id = row.optString("id"),
-                authorId = owner,
+                authorId = row.optString("owner"),
                 authorHandle = row.optString("author_handle").ifBlank { "A curious soul" },
                 kind = row.optString("kind")
                     .takeIf { it.isNotBlank() && it != "null" }
@@ -1370,10 +1465,19 @@ object CommunityApi {
                 dislikeCount = dislikes,
                 dislikedByMe = dislikedByMe,
                 commentCount = row.optJSONArray("community_comments")?.length() ?: 0,
-                mine = myUserId != null && owner == myUserId
+                mine = myUserId != null && row.optString("owner") == myUserId,
+                quoteSourceId = row.optString("quote_source_id")
+                    .takeIf { it.isNotBlank() && it != "null" },
+                quoteWords = row.optString("quote_words"),
+                quoteSource = row.optJSONObject("quote_source")?.let { q ->
+                    // The quoted post is parsed with an EMPTY viewer id: its
+                    // reaction counts arrive with the join but the viewer's
+                    // own state belongs to the outer row's reader, and a
+                    // nested parse with `myUserId` would claim reactions
+                    // that were never this member's.
+                    parseOneCard(q, myUserId = null)
+                }
             )
-        }
-        return cards
     }
 
     /**

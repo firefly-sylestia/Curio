@@ -145,6 +145,9 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
     // The moderation record: the team sees anyone's, and a member sees their
     // own (the server allows exactly those two readers).
     var history by remember { mutableStateOf<List<ModerationRecord>>(emptyList()) }
+    // The follow tie: read once with the profile, flipped optimistically by
+    // the button and corrected by the server answer.
+    var following by remember { mutableStateOf(false) }
 
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
@@ -188,6 +191,10 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 },
                 onFailure = { /* friendship stays unknown; the pill offers the ask */ }
             )
+            // And do we already follow them? Decides Follow vs Following.
+            CommunityApi.followingIds(active, myUserId).onSuccess { ids ->
+                following = userId in ids
+            }
         }
         // The record: anyone may read their OWN, and the team may read this
         // member's. Anything else is refused by the server, so the call is made
@@ -217,6 +224,27 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             cards = cards,
             friendRequestId = friendRequestId,
             asked = asked,
+            following = following,
+            onFollow = {
+                val active = token
+                val me = myUserId
+                if (active == null || me == null) return@onFollow
+                // Optimistic: the pill flips NOW, the server is told after.
+                // A refused call rolls the pill back — a wrong pill is a
+                // small lie, but it is still a lie.
+                following = !following
+                scope.launch {
+                    val call = if (following) CommunityApi.follow(active, userId, me)
+                               else CommunityApi.unfollow(active, userId, me)
+                    call.fold(
+                        onSuccess = {},
+                        onFailure = {
+                            following = !following
+                            error = it.message
+                        }
+                    )
+                }
+            },
             bannedKind = targetKind,
             canModerate = myAdmin?.allows("bans") == true,
             onAsk = {
@@ -525,6 +553,10 @@ private fun SocialProfileHeroBlock(
     cards: List<CommunityCard>,
     friendRequestId: String?,
     asked: Boolean,
+    /** True when this account already follows the member. */
+    following: Boolean,
+    /** Follow / unfollow — never offered on your own page (you cannot follow yourself). */
+    onFollow: () -> Unit,
     /** The tier in force on this member, blank when they are not banned. */
     bannedKind: String,
     /** True for a moderator with the 'bans' permission. */
@@ -641,6 +673,31 @@ private fun SocialProfileHeroBlock(
                         glyph = CurioIcons.Person,
                         ink = ink,
                         onClick = onAsk
+                    )
+                }
+            }
+            if (!isMe) {
+                // FOLLOW — the lightest tie the app offers, and the wall's
+                // Following filter is its point: you follow a member so their
+                // posts survive the wall's 24-hour churn at a glance. It is a
+                // second pill beside the friend one, because a friendship ask
+                // and a follow are two different questions.
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (following) settingsHeroPillFill()
+                            else settingsRoseAccent().copy(alpha = 0.85f),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(onClick = onFollow)
+                ) {
+                    Text(
+                        text = if (following) "Following" else "Follow",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = if (following) ink else Color.White,
+                        maxLines = 1,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                     )
                 }
             }

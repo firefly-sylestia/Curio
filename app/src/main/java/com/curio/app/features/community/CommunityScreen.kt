@@ -141,6 +141,12 @@ fun CommunityScreen(navController: NavController) {
     val asTab = AppPreferences.communityTabVisible
     var cards by remember { mutableStateOf<List<CommunityCard>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
+    // The FOLLOWING filter (v389): off shows the whole wall; on shows only the
+    // posts of members this account follows. The ids are read once when the
+    // wall opens (and after each refresh), so the filter costs the feed
+    // nothing extra.
+    var followingIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var followingOnly by remember { mutableStateOf(false) }
     // ONLY a pull-down sets this: the wall's own refresh indicator belongs to
     // the user's gesture, never to a background read (a like used to flash a
     // spinner because every action funnelled through `load()`).
@@ -150,6 +156,8 @@ fun CommunityScreen(navController: NavController) {
     // request failed), so the page can say so instead of pretending.
     var offlineCopy by remember { mutableStateOf(false) }
     var composing by remember { mutableStateOf(false) }
+    // The post a quote-repost carries in (opened from a card's action row).
+    var quoting by remember { mutableStateOf<CommunityCard?>(null) }
     var reporting by remember { mutableStateOf<CommunityCard?>(null) }
     var deleteTarget by remember { mutableStateOf<CommunityCard?>(null) }
     var commentsFor by remember { mutableStateOf<CommunityCard?>(null) }
@@ -184,6 +192,19 @@ fun CommunityScreen(navController: NavController) {
     }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+
+    // The follow map the Following filter reads: one small request when the
+    // wall opens, refreshed alongside the feed so a follow made on a profile
+    // is honoured the next time the wall reloads.
+    LaunchedEffect(token, account.session?.userId) {
+        val active = token
+        val me = account.session?.userId
+        if (active != null && me != null) {
+            CommunityApi.followingIds(active, me).onSuccess { followingIds = it }
+        } else {
+            followingIds = emptySet()
+        }
+    }
     LaunchedEffect(token, account.session?.userId) {
         val active = token
         val userId = account.session?.userId
@@ -499,6 +520,39 @@ fun CommunityScreen(navController: NavController) {
                 }
             } else {
                 item { SettingsSectionHeading("Last 24 hours") }
+
+                // The wall's one filter: EVERYTHING, or only the members you
+                // follow. A follow is how a member's posts survive the wall's
+                // 24-hour churn at a glance, so the chip is the filter's whole
+                // interface — one tap on, one tap off.
+                if (followingIds.isNotEmpty()) {
+                    item(key = "follow-filter") {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(horizontal = wideContentEdgePadding())
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = if (followingOnly) settingsRoseAccent()
+                                else MaterialTheme.colorScheme.surfaceContainerLow,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .clickable { followingOnly = !followingOnly }
+                            ) {
+                                Text(
+                                    text = if (followingOnly) "Following" else "Everyone",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = if (followingOnly) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                                )
+                            }
+                        }
+                    }
+                }
                 if (offlineCopy) {
                     // Honest, quiet, and only when it is true: the wall below is
                     // the device's own copy because the request failed.
@@ -534,7 +588,31 @@ fun CommunityScreen(navController: NavController) {
                     }
                 }
 
-                if (cards.isEmpty() && !loading && error == null) {
+                // The list actually shown: the whole live wall, or only the
+                // followed members' slice of it. The filter is applied HERE
+                // (not on the fetch) so a fresh post by a followed member
+                // still lands through the same feed read.
+                val visibleCards = if (followingOnly) {
+                    cards.filter { it.authorId in followingIds }
+                } else cards
+
+                if (visibleCards.isEmpty() && !loading && error == null) {
+                    item {
+                        SettingsOptionCard {
+                            SettingsOptionInfoRow(
+                                CurioIcons.Info,
+                                if (followingOnly) "Nothing from who you follow" else "Nothing here yet",
+                                if (followingOnly) {
+                                    "Nobody you followed has posted in the last 24 hours."
+                                } else {
+                                    "Cards only last a day — be the first to pin one up."
+                                }
+                            )
+                        }
+                    }
+                }
+
+                items(visibleCards, key = { it.id }) { card ->
                     item {
                         SettingsOptionCard {
                             SettingsOptionInfoRow(
@@ -610,6 +688,7 @@ fun CommunityScreen(navController: NavController) {
                                 }
                             },
                             onReport = { reporting = card },
+                            onQuote = { quoting = card; composing = true },
                             onDelete = { deleteTarget = card }
                         )
                     }
@@ -674,7 +753,8 @@ fun CommunityScreen(navController: NavController) {
 
     if (composing && token != null) {
         CommunityPostScreen(
-            onDismiss = { composing = false },
+            onDismiss = { composing = false; quoting = null },
+            quoteSource = quoting,
             onPost = { draft, repostOf ->
                 scope.launch {
                     CommunityApi.post(
@@ -913,6 +993,8 @@ private fun CommunityCardItem(
   onLike: () -> Unit,
   onDislike: () -> Unit,
   onReport: () -> Unit,
+    /** Quote-repost: opens the composer with this post attached under the words. */
+    onQuote: () -> Unit,
     onDelete: () -> Unit,
     /**
      * The DENSE row (the shipped default): tighter padding, a smaller
@@ -1037,6 +1119,10 @@ private fun CommunityCardItem(
                 // report is a decision, not a reading task, and two worded
                 // pills crowded the row's tail. The icon keeps its label for
                 // accessibility, so the tap target never loses its meaning.
+                // Quote-repost sits beside them — writing about somebody's
+                // post is a rarer move than reacting, but a commoner one than
+                // reporting, and it opens the composer with the post attached.
+                CommunityAction(CurioIcons.FormatQuote, "", false, onQuote)
                 if (card.mine) {
                     CommunityAction(CurioIcons.Delete, "", false, onDelete)
                 }

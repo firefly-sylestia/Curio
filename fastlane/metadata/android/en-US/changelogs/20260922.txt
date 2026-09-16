@@ -1,4 +1,6 @@
 ADD:
+- Community: follow members — a Follow pill on every profile, and a wall filter that shows just who you follow so their posts are easy to find.
+- Community: quote-repost — share any post with your own words above it, previewed exactly as it will appear on the wall.
 - Community: bans now come in four reaches — hide content, view-only, social-only, or a full account lock — each with its own clock (a day, a week, a month, or until lifted), and the moderation page keeps a living ban list you can soften or lift.
 - Community: every moderation action is remembered — a member's page and your own profile now carry the record of bans, lifts and removals.
 - Community: deleted posts wait locally behind a small door at the foot of the wall, where they can be re-posted or let go.
