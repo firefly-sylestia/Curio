@@ -6,9 +6,9 @@ Verbatim: "the accent fix is still remaining ... also add the similiar series bu
 
 ### Current pass
 
-- Calendar dialog is less rounded and journal date text now uses the dark accent ink.
-- Home create launcher is positioned closer to the bottom navigation edge.
-- Remaining media-sheet/editor/home-preview work is still pending a follow-up implementation pass.
+- Repaired the journal editor parser issue that caused the cascading unresolved-reference CI errors, and removed the unsupported DatePickerDialog color argument.
+- The requested contrast, floating shelf/journal actions, todo/editor controls, and cross-media similar sheets remain the active implementation scope; they are not being marked complete until each path is implemented and reviewed.
+- The garbled `���` text in the pasted report is CI/log encoding noise, not an intentional app label. The compiler diagnostics are build output and should not be rendered in the app UI.
 
 
 ## Request (2026-09-16, IN PROGRESS — shelf at three across, real chapters for open-library books, the design pass, the hero-accent sweep + the "+" additions) — ⛔ NOT PUSHED (user asked to hold)

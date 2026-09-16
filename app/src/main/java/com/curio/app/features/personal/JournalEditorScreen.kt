@@ -388,7 +388,6 @@ fun JournalEditorScreen(
 DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             shape = RoundedCornerShape(16.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
             confirmButton = {
                 androidx.compose.material3.Button(
@@ -489,7 +488,8 @@ private fun JournalTopBar(
                         if (today) "Today" else dateMillis.prettyDate(),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
 color = personalAccentInk()
-            )
+                )
+            }
         }
         if (editing) Surface(
                 onClick = { onShiftDate(1L) },
