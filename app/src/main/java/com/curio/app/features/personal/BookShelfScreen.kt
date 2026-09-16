@@ -546,6 +546,47 @@ private fun AddBookSheet(
                 color = ink
             )
 
+            // Three doors: search by title, scan the ISBN barcode, or type it
+            // yourself. The scan door is the fastest when the book is at hand.
+            var scannerOpen by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ScanDoor(
+                    glyph = CurioIcons.Search,
+                    label = "Search",
+                    selected = !manual && !scannerOpen,
+                    accent = accent,
+                    ink = ink,
+                    onClick = { manual = false; scannerOpen = false }
+                )
+                ScanDoor(
+                    glyph = CurioIcons.Screenshot,
+                    label = "Scan ISBN",
+                    selected = scannerOpen,
+                    accent = accent,
+                    ink = ink,
+                    onClick = { scannerOpen = true }
+                )
+                ScanDoor(
+                    glyph = CurioIcons.Edit,
+                    label = "Type",
+                    selected = manual,
+                    accent = accent,
+                    ink = ink,
+                    onClick = { manual = true; scannerOpen = false }
+                )
+            }
+
+            if (scannerOpen) {
+                IsbnScannerSheet(
+                    onDismiss = { scannerOpen = false },
+                    onAdded = onAdded
+                )
+                return@Column
+            }
+
             if (manual) {
                 BookField(value = manualTitle, onValueChange = { manualTitle = it }, placeholder = "Title", ink = ink, accent = accent)
                 BookField(value = manualAuthor, onValueChange = { manualAuthor = it }, placeholder = "Author", ink = ink, accent = accent)
@@ -853,6 +894,42 @@ private val bookHttp: OkHttpClient by lazy {
  * (the sheet then offers the manual door instead of an error the member can do
  * nothing about).
  */
+/** One third of the Search / Scan / Type row inside the add-book sheet. */
+@Composable
+private fun ScanDoor(
+    glyph: String,
+    label: String,
+    selected: Boolean,
+    accent: Color,
+    ink: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) accent.copy(alpha = 0.22f)
+        else MaterialTheme.colorScheme.surfaceContainerLow
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CurioIcon(
+                glyph,
+                null,
+                tint = if (selected) personalIconTint(accent) else ink.copy(alpha = 0.55f),
+                size = 16.dp
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = if (selected) personalIconTint(accent) else ink.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
 private fun searchOpenLibrary(query: String): List<BookHit>? = runCatching {
     val url = "https://openlibrary.org/search.json?q=" +
         java.net.URLEncoder.encode(query, "UTF-8") +

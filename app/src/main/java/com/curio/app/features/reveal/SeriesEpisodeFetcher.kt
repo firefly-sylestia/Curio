@@ -93,6 +93,44 @@ object SeriesEpisodeFetcher {
         }
     }
 
+    /**
+     * Fetch ALL episodes for a show from TVMaze, converting them to
+     * [SeriesEpisode] objects. Used when the topic has no authored episodes
+     * but the member wants to see the episode guide.
+     */
+    suspend fun fetchAll(showName: String): List<SeriesEpisode> = withContext(Dispatchers.IO) {
+        val title = showName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
+        val json = httpGet(
+            "https://api.tvmaze.com/singlesearch/shows?q=${Uri.encode(title)}"
+        ) ?: return@withContext emptyList()
+        val showId = try {
+            JSONObject(json).optInt("id", 0).takeIf { it > 0 }
+        } catch (_: Exception) { null } ?: return@withContext emptyList()
+        val episodesJson = httpGet("https://api.tvmaze.com/shows/$showId/episodes")
+            ?: return@withContext emptyList()
+        try {
+            val arr = org.json.JSONArray(episodesJson)
+            (0 until arr.length()).mapNotNull { i ->
+                val ep = arr.optJSONObject(i) ?: return@mapNotNull null
+                val season = ep.optInt("season", 0)
+                val number = ep.optInt("number", 0)
+                if (season <= 0 || number <= 0) return@mapNotNull null
+                SeriesEpisode(
+                    season = season,
+                    number = number,
+                    title = ep.optString("name", ""),
+                    summary = ep.optString("summary", "").replace(Regex("<[^>]+>"), "").trim(),
+                    airdate = ep.optString("airdate", ""),
+                    runtime = ep.optInt("runtime", 0),
+                    rating = ep.optJSONObject("rating")?.optDouble("average", 0.0)?.toFloat() ?: 0f,
+                    stillUrl = ep.optJSONObject("image")?.optString("original", "") ?: ""
+                )
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
     /** Look up the TVMaze show ID by name. Returns null on miss. */
     private fun lookupShowId(title: String): Int? {
         val json = httpGet(

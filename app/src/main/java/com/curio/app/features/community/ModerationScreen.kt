@@ -123,8 +123,10 @@ fun ModerationScreen(navController: NavController) {
     var permissionTarget by remember { mutableStateOf<Pair<CurioPerson, CommunityAdminRow?>?>(null) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+    var loaded by remember { mutableStateOf(false) }
 
     suspend fun load(active: String, me: String) {
+        if (loaded) return@load
         loading = true
         CommunityApi.myAdminRow(active, me).fold(
             onSuccess = { row ->
@@ -176,6 +178,7 @@ fun ModerationScreen(navController: NavController) {
             onFailure = { error = it.message ?: "Couldn't verify moderation access." }
         )
         loading = false
+        loaded = true
     }
 
     LaunchedEffect(token, myUserId) {
