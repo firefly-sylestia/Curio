@@ -15,6 +15,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.VoskModels
