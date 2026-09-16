@@ -114,6 +114,13 @@ jobs:
             Write-Error "No MSI installer was produced under $root/msi"
             exit 1
           }
+          # Publish the installer's ACTUAL file name for the release body:
+          # jpackage names it from its numeric package version (MAJOR.MINOR.BUILD,
+          # padded by desktop/build.gradle.kts — tag v2.1-beta6 -> Curio-2.1.0.msi),
+          # which is NOT the full tag the portable zip keeps. Reading the produced
+          # file keeps the body and the artifact in sync without duplicating the
+          # version-normalization rule in PowerShell.
+          "CURIO_MSI_NAME=$($msi.Name)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           # Compose Desktop's Windows output directory is version-dependent:
           # recent plugin versions use `app-image` rather than `app`. Find the
           # actual jpackage image by its executable instead of guessing the
@@ -160,13 +167,14 @@ jobs:
         run: |
           $version = $env:GITHUB_REF_NAME.TrimStart("v")
           if ([string]::IsNullOrWhiteSpace($version)) { $version = "1.0.0" }
-          # jpackage names the MSI from its numeric package version (the
-          # Gradle script strips prerelease/build suffixes, v1.0.2-beta ->
-          # 1.0.2), so derive the same numeric core for the body's MSI row.
-          # The portable zip keeps the FULL tag version to distinguish
-          # prerelease artifacts from later stable ones.
-          $msiVersion = $version.Split('-')[0].Split('+')[0]
-          if ([string]::IsNullOrWhiteSpace($msiVersion)) { $msiVersion = "1.0.0" }
+          # The MSI row names the installer the build actually produced
+          # (published by the collect step): jpackage versions it from the
+          # numeric MAJOR.MINOR.BUILD the Gradle script normalizes the tag to,
+          # so it differs from the portable zip's full-tag name. The portable
+          # zip keeps the FULL tag version to distinguish prerelease artifacts
+          # from later stable ones.
+          $msiName = $env:CURIO_MSI_NAME
+          if ([string]::IsNullOrWhiteSpace($msiName)) { $msiName = "Curio-1.0.0.msi" }
           # String array joined with newlines (a YAML block scalar can't
           # hold an unindented PowerShell here-string; `` `` is an escaped
           # backtick in double-quoted strings, so the markdown code spans
@@ -189,7 +197,7 @@ jobs:
             "| File | Best for |",
             "|---|---|",
             "| ``Curio-Windows-$version-portable.zip`` | Portable — unzip anywhere and run ``Curio.exe``, no install |",
-            "| ``Curio-$msiVersion.msi`` | Installer — adds a Start-menu shortcut and an uninstaller |",
+            "| ``$msiName`` | Installer — adds a Start-menu shortcut and an uninstaller |",
             "",
             "**Windows 10/11, 64-bit.** The window remembers its size, position, theme and last deck between runs."
           ) -join [Environment]::NewLine

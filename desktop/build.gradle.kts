@@ -40,19 +40,54 @@ dependencies {
 // Windows installer from the tag, mirroring the Android app's versionName.
 // Local builds (no env var) keep the default.
 //
-// v27u — jpackage's packageVersion must be strictly numeric
-// (MAJOR[.MINOR][.PATCH] for DMG, MAJOR.MINOR.BUILD for MSI), so prerelease
-// tags like v1.0.2-beta fail configuration with "Illegal version". Strip
-// prerelease/build suffixes here — the installer metadata gets the numeric
-// core (1.0.2) while the release artifacts' names keep the full tag. The
-// Android versionName, by contrast, is a plain string and keeps the suffix.
-val envDesktopVersion: String? = System.getenv("RELEASE_VERSION")
+// ⚠️ jpackage's packageVersion is NOT a free-form string — each bundle format
+// validates it, and MSI is the strict one: it demands exactly
+// MAJOR.MINOR.BUILD (255 / 255 / 65535 ceilings), so a tag carrying fewer
+// numeric components fails CONFIGURATION with "Illegal version for 'Msi':
+// '2.1' is not a valid version". A configuration failure takes the whole
+// build down — release.yml runs :app:assembleRelease with the same
+// RELEASE_VERSION exported, and Gradle configures every project first, so a
+// desktop version mistake broke the Android release (the v2.1-beta6 tag).
+//
+// So normalize the tag instead of trusting it: drop prerelease/build
+// suffixes (v1.0.2-beta -> 1.0.2), pad the version to the three numeric
+// components MSI requires (v2.1-beta6 -> 2.1.0, v2 -> 2.0.0), and fall back
+// to the module default when the tag yields nothing jpackage would accept.
+// The Android versionName is a plain string and keeps its suffix; the
+// release artifacts' names keep the full tag too.
+
+/**
+ * The installer version jpackage will accept for [parts]: MAJOR.MINOR.BUILD
+ * with missing components padded with 0. Returns null when the components are
+ * empty or outside the ranges jpackage allows, so the caller can fall back
+ * rather than fail configuration.
+ */
+fun jpackagePackageVersion(parts: List<Int>): String? {
+    val core = parts.take(3)
+    if (core.isEmpty()) return null
+    val (major, minor, build) = core + List(3 - core.size) { 0 }
+    if (major > 255 || minor > 255 || build > 65535) return null
+    return "$major.$minor.$build"
+}
+
+val rawReleaseVersion: String? = System.getenv("RELEASE_VERSION")
     ?.trim()
     ?.removePrefix("v")
     ?.takeIf { it.isNotEmpty() }
+
+val envDesktopVersion: String? = rawReleaseVersion
     ?.substringBefore('-')
     ?.substringBefore('+')
-    ?.takeIf { it.isNotEmpty() }
+    ?.split('.')
+    ?.mapNotNull { it.toIntOrNull() }
+    ?.let { jpackagePackageVersion(it) }
+
+if (rawReleaseVersion != null && envDesktopVersion == null) {
+    logger.warn(
+        "Curio desktop: RELEASE_VERSION='$rawReleaseVersion' has no usable numeric " +
+            "version (jpackage needs MAJOR.MINOR.BUILD); using the default package version."
+    )
+}
 
 compose.desktop {
     application {

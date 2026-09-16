@@ -1,5 +1,37 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — tag release fix: jpackage MSI version)
+
+Verbatim: releasing the `v2` tag failed with `A problem occurred configuring
+project ':desktop' > Illegal version for 'Msi': '2.1' is not a valid version` —
+fix it, without tagging/releasing anything.
+
+Root cause: the newest tag is `v2.1-beta6`, and `release.yml` exports
+`RELEASE_VERSION` (the tag) for EVERY tag run. Gradle configures every project
+before running `:app:assembleRelease`, so `:desktop`'s `packageVersion` was
+validated too: the tag normalizes to `2.1`, and jpackage's MSI metadata needs
+all three numeric components (`MAJOR.MINOR.BUILD`) — the config failure killed
+the whole invocation, Android release included. The desktop module never even
+had to be built for this to break.
+
+Fix:
+- `desktop/build.gradle.kts` — the tag is no longer trusted as-is. A small
+  `jpackagePackageVersion` helper pads the numeric core to three components
+  (`v2.1-beta6` -> `2.1.0`, `v2` -> `2.0.0`), keeps the range ceilings
+  (255/255/65535), and returns null (module default 1.0.0 + a build warning)
+  when a tag yields nothing jpackage accepts, so a malformed tag can never fail
+  configuration again. Prerelease/build suffix stripping (v27u behavior) is
+  kept. Verified against all nine existing tags: `1.0.1`, `1.2.0`, `2.1.0`, ...
+- `.github/workflows/desktop-release.yml` — the release body's MSI row now uses
+  the installer's ACTUAL file name (`CURIO_MSI_NAME`, published by the collect
+  step) instead of re-deriving the old no-padding rule, which would have named
+  `Curio-2.1.msi` while jpackage produced `Curio-2.1.0.msi`.
+- `.github/AGENTS.md` — desktop workflow contract updated (normalization +
+  fallback + the file-name-driven body).
+
+No tag, release, or workflow run was triggered; the fix lands on `main` for the
+next tag push to pick up.
+
 ## Request (2026-09-14, COMPLETE — schema.sql drop-order fix: delivery-mode trigger)
 
 Re-pasting schema.sql failed with `2BP01: cannot drop function

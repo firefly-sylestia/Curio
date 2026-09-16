@@ -96,13 +96,22 @@ pushes build the desktop module. Re-enable by flipping both gates to
   non-numeric versions.
 - **Tag version is the package version:** exports `RELEASE_VERSION` (tag
   minus `v`) so `desktop/build.gradle.kts` versions the installer from the
-  tag, mirroring the Android convention. jpackage requires a strictly
-  numeric version (`MAJOR[.MINOR][.PATCH]`) for DMG/MSI metadata, so the
-  desktop module strips prerelease/build suffixes (`v1.0.2-beta` → `1.0.2`)
-  from `packageVersion` — the Android `versionName` is a plain string and
-  keeps the suffix. The portable zip name keeps the full tag (distinguishes
-  prerelease from later stable artifacts); the MSI is named from the numeric
-  package version, and the release body mirrors that (`msiVersion`).
+  tag, mirroring the Android convention. jpackage validates
+  `packageVersion` per bundle format, and the Windows MSI is the strict one:
+  it requires exactly `MAJOR.MINOR.BUILD` (255 / 255 / 65535). The desktop
+  module therefore NORMALIZES the tag instead of trusting it — prerelease/
+  build suffixes stripped (`v1.0.2-beta` → `1.0.2`) and missing components
+  padded with 0 (`v2.1-beta6` → `2.1.0`, `v2` → `2.0.0`) — and a tag that
+  yields nothing jpackage accepts falls back to `1.0.0` with a build
+  warning. A two-component tag used to fail **configuration**
+  (`Illegal version for 'Msi': '2.1'`), and since Gradle configures every
+  project before running `:app:assembleRelease`, that broke the Android
+  release on the same tag (v2.1-beta6). The Android `versionName` is a plain
+  string and keeps its suffix. The portable zip name keeps the full tag
+  (distinguishes prerelease from later stable artifacts); the release body's
+  MSI row uses the installer's ACTUAL file name (`CURIO_MSI_NAME`, published
+  by the collect step) rather than re-deriving the rule, so the body can
+  never name a file the build did not produce.
 - Publishes through GitHub Releases with the same `alpha`/`beta`/`rc`
   prerelease detection as the Android workflow, and `update_release_body:
   false` so it never clobbers the Android workflow's release body when both
