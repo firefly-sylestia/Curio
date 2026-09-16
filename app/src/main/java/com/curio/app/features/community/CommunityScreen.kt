@@ -613,18 +613,6 @@ fun CommunityScreen(navController: NavController) {
                 }
 
                 items(visibleCards, key = { it.id }) { card ->
-                    item {
-                        SettingsOptionCard {
-                            SettingsOptionInfoRow(
-                                CurioIcons.Info,
-                                "Nothing here yet",
-                                "Cards only last a day — be the first to pin one up."
-                            )
-                        }
-                    }
-                }
-
-                items(cards, key = { it.id }) { card ->
                     // Each row rises into place as the feed builds, so a
                     // refresh reads as cards arriving rather than a page
                     // blinking in.

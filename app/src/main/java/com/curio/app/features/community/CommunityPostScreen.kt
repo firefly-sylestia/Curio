@@ -416,6 +416,7 @@ internal fun CommunityPostScreen(
                             topic = topic,
                             draft = draft,
                             accent = accent,
+                            quoted = quoteSource,
                             onTopicNote = { topicPresentation = TopicPresentation.NOTE },
                             onTopicCard = { topicPresentation = TopicPresentation.CARD }
                         )
@@ -783,6 +784,8 @@ private fun LivePostPreview(
     topic: CurioTopic?,
     draft: CommunityCardDraft,
     accent: Color,
+    /** REPOST only: the quoted post, nested in the preview as the wall will. */
+    quoted: CommunityCard? = null,
     onTopicNote: () -> Unit,
     onTopicCard: () -> Unit
 ) {
@@ -866,7 +869,7 @@ private fun LivePostPreview(
                         body = draft.quoteWords,
                         credit = "",
                         accent = accent,
-                        quoted = quoteSource
+                        quoted = quoted
                     )
                 } else {
                     TextPostPreview(

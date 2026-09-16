@@ -225,7 +225,7 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             friendRequestId = friendRequestId,
             asked = asked,
             following = following,
-            onFollow = {
+            onFollow = onFollow@{
                 val active = token
                 val me = myUserId
                 if (active == null || me == null) return@onFollow
