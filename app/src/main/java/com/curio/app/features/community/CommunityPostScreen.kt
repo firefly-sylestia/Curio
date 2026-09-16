@@ -269,7 +269,7 @@ internal fun CommunityPostScreen(
 
     val category = topic?.categoryId?.let(CurioCategories::byId)
     val accent = category?.themedAccent() ?: settingsRoseAccent()
-    val accentInk = if (accent.luminance() > 0.55f) Color.Black else Color.White
+    val accentInk = settingsAccentInk()
 
     val topicResults = remember(index, query) {
         searchTopics(

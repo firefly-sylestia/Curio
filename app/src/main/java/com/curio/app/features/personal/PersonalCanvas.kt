@@ -122,8 +122,7 @@ private val SMALL_VIEW_SIZE = 12.5.sp
  * coffee twin, because the deep one would vanish into a dark page.
  */
 @Composable
-internal fun personalQuoteColor(): Color =
-    if (isCurioDarkTheme()) Color(0xFFC7A184) else Color(0xFF6B4A34)
+internal fun personalQuoteColor(): Color = personalAccentInk()
 
 /** The rule beside a quoted block: the same coffee, at rule strength. */
 @Composable
@@ -692,7 +691,7 @@ private fun PersonalTextBlock(
                 }
             },
         textStyle = bodyStyle,
-        cursorBrush = SolidColor(accent),
+        cursorBrush = SolidColor(personalAccentInk()),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Default
@@ -788,7 +787,7 @@ private fun PersonalPhotoBlock(
                     fontSize = 13.sp,
                     color = ink.copy(alpha = 0.72f)
                 ),
-                cursorBrush = SolidColor(accent),
+                cursorBrush = SolidColor(personalAccentInk()),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 8.dp),
@@ -955,6 +954,7 @@ internal fun PersonalToolDock(
     // The dock wears the app's own accent (the same one Home's hero uses), not
     // a hard rose — a member on the azure/hero-lane theme sees THEIR accent.
     val accent = personalAccent()
+    val accentInk = personalAccentInk()
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
         shape = RoundedCornerShape(22.dp),
@@ -975,7 +975,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Bold",
                 active = active and FLAG_BOLD != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_BOLD) }
             ) {
                 Text("B", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 17.sp))
@@ -983,7 +983,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Italic",
                 active = active and FLAG_ITALIC != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_ITALIC) }
             ) {
                 Text(
@@ -994,7 +994,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Underline",
                 active = active and FLAG_UNDERLINE != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_UNDERLINE) }
             ) {
                 Text(
@@ -1008,7 +1008,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Strikethrough",
                 active = active and FLAG_STRIKE != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_STRIKE) }
             ) {
                 Text(
@@ -1022,7 +1022,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Title",
                 active = active and FLAG_TITLE != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_TITLE) }
             ) {
                 Text("H", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 15.sp))
@@ -1030,7 +1030,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Small text",
                 active = active and FLAG_SMALL != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_SMALL) }
             ) {
                 Text(
@@ -1041,7 +1041,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Bullet",
                 active = active and FLAG_BULLET != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_BULLET) }
             ) {
                 BulletGlyph()
@@ -1049,7 +1049,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Quote",
                 active = active and FLAG_QUOTE != 0,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_QUOTE) }
             ) {
                 CurioIcon(CurioIcons.FormatQuote, null, size = 18.dp)
@@ -1057,7 +1057,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Align left",
                 active = state.alignOfFocused() == PersonalAlign.START,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.setAlign(PersonalAlign.START) }
             ) {
                 AlignGlyph(center = false)
@@ -1065,7 +1065,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Align centre",
                 active = state.alignOfFocused() == PersonalAlign.CENTER,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = { state.setAlign(PersonalAlign.CENTER) }
             ) {
                 AlignGlyph(center = true)
@@ -1073,7 +1073,7 @@ internal fun PersonalToolDock(
             PersonalToolButton(
                 label = "Add a photo",
                 active = false,
-                accent = accent, ink = ink,
+                accent = accentInk, ink = ink,
                 onClick = onPickPhoto
             ) {
                 CurioIcon(CurioIcons.Image, null, size = 18.dp)
