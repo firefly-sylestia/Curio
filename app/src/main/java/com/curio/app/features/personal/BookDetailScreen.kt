@@ -271,6 +271,11 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         ) {
                             LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
                             DownloadPill(enabled = !lookingUp) { downloadSheet = true }
+                            if (current.coverUrl.startsWith("content://")) {
+                                TextButton(onClick = {
+                                    navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
+                                }) { Text("Read") }
+                            }
                         }
                         if (lookingUp || lookupNote != null) {
                             Spacer(Modifier.height(6.dp))
@@ -633,7 +638,7 @@ private fun ChapterCard(
                         Text(
                             chapter.toString(),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (review != null) accent else ink.copy(alpha = 0.6f)
+                            color = if (review != null) personalAccentInk() else ink.copy(alpha = 0.62f)
                         )
                     }
                 }
@@ -798,6 +803,11 @@ private fun DownloadHelpSheet(
                 label = "Search for an EPUB",
                 accent = accent
             ) { openDownloadSearch(context, title, author, "epub"); onDismiss() }
+            DownloadFormatRow(
+                tile = "FREE",
+                label = "Search free public-domain copies",
+                accent = accent
+            ) { openDownloadSearch(context, title, author, "gutenberg"); onDismiss() }
         }
     }
 }

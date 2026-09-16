@@ -1,5 +1,8 @@
 package com.curio.app.features.personal
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -34,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,6 +57,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -486,6 +491,7 @@ private fun AddBookSheet(
     onDismiss: () -> Unit,
     onAdded: (String) -> Unit
 ) {
+    val context = LocalContext.current
     val ink = MaterialTheme.colorScheme.onSurface
     val accent = personalAccent()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -503,14 +509,6 @@ private fun AddBookSheet(
     var manualAuthor by remember { mutableStateOf("") }
     var manualChapters by remember { mutableIntStateOf(0) }
 
-    /**
-     * Puts the book on the shelf.
-     *
-     * [catalogId] and [pages] are filled when the book came from Curio's own
-     * catalog: the id is what lets the book's page read the real chapter names,
-     * page ranges and summaries back out of the topic JSON, and the page count
-     * gives "how long is this book" an answer that did not come from a guess.
-     */
     fun addBook(
         title: String,
         author: String,
@@ -542,6 +540,25 @@ private fun AddBookSheet(
             onAdded(id)
         }
     }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri ?: return@rememberLauncherForActivityResult
+        val name = uri.lastPathSegment?.substringAfterLast('/')
+            ?.substringBeforeLast('.')
+            ?.replace('_', ' ')
+            .orEmpty()
+            .ifBlank { "Imported book" }
+        runCatching {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+        addBook(name, "", uri.toString(), 0)
+    }
+
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -629,6 +646,13 @@ private fun AddBookSheet(
                     }) { Text("Add to shelf", color = personalAccentInk()) }
                 }
                 return@Column
+            }
+
+            OutlinedButton(
+                onClick = { importLauncher.launch(arrayOf("application/epub+zip", "application/pdf", "text/plain")) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Import an EPUB, PDF, or text file")
             }
 
             BookField(

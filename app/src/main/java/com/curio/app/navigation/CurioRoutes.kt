@@ -370,9 +370,12 @@ object CurioRoutes {
         }
     }
     /** One book on the personal shelf. */
+    const val BOOK_READER = "books/{bookId}/reader"
     fun bookDetail(bookId: String) = "books/${Uri.encode(bookId)}"
     /** One chapter of a shelf book (1-based). */
     fun chapter(bookId: String, chapter: Int) = "books/${Uri.encode(bookId)}/chapter/$chapter"
+    /** Lightweight offline reader for an imported EPUB or PDF. */
+    fun reader(bookId: String) = "books/${Uri.encode(bookId)}/reader"
     /** One community card's own view. */
     fun communityCard(cardId: String) = "community/$cardId"
     /** A member's public profile (their portrait, handle and live cards). */

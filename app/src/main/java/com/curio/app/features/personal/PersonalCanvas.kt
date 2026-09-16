@@ -123,7 +123,7 @@ private val SMALL_VIEW_SIZE = 12.5.sp
  * coffee twin, because the deep one would vanish into a dark page.
  */
 @Composable
-internal fun personalQuoteColor(): Color = personalAccentInk()
+internal fun personalQuoteColor(): Color = Color(0xFF9A6A43)
 
 /** The rule beside a quoted block: the same coffee, at rule strength. */
 @Composable
@@ -391,7 +391,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun cycleListStyle() {
         val id = focusedId ?: return
         val current = activeFlags()
-        val next = if (current and FLAG_BULLET != 0) FLAG_CHECKBOX else FLAG_BULLET
+        val next = when {
+            current and FLAG_BULLET != 0 -> FLAG_CHECKBOX
+            current and FLAG_CHECKBOX != 0 -> FLAG_BULLET
+            else -> FLAG_BULLET
+        }
         toggleListStyle(next)
     }
 
@@ -623,6 +627,7 @@ private fun PersonalTextBlock(
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
     val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
+    var checkboxChecked by remember(id) { mutableStateOf(false) }
     // ONE hint for the whole page: the empty-line "Write…" on every new
     // paragraph read as a page full of the word "write".
     val showHint = text.isEmpty() && !state.hasText()
@@ -693,7 +698,12 @@ private fun PersonalTextBlock(
                                 cornerRadius = CornerRadius(2.dp.toPx()),
                                 style = Stroke(width = 1.6.dp.toPx())
                             )
+                            if (checkboxChecked) {
+                                drawLine(bulletInk, Offset(3.dp.toPx(), 13.dp.toPx()), Offset(6.dp.toPx(), 16.dp.toPx()), strokeWidth = 1.8.dp.toPx())
+                                drawLine(bulletInk, Offset(6.dp.toPx(), 16.dp.toPx()), Offset(12.dp.toPx(), 8.dp.toPx()), strokeWidth = 1.8.dp.toPx())
+                            }
                         }
+                        .clickable(enabled = enabled) { checkboxChecked = !checkboxChecked }
                         .padding(start = 19.dp)
                     isBullet -> Modifier
                         .drawBehind {
@@ -1082,8 +1092,7 @@ internal fun PersonalToolDock(
                 active = active and FLAG_CHECKBOX != 0,
                 accent = accentInk,
                 ink = ink,
-                onClick = { state.toggleListStyle(FLAG_CHECKBOX) },
-                onLongClick = { state.cycleListStyle() }
+                onClick = { state.toggleListStyle(FLAG_CHECKBOX) }
             ) {
                 CurioIcon(CurioIcons.TaskAlt, null, size = 19.dp)
             }
@@ -1102,8 +1111,7 @@ internal fun PersonalToolDock(
                 label = "Bullet",
                 active = active and FLAG_BULLET != 0,
                 accent = accentInk, ink = ink,
-                onClick = { state.toggleListStyle(FLAG_BULLET) },
-                onLongClick = { state.cycleListStyle() }
+                onClick = { state.toggleListStyle(FLAG_BULLET) }
             ) {
                 BulletGlyph()
             }
