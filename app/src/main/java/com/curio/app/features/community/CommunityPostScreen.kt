@@ -1,5 +1,6 @@
 package com.curio.app.features.community
 
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import androidx.activity.compose.BackHandler
