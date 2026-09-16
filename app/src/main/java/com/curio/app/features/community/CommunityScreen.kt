@@ -62,13 +62,15 @@ import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
 import com.curio.app.features.settings.SettingsOptionRow
 import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.settingsHeroPillFill
+import com.curio.app.features.settings.settingsHeroTotalHeight
 import com.curio.app.features.settings.settingsRoseAccent
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -269,6 +271,29 @@ fun CommunityScreen(navController: NavController) {
         refreshQuietly()
     }
 
+    // v386 — the wall's doors (Chats / Friends / You), rendered INSIDE the
+    // hero banner through SettingsHeroHeader's footer slot so they paint WITH
+    // the header. They used to be a list item under “Last 24 hours”, which
+    // meant they only showed up once the account check landed — the row was
+    // missing every time the wall opened. Defined once here because both hero
+    // placements (the pinned phone overlay, the wide in-list hero) wear it.
+    val doorsFooter: @Composable (Color) -> Unit = { ink ->
+        SocialDoorsRow(
+            ink = ink,
+            onChats = { navController.navigate(CurioRoutes.CHATS) },
+            onFriends = { navController.navigate(CurioRoutes.FRIENDS) },
+            onYou = {
+                // Guarded: an unmatched person/ route would throw.
+                val me = account.session?.userId
+                if (!me.isNullOrBlank()) {
+                    navController.navigate(CurioRoutes.socialProfile(me)) {
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -308,7 +333,9 @@ fun CommunityScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = if (wide) 0.dp else SettingsHeroTotalHeight,
+                // v386 — the hero now carries the doors row (see [SocialDoorsRow]),
+                // so the wall starts below the EXTENDED banner.
+                top = if (wide) 0.dp else settingsHeroTotalHeight(SocialDoorRowHeight),
                 // As a tab root the last card has to clear the floating pill
                 // bar (the NavHost drops the system nav inset on tab routes
                 // because the bar carries it) — same 84dp the Cabinet uses.
@@ -325,7 +352,9 @@ fun CommunityScreen(navController: NavController) {
                     SettingsHeroHeader(
                         title = "Social",
                         subtitle = "",
-                        onBack = if (asTab) null else ({ navController.popBackStack() })
+                        onBack = if (asTab) null else ({ navController.popBackStack() }),
+                        footer = doorsFooter,
+                        footerHeight = SocialDoorRowHeight
                     )
                 }
             }
@@ -408,48 +437,9 @@ fun CommunityScreen(navController: NavController) {
                         )
                     }
                 }
-                item {
-                    // The wall's doors. Posting lives on the floating button
-                    // at the bottom (one clear door); these are the two places
-                    // you GO from the wall, each as a proper tile — icon first,
-                    // label under it — instead of three bare text buttons that
-                    // read as leftover links.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        CommunityDoorTile(
-                            icon = CurioIcons.Chats,
-                            label = "Chats",
-                            onClick = { navController.navigate(CurioRoutes.CHATS) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        CommunityDoorTile(
-                            // Groups: two people side by side — the mark a
-                            // friends list deserves; the chats tile takes the
-                            // speech bubble so the two never blur.
-                            icon = CurioIcons.Friends,
-                            label = "Friends",
-                            onClick = { navController.navigate(CurioRoutes.FRIENDS) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        CommunityDoorTile(
-                            icon = CurioIcons.Person,
-                            label = "You",
-                            onClick = {
-                                // Guarded: an unmatched person/ route would throw.
-                                val me = account.session?.userId
-                                if (!me.isNullOrBlank()) {
-                                    navController.navigate(CurioRoutes.socialProfile(me)) {
-                                        launchSingleTop = true
-                                    }
-                                }
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
+                // v386 — the doors row (Chats / Friends / You) is gone from
+                // here: it rides the hero itself now, so it is on screen the
+                // moment the wall opens instead of after the account check.
 
                 notice?.let { message ->
                     item {
@@ -595,6 +585,8 @@ fun CommunityScreen(navController: NavController) {
                 title = "Social",
                 subtitle = "",
                 onBack = if (asTab) null else ({ navController.popBackStack() }),
+                footer = doorsFooter,
+                footerHeight = SocialDoorRowHeight,
                 glassBackdrop = glassBackdrop
             )
         }
@@ -987,53 +979,120 @@ internal fun CommunityAction(
 }
 
 /**
- * One of the wall's three doors — Chats, Friends, You — as a compact TILE:
- * an icon in a rounded well beside the label, no narration under it. The
- * press squish every other surface on this screen wears. Equal weights keep
- * the row balanced on any width.
+ * v386 — the height the Social hero's doors row ADDS to the banner: the row's
+ * own height plus the gap the header leaves above it. Passed to
+ * [SettingsHeroHeader] as `footerHeight` and to [settingsHeroTotalHeight] as
+ * the reservation, so the wall always starts below the extended banner. Keep
+ * it in step with [SocialDoorsRow]'s natural height (a 31dp icon well plus 7dp
+ * of padding either side = 45dp, plus the 12dp gap, plus a little slack).
+ */
+private val SocialDoorRowHeight = 58.dp
+
+/**
+ * The wall's three doors (Chats / Friends / You) as ONE row for the hero
+ * banner: an icon in a rounded well beside the label, no narration under it.
+ *
+ * On the banner by design — as a list item under “Last 24 hours” the row only
+ * appeared once the account check landed, so it was missing every time the
+ * wall opened. Here it paints with the header itself.
+ */
+@Composable
+private fun SocialDoorsRow(
+    ink: Color,
+    onChats: () -> Unit,
+    onFriends: () -> Unit,
+    onYou: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        CommunityDoorTile(
+            icon = CurioIcons.Chats,
+            label = "Chats",
+            ink = ink,
+            onClick = onChats,
+            modifier = Modifier.weight(1f)
+        )
+        CommunityDoorTile(
+            // Groups: two people side by side — the mark a friends list
+            // deserves; the chats tile takes the speech bubble so the two
+            // never blur.
+            icon = CurioIcons.Friends,
+            label = "Friends",
+            ink = ink,
+            onClick = onFriends,
+            modifier = Modifier.weight(1f)
+        )
+        CommunityDoorTile(
+            icon = CurioIcons.Person,
+            label = "You",
+            ink = ink,
+            onClick = onYou,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+/**
+ * One of the wall's three doors as a compact TILE: an icon in a rounded well
+ * beside the label, wearing the hero's readable [ink] on the hero's own pill
+ * glass so it reads as part of the torn paper. The press squish every other
+ * surface on this screen wears; equal weights keep the row balanced on any
+ * width.
  */
 @Composable
 internal fun CommunityDoorTile(
     icon: String,
     label: String,
+    ink: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = modifier.curioPressClickable(
-            pressedScale = 0.96f,
-            hapticOnPress = false,
-            onClickLabel = label,
-            onClick = onClick
-        )
+        shape = RoundedCornerShape(18.dp),
+        // v27n — OPAQUE hero glass: a translucent fill lets the elevation
+        // shadow bleed through the tile as a blurry smudge.
+        color = settingsHeroPillFill(),
+        shadowElevation = 3.dp,
+        modifier = modifier
+            .curioDarkGlow(3.dp, RoundedCornerShape(18.dp))
+            .curioPressClickable(
+                pressedScale = 0.96f,
+                hapticOnPress = false,
+                onClickLabel = label,
+                onClick = onClick
+            )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 10.dp)
+                .padding(horizontal = 7.dp, vertical = 7.dp)
         ) {
             Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = curioDialogActionColor().copy(alpha = 0.14f)
+                shape = RoundedCornerShape(12.dp),
+                color = ink.copy(alpha = 0.14f)
             ) {
                 CurioIcon(
                     name = icon,
                     contentDescription = null,
-                    tint = curioDialogActionColor(),
-                    size = 18.dp,
-                    modifier = Modifier.padding(9.dp)
+                    tint = ink,
+                    size = 17.dp,
+                    modifier = Modifier.padding(7.dp)
                 )
             }
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                // labelMedium: three tiles share one phone's width and
+                // “Friends” must not ellipsize on a 320dp screen — labelLarge
+                // was already tight before the row moved onto the banner.
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface
+                color = ink
             )
         }
     }

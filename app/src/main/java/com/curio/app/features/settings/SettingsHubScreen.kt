@@ -154,6 +154,9 @@ private const val SETTINGS_HERO_TEAR_SEED = 0x5EED
 private val SettingsHeroBannerHeight = 180.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val SettingsHeroSheetExtent = 24.dp
+/** The breathing room between the title block and an optional banner FOOTER
+ *  (the Social wall's door row). Counted into the footer's height budget. */
+private val SettingsHeroFooterGap = 12.dp
 /** Total header footprint — the torn banner plus its under-sheet extent.
  *  Public so every settings screen can start its scroll content just below
  *  the hero (the hero overlays the content, letting rows disappear under
@@ -166,13 +169,23 @@ private val SettingsHeroSheetExtent = 24.dp
  * changes and the consumers' fixed reservation stays correct).
  */
 val SettingsHeroTotalHeight: Dp
-    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+    get() = settingsHeroTotalHeight()
+
+/**
+ * The hero's footprint for a screen whose banner carries a FOOTER — the
+ * reserved scroll height a caller must use when it passes [footerHeight] to
+ * [SettingsHeroHeader], so the screen's content starts below the extended
+ * banner instead of under it. Defaults to the plain header, i.e. exactly
+ * [SettingsHeroTotalHeight].
+ */
+fun settingsHeroTotalHeight(footerHeight: Dp = 0.dp): Dp =
+    if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
         // v3xx22 — 176dp: the bar's real footprint (status bar + pills row
         // + title block ≈ 172dp on a modern phone). The old 160dp left the
         // settings nav rail peeking from under the header (user fix).
-        176.dp
+        176.dp + footerHeight
     } else {
-        SettingsHeroBannerHeight + SettingsHeroSheetExtent
+        SettingsHeroBannerHeight + SettingsHeroSheetExtent + footerHeight
     }
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
@@ -233,6 +246,15 @@ fun SettingsHeroHeader(
     // avatar + name — messenger headers lead with the person, not with a
     // title that would read first). Rendered left of the title text.
     titleLeading: (@Composable (ink: Color) -> Unit)? = null,
+    // v386 — an optional FOOTER that rides INSIDE the banner: content that
+    // belongs to the header itself (the Social wall's Chats / Friends / You
+    // doors) and must be there the moment the hero paints instead of popping
+    // in below once the page's data lands. [footerHeight] is that row's own
+    // height plus [SettingsHeroFooterGap] — it EXTENDS the banner (and the
+    // caller's reservation, see [settingsHeroTotalHeight]) so the title block
+    // above it never moves.
+    footer: (@Composable (ink: Color) -> Unit)? = null,
+    footerHeight: Dp = 0.dp,
     // v263 — RESTORED sticky-hero architecture: the scroll content records
     // into this LOCAL capture; the hero sits OUTSIDE it (drawn on top), so
     // its back pill can refract the rows scrolling behind it with REAL
@@ -245,27 +267,42 @@ fun SettingsHeroHeader(
     // param maps 1:1; screens that never pass search/trailing just render
     // the plain title bar.
     if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
-        CurioGlassToolbar(
-            title = title,
-            subtitle = subtitle,
-            onBack = onBack,
-            trailing = trailing,
-            searchActive = searchActive,
-            searchQuery = searchQuery,
-            onSearchQueryChange = onSearchQueryChange,
-            onCloseSearch = onCloseSearch,
-            searchFocus = searchFocus,
-            searchPlaceholder = searchPlaceholder,
-            titleTrailing = titleTrailing,
-            titleLeading = titleLeading,
-            glassBackdrop = glassBackdrop
-        )
+        // v386 — the glass style is content-height, so a footer simply stacks
+        // UNDER the bar (inside one Column, since callers place this header as
+        // an overlay: two siblings would paint on top of each other).
+        Column(modifier = Modifier.fillMaxWidth()) {
+            CurioGlassToolbar(
+                title = title,
+                subtitle = subtitle,
+                onBack = onBack,
+                trailing = trailing,
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
+                onCloseSearch = onCloseSearch,
+                searchFocus = searchFocus,
+                searchPlaceholder = searchPlaceholder,
+                titleTrailing = titleTrailing,
+                titleLeading = titleLeading,
+                glassBackdrop = glassBackdrop
+            )
+            if (footer != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .padding(top = SettingsHeroFooterGap)
+                ) {
+                    footer(MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
         return
     }
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
     // its original height and the header text never moves down.
-    val bannerHeight = if (compact) 140.dp else SettingsHeroBannerHeight
+    val bannerHeight = (if (compact) 140.dp else SettingsHeroBannerHeight) + footerHeight
     val totalHeight = bannerHeight + SettingsHeroSheetExtent
     val heroTornShape = remember(SETTINGS_HERO_TEAR_SEED) { SoftTornBottomShape(SETTINGS_HERO_TEAR_SEED, bold = true) }
     val sheetShape = remember(SETTINGS_HERO_TEAR_SEED) {
@@ -352,7 +389,15 @@ fun SettingsHeroHeader(
                     modifier = Modifier
                         .fillMaxSize()
                         .statusBarsPadding()
-                        .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 16.dp)
+                        .padding(
+                            start = 20.dp,
+                            end = 20.dp,
+                            top = 10.dp,
+                            // v386 — a footer sits on the paper just above the
+                            // torn edge, so it needs a little more clearance
+                            // than the title's descenders did.
+                            bottom = if (footer != null) 22.dp else 16.dp
+                        )
                 ) {
                     // ── Top row — back pill + optional hero action pills ──
                     Row(
@@ -515,6 +560,10 @@ fun SettingsHeroHeader(
                             }
                         }
                     }
+                    if (footer != null) {
+                        Spacer(Modifier.height(SettingsHeroFooterGap))
+                        footer(ink)
+                    }
                 }
             }
         }
@@ -568,6 +617,25 @@ internal fun FullBleedHeroItem(edgePad: Dp, hero: @Composable () -> Unit) {
  *  fill for the active/primary state. Public so settings-family screens can
  *  pass their own pills into [SettingsHeroHeader]'s trailing slot. */
 @Composable
+/**
+ * v386 — THE hero-pill fill: the single recipe behind the back pill, every
+ * hero action pill, and any other furniture riding a torn banner (the Social
+ * wall's Chats / Friends / You doors). OPAQUE on purpose — a translucent fill
+ * lets the elevation shadow bleed through as a blurry dark smudge (v27n), and
+ * the lerp resolves to the same perceived tint the old ink glass had. Light
+ * and pastel lift the banner toward the brand rose; dark wears the filter
+ * chips' raised near-black glass instead of bright glass on a deep banner.
+ */
+@Composable
+fun settingsHeroPillFill(
+    backdrop: Color = settingsRoseAccent(),
+    emphasized: Boolean = false
+): Color = if (isCurioDarkTheme()) {
+    lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+} else {
+    lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
+}
+
 fun SettingsHeroActionPill(
     onClick: () -> Unit,
     ink: Color,
@@ -599,6 +667,8 @@ fun SettingsHeroActionPill(
     // dark banner. The glyph stays 20dp.
     val backdrop = backdropOverride ?: settingsRoseAccent()
     // v42 — the glass lifts toward the COLOR-TINTED page background
+    // (see [settingsHeroPillFill] — one recipe, shared with the hero's own
+    // furniture so nothing riding the banner can drift off the pill look).
     // ([curioPillTintLift] — a whisper of the brand rose instead of plain
     // cream) so settings/profile buttons stop reading as flat cream blocks;
     // AMOLED gets a soft grey glass instead of pitch black. Dark keeps the
@@ -606,11 +676,7 @@ fun SettingsHeroActionPill(
     // v108 — dark mode swaps to the FILTER CHIPS' dark raised glass
     // (near-black tinted surface) so the hero pills read as part of the
     // same chip family at night instead of bright glass on the dark banner.
-    val fill = if (isCurioDarkTheme()) {
-        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
-    } else {
-        lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
-    }
+    val fill = settingsHeroPillFill(backdrop, emphasized)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),

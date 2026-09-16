@@ -1151,8 +1151,12 @@ object AppPreferences {
     // bottom sheet, a live recording pulse and springy take switching. The
     // paper notes themselves are untouched; OFF = today's capture page.
     var captureStudioState by mutableStateOf(true)
-  var socialTextEditingState by mutableStateOf(false)
-  private set
+    // v386 — SOCIAL TEXT EDITING now defaults ON (it was an opt-in experiment).
+    // Edit-own-message / edit-own-comment works out of the box; anyone who
+    // explicitly switched the Experiments toggle OFF keeps that choice — only
+    // the untouched default moved (see [isSocialTextEditingEnabled]).
+    var socialTextEditingState by mutableStateOf(true)
+        private set
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -2217,13 +2221,16 @@ object AppPreferences {
   captureStudioState = enabled
   }
 
-  fun isSocialTextEditingEnabled(context: Context): Boolean =
-  prefs(context).getBoolean(KEY_SOCIAL_TEXT_EDITING, false)
+    /** Whether edit controls show for your own direct messages and comments.
+     *  v386 — default ON: the toggle below still turns it off, but a fresh
+     *  install (and every install that never touched the switch) gets it. */
+    fun isSocialTextEditingEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SOCIAL_TEXT_EDITING, true)
 
-  fun setSocialTextEditingEnabled(context: Context, enabled: Boolean) {
-  prefs(context).edit().putBoolean(KEY_SOCIAL_TEXT_EDITING, enabled).apply()
-  socialTextEditingState = enabled
-  }
+    fun setSocialTextEditingEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SOCIAL_TEXT_EDITING, enabled).apply()
+        socialTextEditingState = enabled
+    }
 
 
     // v3xx — the "Subtle pill glow" experiment concluded: subtle is the

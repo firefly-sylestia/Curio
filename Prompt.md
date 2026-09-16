@@ -1,5 +1,97 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — portraits, the Social header, edit-by-default, the category panel)
+
+Verbatim (one message, four parts): the profile avatars "are not good enough and
+beautiful and better detailed enough, redesin all"; the social page's Chats /
+Friends / You "appear late", and should be "put inside the header tear by
+extending the header"; "turn on edit messeges by default"; and in the topic
+browser's category picker, selecting a category then closing the box applies it
+"even though i didnt press done".
+
+### Decisions (ask_user, before building)
+
+1. **Avatars: "Illustrated, much more detail"** — keep the same 28 characters,
+the same palette rows and the same public API, and rebuild the DRAWING.
+2. **The category picker: apply the pick WITHOUT Done.** Their words: "noo i
+want it to apply the pick without done too not the other way fix" — so Browse
+Topics drops the staged pending-set (a tap commits) and its Done simply
+collapses the panel, exactly like the Cabinet's panel already did.
+3. **The doors go in the header for everyone** (signed out included); both
+destinations already carry their own "Sign in…" card.
+
+### Root causes / shape of the work
+
+1. **The portraits were built for 40dp and judged at hero size.** A circle head
+(r=22), hair as ONE rounded rectangle, a mouth as a single arc, no brows in
+some passes, a beard as a half-disc, hats as bare fills. Nothing was wrong
+mechanically — the construction was simply too thin to survive a large size.
+   Also found: the garment rect (`x 20..80, y 74..118`) reached past `y≈90`,
+   where the disc is already narrower than the rect, so every portrait had
+   square garment corners OUTSIDE its circle — nothing clipped the Canvas.
+2. **The doors were a list item under "Last 24 hours" inside the
+`else { eligible }` branch**, so they only rendered after the account/profile
+check came back — the row was missing on every open.
+3. **`isSocialTextEditingEnabled` read `KEY_SOCIAL_TEXT_EDITING` with a `false`
+default**, so Edit was absent until the Experiments switch was found.
+4. **`TopicDatabaseScreen` kept a `pendingCats` set**: taps staged, Done
+committed, closing with the pill discarded — and the committed chips row behind
+the panel told a different story than the panel did.
+
+### Shipped
+
+- **`SocialAvatar.kt` rewritten (v386).** Shared 100×100 grid helpers (`o`, `s`,
+  `cr`, `Path.mv/ln/qd/cu`), tones derived per row (`darken`/`lighten`).
+  `drawCharacter` runs four passes: `drawHairBack` (masses, hood shell, helmet
+  glass, ponytails, braids, curls) → bust (`drawShoulders` with a collar trim,
+  folds and a lit shoulder) + `drawNeck` (jaw shadow, throat light) +
+  `drawHead` (ears, tapered jaw/chin, cheek warmth, forehead shade) →
+  `drawHairFront` (fringe/hat per style + ornaments) → `drawFace` (brows, eyes
+  with an eyelid crease and lower lid, nose bridge + nostrils, two-part mouth +
+  chin crease) and the face accessories (glasses, earring, freckles). The
+  character is drawn inside `clipPath(circle)`, so no geometry can ever spill
+  the disc. `avatarFlower`/`avatarBow`/`avatarLeaf` were rebuilt with shading;
+  the star/heart clip paths are unchanged.
+- **Hero footer slot (`SettingsHeroHeader`, v386).** `footer` +
+  `footerHeight`, `bannerHeight + footerHeight`, a 12dp `SettingsHeroFooterGap`,
+  extra bottom clearance for the tear, the GLASS toolbar path stacking the
+  footer under the bar, and a public `settingsHeroTotalHeight(footerHeight)`
+  the caller reserves. Also extracted the hero pill's opaque fill into
+  `settingsHeroPillFill()` (shared by the back pill, the hero action pills and
+  the new door tiles — v27n: opaque or the elevation shadow smears).
+- **Social screen:** the door row left the list and rides the banner
+  (`doorsFooter` lambda, both the pinned phone hero and the wide in-list hero),
+  `SocialDoorRowHeight = 58.dp` reserved in the content padding, and
+  `CommunityDoorTile` now takes the hero's `ink` and paints hero glass.
+- **Edit by default:** `isSocialTextEditingEnabled` defaults `true`, the state
+  field seeds `true`; the Experiments switch still turns it off (explicit off
+  wins), so no render site changed.
+- **Category panel applies live:** `pendingCats` and its seeding effect deleted
+  from `TopicDatabaseScreen`; `onPanelToggle` commits through `commitCats`,
+  `onPanelClearAll` clears, `onPanelDone` collapses, and both call sites pass
+  `selected = effectiveCats`.
+
+### Detail notes from the build (worth keeping)
+
+- **Brows had to move UNDER the hair.** With the brows inside the face pass
+  (painted after the hair), a dark arc landed ON a beanie cuff and, on light
+  hair, across the fringe. They are now their own `drawBrows` pass, called
+  between the head and the front hair, and the shared fringe arc was shortened
+  (`fringe(top, 30f)` instead of 38) so it stops just above the brow line
+  instead of swallowing the forehead.
+- **The Canvas was never clipped.** The old garment rect ran to `y 118` and the
+  disc is narrower than the rect below `y≈90`, so every portrait had square
+  garment corners OUTSIDE its circle. The character now draws inside
+  `clipPath(circle)`, which also lets the new bust reach the bottom of the frame.
+- **`avatarBow` is the one accessory drawn in CANVAS pixels** (it is placed in a
+  rotated frame), so it uses the raw `Path.moveTo/lineTo` — the `mv/ln/qd/cu`
+  helpers are design units and would have silently mis-scaled it.
+- **Not changed on purpose:** the `0–27` style count and the 28-row palette
+  table (a widening would need the Supabase check + `SOCIAL_AVATAR_STYLE_COUNT`
+  to move together), the Experiments "Social text editing" toggle (the default
+  moved to ON; an explicit OFF still wins), and the store changelog file
+  (`20260922.txt` — the versionCode did not bump).
+
 ## Request (2026-09-16, COMPLETE — the Wildcard lane, restart speed, the composer and the chat surface)
 
 Verbatim (one message, seven parts): the reply box in chats looks too big and too
