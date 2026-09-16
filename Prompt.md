@@ -1299,6 +1299,36 @@ edited_at + edit guard/policy are all in the file but NOT live until pasted.
 
 ## User prompts
 
+### Prompt (2026-09-16, DONE in this push — `477e0d08`) — your own writing: journals, books, the writing canvas, Add take
+
+Verbatim: take the `feature/create-entry-flow` ideas "but our design" — a **+**
+on Home that disappears on scroll, opening a sheet that starts a **journal** or a
+**book**; journals and books get their **own store and their own unique saved
+view**, independent of the app's saved detail view, editable and viewable in that
+same page with **persistent auto-save** for app switches; the book reader is a
+**shelf** of covers with the name and progress under each, and opening one shows
+the chapter reviews written or lets you write them in place; a personal collection
+with its own small view; the journal has date + date changer, emotion, title and
+writing with **bold / italic / underline / strikethrough / quote / left**
+formatting and photos in the same canvas, tools shown **above the keyboard as
+icons** applying to **the line the tool was used on** (selection, else the line),
+the writing never hiding under the keyboard; bring back the **"Add take"** row
+action from that commit (the picker stays, the new take lands beside the previous
+ones); and on Home remove the saved row and show **journal + book chips in a
+horizontal row**, small and fixed-shape, in the app accent ("not the cream
+colors"). Then: fix the CI compile breaks and the topic browser's scrolling and
+loading, push those, "then finish the result but dont push untill i say so".
+
+Status: DONE in this push (the compile breaks + browser fixes went out first as
+the user asked, through their own `fix cl` commit `c82b9e7c`). Decisions taken
+with ask_user: the Saved section goes AND saved captures leave Home's recents;
+the personal collection lives in its own store and shows on the Cabinet's
+Personal shelf; books are found online with a manual fallback; photos are inline
+blocks; a tool applies to the selection else the line; the feature is always on;
+and **push + wire the Cabinet shelf first**. Still open and named in the request
+log: the personal store is not in Backup & restore, and a photo is a block (it
+splits the paragraph) rather than a picture flowing mid-sentence.
+
 ### Prompt (2026-09-14, DONE in this push) — chat bubbles/swipe/edit + the moderation system
 
 Verbatim: the chat bubble for the receiver sits on the right and the "delete
