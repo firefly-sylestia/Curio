@@ -387,7 +387,7 @@ fun JournalEditorScreen(
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = pickerForDate)
 DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
             tonalElevation = 0.dp,
             confirmButton = {
                 androidx.compose.material3.Button(
@@ -407,7 +407,7 @@ DatePickerDialog(
                     onClick = { showDatePicker = false },
                     shape = RoundedCornerShape(50),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = personalAccent().copy(alpha = 0.16f),
+                        containerColor = personalAccent().copy(alpha = 0.24f),
                         contentColor = personalAccentInk()
                     )
                 ) { Text("Cancel") }

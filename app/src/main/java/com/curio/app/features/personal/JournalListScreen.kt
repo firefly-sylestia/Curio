@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -70,12 +71,13 @@ fun JournalListScreen(navController: NavController) {
     var pendingDelete by remember { mutableStateOf<PersonalNoteEntity?>(null) }
     val scope = rememberCoroutineScope()
 
-    Column(
+    Box(
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
+        Column(Modifier.fillMaxSize()) {
         PersonalHeader(
             title = "Journals",
             subtitle = when (journals.size) {
@@ -138,6 +140,18 @@ fun JournalListScreen(navController: NavController) {
                 item("tail") { Spacer(Modifier.height(60.dp)) }
             }
         }
+        PersonalCreateLauncher(
+            visible = true,
+            onClick = {
+                navController.navigate(CurioRoutes.journalEditor(CurioRoutes.PERSONAL_NEW)) {
+                    launchSingleTop = true
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(end = 18.dp, bottom = 18.dp)
+        )
     }
 
     pendingDelete?.let { journal ->
@@ -402,7 +416,7 @@ internal fun PersonalEmptyCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = personalAccent().copy(alpha = 0.12f),
+                color = personalAccent().copy(alpha = 0.24f),
                 modifier = Modifier.size(52.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -103,12 +104,13 @@ fun BookShelfScreen(navController: NavController) {
     var pendingDelete by remember { mutableStateOf<PersonalBookEntity?>(null) }
     val scope = rememberCoroutineScope()
 
-    Column(
+    Box(
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
+        Column(Modifier.fillMaxSize()) {
         PersonalHeader(
             title = "My shelf",
             subtitle = when (books.size) {
@@ -192,6 +194,14 @@ fun BookShelfScreen(navController: NavController) {
                 }
             }
         }
+        PersonalCreateLauncher(
+            visible = true,
+            onClick = { addOpen = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(end = 18.dp, bottom = 18.dp)
+        )
     }
 
     if (addOpen) {

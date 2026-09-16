@@ -211,7 +211,7 @@ private fun CreateEntryOption(
         ) {
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = accent.copy(alpha = 0.16f),
+                color = accent.copy(alpha = 0.24f),
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
