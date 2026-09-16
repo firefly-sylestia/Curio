@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.CategoryId
@@ -219,9 +220,10 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
             bannedKind = targetKind,
             canModerate = myAdmin?.allows("bans") == true,
             onAsk = {
-                if (myUserId != null) {
+                val active = token
+                if (active != null && myUserId != null) {
                     scope.launch {
-                        SocialApi.ask(token, userId, myUserId).fold(
+                        SocialApi.ask(active, userId, myUserId).fold(
                             onSuccess = { asked = true },
                             onFailure = { error = it.message }
                         )
@@ -229,7 +231,7 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 }
             },
             onMessage = {
-                navController.navigate(CurioRoutes.directMessage(userId)) {
+                navController.navigate(CurioRoutes.directMessage(userId.orEmpty())) {
                     launchSingleTop = true
                 }
             },

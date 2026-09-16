@@ -3,6 +3,7 @@ package com.curio.app.data
 import android.content.Context
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
+import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.KIND_NOTE
 import com.curio.app.data.supabase.KIND_QUOTE
@@ -242,9 +243,9 @@ object SocialPostArchive {
     fun draftOf(card: CommunityCard): CommunityCardDraft = CommunityCardDraft(
         topicName = card.topicName,
         categoryName = card.categoryName,
-        categorySlug = CurioCategories.visible
-            .firstOrNull { it.displayName == card.categoryName }
-            ?.routeSlug.orEmpty(),
+        categorySlug = card.categoryName?.let { name ->
+            CurioCategories.visible.firstOrNull { it.displayName == name }?.id?.routeSlug
+        }.orEmpty(),
         categoryGlyph = card.categoryGlyph,
         accentHex = card.accentHex,
         factText = card.factText,

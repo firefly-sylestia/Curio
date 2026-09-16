@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Row
+import com.curio.app.data.supabase.BAN_CONTENT
 import com.curio.app.data.supabase.BAN_TIERS
 import com.curio.app.data.supabase.ModerationReasons
 import com.curio.app.data.supabase.banTierBlurb

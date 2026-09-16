@@ -100,6 +100,7 @@ import com.curio.app.ui.components.AvatarCropDialog
 import com.curio.app.ui.components.ProfileAvatarImage
 import java.io.File
 import com.curio.app.features.community.SocialConfirmDialog
+import com.curio.app.features.community.SocialModerationHistoryCard
 import com.curio.app.features.settings.SocialAvatarPickerRow
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent

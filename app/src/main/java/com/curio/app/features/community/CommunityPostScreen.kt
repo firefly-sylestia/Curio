@@ -39,6 +39,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -393,6 +394,7 @@ internal fun CommunityPostScreen(
                             topicPresentation = topicPresentation,
                             topic = topic,
                             draft = draft,
+                            accent = accent,
                             onTopicNote = { topicPresentation = TopicPresentation.NOTE },
                             onTopicCard = { topicPresentation = TopicPresentation.CARD }
                         )
@@ -751,6 +753,7 @@ private fun LivePostPreview(
     topicPresentation: TopicPresentation,
     topic: CurioTopic?,
     draft: CommunityCardDraft,
+    accent: Color,
     onTopicNote: () -> Unit,
     onTopicCard: () -> Unit
 ) {

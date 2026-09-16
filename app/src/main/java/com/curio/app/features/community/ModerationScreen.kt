@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.supabase.BAN_CONTENT
+import com.curio.app.navigation.CurioRoutes
 import com.curio.app.data.supabase.CommunityAdminRow
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityBan
