@@ -1,5 +1,47 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, IN PROGRESS — journals & books, Add take, the browser lag)
+
+Verbatim (one message): take the create-entry-flow ideas from
+`feature/create-entry-flow` "but our design" — a **+** on Home that disappears on
+scroll like the similar button; the sheet it opens starts a **journal** and a
+**book** ("no write a book", but a flow where you pick a book, then write
+per-chapter reviews and progress); journals and books get their **own store and
+their own unique saved view**, independent of the app's saved detail view, easy
+to edit and view IN THAT SAME PAGE with **persistent auto-save** (nothing lost on
+an app switch); the **book reader is a shelf of covers** with the name and
+progress under each, opening a book shows the chapter reviews you wrote (or a
+new creating → saved → view flow), all kept in a personal collection with its own
+small view; the **journal has date + date changer, emotion, title and writing**,
+with bold/italic/underline/strikethrough/quote/left formatting and photos added
+in the same writing canvas, the tools shown **above the keyboard as icons** and
+applied to **the line the caret is on**, the sheet **auto-scrolling** so the field
+never goes under the keyboard; bring back the **"Add take"** row action from that
+commit (the picker stays, the new take then appears beside the previous ones); and
+on **Home**, remove the saved row and instead show **journal and book chips in a
+horizontal row** — small, fixed-shape previews that open directly, wearing the
+app accent ("not the cream colors").
+
+Then: "fix this" (a CI compile failure: `SocialAvatar.kt:1162` missing `u`,
+`SettingsHubScreen.kt:629` duplicate `@Composable` eating the one
+`SettingsHeroActionPill` needed) "and the topic browser scrolling and loading
+too and push both of them fast, then finish the result but dont push untill i say
+so".
+
+### Shipped (pushed first, as asked)
+
+- **Compile fixes.** `avatarBow(o(50f, 21f), …)` → `o(50f, 21f, u)` (the `u`
+  argument was dropped from one call in the bow ornament), and the stray
+  `@Composable` sitting above `settingsHeroPillFill`'s SECOND doc block (which
+  made the annotation "not repeatable" and left `SettingsHeroActionPill` — and
+  therefore the three composable calls inside it — without one) moved onto
+  `SettingsHeroActionPill` itself.
+- **Topic browser scroll + load (v387).** See `app/AGENTS.md`'s catalog bullet:
+  browse rows read the loader's parsed lane lists directly, the 16k index /
+  id-map / `groupBy` are search-only, the last browse row set is cached for an
+  instant first frame, and the indicator + back-to-top reads moved into a
+  `BoxScope.ScrollScopedRead` so a scroll step no longer recomposes the page.
+
 ## Request (2026-09-16, COMPLETE — portraits, the Social header, edit-by-default, the category panel)
 
 Verbatim (one message, four parts): the profile avatars "are not good enough and

@@ -14,6 +14,7 @@ FIX:
 - Community: the topic chooser in the composer starts collapsed, and its search ranks real matches — name first, then byline, tags and teaser — with each result's category shown.
 - Messages: the quoted message inside a reply is one line tall and fits its own words instead of stretching the bubble across the thread.
 - Speed: the Topic Database opens with the topics already on screen again, and the Cabinet shows your saved entries the moment you open it — no more waiting skeletons.
+- Speed: the Topic Database no longer builds the whole catalog's search index every time it opens or re-derives the page as you scroll, so it opens at once and scrolls without stutter.
 - Releases: the release APK now ships with the full topic catalog — previous releases opened an empty database.
 - Accounts: confirmation and password emails now open a real Curio page instead of a link that went nowhere, and the sign-in form has a "Forgot your password?" row that sets a new one.
 - Community: a reply thread no longer rearranges, duplicates or loses lines when a new answer is posted — every reply is drawn once, in its own branch, at every depth — and a reply you can't reply to no longer blocks a thread.
