@@ -140,6 +140,7 @@ fun JournalListScreen(navController: NavController) {
                 item("tail") { Spacer(Modifier.height(60.dp)) }
             }
         }
+        }
         PersonalCreateLauncher(
             visible = true,
             onClick = {
@@ -152,7 +153,6 @@ fun JournalListScreen(navController: NavController) {
                 .navigationBarsPadding()
                 .padding(end = 18.dp, bottom = 18.dp)
         )
-        }
     }
 
     pendingDelete?.let { journal ->
@@ -225,6 +225,7 @@ private fun JournalRow(
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     val accent = personalAccent()
+    val accentInk = personalAccentInk()
     val mood = journal.moodEnum
     // Decoding a body is only for the row that is actually measuring words:
     // `doc` re-parses the stored JSON on every access, so it is read ONCE per
@@ -252,7 +253,7 @@ private fun JournalRow(
                 .drawBehind {
                     val barWidth = 3.dp.toPx()
                     drawRoundRect(
-            color = personalAccentInk(),
+            color = accentInk,
             size = androidx.compose.ui.geometry.Size(barWidth, size.height),
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f)
                     )

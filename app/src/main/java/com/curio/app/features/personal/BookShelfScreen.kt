@@ -194,6 +194,7 @@ fun BookShelfScreen(navController: NavController) {
                 }
             }
         }
+        }
         PersonalCreateLauncher(
             visible = true,
             onClick = { addOpen = true },
@@ -202,7 +203,6 @@ fun BookShelfScreen(navController: NavController) {
                 .navigationBarsPadding()
                 .padding(end = 18.dp, bottom = 18.dp)
         )
-        }
     }
 
     if (addOpen) {
