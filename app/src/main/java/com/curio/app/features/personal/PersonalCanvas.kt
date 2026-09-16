@@ -3,6 +3,7 @@ package com.curio.app.features.personal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -387,6 +388,13 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * the whole line otherwise. An empty line arms the tool instead, so the
      * first words typed arrive already styled.
      */
+    fun cycleListStyle() {
+        val id = focusedId ?: return
+        val current = activeFlags()
+        val next = if (current and FLAG_BULLET != 0) FLAG_CHECKBOX else FLAG_BULLET
+        toggleListStyle(next)
+    }
+
     fun toggleListStyle(flag: Int) {
         val id = focusedId ?: return
         val mask = mask(id)
@@ -554,7 +562,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
 // ────────────────────────────────────────────────────────────────────────────
 // Canvas
-// ────────────────────────────────────────────────────────────────────────────
+// ───────────────────────────���────────────────────────────────────────────────
 
 /**
  * The writing surface. It does NOT scroll: the caller owns the scroll
@@ -1092,7 +1100,8 @@ label = "Todo checkbox",
                 label = "Bullet",
                 active = active and FLAG_BULLET != 0,
                 accent = accentInk, ink = ink,
-                onClick = { state.toggleListStyle(FLAG_BULLET) }
+                onClick = { state.toggleListStyle(FLAG_BULLET) },
+                onLongClick = { state.cycleListStyle() }
             ) {
                 BulletGlyph()
             }
@@ -1185,13 +1194,18 @@ private fun PersonalToolButton(
     accent: Color,
     ink: Color,
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     Surface(
-        onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = if (active) accent.copy(alpha = 0.18f) else Color.Transparent,
-        modifier = Modifier.size(36.dp)
+        color = if (active) accent.copy(alpha = 0.24f) else Color.Transparent,
+        modifier = Modifier
+            .size(36.dp)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
