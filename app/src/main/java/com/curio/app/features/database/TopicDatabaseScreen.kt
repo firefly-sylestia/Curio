@@ -76,6 +76,7 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.publicationYear
+import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
 import com.curio.app.ui.components.CurioSearchField
@@ -369,33 +370,39 @@ fun TopicDatabaseScreen(navController: NavController) {
     val catalogLoading = !catalogFilled || catalog.size < visibleCategories.size
     val totalTopics = catalog.sumOf { it.second.size }
 
-    // Build the search/sort fields (lowercase keys + word lists + year) OFF
-    // the composition thread, ONCE per catalog identity. v347 — the old code
-    // seeded this producer with a 20k map derived from the merged index and
-    // then IMMEDIATELY rebuilt the same 20k objects from that index in the
-    // producer body (produceState always runs its block on launch, so the
-    // seed was pure duplicate work on every open — warm or cold), and on a
-    // cold start the whole thing ran a THIRD time when the index source
-    // swapped in behind the fallback. One build per open now.
-    val indexedTopics by produceState<List<IndexedTopic>>(
-        initialValue = emptyList(),
-        catalog
+    // v348 — the merged index the app-start prewarm builds (v29/v174f) already
+    // carries the lowercased search keys and the sort year for every topic, so
+    // the browser reads THOSE instead of re-lowercasing the whole catalog and
+    // re-deriving every year on each open. `cachedIndex()` is a synchronous
+    // read: on a warm start the prewarm has already built it, so this state
+    // begins filled and nothing below waits on a coroutine.
+    val indexEntries by produceState<List<TopicIndexEntry>?>(
+        initialValue = TopicJsonLoader.cachedIndex()
     ) {
         value = withContext(Dispatchers.Default) {
-            catalog.flatMap { (cat, topics) ->
-                topics.map { topic ->
-                    IndexedTopic(
-                        category = cat,
-                        topic = topic,
-                        nameKey = topic.name.lowercase(),
-                        subtypeKey = topic.subtype.lowercase(),
-                        bylineKey = topic.byline.lowercase(),
-                        teaserKey = topic.teaser.lowercase(),
-                        tagKeys = topic.tags.map(String::lowercase),
-                        year = topicYear(topic)
-                    )
-                }
-            }.distinctBy { it.topic.id }
+            runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
+        }
+    }
+    val indexByTopicId: Map<String, TopicIndexEntry> = remember(indexEntries) {
+        indexEntries?.associateBy { it.topic.id }.orEmpty()
+    }
+    // Build the search/sort fields (lowercase keys + word lists + year) OFF
+    // the composition thread, ONCE per catalog identity. v347 kept this build
+    // single per open; v348 additionally seeds it SYNCHRONOUSLY from the warm
+    // index, so the rows exist on the FIRST frame — the "Preparing topics…"
+    // flash only survives on a genuinely cold start, before any prewarm.
+    // A warm index seeds the rows synchronously (the whole point). A cold one
+    // seeds NOTHING: building the fallback keys for 16k topics during
+    // composition would stutter the open exactly like the old path did — the
+    // background build below handles it instead, and this producer restarts
+    // with the index keys the moment [indexEntries] lands.
+    val indexedTopics by produceState<List<IndexedTopic>>(
+        initialValue = if (indexByTopicId.isEmpty()) emptyList() else buildIndexedTopics(catalog, indexByTopicId),
+        catalog,
+        indexByTopicId
+    ) {
+        value = withContext(Dispatchers.Default) {
+            buildIndexedTopics(catalog, indexByTopicId)
         }
     }
     // v7.97 — a persisted filter can outlive its lane (a category hidden in
@@ -1580,6 +1587,46 @@ private fun CategoryCheckboxRow(
  * alphabetically within that bucket.
  */
 private fun topicYear(topic: CurioTopic): Int? = topic.publicationYear()
+
+/**
+ * v348 — the browser's row list, built from whatever lanes are cached right
+ * now (see the catalog derivation above).
+ *
+ * The search keys and the sort year come from the merged index
+ * ([TopicJsonLoader.loadIndex]) whenever it already holds the topic: the index
+ * precomputes them once at app start, so opening the browser costs no
+ * lowercasing and no year parsing at all — this is what made the browser open
+ * instantly before the v347 refactor dropped the warm seed. A topic the index
+ * has not reached yet (a cold start, while the prewarm is still walking lanes)
+ * falls back to deriving them from the topic itself, which yields the same
+ * values, so rows render correctly at any point during the warm-up.
+ */
+private fun buildIndexedTopics(
+    catalog: List<Pair<CurioCategory, List<CurioTopic>>>,
+    indexByTopicId: Map<String, TopicIndexEntry>
+): List<IndexedTopic> {
+    val seen = HashSet<String>()
+    val out = ArrayList<IndexedTopic>()
+    for ((category, topics) in catalog) {
+        for (topic in topics) {
+            // The merged wildcard pool duplicates every canonical topic; one
+            // row per topic id, exactly like the previous distinctBy.
+            if (!seen.add(topic.id)) continue
+            val entry = indexByTopicId[topic.id]
+            out += IndexedTopic(
+                category = category,
+                topic = topic,
+                nameKey = entry?.nameKey ?: topic.name.lowercase(),
+                subtypeKey = entry?.subtypeKey ?: topic.subtype.lowercase(),
+                bylineKey = entry?.bylineKey ?: topic.byline.lowercase(),
+                teaserKey = entry?.teaserKey ?: topic.teaser.lowercase(),
+                tagKeys = entry?.tagKeys ?: topic.tags.map(String::lowercase),
+                year = entry?.year ?: topicYear(topic)
+            )
+        }
+    }
+    return out
+}
 
 /**
  * v313 — the single-category BROWSE bar, shown at the very top of the list

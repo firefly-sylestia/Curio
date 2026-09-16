@@ -1,5 +1,63 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — instant open + the create-entry composer)
+
+Verbatim: compare `v1.1.1-beta5` and `feature/create-entry-flow` with current
+main. In the tag, the Topic Database opened with topics instantly available and
+the Cabinet was equally instant; find why and do the same to the current UI.
+From the branch, bring the new post screen with refinements — user picked via
+ask_user: the live-preview composer, the icon aliases, refinements (topic at
+the top, card-vs-text choice for topics, look controls only when cards are
+selected, keep the current quote creation flow), always-on live preview, and
+mirror `android.yml`'s topic bundling into `release.yml`.
+
+### Root causes (measured in the code, not guessed)
+
+1. **Browser:** v347 replaced the tag's warm-index seed
+   (`initialValue = cachedIndex()...`, precomputed keys) with
+   `initialValue = emptyList()`, so every open re-lowercased the whole catalog
+   and re-derived every year on Dispatchers.Default before the first row.
+2. **Startup:** the prewarm was queued behind `TopicRepository.init()`, whose
+   first launch / version-gated re-sync parses all 38 lanes before the browser's
+   index could start building.
+3. **Loader:** `load()` served Room's "fast path" first — row mapping + per-row
+   Gson decode of chapters/tracks/episodes, which is SLOWER than parsing the
+   JSON once, and masked the shipped content.
+4. **Cabinet:** `peekLight()` is only non-empty after something collects the
+   light flow, and nothing did at startup — a cold start into Cabinet had
+   nothing to seed from.
+5. **Releases (not asked, found):** since `a365cd76` the JSON lives in
+   `data/topics/`; `android.yml` copies it back but `release.yml` never did —
+   every tagged release shipped an APK with ZERO topic data.
+
+### Shipped
+
+- `TopicDatabaseScreen.buildIndexedTopics()`: catalog-driven rows whose keys and
+  years come from the warm merged index when it holds the topic, else derived.
+  `indexEntries` produceState seeds from `cachedIndex()` synchronously.
+- `TopicJsonLoader.load()`: JSON pools authoritative, Room fallback only for
+  asset-less builds (`roomFallback`). `warmLoaderFromRoom` warms counts only.
+- `MainActivity`: prewarm un-queued from the Room import; a new warm collector
+  fills the Cabinet's light snapshot (`observeLight().collect()`).
+- Composer rewritten: branch structure (kind rail, always-on live preview,
+  topic picker with chevron aliases in the new `CurioIconAliases.kt`), user's
+  refinements (topic first + auto-open, Card|Note presentation toggle in the
+  preview header, look controls only for cards, quote flow = main's credit
+  field), main's preserved behaviours (caption for every kind, real-identity
+  preview card, 700/1200/180/120 caps, teaser seed on topic pick).
+- `release.yml` now bundles `data/topics/*.json` into `assets/topics/` with the
+  same fail-if-empty guard as `android.yml`.
+- Docs: `app/AGENTS.md` (v348 catalog contract, v349 composer),
+  `.github/AGENTS.md` (release bundling), changelog.
+
+### Verified
+
+Delimiters balanced on all six edited Kotlin files; no unused imports remain in
+the composer; `CommunityCard`/`CommunityCardDraft` constructors re-read before
+use; `git diff --check` clean. Not compiled here (root AGENTS rule) — CI is the
+compile check. NOT ported: the branch's journal/book/create flow (out of scope)
+and its DM/Friends edits (conflict with the shipped fixes).
+
 ## Request (2026-09-16, COMPLETE — Curio account site + email links)
 
 Verbatim: fix the link so we have a web version, because the new "congrats you

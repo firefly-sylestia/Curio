@@ -1,9 +1,12 @@
 ADD:
+- Community: the composer is rebuilt — the topic goes first, the preview is always on, and a topic can ship as a share card or as a plain text post with one tap.
 - Chats: conversations, friends and the wall all run on the same rebuilt chat engine — messages, typing dots, reactions, read ticks and live updates are steadier and faster everywhere.
 - Community: replies now thread properly at any depth — fold and unfold a branch at any level, with a thread line showing where each answer belongs — and every reply can be hearted.
 - Friends: a "Start a chat" strip at the bottom of the contacts list offers your newest friends, one tap from a conversation.
 - Community: the moderation room now covers members too — reports can name a member, hiding an author hides their content without touching their account, and the team manages moderators with five per-person permissions.
 FIX:
+- Speed: the Topic Database opens with the topics already on screen again, and the Cabinet shows your saved entries the moment you open it — no more waiting skeletons.
+- Releases: the release APK now ships with the full topic catalog — previous releases opened an empty database.
 - Accounts: confirmation and password emails now open a real Curio page instead of a link that went nowhere, and the sign-in form has a "Forgot your password?" row that sets a new one.
 - Community: a reply thread no longer rearranges, duplicates or loses lines when a new answer is posted — every reply is drawn once, in its own branch, at every depth — and a reply you can't reply to no longer blocks a thread.
 - Community: a reply posted on a busy card stays in the thread instead of dropping off the end, and replies are compact so more of a conversation fits on screen.

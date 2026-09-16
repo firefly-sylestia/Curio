@@ -173,18 +173,32 @@ class MainActivity : ComponentActivity() {
         // used to cancel loadIndex and restart the whole parse; the warm-up
         // now runs to completion regardless (parses are bounded by the
         // loader's gate, so it can't hog the CPU).
+        // v348 — this no longer QUEUES behind TopicRepository.init(): the
+        // import's one-time JSON→Room pass (and the version-gated re-sync on
+        // an update) used to run FIRST, so on any launch that touched the
+        // database the prewarm — and therefore the browser's warm index —
+        // started late. Both jobs share the loader's caches, so running them
+        // concurrently is safe: `load()` dedupes a lane's parse and the import
+        // re-checks Room counts under its mutex. The import launch above owns
+        // Room; this one only fills the in-memory caches.
         lifecycleScope.launch {
-            // Wait for the one-time Room import / warm-start cache fill before
-            // pre-warming the loader: on warm starts TopicRepository.init() is
-            // instant (Room already holds the catalog) and pre-warming from
-            // the warmed caches means ZERO JSON re-parsing — the old racing
-            // launch could beat init() and re-read every lane's JSON.
-            withContext(kotlinx.coroutines.Dispatchers.IO) {
-                com.curio.app.data.TopicRepository.init(this@MainActivity)
-            }
             withContext(kotlinx.coroutines.NonCancellable) {
                 runCatching { TopicJsonLoader.loadIndex() }
                 runCatching { TopicJsonLoader.preloadAll() }
+            }
+        }
+        // v348 — warm the Cabinet's entry snapshot the same way. The Cabinet
+        // seeds itself from [CaptureRepository.peekLight], which is only
+        // non-empty once SOMETHING has collected the light flow — so a cold
+        // start straight into Cabinet showed a skeleton while the first Room
+        // read landed. Collecting it once here fills the snapshot before the
+        // user can navigate there; later changes keep flowing to screens
+        // through their own collectors (the repository's decode cache makes
+        // the shared emissions cheap). Softly cancelled on teardown — a
+        // process that dies mid-warm simply re-reads on the next open.
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                CurioRepositoryHolder.repo.observeLight().collect()
             }
         }
         // v53 — update notifier on app start: a toast whenever a check finds

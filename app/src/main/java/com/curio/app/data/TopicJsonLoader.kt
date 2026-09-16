@@ -129,20 +129,8 @@ object TopicJsonLoader {
      *   or if [install] hasn't been called yet.
      */
     suspend fun load(id: CategoryId): List<CurioTopic> {
-        // Fast path: already resident.
+        // Fast path: already resident (the app-start prewarm fills this).
         cache[id]?.let { return it }
-        // v294 — Room fast path: if topics are in Room, use them (instant).
-        try {
-            // v294 — TopicRepository provides Room-backed instant access.
-            // On first launch Room is empty → falls through to JSON parse.
-            if (com.curio.app.data.TopicRepository.isInitialized()) {
-                val roomTopics = com.curio.app.data.TopicRepository.loadFromRoom(id)
-                if (roomTopics.isNotEmpty()) {
-                    synchronized(cacheWriteLock) { cache[id] = roomTopics }
-                    return roomTopics
-                }
-            }
-        } catch (_: Exception) { /* Room not ready yet, fall through to JSON */ }
         // Fast path: a cold-start prewarm (or another screen) is already
         // parsing this lane — share their parse instead of double-parsing
         // the asset.
@@ -155,14 +143,38 @@ object TopicJsonLoader {
             inFlight[id] ?: loadScope.async(Dispatchers.IO) { parseAndCache(id) }
                 .also { inFlight[id] = it }
         }
-        return try {
+        val parsed = try {
             deferred.await()
         } finally {
             // Compare-and-remove so only the CREATOR clears the slot — a
             // waiter that got cancelled can never evict the shared parse.
             inFlight.remove(id, deferred)
         }
+        if (parsed.isNotEmpty()) return parsed
+        // v348 — THE ASSET IS THE READ PATH. Parsing one JSON file once is far
+        // cheaper than a full-lane Room read, which has to map every row and
+        // decode its chapters/tracks/episodes JSON column by column; that read
+        // used to run FIRST and was itself the delay this loader was meant to
+        // remove. Room is now only the fallback for a build whose assets carry
+        // no topic JSON at all (see `parseAsset`), which is the one case where
+        // it holds the only copy of the catalog.
+        return roomFallback(id)
     }
+
+    /**
+     * v348 — the lane read back from Room, used ONLY when the bundled JSON
+     * produced nothing (a build shipped without `assets/topics/*.json`). Heavy
+     * by nature, which is exactly why it is no longer on the primary path.
+     */
+    private suspend fun roomFallback(id: CategoryId): List<CurioTopic> = try {
+        if (com.curio.app.data.TopicRepository.isInitialized()) {
+            val roomTopics = com.curio.app.data.TopicRepository.loadFromRoom(id)
+            if (roomTopics.isNotEmpty()) {
+                synchronized(cacheWriteLock) { cache[id] = roomTopics }
+            }
+            roomTopics
+        } else emptyList()
+    } catch (_: Exception) { emptyList() }
 
     /**
      * Parses [id]'s pool (merging every lane for WILDCARD) and caches it.

@@ -97,13 +97,19 @@ object TopicRepository {
     }
 
     /**
-     * v294 — Pre-warm TopicJsonLoader's in-memory caches from Room data.
-     * Called after init() confirms Room has topics. This prevents the
-     * loader from re-parsing JSON files on every process restart.
+     * v294 — Pre-warm TopicJsonLoader's COUNT caches from Room.
+     *
+     * v348 — counts only. This used to also materialise every lane's rows back
+     * into the loader's pool cache (`dao.getByCategory(...).map { it.toCurioTopic() }`),
+     * which decoded the whole catalog — chapters, tracks, episodes and all — on
+     * every process start, and then let those Room rows MASK the shipped JSON on
+     * the read path. The loader parses the bundled asset instead (one parse per
+     * lane, shared with the app-start prewarm), so the pools now always match
+     * the content this build actually ships. Counts stay here because they are
+     * cheap and Room mirrors the same JSON.
      */
     private suspend fun warmLoaderFromRoom(dao: TopicDao) = withContext(Dispatchers.IO) {
         try {
-            // Warm the per-category counts cache.
             val counts = mutableMapOf<CategoryId, Int>()
             for (cat in CategoryId.values()) {
                 if (cat == CategoryId.WILDCARD) continue
@@ -113,16 +119,8 @@ object TopicRepository {
                 }
             }
             TopicJsonLoader.warmCountsFromRoom(counts)
-            // Warm the full topic cache per category.
-            for (cat in CategoryId.values()) {
-                if (cat == CategoryId.WILDCARD) continue
-                try {
-                    val topics = dao.getByCategory(cat.name).map { it.toCurioTopic() }
-                    TopicJsonLoader.warmCacheFromRoom(cat, topics)
-                } catch (_: Exception) { }
-            }
         } catch (e: Exception) {
-            Log.w("TopicRepository", "Failed to warm loader from Room: ${e.message}")
+            Log.w("TopicRepository", "Failed to warm loader counts from Room: ${e.message}")
         }
     }
 
