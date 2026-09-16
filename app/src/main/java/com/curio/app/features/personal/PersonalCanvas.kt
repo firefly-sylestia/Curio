@@ -3,6 +3,7 @@ package com.curio.app.features.personal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -37,10 +39,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -64,6 +69,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -73,8 +79,7 @@ import com.curio.app.data.PersonalDoc
 import com.curio.app.data.newBlockId
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.FrauncesFontFamily
-import com.curio.app.ui.theme.LoraFontFamily
+import com.curio.app.ui.theme.WritingFontFamily
 
 /**
  * v387 — THE WRITING CANVAS (journals + chapter reviews share it).
@@ -94,23 +99,46 @@ import com.curio.app.ui.theme.LoraFontFamily
  * text, never inside it).
  */
 
+/** The quote size inside the canvas' 17sp body and the read-only 16sp body —
+ *  a quoted line reads as a quotation, a touch smaller than the prose. */
+private val QUOTE_BODY_SIZE = 16.sp
+private val QUOTE_VIEW_SIZE = 15.sp
+
 // ────────────────────────────────────────────────────────────────────────────
 // Style → pixels
 // ────────────────────────────────────────────────────────────────────────────
 
-/** The ink of a pulled quote inside the canvas. */
+/** The quote block's rule — the page's own accent at reading strength. */
 @Composable
-internal fun personalQuoteFill(): Color =
-    MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
+internal fun personalQuoteRule(accent: Color): Color = accent.copy(alpha = 0.8f)
 
-/** Renders one block's text with its per-character flags applied.
- *  [quoteTint] draws the pulled-quote block's rule colour and wash. */
+/** True when EVERY visible character of the block carries the quote flag (and
+ *  there is at least one): the whole line is a quote, so it gets the BLOCK
+ *  treatment — the rule down its side — not just the per-run text style. */
+internal fun personalBlockIsQuote(text: String, mask: IntArray): Boolean {
+    var seen = false
+    for (i in text.indices) {
+        if (text[i].isWhitespace()) continue
+        if (mask.getOrElse(i) { 0 } and FLAG_QUOTE == 0) return false
+        seen = true
+    }
+    return seen
+}
+
+/**
+ * Renders one block's text with its per-character flags applied.
+ *
+ * A quoted run is no longer a highlight wash: it is the blockquote a reader
+ * expects — a touch smaller, in the quote ink, with the rule drawn beside the
+ * block by the caller. Bold / italic / underline still stack on top of it, so
+ * "quote the line and embolden the first words" reads exactly as written.
+ */
 internal fun personalAnnotated(
     text: String,
     mask: IntArray,
     ink: Color,
     quoteInk: Color,
-    quoteFill: Color
+    quoteSize: TextUnit
 ): AnnotatedString = androidx.compose.ui.text.buildAnnotatedString {
     append(text)
     var i = 0
@@ -125,14 +153,18 @@ internal fun personalAnnotated(
             addStyle(
                 SpanStyle(
                     color = if (flags and FLAG_QUOTE != 0) quoteInk else ink,
+                    // The quote changes the TEXT, never the page: smaller, in
+                    // the quote ink — the rule beside the block is what makes
+                    // it read as a quotation.
+                    fontSize = if (flags and FLAG_QUOTE != 0) quoteSize
+                    else TextUnit.Unspecified,
                     fontWeight = if (flags and FLAG_BOLD != 0) FontWeight.Bold else null,
                     fontStyle = if (flags and FLAG_ITALIC != 0) FontStyle.Italic else null,
                     textDecoration = when (decorations.size) {
                         0 -> null
                         1 -> decorations.first()
                         else -> TextDecoration.combine(decorations)
-                    },
-                    background = if (flags and FLAG_QUOTE != 0) quoteFill else Color.Unspecified
+                    }
                 ),
                 i, j
             )
@@ -251,6 +283,10 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /** True when nothing has been written yet (the screen's save gate). */
     fun isEmpty(): Boolean = doc().isEmpty
+
+    /** True when ANY block carries words — the canvas shows its "Write…" hint
+     *  only while the whole page is still blank. */
+    fun hasText(): Boolean = blocks.values.any { it.text.isNotBlank() }
 
     /** The whole document as it will be stored. */
     fun doc(): PersonalDoc = PersonalDoc(
@@ -475,12 +511,10 @@ internal fun PersonalCanvas(
     state: PersonalEditorState,
     modifier: Modifier = Modifier,
     ink: Color = MaterialTheme.colorScheme.onSurface,
-    accent: Color = MaterialTheme.colorScheme.primary,
+    accent: Color = personalAccent(),
     onOpenPhoto: (String) -> Unit = {},
     enabled: Boolean = true
 ) {
-    val quoteFill = personalQuoteFill()
-    val quoteInk = ink.copy(alpha = 0.78f)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         state.blockIds.forEach { id ->
             val block = state.block(id) ?: return@forEach
@@ -489,6 +523,7 @@ internal fun PersonalCanvas(
                     uri = block.photo.orEmpty(),
                     caption = state.caption(id),
                     ink = ink,
+                    accent = accent,
                     enabled = enabled,
                     onCaption = { state.setCaption(id, it) },
                     onRemove = { state.removeBlock(id) },
@@ -512,18 +547,22 @@ private fun PersonalTextBlock(
     val text = state.text(id)
     val mask = state.mask(id)
     val align = state.align(id)
-    val quoteFill = personalQuoteFill()
-    val quoteInk = ink.copy(alpha = 0.78f)
+    val quoteRule = personalQuoteRule(accent)
+    val quoteInk = ink.copy(alpha = 0.86f)
+    val isQuote = personalBlockIsQuote(text, mask)
+    // ONE hint for the whole page: the empty-line "Write…" on every new
+    // paragraph read as a page full of the word "write".
+    val showHint = text.isEmpty() && !state.hasText()
     val focusRequester = remember(id) { FocusRequester() }
     val value = TextFieldValue(
-        annotatedString = personalAnnotated(text, mask, ink, quoteInk, quoteFill),
+        annotatedString = personalAnnotated(text, mask, ink, quoteInk, QUOTE_BODY_SIZE),
         selection = (state.selection(id) ?: TextRange(text.length))
             .let { if (it.max > text.length) TextRange(text.length) else it }
             .let { if (it.min < 0) TextRange(0) else it },
         composition = state.composition(id)
     )
     val bodyStyle = TextStyle(
-        fontFamily = LoraFontFamily,
+        fontFamily = WritingFontFamily,
         fontSize = 17.sp,
         lineHeight = 29.sp,
         color = ink,
@@ -535,6 +574,19 @@ private fun PersonalTextBlock(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            // A quoted line wears the rule down its side (drawn on the block's
+            // own height, so it grows with the writing).
+            .then(if (isQuote) Modifier
+                .drawBehind {
+                    val barWidth = 3.dp.toPx()
+                    drawRoundRect(
+                        color = quoteRule,
+                        size = Size(barWidth, size.height),
+                        cornerRadius = CornerRadius(barWidth / 2f)
+                    )
+                }
+                .padding(start = 13.dp)
+            else Modifier)
             .focusRequester(focusRequester)
             .onFocusChanged { state.onFocusChanged(id, it.isFocused) }
             .onPreviewKeyEvent { event ->
@@ -561,7 +613,7 @@ private fun PersonalTextBlock(
         ),
         decorationBox = { inner ->
             Box {
-                if (text.isEmpty()) {
+                if (showHint) {
                     Text(
                         text = "Write…",
                         style = bodyStyle.copy(color = ink.copy(alpha = 0.32f))
@@ -589,6 +641,7 @@ private fun PersonalPhotoBlock(
     uri: String,
     caption: String,
     ink: Color,
+    accent: Color,
     enabled: Boolean,
     onCaption: (String) -> Unit,
     onRemove: () -> Unit,
@@ -641,11 +694,11 @@ private fun PersonalPhotoBlock(
                 onValueChange = onCaption,
                 singleLine = true,
                 textStyle = TextStyle(
-                    fontFamily = LoraFontFamily,
+                    fontFamily = WritingFontFamily,
                     fontSize = 13.sp,
                     color = ink.copy(alpha = 0.72f)
                 ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                cursorBrush = SolidColor(accent),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 8.dp),
@@ -655,7 +708,7 @@ private fun PersonalPhotoBlock(
                             Text(
                                 "Add a caption",
                                 style = TextStyle(
-                                    fontFamily = LoraFontFamily,
+                                    fontFamily = WritingFontFamily,
                                     fontSize = 13.sp,
                                     color = ink.copy(alpha = 0.34f)
                                 )
@@ -679,10 +732,11 @@ internal fun PersonalDocView(
     doc: PersonalDoc,
     modifier: Modifier = Modifier,
     ink: Color = MaterialTheme.colorScheme.onSurface,
+    accent: Color = personalAccent(),
     onOpenPhoto: (String) -> Unit = {}
 ) {
-    val quoteFill = personalQuoteFill()
-    val quoteInk = ink.copy(alpha = 0.78f)
+    val quoteRule = personalQuoteRule(accent)
+    val quoteInk = ink.copy(alpha = 0.86f)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         doc.blocks.forEach { block ->
             if (block.isPhoto) {
@@ -702,7 +756,7 @@ internal fun PersonalDocView(
                         Text(
                             block.caption,
                             style = TextStyle(
-                                fontFamily = LoraFontFamily,
+                                fontFamily = WritingFontFamily,
                                 fontSize = 13.sp,
                                 color = ink.copy(alpha = 0.62f)
                             ),
@@ -711,23 +765,35 @@ internal fun PersonalDocView(
                     }
                 }
             } else if (block.text.isNotBlank()) {
-                Text(
-                    text = personalAnnotated(
-                        block.text,
-                        runsToMask(block.text.length, block.runs),
-                        ink,
-                        quoteInk,
-                        quoteFill
-                    ),
-                    style = TextStyle(
-                        fontFamily = LoraFontFamily,
-                        fontSize = 16.sp,
-                        lineHeight = 27.sp,
-                        textAlign = if (block.align == PersonalAlign.CENTER) TextAlign.Center
-                        else TextAlign.Start
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                val text = block.text
+                val mask = runsToMask(text.length, block.runs)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(if (personalBlockIsQuote(text, mask)) Modifier
+                            .drawBehind {
+                                val barWidth = 3.dp.toPx()
+                                drawRoundRect(
+                                    color = quoteRule,
+                                    size = Size(barWidth, size.height),
+                                    cornerRadius = CornerRadius(barWidth / 2f)
+                                )
+                            }
+                            .padding(start = 13.dp)
+                        else Modifier)
+                ) {
+                    Text(
+                        text = personalAnnotated(text, mask, ink, quoteInk, QUOTE_VIEW_SIZE),
+                        style = TextStyle(
+                            fontFamily = WritingFontFamily,
+                            fontSize = 16.sp,
+                            lineHeight = 27.sp,
+                            textAlign = if (block.align == PersonalAlign.CENTER) TextAlign.Center
+                            else TextAlign.Start
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -750,7 +816,9 @@ internal fun PersonalToolDock(
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
     val active = state.activeFlags()
-    val accent = MaterialTheme.colorScheme.primary
+    // The dock wears the app's own accent (the same one Home's hero uses), not
+    // a hard rose — a member on the azure/hero-lane theme sees THEIR accent.
+    val accent = personalAccent()
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
         shape = RoundedCornerShape(22.dp),
@@ -759,9 +827,14 @@ internal fun PersonalToolDock(
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
+            modifier = Modifier
+                // Nine tools in a fixed row overflowed a narrow phone and cut
+                // the last icons in half; the row scrolls, so every tool is
+                // always reachable and nothing is clipped.
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            horizontalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             PersonalToolButton(
                 label = "Bold",
@@ -882,8 +955,8 @@ private fun PersonalToolButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = if (active) accent.copy(alpha = 0.16f) else Color.Transparent,
-        modifier = Modifier.size(38.dp)
+        color = if (active) accent.copy(alpha = 0.18f) else Color.Transparent,
+        modifier = Modifier.size(36.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),

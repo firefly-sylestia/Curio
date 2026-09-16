@@ -967,13 +967,24 @@ internal fun socialDayLabel(millis: Long): String {
  * going blank after this change.
  */
 internal object SocialReactions {
+    /**
+     * THE ONE-TAP LIKE — the palette's own "Like" entry.
+     *
+     * It has a name because two places send it without a picker: the double
+     * tap in a chat, and the LIKE action on a message notification (v389, user
+     * decision — "like" on the shade is the same reaction the chat sends, on
+     * the newest message). The palette below refers to it by name, so the two
+     * can never drift apart.
+     */
+    const val LIKE = "👍"
+
     /** (emoji, what it means) — the order is also the picker's order. */
     val PALETTE: List<Pair<String, String>> = listOf(
         "❤️" to "Love",
         "😂" to "Haha",
         "😮" to "Wow",
         "😢" to "Sad",
-        "👍" to "Like",
+        LIKE to "Like",
         "🙏" to "Thanks"
     )
 

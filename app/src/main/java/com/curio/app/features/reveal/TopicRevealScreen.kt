@@ -129,6 +129,17 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import com.curio.app.data.PersonalBookEntity
+import com.curio.app.data.PersonalNoteEntity
+import com.curio.app.data.PersonalRepositoryHolder
+// Aliased: this file's own `chapterNoteSpans` / `chapterNotes` locals hold the
+// AppPreferences maps, and a local always shadows an import — the bridge's
+// converters have to be callable next to them.
+import com.curio.app.features.personal.chapterNoteDoc
+import com.curio.app.features.personal.chapterNoteSpans as docToSpans
+import com.curio.app.features.personal.chapterNoteText as docToText
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -3221,9 +3232,89 @@ private fun BookNotesSheet(
     // enlarged note editor) — read reactively so a share always carries the
     // current formatting.
     val chapterNoteSpans = AppPreferences.bookChapterNoteSpansState[bookName].orEmpty()
+
+    // ── THE SHELF BRIDGE ────────────────────────────────────────────────
+    // A book that came from Curio's own lane is the SAME book the member
+    // keeps on their shelf, so a chapter note written here IS that book's
+    // chapter review: one store (`personal_notes`, through the book's topic
+    // id), two screens — this sheet and the shelf's own chapter page. A book
+    // the catalog does not have keeps its notes in AppPreferences exactly as
+    // it always did.
+    var shelfBook by remember(topic.id) { mutableStateOf<PersonalBookEntity?>(null) }
+    var shelfNotes by remember(topic.id) {
+        mutableStateOf<Map<Int, PersonalNoteEntity>>(emptyMap())
+    }
+    // The member's in-flight edits. The store echoes a write back a frame or
+    // two later, and a controlled field that is fed its own stale value is
+    // how characters disappear while typing — so what they typed leads, and
+    // the store follows it.
+    var liveEdits by remember(topic.id) {
+        mutableStateOf<Map<Int, Pair<String, List<TextSpan>>>>(emptyMap())
+    }
+    var pendingWrite by remember(topic.id) {
+        mutableStateOf<Pair<Int, Pair<String, List<TextSpan>>>?>(null)
+    }
+    LaunchedEffect(topic.id) {
+        val linked = withContext(Dispatchers.IO) {
+            runCatching { PersonalRepositoryHolder.repo.bookForCatalog(topic.id) }.getOrNull()
+        }
+        shelfBook = linked
+        if (linked != null) {
+            runCatching {
+                PersonalRepositoryHolder.repo.observeBookNotes(linked.id).collect { list ->
+                    shelfNotes = list.mapNotNull { note ->
+                        note.chapterIndex?.let { index -> index to note }
+                    }.toMap()
+                }
+            }
+        }
+    }
+    // Writes are debounced (the note editor reports every keystroke) and
+    // flushed as one row per pause — never one row per letter.
+    LaunchedEffect(pendingWrite, shelfBook) {
+        val pending = pendingWrite ?: return@LaunchedEffect
+        val linked = shelfBook ?: return@LaunchedEffect
+        delay(400)
+        val (number, payload) = pending
+        withContext(Dispatchers.IO) {
+            runCatching {
+                PersonalRepositoryHolder.repo.saveChapterNote(
+                    bookId = linked.id,
+                    chapter = number,
+                    document = chapterNoteDoc(payload.first, payload.second)
+                )
+            }
+        }
+        pendingWrite = null
+    }
+
+    /** A chapter's note text — the shelf's review when the book is on the
+     *  shelf, else the sheet's own stored note. */
+    fun noteText(number: Int): String =
+        liveEdits[number]?.first
+            ?: shelfNotes[number]?.let { docToText(it.doc) }
+            ?: chapterNotes[number].orEmpty()
+
+    /** A chapter's note runs, from the same source as [noteText]. */
+    fun noteSpans(number: Int): List<TextSpan> =
+        liveEdits[number]?.second
+            ?: shelfNotes[number]?.let { docToSpans(it.doc) }
+            ?: chapterNoteSpans[number].orEmpty()
+
+    /** Writes a chapter note wherever this book keeps its notes. */
+    fun writeNote(number: Int, text: String, spans: List<TextSpan>) {
+        if (shelfBook != null) {
+            liveEdits = liveEdits + (number to (text to spans))
+            pendingWrite = number to (text to spans)
+            return
+        }
+        AppPreferences.setBookChapterNote(context, bookName, number, text)
+        AppPreferences.setBookChapterNoteSpans(context, bookName, number, spans)
+    }
+
     // v371 — the ENLARGE note sheet: which chapter's note is being written
     // in the full writing dialog (null = closed). The dialog edits the SAME
-    // AppPreferences slot as the compact field, so both stay in sync live.
+    // slot as the compact field, so both stay in sync live.
     var noteEditorChapter by remember { mutableStateOf<BookChapter?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val listState = rememberLazyListState()
@@ -3649,7 +3740,7 @@ private fun BookNotesSheet(
                                         // Lives in the expanded panel below the
                                         // summary so readers can jot thoughts.
                                         ChapterNoteField(
-                                            initial = chapterNotes[ch.number].orEmpty(),
+                                            initial = noteText(ch.number),
                                             accent = accent,
                                             onAccent = onAccent,
                                             ink = ink,
@@ -3661,19 +3752,14 @@ private fun BookNotesSheet(
                                             onSurface = onSurface,
                                             onSurfaceVariant = onSurfaceVariant,
                                             isOpen = isOpen,
+                                            // v375 — typing in the compact
+                                            // field rewrites the note, so any
+                                            // rich runs from the enlarged
+                                            // editor no longer line up — clear
+                                            // them (they return via the
+                                            // enlarged editor).
                                             onSave = { text ->
-                                                AppPreferences.setBookChapterNote(
-                                                    context, bookName, ch.number, text
-                                                )
-                                                // v375 — typing in the compact
-                                                // field rewrites the note, so
-                                                // any rich runs from the enlarged
-                                                // editor no longer line up —
-                                                // clear them (they return via
-                                                // the enlarged editor).
-                                                AppPreferences.setBookChapterNoteSpans(
-                                                    context, bookName, ch.number, emptyList()
-                                                )
+                                                writeNote(ch.number, text, emptyList())
                                             },
                                             // v371 — the note row carries two
                                             // actions: EXPAND opens the full
@@ -3683,10 +3769,7 @@ private fun BookNotesSheet(
                                             onExpand = { noteEditorChapter = ch },
                                             onShare = { text ->
                                                 if (text.isNotBlank()) {
-                                                    onShareNote(
-                                                        ch.number, text,
-                                                        chapterNoteSpans[ch.number].orEmpty()
-                                                    )
+                                                    onShareNote(ch.number, text, noteSpans(ch.number))
                                                 }
                                             }
                                         )
@@ -3709,8 +3792,8 @@ private fun BookNotesSheet(
     // is written WITH the text and survives onto the share card's Chapter
     // review + export (spans ride the same AppPreferences slot as the text).
     noteEditorChapter?.let { editCh ->
-        val editText = chapterNotes[editCh.number].orEmpty()
-        val editSpans = chapterNoteSpans[editCh.number].orEmpty()
+        val editText = noteText(editCh.number)
+        val editSpans = noteSpans(editCh.number)
         // v3xx — text-history capture + browser inside the enlarged editor:
         // the pill sits in the header (lifted above the keyboard by the
         // dialog's imePadding) and restores write straight back into this
@@ -3758,11 +3841,9 @@ private fun BookNotesSheet(
                             text = editText,
                             spans = editSpans,
                             onRichTextChange = { newText, spans ->
-                                AppPreferences.setBookChapterNote(
-                                    context, bookName, editCh.number, newText.take(2000)
-                                )
-                                AppPreferences.setBookChapterNoteSpans(
-                                    context, bookName, editCh.number,
+                                writeNote(
+                                    editCh.number,
+                                    newText.take(2000),
                                     if (newText.isBlank()) emptyList() else spans
                                 )
                             },
@@ -3784,11 +3865,7 @@ private fun BookNotesSheet(
                         onClick = {
                             noteEditorChapter = null
                             if (editText.isNotBlank()) {
-                                onShareNote(
-                                    editCh.number,
-                                    editText,
-                                    chapterNoteSpans[editCh.number].orEmpty()
-                                )
+                                onShareNote(editCh.number, editText, noteSpans(editCh.number))
                             }
                         },
                         shape = RoundedCornerShape(50),
@@ -3824,12 +3901,7 @@ private fun BookNotesSheet(
                         TextHistoryRestoreMode.ADD_BOTTOM ->
                             if (editText.isBlank()) restored else "$editText\n$restored"
                     }
-                    AppPreferences.setBookChapterNote(
-                        context, bookName, editCh.number, combined.take(2000)
-                    )
-                    AppPreferences.setBookChapterNoteSpans(
-                        context, bookName, editCh.number, emptyList()
-                    )
+                    writeNote(editCh.number, combined.take(2000), emptyList())
                 },
                 onDismiss = { noteHistoryOpen = false }
             )

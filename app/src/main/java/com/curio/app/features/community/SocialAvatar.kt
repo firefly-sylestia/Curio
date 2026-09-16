@@ -193,53 +193,13 @@ internal fun SocialAvatar(
     ring: Boolean = true,
     online: Boolean = false
 ) {
-    val art = AVATARS[style.coerceIn(0, AVATARS.lastIndex)]
     Box(
         modifier = Modifier
             .size(avatarSize)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(Modifier.size(avatarSize)) {
-            // One grid scale for the whole drawing (see the helpers above).
-            val u = size.minDimension / 100f
-            val radius = size.minDimension / 2f
-
-            // ── the disc ───────────────────────────────────────────────────
-            // A soft LIGHT from the top-left instead of one flat fill, with a
-            // deepened lower edge: the portrait sits in its own light rather
-            // than reading as a sticker cut out of the page.
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        lighten(art.ground, 0.24f),
-                        art.ground,
-                        darken(art.ground, 0.22f)
-                    ),
-                    center = Offset(size.width * 0.32f, size.height * 0.28f),
-                    radius = radius * 1.4f
-                ),
-                radius = radius
-            )
-
-            // The character is CLIPPED to the disc. The canvas is a square,
-            // so a bust drawn to the bottom of the grid would otherwise show
-            // its corners poking out of the circle.
-            clipPath(
-                Path().apply { addOval(Rect(Offset.Zero, Size(size.width, size.height))) }
-            ) {
-                drawCharacter(art, u)
-                drawAvatarLight(u)
-            }
-
-            if (ring) {
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.22f),
-                    radius = radius - s(1.5f, u),
-                    style = Stroke(width = s(2f, u))
-                )
-            }
-        }
+        Canvas(Modifier.size(avatarSize)) { drawSocialAvatar(style, ring) }
 
         if (online) {
             // CUT OUT of the portrait, not painted over it: the ring of page
@@ -258,6 +218,62 @@ internal fun SocialAvatar(
                     )
             )
         }
+    }
+}
+
+/**
+ * THE DRAWING ITSELF, as a plain [`DrawScope`] function.
+ *
+ * It is separated from the composable for ONE reason: the wallpaper of a
+ * notification needs the portrait as an `android.graphics.Bitmap`, and a
+ * notification is posted from a receiver that has no composition to draw in.
+ * Drawing the character a second time (a notification-only lookalike) would
+ * drift from the portraits the app shows — so both call THIS: the composable
+ * draws it on a Compose canvas, and `socialAvatarBitmap`
+ * (`SocialNotifications.kt`) draws it into an off-screen `ImageBitmap`.
+ *
+ * Everything is measured from the canvas' own short side, so any square size
+ * renders the same portrait.
+ */
+internal fun DrawScope.drawSocialAvatar(style: Int, ring: Boolean = true) {
+    val art = AVATARS[style.coerceIn(0, AVATARS.lastIndex)]
+    // One grid scale for the whole drawing (see the helpers above).
+    val u = size.minDimension / 100f
+    val radius = size.minDimension / 2f
+
+    // ── the disc ───────────────────────────────────────────────────────────
+    // A soft LIGHT from the top-left instead of one flat fill, with a
+    // deepened lower edge: the portrait sits in its own light rather than
+    // reading as a sticker cut out of the page.
+    drawCircle(
+        brush = Brush.radialGradient(
+            colors = listOf(
+                lighten(art.ground, 0.24f),
+                art.ground,
+                darken(art.ground, 0.22f)
+            ),
+            center = Offset(size.width * 0.32f, size.height * 0.28f),
+            radius = radius * 1.4f
+        ),
+        radius = radius
+    )
+
+    // The character is CLIPPED to the disc. The canvas is a square, so a bust
+    // drawn to the bottom of the grid would otherwise show its corners poking
+    // out of the circle.
+    clipPath(
+        Path().apply { addOval(Rect(Offset.Zero, Size(size.width, size.height))) }
+    ) {
+        drawCharacter(art, u)
+        drawAvatarLight(u)
+    }
+
+    if (ring) {
+        drawCircle(
+            color = Color.White.copy(alpha = 0.22f),
+            radius = radius - s(1.5f, u),
+            style = Stroke(width = s(2f, u))
+        )
     }
 }
 

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -68,7 +69,12 @@ fun JournalListScreen(navController: NavController) {
     var pendingDelete by remember { mutableStateOf<PersonalNoteEntity?>(null) }
     val scope = rememberCoroutineScope()
 
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+    ) {
         PersonalHeader(
             title = "Journals",
             subtitle = when (journals.size) {
@@ -162,7 +168,7 @@ private fun JournalRow(
     onLongPress: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     val mood = journal.moodEnum
     // Decoding a body is only for the row that is actually measuring words:
     // `doc` re-parses the stored JSON on every access, so it is read ONCE per
@@ -301,7 +307,7 @@ internal fun PersonalHeaderAction(
     label: String,
     onClick: () -> Unit
 ) {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
@@ -312,11 +318,11 @@ internal fun PersonalHeaderAction(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            CurioIcon(glyph, null, tint = MaterialTheme.colorScheme.onPrimary, size = 17.dp)
+            CurioIcon(glyph, null, tint = personalOnAccent(), size = 17.dp)
             Text(
                 label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onPrimary
+                color = personalOnAccent()
             )
         }
     }
@@ -344,11 +350,11 @@ internal fun PersonalEmptyCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                color = personalAccent().copy(alpha = 0.12f),
                 modifier = Modifier.size(52.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(glyph, null, tint = MaterialTheme.colorScheme.primary, size = 24.dp)
+                    CurioIcon(glyph, null, tint = personalIconTint(personalAccent()), size = 24.dp)
                 }
             }
             Spacer(Modifier.height(14.dp))

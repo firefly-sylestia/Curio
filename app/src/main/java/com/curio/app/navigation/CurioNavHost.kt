@@ -101,6 +101,7 @@ import com.curio.app.features.managecategories.ManageCategoriesScreen
 import com.curio.app.features.onboarding.OnboardingScreen
 import com.curio.app.features.personal.BookDetailScreen
 import com.curio.app.features.personal.BookShelfScreen
+import com.curio.app.features.personal.ChapterScreen
 import com.curio.app.features.personal.JournalEditorScreen
 import com.curio.app.features.personal.JournalListScreen
 import com.curio.app.features.profile.ProfileScreen
@@ -1011,6 +1012,21 @@ fun CurioNavHost(
                 BookDetailScreen(
                     navController = navController,
                     bookId = entry.arguments?.getString("bookId").orEmpty()
+                )
+            }
+            // A chapter is its own page (the journal's shape), so the review
+            // is written on a page rather than inside the shelf's list.
+            composable(
+                route = CurioRoutes.CHAPTER,
+                arguments = listOf(
+                    navArgument("bookId") { type = NavType.StringType },
+                    navArgument("chapter") { type = NavType.IntType }
+                )
+            ) { entry ->
+                ChapterScreen(
+                    navController = navController,
+                    bookId = entry.arguments?.getString("bookId").orEmpty(),
+                    chapter = entry.arguments?.getInt("chapter") ?: 1
                 )
             }
 

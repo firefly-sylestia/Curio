@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -215,12 +216,16 @@ fun JournalEditorScreen(navController: NavController, entryIdArg: String) {
     }
 
     val ink = MaterialTheme.colorScheme.onBackground
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            // The page's own header sits UNDER the status bar without this:
+            // every new personal page in the engine padded the bars and this
+            // one only padded the bottom.
+            .statusBarsPadding()
             .imePadding()
             .navigationBarsPadding()
     ) {
@@ -345,7 +350,7 @@ private fun JournalTopBar(
     onPickDate: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     val today = dateMillis.toLocalDate() == LocalDate.now()
     Row(
         modifier = Modifier
@@ -463,7 +468,7 @@ private fun MoodRow(
                     CurioIcon(
                         personalMoodGlyph(mood),
                         mood.label,
-                        tint = if (on) MaterialTheme.colorScheme.onPrimary else ink.copy(alpha = 0.62f),
+                        tint = if (on) personalOnAccent() else ink.copy(alpha = 0.62f),
                         size = 18.dp
                     )
                 }

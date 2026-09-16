@@ -1,9 +1,7 @@
 package com.curio.app.features.personal
 
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -30,19 +29,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -52,12 +49,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.BookChapter
-import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
-import com.curio.app.data.newNoteId
 import com.curio.app.navigation.CurioRoutes
-import com.curio.app.navigation.LightboxTarget
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -89,9 +83,6 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             PersonalRepositoryHolder.repo.observeBookNotes(bookId).collect { value = it }
         }
     }
-    var notesLoaded by remember { mutableStateOf(false) }
-    LaunchedEffect(notes) { notesLoaded = true }
-
     // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
     // topic id, so its chapter rows can wear the book's REAL chapter names, page
     // ranges and summaries instead of "Chapter 7" — the catalog is the reason
@@ -104,17 +95,35 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         value = if (catalogId.isBlank()) emptyList() else BookCatalog.chapters(catalogId)
     }
 
+    // The catalog's own blurb for this book — shown when it has one.
+    val catalogSynopsis by produceState(initialValue = "", catalogId) {
+        value = BookCatalog.synopsis(catalogId)
+    }
+
     val scope = rememberCoroutineScope()
 
-    // Which chapter is open for writing (one at a time — the page keeps a
-    // single tool dock, so only one writer can be live).
-    var expanded by remember { mutableStateOf<Int?>(null) }
-    var draft by remember { mutableStateOf(PersonalDoc(emptyList())) }
-    val activeState = remember(expanded) {
-        expanded?.let { PersonalEditorState(PersonalDoc(emptyList())) }
-    }
-    SideEffect {
-        activeState?.onDocChanged = { updated -> draft = updated }
+    // ── Auto-fetch ─────────────────────────────────────────────────────
+    // What Curio knows about this book is filled in FOR the member rather
+    // than asked of them: the app's own catalog first (real chapters, pages
+    // and synopsis), then Open Library for a page count the catalog does not
+    // have. One pass per visit, plus one more when they tap "Look it up".
+    var lookupTick by remember(bookId) { mutableIntStateOf(0) }
+    var enrichedTick by remember(bookId) { mutableIntStateOf(-1) }
+    var lookingUp by remember(bookId) { mutableStateOf(false) }
+    LaunchedEffect(book, lookupTick) {
+        val current = book ?: return@LaunchedEffect
+        if (enrichedTick == lookupTick) return@LaunchedEffect
+        enrichedTick = lookupTick
+        lookingUp = true
+        val updated = withContext(Dispatchers.IO) {
+            runCatching { BookEnrichment.enrich(current) }.getOrNull()
+        }
+        if (updated != null && updated != current) {
+            withContext(Dispatchers.IO) {
+                runCatching { PersonalRepositoryHolder.repo.saveBook(updated) }
+            }
+        }
+        lookingUp = false
     }
 
     // The book's own note ("why I picked it up") — same auto-save discipline.
@@ -128,31 +137,6 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         }
     }
 
-    // Load the chapter's existing review into the editor when it opens.
-    var loadedChapter by remember { mutableStateOf<Int?>(null) }
-    LaunchedEffect(expanded, notesLoaded, notes) {
-        val chapter = expanded ?: return@LaunchedEffect
-        if (!notesLoaded) return@LaunchedEffect
-        if (loadedChapter == chapter) return@LaunchedEffect
-        val existing = notes.firstOrNull { it.chapterIndex == chapter }
-        val document = existing?.doc ?: PersonalDoc(emptyList())
-        draft = document
-        activeState?.replace(document)
-        loadedChapter = chapter
-    }
-
-    // Auto-save the open chapter (debounced), and persist the book's note.
-    val liveDraft = rememberUpdatedState(draft)
-    val liveExpanded = rememberUpdatedState(expanded)
-    val liveNotes = rememberUpdatedState(notes)
-    LaunchedEffect(expanded, draft) {
-        val chapter = expanded ?: return@LaunchedEffect
-        if (liveDraft.value.isEmpty) return@LaunchedEffect
-        delay(700)
-        withContext(Dispatchers.IO) {
-            runCatching { saveChapterReview(bookId, chapter, liveDraft.value, liveNotes.value) }
-        }
-    }
     LaunchedEffect(blurb, bookId) {
         if (!blurbSeeded) return@LaunchedEffect
         delay(700)
@@ -167,26 +151,14 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
             .imePadding()
     ) {
         val current = book
         PersonalHeader(
             title = current?.title ?: " ",
             subtitle = current?.author.orEmpty().ifBlank { "Your book" },
-            onBack = {
-                // Leaving the page must never be able to drop what is open.
-                val chapter = liveExpanded.value
-                if (chapter != null && !liveDraft.value.isEmpty) {
-                    val body = liveDraft.value
-                    val known = liveNotes.value
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            runCatching { saveChapterReview(bookId, chapter, body, known) }
-                        }
-                    }
-                }
-                navController.popBackStack()
-            }
+            onBack = { navController.popBackStack() }
         )
 
         if (current == null) {
@@ -240,6 +212,27 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                             )
                         }
+                        // What the app knows about the book, at a glance.
+                        val facts = listOfNotNull(
+                            current.pageCount.takeIf { it > 0 }?.let { "$it pages" },
+                            current.totalChapters.takeIf { it > 0 }?.let { "$it chapters" },
+                            current.catalogId.takeIf { it.isNotBlank() }
+                                ?.let { "From Curio's catalog" }
+                        ).joinToString(" \u00b7 ")
+                        if (facts.isNotBlank()) {
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                facts,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+                            )
+                        }
+                        // The catalog could not place it: one quiet door to ask
+                        // again (the first pass runs by itself).
+                        if (current.catalogId.isBlank()) {
+                            Spacer(Modifier.height(8.dp))
+                            LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
+                        }
                         Spacer(Modifier.height(12.dp))
                         BlurbField(
                             value = blurb,
@@ -283,6 +276,12 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 )
             }
 
+            if (catalogSynopsis.isNotBlank()) {
+                item("synopsis") {
+                    SynopsisCard(synopsis = catalogSynopsis)
+                }
+            }
+
             item("chapters-title") {
                 Text(
                     if (total > 0) "Chapters" else "Where you write",
@@ -302,37 +301,27 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 val chapter = index + 1
                 val review = notes.firstOrNull { it.chapterIndex == chapter }
                 ChapterCard(
-                    bookId = bookId,
                     chapter = chapter,
                     // The catalog's own words for this chapter, when the book came
                     // from Curio's lane: a name, and the pages it spans.
                     catalogTitle = catalogChapters.getOrNull(chapter - 1)?.title.orEmpty(),
                     catalogPages = catalogChapters.getOrNull(chapter - 1)
+                        ?.takeIf { it.pageStart > 0 && it.pageEnd > 0 }
                         ?.let { "pp. ${it.pageStart}\u2013${it.pageEnd}" }
                         .orEmpty(),
                     review = review,
-                    isOpen = expanded == chapter,
-                    openState = if (expanded == chapter) activeState else null,
-                    onToggle = {
-                        expanded = if (expanded == chapter) null else chapter
-                        loadedChapter = null
+                    // The chapter's own page (its summary and its review, and
+                    // the writing) — never a canvas grown inside this list.
+                    onOpen = {
+                        navController.navigate(CurioRoutes.chapter(bookId, chapter)) {
+                            launchSingleTop = true
+                        }
                     },
-                    onDelete = { pendingReviewDelete = review },
-                    onOpenPhoto = { uri ->
-                        LightboxTarget.uri = uri
-                        navController.navigate(CurioRoutes.LIGHTBOX) { launchSingleTop = true }
-                    }
+                    onDelete = { pendingReviewDelete = review }
                 )
             }
 
             item("shelf-tail") { Spacer(Modifier.height(96.dp)) }
-        }
-
-        // The writing dock rides above the keyboard while a chapter is open.
-        if (expanded != null && activeState != null) {
-            Box(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp)) {
-                PhotoAndTools(state = activeState)
-            }
         }
     }
 
@@ -357,66 +346,6 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     }
 }
 
-/**
- * The chapter's tool dock, with the photo door: a chapter review lives in the
- * same canvas as a journal page, so a diagram, a page of the book or a
- * passage photographed at the desk can sit inside the writing.
- */
-@Composable
-private fun PhotoAndTools(state: PersonalEditorState) {
-    val context = LocalContext.current
-    val picker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenMultipleDocuments()
-    ) { uris ->
-        uris.forEach { uri ->
-            runCatching {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            }
-            state.insertPhoto(uri.toString())
-        }
-    }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        PersonalToolDock(
-            state = state,
-            onPickPhoto = { picker.launch(arrayOf("image/*")) }
-        )
-    }
-}
-
-/** Saves (or refreshes) the review of one chapter. */
-private suspend fun saveChapterReview(
-    bookId: String,
-    chapter: Int,
-    document: PersonalDoc,
-    existing: List<PersonalNoteEntity>
-) {
-    val match = existing.firstOrNull { it.chapterIndex == chapter }
-    PersonalRepositoryHolder.repo.saveNote(
-        PersonalNoteEntity(
-            id = match?.id ?: newNoteId(),
-            bookId = bookId,
-            chapterIndex = chapter,
-            title = "Chapter $chapter",
-            bodyJson = com.curio.app.data.PersonalDocCodec.encode(document),
-            preview = "",
-            dateMillis = match?.dateMillis ?: startOfToday(),
-            mood = "",
-            chapterTitle = "",
-            createdAtMillis = match?.createdAtMillis ?: 0L,
-            updatedAtMillis = 0L
-        )
-    )
-    // Writing about a chapter is moving through the book: progress follows the
-    // writing, never the other way round.
-    val book = PersonalRepositoryHolder.repo.book(bookId) ?: return
-    if (chapter > book.currentChapter) {
-        PersonalRepositoryHolder.repo.setProgress(bookId, chapter)
-    }
-}
-
 @Composable
 private fun ProgressCard(
     total: Int,
@@ -427,7 +356,7 @@ private fun ProgressCard(
     onFinished: (Boolean) -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -543,7 +472,7 @@ private fun BlurbField(
                 lineHeight = 19.sp,
                 color = ink
             ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(personalAccent()),
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences,
                 imeAction = ImeAction.Default
@@ -576,29 +505,24 @@ private fun BlurbField(
  */
 @Composable
 private fun ChapterCard(
-    bookId: String,
     chapter: Int,
     /** The catalog's name for this chapter (blank for a book added by hand). */
     catalogTitle: String = "",
     /** The pages this chapter spans, e.g. "pp. 121–154". */
     catalogPages: String = "",
     review: PersonalNoteEntity?,
-    isOpen: Boolean,
-    openState: PersonalEditorState?,
-    onToggle: () -> Unit,
-    onDelete: () -> Unit,
-    onOpenPhoto: (String) -> Unit
+    onOpen: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     // `doc` re-parses the stored body on every access — read it once per
     // version of the review, never per recomposition.
     val words = remember(review?.id, review?.updatedAtMillis) { review?.doc?.wordsLabel().orEmpty() }
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = if (isOpen) MaterialTheme.colorScheme.surfaceContainerHigh
-        else MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onOpen)
     ) {
         Column(Modifier.padding(horizontal = 15.dp, vertical = 13.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -645,7 +569,7 @@ private fun ChapterCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                if (review != null && !isOpen) {
+                if (review != null) {
                     Surface(
                         onClick = onDelete,
                         shape = CircleShape,
@@ -664,38 +588,89 @@ private fun ChapterCard(
                     Spacer(Modifier.width(8.dp))
                 }
                 Surface(
-                    onClick = onToggle,
+                    onClick = onOpen,
                     shape = RoundedCornerShape(50),
-                    color = if (isOpen) accent else MaterialTheme.colorScheme.surfaceContainerHigh
+                    color = if (review == null) accent.copy(alpha = 0.16f)
+                    else MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
                     Text(
-                        if (isOpen) "Done" else if (review == null) "Write" else "Open",
+                        if (review == null) "Write" else "Open",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = if (isOpen) MaterialTheme.colorScheme.onPrimary else ink.copy(alpha = 0.8f),
+                        color = if (review == null) personalIconTint(accent) else ink.copy(alpha = 0.8f),
                         modifier = Modifier.padding(horizontal = 13.dp, vertical = 8.dp)
                     )
                 }
             }
 
-            if (!isOpen && review != null && review.preview.isNotBlank()) {
+            // The review reads HERE, in place: the member's own words, before
+            // they decide to open the chapter's page.
+            if (review != null && review.preview.isNotBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Text(
                     review.preview,
                     style = MaterialTheme.typography.bodyMedium.copy(fontFamily = LoraFontFamily),
                     color = ink.copy(alpha = 0.72f),
-                    maxLines = 3,
+                    maxLines = 4,
                     overflow = TextOverflow.Ellipsis
                 )
             }
+        }
+    }
+}
 
-            if (isOpen && openState != null) {
-                Spacer(Modifier.height(12.dp))
-                PersonalCanvas(
-                    state = openState,
-                    modifier = Modifier.fillMaxWidth(),
-                    onOpenPhoto = onOpenPhoto
-                )
-            }
+/** "Look it up": asks again for the book's catalog record / page count. */
+@Composable
+private fun LookUpPill(lookingUp: Boolean, onClick: () -> Unit) {
+    val accent = personalAccent()
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = accent.copy(alpha = 0.12f)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CurioIcon(
+                CurioIcons.Search,
+                null,
+                tint = personalIconTint(accent),
+                size = 14.dp
+            )
+            Text(
+                if (lookingUp) "Looking it up…" else "Look it up",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = personalIconTint(accent)
+            )
+        }
+    }
+}
+
+/** The catalog's own blurb for the book, when Curio has one. */
+@Composable
+private fun SynopsisCard(synopsis: String) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "About this book",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = personalIconTint(personalAccent())
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                synopsis,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = LoraFontFamily,
+                    lineHeight = 23.sp
+                ),
+                color = ink.copy(alpha = 0.82f)
+            )
         }
     }
 }

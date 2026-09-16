@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -102,7 +103,12 @@ fun BookShelfScreen(navController: NavController) {
     var pendingDelete by remember { mutableStateOf<PersonalBookEntity?>(null) }
     val scope = rememberCoroutineScope()
 
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+    ) {
         PersonalHeader(
             title = "My shelf",
             subtitle = when (books.size) {
@@ -197,7 +203,7 @@ private fun BookShelfCard(
     onLongPress: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     val press = rememberCurioPressSource(pressedScale = 0.97f)
     Column(
         modifier = Modifier
@@ -370,7 +376,7 @@ private fun AddBookSheet(
     onAdded: (String) -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var query by remember { mutableStateOf("") }

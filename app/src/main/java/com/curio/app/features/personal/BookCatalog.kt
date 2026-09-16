@@ -34,6 +34,10 @@ internal object BookCatalog {
         val coverUrl: String,
         val pageCount: Int,
         val genre: String,
+        /** The topic's own synopsis — the book's blurb, when the catalog has
+         *  one. The shelf's book page shows it, so "what is this book about"
+         *  has an answer that comes from Curio itself. */
+        val synopsis: String,
         val chapters: List<BookChapter>,
         /** Title + author + genre + tags + teaser, lowercased once. */
         val haystack: String
@@ -92,6 +96,44 @@ internal object BookCatalog {
         cache?.firstOrNull { it.topicId == topicId }
             ?: library()?.firstOrNull { it.topicId == topicId }
 
+    /** The catalog's own synopsis for a book, when it has one. */
+    suspend fun synopsis(topicId: String): String =
+        if (topicId.isBlank()) "" else book(topicId)?.synopsis.orEmpty()
+
+    /**
+     * The catalog's own book for a title typed by hand.
+     *
+     * The shelf's AUTO-FETCH uses this: a book added from Open Library (or
+     * typed in) that Curio itself has is the SAME book as the lane's, and
+     * adopting its topic id is what gives the member the real chapter list,
+     * the page count and the synopsis without them asking for it.
+     *
+     * Deliberately an EXACT match on a punctuation-insensitive title (with the
+     * author as the tie-breaker) — never a fuzzy guess, because silently
+     * binding a member's book to a different one would write the wrong
+     * chapters under their reviews.
+     */
+    suspend fun bestMatch(title: String, author: String = ""): Hit? {
+        val all = library() ?: return null
+        val needle = normalise(title)
+        if (needle.isEmpty()) return null
+        val titled = all.filter { normalise(it.title) == needle }
+        if (titled.isEmpty()) return null
+        if (titled.size == 1) return titled.first()
+        val wanted = normalise(author)
+        if (wanted.isNotEmpty()) {
+            titled.firstOrNull { normalise(it.author).contains(wanted) }?.let { return it }
+            titled.firstOrNull { wanted.contains(normalise(it.author)) && normalise(it.author).isNotEmpty() }
+                ?.let { return it }
+        }
+        return titled.first()
+    }
+
+    /** Letters and digits only, lowercased — so "The Iliad" and "the iliad:"
+     *  are the same title. */
+    private fun normalise(value: String): String =
+        value.lowercase().filter { it.isLetterOrDigit() }
+
     // ── ranking ─────────────────────────────────────────────────────────────
 
     private fun rank(hit: Hit, needle: String): Int? {
@@ -119,6 +161,7 @@ internal object BookCatalog {
             coverUrl = imageUrl.trim(),
             pageCount = pageCount ?: 0,
             genre = subtype.trim(),
+            synopsis = synopsis.orEmpty().trim(),
             chapters = chapters.orEmpty(),
             haystack = buildString {
                 append(name).append(' ')

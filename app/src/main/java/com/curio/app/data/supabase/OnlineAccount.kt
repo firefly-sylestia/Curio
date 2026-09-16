@@ -212,6 +212,10 @@ object OnlineAccount {
         // the portrait stay: they are this person's own and are re-pulled from
         // whichever account signs in next.
         AppPreferences.setUsername(context, "")
+        // Whose notifications were silenced is a property of the ACCOUNT too:
+        // a mute is a user id, and the next member to sign in here is not that
+        // person (and must not inherit a silenced friend).
+        AppPreferences.clearMutedConversations(context)
         // The device's social copy goes too: every cached conversation, wall
         // page, inbox, reply set and remembered person lives in
         // [SocialCache] (see the caches in features/community). Signing out

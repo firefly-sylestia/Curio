@@ -1,5 +1,115 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — chat notifications that act, and the writing/books refinement)
+
+Verbatim: the request logged in this file's "Next prompt" slot (messenger-style
+message notifications with the sender's portrait and Like / Reply / Mute,
+where Reply opens in the notification's own message box and sends the answer
+attached to the last message; the journals, the saved journal list, the shelf
+and every book page reaching the status bar; bold not working; a quote showing
+as a highlight instead of a quote; the writing dock's colours not matching the
+theme/hero; "write write" on every new line; the `+` sheet's colours and pale
+icons in light mode; chapters opening as a journal-style page instead of inside
+the list; previews inline in the saved view; no mood/format clutter until
+writing, then the options in the same page with animations; chapters, pages and
+the synopsis auto-fetched, using the app's own data when it has it; icons
+cutting off) plus the follow-up that closes it: "we have book bottomsheets in
+topic reveal page too, so if the book is from the app sync the data between
+them properly they should share the same data but not the same screen".
+
+### Decisions (ask_user, before the work)
+
+1. The notification's **Like** reacts to the LAST message of that conversation;
+   **Mute** silences that ONE conversation (not all messages).
+2. **The shelf is the source of truth** for a book's chapters — so the topic
+   page's book sheets had to become a VIEW of it (below).
+3. **Always on** — no Experiment toggle for any of this, plus suggestions after
+   the push.
+
+### The shade's doors (notifications)
+
+- **`SocialNotifications.kt`** — a message notification is a
+  `NotificationCompat.MessagingStyle` conversation: the sender's REAL drawn
+  portrait as the large icon (`NotificationAvatars.of` draws the `SocialAvatar`
+  art into an off-screen `ImageBitmap` through `CanvasDrawScope`), the message
+  body as the conversation's last line, `CATEGORY_MESSAGE`, and three actions.
+- **`SocialNotificationReceiver.kt`** (new, `android:exported="false"`) — the
+  actions work with the app in the BACKGROUND: it restores the session itself
+  (`OnlineAccount.restore`) and `goAsync()`s the network work. **Reply** reads
+  the `RemoteInput` text and sends it with `replyTo = the last message's id`
+  (the "reply attached with the last message" ask) and then takes the entry off
+  the shade; **Like** sends `SocialReactions.LIKE` on that message and re-posts
+  the entry settled; **Mute/Unmute** writes `AppPreferences.mutedConversations`
+  (device-side, per conversation — a muted conversation still counts its unread
+  so unmuting never dumps a backlog). The token is never carried in a
+  PendingIntent's extras; only who/which.
+- `SocialApi.sendPlaintext` gained `replyTo`; the mute set is cleared on
+  sign-out (the ids belong to an account); `DirectMessageScreen` cancels a
+  conversation's entry the moment the thread opens; `MainActivity` runs
+  `SocialNotificationWatcher()`.
+
+### The writing side
+
+- **Bold: the real cause.** `LoraFontFamily` declares four entries over ONE
+  variable file, so a Bold request matched an "exact" descriptor whose glyphs
+  are the regular face — bold rendered as regular (italic was never declared,
+  so it synthesised and "worked"). The writing surfaces now use the
+  single-entry `WritingFontFamily` (`CurioTypography.kt`), which is what lets
+  the text stack fake-bold the words. Only the canvas changed.
+- **A quote is a quote.** No highlight wash: quoted runs are a touch smaller in
+  the quote ink, and a block that is quoted end-to-end gets an accent RULE down
+  its side — in the editor and in the read-only view. Bold/italic/underline
+  still stack inside it ("bold look if the user wants").
+- **One hint per page.** "Write…" shows only while the whole document is blank
+  (`PersonalEditorState.hasText()`), instead of on every new paragraph.
+- **Themes + fit.** `PersonalTheme.kt` (`personalAccent()` = the settings hero
+  accent, `personalOnAccent()`, `personalIconTint()`) replaces the fixed
+  `colorScheme.primary` across the personal pages and the `+` sheet (whose icon
+  tiles now take the deeper ink in light mode). Every personal page pads the
+  status bar, and the tool dock is 36dp a button in a scrollable row — nine
+  tools no longer cut off on a narrow phone.
+
+### Chapters, auto-fetch and the shared store
+
+- **`ChapterScreen.kt`** (new, route `books/{bookId}/chapter/{chapter}`): the
+  chapter's own journal-shaped page — catalog name / pages / summary, then the
+  review READ first, with the writing one tap away. The read chrome and the
+  dock cross-fade / slide (no mood row, no formatting clutter until writing).
+  The shelf's chapter rows keep the review's preview inline and now OPEN this
+  page instead of growing a canvas inside the list.
+- **`BookEnrichment.kt`** (new): opens-fills-in — the catalog first
+  (`BookCatalog.bestMatch`: exact, punctuation-insensitive title, author as
+  tie-breaker), then Open Library for a page count when consent allows. The
+  catalog's synopsis card ("About this book") and a "Look it up" pill for books
+  the catalog cannot place.
+- **ONE store, TWO screens (the follow-up ask).** `PersonalRepository` gained
+  `bookForCatalog` (by `catalogId`), `observeBookForCatalog`, `bookByTitle` and
+  `saveChapterNote` (the single writer: keeps the note's identity, moves
+  `currentChapter` to the chapter — progress follows the writing).
+  `ChapterNoteBridge.kt` converts a chapter note (text + `TextSpan` runs) to and
+  from the canvas document, documented flag by flag (highlight → quote, size
+  dropped). `TopicRevealScreen`'s Book Notes sheet reads its chapter note from
+  the shelf when the book is on it, writes there (debounced 400ms) and falls
+  back to the old AppPreferences slot for a book the catalog does not have — so
+  a note taken while reading the topic IS that chapter's review on the shelf.
+
+### Docs
+
+`app/AGENTS.md` gained "Chapter pages, the shelf bridge & the shade's doors
+(v389)"; the current store changelog (`20260922.txt`) gained the user-visible
+ADD/FIX lines for this pass.
+
+### Verification
+
+No Gradle in this environment, so: `scripts/check_braces.js` over every touched
+Kotlin file (clean), `git diff --check`, and a sweep for every symbol this pass
+removed (none left) plus every API it called (`ic_notification`, `CurioPerson`,
+`handleLabel`, `getDisplayName`, `sendPlaintext(replyTo)`, `PendingDirectMessageOpen`,
+`SocialReactions.LIKE`, `CurioIcons.Search`) — all present. CI is the real
+compile.
+
+---
+
 ## Request (2026-09-16, COMPLETE — revert the quote-repost feature and the social wall's card size)
 
 Verbatim: "from this revert the quote repost feature only" (commit `2a9d4ea3`,
@@ -1641,6 +1751,24 @@ confirmation flow; encryption off by default with honest failure advice; tell
 the user what else is missing. No em dashes. After the task: ask_user for
 tests.
 
-### Next prompt (the next instruction goes here — never cleared by an agent)
+### Prompt (2026-09-16, DONE in this push) — chat notifications that act + the writing/books refinement
 
-now lets fix the chat messege notifications, with proper avatar view and like reply and mute options. and reply opens in notification messege box which sends the messege too with reply attached with the last messege, and now the journal and book the new pages th journals saved page too and books sheleve too. they all are rechiing the statsus bar, every new page u added in that check and fix, then the bold option doesnt work it works with italic but doesnt show as working on its own, the quote just hihglights the text instead it should show the quote style a little smaller text with bold look if user wants, also fix its buttons accent and colors they dont match the theme and colors of the hero, also per new line it says write write which is bad view fix that too. also the button sheet of the + fix colors and proper darker accent for icons in ligh mode, and then for chapter write open a page like journal style for chapters not inside editing, show previe in inline also in the saved view, dont show all the mood icons or the fomat icons show a proper view olny and when editing smoothly show the options in the same page with animations and fix the colors and all too also the book chapters auto fetch if possible with pages if thats possible too. and its synopsis too if any provides, or if its in app then use that info. fully refine it and make it professional. also fix icons cutting
+Verbatim: the messenger-style notifications (the sender's portrait, Reply in
+the notification's own message box with the answer attached to the last
+message, Like, Mute), the journals / saved journal list / shelf / book pages
+reaching the status bar, bold not working, a quote shown as a highlight,
+"write write" on every new line, the `+` sheet's colours and pale icons in
+light mode, chapters as their own journal-style page with inline previews and
+no mood/format clutter until writing, chapters/pages/synopsis auto-fetched,
+icons cutting off — plus the follow-up that closed it: "we have book
+bottomsheets in topic reveal page too, so if the book is from the app sync the
+data between them properly they should share the same data but not the same
+screen" (answered: the shelf is the source of truth, and the topic page's book
+sheets became a view of it).
+
+Done in this push — the request at the TOP of this file carries the full
+account: the shade's doors (`SocialNotifications` + `SocialNotificationReceiver`),
+`WritingFontFamily` (why bold was broken), the quote rule, the personal accent,
+`ChapterScreen`, `BookEnrichment`, and the shelf ↔ Book Notes bridge.
+
+### Next prompt (the next instruction goes here — never cleared by an agent)

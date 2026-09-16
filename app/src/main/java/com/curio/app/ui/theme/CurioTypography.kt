@@ -124,6 +124,27 @@ val LoraFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * THE WRITING CANVAS' serif — the SAME Lora file as [LoraFontFamily], but as
+ * a SINGLE-entry family.
+ *
+ * The writing surfaces (a journal page, a chapter review) let the member put
+ * bold / italic on their own words, and a request has to be able to MISMATCH
+ * for the text stack to synthesise the weight. [LoraFontFamily] declares four
+ * entries that all point at one variable file, so a Bold request matches an
+ * "exact" descriptor whose glyphs are still the regular face — which is why
+ * bold silently rendered as regular in the canvas while italic (never
+ * declared, so always synthesised) worked. Same doctrine as
+ * [PatrickHandFontFamily]: one entry, so the fake-bold/oblique synthesis the
+ * tools depend on actually happens.
+ *
+ * Only the writing surfaces use this family, so the rest of the app keeps the
+ * multi-entry [LoraFontFamily] exactly as it was.
+ */
+val WritingFontFamily: FontFamily = FontFamily(
+    Font(R.font.lora)
+)
+
+/**
  * Cormorant Garamond — an elegant high-contrast display serif (OFL).
  * Variable font (wght 300–700) bundled at `res/font/cormorant_garamond.ttf`.
  * Used for literary/historical share-card titles needing a refined,

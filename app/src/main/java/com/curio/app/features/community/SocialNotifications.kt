@@ -8,13 +8,24 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.Person
+import androidx.core.app.RemoteInput
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.curio.app.MainActivity
 import com.curio.app.R
 import com.curio.app.data.AppPreferences
@@ -37,6 +48,25 @@ import kotlinx.coroutines.delay
  * one user-facing toggle (Settings → Notifications → Messages and community),
  * and the whole feature is off the moment Online Mode is off.
  *
+ * A MESSAGE NOTIFICATION IS A MESSENGER NOTIFICATION (v389, user decision):
+ *
+ *  · the sender's own PORTRAIT is the notification's large icon — the real
+ *    code-drawn avatar, not a stand-in (see [NotificationAvatars]);
+ *  · it is a [NotificationCompat.MessagingStyle] conversation, so the shade
+ *    reads as a chat rather than a bulletin;
+ *  · REPLY opens the shade's own message box ([RemoteInput]) and sends what
+ *    was typed as a reply TO THE LAST MESSAGE of that conversation — the
+ *    thread never has to be opened to answer it;
+ *  · LIKE reacts to that last message with the app's own reaction
+ *    ([SocialReactions.LIKE]) — the same thing the chat's reaction row sends;
+ *  · MUTE silences THIS conversation (device-side, [AppPreferences]) and the
+ *    action flips to Unmute in place.
+ *
+ * All three are handled by [SocialNotificationReceiver] so they work with the
+ * app in the background, and they are ALWAYS ON: they ride the existing
+ * Notifications switch instead of adding a second thing to find (user
+ * decision, v389).
+ *
  * Nothing here is media: a message notification is the sender's name and the
  * line they typed, exactly like the thread itself.
  */
@@ -53,27 +83,163 @@ internal object SocialNotifications {
         return base + (hash % 10_000)
     }
 
+    /** The entry one conversation owns (used to update and to cancel it). */
+    fun messageIdFor(userId: String): Int = notificationId(MESSAGE_NOTIFICATION_BASE, userId)
+
     /**
      * "A friend wrote" — tapping it opens THAT conversation, not the front
      * door: the target rides on the launch intent and the NavHost picks it up
      * once it is on a stable root (see [PendingDirectMessageOpen]).
+     *
+     * [lastMessageId] is what the shade's Reply and Like actions point at (the
+     * message they answer / react to). [liked] re-posts the same entry settled:
+     * the like already happened, and saying so is the only receipt the shade
+     * can give for a reaction.
      */
-    fun message(context: Context, person: CurioPerson, preview: String) {
+    fun message(
+        context: Context,
+        person: CurioPerson,
+        preview: String,
+        lastMessageId: String,
+        lastAtMillis: Long = System.currentTimeMillis(),
+        liked: Boolean = false
+    ) {
+        val notificationId = messageIdFor(person.userId)
+        val openIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(PendingDirectMessageOpen.EXTRA_USER_ID, person.userId)
+            putExtra(PendingDirectMessageOpen.EXTRA_HANDLE, person.label)
+        }
+        val avatar = NotificationAvatars.of(person.avatarStyle)
+        val sender = Person.Builder()
+            .setName(person.label)
+            .apply { avatar?.let { setIcon(IconCompat.createWithBitmap(it)) } }
+            .build()
+        val me = Person.Builder()
+            .setName(AppPreferences.getDisplayName(context).ifBlank { "You" })
+            .build()
+
         post(
             context = context,
-            notificationId = notificationId(MESSAGE_NOTIFICATION_BASE, person.userId),
+            notificationId = notificationId,
             channelId = MESSAGE_CHANNEL,
             channelName = "Messages",
             channelDescription = "New messages from your friends",
             title = person.label,
             body = preview.ifBlank { "Sent you a message" },
-            intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra(PendingDirectMessageOpen.EXTRA_USER_ID, person.userId)
-                putExtra(PendingDirectMessageOpen.EXTRA_HANDLE, person.label)
+            whenMillis = lastAtMillis,
+            style = {
+                it.setStyle(
+                    NotificationCompat.MessagingStyle(me)
+                        .addMessage(preview.ifBlank { "Sent you a message" }, lastAtMillis, sender)
+                )
+                it.setLargeIcon(avatar)
+                it.setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                if (liked) it.setSubText("You liked this")
             },
-            requestCode = notificationId(MESSAGE_NOTIFICATION_BASE, person.userId)
+            actions = messageActions(context, person, lastMessageId, preview),
+            intent = openIntent,
+            requestCode = notificationId
         )
+    }
+
+    /**
+     * The three doors a message notification offers, in the order a thumb
+     * expects them: answer it, react to it, or stop hearing from it.
+     */
+    private fun messageActions(
+        context: Context,
+        person: CurioPerson,
+        lastMessageId: String,
+        preview: String
+    ): (NotificationCompat.Builder) -> Unit = { builder ->
+        val replyInput = RemoteInput.Builder(SocialNotificationReceiver.EXTRA_TEXT)
+            .setLabel("Reply…")
+            .build()
+        builder.addAction(
+            NotificationCompat.Action.Builder(
+                R.drawable.ic_notification,
+                "Reply",
+                actionPendingIntent(
+                    context,
+                    SocialNotificationReceiver.ACTION_REPLY,
+                    person,
+                    lastMessageId,
+                    preview = preview,
+                    requestCode = messageIdFor(person.userId) + 1,
+                    // RemoteInput requires a MUTABLE target: the system has to
+                    // hand the typed text back through it.
+                    mutable = true
+                )
+            )
+                .addRemoteInput(replyInput)
+                .setAllowGeneratedReplies(true)
+                .build()
+        )
+        builder.addAction(
+            NotificationCompat.Action.Builder(
+                R.drawable.ic_notification,
+                "Like",
+                actionPendingIntent(
+                    context,
+                    SocialNotificationReceiver.ACTION_LIKE,
+                    person,
+                    lastMessageId,
+                    preview = preview,
+                    requestCode = messageIdFor(person.userId) + 2
+                )
+            ).build()
+        )
+        val muted = person.userId in AppPreferences.mutedConversationsState
+        builder.addAction(
+            NotificationCompat.Action.Builder(
+                R.drawable.ic_notification,
+                if (muted) "Unmute" else "Mute",
+                actionPendingIntent(
+                    context,
+                    if (muted) SocialNotificationReceiver.ACTION_UNMUTE
+                    else SocialNotificationReceiver.ACTION_MUTE,
+                    person,
+                    lastMessageId,
+                    preview = preview,
+                    requestCode = messageIdFor(person.userId) + 3
+                )
+            ).build()
+        )
+    }
+
+    /** One action's explicit target — the receiver, with who/which to act on. */
+    private fun actionPendingIntent(
+        context: Context,
+        action: String,
+        person: CurioPerson,
+        lastMessageId: String,
+        preview: String,
+        requestCode: Int,
+        mutable: Boolean = false
+    ): PendingIntent {
+        val intent = Intent(context, SocialNotificationReceiver::class.java).apply {
+            this.action = action
+            putExtra(SocialNotificationReceiver.EXTRA_PEER_ID, person.userId)
+            putExtra(SocialNotificationReceiver.EXTRA_PEER_LABEL, person.label)
+            putExtra(SocialNotificationReceiver.EXTRA_PEER_HANDLE, person.handleLabel)
+            putExtra(SocialNotificationReceiver.EXTRA_PEER_AVATAR, person.avatarStyle)
+            putExtra(SocialNotificationReceiver.EXTRA_MESSAGE_ID, lastMessageId)
+            putExtra(SocialNotificationReceiver.EXTRA_BODY, preview)
+        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or
+            if (mutable) PendingIntent.FLAG_MUTABLE else PendingIntent.FLAG_IMMUTABLE
+        return PendingIntent.getBroadcast(context, requestCode, intent, flags)
+    }
+
+    /**
+     * Takes one conversation's entry off the shade. Called when the reply is
+     * sent, when the conversation is muted, and when the thread is opened.
+     */
+    fun cancelMessage(context: Context, userId: String) {
+        runCatching {
+            NotificationManagerCompat.from(context).cancel(messageIdFor(userId))
+        }
     }
 
     /**
@@ -90,6 +256,11 @@ internal object SocialNotifications {
             channelDescription = "New posts on the 24-hour wall",
             title = title,
             body = body,
+            whenMillis = System.currentTimeMillis(),
+            style = {
+                it.setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            },
+            actions = {},
             intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra(PendingCommunityOpen.EXTRA_OPEN_COMMUNITY, true)
@@ -125,6 +296,9 @@ internal object SocialNotifications {
         channelDescription: String,
         title: String,
         body: String,
+        whenMillis: Long,
+        style: (NotificationCompat.Builder) -> Unit,
+        actions: (NotificationCompat.Builder) -> Unit,
         intent: Intent,
         requestCode: Int
     ) {
@@ -152,18 +326,67 @@ internal object SocialNotifications {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            val notification = NotificationCompat.Builder(context, channelId)
+            val builder = NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                 .setContentIntent(contentIntent)
                 .setAutoCancel(true)
+                .setWhen(whenMillis)
+                .setShowWhen(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .build()
-            NotificationManagerCompat.from(context).notify(notificationId, notification)
+            style(builder)
+            actions(builder)
+            NotificationManagerCompat.from(context).notify(notificationId, builder.build())
         }
     }
+}
+
+/**
+ * THE SHADE'S PORTRAITS — the app's own avatars, rendered once per style.
+ *
+ * A notification's large icon is an `android.graphics.Bitmap`, and a
+ * notification is posted from a receiver or a coroutine with no composition
+ * to draw in — so the character is drawn into an off-screen [ImageBitmap] by
+ * the SAME [`drawSocialAvatar`] the app's canvas uses (never a lookalike:
+ * a second drawing would drift from the faces the app shows).
+ *
+ * 28 styles, each rendered at most once per process and kept in a small map:
+ * a notification costs a map lookup, not a drawing.
+ */
+private object NotificationAvatars {
+
+    /** 192px is the largest a notification icon is ever drawn at. */
+    private const val SIZE_PX = 192
+
+    private val cache = HashMap<Int, Bitmap>(32)
+
+    /** The portrait for [style], or null when the canvas could not be drawn. */
+    @Synchronized
+    fun of(style: Int): Bitmap? {
+        cache[style]?.let { return it }
+        val rendered = render(style) ?: return null
+        cache[style] = rendered
+        return rendered
+    }
+
+    /** Must run off the main thread's UI work — it paints, it does not compose. */
+    private fun render(style: Int): Bitmap? = runCatching {
+        val pixels = SIZE_PX.toFloat()
+        val image = ImageBitmap(SIZE_PX, SIZE_PX)
+        val canvas = Canvas(image)
+        CanvasDrawScope().draw(
+            Density(1f, 1f),
+            LayoutDirection.Ltr,
+            canvas,
+            Size(pixels, pixels)
+        ) {
+            // No inner rim: against the shade's own background it reads as a
+            // hairline that is not in the app's avatar either.
+            drawSocialAvatar(style, ring = false)
+        }
+        image.asAndroidBitmap()
+    }.getOrNull()
 }
 
 /**
@@ -174,7 +397,8 @@ internal object SocialNotifications {
  *  1. **the inbox**, every [INBOX_MS] — a conversation whose unread count went
  *     UP since the previous tick is announced (the FIRST tick is a baseline
  *     only, so launching Curio never fires a notification for mail that was
- *     already waiting).
+ *     already waiting). A MUTED conversation is still counted (so unmuting
+ *     never dumps a backlog on the shade) but never announced.
  *  2. **the wall**, every [WALL_MS] — cards that are newer than the newest one
  *     seen before, and not written by this account, are announced once.
  *  3. **presence**, every [PRESENCE_MS] — the member's own last-active stamp.
@@ -207,8 +431,19 @@ internal fun SocialNotificationWatcher() {
                     .filter { thread ->
                         (counts[thread.person.userId] ?: 0) > (before[thread.person.userId] ?: 0)
                     }
+                    // A muted conversation is read like the others (that is
+                    // what keeps the baseline honest) and then dropped.
+                    .filterNot { it.person.userId in AppPreferences.mutedConversationsState }
                     .maxByOrNull { it.lastAtMillis }
-                    ?.let { SocialNotifications.message(context, it.person, it.preview) }
+                    ?.let { thread ->
+                        SocialNotifications.message(
+                            context = context,
+                            person = thread.person,
+                            preview = thread.preview,
+                            lastMessageId = thread.lastMessageId,
+                            lastAtMillis = thread.lastAtMillis
+                        )
+                    }
             }
             delay(INBOX_MS)
         }

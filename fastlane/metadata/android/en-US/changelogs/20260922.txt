@@ -1,4 +1,7 @@
 ADD:
+- Messages: notifications now look like the people they are from — the sender's own portrait, a Reply box right on the notification that answers their last message, a Like, and Mute for that conversation.
+- Writing: a book's chapter is its own page now — what the app knows about it (its name, its pages, a summary), then your review; tap and you are writing on the same page, with the tools sliding in.
+- Books: opening a book fills in the rest by itself — its chapters, page count and synopsis come from Curio's own catalog first, then the open library. No page is left blank to fill in.
 - Community: follow members — a Follow pill on every profile, and a wall filter that shows just who you follow so their posts are easy to find.
 - Community: bans now come in four reaches — hide content, view-only, social-only, or a full account lock — each with its own clock (a day, a week, a month, or until lifted), and the moderation page keeps a living ban list you can soften or lift.
 - Community: every moderation action is remembered — a member's page and your own profile now carry the record of bans, lifts and removals.
@@ -7,6 +10,9 @@ ADD:
 - Books: the add-book sheet searches Curio's own book shelf first, then the open library — and says which one it found the book in.
 - Profile: your profile (and every member's) now lives inside the header itself — portrait, counts, bio and actions on the banner, with a proper Message pill.
 FIX:
+- Writing: bold works again, a quote looks like a quote — a touch smaller, with the rule down its side — and an empty page says "Write…" once instead of on every new line.
+- Writing: the journals, the shelf, a book and a chapter page no longer run under the status bar, the writing tools fit a narrow screen without being cut off, and every one of those pages wears your theme's accent instead of a fixed rose.
+- Books: a chapter note taken from a topic's Book Notes and the chapter review on your shelf are the same note — write it in either place and both show it.
 - Social: the portraits are redrawn cute — matching brows, big friendly chibi eyes, and no more odd tint under the chin.
 - Community: wall cards wear the app's accent instead of paper cream, and the Post button steps out of the way while you scroll down.
 - Community: quotes now look like quotes — one proper pull-quote shape shared by the composer preview and the wall.

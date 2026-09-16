@@ -1156,6 +1156,13 @@ object AppPreferences {
     // explicitly switched the Experiments toggle OFF keeps that choice — only
     // the untouched default moved (see [isSocialTextEditingEnabled]).
     var socialTextEditingState by mutableStateOf(true)
+    // v389 — CONVERSATIONS MUTED ON THE SHADE. A device-side set of user ids:
+    // muting a friend silences their message notifications (the inbox keeps
+    // counting them, so unmuting never dumps a backlog) while the conversation
+    // itself stays fully readable. Set from the notification's own action, from
+    // the thread's bell, and cleared on sign-out (the ids belong to an account).
+    var mutedConversationsState by mutableStateOf<Set<String>>(emptySet())
+        private set
     // v389 — the wall's density experiment CLOSED: the compact card spacing
     // (and its "Roomy social wall" switch, v387) was reverted on the member's
     // call, so the airier row is the shipped one and nothing here toggles it.
@@ -1744,6 +1751,7 @@ object AppPreferences {
         screenRevealEnabledState = isScreenRevealEnabled(context)
         captureStudioState = isCaptureStudioEnabled(context)
         socialTextEditingState = isSocialTextEditingEnabled(context)
+        mutedConversationsState = mutedConversations(context)
         cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -2087,6 +2095,7 @@ object AppPreferences {
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
     private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
   private const val KEY_SOCIAL_TEXT_EDITING = "social_text_editing_enabled"
+  private const val KEY_MUTED_CONVERSATIONS = "social_muted_conversations"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
@@ -2232,6 +2241,35 @@ object AppPreferences {
     fun setSocialTextEditingEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SOCIAL_TEXT_EDITING, enabled).apply()
         socialTextEditingState = enabled
+    }
+
+    /**
+     * v389 — WHOSE MESSAGE NOTIFICATIONS ARE SILENCED, on this device only.
+     *
+     * A mute is per CONVERSATION, not a blanket switch: it comes from the
+     * notification's own Mute action and from the thread's bell, and it is
+     * read by the arrival watcher, which still counts a muted conversation's
+     * unread (so unmuting never fires a backlog) and simply never announces it.
+     */
+    fun mutedConversations(context: Context): Set<String> =
+        prefs(context).getStringSet(KEY_MUTED_CONVERSATIONS, emptySet()).orEmpty()
+
+    fun isConversationMuted(context: Context, userId: String): Boolean =
+        userId in mutedConversations(context)
+
+    fun setConversationMuted(context: Context, userId: String, muted: Boolean) {
+        val current = mutedConversations(context).toMutableSet()
+        if (muted) current.add(userId) else current.remove(userId)
+        // A COPY is written back: the set SharedPreferences hands out must not
+        // be mutated in place (the value in memory would change silently).
+        prefs(context).edit().putStringSet(KEY_MUTED_CONVERSATIONS, current).apply()
+        mutedConversationsState = current
+    }
+
+    /** Signing out forgets whose notifications were silenced. */
+    fun clearMutedConversations(context: Context) {
+        prefs(context).edit().remove(KEY_MUTED_CONVERSATIONS).apply()
+        mutedConversationsState = emptySet()
     }
 
 

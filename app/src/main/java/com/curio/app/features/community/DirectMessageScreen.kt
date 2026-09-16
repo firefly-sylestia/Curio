@@ -160,6 +160,10 @@ fun DirectMessageScreen(
     val myUserId = account.session?.userId
     val eligible = account.signedIn && onlineMode && token != null && myUserId != null
 
+    // Opening the conversation ANSWERS its shade entry: a message notification
+    // still sitting there for a chat you are reading is noise (v389).
+    LaunchedEffect(otherUserId) { SocialNotifications.cancelMessage(context, otherUserId) }
+
     // Filled from the device's own copy the instant the account resolves, so
     // a conversation you have already had is never a blank screen.
     var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
@@ -858,7 +862,8 @@ onSuccess = {
                             SettingsHeroHeader(
                                 title = title,
                                 subtitle = if (peerTyping) "Typing…" else person?.handleLabel.orEmpty(),
-                                onBack = { navController.popBackStack() }
+                                onBack = { navController.popBackStack() },
+                                trailing = { ink -> PeerMutePill(userId = otherUserId, ink = ink) }
                             )
                         }
                     }
@@ -1037,6 +1042,9 @@ onSuccess = {
                 subtitle = if (peerTyping) "Typing…" else person?.handleLabel.orEmpty(),
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop,
+                // The conversation's own bell: the SAME device-side mute the
+                // shade's Mute action writes, so the two can never disagree.
+                titleTrailing = { ink -> PeerMutePill(userId = otherUserId, ink = ink) },
                 // The person LEADS the header — avatar first, then the name,
                 // exactly like a messenger. The old titleTrailing slot put
                 // them on the right edge, past the (empty) title.
@@ -1101,6 +1109,38 @@ private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedWithDays(
             !sameAsPrevious,
             !sameAsNext
         )
+    }
+}
+
+/**
+ * THE CONVERSATION'S BELL (v389) — whether THIS friend's messages are
+ * announced on the shade.
+ *
+ * It is not a second setting: it writes exactly the same device-side flag the
+ * notification's own Mute action writes ([AppPreferences.mutedConversations]),
+ * so muting from the shade lights this bell and muting here silences the
+ * shade. The glyph never changes (the bundled symbol subset has no bell-off,
+ * and a missing glyph renders as its literal name) — the MUTED state is the
+ * quiet one: dim ink, no container.
+ */
+@Composable
+private fun PeerMutePill(userId: String, ink: Color) {
+    val context = LocalContext.current
+    val muted = userId in AppPreferences.mutedConversationsState
+    Surface(
+        onClick = { AppPreferences.setConversationMuted(context, userId, !muted) },
+        shape = CircleShape,
+        color = if (muted) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.size(38.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CurioIcon(
+                CurioIcons.Notifications,
+                if (muted) "Muted — tap to unmute" else "Mute this conversation",
+                tint = if (muted) ink.copy(alpha = 0.32f) else ink.copy(alpha = 0.8f),
+                size = 18.dp
+            )
+        }
     }
 }
 

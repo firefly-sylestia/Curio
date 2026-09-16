@@ -56,6 +56,20 @@ interface PersonalDao {
     @Query("SELECT * FROM personal_books WHERE id = :id")
     fun observeBook(id: String): Flow<PersonalBookEntity?>
 
+    /**
+     * The shelf row for a book that came from Curio's own catalog.
+     *
+     * This is the BRIDGE between the topic page and the personal shelf: the
+     * reveal page's book sheets look their book up through its topic id, so a
+     * chapter note written there is the SAME row as the chapter review written
+     * here — one store, two screens.
+     */
+    @Query("SELECT * FROM personal_books WHERE catalogId = :catalogId AND catalogId != '' LIMIT 1")
+    suspend fun bookForCatalog(catalogId: String): PersonalBookEntity?
+
+    @Query("SELECT * FROM personal_books WHERE catalogId = :catalogId AND catalogId != '' LIMIT 1")
+    fun observeBookForCatalog(catalogId: String): Flow<PersonalBookEntity?>
+
     // ── Single notes ───────────────────────────────────────────────────
 
     @Query("SELECT * FROM personal_notes WHERE id = :id")
@@ -90,6 +104,10 @@ interface PersonalDao {
     @Query("DELETE FROM personal_notes WHERE bookId = :bookId")
     suspend fun deleteNotesForBook(bookId: String)
 
+    /** A shelf book by its exact title (the catalog matcher's second pass). */
+    @Query("SELECT * FROM personal_books WHERE title = :title COLLATE NOCASE LIMIT 1")
+    suspend fun bookByTitle(title: String): PersonalBookEntity?
+
     @Query("SELECT COUNT(*) FROM personal_notes WHERE deletedAt IS NULL AND bookId IS NULL")
     suspend fun journalCount(): Int
 
@@ -111,6 +129,8 @@ class PersonalRepository(private val dao: PersonalDao) {
     fun observeJournals(): Flow<List<PersonalNoteEntity>> = dao.observeJournals()
     fun observeBooks(): Flow<List<PersonalBookEntity>> = dao.observeBooks()
     fun observeBook(id: String): Flow<PersonalBookEntity?> = dao.observeBook(id)
+    fun observeBookForCatalog(catalogId: String): Flow<PersonalBookEntity?> =
+        dao.observeBookForCatalog(catalogId)
     fun observeBookNotes(bookId: String): Flow<List<PersonalNoteEntity>> = dao.observeBookNotes(bookId)
     fun observeNote(id: String): Flow<PersonalNoteEntity?> = dao.observeNote(id)
 
@@ -119,6 +139,12 @@ class PersonalRepository(private val dao: PersonalDao) {
     suspend fun note(id: String): PersonalNoteEntity? = dao.note(id)
     suspend fun book(id: String): PersonalBookEntity? = dao.book(id)
     suspend fun bookNotes(bookId: String): List<PersonalNoteEntity> = dao.bookNotes(bookId)
+
+    /** The shelf row for a catalog book (the topic page's bridge). */
+    suspend fun bookForCatalog(catalogId: String): PersonalBookEntity? =
+        if (catalogId.isBlank()) null else dao.bookForCatalog(catalogId)
+
+    suspend fun bookByTitle(title: String): PersonalBookEntity? = dao.bookByTitle(title.trim())
 
     /**
      * Persists one note. [preview] is recomputed HERE from the document, so
@@ -137,6 +163,45 @@ class PersonalRepository(private val dao: PersonalDao) {
         )
         dao.upsertNote(stamped)
         return stamped
+    }
+
+    /**
+     * Writes one chapter's review — the ONE writer behind both screens: the
+     * shelf's chapter page and the topic page's book sheet. It keeps the note's
+     * identity (so a review written in one view is edited, never duplicated by
+     * the other), and it moves the book's progress forward, because writing
+     * about a chapter is what reading it looks like.
+     */
+    suspend fun saveChapterNote(
+        bookId: String,
+        chapter: Int,
+        document: PersonalDoc,
+        chapterTitle: String = ""
+    ): PersonalNoteEntity {
+        val existing = dao.bookNotes(bookId).firstOrNull { it.chapterIndex == chapter }
+        val saved = saveNote(
+            PersonalNoteEntity(
+                id = existing?.id ?: newNoteId(),
+                bookId = bookId,
+                chapterIndex = chapter,
+                title = existing?.title ?: "Chapter $chapter",
+                bodyJson = PersonalDocCodec.encode(document),
+                preview = "",
+                dateMillis = existing?.dateMillis ?: System.currentTimeMillis(),
+                mood = existing?.mood.orEmpty(),
+                chapterTitle = when {
+                    chapterTitle.isNotBlank() -> chapterTitle
+                    else -> existing?.chapterTitle.orEmpty()
+                },
+                createdAtMillis = existing?.createdAtMillis ?: 0L,
+                updatedAtMillis = 0L
+            )
+        )
+        val book = dao.book(bookId)
+        if (book != null && chapter > book.currentChapter) {
+            setProgress(bookId, chapter)
+        }
+        return saved
     }
 
     suspend fun saveBook(book: PersonalBookEntity) {

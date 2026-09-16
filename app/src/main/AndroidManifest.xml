@@ -102,6 +102,14 @@
             android:name=".infrastructure.ExploreReminderReceiver"
             android:exported="false" />
 
+        <!-- v389 — the shade's own doors on a message notification: Reply
+             (RemoteInput), Like and Mute land here, so they work with the app
+             in the background and on a cold process. Not exported: only our
+             own PendingIntents may reach it. -->
+        <receiver
+            android:name=".features.community.SocialNotificationReceiver"
+            android:exported="false" />
+
         <receiver
             android:name=".infrastructure.ExploreBootReceiver"
             android:exported="false">

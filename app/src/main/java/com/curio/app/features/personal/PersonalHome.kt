@@ -86,7 +86,7 @@ fun PersonalCreateLauncher(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(tween(200)) + scaleIn(tween(220), initialScale = 0.82f),
@@ -104,7 +104,7 @@ fun PersonalCreateLauncher(
                 CurioIcon(
                     CurioIcons.Add,
                     "Write something",
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    tint = personalOnAccent(),
                     size = 26.dp
                 )
             }
@@ -150,14 +150,14 @@ fun CreateEntrySheet(
                 glyph = CurioIcons.Note,
                 title = "A journal page",
                 body = "Today, how it felt, what you want to keep",
-                accent = MaterialTheme.colorScheme.primary,
+                accent = personalAccent(),
                 onClick = onJournal
             )
             CreateEntryOption(
                 glyph = CurioIcons.MenuBook,
                 title = "A book",
                 body = "Pick a book, review it chapter by chapter",
-                accent = MaterialTheme.colorScheme.tertiary,
+                accent = personalAccent(),
                 onClick = onBook
             )
         }
@@ -173,6 +173,9 @@ private fun CreateEntryOption(
     onClick: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
+    // The glyph tone is NOT the raw accent: in light mode the accent is too
+    // pale to read on its own wash, so the icon takes the deeper hero ink.
+    val glyphTint = personalIconTint(accent)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
@@ -186,11 +189,11 @@ private fun CreateEntryOption(
         ) {
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = accent.copy(alpha = 0.14f),
+                color = accent.copy(alpha = 0.16f),
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
-                    CurioIcon(glyph, null, tint = accent, size = 20.dp)
+                    CurioIcon(glyph, null, tint = glyphTint, size = 20.dp)
                 }
             }
             Column(Modifier.weight(1f)) {
@@ -289,7 +292,7 @@ fun PersonalChipsRow(
 
 @Composable
 private fun NewChip(onClick: () -> Unit) {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
@@ -308,7 +311,7 @@ private fun NewChip(onClick: () -> Unit) {
                     CurioIcon(
                         CurioIcons.Add,
                         null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = personalOnAccent(),
                         size = 19.dp
                     )
                 }
@@ -330,7 +333,7 @@ private fun JournalChip(
     onClick: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     val mood = journal.moodEnum
     Surface(
         onClick = onClick,
@@ -387,7 +390,7 @@ private fun BookChip(
     onClick: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = personalAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),

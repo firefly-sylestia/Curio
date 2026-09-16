@@ -269,6 +269,11 @@ object CurioRoutes {
     const val BOOKS = "books"
     /** One book: its chapters, its chapter reviews and the member's progress. */
     const val BOOK_DETAIL = "books/{bookId}"
+    /** ONE CHAPTER of that book: what the app knows about it and the review
+     *  the member wrote, with the writing happening on the page itself (see
+     *  ChapterScreen). Its own route, because a chapter is a page — not an
+     *  expanded row inside the chapter list. */
+    const val CHAPTER = "books/{bookId}/chapter/{chapter}"
     /** The "write something new" sentinel carried by [JOURNAL_EDITOR]. */
     const val PERSONAL_NEW = "new"
     const val EDIT_MOODBOARD = "edit-moodboard/{entryId}"
@@ -347,6 +352,8 @@ object CurioRoutes {
     fun journalEditor(entryId: String) = "journal/$entryId"
     /** One book on the personal shelf. */
     fun bookDetail(bookId: String) = "books/${Uri.encode(bookId)}"
+    /** One chapter of a shelf book (1-based). */
+    fun chapter(bookId: String, chapter: Int) = "books/${Uri.encode(bookId)}/chapter/$chapter"
     /** One community card's own view. */
     fun communityCard(cardId: String) = "community/$cardId"
     /** A member's public profile (their portrait, handle and live cards). */

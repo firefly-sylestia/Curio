@@ -208,7 +208,13 @@ data class CurioDmThread(
     val person: CurioPerson,
     val preview: String,
     val lastAtMillis: Long,
-    val unread: Int
+    val unread: Int,
+    /**
+     * The NEWEST message in this conversation. The shade's Reply and Like
+     * actions (v389) point at it: a reply quotes it, a like reacts to it —
+     * and both are the reason the inbox read carries the id at all.
+     */
+    val lastMessageId: String = ""
 )
 
 /**
@@ -860,6 +866,7 @@ private const val PERSON_COLUMNS_PRIVACY =
                                 .withPresence(presence[otherId]),
                             preview = row.optString("body"),
                             lastAtMillis = epochMillis(row.optString("created_at")),
+                            lastMessageId = row.optString("id"),
                             // A row older than the scan window counts as read;
                             // the UI only needs enough to badge the row.
                             unread = unread[otherId] ?: 0
