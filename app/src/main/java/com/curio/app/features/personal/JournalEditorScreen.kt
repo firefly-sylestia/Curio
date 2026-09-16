@@ -384,9 +384,12 @@ fun JournalEditorScreen(
 
     if (showDatePicker) {
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = pickerForDate)
-        DatePickerDialog(
+DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
-                confirmButton = {
+            shape = RoundedCornerShape(16.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
+            confirmButton = {
                 androidx.compose.material3.Button(
                     onClick = {
                         pickerState.selectedDateMillis?.let { dateMillis = it }
@@ -476,11 +479,10 @@ private fun JournalTopBar(
                     Text(
                         if (today) "Today" else dateMillis.prettyDate(),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = ink
-                    )
-                }
-            }
-            if (editing) Surface(
+color = personalAccentInk()
+            )
+        }
+        if (editing) Surface(
                 onClick = { onShiftDate(1L) },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainer,

@@ -1,5 +1,16 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, IN PROGRESS — accent contrast, floating create action, journal controls, and media sheets)
+
+Verbatim: "the accent fix is still remaining ... also add the similiar series buttom sheet style with episodes view to anime as well, and movies, songs too ... also add touch and hold to switch differnt bullet point styles ... fix them too"
+
+### Current pass
+
+- Calendar dialog is less rounded and journal date text now uses the dark accent ink.
+- Home create launcher is positioned closer to the bottom navigation edge.
+- Remaining media-sheet/editor/home-preview work is still pending a follow-up implementation pass.
+
+
 ## Request (2026-09-16, IN PROGRESS — shelf at three across, real chapters for open-library books, the design pass, the hero-accent sweep + the "+" additions) — ⛔ NOT PUSHED (user asked to hold)
 
 Verbatim: "now lets make the shelf 3 grid and also for the openlibrary books the
