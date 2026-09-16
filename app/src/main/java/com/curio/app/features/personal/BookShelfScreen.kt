@@ -202,6 +202,7 @@ fun BookShelfScreen(navController: NavController) {
                 .navigationBarsPadding()
                 .padding(end = 18.dp, bottom = 18.dp)
         )
+        }
     }
 
     if (addOpen) {

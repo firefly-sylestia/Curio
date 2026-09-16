@@ -152,6 +152,7 @@ fun JournalListScreen(navController: NavController) {
                 .navigationBarsPadding()
                 .padding(end = 18.dp, bottom = 18.dp)
         )
+        }
     }
 
     pendingDelete?.let { journal ->
