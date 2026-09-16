@@ -1,6 +1,7 @@
 package com.curio.app.features.personal
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -67,6 +68,7 @@ import com.google.gson.JsonParser
 private data class IsbnBookResult(val title: String, val author: String, val coverUrl: String, val pages: Int)
 
 @OptIn(ExperimentalGetImage::class)
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun IsbnScannerSheet(onDismiss: () -> Unit, onAdded: (String) -> Unit) {
     val context = LocalContext.current
