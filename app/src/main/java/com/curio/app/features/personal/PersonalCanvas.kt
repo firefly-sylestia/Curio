@@ -560,7 +560,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
+// ──────────────��─────────────────────────────────────────────────────────────
 // Canvas
 // ───────────────────────────���────────────────────────────────────────────────
 
@@ -1198,7 +1198,7 @@ private fun PersonalToolButton(
     content: @Composable () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(50),
         color = if (active) accent.copy(alpha = 0.24f) else Color.Transparent,
         modifier = Modifier
             .size(36.dp)
