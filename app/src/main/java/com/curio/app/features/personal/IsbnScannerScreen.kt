@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -65,6 +66,7 @@ import com.google.gson.JsonParser
 
 private data class IsbnBookResult(val title: String, val author: String, val coverUrl: String, val pages: Int)
 
+@OptIn(ExperimentalGetImage::class)
 @Composable
 fun IsbnScannerSheet(onDismiss: () -> Unit, onAdded: (String) -> Unit) {
     val context = LocalContext.current
