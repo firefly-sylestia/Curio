@@ -102,6 +102,16 @@ object CurioIcons {
     const val BookmarkBorder = "bookmark"
     const val ThumbUp = "thumb_up"
     const val ThumbDown = "thumb_down"
+
+    /**
+     * The HEART — one glyph, two states.
+     *
+     * There is deliberately no `FavoriteBorder`: Curio's bundled Material
+     * Symbols subset (see [safeGlyphName]) carries `favorite` but not
+     * `favorite_border`, so an outlined heart would render as the literal word.
+     * An un-hearted control draws THIS glyph in a muted tone instead.
+     */
+    const val Favorite = "favorite"
     const val FormatQuote = "format_quote"
     const val FormatBold = "format_bold"
     const val FormatItalic = "format_italic"

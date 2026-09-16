@@ -1,8 +1,10 @@
 package com.curio.app.features.community
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +12,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -564,6 +570,40 @@ fun FriendsScreen(navController: NavController) {
                         }
                     }
                 }
+
+                // ── 5. start a new chat ──────────────────────────────────
+                // A–Z is the right order to LOOK someone up in and the wrong
+                // one to START talking in: the person a new chat is most likely
+                // to be with is the one just added. So the bottom of the screen
+                // offers exactly those, newest friendship first (the server's
+                // own order), and a tap opens the conversation.
+                if (friends.isNotEmpty()) {
+                    item { SettingsSectionHeading("Start a chat") }
+                    item(key = "start-chat") {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(end = 8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(
+                                friends.take(RECENT_FRIEND_LIMIT),
+                                key = { "recent-${it.requestId}" }
+                            ) { friend ->
+                                RecentFriendTile(
+                                    person = friend.person,
+                                    onClick = {
+                                        navController.navigate(
+                                            CurioRoutes.directMessage(
+                                                friend.person.userId,
+                                                friend.person.label
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -606,6 +646,36 @@ fun FriendsScreen(navController: NavController) {
                 glassBackdrop = glassBackdrop
             )
         }
+    }
+}
+
+/** How many recently added friends the "Start a chat" strip offers. */
+private const val RECENT_FRIEND_LIMIT = 12
+
+/**
+ * One face in the "Start a chat" strip: the portrait with the name under it,
+ * tap either to open the conversation. Deliberately bare — this is a launch
+ * pad, not another list.
+ */
+@Composable
+private fun RecentFriendTile(person: CurioPerson, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(66.dp)
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp)
+    ) {
+        SocialAvatar(style = person.avatarStyle, avatarSize = 44.dp)
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = person.label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

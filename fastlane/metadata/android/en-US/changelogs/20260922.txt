@@ -1,7 +1,11 @@
 ADD:
 - Chats: conversations, friends and the wall all run on the same rebuilt chat engine — messages, typing dots, reactions, read ticks and live updates are steadier and faster everywhere.
+- Community: replies now thread properly at any depth — fold and unfold a branch at any level, with a thread line showing where each answer belongs — and every reply can be hearted.
+- Friends: a "Start a chat" strip at the bottom of the contacts list offers your newest friends, one tap from a conversation.
 - Community: the moderation room now covers members too — reports can name a member, hiding an author hides their content without touching their account, and the team manages moderators with five per-person permissions.
 FIX:
+- Community: a reply thread no longer rearranges, duplicates or loses lines when a new answer is posted — every reply is drawn once, in its own branch, at every depth — and a reply you can't reply to no longer blocks a thread.
+- Community: a reply posted on a busy card stays in the thread instead of dropping off the end, and replies are compact so more of a conversation fits on screen.
 - Messages: editing a sent message or a reply really saves now, reaches the other device, and keeps its "edited" mark after reopening the chat; swiping to reply no longer traps a long message.
 - Messages: sending puts the real message on screen at once, and a slow connection can no longer make a sent message look lost until the chat is reopened.
 - Messages: read ticks are per message, so a double tick means it was actually read; opening a chat also clears its unread badge.

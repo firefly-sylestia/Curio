@@ -513,7 +513,8 @@ private fun CommunityInlineReplies(
     var text by remember(card.id) { mutableStateOf("") }
     var replyTo by remember(card.id) { mutableStateOf<CommunityComment?>(null) }
     var editing by remember(card.id) { mutableStateOf<CommunityComment?>(null) }
-    var expandedRoots by remember(card.id) { mutableStateOf(setOf<String>()) }
+    // Replies whose folded answers are open. Keyed by reply id, at ANY depth.
+    var expandedNodes by remember(card.id) { mutableStateOf(setOf<String>()) }
     var pushed by remember(card.id) { mutableStateOf(0) }
 
     suspend fun load() {
@@ -528,6 +529,35 @@ private fun CommunityInlineReplies(
             onFailure = { error = it.message }
         )
         loading = false
+    }
+
+    /**
+     * Hearts one reply, or takes the heart back — drawn on the tap and put back
+     * if the server refuses, exactly like the sheet's own heart.
+     */
+    fun toggleHeart(reply: CommunityComment) {
+        val active = accessToken ?: return
+        val me = myUserId ?: return
+        val optimistic = reply.copy(
+            likes = (reply.likes + if (reply.likedByMe) -1 else 1).coerceAtLeast(0),
+            likedByMe = !reply.likedByMe
+        )
+        fun draw(updated: CommunityComment) {
+            replies = replies.map { if (it.id == reply.id) updated else it }
+            SocialCommentsCache.write(context, card.id, replies)
+        }
+        draw(optimistic)
+        scope.launch {
+            val result = if (optimistic.likedByMe) {
+                CommunityApi.likeComment(active, reply.id, me)
+            } else {
+                CommunityApi.unlikeComment(active, reply.id, me)
+            }
+            result.onFailure {
+                draw(reply)
+                error = it.message
+            }
+        }
     }
 
     LaunchedEffect(card.id, accessToken) {
@@ -557,7 +587,7 @@ private fun CommunityInlineReplies(
     }
     LaunchedEffect(pushed) { if (pushed > 0) load() }
 
-    val branch = remember(replies, expandedRoots) { branchRenderList(replies, expandedRoots) }
+    val branch = remember(replies, expandedNodes) { branchRenderList(replies, expandedNodes) }
 
     Surface(
         shape = RoundedCornerShape(22.dp),
@@ -585,56 +615,51 @@ private fun CommunityInlineReplies(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            branch.filterIsInstance<BranchRender.Reply>().forEach { node ->
-                val reply = node.comment
-                CommunityReplyRow(
-                    reply = reply,
-                    depth = node.depth,
-                    onAuthor = { if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId) },
-                    onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
-                    onEdit = if (reply.mine) {
-                        {
-                            editing = reply
-                            text = reply.body
-                            replyTo = null
-                        }
-                    } else null,
-                    canAddFriend = false,
-                    onAddFriend = { },
-                    onDelete = {
-                        val active = accessToken
-                        if (active != null) scope.launch {
-                            CommunityApi.deleteComment(active, reply.id).fold(
-                                onSuccess = {
-                                    if (editing?.id == reply.id) {
-                                        editing = null
-                                        text = ""
-                                    }
-                                    load()
-                                },
-                                onFailure = { error = it.message }
-                            )
-                        }
-                    }
-                )
-            }
-            branch.filterIsInstance<BranchRender.More>().forEach { more ->
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    modifier = Modifier
-                        .padding(start = 18.dp)
-                        .curioPressClickable(
-                            pressedScale = 0.985f,
-                            hapticOnPress = false,
-                            onClick = { expandedRoots = expandedRoots + more.rootId }
+            // ONE ordered pass over the render list (see [branchRenderList]):
+            // a reply and the door that unfolds its OWN answers stay together,
+            // at every depth.
+            branch.forEach { row ->
+                when (row) {
+                    is BranchRender.Reply -> {
+                        val reply = row.comment
+                        CommunityReplyRow(
+                            reply = reply,
+                            depth = row.depth,
+                            onAuthor = {
+                                if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId)
+                            },
+                            onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
+                            onToggleLike = { toggleHeart(reply) },
+                            onEdit = if (reply.mine) {
+                                {
+                                    editing = reply
+                                    text = reply.body
+                                    replyTo = null
+                                }
+                            } else null,
+                            canAddFriend = false,
+                            onAddFriend = { },
+                            onDelete = {
+                                val active = accessToken
+                                if (active != null) scope.launch {
+                                    CommunityApi.deleteComment(active, reply.id).fold(
+                                        onSuccess = {
+                                            if (editing?.id == reply.id) {
+                                                editing = null
+                                                text = ""
+                                            }
+                                            load()
+                                        },
+                                        onFailure = { error = it.message }
+                                    )
+                                }
+                            }
                         )
-                ) {
-                    Text(
-                        text = "Show ${more.hidden} more",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                        color = curioDialogActionColor(),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                    }
+                    is BranchRender.More -> ShowMoreReplies(
+                        hidden = row.hidden,
+                        depth = row.depth,
+                        onClick = { expandedNodes = expandedNodes + row.nodeId }
                     )
                 }
             }
@@ -731,12 +756,20 @@ private fun CommunityInlineReplies(
                                     card.id,
                                     text,
                                     handle,
-                                    parentId = parent?.id
+                                    parentId = parent?.id,
+                                    myUserId = myUserId
                                 ).fold(
-                                    onSuccess = {
+                                    onSuccess = { created ->
                                         text = ""
                                         replyTo = null
-                                        load()
+                                        // The server's own row, straight into
+                                        // the thread; only the hosts that can
+                                        // scroll to it need the reload.
+                                        replies = replies + created
+                                        SocialCommentsCache.write(context, card.id, replies)
+                                        created.parentId?.let { parentId ->
+                                            expandedNodes = expandedNodes + parentId
+                                        }
                                     },
                                     onFailure = { error = it.message }
                                 )

@@ -1418,7 +1418,14 @@ internal object SocialInboxCache {
  */
 internal object SocialCommentsCache {
     private const val KIND = "comments"
-    private const val CAP = 60
+
+    /**
+     * How many replies one card's entry keeps. Sized to the thread read
+     * ([CommunityApi.comments] asks for the newest 200), so a cached thread is
+     * the same thread the network would draw — a smaller cap silently dropped
+     * the newest replies of a busy card on the first frame.
+     */
+    private const val CAP = 200
 
     fun read(context: Context, cardId: String, myUserId: String?): List<CommunityComment> {
         if (cardId.isBlank()) return emptyList()
@@ -1443,7 +1450,19 @@ internal object SocialCommentsCache {
                         body = body,
                         parentId = row.optString("p").takeIf { it.isNotBlank() },
                         createdAtMillis = row.optLong("t"),
-                        mine = myUserId != null && authorId == myUserId
+                        // The edit stamp is part of the row: dropping it made an
+                        // edited reply lose its "edited" mark the moment the
+                        // cached copy drew it.
+                        editedAtMillis = row.optLong("e").takeIf { it > 0L },
+                        mine = myUserId != null && authorId == myUserId,
+                        likes = row.optInt("l", 0),
+                        // The heart's MINE flag is the one field a cached row
+                        // cannot re-derive (a reply's author id says nothing
+                        // about who hearted it), so it is stored as the last
+                        // state seen for this device's account. It is only ever
+                        // a FIRST FRAME: the network read that follows replaces
+                        // the row, and a heart is idempotent on the wire.
+                        likedByMe = myUserId != null && row.optBoolean("lm", false)
                     )
                 )
             }
@@ -1465,6 +1484,9 @@ internal object SocialCommentsCache {
                     .put("b", comment.body)
                     .put("p", comment.parentId ?: "")
                     .put("t", comment.createdAtMillis)
+                    .put("e", comment.editedAtMillis ?: 0L)
+                    .put("l", comment.likes)
+                    .put("lm", comment.likedByMe)
             )
         }
         SocialCache.write(context, KIND, cardId, array, SocialCache.TTL_COMMENTS_MS)

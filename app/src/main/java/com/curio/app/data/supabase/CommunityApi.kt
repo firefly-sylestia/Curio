@@ -258,7 +258,11 @@ data class CommunityComment(
     val createdAtMillis: Long,
     /** Server-stamped the last time the author changed the body (null = never). */
     val editedAtMillis: Long? = null,
-    val mine: Boolean
+    val mine: Boolean,
+    /** How many members have hearted this reply. */
+    val likes: Int = 0,
+    /** True when THIS account's heart is one of them. */
+    val likedByMe: Boolean = false
 ) {
     /** Display name first, live username second, post-time snapshot last. */
     val authorLabel: String
@@ -307,6 +311,8 @@ object CommunityApi {
     private const val CARDS = "/rest/v1/community_cards"
     private const val REACTIONS = "/rest/v1/community_reactions"
     private const val COMMENTS = "/rest/v1/community_comments"
+    /** The reply-side heart. Keyed by reply + member — see §4c of the schema. */
+    private const val COMMENT_REACTIONS = "/rest/v1/community_comment_reactions"
     private const val REPORTS = "/rest/v1/community_reports"
     private const val ADMINS = "/rest/v1/community_admins"
 
@@ -315,8 +321,25 @@ object CommunityApi {
         "user_id,role,can_delete_posts,can_delete_replies,can_handle_reports," +
             "can_manage_admins,can_ban_members"
 
-    /** The reply SELECT the sheet and the moderation queue share. */
+    /**
+     * The reply SELECT the sheet and the moderation queue share.
+     *
+     * The embedded `community_comment_reactions` is the reply's own heart (keyed
+     * by reply + member) — the same shape as a card's reactions, one level down,
+     * counted and "mine" resolved in [parseComments].
+     */
     private const val COMMENT_COLUMNS =
+        "$COMMENTS?select=id,author,author_handle,body,parent_id,created_at,edited_at," +
+            "community_comment_reactions(user_id)"
+
+    /**
+     * The same SELECT for a server that predates §4c (no heart table yet).
+     *
+     * A missing embedded table is a 400 from PostgREST (`PGRST200`), and the
+     * thread must not be the heart's hostage — [readComments] falls back to this
+     * shape so replies keep working until the schema is re-pasted.
+     */
+    private const val COMMENT_COLUMNS_NO_HEARTS =
         "$COMMENTS?select=id,author,author_handle,body,parent_id,created_at,edited_at"
 
     // The moderation doors. Every one of them is a server function: the CHECK
@@ -354,6 +377,13 @@ object CommunityApi {
 
     /** How many live cards one profile asks for. */
     private const val PROFILE_LIMIT = 24
+
+    /**
+     * How many replies one thread read asks for. A page, not the whole thread:
+     * the request asks for the NEWEST [REPLY_LIMIT] and re-sorts them, so the
+     * reply that was just written is always inside the window.
+     */
+    private const val REPLY_LIMIT = 200
 
     /**
      * Why this draft cannot be posted, or null when it is fine. Media-backed
@@ -435,32 +465,75 @@ object CommunityApi {
 
     // ── replies ──────────────────────────────────────────────────────────
 
-    /** The replies under a card, oldest first (a conversation reads downwards). */
+    /**
+     * The replies under a card, oldest first (a conversation reads downwards).
+     *
+     * The read asks for the NEWEST page and re-orders it in memory. `order=asc`
+     * with a limit returns the OLDEST replies, so on a busy card a reply that
+     * had just been written fell off the end of the page — the thread looked
+     * like it had swallowed it, which is the "my new reply vanished" report.
+     * Newest-first always contains the one every reader is looking for, and the
+     * sort restores reading order for the sheet.
+     */
     suspend fun comments(
         accessToken: String,
         cardId: String,
         myUserId: String?
     ): Result<List<CommunityComment>> = withContext(Dispatchers.IO) {
-        val parsed = mapped {
-            val path = "$COMMENT_COLUMNS&card_id=eq.$cardId&order=created_at.asc&limit=200"
-            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
-            parseComments(SupabaseClient.executeBody(request), myUserId)
-        }
+        val parsed = mapped { readComments(accessToken, cardId, myUserId, withHearts = true) }
+        // A server that predates §4c refuses the embedded heart table, so the
+        // read is tried once more WITHOUT it: the thread keeps working (and the
+        // failures it reports stay the first, honest one) until the schema is
+        // re-pasted, after which the hearts appear by themselves.
+        val replies = parsed.getOrNull()
+            ?: mapped { readComments(accessToken, cardId, myUserId, withHearts = false) }
+                .getOrNull()
+            ?: return@withContext parsed.asFailure()
         // A reply shows the author's CURRENT name and portrait too, so a
         // rename never leaves an old handle stranded in a thread.
-        val replies = parsed.getOrNull() ?: return@withContext parsed.asFailure()
         Result.success(withCommentAuthors(accessToken, replies))
     }
 
+    /**
+     * One blocking reply read — the newest [REPLY_LIMIT], oldest first.
+     *
+     * Blocking (not `suspend`) on purpose: it is called from inside [mapped],
+     * which is a plain function, and this layer's HTTP calls are synchronous
+     * calls on an IO dispatcher rather than suspend points.
+     */
+    private fun readComments(
+        accessToken: String,
+        cardId: String,
+        myUserId: String?,
+        withHearts: Boolean
+    ): List<CommunityComment> {
+        val columns = if (withHearts) COMMENT_COLUMNS else COMMENT_COLUMNS_NO_HEARTS
+        val path = "$columns&card_id=eq.$cardId&order=created_at.desc&limit=$REPLY_LIMIT"
+        val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+        return parseComments(SupabaseClient.executeBody(request), myUserId)
+            .sortedBy { it.createdAtMillis }
+    }
+
+    /**
+     * Posts a reply and hands back the row the server stored.
+     *
+     * `return=representation` is what lets the sheet show the reply the moment
+     * Send is released — with the id the server assigned and the branch it was
+     * posted into — instead of waiting for a whole thread read to come back to
+     * prove it exists. That read is what made a just-written reply appear late
+     * (or not at all, before the page-window fix above).
+     */
     suspend fun comment(
         accessToken: String,
         cardId: String,
         body: String,
         handle: String,
         /** The reply this answers, for a branched thread — null at the top. */
-        parentId: String? = null
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        mappedUnit {
+        parentId: String? = null,
+        /** Only used to mark the returned row as MINE. */
+        myUserId: String? = null
+    ): Result<CommunityComment> = withContext(Dispatchers.IO) {
+        mapped {
             val text = body.trim()
             if (text.isEmpty()) throw IllegalArgumentException("Write something first.")
             if (text.length > MAX_COMMENT_CHARS) {
@@ -481,9 +554,51 @@ object CommunityApi {
             // keeps a top-level reply from touching the branch column at all.
             parentId?.takeIf { it.isNotBlank() }?.let { payload.put("parent_id", it) }
             val request = SupabaseClient.requestBuilder(COMMENTS, accessToken)
-                .header("Prefer", "return=minimal")
+                .header("Prefer", "return=representation")
                 .post(payload.toString().toRequestBody(jsonMediaType))
                 .build()
+            parseComments(SupabaseClient.executeBody(request), myUserId).firstOrNull()
+                ?: throw CommunityError("The reply could not be posted.")
+        }
+    }
+
+    /**
+     * Hearts one reply. Idempotent — hearting twice leaves one heart.
+     *
+     * Its own table (§4c), because a card's reactions are keyed by card + member
+     * and cannot carry a per-reply heart.
+     */
+    suspend fun likeComment(
+        accessToken: String,
+        commentId: String,
+        myUserId: String
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val payload = JSONObject()
+                .put("comment_id", commentId)
+                .put("user_id", myUserId)
+            val request = SupabaseClient.requestBuilder(
+                "$COMMENT_REACTIONS?on_conflict=comment_id%2Cuser_id",
+                accessToken
+            )
+                .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** Takes MY heart back off a reply. */
+    suspend fun unlikeComment(
+        accessToken: String,
+        commentId: String,
+        myUserId: String
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val request = SupabaseClient.requestBuilder(
+                "$COMMENT_REACTIONS?comment_id=eq.$commentId&user_id=eq.$myUserId",
+                accessToken
+            ).delete().build()
             SupabaseClient.executeBody(request)
         }
     }
@@ -892,6 +1007,18 @@ object CommunityApi {
         return buildList(array.length()) {
             for (index in 0 until array.length()) {
                 val row = array.optJSONObject(index) ?: continue
+                // The reply's hearts, embedded in the same read: how many there
+                // are, and whether one of them is mine.
+                val hearts = row.optJSONArray("community_comment_reactions")
+                var mineHeart = false
+                if (hearts != null && myUserId != null) {
+                    for (heart in 0 until hearts.length()) {
+                        if (hearts.optJSONObject(heart)?.optString("user_id") == myUserId) {
+                            mineHeart = true
+                            break
+                        }
+                    }
+                }
                 add(
                     CommunityComment(
                         id = row.optString("id"),
@@ -905,7 +1032,9 @@ object CommunityApi {
                         editedAtMillis = row.optString("edited_at")
                             .takeIf { it.isNotBlank() && it != "null" }
                             ?.let(::epochMillis),
-                        mine = myUserId != null && row.optString("author") == myUserId
+                        mine = myUserId != null && row.optString("author") == myUserId,
+                        likes = hearts?.length() ?: 0,
+                        likedByMe = mineHeart
                     )
                 )
             }
@@ -1086,8 +1215,16 @@ internal fun communityMessage(failure: Throwable): String {
         raw.contains("jwt", true) || raw.contains("token is expired", true) ||
             raw.contains("invalid claim", true) ->
             "That session has expired. Reopen Curio, or sign in again in Settings → Online mode."
+        // The server is older than the app. A function or a TABLE this build
+        // needs may simply not be there yet — a new table arrives as
+        // PostgREST's PGRST205 ("could not find the table") and a new embedded
+        // relationship as PGRST200 ("could not find a relationship"), and
+        // either one used to surface as PostgREST's own internal sentence.
         raw.contains("could not find the function", true) ||
-            raw.contains("permission denied for function", true) ->
+            raw.contains("permission denied for function", true) ||
+            raw.contains("could not find the table", true) ||
+            raw.contains("could not find a relationship", true) ||
+            raw.contains("pgrst200", true) || raw.contains("pgrst205", true) ->
             "Curio needs its server update. Paste supabase/schema.sql, then try again."
         failure is IllegalArgumentException && raw.isNotBlank() -> raw
         failure is IllegalStateException && raw.isNotBlank() -> raw

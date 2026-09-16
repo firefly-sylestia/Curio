@@ -1,5 +1,96 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — reply threads, reply hearts, compact comments, Friends strip)
+
+Verbatim: reply threads are glitchy — they vanish when a new reply branch is
+added, sometimes ALL of them vanish, and sometimes it will not let you keep
+replying inside a thread. Also: the Friends tab should show new friends at the
+bottom to start new chats, comments should be compact per message, comments
+need like buttons and a Reply that branches below as many times as you like,
+with proper hierarchy.
+
+### Root causes found (in the code, not guessed)
+
+1. **The renderer only placed TWO levels of the tree.** `branchRenderList`
+   rendered each top-level reply plus its DIRECT answers and nothing else, so
+   an answer to an answer was not a child of anything it could place — it fell
+   into the final "anything not seen" sweep and surfaced at the TOP level of
+   the thread, out of order. That is "it doesn't let me keep replying in a
+   thread".
+2. **The same sweep also swallowed the answers a FOLD was hiding.** A reply
+   with more than `BRANCH_PREVIEW` answers showed the first three and pushed the
+   rest into that sweep — so they reappeared as flattened duplicates at the
+   bottom of the sheet, and the whole thread looked rearranged. Nothing could be
+   unfolded below the top level either, because the fold was keyed on roots.
+3. **The sheet rendered the two row kinds in two separate `items()` blocks**, and
+   a `LazyListScope` puts the second block's rows AFTER the first — every "show
+   more" door landed at the very bottom of the sheet, away from the branch it
+   belonged to.
+4. **A busy card's newest replies fell outside the page.** `comments()` asked for
+   `order=created_at.asc&limit=200`: the OLDEST 200 replies. On a card with more
+   than that, a reply that had just been written was not in the response at all,
+   so the sheet's reload after Send drew the thread without it — the "it
+   vanishes when a new reply branch is added" report, and occasionally the whole
+   list looked wrong when the fold/orphan mess landed on top of it.
+5. **You could not reply to your own line** — the Reply pill was inside the
+   `else` branch of `if (reply.mine)`, so a thread could only be continued by
+   the other person.
+6. **`SocialCommentsCache` threw away part of every row it stored** (no
+   `edited_at`) and capped a card at 60 replies against a 200-reply read, so the
+   first frame of a busy thread was a different thread from the one the network
+   drew.
+
+### Shipped
+
+- **`branchRenderList` rewritten as a depth-first walk** that emits every reply
+  EXACTLY once at its real depth, folds each reply's OWN answers behind its own
+  `More` node (any level expandable, `More` now carries `depth`), keeps the
+  indent bounded (`MAX_REPLY_INDENT` steps of `REPLY_INDENT_STEP_DP` plus a
+  hairline thread rule beside every branch) and promotes only a reply whose
+  parent is genuinely absent from the page — a merely folded reply stays folded,
+  so nothing is duplicated and nothing written is hidden. `BranchRender.key`
+  gives every row (`r-<id>` / `m-<id>`) a stable identity; the dead
+  `branchOrder()` is gone.
+- **The sheet renders that list in ONE lazy pass** keyed on `BranchRender.key`,
+  with a `LazyListState` that scrolls a just-sent reply into view; the card
+  screen's inline replies use the same list in order, and both share the new
+  `ShowMoreReplies` door.
+- **`CommunityReplyRow` is three compact lines** (name · age · edited, body,
+  actions) with the avatar at 26dp: the heart (new), Reply on ANY reply,
+  then the owner's or reader's ICON-ONLY pills (`ReplyPill(label = null)`), which
+  is what keeps four actions on one line at the deepest indent.
+- **Reply hearts are real now:** `community_comment_reactions` (§4c — its own
+  table, because `community_reactions` is keyed by card + member and cannot
+  carry a per-reply heart), embedded in the reply read, parsed into
+  `CommunityComment.likes/likedByMe`, toggled through
+  `CommunityApi.likeComment/unlikeComment` optimistically from the sheet and the
+  card view, and cached. One heart glyph (`CurioIcons.Favorite`) in two tones —
+  the bundled Material Symbols subset has no `favorite_border`, so an outline
+  heart would draw the literal word.
+- **Send no longer needs a reload:** `CommunityApi.comment` uses
+  `return=representation` and the sheet inserts the server's own row, expands
+  the branch it landed in and scrolls to it. `comments()` asks for the NEWEST
+  page and re-sorts ascending. `SocialCommentsCache` keeps the whole row
+  (edited stamp included) and the same 200-reply window as the read.
+- **Friends:** a "Start a chat" strip at the bottom of the contacts sidebar —
+  `RecentFriendTile` faces for the newest friendships (`SocialApi.friends`
+  already orders by `responded_at desc`), each one tap from a conversation.
+- **Copy:** a server that predates the app now says "Paste supabase/schema.sql"
+  for a missing TABLE (PGRST205) and a missing embedded RELATIONSHIP (PGRST200)
+  too, not just a missing function.
+
+USER ACTION REQUIRED: re-paste `supabase/schema.sql` (Database → SQL Editor).
+The new `community_comment_reactions` table (§4c) is what reply hearts live in;
+until it exists, hearts report the paste-the-schema message. Threading, the
+Friends strip and every other fix here work with or without the re-paste.
+
+### Verified
+
+- Delimiter balance + brace count on every edited file (python), stale-token
+  grep (`rootId`, `expandedRoots`, `branchOrder`) returns nothing.
+- No Gradle in this environment (root AGENTS rule); CI on this push is the
+  compile check.
+
 ## Request (2026-09-16, COMPLETE — DM delivery, receipts, edits, session)
 
 Verbatim: offline/slow network reports "jwt expired something"; an edit shows

@@ -456,6 +456,82 @@ create policy cmt_update_own on public.community_comments
     with check (author = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 4c. community_comment_reactions — one heart per member per REPLY
+--
+-- WHY its own table: `community_reactions` is keyed by (card_id, user_id), so
+-- it holds exactly one row per member per CARD. A heart on a reply cannot live
+-- there — a card that has the reader's own like on it has no room for a second
+-- row, and every reply under it would share that one reaction. A reply heart is
+-- therefore the same shape one level down: keyed by (comment_id, user_id),
+-- cascading away with its reply (and so with the reply's 24-hour card), and
+-- read through the SAME gate as the reply itself — the card still live, its
+-- author in Online Mode, the reader in Online Mode — so a heart can never be
+-- counted on a card that has expired.
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.community_comment_reactions (
+    comment_id uuid not null references public.community_comments (id) on delete cascade,
+    user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    created_at timestamptz not null default now(),
+    primary key (comment_id, user_id)
+);
+
+create index if not exists community_comment_reactions_comment_idx
+    on public.community_comment_reactions (comment_id);
+
+create index if not exists community_comment_reactions_user_idx
+    on public.community_comment_reactions (user_id);
+
+alter table public.community_comment_reactions enable row level security;
+
+drop policy if exists creac_select_visible on public.community_comment_reactions;
+create policy creac_select_visible on public.community_comment_reactions
+    for select to authenticated
+    using (
+        exists (
+            select 1 from public.community_comments cm
+            join public.community_cards c on c.id = cm.card_id
+            where cm.id = community_comment_reactions.comment_id
+              and c.expires_at > now()
+              and exists (
+                  select 1 from public.profiles p
+                  where p.id = c.owner and p.online_mode_enabled
+              )
+        )
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+drop policy if exists creac_insert_own on public.community_comment_reactions;
+create policy creac_insert_own on public.community_comment_reactions
+    for insert to authenticated
+    with check (
+        user_id = auth.uid()
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+        and exists (
+            select 1 from public.community_comments cm
+            join public.community_cards c on c.id = cm.card_id
+            where cm.id = community_comment_reactions.comment_id
+              and c.expires_at > now()
+        )
+    );
+
+drop policy if exists creac_update_own on public.community_comment_reactions;
+create policy creac_update_own on public.community_comment_reactions
+    for update to authenticated
+    using (user_id = auth.uid())
+    with check (user_id = auth.uid());
+
+drop policy if exists creac_delete_own on public.community_comment_reactions;
+create policy creac_delete_own on public.community_comment_reactions
+    for delete to authenticated
+    using (user_id = auth.uid());
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 5. community_reports — moderation queue (write-only for users)
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.community_reports (
@@ -2396,6 +2472,7 @@ begin
        and c.relname in ('profiles','cloud_captures','community_cards',
                          'member_blocks',
                          'community_reactions','community_comments',
+                         'community_comment_reactions',
                          'community_reports','friend_requests','dm_messages',
                          'dm_typing','dm_reactions','dm_conversation_hidden')
        and c.relrowsecurity = false;
@@ -2412,6 +2489,7 @@ begin
        and roles::text like '%anon%'
        and tablename in ('profiles','cloud_captures','community_cards',
                          'community_reactions','community_comments',
+                         'community_comment_reactions',
                          'community_reports','friend_requests','dm_messages',
                          'dm_typing','dm_reactions','member_blocks',
                          'dm_conversation_hidden');
@@ -2425,6 +2503,7 @@ begin
       into missing
       from unnest(array['profiles','cloud_captures','community_cards',
                         'community_reactions','community_comments',
+                        'community_comment_reactions',
                         'community_reports','friend_requests','dm_messages',
                         'dm_typing','dm_reactions','member_blocks',
                         'dm_conversation_hidden']) as t
