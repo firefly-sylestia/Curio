@@ -251,8 +251,8 @@ private fun JournalRow(
                 .drawBehind {
                     val barWidth = 3.dp.toPx()
                     drawRoundRect(
-                        color = accent,
-                        size = androidx.compose.ui.geometry.Size(barWidth, size.height),
+            color = personalAccentInk(),
+            size = androidx.compose.ui.geometry.Size(barWidth, size.height),
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f)
                     )
                 }

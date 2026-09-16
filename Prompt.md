@@ -8,6 +8,7 @@ Verbatim: "the accent fix is still remaining ... also add the similiar series bu
 
 - Repaired the journal editor parser issue that caused the cascading unresolved-reference CI errors, and removed the unsupported DatePickerDialog color argument.
 - Personal shelf/journal create actions now float above the bottom inset, and the personal editor now has a persisted checklist style distinct from bullets; list-style toggles prevent checkbox rows from becoming bullet rows.
+- The personal accent pass now darkens the journal rail, shelf actions, and chapter-count foregrounds; pale accent remains reserved for fills/tracks.
 - Remaining active editor work is bullet-style cycling on long press and the final toolbar interaction polish; cross-media similar sheets still require a dedicated implementation pass.
 - The garbled `���` text in the pasted report is CI/log encoding noise, not an intentional app label. The compiler diagnostics are build output and should not be rendered in the app UI.
 

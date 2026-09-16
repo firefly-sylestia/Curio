@@ -625,7 +625,7 @@ private fun AddBookSheet(
                     TextButton(onClick = { manual = false }) { Text("Search instead") }
                     TextButton(onClick = {
                         addBook(manualTitle, manualAuthor, "", manualChapters)
-                    }) { Text("Add to shelf", color = accent) }
+                    }) { Text("Add to shelf", color = personalAccentInk()) }
                 }
                 return@Column
             }
@@ -872,7 +872,7 @@ internal fun ChapterStepper(
         Text(
             count.toString(),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = accent,
+            color = personalAccentInk(),
             textAlign = TextAlign.Center,
             modifier = Modifier.width(38.dp)
         )

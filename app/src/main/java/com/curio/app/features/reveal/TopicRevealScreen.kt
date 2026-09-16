@@ -342,7 +342,7 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
-    // v3xx ������� the episode an EPISODES chip opens the series sheet at (null =
+    // The episode an EPISODES chip opens the series sheet at (null =
     // opened from the poster card, list starts at the top). Mirrors the
     // album sheet's [selectedAlbumTrack].
     var selectedSeriesEpisode by remember { mutableStateOf<com.curio.app.data.SeriesEpisode?>(null) }
