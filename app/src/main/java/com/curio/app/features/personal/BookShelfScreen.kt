@@ -37,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -506,18 +507,58 @@ private fun AddBookSheet(
     var manual by remember { mutableStateOf(false) }
     var manualTitle by remember { mutableStateOf("") }
     var manualAuthor by remember { mutableStateOf("") }
-  var manualChapters by remember { mutableIntStateOf(0) }
-  val importLauncher = rememberLauncherForActivityResult(
-      ActivityResultContracts.OpenDocument()
-  ) { uri: Uri? ->
-      uri ?: return@rememberLauncherForActivityResult
-      val name = uri.lastPathSegment?.substringAfterLast('/').orEmpty()
-          .substringBeforeLast('.')
-          .replace('_', ' ')
-          .ifBlank { "Imported book" }
-      runCatching { context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
-      addBook(name, "", uri.toString(), 0)
-  }
+    var manualChapters by remember { mutableIntStateOf(0) }
+
+    fun addBook(
+        title: String,
+        author: String,
+        cover: String,
+        chapters: Int,
+        catalogId: String = "",
+        pages: Int = 0
+    ) {
+        val trimmed = title.trim()
+        if (trimmed.isEmpty()) return
+        val id = newPersonalBookId()
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    PersonalRepositoryHolder.repo.saveBook(
+                        PersonalBookEntity(
+                            id = id,
+                            title = trimmed,
+                            author = author.trim(),
+                            coverUrl = cover,
+                            totalChapters = chapters.coerceAtLeast(0),
+                            currentChapter = 0,
+                            catalogId = catalogId,
+                            pageCount = pages.coerceAtLeast(0)
+                        )
+                    )
+                }
+            }
+            onAdded(id)
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri ?: return@rememberLauncherForActivityResult
+        val name = uri.lastPathSegment?.substringAfterLast('/')
+            ?.substringBeforeLast('.')
+            ?.replace('_', ' ')
+            .orEmpty()
+            .ifBlank { "Imported book" }
+        runCatching {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+        addBook(name, "", uri.toString(), 0)
+    }
+
   
   /**
      * Puts the book on the shelf.
