@@ -104,6 +104,9 @@ import com.curio.app.features.personal.BookShelfScreen
 import com.curio.app.features.personal.ChapterScreen
 import com.curio.app.features.personal.JournalEditorScreen
 import com.curio.app.features.personal.JournalListScreen
+import com.curio.app.data.PAGE_KIND_JOURNAL
+import com.curio.app.features.personal.PersonalPhotoOverlay
+import com.curio.app.features.personal.rememberPersonalPhotoOverlayState
 import com.curio.app.features.profile.ProfileScreen
 import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
@@ -997,10 +1000,26 @@ fun CurioNavHost(
                 route = CurioRoutes.JOURNAL_EDITOR,
                 arguments = listOf(navArgument("entryId") { type = NavType.StringType })
             ) { entry ->
-                JournalEditorScreen(
-                    navController = navController,
-                    entryIdArg = entry.arguments?.getString("entryId").orEmpty()
-                )
+                // The photo viewer rides the page it was opened from, drawn over
+                // it by this route, so a tapped picture grows out of the page
+                // instead of pushing a whole Lightbox screen on top of it.
+                val photos = rememberPersonalPhotoOverlayState()
+                val topicId = entry.arguments?.getString("topicId").orEmpty()
+                val topicName = entry.arguments?.getString("topicName").orEmpty()
+                val categoryId = entry.arguments?.getString("categoryId").orEmpty()
+                val kind = entry.arguments?.getString("kind").orEmpty()
+                Box(Modifier.fillMaxSize()) {
+                    JournalEditorScreen(
+                        navController = navController,
+                        entryIdArg = entry.arguments?.getString("entryId").orEmpty(),
+                        photos = photos,
+                        initialTopicId = topicId,
+                        initialTopicName = topicName,
+                        initialCategoryId = categoryId,
+                        initialKind = kind.ifBlank { PAGE_KIND_JOURNAL }
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
             }
             composable(route = CurioRoutes.BOOKS) {
                 BookShelfScreen(navController = navController)
@@ -1023,11 +1042,16 @@ fun CurioNavHost(
                     navArgument("chapter") { type = NavType.IntType }
                 )
             ) { entry ->
-                ChapterScreen(
-                    navController = navController,
-                    bookId = entry.arguments?.getString("bookId").orEmpty(),
-                    chapter = entry.arguments?.getInt("chapter") ?: 1
-                )
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    ChapterScreen(
+                        navController = navController,
+                        bookId = entry.arguments?.getString("bookId").orEmpty(),
+                        chapter = entry.arguments?.getInt("chapter") ?: 1,
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
             }
 
             // ── Push destinations (no bottom nav) ──────────────────────────

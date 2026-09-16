@@ -1,6 +1,11 @@
 ADD:
 - Books: the shelf shows three covers across, split into what you are reading and what you have finished.
 - Books: a book added from the open library now arrives with its real chapter names and page ranges, read from the edition's own table of contents.
+- Books: a photo on a page now grows out of where you tapped it — no screen change, the page stays behind it.
+- Books: the "+" sheet has two new doors — a note on any topic, and a to-do list.
+- Books: a "Download help" pill on the book page searches the web for a PDF or EPUB copy.
+- Books: "Look it up" now tells you what it found (chapters, pages, the description) or why it found nothing.
+- Books: "About this book" now works for non-catalog books too — it shows the description from Open Library, labelled as such.
 - Messages: notifications now look like the people they are from — the sender's own portrait, a Reply box right on the notification that answers their last message, a Like, and Mute for that conversation.
 - Writing: a book's chapter is its own page now — what the app knows about it (its name, its pages, a summary), then your review; tap and you are writing on the same page, with the tools sliding in.
 - Books: opening a book fills in the rest by itself — its chapters, page count and synopsis come from Curio's own catalog first, then the open library. No page is left blank to fill in.

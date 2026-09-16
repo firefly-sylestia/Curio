@@ -1,6 +1,7 @@
 package com.curio.app.features.database
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsRoseAccent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -1837,7 +1838,7 @@ private fun SearchGroupHeaderRow(label: String, count: Int) {
         Text(
             text = label.uppercase(),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = settingsRoseAccent()
+            color = settingsAccentInk()
         )
         Text(
             text = "$count",

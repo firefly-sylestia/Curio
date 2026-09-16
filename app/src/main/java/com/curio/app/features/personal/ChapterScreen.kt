@@ -58,8 +58,6 @@ import androidx.navigation.NavController
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
-import com.curio.app.navigation.CurioRoutes
-import com.curio.app.navigation.LightboxTarget
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -94,7 +92,14 @@ import kotlinx.coroutines.withContext
  * here as this chapter's review.
  */
 @Composable
-fun ChapterScreen(navController: NavController, bookId: String, chapter: Int) {
+fun ChapterScreen(
+    navController: NavController,
+    bookId: String,
+    chapter: Int,
+    // The chapter's own photo viewer (see PersonalPhotoOverlay) — handed in by
+    // the route that hosts this page.
+    photos: PersonalPhotoOverlayState = rememberPersonalPhotoOverlayState()
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -301,10 +306,7 @@ fun ChapterScreen(navController: NavController, bookId: String, chapter: Int) {
                         state = editor,
                         modifier = Modifier.fillMaxWidth(),
                         accent = accent,
-                        onOpenPhoto = { uri ->
-                            LightboxTarget.uri = uri
-                            navController.navigate(CurioRoutes.LIGHTBOX) { launchSingleTop = true }
-                        }
+                        onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
                     )
                     Spacer(Modifier.height(140.dp))
                 }
@@ -333,10 +335,7 @@ fun ChapterScreen(navController: NavController, bookId: String, chapter: Int) {
                         PersonalDocView(
                             doc = document,
                             accent = accent,
-                            onOpenPhoto = { uri ->
-                                LightboxTarget.uri = uri
-                                navController.navigate(CurioRoutes.LIGHTBOX) { launchSingleTop = true }
-                            }
+                            onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
                         )
                         if (words.isNotBlank()) {
                             Spacer(Modifier.height(14.dp))

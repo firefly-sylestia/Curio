@@ -117,7 +117,16 @@ data class PersonalBookEntity(
      * A catalog book leaves this empty and reads its chapters from the topic
      * JSON instead (see `BookCatalog`), which is the same list its lane shows.
      */
-    val chaptersJson: String = ""
+    val chaptersJson: String = "",
+    /**
+     * THE BOOK'S ABOUT-TEXT when it did not come from Curio's own catalog:
+     * Open Library's description of the work (see `BookEnrichment`), kept on
+     * the row so the page's "About this book" card is there offline too. A
+     * catalog book leaves this empty — its card reads the catalog's own
+     * synopsis through [catalogId]. The column itself has been in the schema
+     * since migration 16 → 17; this is the row finally reading it.
+     */
+    val synopsis: String = ""
 ) {
     /** 0f..1f reading progress, 0 when the length is unknown. */
     val progress: Float

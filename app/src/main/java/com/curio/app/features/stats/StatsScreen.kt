@@ -1,6 +1,7 @@
 package com.curio.app.features.stats
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -693,9 +694,9 @@ private fun JourneyCard(
                         Text(
                             "Quests",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                            color = settingsRoseAccent()
+                            color = settingsAccentInk()
                         )
-                        CurioIcon(CurioIcons.ChevronRight, null, tint = settingsRoseAccent(), size = 16.dp)
+                        CurioIcon(CurioIcons.ChevronRight, null, tint = settingsAccentInk(), size = 16.dp)
                     }
                 }
             }

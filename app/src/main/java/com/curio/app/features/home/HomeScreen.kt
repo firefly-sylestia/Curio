@@ -118,6 +118,7 @@ import com.curio.app.data.SavedQuote
 import com.curio.app.features.personal.CreateEntrySheet
 import com.curio.app.features.personal.PersonalCreateLauncher
 import com.curio.app.features.personal.PersonalChipsRow
+import com.curio.app.features.personal.TopicNoteInputSheet
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
@@ -322,6 +323,7 @@ fun HomeScreen(navController: NavController) {
     // book). The button itself hides while the page is scrolled down, so a
     // long read is never covered by it.
     var writeSheetOpen by remember { mutableStateOf(false) }
+    var topicNoteOpen by remember { mutableStateOf(false) }
     val streakDays = StreakTracker.getStreak(context)
     val reminderEnabled = AppPreferences.reminderEnabledState
     // v8.8 — the pet's flower bed at Home (spec §10.3): the pet naps here
@@ -1263,6 +1265,36 @@ fun HomeScreen(navController: NavController) {
                     onBook = {
                         writeSheetOpen = false
                         navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                    },
+                    onTopicNote = {
+                        writeSheetOpen = false
+                        topicNoteOpen = true
+                    },
+                    onTodoList = {
+                        writeSheetOpen = false
+                        navController.navigate(
+                            CurioRoutes.journalEditor(
+                                CurioRoutes.PERSONAL_NEW,
+                                pageKind = "todo"
+                            )
+                        ) { launchSingleTop = true }
+                    }
+                )
+            }
+
+            // Topic name input for the "note on a topic" flow.
+            if (topicNoteOpen) {
+                TopicNoteInputSheet(
+                    onDismiss = { topicNoteOpen = false },
+                    onSubmit = { topicName ->
+                        topicNoteOpen = false
+                        navController.navigate(
+                            CurioRoutes.journalEditor(
+                                CurioRoutes.PERSONAL_NEW,
+                                topicId = topicName.lowercase().replace(" ", "-"),
+                                topicName = topicName
+                            )
+                        ) { launchSingleTop = true }
                     }
                 )
             }

@@ -294,14 +294,23 @@ fun CurioIcon(
             softWrap = false,
             style = TextStyle(
                 lineHeight = iconSp,
-                platformStyle = PlatformTextStyle(includeFontPadding = true)
+                // NO FONT PADDING. Material Symbols carry extra leading above
+                // and below the em box, so a glyph laid out at exactly the
+                // requested size sits LOW inside it — inside a pill (whose
+                // shape clips) that shaved the bottom off the icon. With the
+                // padding gone the ink centring below is exact, so the ink
+                // never leaves the box the caller gave it.
+                platformStyle = PlatformTextStyle(includeFontPadding = false)
             ),
             onTextLayout = { layout ->
                 val inkBounds = runCatching { layout.getBoundingBox(0) }.getOrNull()
                 if (inkBounds != null && layout.size.height > 0) {
-                    inkShiftPx = layout.size.height / 2f -
-                        (inkBounds.top + inkBounds.bottom) / 2f +
-                        layout.size.height * 0.04f
+                    val centred = layout.size.height / 2f -
+                        (inkBounds.top + inkBounds.bottom) / 2f
+                    // A glyph the font lays out oddly must not walk out of a
+                    // pill's clip, so the nudge stays inside a tenth of the box.
+                    val limit = layout.size.height * 0.1f
+                    inkShiftPx = centred.coerceIn(-limit, limit)
                 }
             },
             modifier = Modifier

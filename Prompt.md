@@ -1839,4 +1839,19 @@ account: the shade's doors (`SocialNotifications` + `SocialNotificationReceiver`
 `WritingFontFamily` (why bold was broken), the quote rule, the personal accent,
 `ChapterScreen`, `BookEnrichment`, and the shelf ↔ Book Notes bridge.
 
+### Prompt (2026-09-16, DONE in this push) — accent sweep, image overlay, book enrichment, download help, + sheet additions, icon fix
+
+Verbatim: theme accents too light → darker shades; journal mood one button expanding; saved journal opens read view; today+arrows shifted left with eye/pen mode icons; quote coffee color; more text formats (title, small, bullet); image preview smaller/higher quality with in-page morph overlay; accent sweep for shade hierarchy; title format; "Look it up" does nothing; download help button; chapters/synopsis lookup; icons cut in pills.
+
+Done in this push:
+- **CurioIcon clipping**: `includeFontPadding = false` + clamped ink-centre (no glyph walks outside a pill's clip).
+- **In-page photo overlay**: `PersonalPhotoOverlay.kt` — morphs a tapped thumbnail to full-screen with spring, pinch/pan, back or tap to close; hosted by the nav route, passed to screens via `PersonalPhotoOverlayState`. Canvas thumbnails 172dp/156dp, `FilterQuality.High`.
+- **"Look it up" reports back**: `BookEnrichment.enrich` returns an `EnrichReport` (learned list + consent flag); manual taps show "Found 12 chapters, 416 pages." or "Nothing more found" or "Book lookups are off".
+- **"About this book" for non-catalog books**: `openLibraryDescription` fetches the work's description from Open Library (stored in `personal_books.synopsis`), the card is labelled "Open Library" vs "Curio catalog".
+- **Download help**: a pill + sheet (PDF / EPUB) that searches Google with the filetype extension the member picked.
+- **"+" sheet gains**: "A note on a topic" (opens `TopicNoteInputSheet`, the topic id is the lowercased name, passed as route query params to `JournalEditorScreen`), and "A to-do list" (`kind = PAGE_KIND_TODO`).
+- **`PersonalHome.kt` / `HomeScreen.kt`**: the `+` sheet has four doors; `TopicNoteInputSheet` is a tiny modal asking for the topic name.
+- **`CurioRoutes.journalEditor`**: optional `topicId` / `topicName` / `categoryId` / `pageKind` query params; `CurioNavHost` extracts them and passes them to `JournalEditorScreen`, which stores them on the saved entity.
+- **Accent sweep**: darker ink shades across Cabinet V2 content, personal shelf, recycle bin, Stats, Manage categories, the category picker, book-cover hub, Settings/account components, FieldMind, Topic Database, composer and Spin.
+
 ### Next prompt (the next instruction goes here — never cleared by an agent)

@@ -45,8 +45,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
@@ -56,6 +58,8 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -79,7 +83,9 @@ import com.curio.app.data.PersonalDoc
 import com.curio.app.data.newBlockId
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * v387 — THE WRITING CANVAS (journals + chapter reviews share it).
@@ -104,26 +110,47 @@ import com.curio.app.ui.theme.WritingFontFamily
 private val QUOTE_BODY_SIZE = 16.sp
 private val QUOTE_VIEW_SIZE = 15.sp
 
+/** A TITLE line and a SMALL line, in the editor and in the read-only view. */
+private val TITLE_BODY_SIZE = 24.sp
+private val TITLE_VIEW_SIZE = 22.sp
+private val SMALL_BODY_SIZE = 13.5.sp
+private val SMALL_VIEW_SIZE = 12.5.sp
+
+/**
+ * THE QUOTE'S OWN COLOUR — COFFEE, never the app's accent (user decision: a
+ * quotation has to read as ink on paper, and an accent-tinted quote looked
+ * like a highlight someone forgot to finish). The dark theme takes the milky
+ * coffee twin, because the deep one would vanish into a dark page.
+ */
+@Composable
+internal fun personalQuoteColor(): Color =
+    if (isCurioDarkTheme()) Color(0xFFC7A184) else Color(0xFF6B4A34)
+
+/** The rule beside a quoted block: the same coffee, at rule strength. */
+@Composable
+internal fun personalQuoteRule(): Color = personalQuoteColor().copy(alpha = 0.85f)
+
 // ────────────────────────────────────────────────────────────────────────────
 // Style → pixels
 // ────────────────────────────────────────────────────────────────────────────
 
-/** The quote block's rule — the page's own accent at reading strength. */
-@Composable
-internal fun personalQuoteRule(accent: Color): Color = accent.copy(alpha = 0.8f)
-
-/** True when EVERY visible character of the block carries the quote flag (and
- *  there is at least one): the whole line is a quote, so it gets the BLOCK
- *  treatment — the rule down its side — not just the per-run text style. */
-internal fun personalBlockIsQuote(text: String, mask: IntArray): Boolean {
+/** True when EVERY visible character of the block carries the flag (and
+ *  there is at least one): the whole LINE is that style, so it gets the block
+ *  treatment — the coffee rule for a quote, the drawn dot for a bullet, a
+ *  bigger (or smaller) body for the title and small formats. */
+internal fun personalBlockCarries(text: String, mask: IntArray, flag: Int): Boolean {
     var seen = false
     for (i in text.indices) {
         if (text[i].isWhitespace()) continue
-        if (mask.getOrElse(i) { 0 } and FLAG_QUOTE == 0) return false
+        if (mask.getOrElse(i) { 0 } and flag == 0) return false
         seen = true
     }
     return seen
 }
+
+/** Kept as the quote's own name — everything else calls the general one. */
+internal fun personalBlockIsQuote(text: String, mask: IntArray): Boolean =
+    personalBlockCarries(text, mask, FLAG_QUOTE)
 
 /**
  * Renders one block's text with its per-character flags applied.
@@ -138,7 +165,9 @@ internal fun personalAnnotated(
     mask: IntArray,
     ink: Color,
     quoteInk: Color,
-    quoteSize: TextUnit
+    quoteSize: TextUnit,
+    titleSize: TextUnit = TextUnit.Unspecified,
+    smallSize: TextUnit = TextUnit.Unspecified
 ): AnnotatedString = androidx.compose.ui.text.buildAnnotatedString {
     append(text)
     var i = 0
@@ -155,10 +184,20 @@ internal fun personalAnnotated(
                     color = if (flags and FLAG_QUOTE != 0) quoteInk else ink,
                     // The quote changes the TEXT, never the page: smaller, in
                     // the quote ink — the rule beside the block is what makes
-                    // it read as a quotation.
-                    fontSize = if (flags and FLAG_QUOTE != 0) quoteSize
-                    else TextUnit.Unspecified,
-                    fontWeight = if (flags and FLAG_BOLD != 0) FontWeight.Bold else null,
+                    // it read as a quotation. A title goes the other way (the
+                    // display serif, bigger), and small steps down again.
+                    fontSize = when {
+                        flags and FLAG_QUOTE != 0 -> quoteSize
+                        flags and FLAG_TITLE != 0 -> titleSize
+                        flags and FLAG_SMALL != 0 -> smallSize
+                        else -> TextUnit.Unspecified
+                    },
+                    fontFamily = if (flags and FLAG_TITLE != 0) FrauncesFontFamily else null,
+                    fontWeight = when {
+                        flags and FLAG_BOLD != 0 -> FontWeight.Bold
+                        flags and FLAG_TITLE != 0 -> FontWeight.SemiBold
+                        else -> null
+                    },
                     fontStyle = if (flags and FLAG_ITALIC != 0) FontStyle.Italic else null,
                     textDecoration = when (decorations.size) {
                         0 -> null
@@ -512,7 +551,10 @@ internal fun PersonalCanvas(
     modifier: Modifier = Modifier,
     ink: Color = MaterialTheme.colorScheme.onSurface,
     accent: Color = personalAccent(),
-    onOpenPhoto: (String) -> Unit = {},
+    // The tapped thumbnail's bounds ride along with its URI: the page's own
+    // overlay grows the picture out of the spot it was tapped in (see
+    // PersonalPhotoOverlay), which a bare URI cannot say.
+    onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
     enabled: Boolean = true
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -527,7 +569,7 @@ internal fun PersonalCanvas(
                     enabled = enabled,
                     onCaption = { state.setCaption(id, it) },
                     onRemove = { state.removeBlock(id) },
-                    onOpen = { onOpenPhoto(block.photo.orEmpty()) }
+                    onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
                 )
             } else {
                 PersonalTextBlock(id = id, state = state, ink = ink, accent = accent, enabled = enabled)
@@ -547,46 +589,91 @@ private fun PersonalTextBlock(
     val text = state.text(id)
     val mask = state.mask(id)
     val align = state.align(id)
-    val quoteRule = personalQuoteRule(accent)
-    val quoteInk = ink.copy(alpha = 0.86f)
+    val quoteRule = personalQuoteRule()
+    val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
+    val bulletInk = personalAccentInk()
     val isQuote = personalBlockIsQuote(text, mask)
+    // A line that IS a title (or a small note) is set by the BLOCK, so a
+    // heading really is bigger writing and not just a bolder word.
+    val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+    val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
+    val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
     // ONE hint for the whole page: the empty-line "Write…" on every new
     // paragraph read as a page full of the word "write".
     val showHint = text.isEmpty() && !state.hasText()
     val focusRequester = remember(id) { FocusRequester() }
     val value = TextFieldValue(
-        annotatedString = personalAnnotated(text, mask, ink, quoteInk, QUOTE_BODY_SIZE),
+        annotatedString = personalAnnotated(
+            text, mask, ink, quoteInk, QUOTE_BODY_SIZE,
+            titleSize = if (isTitle) TextUnit.Unspecified else TITLE_BODY_SIZE,
+            smallSize = if (isSmall) TextUnit.Unspecified else SMALL_BODY_SIZE
+        ),
         selection = (state.selection(id) ?: TextRange(text.length))
             .let { if (it.max > text.length) TextRange(text.length) else it }
             .let { if (it.min < 0) TextRange(0) else it },
         composition = state.composition(id)
     )
-    val bodyStyle = TextStyle(
-        fontFamily = WritingFontFamily,
-        fontSize = 17.sp,
-        lineHeight = 29.sp,
-        color = ink,
-        textAlign = if (align == PersonalAlign.CENTER) TextAlign.Center else TextAlign.Start
-    )
+    val alignOf = if (align == PersonalAlign.CENTER) TextAlign.Center else TextAlign.Start
+    val bodyStyle = when {
+        isTitle -> TextStyle(
+            fontFamily = FrauncesFontFamily,
+            fontSize = TITLE_BODY_SIZE,
+            lineHeight = 34.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = ink,
+            textAlign = alignOf
+        )
+        isSmall -> TextStyle(
+            fontFamily = WritingFontFamily,
+            fontSize = SMALL_BODY_SIZE,
+            lineHeight = 22.sp,
+            color = ink,
+            textAlign = alignOf
+        )
+        else -> TextStyle(
+            fontFamily = WritingFontFamily,
+            fontSize = 17.sp,
+            lineHeight = 29.sp,
+            color = ink,
+            textAlign = alignOf
+        )
+    }
     BasicTextField(
         value = value,
         onValueChange = { state.onFieldChange(id, it) },
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
-            // A quoted line wears the rule down its side (drawn on the block's
-            // own height, so it grows with the writing).
-            .then(if (isQuote) Modifier
-                .drawBehind {
-                    val barWidth = 3.dp.toPx()
-                    drawRoundRect(
-                        color = quoteRule,
-                        size = Size(barWidth, size.height),
-                        cornerRadius = CornerRadius(barWidth / 2f)
-                    )
+            // A quoted line wears the coffee rule down its side, a bulleted
+            // line wears a drawn dot (both on the block's own height, so they
+            // grow with the writing).
+            .then(
+                when {
+                    isQuote -> Modifier
+                        .drawBehind {
+                            val barWidth = 3.dp.toPx()
+                            drawRoundRect(
+                                color = quoteRule,
+                                size = Size(barWidth, size.height),
+                                cornerRadius = CornerRadius(barWidth / 2f)
+                            )
+                        }
+                        .padding(start = 13.dp)
+                    isBullet -> Modifier
+                        .drawBehind {
+                            drawCircle(
+                                color = bulletInk,
+                                radius = 2.6.dp.toPx(),
+                                center = Offset(
+                                    x = 3.dp.toPx(),
+                                    y = (if (isTitle) 18.dp else if (isSmall) 12.dp else 15.dp).toPx()
+                                )
+                            )
+                        }
+                        .padding(start = 17.dp)
+                    else -> Modifier
                 }
-                .padding(start = 13.dp)
-            else Modifier)
+            )
             .focusRequester(focusRequester)
             .onFocusChanged { state.onFocusChanged(id, it.isFocused) }
             .onPreviewKeyEvent { event ->
@@ -645,8 +732,11 @@ private fun PersonalPhotoBlock(
     enabled: Boolean,
     onCaption: (String) -> Unit,
     onRemove: () -> Unit,
-    onOpen: () -> Unit
+    onOpen: (Rect?) -> Unit
 ) {
+    // The preview is deliberately SMALL (it is a note in a page, not a
+    // gallery) and its bounds are what the page's overlay grows out of.
+    var bounds by remember(uri) { mutableStateOf<Rect?>(null) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -657,15 +747,17 @@ private fun PersonalPhotoBlock(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(212.dp)
+                .height(172.dp)
+                .onGloballyPositioned { bounds = it.boundsInWindow() }
                 .clip(RoundedCornerShape(14.dp))
-                .clickable(enabled = enabled) { onOpen() }
+                .clickable(enabled = enabled) { onOpen(bounds) }
         ) {
             androidx.compose.foundation.Image(
                 painter = rememberAsyncImagePainter(uri),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().height(212.dp)
+                filterQuality = FilterQuality.High,
+                modifier = Modifier.fillMaxWidth().height(172.dp)
             )
             if (enabled) {
                 Surface(
@@ -733,24 +825,31 @@ internal fun PersonalDocView(
     modifier: Modifier = Modifier,
     ink: Color = MaterialTheme.colorScheme.onSurface,
     accent: Color = personalAccent(),
-    onOpenPhoto: (String) -> Unit = {}
+    onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> }
 ) {
-    val quoteRule = personalQuoteRule(accent)
-    val quoteInk = ink.copy(alpha = 0.86f)
+    val quoteRule = personalQuoteRule()
+    val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
+    val bulletInk = personalAccentInk()
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         doc.blocks.forEach { block ->
             if (block.isPhoto) {
+                // A saved page shows the picture SMALL — it is a page of
+                // writing, not a gallery — and hands its bounds to the
+                // overlay so tapping it grows out of exactly here.
+                var bounds by remember(block.photo) { mutableStateOf<Rect?>(null) }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .onGloballyPositioned { bounds = it.boundsInWindow() }
                         .clip(RoundedCornerShape(16.dp))
-                        .clickable { onOpenPhoto(block.photo.orEmpty()) }
+                        .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
                 ) {
                     androidx.compose.foundation.Image(
                         painter = rememberAsyncImagePainter(block.photo.orEmpty()),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth().height(200.dp)
+                        filterQuality = FilterQuality.High,
+                        modifier = Modifier.fillMaxWidth().height(156.dp)
                     )
                     if (block.caption.isNotBlank()) {
                         Text(
@@ -767,30 +866,70 @@ internal fun PersonalDocView(
             } else if (block.text.isNotBlank()) {
                 val text = block.text
                 val mask = runsToMask(text.length, block.runs)
+                val isQuote = personalBlockIsQuote(text, mask)
+                val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+                val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
+                val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+                val alignOf = if (block.align == PersonalAlign.CENTER) TextAlign.Center
+                else TextAlign.Start
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .then(if (personalBlockIsQuote(text, mask)) Modifier
-                            .drawBehind {
-                                val barWidth = 3.dp.toPx()
-                                drawRoundRect(
-                                    color = quoteRule,
-                                    size = Size(barWidth, size.height),
-                                    cornerRadius = CornerRadius(barWidth / 2f)
-                                )
+                        .then(
+                            when {
+                                isQuote -> Modifier
+                                    .drawBehind {
+                                        val barWidth = 3.dp.toPx()
+                                        drawRoundRect(
+                                            color = quoteRule,
+                                            size = Size(barWidth, size.height),
+                                            cornerRadius = CornerRadius(barWidth / 2f)
+                                        )
+                                    }
+                                    .padding(start = 13.dp)
+                                isBullet -> Modifier
+                                    .drawBehind {
+                                        drawCircle(
+                                            color = bulletInk,
+                                            radius = 2.4.dp.toPx(),
+                                            center = Offset(
+                                                x = 3.dp.toPx(),
+                                                y = (if (isTitle) 16.dp else 14.dp).toPx()
+                                            )
+                                        )
+                                    }
+                                    .padding(start = 16.dp)
+                                else -> Modifier
                             }
-                            .padding(start = 13.dp)
-                        else Modifier)
+                        )
                 ) {
                     Text(
-                        text = personalAnnotated(text, mask, ink, quoteInk, QUOTE_VIEW_SIZE),
-                        style = TextStyle(
-                            fontFamily = WritingFontFamily,
-                            fontSize = 16.sp,
-                            lineHeight = 27.sp,
-                            textAlign = if (block.align == PersonalAlign.CENTER) TextAlign.Center
-                            else TextAlign.Start
+                        text = personalAnnotated(
+                            text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
+                            titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
+                            smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
                         ),
+                        style = when {
+                            isTitle -> TextStyle(
+                                fontFamily = FrauncesFontFamily,
+                                fontSize = TITLE_VIEW_SIZE,
+                                lineHeight = 31.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = alignOf
+                            )
+                            isSmall -> TextStyle(
+                                fontFamily = WritingFontFamily,
+                                fontSize = SMALL_VIEW_SIZE,
+                                lineHeight = 21.sp,
+                                textAlign = alignOf
+                            )
+                            else -> TextStyle(
+                                fontFamily = WritingFontFamily,
+                                fontSize = 16.sp,
+                                lineHeight = 27.sp,
+                                textAlign = alignOf
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -884,6 +1023,33 @@ internal fun PersonalToolDock(
                 )
             }
             PersonalToolButton(
+                label = "Title",
+                active = active and FLAG_TITLE != 0,
+                accent = accent, ink = ink,
+                onClick = { state.toggle(FLAG_TITLE) }
+            ) {
+                Text("H", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 15.sp))
+            }
+            PersonalToolButton(
+                label = "Small text",
+                active = active and FLAG_SMALL != 0,
+                accent = accent, ink = ink,
+                onClick = { state.toggle(FLAG_SMALL) }
+            ) {
+                Text(
+                    "Aa",
+                    style = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+                )
+            }
+            PersonalToolButton(
+                label = "Bullet",
+                active = active and FLAG_BULLET != 0,
+                accent = accent, ink = ink,
+                onClick = { state.toggle(FLAG_BULLET) }
+            ) {
+                BulletGlyph()
+            }
+            PersonalToolButton(
                 label = "Quote",
                 active = active and FLAG_QUOTE != 0,
                 accent = accent, ink = ink,
@@ -916,6 +1082,28 @@ internal fun PersonalToolDock(
                 CurioIcon(CurioIcons.Image, null, size = 18.dp)
             }
         }
+    }
+}
+
+/** The bullet tool's own glyph — a dot and two hanging rules. */
+@Composable
+private fun BulletGlyph() {
+    val ink = LocalContentColor.current
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
+        val stroke = 1.8f.dp.toPx()
+        val dot = 1.9f.dp.toPx()
+        val textLeft = size.width * 0.42f
+        listOf(0.3f to 1f, 0.72f to 0.72f).forEach { (yFraction, width) ->
+            val y = size.height * yFraction
+            drawLine(
+                color = ink,
+                start = Offset(textLeft, y),
+                end = Offset(textLeft + (size.width - textLeft) * width, y),
+                strokeWidth = stroke,
+                cap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
+        }
+        drawCircle(color = ink, radius = dot, center = Offset(size.width * 0.16f, size.height * 0.3f))
     }
 }
 

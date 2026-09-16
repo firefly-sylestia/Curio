@@ -348,8 +348,27 @@ object CurioRoutes {
     fun captureFor(categorySlug: String, topicName: String) =
         "capture/$categorySlug/${Uri.encode(topicName)}"
     fun entryDetail(entryId: String) = "detail/$entryId"
-    /** One journal page ([PERSONAL_NEW] starts today's). */
-    fun journalEditor(entryId: String) = "journal/$entryId"
+    /** One journal page ([PERSONAL_NEW] starts today's).
+     *  When [topicId]/[topicName]/[categoryId] are supplied, the page is a
+     *  "note on a topic" (the "+" sheet's new door). When [pageKind] is
+     *  [PAGE_KIND_TODO], the page is a checklist. */
+    fun journalEditor(
+        entryId: String,
+        topicId: String = "",
+        topicName: String = "",
+        categoryId: String = "",
+        pageKind: String = ""
+    ): String = buildString {
+        append("journal/$entryId")
+        val params = mutableListOf<String>()
+        if (topicId.isNotBlank()) params += "topicId=${Uri.encode(topicId)}"
+        if (topicName.isNotBlank()) params += "topicName=${Uri.encode(topicName)}"
+        if (categoryId.isNotBlank()) params += "categoryId=${Uri.encode(categoryId)}"
+        if (pageKind.isNotBlank()) params += "kind=$pageKind"
+        if (params.isNotEmpty()) {
+            params.joinToString("&").let { append("?$it") }
+        }
+    }
     /** One book on the personal shelf. */
     fun bookDetail(bookId: String) = "books/${Uri.encode(bookId)}"
     /** One chapter of a shelf book (1-based). */

@@ -36,15 +36,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalNoteEntity
@@ -53,6 +59,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.WritingFontFamily
 
 /**
  * v387 — THE PERSONAL FAMILY ON HOME.
@@ -122,7 +129,9 @@ fun PersonalCreateLauncher(
 fun CreateEntrySheet(
     onDismiss: () -> Unit,
     onJournal: () -> Unit,
-    onBook: () -> Unit
+    onBook: () -> Unit,
+    onTopicNote: () -> Unit,
+    onTodoList: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -159,6 +168,20 @@ fun CreateEntrySheet(
                 body = "Pick a book, review it chapter by chapter",
                 accent = personalAccent(),
                 onClick = onBook
+            )
+            CreateEntryOption(
+                glyph = CurioIcons.TravelExplore,
+                title = "A note on a topic",
+                body = "Write about something you are exploring",
+                accent = personalAccent(),
+                onClick = onTopicNote
+            )
+            CreateEntryOption(
+                glyph = CurioIcons.TaskAlt,
+                title = "A to-do list",
+                body = "Check off tasks as you go",
+                accent = personalAccent(),
+                onClick = onTodoList
             )
         }
     }
@@ -209,6 +232,84 @@ private fun CreateEntryOption(
                 )
             }
             CurioIcon(CurioIcons.ChevronRight, null, tint = ink.copy(alpha = 0.4f), size = 18.dp)
+        }
+    }
+}
+
+/**
+ * A tiny sheet asking for the topic name. The name is the handle: it becomes
+ * the topic id (lowercased, hyphenated) and the label the journal list shows.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopicNoteInputSheet(
+    onDismiss: () -> Unit,
+    onSubmit: (String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    val accent = personalAccent()
+    val ink = MaterialTheme.colorScheme.onSurface
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 26.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "A note on a topic",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = ink
+            )
+            BasicTextField(
+                value = name,
+                onValueChange = { name = it },
+                singleLine = true,
+                textStyle = TextStyle(
+                    fontFamily = WritingFontFamily,
+                    fontSize = 16.sp,
+                    color = ink
+                ),
+                cursorBrush = SolidColor(accent),
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { inner ->
+                    Box {
+                        if (name.isEmpty()) {
+                            Text(
+                                "What topic?",
+                                style = TextStyle(
+                                    fontFamily = WritingFontFamily,
+                                    fontSize = 16.sp,
+                                    color = ink.copy(alpha = 0.4f)
+                                )
+                            )
+                        }
+                        inner()
+                    }
+                }
+            )
+            Surface(
+                onClick = { if (name.isNotBlank()) onSubmit(name.trim()) },
+                shape = RoundedCornerShape(50),
+                color = accent
+            ) {
+                Text(
+                    "Start writing",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = personalOnAccent(),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+                )
+            }
         }
     }
 }

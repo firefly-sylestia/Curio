@@ -1,6 +1,7 @@
 package com.curio.app.features.cabinet
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -369,7 +370,7 @@ private fun PersonalShelfDoor(
                     .background(settingsRoseAccent().copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
-                CurioIcon(glyph, null, tint = settingsRoseAccent(), size = 18.dp)
+                CurioIcon(glyph, null, tint = settingsAccentInk(), size = 18.dp)
             }
             Column(Modifier.weight(1f)) {
                 Text(
@@ -400,11 +401,11 @@ private fun PersonalShelfPill(glyph: String, label: String, onClick: () -> Unit)
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            CurioIcon(glyph, null, tint = settingsRoseAccent(), size = 16.dp)
+            CurioIcon(glyph, null, tint = settingsAccentInk(), size = 16.dp)
             Text(
                 label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = settingsRoseAccent()
+                color = settingsAccentInk()
             )
         }
     }

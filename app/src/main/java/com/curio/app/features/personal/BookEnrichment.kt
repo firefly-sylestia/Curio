@@ -38,27 +38,115 @@ import java.util.concurrent.TimeUnit
 internal object BookEnrichment {
 
     /**
-     * Fills in what [book] is missing. Returns the updated row, or null when
-     * there was nothing to learn (so the caller writes nothing).
+     * What ONE pass over a book learned, so the book's page can say it out
+     * loud. "Look it up" used to be a pill that visibly did nothing: the pass
+     * ran, found nothing it could add, and reported nothing back. Now every
+     * door it opened is named in [learned], and a pass that found nothing
+     * while fetching is OFF says so ([needsConsent]) instead of sitting there.
      */
-    suspend fun enrich(book: PersonalBookEntity): PersonalBookEntity? {
-        catalogMatch(book)?.let { return it }
+    internal data class EnrichReport(
+        val book: PersonalBookEntity,
+        /** "12 chapters", "416 pages", "the description" … in pass order. */
+        val learned: List<String>,
+        val needsConsent: Boolean
+    ) {
+        /** True when the row has to be written back. */
+        val changed: Boolean get() = learned.isNotEmpty()
+    }
+
+    /**
+     * Fills in what [book] is missing, trying EVERY source: the app's own
+     * catalog first, then Open Library's table of contents, page count and
+     * description. A catalog match no longer ends the pass — a book Curio
+     * knows can still be missing its page count or an about-text.
+     */
+    suspend fun enrich(book: PersonalBookEntity): EnrichReport {
+        val learned = mutableListOf<String>()
         var updated = book
-        if (book.chaptersJson.isBlank()) {
-            openLibraryChapters(book.title, book.author)?.let { chapters ->
+
+        catalogMatch(updated)?.let { matched ->
+            updated = matched
+            learned += "the catalog's own record"
+        }
+        if (updated.chaptersJson.isBlank()) {
+            openLibraryChapters(updated.title, updated.author)?.let { chapters ->
                 updated = updated.copy(
                     chaptersJson = PersonalChapterCodec.encode(chapters),
                     totalChapters = if (updated.totalChapters <= 0) chapters.size
                     else updated.totalChapters
                 )
+                learned += "${chapters.size} chapters"
             }
         }
         if (updated.pageCount <= 0) {
-            openLibraryPages(book.title, book.author)?.let { pages ->
+            openLibraryPages(updated.title, updated.author)?.let { pages ->
                 updated = updated.copy(pageCount = pages)
+                learned += "$pages pages"
             }
         }
-        return updated.takeIf { it != book }
+        // A catalog book's about-text is the catalog's own (read live by the
+        // book's page), so only a book the catalog does not have asks Open
+        // Library for a description.
+        if (updated.catalogId.isBlank() && updated.synopsis.isBlank()) {
+            openLibraryDescription(updated.title, updated.author)?.let { text ->
+                updated = updated.copy(synopsis = text)
+                learned += "the description"
+            }
+        }
+
+        return EnrichReport(
+            book = updated,
+            learned = learned,
+            needsConsent = learned.isEmpty() &&
+                updated.catalogId.isBlank() &&
+                !AppPreferences.bookFetchEnabledState
+        )
+    }
+
+    /**
+     * The work's DESCRIPTION — Open Library's own about-text, the one its
+     * book pages show (the member asked which of the two the app uses: the
+     * catalog's synopsis when Curio has the book, this otherwise). It lives on
+     * the WORK, is sometimes an object (`{ "value": … }`) and is occasionally
+     * missing entirely, in which case the first sentence stands in. Null when
+     * consent is off, nothing matched by title, or the text is too short to be
+     * a description at all.
+     */
+    suspend fun openLibraryDescription(title: String, author: String): String? {
+        if (title.isBlank()) return null
+        if (!AppPreferences.bookFetchEnabledState) return null
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val wanted = normalise(title)
+                val search = getJson(searchUrl(title, author, 5, "key,title"))
+                    ?: return@runCatching null
+                val match = search.asJsonObject.array("docs")
+                    .mapNotNull { it as? JsonObject }
+                    .firstOrNull {
+                        normalise(it.str("title")) == wanted &&
+                            it.str("key").startsWith("/works/")
+                    }
+                    ?: return@runCatching null
+                val work = getJson("https://openlibrary.org${match.str("key")}.json")
+                    ?.let { runCatching { it.asJsonObject }.getOrNull() }
+                    ?: return@runCatching null
+                val description = work.descriptionText().ifBlank { work.str("first_sentence") }
+                description.trim().takeIf { it.length >= MIN_DESCRIPTION }
+            }.getOrNull()
+        }
+    }
+
+    /** `description`, which Open Library writes as a string OR an object. */
+    private fun JsonObject.descriptionText(): String {
+        val value = get("description") ?: return ""
+        if (value.isJsonNull) return ""
+        return runCatching {
+            if (value.isJsonObject) {
+                value.asJsonObject.get("value")?.takeIf { !it.isJsonNull }?.asString.orEmpty()
+            } else {
+                value.asString
+            }
+        }.getOrDefault("")
     }
 
     /**
@@ -95,15 +183,7 @@ internal object BookEnrichment {
             runCatching {
                 val wanted = normalise(title)
                 val search = getJson(
-                    buildString {
-                        append("https://openlibrary.org/search.json?title=")
-                        append(java.net.URLEncoder.encode(title, "UTF-8"))
-                        if (author.isNotBlank()) {
-                            append("&author=")
-                            append(java.net.URLEncoder.encode(author, "UTF-8"))
-                        }
-                        append("&limit=5&fields=key,title,number_of_pages_median")
-                    }
+                    searchUrl(title, author, 5, "key,title,number_of_pages_median")
                 ) ?: return@runCatching null
                 val docs = search.asJsonObject.array("docs")
                 val match = docs.mapNotNull { it as? JsonObject }
@@ -156,15 +236,7 @@ internal object BookEnrichment {
         return withContext(Dispatchers.IO) {
             runCatching {
                 val search = getJson(
-                    buildString {
-                        append("https://openlibrary.org/search.json?title=")
-                        append(java.net.URLEncoder.encode(title, "UTF-8"))
-                        if (author.isNotBlank()) {
-                            append("&author=")
-                            append(java.net.URLEncoder.encode(author, "UTF-8"))
-                        }
-                        append("&limit=3&fields=title,number_of_pages_median")
-                    }
+                    searchUrl(title, author, 3, "title,number_of_pages_median")
                 ) ?: return@runCatching null
                 search.asJsonObject.array("docs")
                     .firstOrNull()
@@ -175,6 +247,22 @@ internal object BookEnrichment {
                     ?.takeIf { it > 0 }
             }.getOrNull()
         }
+    }
+
+    /** One Open Library title search, encoded once for every caller. */
+    private fun searchUrl(
+        title: String,
+        author: String,
+        limit: Int,
+        fields: String
+    ): String = buildString {
+        append("https://openlibrary.org/search.json?title=")
+        append(java.net.URLEncoder.encode(title, "UTF-8"))
+        if (author.isNotBlank()) {
+            append("&author=")
+            append(java.net.URLEncoder.encode(author, "UTF-8"))
+        }
+        append("&limit=$limit&fields=$fields")
     }
 
     private fun getJson(url: String): com.google.gson.JsonElement? = runCatching {
@@ -201,6 +289,9 @@ internal object BookEnrichment {
 
     /** Three rows is the floor for a real chapter list. */
     private const val MIN_CHAPTERS = 3
+
+    /** Below this many characters it is a tagline, not a description. */
+    private const val MIN_DESCRIPTION = 60
 
     private val http: OkHttpClient by lazy {
         OkHttpClient.Builder()

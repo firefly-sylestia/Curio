@@ -834,6 +834,49 @@ fun settingsRoseAccent(): Color {
     }
 }
 
+/**
+ * THE ACCENT'S INK — the SAME hue as [settingsRoseAccent], at a shade that
+ * can actually be READ.
+ *
+ * [settingsRoseAccent] is a HERO FILL: airy on purpose (the pale rose-wood,
+ * the pastel twin, a lane's banner tone), which is exactly what a torn banner
+ * wants and exactly wrong for a line of text or a 16dp glyph on a light page
+ * — the pale fill as ink is the "washed out / cheap" look. So the accent has
+ * three shades, and a surface picks by ROLE:
+ *
+ *  · [settingsRoseAccent] — FILLS: banners, buttons, pills, rails, borders.
+ *  · [settingsAccentInk] — TEXT and GLYPHS: a deep shade of the same hue on a
+ *    light page, a lifted one on a dark page (where "darker" would vanish).
+ *  · `accent.copy(alpha = 0.12f)` — HIGHLIGHTS and tracks, never a foreground.
+ *
+ * Nothing here is a second palette: it is the same hue with the lightness the
+ * role needs, derived from whatever accent the member's hero is wearing
+ * (rose, azure, Material's container, or a Spin lane).
+ */
+@Composable
+fun settingsAccentInk(): Color {
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
+    val fill = settingsRoseAccent()
+    val base = toHsl(fill)
+    return if (isCurioDarkTheme()) {
+        // A deep fill on a dark page: the ink is the SAME hue, lifted — a
+        // darker shade here would simply disappear into the surface.
+        fromHsl(
+            base.h,
+            (base.s * 0.92f).coerceAtMost(0.70f),
+            (base.l + 0.30f).coerceAtMost(0.80f)
+        )
+    } else {
+        // A light fill on a light page: the ink is the same hue, DROPPED to a
+        // deep, saturated shade — this is the darker tone, never a paler one.
+        fromHsl(
+            base.h,
+            (base.s * 1.10f).coerceAtMost(0.62f),
+            (base.l * 0.48f).coerceAtMost(0.36f)
+        )
+    }
+}
+
 /** Readable ink for content sitting on the settings rose banner (Home's
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable

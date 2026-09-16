@@ -309,6 +309,9 @@ abstract class CurioDatabase : RoomDatabase() {
          *    Library's table of contents, so a book Curio's own catalog does
          *    not have still opens with real chapter names and page ranges
          *    instead of "Chapter 7".
+         *  · `personal_books.synopsis` — the blurb for a book the catalog does
+         *    not have, read from Open Library's work description, so "About
+         *    this book" is never blank on a hand-added book.
          *  · `personal_notes.kind` — "" for a journal day, "todo" for a
          *    checklist page, so ONE store serves both without guessing which
          *    is which from an empty body.
@@ -323,6 +326,9 @@ abstract class CurioDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     "ALTER TABLE personal_books ADD COLUMN chaptersJson TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''"
                 )
                 db.execSQL(
                     "ALTER TABLE personal_notes ADD COLUMN kind TEXT NOT NULL DEFAULT ''"

@@ -24,9 +24,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -53,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.data.openSearchUrl
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -88,7 +93,8 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
     // topic id, so its chapter rows can wear the book's REAL chapter names, page
     // ranges and summaries instead of "Chapter 7" — the catalog is the reason
-    // the shelf can be more than a list of titles.    val catalogId by produceState(initialValue = "", book) { value = book?.catalogId.orEmpty() }
+    // the shelf can be more than a list of titles.
+    val catalogId by produceState(initialValue = "", book) { value = book?.catalogId.orEmpty() }
     // THE CHAPTERS, from whichever door the book came in by: Curio's own lane
     // when it has the book, else the table of contents read from Open Library
     // (see BookEnrichment) — so a hand-added book has real chapter names too.
@@ -108,21 +114,40 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     var lookupTick by remember(bookId) { mutableIntStateOf(0) }
     var enrichedTick by remember(bookId) { mutableIntStateOf(-1) }
     var lookingUp by remember(bookId) { mutableStateOf(false) }
+    // What the last TAPPED pass found, said plainly under the pills. The pill
+    // used to be silent: the pass ran, learned nothing, and the button looked
+    // broken. Now it reports — found what, or why it found nothing.
+    var lookupNote by remember(bookId) { mutableStateOf<String?>(null) }
     LaunchedEffect(book, lookupTick) {
         val current = book ?: return@LaunchedEffect
         if (enrichedTick == lookupTick) return@LaunchedEffect
+        val manual = lookupTick > 0
         enrichedTick = lookupTick
         lookingUp = true
-        val updated = withContext(Dispatchers.IO) {
+        if (manual) lookupNote = null
+        val report = withContext(Dispatchers.IO) {
             runCatching { BookEnrichment.enrich(current) }.getOrNull()
         }
-        if (updated != null && updated != current) {
+        if (report != null && report.book != current) {
             withContext(Dispatchers.IO) {
-                runCatching { PersonalRepositoryHolder.repo.saveBook(updated) }
+                runCatching { PersonalRepositoryHolder.repo.saveBook(report.book) }
+            }
+        }
+        if (manual) {
+            lookupNote = when {
+                report == null -> "Could not reach the catalogue just now."
+                report.learned.isNotEmpty() ->
+                    "Found " + report.learned.joinToString(", ") + "."
+                report.needsConsent ->
+                    "Book lookups are off in Settings — turn them on to search Open Library."
+                else -> "Nothing more found for this book."
             }
         }
         lookingUp = false
     }
+
+    // The download-help sheet (PDF / EPUB).
+    var downloadSheet by remember(bookId) { mutableStateOf(false) }
 
     // The book's own note ("why I picked it up") — same auto-save discipline.
     var blurb by remember(bookId) { mutableStateOf("") }
@@ -227,11 +252,24 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
                             )
                         }
-                        // The catalog could not place it: one quiet door to ask
-                        // again (the first pass runs by itself).
-                        if (current.catalogId.isBlank()) {
-                            Spacer(Modifier.height(8.dp))
+                        // Two doors, both always open: ask the app's sources
+                        // again (the first pass runs by itself), or go looking
+                        // for a copy to download.
+                        Spacer(Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
+                            DownloadPill(enabled = !lookingUp) { downloadSheet = true }
+                        }
+                        if (lookingUp || lookupNote != null) {
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                lookupNote ?: "Looking it up\u2026",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+                            )
                         }
                         Spacer(Modifier.height(12.dp))
                         BlurbField(
@@ -276,9 +314,17 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 )
             }
 
-            if (catalogSynopsis.isNotBlank()) {
+            // ABOUT THIS BOOK. A book from Curio's own lane reads the catalog's
+            // synopsis; one the catalog does not have reads the description
+            // Open Library keeps for the work (fetched by BookEnrichment, so it
+            // is here offline too). The card says which of the two it is.
+            val about = catalogSynopsis.ifBlank { current.synopsis }
+            if (about.isNotBlank()) {
                 item("synopsis") {
-                    SynopsisCard(synopsis = catalogSynopsis)
+                    SynopsisCard(
+                        synopsis = about,
+                        source = if (catalogSynopsis.isNotBlank()) "Curio catalog" else "Open Library"
+                    )
                 }
             }
 
@@ -323,6 +369,16 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
 
             item("shelf-tail") { Spacer(Modifier.height(96.dp)) }
         }
+    }
+
+    // Download help: PDF or EPUB, chosen here and searched out in the
+    // browser. The extension is the app's own — the member picks a format.
+    if (downloadSheet) {
+        DownloadHelpSheet(
+            title = book?.title.orEmpty(),
+            author = book?.author.orEmpty(),
+            onDismiss = { downloadSheet = false }
+        )
     }
 
     pendingReviewDelete?.let { review ->
@@ -661,6 +717,173 @@ private fun ChapterCard(
     }
 }
 
+/** The other door on the book page: find a copy to download. */
+@Composable
+private fun DownloadPill(enabled: Boolean, onClick: () -> Unit) {
+    val accent = personalAccent()
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(50),
+        color = accent.copy(alpha = 0.12f)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CurioIcon(
+                CurioIcons.Download,
+                null,
+                tint = personalIconTint(accent),
+                size = 14.dp
+            )
+            Text(
+                "Download help",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = personalIconTint(accent)
+            )
+        }
+    }
+}
+
+/**
+ * DOWNLOAD HELP — the format chooser.
+ *
+ * Two formats, and that is the whole sheet: the app searches the web for the
+ * book as a PDF or as an EPUB (the file-type the member chose is added to the
+ * search for them, which is the "hidden extension" — nobody has to know the
+ * syntax), and opens the results in their browser. It deliberately does not
+ * host or download anything itself: it hands the member to the pages that do.
+ */
+@Composable
+private fun DownloadHelpSheet(
+    title: String,
+    author: String,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val accent = personalAccent()
+    val ink = MaterialTheme.colorScheme.onSurface
+    val shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                "Find a copy",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = ink,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+            // The extension is the app's own "hidden" search token — the member
+            // picks a format and the app writes the filetype syntax for them.
+            DownloadFormatRow(
+                tile = "PDF",
+                label = "Search for a PDF",
+                accent = accent
+            ) { openDownloadSearch(context, title, author, "pdf"); onDismiss() }
+            DownloadFormatRow(
+                tile = "EPUB",
+                label = "Search for an EPUB",
+                accent = accent
+            ) { openDownloadSearch(context, title, author, "epub"); onDismiss() }
+        }
+    }
+}
+
+@Composable
+private fun DownloadFormatRow(
+    tile: String,
+    label: String,
+    accent: Color,
+    onClick: () -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // The extension itself, in a coloured tile — no icon glyph risk,
+            // and it reads as a format badge the member can recognise at once.
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(accent.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    tile,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp
+                    ),
+                    color = personalIconTint(accent)
+                )
+            }
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = ink,
+                modifier = Modifier.weight(1f)
+            )
+            CurioIcon(
+                CurioIcons.OpenInNew,
+                null,
+                tint = ink.copy(alpha = 0.45f),
+                size = 16.dp
+            )
+        }
+    }
+}
+
+/**
+ * The search itself: the book's title and author in quotes, then the file
+ * type the member chose — the syntax engines answer "where is this book as a
+ * PDF/EPUB" with, and it costs them nothing to read it.
+ */
+private fun openDownloadSearch(
+    context: android.content.Context,
+    title: String,
+    author: String,
+    extension: String
+) {
+    val query = buildString {
+        append('"')
+        append(title.trim())
+        append('"')
+        if (author.isNotBlank()) {
+            append(" \"")
+            append(author.trim())
+            append('"')
+        }
+        append(" filetype:")
+        append(extension)
+    }
+    val url = "https://www.google.com/search?q=" +
+        java.net.URLEncoder.encode(query, "UTF-8")
+    openSearchUrl(context, url)
+}
+
 /** "Look it up": asks again for the book's catalog record / page count. */
 @Composable
 private fun LookUpPill(lookingUp: Boolean, onClick: () -> Unit) {
@@ -692,7 +915,7 @@ private fun LookUpPill(lookingUp: Boolean, onClick: () -> Unit) {
 
 /** The catalog's own blurb for the book, when Curio has one. */
 @Composable
-private fun SynopsisCard(synopsis: String) {
+private fun SynopsisCard(synopsis: String, source: String) {
     val ink = MaterialTheme.colorScheme.onSurface
     val accent = personalAccent()
     Surface(
@@ -718,6 +941,12 @@ private fun SynopsisCard(synopsis: String) {
                         letterSpacing = 1.2.sp
                     ),
                     color = personalIconTint(accent)
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    source,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.4f)
                 )
             }
             Spacer(Modifier.height(8.dp))

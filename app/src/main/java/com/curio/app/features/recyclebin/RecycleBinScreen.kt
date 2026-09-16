@@ -1,6 +1,7 @@
 package com.curio.app.features.recyclebin
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -250,7 +251,7 @@ fun RecycleBinScreen(navController: NavController) {
                             Text(
                                 text = "\u2726",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = settingsRoseAccent().copy(alpha = 0.75f)
+                                color = settingsAccentInk().copy(alpha = 0.75f)
                             )
                             Spacer(Modifier.width(7.dp))
                             Text(
@@ -277,7 +278,7 @@ fun RecycleBinScreen(navController: NavController) {
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.SemiBold
                                 ),
-                                color = settingsRoseAccent(),
+                                color = settingsAccentInk(),
                                 modifier = Modifier.clickable {
                                     selectedIds = if (selectedIds.size == trashed.size)
                                         emptySet()
@@ -650,7 +651,7 @@ private fun BinSummaryCard(
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = settingsRoseAccent(),
+                    color = settingsAccentInk(),
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }

@@ -1,6 +1,7 @@
 package com.curio.app.features.cabinet
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsRoseAccent
 import android.content.Context
 import androidx.activity.compose.BackHandler
@@ -1653,13 +1654,13 @@ private fun V2NewCollectionTile(onClick: () -> Unit) {
             CurioIcon(
                 name = CurioIcons.Add,
                 contentDescription = null,
-                tint = settingsRoseAccent(),
+                tint = settingsAccentInk(),
                 size = 19.dp
             )
             Text(
                 text = "New collection",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = settingsRoseAccent()
+                color = settingsAccentInk()
             )
         }
     }
@@ -2024,13 +2025,13 @@ private fun V2AddPillCompact(onClick: () -> Unit) {
             CurioIcon(
                 name = CurioIcons.Add,
                 contentDescription = null,
-                tint = settingsRoseAccent(),
+                tint = settingsAccentInk(),
                 size = 20.dp
             )
             Text(
                 text = "Add",
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = settingsRoseAccent(),
+                color = settingsAccentInk(),
                 maxLines = 1
             )
         }
@@ -2264,7 +2265,7 @@ private fun V2ReviewTileCard(
                     CurioIcon(
                         name = CurioIcons.Check,
                         contentDescription = "Selected",
-                        tint = settingsRoseAccent(),
+                        tint = settingsAccentInk(),
                         size = 18.dp
                     )
                 }
@@ -2664,13 +2665,13 @@ private fun V2DetailHeader(
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = "Add saved captures",
-                    tint = settingsRoseAccent(),
+                    tint = settingsAccentInk(),
                     size = 22.dp
                 )
                 Text(
                     text = "Add",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = settingsRoseAccent(),
+                    color = settingsAccentInk(),
                     maxLines = 1
                 )
             }
@@ -2961,7 +2962,7 @@ private fun V2CollectionNameSheet(
                                 CurioIcon(
                                     name = CurioIcons.Image,
                                     contentDescription = null,
-                                    tint = settingsRoseAccent(),
+                                    tint = settingsAccentInk(),
                                     size = 16.dp
                                 )
                             }
@@ -3213,7 +3214,7 @@ private fun V2CoverSourceSheet(
                                     else -> CurioIcons.AutoAwesome
                                 },
                                 contentDescription = null,
-                                tint = settingsRoseAccent(),
+                                tint = settingsAccentInk(),
                                 size = 16.dp
                             )
                         }
@@ -3401,7 +3402,7 @@ private fun V2AddToShelfSheet(
                             Text(
                                 text = "${picked.size} picked",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = settingsRoseAccent()
+                                color = settingsAccentInk()
                             )
                         }
                     }
@@ -3997,13 +3998,13 @@ private fun V2EmptySuggestions(
                 CurioIcon(
                     name = CurioIcons.Shuffle,
                     contentDescription = null,
-                    tint = settingsRoseAccent(),
+                    tint = settingsAccentInk(),
                     size = 17.dp
                 )
                 Text(
                     text = "Shuffle suggestions",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = settingsRoseAccent()
+                    color = settingsAccentInk()
                 )
             }
         }

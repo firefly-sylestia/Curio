@@ -511,7 +511,7 @@ private fun StatCell(value: String, label: String, modifier: Modifier = Modifier
         Text(
             value,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = settingsRoseAccent()
+            color = settingsAccentInk()
         )
         Text(
             label,

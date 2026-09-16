@@ -3,6 +3,14 @@ package com.curio.app.features.personal
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -51,8 +59,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -62,6 +75,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.curio.app.data.PAGE_KIND_JOURNAL
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMood
 import com.curio.app.data.PersonalNoteEntity
@@ -69,7 +83,6 @@ import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.newNoteId
 import com.curio.app.data.wordCount
 import com.curio.app.navigation.CurioRoutes
-import com.curio.app.navigation.LightboxTarget
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -100,15 +113,36 @@ import java.util.Locale
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JournalEditorScreen(navController: NavController, entryIdArg: String) {
+fun JournalEditorScreen(
+    navController: NavController,
+    entryIdArg: String,
+    // The page's own photo viewer. The route that hosts this screen draws it,
+    // so a tapped picture grows out of the page instead of leaving it.
+    photos: PersonalPhotoOverlayState = rememberPersonalPhotoOverlayState(),
+    // Topic-note and to-do support: when the "+" sheet creates a note on a
+    // topic or a to-do list, these arrive as route query params and ride along
+    // into the saved entity.
+    initialTopicId: String = "",
+    initialTopicName: String = "",
+    initialCategoryId: String = "",
+    initialKind: String = PAGE_KIND_JOURNAL
+) {
     val isNew = entryIdArg == CurioRoutes.PERSONAL_NEW
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
+    val topicId = remember(initialTopicId) { mutableStateOf(initialTopicId) }
+    val topicName = remember(initialTopicName) { mutableStateOf(initialTopicName) }
+    val categoryId = remember(initialCategoryId) { mutableStateOf(initialCategoryId) }
+    val pageKind = remember(initialKind) { mutableStateOf(initialKind) }
 
     var entryId by remember { mutableStateOf(if (isNew) newNoteId() else entryIdArg) }
     var doc by remember { mutableStateOf(PersonalDoc(emptyList())) }
     var title by remember { mutableStateOf("") }
     var mood by remember { mutableStateOf<PersonalMood?>(null) }
+    // READ FIRST, write on request: a saved page OPENS as the page it is (the
+    // date, the title, the writing) and the pen switches the tools on. A brand
+    // new page has nothing to read, so it opens with the pen already down.
+    var editing by remember(entryId) { mutableStateOf(isNew) }
     var dateMillis by remember { mutableLongStateOf(startOfToday()) }
     var createdAt by remember { mutableLongStateOf(0L) }
     var loaded by remember { mutableStateOf(isNew) }
@@ -170,7 +204,11 @@ fun JournalEditorScreen(navController: NavController, entryIdArg: String) {
                         dateMillis = liveDate.value,
                         mood = liveMood.value?.key.orEmpty(),
                         createdAtMillis = liveCreatedAt.value,
-                        updatedAtMillis = 0L
+                        updatedAtMillis = 0L,
+                        kind = pageKind.value,
+                        topicId = topicId.value,
+                        topicName = topicName.value,
+                        categoryId = categoryId.value
                     )
                 )
             }
@@ -232,6 +270,8 @@ fun JournalEditorScreen(navController: NavController, entryIdArg: String) {
         JournalTopBar(
             dateMillis = dateMillis,
             saving = saving,
+            editing = editing,
+            onToggleMode = { mode -> editing = mode },
             onBack = {
                 saveNow()
                 navController.popBackStack()
@@ -245,19 +285,32 @@ fun JournalEditorScreen(navController: NavController, entryIdArg: String) {
             }
         )
 
+        Crossfade(
+            targetState = editing,
+            animationSpec = tween(220),
+            label = "journal-mode",
+            modifier = Modifier.fillMaxWidth().weight(1f)
+        ) { writing ->
+            if (!writing) {
+                JournalReadView(
+                    dateMillis = dateMillis,
+                    title = title,
+                    mood = mood,
+                    doc = doc,
+                    ink = ink,
+                    accent = accent,
+                    onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
+                )
+            } else {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                // weight, not fillMaxSize: the tool dock below is the column's
-                // last child, and the writing scrolls in the space left over
-                // (so the dock always rides the keyboard).
-                .weight(1f)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .widthIn(max = 680.dp)
         ) {
             Spacer(Modifier.height(6.dp))
-            MoodRow(selected = mood, onSelect = { mood = it }, accent = accent, ink = ink)
+            MoodSelector(selected = mood, onSelect = { mood = it }, ink = ink)
             Spacer(Modifier.height(18.dp))
             BasicTextField(
                 value = title,
@@ -299,26 +352,32 @@ fun JournalEditorScreen(navController: NavController, entryIdArg: String) {
             PersonalCanvas(
                 state = editor,
                 modifier = Modifier.fillMaxWidth(),
-                onOpenPhoto = { uri ->
-                    LightboxTarget.uri = uri
-                    navController.navigate(CurioRoutes.LIGHTBOX) { launchSingleTop = true }
-                }
+                onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
             )
-            Spacer(Modifier.height(120.dp))
+            Spacer(Modifier.height(140.dp))
+        }
+            }
         }
 
-        // The dock sits directly above the keyboard (the column's imePadding
-        // lifts it), so a tool is always one tap away while writing.
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp)
+        // The dock rides the keyboard while the page is being WRITTEN and
+        // steps out of the way while it is being read.
+        AnimatedVisibility(
+            visible = editing,
+            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
+            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            PersonalToolDock(
-                state = editor,
-                onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                PersonalToolDock(
+                    state = editor,
+                    onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
     }
 
@@ -345,6 +404,8 @@ fun JournalEditorScreen(navController: NavController, entryIdArg: String) {
 private fun JournalTopBar(
     dateMillis: Long,
     saving: Boolean,
+    editing: Boolean,
+    onToggleMode: (Boolean) -> Unit,
     onBack: () -> Unit,
     onShiftDate: (Long) -> Unit,
     onPickDate: () -> Unit
@@ -357,7 +418,7 @@ private fun JournalTopBar(
             .fillMaxWidth()
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(9.dp)
     ) {
         Surface(
             onClick = onBack,
@@ -370,6 +431,8 @@ private fun JournalTopBar(
             }
         }
 
+        // The day sits just after the back button (not floating in the middle
+        // of the bar) — it is the page's title, so it belongs to its head.
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -390,11 +453,11 @@ private fun JournalTopBar(
                 color = MaterialTheme.colorScheme.surfaceContainer
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                    modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
-                    CurioIcon(CurioIcons.CalendarToday, null, tint = accent, size = 15.dp)
+                    CurioIcon(CurioIcons.CalendarToday, null, tint = personalAccentInk(), size = 15.dp)
                     Text(
                         if (today) "Today" else dateMillis.prettyDate(),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
@@ -410,6 +473,32 @@ private fun JournalTopBar(
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CurioIcon(CurioIcons.ChevronRight, "Next day", tint = ink.copy(alpha = 0.7f), size = 18.dp)
+                }
+            }
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        // EYE or PEN: the eye hides the tools and stops the page being typed
+        // into, the pen hands the writing back. Whichever is lit is the mode
+        // the page is IN.
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.surfaceContainer
+        ) {
+            Row(
+                modifier = Modifier.padding(3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                ModeButton(label = "Reading", active = !editing) { EyeGlyph(active = !editing) }
+                ModeButton(label = "Writing", active = editing) {
+                    CurioIcon(
+                        CurioIcons.Edit,
+                        null,
+                        tint = if (editing) personalAccentInk() else ink.copy(alpha = 0.55f),
+                        size = 17.dp
+                    )
                 }
             }
         }
@@ -442,38 +531,205 @@ private fun JournalTopBar(
     }
 }
 
+/**
+ * HOW THE DAY FELT, as ONE button.
+ *
+ * Six glyphs standing on the page was a wall of icons over the writing the
+ * member came here to do (user request: "make the mood just one button and it
+ * expands on tap"). The pill names the mood — or offers one — and the six
+ * chips unfold UNDER it when it is tapped, then fold away again once a mood
+ * is picked.
+ */
 @Composable
-private fun MoodRow(
+private fun MoodSelector(
     selected: PersonalMood?,
     onSelect: (PersonalMood?) -> Unit,
-    accent: Color,
     ink: Color
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        PersonalMood.entries.forEach { mood ->
-            val on = mood == selected
-            Surface(
-                onClick = { onSelect(if (on) null else mood) },
-                shape = RoundedCornerShape(50),
-                color = if (on) accent else MaterialTheme.colorScheme.surfaceContainer,
-                modifier = Modifier.width(42.dp)
+    var open by remember { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth()) {
+        Surface(
+            onClick = { open = !open },
+            shape = RoundedCornerShape(50),
+            color = if (selected != null) personalAccent().copy(alpha = 0.16f)
+            else MaterialTheme.colorScheme.surfaceContainer
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
-                Box(
-                    modifier = Modifier.height(38.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                if (selected != null) {
                     CurioIcon(
-                        personalMoodGlyph(mood),
-                        mood.label,
-                        tint = if (on) personalOnAccent() else ink.copy(alpha = 0.62f),
-                        size = 18.dp
+                        personalMoodGlyph(selected),
+                        null,
+                        tint = personalAccentInk(),
+                        size = 17.dp
                     )
+                }
+                Text(
+                    selected?.label ?: "How did the day feel?",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = if (selected != null) personalAccentInk() else ink.copy(alpha = 0.6f)
+                )
+                CurioIcon(
+                    if (open) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                    null,
+                    tint = if (selected != null) personalAccentInk() else ink.copy(alpha = 0.5f),
+                    size = 18.dp
+                )
+            }
+        }
+        AnimatedVisibility(
+            visible = open,
+            enter = expandVertically(tween(180)) + fadeIn(tween(140)),
+            exit = shrinkVertically(tween(140)) + fadeOut(tween(110))
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PersonalMood.entries.forEach { mood ->
+                    val on = mood == selected
+                    Surface(
+                        onClick = {
+                            onSelect(if (on) null else mood)
+                            open = false
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = if (on) personalAccent() else MaterialTheme.colorScheme.surfaceContainer,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier.height(38.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                personalMoodGlyph(mood),
+                                mood.label,
+                                tint = if (on) personalOnAccent() else personalAccentInk(),
+                                size = 18.dp
+                            )
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+/** One half of the eye/pen switch. */
+@Composable
+private fun ModeButton(label: String, active: Boolean, content: @Composable () -> Unit) {
+    val accent = personalAccent()
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (active) accent.copy(alpha = 0.18f) else Color.Transparent,
+        modifier = Modifier.size(34.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize().semantics { contentDescription = label },
+            contentAlignment = Alignment.Center
+        ) {
+            content()
+        }
+    }
+}
+
+/** The eye itself — drawn here, because the icon set only bundles the struck
+ *  version and the reading mode is not a "hidden" state. */
+@Composable
+private fun EyeGlyph(active: Boolean) {
+    val ink = if (active) personalAccentInk()
+    else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(19.dp)) {
+        val stroke = 1.6f.dp.toPx()
+        val w = size.width
+        val h = size.height
+        val path = androidx.compose.ui.graphics.Path().apply {
+            moveTo(w * 0.06f, h * 0.5f)
+            cubicTo(w * 0.3f, h * 0.16f, w * 0.7f, h * 0.16f, w * 0.94f, h * 0.5f)
+            cubicTo(w * 0.7f, h * 0.84f, w * 0.3f, h * 0.84f, w * 0.06f, h * 0.5f)
+            close()
+        }
+        drawPath(path, color = ink, style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke))
+        drawCircle(color = ink, radius = h * 0.13f, center = Offset(w * 0.5f, h * 0.5f))
+    }
+}
+
+/**
+ * THE PAGE AS IT READS: the day, how it felt, the title and the writing — and
+ * nothing that can be typed into. Opening a saved journal used to drop the
+ * member straight into the editor (tools up, caret waiting) when what they
+ * tapped was a page to READ.
+ */
+@Composable
+private fun JournalReadView(
+    dateMillis: Long,
+    title: String,
+    mood: PersonalMood?,
+    doc: PersonalDoc,
+    ink: Color,
+    accent: Color,
+    onOpenPhoto: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 22.dp)
+            .widthIn(max = 680.dp)
+    ) {
+        Spacer(Modifier.height(8.dp))
+        Text(
+            dateMillis.prettyDate(),
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.6.sp
+            ),
+            color = personalAccentInk()
+        )
+        if (mood != null) {
+            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CurioIcon(personalMoodGlyph(mood), null, tint = ink.copy(alpha = 0.55f), size = 15.dp)
+                Text(
+                    mood.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.55f)
+                )
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Text(
+            title.ifBlank { "Untitled day" },
+            style = TextStyle(
+                fontFamily = FrauncesFontFamily,
+                fontSize = 27.sp,
+                lineHeight = 34.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = if (title.isBlank()) ink.copy(alpha = 0.42f) else ink
+            )
+        )
+        Spacer(Modifier.height(18.dp))
+        if (doc.isEmpty) {
+            Text(
+                "Nothing written for this day yet — tap the pen to start.",
+                style = TextStyle(
+                    fontFamily = FrauncesFontFamily,
+                    fontSize = 15.sp,
+                    color = ink.copy(alpha = 0.5f)
+                )
+            )
+        } else {
+            PersonalDocView(doc = doc, accent = accent, onOpenPhoto = onOpenPhoto)
+        }
+        Spacer(Modifier.height(120.dp))
     }
 }
 

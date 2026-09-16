@@ -1,6 +1,7 @@
 package com.curio.app.features.fieldmind
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -154,7 +155,7 @@ fun FieldMindObservationScreen(navController: NavController) {
                 Text("FieldMind observation", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold))
                 Text("A focused field session, in Curio", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            CurioIcon(CurioIcons.ScienceGlyph, null, tint = settingsRoseAccent(), size = 28.dp)
+            CurioIcon(CurioIcons.ScienceGlyph, null, tint = settingsAccentInk(), size = 28.dp)
         }
 
         Surface(

@@ -42,8 +42,15 @@ data class PersonalRun(
     val italic: Boolean = false,
     val underline: Boolean = false,
     val strike: Boolean = false,
-    /** The paragraph is a pulled quote: a tinted, indented aside. */
-    val quote: Boolean = false
+    /** A pulled quote: a smaller aside with the coffee rule down its side. */
+    val quote: Boolean = false,
+    /** A TITLE: the line is set bigger (and in the display serif), so a page
+     *  of writing can carry its own headings. */
+    val title: Boolean = false,
+    /** A footnote-sized line. */
+    val small: Boolean = false,
+    /** A bulleted line (the dot is drawn, never typed). */
+    val bullet: Boolean = false
 )
 
 /** Alignment of one block's paragraph. */
@@ -136,6 +143,9 @@ object PersonalDocCodec {
                 if (run.underline) r.addProperty("u", true)
                 if (run.strike) r.addProperty("k", true)
                 if (run.quote) r.addProperty("q", true)
+                if (run.title) r.addProperty("h", true)
+                if (run.small) r.addProperty("m", true)
+                if (run.bullet) r.addProperty("l", true)
                 runs.add(r)
             }
             b.add("runs", runs)
@@ -164,7 +174,10 @@ object PersonalDocCodec {
                     italic = r.flag("i"),
                     underline = r.flag("u"),
                     strike = r.flag("k"),
-                    quote = r.flag("q")
+                    quote = r.flag("q"),
+                    title = r.flag("h"),
+                    small = r.flag("m"),
+                    bullet = r.flag("l")
                 ).takeIf { it.end > it.start }
             }.orEmpty()
             PersonalBlock(

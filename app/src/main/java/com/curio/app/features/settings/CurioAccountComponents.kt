@@ -587,7 +587,7 @@ private fun TermsAcceptanceRow(
         Text(
             text = if (accepted) "Terms and data disclosures accepted · View" else "Review Curio's Terms and data disclosures",
             style = MaterialTheme.typography.labelMedium,
-            color = settingsRoseAccent()
+            color = settingsAccentInk()
         )
     }
 }
