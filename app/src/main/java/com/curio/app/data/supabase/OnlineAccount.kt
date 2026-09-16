@@ -32,6 +32,23 @@ object OnlineAccount {
     /** The running token-refresh loop; replaced whenever a session starts. */
     private var refreshJob: Job? = null
 
+    /**
+     * The application context, captured on the first session-aware entry.
+     *
+     * [refreshForRetry] runs INSIDE the REST layer's own call, so it cannot be
+     * handed a context by a screen: the vault read and the refreshed session's
+     * save both happen here. Only the application context is kept, so no
+     * activity is ever held.
+     */
+    private var appContext: Context? = null
+
+    init {
+        // The REST layer asks THIS for a fresh token whenever the server
+        // refuses one (a 401 mid-request). Registering the hook here means
+        // every social surface gets the retry without a line of its own.
+        SupabaseClient.sessionRefresher = ::refreshForRetry
+    }
+
     /** What the account UI renders. */
     data class State(
         val session: SupabaseClient.Session? = null,
@@ -66,6 +83,7 @@ object OnlineAccount {
      * is never overwritten, so a screen entering twice costs nothing.
      */
     fun restore(context: Context) {
+        appContext = context.applicationContext
         if (state.session != null) return
         val stored = SupabaseSessionStore.get(context) ?: return
         state = state.copy(session = stored, error = null)
@@ -90,6 +108,7 @@ object OnlineAccount {
 
     /** Signs in and, on success, turns Online Mode on (the user asked for it). */
     suspend fun signIn(context: Context, email: String, password: String): Boolean {
+        appContext = context.applicationContext
         val address = email.trim()
         if (address.isEmpty() || password.isEmpty()) {
             state = state.copy(error = "Enter your email and password.")
@@ -120,6 +139,7 @@ object OnlineAccount {
      * confirm first, so that case reports a notice instead of signing in.
      */
     suspend fun signUp(context: Context, email: String, password: String): Boolean {
+        appContext = context.applicationContext
         val address = email.trim()
         if (address.isEmpty() || password.isEmpty()) {
             state = state.copy(error = "Enter your email and password.")
@@ -272,6 +292,45 @@ object OnlineAccount {
                     onFailure = { delay(REFRESH_RETRY_MS) }
                 )
             }
+        }
+    }
+
+    /**
+     * The retry behind [SupabaseClient.sessionRefresher]: a request came back
+     * 401, so refresh the session and hand back a usable token.
+     *
+     * Blocking by contract (the REST layer is mid-request on its own IO
+     * thread). Three things can be true, and each one gets its own answer
+     * rather than the server's "JWT expired":
+     *
+     *  - another call already refreshed while this request was in flight, so
+     *    the newer token is reused and no second session is minted;
+     *  - the refresh cannot reach the server (no signal, slow network), which
+     *    is a CONNECTION problem, not a session problem;
+     *  - the refresh token was refused, which really does end the session.
+     *
+     * A successful refresh also seals the session into the vault, publishes it
+     * to [state] (screens holding the old token recompose with the new one and
+     * the realtime channel re-joins as the new RLS context) and restarts the
+     * freshness loop.
+     */
+    private fun refreshForRetry(refused: String): TokenRefresh {
+        state.session?.let { live ->
+            if (live.accessToken != refused) return TokenRefresh.Fresh(live.accessToken)
+        }
+        val context = appContext ?: return TokenRefresh.Refused
+        val refresh = state.session?.refreshToken
+            ?: SupabaseSessionStore.get(context)?.refreshToken
+            ?: return TokenRefresh.Refused
+        return when (val attempt = SupabaseClient.refreshSessionBlocking(refresh)) {
+            is RefreshAttempt.Ok -> {
+                SupabaseSessionStore.save(context, attempt.session)
+                state = state.copy(session = attempt.session, busy = false, error = null)
+                keepSessionFresh(context, attempt.session)
+                TokenRefresh.Fresh(attempt.session.accessToken)
+            }
+            RefreshAttempt.Unreachable -> TokenRefresh.Unreachable
+            RefreshAttempt.Refused -> TokenRefresh.Refused
         }
     }
 

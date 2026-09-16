@@ -978,6 +978,13 @@ internal object SocialMessageCache {
                 body = body,
                 createdAtMillis = row.optLong("t"),
                 readAtMillis = row.optLong("r").takeIf { it > 0L },
+                // The edit stamp and the quote parent are part of the row, so
+                // they are part of the copy: a cached row that dropped them
+                // used to shadow the server's own row on the next open, which
+                // lost the "edited" marker (and every reply quote) while the
+                // words stayed edited.
+                editedAtMillis = row.optLong("e").takeIf { it > 0L },
+                replyTo = row.optString("p").takeIf { it.isNotBlank() && it != "null" },
                 mine = senderId == myUserId
             )
         }
@@ -1020,6 +1027,8 @@ internal object SocialMessageCache {
                     .put("b", message.body)
                     .put("t", message.createdAtMillis)
                     .put("r", message.readAtMillis ?: 0L)
+                    .put("e", message.editedAtMillis ?: 0L)
+                    .put("p", message.replyTo ?: JSONObject.NULL)
             )
         }
         SocialCache.write(context, KIND, otherUserId, array, SocialCache.TTL_THREAD_MS)

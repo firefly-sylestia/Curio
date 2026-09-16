@@ -9,6 +9,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 
 /** Who may see a profile. Mirrors the schema's own check constraint (§5f). */
 const val PROFILE_VISIBILITY_PUBLIC = "public"
@@ -286,11 +287,8 @@ object SocialApi {
 private const val PERSON_COLUMNS_PRIVACY =
     "$PERSON_COLUMNS,profile_visibility,hide_activity,presence_mode,last_active_at,bio"
 
-    /** How many NEW messages one live tick asks for. */
+    /** How many rows one live tick can bring back (new, edited and read alike). */
     private const val LIVE_TICK_LIMIT = 100
-
-    /** How many of my own messages a receipt refresh looks back over. */
-    private const val RECEIPT_LIMIT = 12
 
     /** How many recent messages the inbox groups into conversations. */
     private const val INBOX_SCAN = 200
@@ -956,14 +954,30 @@ private const val PERSON_COLUMNS_PRIVACY =
     }
 
     /**
-     * ONLY what arrived after [sinceMillis] — what an open conversation polls.
+     * Everything that MOVED after [sinceMillis] — what an open conversation
+     * polls, and what makes it live.
      *
-     * A live thread must not re-read its whole page every few seconds: this
-     * asks the server for the rows newer than the newest one on screen, so a
-     * tick costs a few hundred bytes and can run several times a minute. The
-     * requested window backs off by a second to absorb clock skew between the
-     * phone and the server, and the caller de-dupes by id (re-reading one
-     * message is free; missing one is not).
+     * A live thread must not re-read its whole page every few seconds, so this
+     * asks only for rows whose stamps are newer than the newest row already on
+     * screen: a tick costs a few hundred bytes and can run several times a
+     * minute. The requested window backs off by a second to absorb clock skew
+     * between the phone and the server, and the caller de-dupes by id
+     * (re-reading one message is free; missing one is not).
+     *
+     * THREE stamps are asked about, not one, because a conversation changes in
+     * three ways and only the first one moves `created_at`:
+     *
+     *  - `created_at` — a new message;
+     *  - `edited_at` — an edit by EITHER side (a created_at-only window never
+     *    saw one, so the other device kept the old words until the thread was
+     *    reopened);
+     *  - `read_at` — a read receipt, which is what turns the sender's single
+     *    tick into a double one. Piggybacking them here also retires a second
+     *    request per tick.
+     *
+     * Each stamp is asked about per DIRECTION, because PostgREST takes one
+     * top-level `or=` and the pair scope has to be repeated inside every
+     * branch.
      */
     suspend fun messagesSince(
         accessToken: String,
@@ -972,13 +986,26 @@ private const val PERSON_COLUMNS_PRIVACY =
         sinceMillis: Long
     ): Result<List<CurioDirectMessage>> = withContext(Dispatchers.IO) {
         mapped {
+            // One second of back-off absorbs clock skew between the phone and
+            // the server; the fractional part is dropped because this value sits
+            // INSIDE the logic tree below, where a dot would read as another
+            // separator instead of as part of the timestamp.
             val stamp = Instant
                 .ofEpochMilli((sinceMillis - 1_000L).coerceAtLeast(0L))
+                .truncatedTo(ChronoUnit.SECONDS)
                 .toString()
+            val mine = id(myUserId)
+            val theirs = id(otherUserId)
+            val directions = listOf(
+                "and(sender.eq.$mine,recipient.eq.$theirs)",
+                "and(sender.eq.$theirs,recipient.eq.$mine)"
+            )
+            val branches = directions.flatMap { direction ->
+                listOf("created_at", "edited_at", "read_at").map { "$direction,$it.gt.$stamp" }
+            }
             val path = "$MESSAGES?select=$MESSAGE_COLUMNS" +
-                "&or=(and(sender.eq.${id(myUserId)},recipient.eq.${id(otherUserId)})," +
-                "and(sender.eq.${id(otherUserId)},recipient.eq.${id(myUserId)}))" +
-                "&created_at=gt.$stamp&order=created_at.asc&limit=$LIVE_TICK_LIMIT"
+                "&or=(${branches.joinToString(",")})" +
+                "&order=created_at.asc&limit=$LIVE_TICK_LIMIT"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             parseMessages(SupabaseClient.executeBody(request), myUserId)
         }
@@ -998,9 +1025,15 @@ private const val PERSON_COLUMNS_PRIVACY =
                         senderId = row.optString("sender"),
                         body = row.stringOrNull("body").orEmpty(),
                         createdAtMillis = epochMillis(row.optString("created_at")),
-                        readAtMillis = row.optString("read_at")
-                            .takeIf { it.isNotBlank() }
-                            ?.let(::epochMillis),
+                        // `optString` answers the STRING "null" for a JSON
+                        // null, which is exactly why every other column here
+                        // goes through blankOrNull/stringOrNull. Read as a
+                        // timestamp, an UNREAD row became 0L instead of null,
+                        // and the bubble draws its double tick whenever the
+                        // receipt is not null: every sent message claimed to
+                        // have been read the moment it was sent.
+                        readAtMillis = if (row.blankOrNull("read_at")) null
+                        else epochMillis(row.optString("read_at")),
                         editedAtMillis = row.optString("edited_at")
                             .takeIf { it.isNotBlank() && it != "null" }
                             ?.let(::epochMillis),
@@ -1028,9 +1061,29 @@ private const val PERSON_COLUMNS_PRIVACY =
     }
   }
 
-  /** Sends a new plaintext row only after the server accepted plaintext mode for this chat. */
-  suspend fun sendPlaintext(accessToken: String, toUserId: String, body: String, myUserId: String, replyTo: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
-    mappedUnit {
+  /**
+   * Sends one message and answers THE ROW THE SERVER CREATED.
+   *
+   * `return=representation` is the difference between a chat that shows your
+   * message and one that only thinks it does: the inserted row comes back with
+   * its real id, its server `created_at` and its receipt column, so the thread
+   * can put the real message in place of the optimistic bubble without
+   * re-reading the whole page. That page re-read (200 rows plus a reaction
+   * read) used to be what a send cost on every tap, which on a slow connection
+   * is exactly "sending feels slow".
+   *
+   * The row is null only on a project whose INSERT is not allowed to return a
+   * representation; the caller then keeps its optimistic bubble until a pull
+   * finds the row.
+   */
+  suspend fun sendPlaintext(
+    accessToken: String,
+    toUserId: String,
+    body: String,
+    myUserId: String,
+    replyTo: String? = null
+  ): Result<CurioDirectMessage?> = withContext(Dispatchers.IO) {
+    mapped {
       require(body.isNotBlank()) { "Message is empty." }
       require(toUserId != myUserId) { "You can't message yourself." }
       lastMessageAt = throttle(lastMessageAt, WRITE_GAP_MS, "Slow down a moment.")
@@ -1039,9 +1092,9 @@ private const val PERSON_COLUMNS_PRIVACY =
         .put("body", body)
       if (replyTo != null) payload.put("reply_to", replyTo)
       val request = SupabaseClient.requestBuilder(MESSAGES, accessToken)
-        .header("Prefer", "return=minimal")
+        .header("Prefer", "return=representation")
         .post(payload.toString().toRequestBody(jsonMediaType)).build()
-      SupabaseClient.executeBody(request)
+      parseMessages(SupabaseClient.executeBody(request), myUserId).firstOrNull()
     }
   }
 
@@ -1067,38 +1120,12 @@ private const val PERSON_COLUMNS_PRIVACY =
         }
     }
 
-    /**
-     * The read stamps on MY last messages to [otherUserId] — what a "Seen"
-     * line is actually made of.
-     *
-     * A receipt lives on the RECIPIENT's copy of a row (`read_at`), so a
-     * thread that only refreshed when it was entered showed a receipt that was
-     * stale or missing entirely: the other person read the message, and the
-     * sender's screen never learned. This asks for a handful of ids and stamps
-     * on the same live tick as the messages themselves, so "Seen" is true when
-     * it is shown and absent when it is not.
-     */
-    suspend fun readStamps(
-        accessToken: String,
-        otherUserId: String,
-        myUserId: String
-    ): Result<Map<String, Long>> = withContext(Dispatchers.IO) {
-        mapped {
-            val path = "$MESSAGES?select=id,read_at" +
-                "&sender=eq.${id(myUserId)}&recipient=eq.${id(otherUserId)}" +
-                "&read_at=not.is.null&order=created_at.desc&limit=$RECEIPT_LIMIT"
-            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
-            val rows = JSONArray(SupabaseClient.executeBody(request))
-            buildMap {
-                for (index in 0 until rows.length()) {
-                    val row = rows.optJSONObject(index) ?: continue
-                    val messageId = row.optString("id").takeIf { it.isNotBlank() } ?: continue
-                    val at = epochMillis(row.optString("read_at"))
-                    if (at > 0L) put(messageId, at)
-                }
-            }
-        }
-    }
+    // The read receipts used to need a SECOND read of their own here
+    // (`readStamps`, a page of my last messages and their `read_at`). They now
+    // ride the conversation's delta ([messagesSince] asks about `read_at`
+    // alongside `created_at` and `edited_at`), so a tick is one small request
+    // that answers every way a thread can move, and a receipt can never be
+    // fresher in one read than in the other.
 
     /** Recalls one message for both participants. Server RLS verifies membership. */
     suspend fun deleteMessage(accessToken: String, messageId: String): Result<Unit> =
@@ -1298,7 +1325,12 @@ private const val PERSON_COLUMNS_PRIVACY =
     private fun <T> mapped(block: () -> T): Result<T> = try {
         Result.success(block())
     } catch (failure: Throwable) {
-        Result.failure(CommunityError(communityMessage(failure)))
+        // [CommunityError.transport] is carried through so a WRITE can tell
+        // "the server refused it" from "the answer never came back" - the
+        // second one may still have been delivered.
+        Result.failure(
+            CommunityError(communityMessage(failure), transport = failure.isTransportFailure())
+        )
     }
 
     /** See [CommunityApi]: writes discard the response body and answer Unit. */

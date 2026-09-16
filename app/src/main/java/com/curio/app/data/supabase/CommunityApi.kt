@@ -280,7 +280,18 @@ data class CommunityComment(
 }
 
 /** A community failure whose [message] is already safe to show the user. */
-class CommunityError(message: String) : Exception(message)
+/**
+ * A social failure, already worded for the member.
+ *
+ * [transport] is the important flag for a WRITE: an IOException family failure
+ * (a read timeout, a dropped socket) means the outcome is UNKNOWN, not refused
+ * - the request may have been delivered and only the answer lost. Callers use
+ * it to reconcile instead of telling the member their message never sent.
+ */
+class CommunityError(message: String, val transport: Boolean = false) : Exception(message)
+
+/** True when the failure says nothing about the OUTCOME, only the wire. */
+internal fun Throwable.isTransportFailure(): Boolean = this is java.io.IOException
 
 /**
  * The community feed's REST layer — the only place the app talks to the
@@ -925,7 +936,9 @@ object CommunityApi {
     private fun <T> mapped(block: () -> T): Result<T> = try {
         Result.success(block())
     } catch (failure: Throwable) {
-        Result.failure(CommunityError(communityMessage(failure)))
+        Result.failure(
+            CommunityError(communityMessage(failure), transport = failure.isTransportFailure())
+        )
     }
 
     /**
@@ -1063,6 +1076,19 @@ object CommunityApi {
 internal fun communityMessage(failure: Throwable): String {
     val raw = failure.message.orEmpty()
     return when {
+        // CONDITIONS first, then the pass-through of text that is already
+        // written for the member. A stale session and a missing server
+        // function arrive as plain IllegalStateExceptions, so before this
+        // order was fixed the screen rendered the server's own words for both:
+        // "JWT expired" naming a mechanism, and "Could not find the function
+        // public.curio_edit_dm_message(...)" naming an internal it was told to
+        // paste. Each one has an action attached now.
+        raw.contains("jwt", true) || raw.contains("token is expired", true) ||
+            raw.contains("invalid claim", true) ->
+            "That session has expired. Reopen Curio, or sign in again in Settings → Online mode."
+        raw.contains("could not find the function", true) ||
+            raw.contains("permission denied for function", true) ->
+            "Curio needs its server update. Paste supabase/schema.sql, then try again."
         failure is IllegalArgumentException && raw.isNotBlank() -> raw
         failure is IllegalStateException && raw.isNotBlank() -> raw
         raw.contains("rate limit", true) || raw.contains("too many", true) ->

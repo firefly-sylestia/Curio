@@ -1,5 +1,80 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — DM delivery, receipts, edits, session)
+
+Verbatim: offline/slow network reports "jwt expired something"; an edit shows
+as edited but the marker is gone when the chat is reopened and the edit never
+reaches the other device; sending is slow and the new message only appears
+after leaving and reopening the DM; the inbox sometimes shows a message as new
+after it has been read; the double tick is faulty (it shows before the
+receiver has read). Fix it all.
+
+### Root causes found (in the code, not guessed)
+
+1. **"JWT expired" was the SERVER's own text, rendered verbatim.**
+   `SupabaseClient.executeBody` threw the raw `msg`, and `communityMessage`'s
+   `failure is IllegalStateException -> raw` branch passed it straight to the
+   UI. Nothing ever refreshed a 401: a token that expired while offline (or
+   simply aged out before the refresh loop ran) failed EVERY action until
+   something else happened to refresh the session.
+2. **The double tick was a parsing bug, not a clock.** `optString` answers the
+   STRING `"null"` for a JSON null, so an unread row's `read_at` parsed as
+   `epochMillis("null")` = `0L` — not null — and the bubble draws `✓✓`
+   whenever the receipt is not null. Every sent message claimed to be read.
+3. **Reading a thread never stamped it.** `markRead` was only called when a NEW
+   row arrived, so a conversation you opened and read stayed unread on the
+   server: the inbox badge stayed up and the sender stayed on a single tick.
+4. **An edit was invisible to every live path.** `messagesSince` filtered
+   `created_at > anchor` only, and an edit does not move `created_at`; the
+   realtime UPDATE hint existed but the revision sweep was the only thing that
+   could apply it. The editor's own copy also looked right for one beat and
+   then lost its marker: `load()` merged `(known + fresh)` with the CACHED row
+   winning, and the cache's serialized shape never carried `edited_at` or
+   `reply_to` at all.
+5. **A session's bindings were never joined once the socket was open.**
+   `SupabaseRealtime.watch` treated a brand-new owner as "nothing changed" and
+   fell through to `connect()`, which returns early on an open socket — so the
+   DM screen (entered after the inbox had already linked) heard NO pushes and
+   fell back to a 20s safety tick. That is the "I have to reopen the chat"
+   report, and it also meant every keystroke from the peer bought a 200-row
+   page read (typing and reaction pushes raised the revision flag).
+6. **A send cost a whole page re-read** (200 rows + reactions) and its
+   optimistic bubble was dropped on any failure — including a read timeout,
+   which is OUR deadline and not the server's refusal, so a delivered message
+   could look lost until the chat was reopened.
+
+### Shipped
+
+- **Session:** `SupabaseClient` now refreshes and RE-SENDS once on a 401
+  (`sessionRefresher` → `OnlineAccount.refreshForRetry`, blocking and on the
+  REST layer's own IO thread, distincting offline (`Unreachable`) from a
+  refused refresh), maps every refusal to honest copy, and uses generous
+  timeouts (connect 15s, read/write 30s). `communityMessage` maps stale-session
+  and missing-server-function text BEFORE its pass-through of written copy.
+- **Receipts:** the `read_at` parse is fixed (`blankOrNull`), reading a thread
+  stamps it on the server (paced retry), and the receipts ride the delta.
+- **Edits/live thread:** `messagesSince` asks about `created_at` OR `edited_at`
+  OR `read_at` per direction (one small request replaces the old delta + a
+  separate receipt read), `pullDelta` merges in place (`applyMoved`), and a new
+  page read happens only on a realtime revision hint (a DELETE has no stamp).
+  Two realtime owners (`dm:<id>` messages, `dm:<id>:live` typing/reactions) and
+  a union-signature re-join in `SupabaseRealtime`.
+- **Cache/merge:** the cached row keeps `edited_at`/`reply_to`, and the
+  SERVER's copy wins the merge (`fresh + known`).
+- **Sends:** `sendPlaintext` returns the created row
+  (`Prefer: return=representation`), so the real message replaces the stand-in
+  with no page re-read; a transport failure runs `confirmDelivered` once before
+  the draft is handed back.
+- Safety tick 20s → 4s; docs (app/AGENTS.md, data/supabase/AGENTS.md),
+  changelog and this log updated.
+
+### Verified
+
+- Brace/paren balance on all seven edited files (python), no leftover
+  references to the removed `readStamps`/`RECEIPT_LIMIT`.
+- No Gradle in this environment (root AGENTS rule); CI on this push is
+  authoritative.
+
 ## Request (2026-09-16, COMPLETE — tag release fix: jpackage MSI version)
 
 Verbatim: releasing the `v2` tag failed with `A problem occurred configuring

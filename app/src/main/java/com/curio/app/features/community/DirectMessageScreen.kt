@@ -77,6 +77,7 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.supabase.CommunityError
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.CurioDmReaction
 import com.curio.app.data.supabase.CurioPerson
@@ -245,11 +246,19 @@ fun DirectMessageScreen(
                 // received. Merging (rather than replacing) is what makes "gone
                 // from the server" and "gone from Curio" two different things:
                 // opening a conversation can never lose a message this phone
-                // already had. Newest wins per id, so a cached row still gets
-                // its fresh read receipt.
+                // already had.
+                //
+                // The SERVER's copy wins wherever both hold the same id: it is
+                // the only one that knows about an edit made on another device,
+                // and the only one that carries `edited_at` and `reply_to` at
+                // all. The device's copy is therefore merged in SECOND, and it
+                // is what keeps a message the server has already forgotten on
+                // screen. (The old order let a cached row shadow every fresh
+                // row, which is why an edit showed as "edited" here and then
+                // quietly lost its marker the next time the thread opened.)
                 val hidden = SocialMessageCache.hiddenIds(context, otherUserId)
                 val known = SocialMessageCache.read(context, otherUserId, me).filterNot { it.id in hidden }
-                val merged = (known + fresh.filterNot { it.id in hidden })
+                val merged = (fresh.filterNot { it.id in hidden } + known)
                     .distinctBy { it.id }
                     .sortedBy { it.createdAtMillis }
                 messages = merged
@@ -334,6 +343,100 @@ onSuccess = {
     // scroll to bottom after every send (even when the user has scrolled
     // up to read history).
     var pendingSends by remember(otherUserId) { mutableStateOf(0) }
+    // When the read stamp was last attempted, so an offline device retries it
+    // on a slow cadence instead of on every tick.
+    var readStampAt by remember(otherUserId) { mutableStateOf(0L) }
+
+    /**
+     * Stamps this conversation read, on the server and on screen.
+     *
+     * Entering a thread IS reading it: the inbox badge and the double tick the
+     * sender sees are both built from this one stamp. The old rule (stamp only
+     * when a NEW message arrived) left a thread the member had just read
+     * flagged as unread in Chats, with the other side still on a single tick,
+     * until somebody happened to send something else.
+     */
+    suspend fun markThreadRead(active: String, me: String) {
+        if (messages.none { !it.mine && it.readAtMillis == null }) return
+        // A failed stamp has to be retried (see below), but not once per tick
+        // against a network that is simply down: the retry is paced.
+        val now = System.currentTimeMillis()
+        if (now - readStampAt < READ_STAMP_RETRY_MS) return
+        readStampAt = now
+        // The SERVER is what matters: the inbox badge and the other side's
+        // second tick are both read from `read_at`. The device's copy is
+        // therefore stamped only once the server agreed, so a stamp that failed
+        // is not remembered as done while the other side still shows a single
+        // tick - a later tick (or the next entry) simply tries again.
+        SocialApi.markRead(active, otherUserId, me).onSuccess {
+            val now = System.currentTimeMillis()
+            messages = messages.map { message ->
+                if (!message.mine && message.readAtMillis == null) message.copy(readAtMillis = now)
+                else message
+            }
+            SocialMessageCache.write(context, otherUserId, messages)
+        }
+    }
+
+    /**
+     * Folds a delta into the thread IN PLACE: rows that are new are appended,
+     * rows already on screen are replaced by the server's copy when they differ
+     * (an edit, a read receipt). Answers true when something genuinely new
+     * arrived, which is the caller's cue to stamp the conversation read.
+     *
+     * No page re-read is involved, which is the point: an edit or a receipt on
+     * a row from an hour ago costs one small delta, not 200 rows.
+     */
+    fun applyMoved(moved: List<CurioDirectMessage>): Boolean {
+        val byId = moved.associateBy { it.id }
+        val known = messages.map { it.id }.toSet()
+        val arrived = moved.any { it.id !in known }
+        val changed = messages.any { held -> byId[held.id]?.let { it != held } == true }
+        if (!arrived && !changed) return false
+        messages = (messages.map { held -> byId[held.id] ?: held } + moved.filterNot { it.id in known })
+            .sortedBy { it.createdAtMillis }
+        SocialMessageCache.write(context, otherUserId, messages)
+        // A stand-in whose words are now a real server row retires here too, so
+        // the same reconciliation the initial load does also happens live.
+        sentShadow = sentShadow.filterNot { shadow ->
+            messages.any { real ->
+                real.mine && real.body == shadow.body &&
+                    kotlin.math.abs(real.createdAtMillis - shadow.createdAtMillis) < 10_000L
+            }
+        }
+        return arrived
+    }
+
+    /**
+     * Did a send that failed on the wire actually arrive?
+     *
+     * A read timeout is the CLIENT giving up, not the server refusing: the row
+     * may be sitting in the conversation already. One small delta read answers
+     * it, and a match is treated as the success it was, which is what stops a
+     * slow connection from making the member leave the chat and reopen it to
+     * find the message they were told had failed.
+     */
+    suspend fun confirmDelivered(
+        active: String,
+        me: String,
+        optimisticText: String,
+        sentAtMillis: Long
+    ): Boolean {
+        val newest = messages
+            .filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
+            .maxOfOrNull { it.createdAtMillis } ?: return false
+        val known = messages.map { it.id }.toSet()
+        val landed = SocialApi
+            .messagesSince(active, otherUserId, me, newest)
+            .getOrNull()
+            .orEmpty()
+            .firstOrNull { row ->
+                row.mine && row.body == optimisticText && row.id !in known &&
+                    kotlin.math.abs(row.createdAtMillis - sentAtMillis) < DELIVERED_WINDOW_MS
+            } ?: return false
+        applyMoved(listOf(landed))
+        return true
+    }
 
     suspend fun send(active: String, me: String) {
         // An edit in flight takes the composer over: Send IS Save until the
@@ -369,20 +472,39 @@ onSuccess = {
         pendingSends++
 
         SocialApi.sendPlaintext(active, otherUserId, text, me, replyTo).fold(
-                onSuccess = {
+                onSuccess = { sent ->
                     SocialApi.setTyping(active, otherUserId, false)
-                    // The bubble does NOT vanish while the thread re-reads: it
-                    // moves from [pending] to [sentShadow], a stand-in that
-                    // renders until the server's own copy of the same words
-                    // lands in [messages] — then it is dropped silently. The
-                    // old remove-then-load sequence was the flicker: gone for
-                    // a beat, then back.
                     pending = pending.filterNot { it.id == optimistic.id }
-                    sentShadow = sentShadow + optimistic
-                    load(active, me)
+                    if (sent != null) {
+                        // The server's own row takes the stand-in's place at
+                        // once: its real id, its own clock, its receipt column.
+                        // No page re-read, so a send costs one small request and
+                        // what the member sees is the actual message. (The old
+                        // path re-read 200 rows plus reactions on every tap,
+                        // and on a slow connection the bubble sat as a stand-in
+                        // for as long as that took.)
+                        messages = (messages.filterNot { it.id == sent.id } + sent)
+                            .sortedBy { it.createdAtMillis }
+                        SocialMessageCache.write(context, otherUserId, messages)
+                    } else {
+                        // A project that would not return the row keeps the
+                        // stand-in until a pull finds it. It never vanishes meanwhile.
+                        sentShadow = sentShadow + optimistic
+                    }
                 },
                 onFailure = { failure ->
                     pending = pending.filterNot { it.id == optimistic.id }
+                    // A read timeout is OUR deadline, not the server's refusal:
+                    // the row may be in the conversation already. Ask once
+                    // before telling the member it failed and handing the words
+                    // back - that ambiguity is what made a slow send look like
+                    // a lost message until the chat was reopened.
+                    if ((failure as? CommunityError)?.transport == true &&
+                        confirmDelivered(active, me, text, optimistic.createdAtMillis)
+                    ) {
+                        error = null
+                        return@fold
+                    }
                     draft = text
                     error = failure.message ?: "That message didn't send."
                 }
@@ -406,10 +528,11 @@ onSuccess = {
         if (cached.isNotEmpty()) messages = cached
         load(token, myUserId)
         loadPerson(token)
-        // Existing incoming messages are marked only after the conversation
-        // has rendered and the user has entered this screen; new arrivals use
-        // the same rule in pullDelta below. Never mark a sender's messages
-        // read merely because the sender refreshed their own thread.
+        // The thread is on screen, which IS the act of reading it: everything
+        // received is stamped here, and arrivals use the same rule in
+        // pullDelta below. Never mark a SENDER's messages read merely because
+        // the sender refreshed their own thread.
+        markThreadRead(token, myUserId)
     }
 
     // "is typing…" — pushed by a `dm_typing` frame, and re-read on a timer as
@@ -426,25 +549,26 @@ onSuccess = {
 
     // THE THREAD'S DELTA — one small pull, shared by the push and the timer.
     //
-    // It asks only for what is NEWER than the newest message already on screen
-    // (a strict `created_at >` window, so a pull is a few hundred bytes),
-    // merges it in, keeps the device's copy current and stamps the receipt.
+    // It asks for every row that MOVED since the newest one on screen: a new
+    // message, an edit by either side, or a read receipt (see
+    // SocialApi.messagesSince). What comes back is merged IN PLACE, so an edit
+    // lands as a new body on the bubble that is already there and a receipt
+    // flips a tick, both without a page re-read.
     suspend fun pullDelta(active: String, me: String) {
         // Only CONFIRMED messages anchor the window: an optimistic bubble
         // carries the phone's own clock, and a fast phone would otherwise push
-        // the window past the very messages this pull exists to find.
+        // the window past the very rows this pull exists to find.
         val anchor = messages
             .filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
             .maxOfOrNull { it.createdAtMillis }
             ?: return
-        val fresh = SocialApi.messagesSince(active, otherUserId, me, anchor)
+        val moved = SocialApi.messagesSince(active, otherUserId, me, anchor)
             .getOrNull()
             .orEmpty()
-            .filter { row -> (messages + pending).none { it.id == row.id } }
-        // A realtime push can also be an EDIT or a DELETE on an OLDER row,
-        // which the created_at window above never sees. Edits are re-read in
-        // full at most once per push (cheap: one page read); deletes of rows
-        // we still hold are pruned locally.
+        val arrived = if (moved.isEmpty()) false else applyMoved(moved)
+        // A realtime hint can also be a DELETE, which no stamp window can see
+        // (the row is simply gone). One page read per hint is what keeps a
+        // recall honest; edits and arrivals no longer need it.
         if (pendingRealtimeRevisions) {
             pendingRealtimeRevisions = false
             SocialApi.messages(active, otherUserId, me).getOrNull()?.let { server ->
@@ -452,40 +576,21 @@ onSuccess = {
                 messages = messages.mapNotNull { held ->
                     when {
                         held.id in hidden -> null
+                        held.id.startsWith(LOCAL_ID_PREFIX) -> held
                         // Gone from the server: they recalled it.
-                        server.none { it.id == held.id } && !held.id.startsWith(LOCAL_ID_PREFIX) -> null
+                        server.none { it.id == held.id } -> null
                         // Changed on the server: their edit wins.
-                        else -> server.firstOrNull { it.id == held.id } ?: held
+                        else -> server.first { it.id == held.id }
                     }
                 }
                 SocialMessageCache.write(context, otherUserId, messages)
             }
         }
-        // The receipts ride the same pull, whether or not anything new arrived:
-        // they change when the other side READS, which is a different moment
-        // from when they write.
-        SocialApi.readStamps(active, otherUserId, me).onSuccess { stamps ->
-            if (stamps.isNotEmpty()) {
-                messages = messages.map { message ->
-                    val at = stamps[message.id] ?: return@map message
-                    if (message.readAtMillis == null || message.readAtMillis < at) {
-                        message.copy(readAtMillis = at)
-                    } else {
-                        message
-                    }
-                }
-            }
-        }
-        if (fresh.isEmpty()) return
-        // `messagesSince` returns transport rows. Route a real arrival through
-        // the same batched-envelope decrypt path as initial load; otherwise a
-        // realtime message can briefly keep its null body or stale ciphertext.
-        load(active, me)
-        // An arrival means the other side stopped writing.
-        peerTyping = false
-        if (fresh.any { !it.mine }) {
-            SocialApi.markRead(active, otherUserId, me)
-        }
+        // An arrival means the other side stopped writing. Anything unread is
+        // stamped on every tick rather than only on that arrival, which is what
+        // makes a stamp that failed (offline, a stale session) heal itself.
+        if (arrived) peerTyping = false
+        markThreadRead(active, me)
     }
 
     /**
@@ -505,15 +610,22 @@ onSuccess = {
     }
 
     // REALTIME — the server tells this screen when the thread moved, instead of
-    // a timer asking. Four bindings, all SERVER-filtered: their new messages
-    // (INSERT), my own message being read (UPDATE on a row I sent them), their
-    // "is typing…" row (INSERT/UPDATE), and a reaction from them (the row's
-    // primary key carries the reactor, so INSERT/UPDATE/DELETE all match the
-    // filter). The subscription is released the moment the screen goes away.
+    // a timer asking. The bindings are all SERVER-filtered: their new messages
+    // and my own message being read (dm_messages), their "is typing…" row, and
+    // a reaction from them (the row's primary key carries the reactor, so
+    // INSERT/UPDATE/DELETE all match the filter).
+    //
+    // They ride TWO owners on purpose. The message bindings are the ones that
+    // can mean "a row you hold was revised" (their edit, their recall), which
+    // is what the revision sweep exists for; the typing and reaction bindings
+    // can never mean that, and letting them raise the same flag made every
+    // keystroke of theirs buy a full page read. The subscription is released
+    // the moment the screen goes away.
     DisposableEffect(eligible, token, myUserId, otherUserId) {
         val active = token
         val me = myUserId
         val owner = "dm:$otherUserId"
+        val liveOwner = "dm:$otherUserId:live"
         if (eligible && active != null && me != null) {
             SupabaseRealtime.watch(
                 owner = owner,
@@ -522,8 +634,9 @@ onSuccess = {
                     RealtimeWatch(
                         table = "dm_messages",
                         // INSERT is their new message; UPDATE catches their
-                        // edit; DELETE their recall. The delta fetch then
-                        // re-reads the touched rows.
+                        // edit; DELETE their recall. The next delta pull reads
+                        // the moved rows, and a revision flag asks for the whole
+                        // page once so a RECALL (a row that is simply gone) lands.
                         filter = "sender=eq.$otherUserId",
                         events = listOf("INSERT", "UPDATE", "DELETE")
                     ),
@@ -531,7 +644,18 @@ onSuccess = {
                         table = "dm_messages",
                         filter = "recipient=eq.$otherUserId",
                         events = listOf("UPDATE")
-                    ),
+                    )
+                )
+            ) {
+                // Compose state is written on the composition's own scope, never
+                // from the socket thread.
+                scope.launch { pendingRealtimeRevisions = true }
+                scope.launch { pushed++ }
+            }
+            SupabaseRealtime.watch(
+                owner = liveOwner,
+                accessToken = active,
+                watches = listOf(
                     RealtimeWatch(
                         table = "dm_typing",
                         filter = "sender=eq.$otherUserId",
@@ -544,19 +668,15 @@ onSuccess = {
                     )
                 )
             ) {
-                // The push may be an INSERT, or an UPDATE/DELETE on an older
-                // row (their edit, their recall). The next delta pull asks for
-                // the whole page once when any revision flag is set, so both
-                // shapes land. Compose state is written on the composition's
-                // own scope, never from the socket thread.
-                scope.launch { pendingRealtimeRevisions = true }
-                scope.launch { pushed++ }
                 // The live bits that are not part of the message delta — the
                 // typing row and their reactions — are re-read right away.
                 scope.launch { refreshLiveBits(active, me) }
             }
         }
-        onDispose { SupabaseRealtime.unwatch(owner) }
+        onDispose {
+            SupabaseRealtime.unwatch(owner)
+            SupabaseRealtime.unwatch(liveOwner)
+        }
     }
 
     // A push means "fetch now". The very first run is skipped (pushed == 0):
@@ -1834,10 +1954,33 @@ private const val LIVE_TICK_MS = 1_200L
 
 /**
  * The safety-net cadence used once realtime is linked: a missed frame or a
- * socket that died without saying so is still picked up, but the timer is no
- * longer the thing that makes the thread feel live.
+ * socket that died without saying so is still picked up.
+ *
+ * 4s rather than the old 20s: a channel that reports itself linked while its
+ * bindings deliver nothing (a publication without the table, a policy the
+ * server evaluates differently for the WAL than for REST) used to leave an
+ * open conversation up to twenty seconds behind, which is indistinguishable
+ * from "it never updates — I have to reopen the chat". The delta is now one
+ * small request for every way a thread can move, so a safety tick is cheap.
  */
-private const val SAFETY_TICK_MS = 20_000L
+private const val SAFETY_TICK_MS = 4_000L
+
+/**
+ * The pacing of a RETRIED read stamp. The first stamp of a conversation is
+ * immediate (nothing has been attempted yet); after a failure the retry waits
+ * this long, so a device with no signal is not asked to stamp a receipt several
+ * times a minute.
+ */
+private const val READ_STAMP_RETRY_MS = 10_000L
+
+/**
+ * How long after a send a timed-out row may still be recognised as delivered.
+ *
+ * A read timeout can land well after the tap (the request may have sat on a
+ * slow connection), so the reconciliation window is wider than the 10s a
+ * stand-in uses.
+ */
+private const val DELIVERED_WINDOW_MS = 120_000L
 
 /**
  * How often the "is typing…" row is re-read when realtime is NOT linked.

@@ -144,9 +144,16 @@ object SupabaseRealtime {
         if (watches.isEmpty() || !SupabaseClient.isConfigured) return
         val previous = subscriptions[owner]
         val tokenChanged = token != null && token != accessToken
-        val bindingsChanged = previous != null && previous.watches != watches
+        val before = bindingSignature()
         token = accessToken
         subscriptions[owner] = Subscription(watches, onChange)
+        // The union is what the JOIN carries, so it is the union that decides
+        // whether this channel still describes what the app wants to hear. A
+        // screen that had never watched before (the DM thread opening after
+        // the inbox already opened the socket) used to leave `connect()` to
+        // return early, and its bindings were NEVER joined: the open
+        // conversation heard nothing at all and fell back to its safety tick.
+        val bindingsChanged = previous?.watches != watches || bindingSignature() != before
         if (tokenChanged) {
             // A new session is a new RLS context: the old channel's bindings
             // were authorised as somebody else, so it has to be rebuilt.
@@ -165,6 +172,24 @@ object SupabaseRealtime {
             connect()
         }
     }
+
+    /**
+     * Every binding the channel would be JOINED with, as one comparable string.
+     *
+     * A channel holds exactly the bindings it was joined with — the server
+     * cannot add one afterwards — so any change to this union (a new owner's
+     * set, a screen re-declaring different rows) has to re-join, or the app
+     * silently keeps hearing about the OLD set. Order-independent: two screens
+     * declaring the same bindings must compare equal whichever landed first.
+     */
+    private fun bindingSignature(): String =
+        subscriptions.values
+            .flatMap { it.watches }
+            .map { watch ->
+                "${watch.table}|${watch.events.joinToString(",")}|${watch.filter.orEmpty()}"
+            }
+            .sorted()
+            .joinToString(";")
 
     /** Drops [owner]. The socket closes once nothing is left to hear. */
     fun unwatch(owner: String) {

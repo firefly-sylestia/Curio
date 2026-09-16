@@ -2,7 +2,10 @@ ADD:
 - Chats: conversations, friends and the wall all run on the same rebuilt chat engine — messages, typing dots, reactions, read ticks and live updates are steadier and faster everywhere.
 - Community: the moderation room now covers members too — reports can name a member, hiding an author hides their content without touching their account, and the team manages moderators with five per-person permissions.
 FIX:
-- Messages: editing a sent message or a reply really saves now (the old edit silently failed), and swiping to reply no longer traps a long message.
+- Messages: editing a sent message or a reply really saves now, reaches the other device, and keeps its "edited" mark after reopening the chat; swiping to reply no longer traps a long message.
+- Messages: sending puts the real message on screen at once, and a slow connection can no longer make a sent message look lost until the chat is reopened.
+- Messages: read ticks are per message, so a double tick means it was actually read; opening a chat also clears its unread badge.
+- Messages: an expired sign-in no longer reports "JWT expired". The session renews itself, and a device with no connection says so plainly.
 - Messages: received bubbles sit on the left again, and "Delete for everyone" is a solid red action.
 - Social: topic cards render whole and crisp at every size — no more shrunken art, cropped corners or off-centre previews.
 - Server setup: re-pasting the SQL no longer fails on the old encryption triggers.
