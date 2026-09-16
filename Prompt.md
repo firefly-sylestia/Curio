@@ -1863,4 +1863,20 @@ Done on branch `feat/book-by-cover-isbn`:
 - **`BookShelfScreen.kt`**: the add-book sheet now has three doors — Search, Scan ISBN, and Type — so the scanner is one tap away when the book is at hand.
 - **Dependencies**: `mlkit-barcode-scanning` 17.3.0 + `kotlinx-coroutines-play-services` (for `Task.await`). CAMERA permission added to the manifest; `isbn/` cache path added to `file_paths.xml` for the FileProvider.
 
+### Prompt (2026-09-16, DONE on feat/book-by-cover-isbn) — bug fixes + film/anime/song fetchers
+
+Verbatim: series episodes not showing (Chernobyl), ban button not clickable, moderation page reloading, eye/pen toggle not smooth, two progress bars in book review, lighter accents in light mode, stop look up when book has info, fetch chapters with look up, finish film/anime/song poster fetching.
+
+Done:
+- **SeriesEpisodeFetcher.fetchAll**: when a series has no authored episodes but fetch consent is on, fetch the full episode list from TVMaze (Chernobyl fix).
+- **ModeButton onClick**: added click handler so the eye/pen toggle actually switches modes.
+- **Progress bars**: removed the duplicate `LinearProgressIndicator` — only the tick row remains.
+- **Auto-fetch skip**: skip initial fetch when the book already has chapters, pages, and synopsis.
+- **Darker accents**: increased alpha on button/surface backgrounds from 0.12–0.16 to 0.18–0.26.
+- **Moderation reload**: added `loaded` flag to prevent re-fetching on every recomposition.
+- **FilmPosterFetch**: iTunes + TVMaze for FILMS/ANIMATED_MOVIES.
+- **AnimePosterFetch**: Jikan + iTunes for ANIME, plus synopsis fetch.
+- **SongArtFetch**: iTunes for SONGS, plus description fetch.
+- **TopicRevealScreen**: FilmInfoSection, AnimeInfoSection, SongInfoSection with poster cards.
+
 ### Next prompt (the next instruction goes here — never cleared by an agent)
