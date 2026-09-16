@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -134,6 +135,24 @@ object OnlineAccount {
     }
 
     /**
+     * Where a confirmation email should land, or null when no account site is
+     * configured for this build.
+     *
+     * The account site owns that page, because an email link has to open
+     * somewhere a browser can show: the app's own sign-up form is not a URL, and
+     * without this Supabase falls back to the project's Site URL, whose default
+     * is `http://localhost:3000`. An empty [BuildConfig.CURIO_AUTH_SITE_URL]
+     * sends no redirect at all, which is exactly the old behaviour, so a build
+     * from before the site exists is unchanged.
+     */
+    private fun confirmationRedirect(): String? =
+        BuildConfig.CURIO_AUTH_SITE_URL
+            .trim()
+            .trimEnd('/')
+            .takeIf { it.isNotEmpty() }
+            ?.let { "$it/confirm" }
+
+    /**
      * Creates the account. Supabase only answers with a session when email
      * confirmation is disabled for the project; otherwise the user has to
      * confirm first, so that case reports a notice instead of signing in.
@@ -146,7 +165,7 @@ object OnlineAccount {
             return false
         }
         state = state.copy(busy = true, error = null, notice = null)
-        return SupabaseClient.signUp(address, password).fold(
+        return SupabaseClient.signUp(address, password, confirmationRedirect()).fold(
             onSuccess = { session ->
                 if (session == null) {
                     // Email confirmation is ON for this project, so the

@@ -86,6 +86,10 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # The Curio account site (auth-web/): the redirect every confirmation
+          # and password reset email carries. Optional: unset (empty) leaves
+          # Supabase's own Site URL in charge and hides the recovery row.
+          CURIO_AUTH_SITE_URL: ${{ secrets.CURIO_AUTH_SITE_URL }}
         run: |
           if [ -z "$SUPABASE_URL" ] || { [ -z "$SUPABASE_PUBLISHABLE_KEY" ] && [ -z "$SUPABASE_ANON_KEY" ]; }; then
             echo "::warning::Supabase URL/key secrets not provided — this release APK will ship with Online Mode reporting unconfigured."

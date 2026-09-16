@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your account · Curio</title>
+<meta name="description" content="Review your Curio account, sign out, or delete it.">
+<meta name="theme-color" content="#100c11">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+<body data-page="account">
+<div class="aurora" aria-hidden="true"></div>
+<a class="skip" href="#page">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
+  <nav class="topnav" aria-label="Account">
+    <a href="/signin">Sign in</a>
+    <a href="/reset">Password</a>
+    <a href="/account" aria-current="page">Account</a>
+    <a href="/support">Support</a>
+  </nav>
+</header>
+
+<main id="page" class="shell">
+  <div class="rise">
+    <span class="eyebrow">Curio account</span>
+    <h1>Your account</h1>
+    <p class="lede">
+      What Curio holds for you, and the two things only you can do: leave, or sign out.
+    </p>
+  </div>
+
+  <p class="notice" id="page-status" role="status"></p>
+
+  <section class="state" data-state="signed-out">
+    <div class="card rise-1">
+      <h2>Sign in to continue</h2>
+      <p class="muted">
+        Your account page needs a signed-in session so it can show your profile and, if you want,
+        delete the account. Signing in here does not sign you in inside the app.
+      </p>
+      <div class="row mt-2">
+        <a class="btn btn-primary" href="/signin">Sign in</a>
+        <a class="btn btn-ghost" href="/reset">Reset my password</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="state" data-state="signed-in">
+    <div class="card rise-1">
+      <div class="identity">
+        <div class="disc" id="profile-disc" aria-hidden="true">C</div>
+        <div>
+          <h2 id="profile-name">Curio member</h2>
+          <p class="muted tight" id="profile-handle">@unnamed</p>
+          <p class="faint tight"><span id="profile-online" class="badge">Online mode</span></p>
+        </div>
+      </div>
+
+      <dl class="kv">
+        <dt>Email</dt>
+        <dd><span data-account-email class="muted"></span></dd>
+        <dt>Member since</dt>
+        <dd><span id="profile-since" class="muted">Loading…</span></dd>
+        <dt>Portrait</dt>
+        <dd><span id="profile-avatar" class="muted">From the app</span></dd>
+        <dt>On the wall now</dt>
+        <dd class="muted">
+          <span id="stat-posts">0</span> live posts, <span id="stat-replies">0</span> live replies
+        </dd>
+      </dl>
+
+      <p class="faint mt-2">
+        Posts and replies live for 24 hours, so these numbers are what is on the wall right now.
+        Everything you saved in Curio stays on your phone either way.
+      </p>
+
+      <div class="row mt-3">
+        <a class="btn btn-ghost" href="https://github.com/firefly-sylestia/Curio/releases/latest" data-app-download>Download Curio</a>
+        <button class="btn btn-quiet" id="sign-out" type="button">Sign out of this browser</button>
+      </div>
+    </div>
+
+    <div class="card danger rise-2">
+      <h2>Delete my account</h2>
+      <p class="muted tight">
+        This is immediate and it cannot be undone. It removes the account itself, so the same email
+        has to sign up again from scratch.
+      </p>
+      <ul>
+        <li>Your profile, username, portrait and bio are deleted.</li>
+        <li>Your live posts and replies are deleted, along with their replies from other people.</li>
+        <li>Friend connections and direct messages on the server are deleted.</li>
+        <li>Your Curio library, saved discoveries and settings on this device are untouched.</li>
+        <li>This browser session ends the moment the account is gone.</li>
+      </ul>
+      <div class="row mt-3">
+        <button class="btn btn-danger" id="delete-start" type="button">Delete my account</button>
+        <a class="btn btn-quiet" href="/support">Ask a question first</a>
+      </div>
+      <p class="notice" id="delete-status" role="status"></p>
+    </div>
+  </section>
+
+  <section class="state" data-state="deleted">
+    <div class="card rise-1">
+      <h2>Your account is gone</h2>
+      <p class="muted">
+        Everything Curio held for you online has been deleted, and this browser is signed out. Your
+        saved discoveries and your library are still on your device.
+      </p>
+      <p class="faint mt-2">
+        If this was not what you wanted, the same email can create a fresh account, but the old
+        data cannot be restored.
+      </p>
+      <div class="row mt-2">
+        <a class="btn btn-ghost" href="/">Back to the start</a>
+        <a class="btn btn-quiet" href="https://github.com/firefly-sylestia/Curio/releases/latest" data-app-download>Download Curio</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="delete-dialog" aria-labelledby="delete-dialog-title">
+  <h2 id="delete-dialog-title">Delete your Curio account?</h2>
+  <p class="muted tight">
+    This removes your profile, your posts, your replies and your server-side messages. It cannot be
+    undone, and the same email would have to start over.
+  </p>
+  <div class="field mt-2">
+    <label for="delete-confirm-word">Type DELETE to confirm</label>
+    <input id="delete-confirm-word" name="confirm" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE">
+  </div>
+  <div class="row">
+    <button class="btn btn-ghost" id="delete-cancel" type="button">Keep my account</button>
+    <button class="btn btn-danger" id="delete-button" type="button" disabled>Delete it</button>
+  </div>
+</dialog>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <span>Curio account desk</span>
+    <span class="dot" aria-hidden="true">•</span>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/support">Support</a>
+    <a href="/account">Account</a>
+  </div>
+</footer>
+
+<script type="module" src="/assets/curio.js"></script>
+</body>
+</html>

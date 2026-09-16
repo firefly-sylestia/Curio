@@ -1,5 +1,91 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — Curio account site + email links)
+
+Verbatim: fix the link so we have a web version, because the new "congrats you
+have verified", reset password and similar Supabase emails open on localhost,
+which is bad. Create a new directory for the email account pages (reset
+password, confirm email, etc.), the user will add the .env in the Vercel secrets
+and launch it, with a beautiful UI, a delete-account button, and more support.
+
+### Decisions (asked before building)
+
+1. **`auth-web/`, static, zero build** (the user picked this): plain HTML/CSS/JS
+   plus two Vercel functions, so nothing here can break the Android CI, no
+   dependency install is needed, and the env vars work through `/api/config`.
+2. **All six page groups**: confirmation landing, reset password (request and
+   set), magic-link sign-in, account page with delete, privacy and terms, and a
+   support page.
+3. **Deletion through a Vercel function** holding the service-role key, which
+   re-derives the caller's identity from their own token before deleting.
+4. **Wire the Android app too**: the sign-up redirect plus a "Forgot your
+   password?" row.
+
+### Root cause (in the code, not guessed)
+
+The Android client called `POST /auth/v1/signup` with **no `redirect_to`**, so
+Supabase fell back to the project's **Site URL**, whose default is
+`http://localhost:3000`. There was also no `curio://` scheme registered in
+`AndroidManifest.xml` and no reset UI anywhere in the app, so a recovery email
+had no destination at all. Both halves are now fixed: a real site exists, and the
+app says where the emails should land.
+
+### Shipped
+
+**New `auth-web/`** (static site + 2 functions, documented in `README.md` and
+`AGENTS.md`):
+- `index.html` landing, `confirm/`, `link/` (magic link), `reset/` (request and
+  set new password), `signin/` (link or password), `account/` (profile, counts,
+  sign out, delete with a typed confirmation), `privacy/`, `terms/`, `support/`.
+- `assets/theme.css` is a full design system (aurora backdrop, glass cards,
+  Fraunces + Sora, light-mode override, reduced-motion, print styles) and
+  `assets/curio.js` is the only script: config fetch, GoTrue client, session
+  store, all three email-link shapes (`#access_token`, `?token_hash`, error
+  fragments), friendly copy, and the per-page wiring keyed on `data-page`. No
+  inline scripts or styles anywhere, so the CSP is strict.
+- `api/config.js` serves only public values (project URL + anon key, support
+  address, download link) from Vercel env vars; `api/delete-account.js` verifies
+  the caller's token against GoTrue and deletes the id that call returns, then
+  re-checks the typed confirmation server-side.
+- `vercel.json` carries the security headers (no-referrer, frame denial, strict
+  CSP) and asset caching.
+- `privacy/` and `terms/` publish `docs/ONLINE_PRIVACY.md` and
+  `docs/ONLINE_TERMS.md` without their internal launch-review banners.
+
+**Android wiring**:
+- `CURIO_AUTH_SITE_URL` build field (env-driven, empty by default) exported by
+  both `android.yml` and `release.yml`.
+- `SupabaseClient.signUp(email, password, confirmationRedirect)` sends GoTrue's
+  `redirect_to`; `OnlineAccount.confirmationRedirect()` builds `<site>/confirm`.
+- `CurioAuthCard` gained a "Forgot your password?" row that opens `<site>/reset`
+  in the browser, hidden while the build carries no site URL.
+
+**Docs**: root `AGENTS.md` scope + a new `auth-web/` section and index entry,
+`auth-web/AGENTS.md`, `auth-web/README.md`, `master.md` tree, `docs/DOX_TREE.md`,
+`.github/AGENTS.md` (the optional secret), `app/AGENTS.md` (the email-link
+contract), and the store changelog.
+
+### USER ACTION REQUIRED
+
+1. Deploy `auth-web/` to Vercel (Root Directory `auth-web`) and add
+   `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+   `SUPPORT_EMAIL` (and optionally `APP_DOWNLOAD_URL`).
+2. In Supabase: set the Site URL to the domain and add `https://<domain>/**` to
+   the Redirect URLs, or Supabase silently ignores the app's redirect.
+3. Add the `CURIO_AUTH_SITE_URL` repo secret so the app's emails and its
+   recovery row point at the site.
+4. Optional but recommended: switch the email templates to `{{ .RedirectTo }}`
+   (see `auth-web/README.md`); the classic `{{ .ConfirmationURL }}` works too.
+
+### Verified
+
+- `node --check` on all three JavaScript files; HTML tag balance on all nine
+  pages; a DOM-contract check that every element id the script needs exists on
+  the page that needs it (0 problems); no inline `style=` or bare `<script>`.
+- Delimiter balance on the edited Kotlin files; `git diff --check` clean.
+- No Gradle in this environment (root AGENTS rule); CI is the compile check for
+  the app-side changes, and a Vercel preview deploy is the check for the site.
+
 ## Request (2026-09-16, COMPLETE — reply threads, reply hearts, compact comments, Friends strip)
 
 Verbatim: reply threads are glitchy — they vanish when a new reply branch is

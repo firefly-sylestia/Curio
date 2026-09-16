@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
 /**
@@ -82,8 +83,31 @@ object SupabaseClient {
         val email: String?
     )
 
-    suspend fun signUp(email: String, password: String): Result<Session?> =
-        authRequest("/auth/v1/signup", email, password)
+    /**
+     * Creates the account.
+     *
+     * [confirmationRedirect] is where the confirmation email should land. It
+     * travels as GoTrue's own `redirect_to` QUERY parameter, and it is the one
+     * thing that decides whether a member ends up on the Curio account site or
+     * on the project's Site URL (whose default, `http://localhost:3000`, is the
+     * "the link opens localhost" report). Null sends no redirect at all.
+     */
+    suspend fun signUp(
+        email: String,
+        password: String,
+        confirmationRedirect: String? = null
+    ): Result<Session?> = authRequest(
+        "/auth/v1/signup" + redirectQuery(confirmationRedirect),
+        email,
+        password
+    )
+
+    /** `?redirect_to=…` for an email request, or nothing when there is no site. */
+    private fun redirectQuery(target: String?): String {
+        val clean = target?.trim().orEmpty()
+        if (clean.isEmpty()) return ""
+        return "?redirect_to=" + URLEncoder.encode(clean, "UTF-8")
+    }
 
     suspend fun signIn(email: String, password: String): Result<Session> =
         authRequest("/auth/v1/token?grant_type=password", email, password)

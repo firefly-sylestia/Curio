@@ -88,6 +88,20 @@ val supabasePublishableKeyEscaped: String = envSupabasePublishableKey
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// The Curio account site (auth-web/) — where Supabase confirmation and password
+// reset emails send people. Without it the app sends NO redirect, so Supabase
+// falls back to the project's own Site URL (which is what sent members to
+// localhost), and the sign-in form hides its "Forgot your password?" row.
+// Trailing slashes are trimmed here because every caller appends a path.
+val envAuthSiteUrl: String? = System.getenv("CURIO_AUTH_SITE_URL")
+    ?.trim()
+    ?.trimEnd('/')
+    ?.takeIf { it.isNotEmpty() }
+val authSiteUrlEscaped: String = envAuthSiteUrl
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Only create release signing if ALL four secrets are present and non-empty.
 // GitHub Actions exports missing secrets as empty strings, so .takeIf { it.isNotEmpty() }
 // converts them back to null. Without this guard, AGP would create a signing config
@@ -130,6 +144,11 @@ android {
         buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"$spotifySecretEscaped\"")
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrlEscaped\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKeyEscaped\"")
+
+        // Empty on a build whose account site is not deployed yet: the app then
+        // keeps Supabase's own Site URL in charge of email links and hides the
+        // password-recovery row, rather than opening a door that goes nowhere.
+        buildConfigField("String", "CURIO_AUTH_SITE_URL", "\"$authSiteUrlEscaped\"")
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.

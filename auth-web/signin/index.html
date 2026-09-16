@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · Curio</title>
+<meta name="description" content="Sign in to your Curio account with an email link or a password.">
+<meta name="theme-color" content="#100c11">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+<body data-page="signin">
+<div class="aurora" aria-hidden="true"></div>
+<a class="skip" href="#page">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
+  <nav class="topnav" aria-label="Account">
+    <a href="/signin" aria-current="page">Sign in</a>
+    <a href="/reset">Password</a>
+    <a href="/account">Account</a>
+    <a href="/support">Support</a>
+  </nav>
+</header>
+
+<main id="page" class="shell">
+  <div class="rise">
+    <span class="eyebrow">Curio account</span>
+    <h1>Sign in</h1>
+    <p class="lede">
+      This signs you in to the account desk only, which is where your profile and your account
+      settings live. The app itself uses the same email and password.
+    </p>
+  </div>
+
+  <p class="notice" id="page-status" role="status"></p>
+
+  <section class="state show" data-state="form">
+    <div class="card rise-1">
+      <h2>Email me a sign-in link</h2>
+      <p class="muted tight">No password needed. The link opens your account in this browser.</p>
+      <form id="link-form" class="stack" novalidate>
+        <div class="field">
+          <label for="link-email">Email</label>
+          <input id="link-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <label class="check" for="link-create">
+          <input id="link-create" name="create" type="checkbox" checked>
+          <span>Create a Curio account if this address is new.</span>
+        </label>
+        <div class="row">
+          <button class="btn btn-primary" id="link-button" type="submit">Send me a link</button>
+        </div>
+      </form>
+      <p class="notice" id="link-status" role="status"></p>
+    </div>
+
+    <div class="card rise-2">
+      <h2>Or use your password</h2>
+      <form id="password-form" class="stack" novalidate>
+        <div class="field">
+          <label for="password-email">Email</label>
+          <input id="password-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="password-value">Password</label>
+          <input id="password-value" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" id="password-button" type="submit">Sign in</button>
+          <a class="btn btn-quiet" href="/reset">Forgot your password?</a>
+        </div>
+      </form>
+      <p class="notice" id="password-status" role="status"></p>
+    </div>
+  </section>
+
+  <section class="state" data-state="sent">
+    <div class="card rise-1">
+      <h2>Check your inbox</h2>
+      <p class="muted">
+        A sign-in link is on its way to <span id="link-sent" class="faint"></span>. Open it in this
+        browser and you are in.
+      </p>
+      <p class="faint mt-2">
+        Links are single use and expire quickly. If it arrives late, ask for a new one.
+      </p>
+      <div class="row mt-2">
+        <a class="btn btn-ghost" href="/account">Already signed in?</a>
+        <a class="btn btn-quiet" href="/support">It did not arrive</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <span>Curio account desk</span>
+    <span class="dot" aria-hidden="true">•</span>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/support">Support</a>
+    <a href="/account">Account</a>
+  </div>
+</footer>
+
+<script type="module" src="/assets/curio.js"></script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 package com.curio.app.features.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -8,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,6 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioContentFilter
 import com.curio.app.data.supabase.OnlineAccount
@@ -261,6 +265,36 @@ internal fun CurioAuthCard(
         notice?.let { message ->
             if (account.notice == null && localProblem == null && account.error == null) {
                 AccountMessage(text = message, isError = false)
+            }
+        }
+
+        // ── Password recovery lives on the account site ───────────────────
+        // A reset link has to open somewhere a password field can live, and the
+        // app's sign-in form is not a URL. So the site owns that page (it can
+        // also set a new password without the app), and this row is the door to
+        // it. Hidden entirely while the build carries no site URL: a build from
+        // before the site exists must not offer a door that goes nowhere.
+        if (mode == AuthMode.SIGN_IN && BuildConfig.CURIO_AUTH_SITE_URL.isNotBlank()) {
+            TextButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(
+                                    BuildConfig.CURIO_AUTH_SITE_URL.trimEnd('/') + "/reset"
+                                )
+                            )
+                        )
+                    }
+                },
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text(
+                    text = "Forgot your password?",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = curioDialogActionColor()
+                )
             }
         }
 

@@ -114,6 +114,7 @@ See [`DOX_TREE.md`](docs/DOX_TREE.md) for a visual Mermaid diagram and ASCII tre
 
 - `AGENTS.md` (root) — Project-wide DOX rail: environment rules, workflow, Prompt.md management, and release-note guidance
   - `app/AGENTS.md` — Active Curio Android app module
+  - `auth-web/AGENTS.md` — Curio account web: Supabase email links, password reset, account desk (static site + two Vercel functions)
     - `app/CURIO_DATA_PLAN.md` — Topic taxonomy, schema, and authoring contract
     - `app/src/main/assets/topics/SCHEMA.md` — Topic JSON quick reference
   - `gradle/AGENTS.md` — Version catalog and Gradle wrapper
