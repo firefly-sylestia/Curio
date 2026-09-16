@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Update checker: queries the public GitHub API for the latest release (About → Check for updates). -->
     <uses-permission android:name="android.permission.INTERNET" />
