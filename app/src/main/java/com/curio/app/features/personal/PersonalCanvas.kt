@@ -1020,12 +1020,20 @@ internal fun PersonalToolDock(
                 )
             }
             PersonalToolButton(
-                label = "Title",
+                label = "Large bold text",
                 active = active and FLAG_TITLE != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_TITLE) }
             ) {
-                Text("H", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 15.sp))
+                Text("T", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 19.sp))
+            }
+            PersonalToolButton(
+                label = "Todo checkbox",
+                active = active and FLAG_BULLET != 0,
+                accent = accentInk, ink = ink,
+                onClick = { state.toggle(FLAG_BULLET) }
+            ) {
+                Text("□", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 19.sp))
             }
             PersonalToolButton(
                 label = "Small text",

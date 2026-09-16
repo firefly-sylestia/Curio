@@ -322,7 +322,7 @@ private fun BookShelfCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(32.dp),
+                .height(38.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Text(
@@ -330,7 +330,8 @@ private fun BookShelfCard(
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.SemiBold,
-                    lineHeight = 15.sp
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp
                 ),
                 color = ink,
                 maxLines = 2,

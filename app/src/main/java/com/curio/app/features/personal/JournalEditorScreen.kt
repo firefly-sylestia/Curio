@@ -386,14 +386,28 @@ fun JournalEditorScreen(
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = pickerForDate)
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    pickerState.selectedDateMillis?.let { dateMillis = it }
-                    showDatePicker = false
-                }) { Text("Move the entry") }
+                confirmButton = {
+                androidx.compose.material3.Button(
+                    onClick = {
+                        pickerState.selectedDateMillis?.let { dateMillis = it }
+                        showDatePicker = false
+                    },
+                    shape = RoundedCornerShape(50),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = personalAccent(),
+                        contentColor = personalOnAccent()
+                    )
+                ) { Text("Move the entry") }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                androidx.compose.material3.Button(
+                    onClick = { showDatePicker = false },
+                    shape = RoundedCornerShape(50),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = personalAccent().copy(alpha = 0.16f),
+                        contentColor = personalAccentInk()
+                    )
+                ) { Text("Cancel") }
             }
         ) {
             DatePicker(state = pickerState)
@@ -438,18 +452,18 @@ private fun JournalTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Surface(
+            if (editing) Surface(
                 onClick = { onShiftDate(-1L) },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 modifier = Modifier.size(34.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronLeft, "Previous day", tint = ink.copy(alpha = 0.7f), size = 18.dp)
+                    CurioIcon(CurioIcons.ChevronLeft, "Previous day", tint = personalAccentInk(), size = 18.dp)
                 }
             }
             Surface(
-                onClick = onPickDate,
+                onClick = if (editing) onPickDate else ({}),
                 shape = RoundedCornerShape(50),
                 color = MaterialTheme.colorScheme.surfaceContainer
             ) {
@@ -466,14 +480,14 @@ private fun JournalTopBar(
                     )
                 }
             }
-            Surface(
+            if (editing) Surface(
                 onClick = { onShiftDate(1L) },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 modifier = Modifier.size(34.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronRight, "Next day", tint = ink.copy(alpha = 0.7f), size = 18.dp)
+                    CurioIcon(CurioIcons.ChevronRight, "Next day", tint = personalAccentInk(), size = 18.dp)
                 }
             }
         }
