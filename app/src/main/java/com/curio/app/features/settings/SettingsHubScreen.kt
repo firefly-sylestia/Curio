@@ -616,7 +616,6 @@ internal fun FullBleedHeroItem(edgePad: Dp, hero: @Composable () -> Unit) {
  *  sort / search read on the rose in every theme. [emphasized] deepens the
  *  fill for the active/primary state. Public so settings-family screens can
  *  pass their own pills into [SettingsHeroHeader]'s trailing slot. */
-@Composable
 /**
  * v386 — THE hero-pill fill: the single recipe behind the back pill, every
  * hero action pill, and any other furniture riding a torn banner (the Social
@@ -636,6 +635,7 @@ fun settingsHeroPillFill(
     lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
 }
 
+@Composable
 fun SettingsHeroActionPill(
     onClick: () -> Unit,
     ink: Color,

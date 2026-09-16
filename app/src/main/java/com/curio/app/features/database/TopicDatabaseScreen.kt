@@ -17,8 +17,8 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -133,6 +133,24 @@ import androidx.compose.foundation.layout.heightIn
  * backdrop, content scrolling under the ragged tear, ScreenEntrance
  * entrance animation.
  */
+
+/**
+ * v387 — the last BROWSE row set the browser built, plus the lane signature
+ * and done-set size it was built for. The topic catalog is ~16k rows, and the
+ * screen is opened and closed constantly (a reveal round-trip, a tab switch),
+ * so rebuilding it from scratch every time was both the "loading" wait and the
+ * GC pressure behind the stutter. A matching cache now paints instantly; the
+ * background build still runs and refreshes it.
+ *
+ * File-private: [DatabaseRow] never leaves this screen.
+ */
+private object BrowseRowsCache {
+    // @Volatile — written on a background dispatcher, read on the main thread
+    // by the NEXT composition of this screen (no lock, no coroutine hand-off).
+    @Volatile var lanes: String = ""
+    @Volatile var done: Int = -1
+    @Volatile var rows: List<DatabaseRow>? = null
+}
 
 /**
  * v199 — the Browse-Topics session: the selected category filter and the
@@ -370,8 +388,11 @@ fun TopicDatabaseScreen(navController: NavController) {
             runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
         }
     }
-    val indexByTopicId: Map<String, TopicIndexEntry> = remember(indexEntries) {
-        indexEntries?.associateBy { it.topic.id }.orEmpty()
+    // v387 — SEARCH-ONLY. Browse rows read the loader's warm lane lists
+    // directly now, so a 16k-entry HashMap is built the moment the hero search
+    // opens and dropped again when it closes, instead of on every open.
+    val indexByTopicId: Map<String, TopicIndexEntry> = remember(indexEntries, searchActive) {
+        if (!searchActive) emptyMap() else indexEntries?.associateBy { it.topic.id }.orEmpty()
     }
     // Build the search/sort fields (lowercase keys + word lists + year) OFF
     // the composition thread, ONCE per catalog identity. v347 kept this build
@@ -383,12 +404,21 @@ fun TopicDatabaseScreen(navController: NavController) {
     // composition would stutter the open exactly like the old path did — the
     // background build below handles it instead, and this producer restarts
     // with the index keys the moment [indexEntries] lands.
+    // v387 — the index objects are SEARCH-ONLY too, and never built on the
+    // composition thread. Every open used to build the whole catalog's
+    // IndexedTopic list SYNCHRONOUSLY (`initialValue` above) and then build it
+    // AGAIN in this producer — two 16k passes, the first one on the main
+    // thread while the screen was composing. That was the browser's
+    // "Preparing topics…"/loading lag, and the retained 16k objects were the
+    // memory pressure that made scrolling stutter. Browsing now touches none
+    // of it; opening the search builds it once, in the background.
     val indexedTopics by produceState<List<IndexedTopic>>(
-        initialValue = if (indexByTopicId.isEmpty()) emptyList() else buildIndexedTopics(catalog, indexByTopicId),
+        initialValue = emptyList(),
         catalog,
-        indexByTopicId
+        searchActive
     ) {
-        value = withContext(Dispatchers.Default) {
+        value = if (!searchActive) emptyList()
+        else withContext(Dispatchers.Default) {
             buildIndexedTopics(catalog, indexByTopicId)
         }
     }
@@ -399,6 +429,13 @@ fun TopicDatabaseScreen(navController: NavController) {
     // the selected lanes).
     val effectiveCats: Set<CategoryId> = remember(catalog, selectedCats) {
         selectedCats.filter { id -> catalog.any { it.first.id == id } }.toSet()
+    }
+    // v387 — the lane signature of the last browse build (see
+    // [BrowseRowsCache]): "ALL" or the selected lanes, sorted. Declared here
+    // (before the row pass that writes the cache).
+    val browseLanesKey: String = remember(effectiveCats) {
+        if (effectiveCats.isEmpty()) "ALL"
+        else effectiveCats.sorted().joinToString(",") { it.name }
     }
 
     // Filtered rows — section headers while browsing All, topic rows always.
@@ -443,7 +480,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     // of the "results feel slow" cost. Results are split into two labelled
     // groups: EXACT (substring) matches first, then SIMILAR (typo-tolerant)
     // matches — both searches shown, exact on top.
-    val topicsByCat = remember(indexedTopics) { indexedTopics.groupBy { it.category.id } }
+    // v387 — the per-lane grouping map is gone: the search branch walks
+    // `catalog` and looks each topic up in the index by id, so a 16k groupBy
+    // (allocated on every index build) had no reader left. `indexedTopics`
+    // stays an effect key, which is what actually re-runs the pass.
     // v3xx — the merged rows are recomputed on every key change (category
     // filter, settled query, done-set) but the PREVIOUS rows stay on screen
     // while the new set builds on [Dispatchers.Default]. produceState used
@@ -451,23 +491,40 @@ fun TopicDatabaseScreen(navController: NavController) {
     // topics match" (and resetting pagination feel) between every category
     // switch and query settle: the perceived loading lag while browsing.
     // [searchPassReady] gates only the very first build (nothing retained).
-    var searchPass by remember { mutableStateOf(SearchPass(rows = emptyList())) }
-    var searchPassReady by remember { mutableStateOf(false) }
-    LaunchedEffect(catalog, topicsByCat, indexedTopics, effectiveCats, needle, doneTopics) {
+    // Seed the pass FROM THE CACHE when it still matches this lane set and
+    // done-set: reopening the browser (or coming back to it) paints the
+    // previous rows on the FIRST frame — no empty list, no "Preparing
+    // topics…", no fresh 16k build before anything is on screen.
+    val cachedBrowseRows: List<DatabaseRow>? = remember {
+        BrowseRowsCache.rows?.takeIf {
+            BrowseRowsCache.lanes == browseLanesKey &&
+                BrowseRowsCache.done == doneTopics.size
+        }
+    }
+    var searchPass by remember {
+        mutableStateOf(
+            if (cachedBrowseRows == null) SearchPass(rows = emptyList())
+            else SearchPass(rows = cachedBrowseRows)
+        )
+    }
+    // A cached pass is already RENDERABLE, so the loading slot must not appear
+    // over it while the background rebuild runs behind.
+    var searchPassReady by remember { mutableStateOf(cachedBrowseRows != null) }
+    LaunchedEffect(catalog, indexedTopics, effectiveCats, needle, doneTopics) {
         val next = withContext(Dispatchers.Default) {
             if (needle.isEmpty()) {
-                // BROWSE MODE: per-lane with section headers. v347 — rows
-                // come from the PRE-GROUPED lane lists (topicsByCat, built
-                // once per indexedTopics) instead of a fresh
-                // `indexedTopics.associateBy` + filter + sort over all ~20k
-                // topics on every category switch: with an empty needle the
-                // filter and sort are no-ops and the lane order is already
-                // final, so a lane switch only walks the SELECTED lanes'
-                // prebuilt lists instead of remapping the whole catalog.
+                // BROWSE MODE: per-lane with section headers, read straight
+                // from the loader's parsed lane lists — no index objects, no
+                // grouping map, no 16k pass that has nothing to do with
+                // browsing (v387). A lane switch only walks the SELECTED
+                // lanes' lists.
                 val rows = buildList {
-                    catalog.forEach { (cat, _) ->
+                    // v387 — the lane's OWN parsed list (file order), the same
+                    // order the index used to hand back: reading it directly is
+                    // what keeps a 16k IndexedTopic build out of every open.
+                    catalog.forEach { (cat, laneTopics) ->
                         if (effectiveCats.isNotEmpty() && cat.id !in effectiveCats) return@forEach
-                        val shown = topicsByCat[cat.id].orEmpty()
+                        val shown = laneTopics
                         if (shown.isEmpty()) return@forEach
                         // v314 — headers whenever browsing All or several lanes
                         // are selected; a single selected lane stays flat under
@@ -475,17 +532,27 @@ fun TopicDatabaseScreen(navController: NavController) {
                         if (effectiveCats.size != 1) {
                             add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
                         }
-                        shown.forEach { indexed ->
+                        val doneCount = doneTopics.size
+                        shown.forEach { topic ->
                             add(
                                 DatabaseRow(
-                                    key = indexed.topic.id,
-                                    topic = indexed.topic,
-                                    done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                                    key = topic.id,
+                                    topic = topic,
+                                    // The done key is only built when there is
+                                    // something to match it against — the
+                                    // concat for all 16k topics was pure
+                                    // garbage while nothing was explored.
+                                    done = doneCount > 0 &&
+                                        "${cat.id.name}::${topic.name}" in doneTopics
                                 )
                             )
                         }
                     }
                 }
+                // v387 — remembered for the next open (see [BrowseRowsCache]).
+                BrowseRowsCache.lanes = browseLanesKey
+                BrowseRowsCache.done = doneTopics.size
+                BrowseRowsCache.rows = rows
                 SearchPass(rows = rows)
             } else {
                 // SEARCH MODE — v313 filter: results come ONLY from the
@@ -894,8 +961,12 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // Catalog parsing and indexing are separate background steps.
                 // Keep the loading state through both so the intermediate
                 // empty `rows` value never flashes "No topics match".
+                // v387 — the index wait is SEARCH-ONLY: browse rows no longer
+                // come from the index, so holding the loading state until
+                // `indexedTopics` filled would have hidden the whole catalog
+                // on every browse (the index is deliberately not built then).
                 val browserLoading = catalogLoading ||
-                    (catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0) ||
+                    (searchActive && catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0) ||
                     // v3xx — until the FIRST row build lands there is nothing
                     // to retain, so show the preparing note instead of a
                     // one-frame "No topics match" flash.
@@ -1027,17 +1098,19 @@ fun TopicDatabaseScreen(navController: NavController) {
         }
         // Side scroll indicator — speed-scrolling knob (v26) with the A–Z
         // fast-scroller rail (tap the knob to open it, tap a letter to jump).
-        CurioVerticalScrollIndicator(
-            state = listState.scrollIndicatorState,
-            onScrollBy = { listState.dispatchRawDelta(it) },
-            alphabet = alphabetLetters,
-            activeAlphabetIndex = activeAlphabetIndex,
-            onAlphabetSelect = onAlphabetSelect,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .fillMaxHeight()
-                .padding(top = contentTop, bottom = 16.dp)
-        )
+        ScrollScopedRead({ activeAlphabetIndex }) { letterIndex ->
+            CurioVerticalScrollIndicator(
+                state = listState.scrollIndicatorState,
+                onScrollBy = { listState.dispatchRawDelta(it) },
+                alphabet = alphabetLetters,
+                activeAlphabetIndex = letterIndex,
+                onAlphabetSelect = onAlphabetSelect,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight()
+                    .padding(top = contentTop, bottom = 16.dp)
+            )
+        }
 
         // ── Floating back-to-top arrow (v26) — once the list is scrolled
         // down a ways (≈ a full screen of rows), a small arrow floats at the
@@ -1048,8 +1121,9 @@ fun TopicDatabaseScreen(navController: NavController) {
         val backToTopVisible by remember {
             derivedStateOf { listState.firstVisibleItemIndex >= BackToTopRowThreshold }
         }
+        ScrollScopedRead({ backToTopVisible }) { showArrow ->
         AnimatedVisibility(
-            visible = backToTopVisible,
+            visible = showArrow,
             enter = fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.85f),
             exit = scaleOut(tween(180), targetScale = 0.85f) + fadeOut(tween(180)),
             modifier = Modifier
@@ -1088,6 +1162,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     )
                 }
             }
+        }
         }
 
         // ── Category filter UI (v314) — the Category pill inside the hero
@@ -1329,6 +1404,27 @@ private val DatabaseFilterPanelHeight = 352.dp
 /** Rows scrolled before the floating back-to-top arrow appears (≈ one
  *  full screen — each row is roughly 70dp tall). */
 /** v292g — page size for Topic Database pagination. */
+/**
+ * v387 — read a HOT scroll value inside its own composition scope.
+ *
+ * A `derivedStateOf` read registers a dependency WHERE IT IS READ, so reading
+ * `activeAlphabetIndex` / `backToTopVisible` straight in the screen body put
+ * that dependency — and the recomposition it triggers — on the WHOLE page:
+ * every row crossing while scrolling re-ran TopicDatabaseScreen (its ~30
+ * remembered derivations, the lane lists, and a fresh emit of the whole
+ * LazyColumn). Confining the read to a tiny composable means only the control
+ * that actually shows the value recomposes per scroll step.
+ *
+ * Box-scoped so the overlays keep their `Modifier.align` placements.
+ */
+@Composable
+private fun <T> BoxScope.ScrollScopedRead(
+    value: () -> T,
+    content: @Composable BoxScope.(T) -> Unit
+) {
+    content(value())
+}
+
 private const val PAGE_SIZE = 100
 
 /** v328 — search results are capped at the best 50 (a broad query returns

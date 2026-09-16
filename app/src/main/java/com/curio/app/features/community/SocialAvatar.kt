@@ -1159,7 +1159,7 @@ private fun DrawScope.drawHairFront(art: AvatarArt, u: Float) {
                 topLeft = o(41f, 18.4f, u), size = Size(s(18f, u), s(5.4f, u)),
                 cornerRadius = cr(2.7f, u)
             )
-            avatarBow(o(50f, 21f), s(4.6f, u), art.garment, 0f)
+            avatarBow(o(50f, 21f, u), s(4.6f, u), art.garment, 0f)
         }
         13, 24 -> {                       // short crop
             drawArc(
