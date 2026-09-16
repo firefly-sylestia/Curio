@@ -1078,12 +1078,14 @@ internal fun PersonalToolDock(
                 Text("T", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 19.sp))
             }
             PersonalToolButton(
-label = "Todo checkbox",
-  active = active and FLAG_CHECKBOX != 0,
-  accent = accentInk, ink = ink,
-  onClick = { state.toggleListStyle(FLAG_CHECKBOX) }
-  ) {
-  Text("☐", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 19.sp))
+                label = "Todo checkbox",
+                active = active and FLAG_CHECKBOX != 0,
+                accent = accentInk,
+                ink = ink,
+                onClick = { state.toggleListStyle(FLAG_CHECKBOX) },
+                onLongClick = { state.cycleListStyle() }
+            ) {
+                CurioIcon(CurioIcons.TaskAlt, null, size = 19.dp)
             }
             PersonalToolButton(
                 label = "Small text",
