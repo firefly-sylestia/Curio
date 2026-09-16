@@ -80,7 +80,6 @@ import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
-import com.curio.app.data.supabase.KIND_REPOST
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.KIND_NOTE
 import com.curio.app.data.supabase.KIND_QUOTE
@@ -179,12 +178,6 @@ private fun topicMatchRank(entry: TopicIndexEntry, q: String): Int {
 internal fun CommunityPostScreen(
     onDismiss: () -> Unit,
     /**
-     * The post being QUOTE-REPOSTED (v389): non-null opens the composer in the
-     * REPOST kind with this card attached, and it rides the post as
-     * `quote_source_id`. Null is the plain composer.
-     */
-    quoteSource: CommunityCard? = null,
-    /**
      * Posts the draft. [repostOf] is the id of a locally-kept deleted post when
      * the writer is putting one back on the wall — the caller drops it from the
      * archive once the server has accepted it.
@@ -197,7 +190,7 @@ internal fun CommunityPostScreen(
     val listState = rememberLazyListState()
     val context = LocalContext.current
 
-    var kind by remember { mutableStateOf(if (quoteSource != null) KIND_REPOST else KIND_NOTE) }
+    var kind by remember { mutableStateOf(KIND_NOTE) }
     var text by remember { mutableStateOf("") }
     var caption by remember { mutableStateOf("") }
     var credit by remember { mutableStateOf("") }
@@ -308,16 +301,13 @@ internal fun CommunityPostScreen(
         style = style.name,
         aspect = aspect.name,
         bodyScale = bodyScale,
-        byline = if (kind == KIND_QUOTE) credit else "",
-        quoteSourceId = if (kind == KIND_REPOST) quoteSource?.id else null,
-        quoteWords = if (kind == KIND_REPOST) text else ""
+        byline = if (kind == KIND_QUOTE) credit else ""
     )
 
     val canPost = when {
         kind == KIND_CARD && topicPresentation == TopicPresentation.CARD -> topic != null && (text.isNotBlank() || caption.isNotBlank())
         kind == KIND_CARD && topicPresentation == TopicPresentation.NOTE -> topic != null && text.isNotBlank()
         kind == KIND_QUOTE -> text.isNotBlank() && credit.isNotBlank()
-        kind == KIND_REPOST -> text.isNotBlank() && quoteSource != null
         else -> text.isNotBlank()
     }
 
@@ -355,7 +345,6 @@ internal fun CommunityPostScreen(
                 PostKindRail(
                     selected = kind,
                     accent = accent,
-                    quotedPostAvailable = quoteSource != null,
                     onSelect = { selected ->
                         kind = selected
                         // v385 — changing the kind COLLAPSES the chooser. It
@@ -377,16 +366,6 @@ internal fun CommunityPostScreen(
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // ── The quoted post, for a quote-repost ─────────────────
-                    // Shown UNDER the writer's own field as a quiet chip, so
-                    // the composer answers "what am I quoting?" without a
-                    // second trip back to the wall.
-                    if (kind == KIND_REPOST) {
-                        item(key = "quoted-chip") {
-                            QuoteSourceChip(source = quoteSource)
-                        }
-                    }
-
                     // ── The topic chooser leads a topic post ────────────────
                     if (kind == KIND_CARD) {
                         item(key = "topic") {
@@ -416,7 +395,6 @@ internal fun CommunityPostScreen(
                             topic = topic,
                             draft = draft,
                             accent = accent,
-                            quoted = quoteSource,
                             onTopicNote = { topicPresentation = TopicPresentation.NOTE },
                             onTopicCard = { topicPresentation = TopicPresentation.CARD }
                         )
@@ -426,10 +404,7 @@ internal fun CommunityPostScreen(
                         ComposerEditorField(
                             kind = kind,
                             value = text,
-                            onValueChange = { text = it.take(if (kind == KIND_CARD) 700 else 1200) },
-                            placeholder = if (kind == KIND_REPOST) {
-                                "Say something about it…"
-                            } else null
+                            onValueChange = { text = it.take(if (kind == KIND_CARD) 700 else 1200) }
                         )
                     }
 
@@ -726,8 +701,6 @@ private fun ComposerTopBar(
 private fun PostKindRail(
     selected: String,
     accent: Color,
-    /** The Repost pill only exists when a post was quoted in from the wall. */
-    quotedPostAvailable: Boolean,
     onSelect: (String) -> Unit
 ) {
     Row(
@@ -736,9 +709,6 @@ private fun PostKindRail(
     ) {
         KindPill("Note", "A thought", KIND_NOTE, selected, accent, onSelect)
         KindPill("Topic", "A discovery", KIND_CARD, selected, accent, onSelect)
-        if (quotedPostAvailable) {
-            KindPill("Repost", "Quote a post", KIND_REPOST, selected, accent, onSelect)
-        }
         KindPill("Quote", "Words worth keeping", KIND_QUOTE, selected, accent, onSelect)
     }
 }
@@ -784,8 +754,6 @@ private fun LivePostPreview(
     topic: CurioTopic?,
     draft: CommunityCardDraft,
     accent: Color,
-    /** REPOST only: the quoted post, nested in the preview as the wall will. */
-    quoted: CommunityCard? = null,
     onTopicNote: () -> Unit,
     onTopicCard: () -> Unit
 ) {
@@ -858,18 +826,6 @@ private fun LivePostPreview(
                         body = draft.factText,
                         credit = draft.byline,
                         accent = accent
-                    )
-                } else if (stateKind == KIND_REPOST) {
-                    // The preview IS the wall's rendering, at preview size: the
-                    // member's words above the quoted post, nested exactly as
-                    // SocialTextPost nests it below — the only reason a preview
-                    // is worth having is that it does not lie.
-                    TextPostPreview(
-                        label = "REPOST",
-                        body = draft.quoteWords,
-                        credit = "",
-                        accent = accent,
-                        quoted = quoted
                     )
                 } else {
                     TextPostPreview(
@@ -945,9 +901,7 @@ private fun TextPostPreview(
     body: String,
     credit: String,
     /** The post's own accent — a quote is pulled in the colour it will wear. */
-    accent: Color,
-    /** REPOST only: the quoted post, nested under the words as the wall will. */
-    quoted: CommunityCard? = null
+    accent: Color
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -982,43 +936,6 @@ private fun TextPostPreview(
                 color = if (body.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                 lineHeight = 29.sp
             )
-            quoted?.let { source ->
-                // The nested quoted post, in the SAME shape the wall's
-                // SocialTextPost draws it — author line, then the words (or
-                // the pull-quote, for a quoted quote).
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = source.authorLabel,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1
-                        )
-                        if (source.kind == KIND_QUOTE) {
-                            SocialPullQuote(
-                                words = source.factText,
-                                credit = source.byline,
-                                accent = parseAccent(source.accentHex)
-                            )
-                        } else {
-                            Text(
-                                text = source.factText,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 6
-                            )
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -1111,21 +1028,17 @@ private fun draftPreviewCard(draft: CommunityCardDraft): CommunityCard {
 private fun ComposerEditorField(
     kind: String,
     value: String,
-    onValueChange: (String) -> Unit,
-    /** A REPOST hands its own line in; the kinds below keep theirs. */
-    placeholder: String? = null
+    onValueChange: (String) -> Unit
 ) {
-    val placeholder = placeholder ?: when (kind) {
+    val placeholder = when (kind) {
         KIND_CARD -> "Write the fact in your own words…"
         KIND_QUOTE -> "Write the quote…"
-        KIND_REPOST -> "Say something about it…"
         else -> "What are you thinking about?"
     }
     LabeledTextField(
         label = when (kind) {
             KIND_CARD -> "Your version"
             KIND_QUOTE -> "The quote"
-            KIND_REPOST -> "Your words"
             else -> "Your note"
         },
         value = value,
@@ -1134,50 +1047,6 @@ private fun ComposerEditorField(
         minHeightDp = 130,
         onValueChange = onValueChange
     )
-}
-
-/**
- * The quoted post, as a quiet chip UNDER the composer's own field — who wrote
- * it and what it says, read at a glance. A quote-repost of a post the reader
- * cannot see (expired mid-write) says so rather than pretending.
- */
-@Composable
-private fun QuoteSourceChip(source: CommunityCard?) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        if (source == null) {
-            Text(
-                text = "The post you were quoting is gone.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
-            )
-        } else {
-            Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = source.authorLabel,
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-                Text(
-                    text = source.factText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
 }
 
 @Composable

@@ -1,5 +1,103 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — revert the quote-repost feature and the social wall's card size)
+
+Verbatim: "from this revert the quote repost feature only" (commit `2a9d4ea3`,
+which shipped Follow members + Quote-repost together) "and " (commit
+`6ffb0272`) "revert the topic card view in social page, i mean revert its size
+which got chnaged in that commit".
+
+### Decisions (ask_user, before touching anything)
+
+`6ffb0272` changed TWO sizes on the wall, so the pick was put to the user:
+
+1. **"Both of them"** — the topic card ART (that commit rewrote
+   `CommunityCardCanvas` to lay the card out at its own design size and scale
+   it as one layer, which is the "shrunken art" `86d37814` had already fixed
+   on 2026-09-14) AND the post ROW (compact padding / 32dp portraits). Both go
+   back to their pre-commit state.
+2. **"Yes — remove it all"** — the quote-repost database side comes out of
+   `supabase/schema.sql` too (the two columns and the widened kind CHECK).
+   Nothing has to be re-pasted: the file only ever ADDS columns, so a live
+   database that already ran the newer file keeps them, unused.
+3. **"Remove the switch (recommended)"** — the wall's density experiment is
+   settled, so the "Roomy social wall" User-experiments row and the
+   `communityRoomyWall` preference key are gone with the compact spacing
+   (root AGENTS: an experiment's toggle is removed once the A/B is decided).
+
+### Reverted — the quote-repost (v389)
+
+- **`CommunityApi.kt`:** `CommunityCard.quoteSourceId/quoteWords/quoteSource`,
+  `CommunityCardDraft.quoteSourceId/quoteWords`, the `KIND_REPOST` constant and
+  the widened `isTextOnly`, the `quote_source:…` self-join in `CARD_COLUMNS`,
+  the REPOST branches in `draftProblem`, the `quote_source_id`/`quote_words`
+  payload block, and the three parsed quote fields.
+- **`CommunityPostScreen.kt`:** the `quoteSource` parameter, the REPOST
+  starting kind, the Repost pill (`PostKindRail.quotedPostAvailable`), the
+  quoted-post chip (`QuoteSourceChip`, deleted), the nested `quoted` block in
+  `TextPostPreview`, the `placeholder` parameter on `ComposerEditorField`, and
+  the two REPOST cases in the preview.
+- **`CommunityScreen.kt`:** the `quoting` state and `onQuote` (the wall's
+  second quote icon), and the `quoteSource` wiring into the composer.
+- **`SocialComponents.kt`:** the whole `KIND_REPOST` branch of
+  `SocialTextPost` (the nested quoted card) and the import.
+- **`supabase/schema.sql`:** the two `add column` lines, the guarded
+  `community_cards_kind_v2` constraint block, and the kind CHECK back to
+  `('CARD', 'NOTE', 'QUOTE')`. The `member_follows` table, its policies and
+  its entry in the ban guard's table list STAY (follows were not reverted).
+
+### Reverted — the wall's card size (v388)
+
+- **`CommunityCardCanvas`** is back to the v86d37814 shape: the real share card
+  laid out DIRECTLY at the width the row offers, capped at the aspect's design
+  width (`minOf(maxWidth, aspect.widthDp.dp)` + `aspectRatio`) — no
+  `graphicsLayer` scaling at the design size, no pinned font scale, so the wall
+  row, the composer preview and the post's page all draw the card at their own
+  width again. The doc block, the now-unused
+  `CompositionLocalProvider`/`LocalDensity`/`Density`/`TransformOrigin` imports
+  and the duplicate `graphicsLayer` import the commit added went with it.
+- **`CommunityCardItem`** is the airy row again: 24dp shape, 12dp padding,
+  36dp portrait, 10dp name inset, 8dp seams. The `compact` parameter, its
+  `AppPreferences.communityRoomyWallState` call site, the state field, its
+  loader line, `KEY_COMMUNITY_ROOMY_WALL`, both preference functions and the
+  Experiments switch row were deleted.
+- **Kept** (not part of either size): the rose **accent fill**
+  (`communityCardFill()`), the pull-quote (`SocialPullQuote`), drafts + locally
+  kept deleted posts, the Post pill's scroll hiding, the Following chip and the
+  follow pill.
+
+### Docs
+
+`app/AGENTS.md` — the wall's-look bullet now says the airier row is shipped and
+names the removed switch; the "Follows + quote-reposts" bullet is "Follows"
+again and records that the quote-repost was built and then reverted. The store
+changelog `20260922.txt` lost the quote-repost ADD line (it never shipped) and
+the "wall cards are tighter" half of its FIX line; the "topic cards render
+whole and crisp" FIX line stays — it describes the rendering this revert
+restores.
+
+### Verified
+
+Brace balance on all six touched Kotlin files (`scripts/check_braces.js`),
+`git diff --check` clean, and a repo-wide sweep for `KIND_REPOST`,
+`quoteSource(Id)`, `quoteWords`, `quote_source`, `communityRoomyWall`,
+`CompositionLocalProvider`, `TransformOrigin` and `LocalDensity` inside
+`app/src/main/java/com/curio/app/features/community` + `data/supabase` returns
+nothing. One deliberate near-revert: `parseOneCard` stays (the feature commit
+extracted it for the nested parse), but it is honestly non-null now instead of
+returning a `?` the loop had to unwrap.
+
+Not compiled here (no Android SDK — root AGENTS rule); CI is the compile check.
+
+### Still open (named, not silently dropped)
+
+Prompt.md's "Next prompt" slot still holds the member's separate request about
+chat notifications, the journal/book pages, the formatting tools and the +
+sheet — it was NOT part of this request and is left pending, surfaced to the
+user.
+
+---
+
 ## Request (2026-09-16, SHIPPED (`736cdb9b`) — the compile fix, then FOLLOW MEMBERS + QUOTE-REPOST built on top)
 
 The CI log the user pasted listed eight broken files; every one was a real

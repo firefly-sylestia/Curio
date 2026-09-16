@@ -48,7 +48,6 @@ import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.CurioDirectMessage
 import com.curio.app.data.supabase.KIND_QUOTE
-import com.curio.app.data.supabase.KIND_REPOST
 import com.curio.app.data.supabase.SOCIAL_AVATAR_STYLE_COUNT
 import com.curio.app.data.supabase.CurioDmThread
 import com.curio.app.data.supabase.CurioFriend
@@ -486,68 +485,6 @@ internal fun SocialTextPost(
                     credit = card.byline,
                     accent = parseAccent(card.accentHex)
                 )
-                return@Column
-            }
-            if (card.kind == KIND_REPOST) {
-                // A REPOST is the member's words ABOVE somebody else's post —
-                // their line, then the quoted post as a proper nested card
-                // (a topic card keeps its art; a note or quote shows its
-                // words; a quote keeps its pull-quote shape). The nesting is
-                // what makes it a quote-repost rather than a copy: the words
-                // stay theirs, and the quoted post is one tap from its own
-                // page.
-                if (card.quoteWords.isNotBlank()) {
-                    Text(
-                        text = card.quoteWords,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                card.quoteSource?.let { quoted ->
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(7.dp)
-                            ) {
-                                SocialAvatar(
-                                    style = quoted.authorAvatar,
-                                    avatarSize = 22.dp,
-                                    onClick = null
-                                )
-                                Text(
-                                    text = quoted.authorLabel,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
-                            }
-                            if (quoted.kind == KIND_QUOTE) {
-                                SocialPullQuote(
-                                    words = quoted.factText,
-                                    credit = quoted.byline,
-                                    accent = parseAccent(quoted.accentHex)
-                                )
-                            } else {
-                                Text(
-                                    text = quoted.factText,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 6
-                                )
-                            }
-                        }
-                    }
-                }
                 return@Column
             }
             Text(

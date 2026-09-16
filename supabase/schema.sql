@@ -156,7 +156,7 @@ create table if not exists public.community_cards (
     constraint community_cards_fact_len_v2 check (
         char_length(fact_text) <= 600 and char_length(fact_text) >= 1
     ),
-    constraint community_cards_kind check (kind in ('CARD', 'NOTE', 'QUOTE', 'REPOST')),
+    constraint community_cards_kind check (kind in ('CARD', 'NOTE', 'QUOTE')),
     constraint community_cards_scale check (body_scale between 0.5 and 2.0),
     constraint community_cards_style check (style in
         ('PAPER','VINYL','COLLAGE','NEUMORPHIC','EDITORIAL','MINIMAL','SIGNATURE')),
@@ -165,24 +165,7 @@ create table if not exists public.community_cards (
 
 alter table public.community_cards add column if not exists caption text not null default '';
 alter table public.community_cards add column if not exists kind text not null default 'CARD';
-alter table public.community_cards add column if not exists quote_source_id uuid references public.community_cards (id) on delete set null;
-alter table public.community_cards add column if not exists quote_words text not null default '';
 alter table public.community_cards alter column topic_name set default '';
-
-do $$
-begin
-    -- The REPOST kind (a member's words above somebody's post) needs its two
-    -- carrying columns; the kind CHECK is widened in the same breath, because
-    -- a client that inserts REPOST before the constraint is replaced would
-    -- fail on the old one.
-    if not exists (
-        select 1 from pg_constraint where conname = 'community_cards_kind_v2'
-    ) then
-        alter table public.community_cards drop constraint if exists community_cards_kind;
-        alter table public.community_cards add constraint community_cards_kind_v2
-            check (kind in ('CARD', 'NOTE', 'QUOTE', 'REPOST'));
-    end if;
-end $$;
 
 -- Upgrade path for a project that already ran an earlier version of this
 -- file: the original fact constraint demanded at least one character of a
@@ -2684,7 +2667,8 @@ end $$;
 do $$
 declare
     t text;
-begin        foreach t in array array['community_cards', 'community_comments',
+begin
+    foreach t in array array['community_cards', 'community_comments',
                              'community_reactions', 'community_comment_reactions',
                              'friend_requests', 'dm_messages', 'dm_typing',
                              'dm_reactions', 'member_blocks', 'member_follows', 'profiles']

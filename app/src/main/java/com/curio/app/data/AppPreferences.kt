@@ -1156,13 +1156,9 @@ object AppPreferences {
     // explicitly switched the Experiments toggle OFF keeps that choice — only
     // the untouched default moved (see [isSocialTextEditingEnabled]).
     var socialTextEditingState by mutableStateOf(true)
-    // v387 — THE WALL'S DENSITY (Settings → Experiments → Social). The wall's
-    // cards are COMPACT as shipped (the request was rows that take less room),
-    // and this switch is the A/B partner that brings the old roomy spacing back
-    // without a code change — an experimental visual ships as an opt-in toggle,
-    // never as a silent swap.
-    var communityRoomyWallState by mutableStateOf(false)
-        private set
+    // v389 — the wall's density experiment CLOSED: the compact card spacing
+    // (and its "Roomy social wall" switch, v387) was reverted on the member's
+    // call, so the airier row is the shipped one and nothing here toggles it.
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -1748,7 +1744,6 @@ object AppPreferences {
         screenRevealEnabledState = isScreenRevealEnabled(context)
         captureStudioState = isCaptureStudioEnabled(context)
         socialTextEditingState = isSocialTextEditingEnabled(context)
-        communityRoomyWallState = isCommunityRoomyWallEnabled(context)
         cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -2092,7 +2087,6 @@ object AppPreferences {
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
     private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
   private const val KEY_SOCIAL_TEXT_EDITING = "social_text_editing_enabled"
-  private const val KEY_COMMUNITY_ROOMY_WALL = "community_roomy_wall"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
@@ -2234,21 +2228,6 @@ object AppPreferences {
      *  install (and every install that never touched the switch) gets it. */
     fun isSocialTextEditingEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_SOCIAL_TEXT_EDITING, true)
-
-    /**
-     * v387 — whether the social wall uses its ROOMY card spacing.
-     *
-     * Default OFF, i.e. the wall is COMPACT: the delivered look is the dense
-     * one, and this switch is how a member (or a design pass) compares it
-     * against the earlier, airier rows without touching code.
-     */
-    fun isCommunityRoomyWallEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_COMMUNITY_ROOMY_WALL, false)
-
-    fun setCommunityRoomyWallEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_COMMUNITY_ROOMY_WALL, enabled).apply()
-        communityRoomyWallState = enabled
-    }
 
     fun setSocialTextEditingEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SOCIAL_TEXT_EDITING, enabled).apply()

@@ -214,12 +214,6 @@ fun UserExperimentsScreen(navController: NavController) {
                         "Show edit controls for your own direct messages and comments. Experimental.",
                         AppPreferences.socialTextEditingState
                     ) { AppPreferences.setSocialTextEditingEnabled(context, it) }
-                    ExperimentSwitchRow(
-                        "Roomy social wall",
-                        "The wall's posts are compact by default — this brings the earlier, " +
-                            "airier card spacing back for comparison. Experimental.",
-                        AppPreferences.communityRoomyWallState
-                    ) { AppPreferences.setCommunityRoomyWallEnabled(context, it) }
                 }
             }
 

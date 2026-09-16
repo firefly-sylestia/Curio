@@ -36,7 +36,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -50,11 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -156,8 +151,6 @@ fun CommunityScreen(navController: NavController) {
     // request failed), so the page can say so instead of pretending.
     var offlineCopy by remember { mutableStateOf(false) }
     var composing by remember { mutableStateOf(false) }
-    // The post a quote-repost carries in (opened from a card's action row).
-    var quoting by remember { mutableStateOf<CommunityCard?>(null) }
     var reporting by remember { mutableStateOf<CommunityCard?>(null) }
     var deleteTarget by remember { mutableStateOf<CommunityCard?>(null) }
     var commentsFor by remember { mutableStateOf<CommunityCard?>(null) }
@@ -619,7 +612,6 @@ fun CommunityScreen(navController: NavController) {
                     Box(Modifier.animateItem()) {
                         CommunityCardItem(
                             card = card,
-                            compact = !AppPreferences.communityRoomyWallState,
                             onOpen = { navController.navigate(CurioRoutes.communityCard(card.id)) },
                             onAuthor = {
                                 if (card.authorId.isNotBlank()) {
@@ -676,7 +668,6 @@ fun CommunityScreen(navController: NavController) {
                                 }
                             },
                             onReport = { reporting = card },
-                            onQuote = { quoting = card; composing = true },
                             onDelete = { deleteTarget = card }
                         )
                     }
@@ -741,8 +732,7 @@ fun CommunityScreen(navController: NavController) {
 
     if (composing && token != null) {
         CommunityPostScreen(
-            onDismiss = { composing = false; quoting = null },
-            quoteSource = quoting,
+            onDismiss = { composing = false },
             onPost = { draft, repostOf ->
                 scope.launch {
                     CommunityApi.post(
@@ -873,25 +863,12 @@ fun CommunityScreen(navController: NavController) {
 /**
  * A community card drawn at whatever width it is given.
  *
- * v388 — ONE CARD, ONE RATIO, EVERYWHERE. The card used to be laid out at
- * whatever width the caller offered, so its own "smart fit" re-sized the
- * title, the fact box and the body for each surface: a post on the wall, the
- * composer's preview and the post's full page each showed the same card with
- * DIFFERENT proportions — text that filled the card in a preview came out
- * small and lost on the full page, and a reviewer comparing the two could not
- * tell whether the difference was theirs or the renderer's.
- *
- * The card is now always laid out at its own DESIGN size (the aspect's width)
- * and the whole drawing is scaled to the width it is given, as one object. So
- * every proportion inside it — margins, the title's size against the fact
- * box, the byline's weight — is identical in the wall's row, the composer's
- * preview and the full page, at any screen width and at any system font scale
- * (the design layout pins the font scale too, because the card is a poster:
- * it scales as one image rather than re-flowing).
- *
- * Nothing is cropped and no row reserves height the art does not use: the
- * scaled footprint is computed from the same scale, so the layout still knows
- * exactly how much room the card takes.
+ * The REAL share card is rendered (never a simplified lookalike), laid out
+ * DIRECTLY at the width its row offers — the same way the card editor draws
+ * its own preview (a 280dp base). The card's own layout and smart fit size the
+ * title, the fact box and the text for the size they are handed, so a post
+ * shows the WHOLE card, crisp: nothing is scaled as a layer, nothing is
+ * cropped, and no row reserves height the art does not use.
  */
 @Composable
 internal fun CommunityCardCanvas(
@@ -920,48 +897,27 @@ internal fun CommunityCardCanvas(
             modifier = Modifier.fillMaxWidth(widthFraction.coerceIn(0.2f, 1f)),
             contentAlignment = Alignment.Center
         ) {
-            // The card's own design size: the ONE layout every surface shares.
-            val designWidth = aspect.widthDp.dp
-            val designHeight = aspect.heightDp.dp
-            // What we are handed decides only the SCALE, never the layout.
-            val scale = maxWidth.value / designWidth.value
-            Box(
+            // The card keeps its own aspect ratio and is capped at its design
+            // width, so a wide window shows it at its natural size instead of
+            // inflating the art.
+            val targetWidth = minOf(maxWidth, aspect.widthDp.dp)
+            TopicShareCard(
+                topicName = card.topicName,
+                categoryName = card.categoryName,
+                categoryGlyph = card.categoryGlyph,
+                accent = accent,
+                factText = card.factText,
+                // The card wears the author's CURRENT username, so renaming
+                // yourself updates everything you ever posted.
+                sharerName = card.authorLabel,
+                aspect = aspect,
+                style = style,
+                byline = card.byline,
+                bodyScale = card.bodyScale,
                 modifier = Modifier
-                    .width(maxWidth)
-                    .height(designHeight * scale)
-            ) {
-                CompositionLocalProvider(
-                    // A poster does not re-flow: pinning the font scale means a
-                    // member browsing with large text gets the same card as
-                    // everybody else, just bigger with the screen.
-                    LocalDensity provides LocalDensity.current.run {
-                        Density(density = density, fontScale = 1f)
-                    }
-                ) {
-                    TopicShareCard(
-                        topicName = card.topicName,
-                        categoryName = card.categoryName,
-                        categoryGlyph = card.categoryGlyph,
-                        accent = accent,
-                        factText = card.factText,
-                        // The card wears the author's CURRENT username, so
-                        // renaming yourself updates everything you ever posted.
-                        sharerName = card.authorLabel,
-                        aspect = aspect,
-                        style = style,
-                        byline = card.byline,
-                        bodyScale = card.bodyScale,
-                        modifier = Modifier
-                            .width(designWidth)
-                            .height(designHeight)
-                            .graphicsLayer {
-                                scaleX = scale
-                                scaleY = scale
-                                transformOrigin = TransformOrigin(0f, 0f)
-                            }
-                    )
-                }
-            }
+                    .width(targetWidth)
+                    .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+            )
         }
     }
 }
@@ -981,25 +937,17 @@ private fun CommunityCardItem(
   onLike: () -> Unit,
   onDislike: () -> Unit,
   onReport: () -> Unit,
-    /** Quote-repost: opens the composer with this post attached under the words. */
-    onQuote: () -> Unit,
-    onDelete: () -> Unit,
-    /**
-     * The DENSE row (the shipped default): tighter padding, a smaller
-     * portrait, closer seams. The Experiments switch "Roomy social wall" flips
-     * this back to the airier spacing so the two can be compared live.
-     */
-    compact: Boolean = true
+    onDelete: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(if (compact) 22.dp else 24.dp),
+        shape = RoundedCornerShape(24.dp),
         // The ACCENT's own tint, never the plain cream container: the wall is
         // the community's surface, and it should wear the app's colour the way
         // every other surface does.
         color = communityCardFill(),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(if (compact) 10.dp else 12.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             // ── Who posted it ────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1009,14 +957,11 @@ private fun CommunityCardItem(
                     .clickable(onClick = onAuthor)
                     .padding(vertical = 2.dp)
             ) {
-                SocialAvatar(
-                    style = card.authorAvatar,
-                    avatarSize = if (compact) 32.dp else 36.dp
-                )
+                SocialAvatar(style = card.authorAvatar, avatarSize = 36.dp)
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = if (compact) 8.dp else 10.dp)
+                        .padding(start = 10.dp)
                 ) {
                     // The DISPLAY name leads and the @username rides the line
                     // beneath it, beside the card's age: a name and a handle
@@ -1049,7 +994,7 @@ private fun CommunityCardItem(
             }
 
             if (card.caption.isNotBlank()) {
-                Spacer(Modifier.height(if (compact) 5.dp else 8.dp))
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = card.caption,
                     style = MaterialTheme.typography.bodyMedium,
@@ -1058,7 +1003,7 @@ private fun CommunityCardItem(
                 )
             }
 
-            Spacer(Modifier.height(if (compact) 6.dp else 8.dp))
+            Spacer(Modifier.height(8.dp))
             if (card.kind == KIND_CARD) {
                 CommunityCardCanvas(
                     card = card,
@@ -1107,10 +1052,6 @@ private fun CommunityCardItem(
                 // report is a decision, not a reading task, and two worded
                 // pills crowded the row's tail. The icon keeps its label for
                 // accessibility, so the tap target never loses its meaning.
-                // Quote-repost sits beside them — writing about somebody's
-                // post is a rarer move than reacting, but a commoner one than
-                // reporting, and it opens the composer with the post attached.
-                CommunityAction(CurioIcons.FormatQuote, "", false, onQuote)
                 if (card.mine) {
                     CommunityAction(CurioIcons.Delete, "", false, onDelete)
                 }

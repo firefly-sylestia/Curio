@@ -36,8 +36,7 @@ data class CommunityCard(
     val authorDisplayName: String = "",
     /** The author's chosen portrait (0–15). */
     val authorAvatar: Int = 0,
-    /** CARD (a topic share card), NOTE (a text-only post), QUOTE, or REPOST
-     *  (the member's words above somebody else's post). */
+    /** CARD (a topic share card), NOTE (a text-only post) or QUOTE. */
     val kind: String = "CARD",
     val topicName: String,
     val categoryName: String,
@@ -59,13 +58,7 @@ data class CommunityCard(
   /** How many replies hang under the card. */
     val commentCount: Int,
     /** True when this device's account posted the card. */
-    val mine: Boolean,
-    /** For a REPOST: the id of the post being quoted (null otherwise). */
-    val quoteSourceId: String? = null,
-    /** For a REPOST: the member's own words above the quoted post. */
-    val quoteWords: String = "",
-    /** For a REPOST: the quoted post itself, fully joined at read time. */
-    val quoteSource: CommunityCard? = null
+    val mine: Boolean
 ) {
     /** Hours left before the card disappears, floored at 0. */
     val hoursLeft: Long
@@ -256,28 +249,22 @@ data class CommunityCardDraft(
     val factText: String,
     /** The poster's own line above the card — optional, never media. */
     val caption: String = "",
-    /** CARD, NOTE, QUOTE or REPOST — the renderer a card is rebuilt with. */
+    /** CARD, NOTE or QUOTE — the renderer a card is rebuilt with. */
     val kind: String = KIND_CARD,
     val style: String = "PAPER",
     val aspect: String = "CLASSIC",
     val bodyScale: Float = 1f,
-    val byline: String = "",
-    /** REPOST only: the id of the post being quoted. */
-    val quoteSourceId: String? = null,
-    /** REPOST only: the member's own words above the quoted post. */
-    val quoteWords: String = ""
+    val byline: String = ""
 ) {
     /** True for the text-only posts that carry no topic and no card art. */
-    val isTextOnly: Boolean get() = kind == KIND_NOTE || kind == KIND_QUOTE || kind == KIND_REPOST
+    val isTextOnly: Boolean get() = kind == KIND_NOTE || kind == KIND_QUOTE
 }
 
 /** A topic share card. */
-const val KIND_CARD = "CARD"    /** A tweet-style text post — words and nothing else. */
-const val KIND_NOTE = "NOTE"
+const val KIND_CARD = "CARD"
 
-/** The member's words ABOVE somebody else's post, kept in [CommunityCard.quoteWords];
- *  the quoted post itself rides in [CommunityCard.quoteSource]. */
-const val KIND_REPOST = "REPOST"
+/** A tweet-style text post — words and nothing else. */
+const val KIND_NOTE = "NOTE"
 
 /** A line someone else said, credited to them. */
 const val KIND_QUOTE = "QUOTE"
@@ -491,10 +478,6 @@ object CommunityApi {
     private const val CARD_COLUMNS =
         "id,owner,author_handle,kind,topic_name,category_name,category_glyph,accent_hex," +
             "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at," +
-            "quote_source_id,quote_words," +
-            "quote_source:community_cards!community_cards_quote_source_id_fkey(" +
-            "id,owner,author_handle,kind,topic_name,category_name,category_glyph,accent_hex," +
-            "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at)," +
             "community_reactions(user_id,kind),community_comments(id)"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
@@ -529,12 +512,9 @@ object CommunityApi {
         // A text-only post has no topic BY DESIGN (that is the point of it),
         // so the topic requirement applies to topic cards alone.
         draft.kind == KIND_CARD && draft.topicName.isBlank() -> "What is your card about?"
-        draft.kind == KIND_REPOST && draft.quoteSourceId.isNullOrBlank() ->
-            "The post you were quoting is gone."
         draft.factText.isBlank() -> when (draft.kind) {
             KIND_QUOTE -> "Write the quote first."
             KIND_NOTE -> "Write something first."
-            KIND_REPOST -> "Add your words above the post you're quoting."
             else -> "Add the words you want on the card."
         }
         draft.factText.length > MAX_FACT_CHARS ->
@@ -821,10 +801,6 @@ object CommunityApi {
                 .put("aspect", draft.aspect)
                 .put("body_scale", draft.bodyScale.toDouble())
                 .put("byline", draft.byline.trim())
-            if (draft.kind == KIND_REPOST) {
-                payload.put("quote_source_id", draft.quoteSourceId)
-                payload.put("quote_words", draft.quoteWords.trim())
-            }
             val request = SupabaseClient.requestBuilder(CARDS, accessToken)
                 .header("Prefer", "return=representation")
                 .post(payload.toString().toRequestBody(jsonMediaType))
@@ -1418,13 +1394,13 @@ object CommunityApi {
         val cards = ArrayList<CommunityCard>(array.length())
         for (index in 0 until array.length()) {
             val row = array.optJSONObject(index) ?: continue
-            parseOneCard(row, myUserId)?.let { cards += it }
+            cards += parseOneCard(row, myUserId)
         }
         return cards
     }
 
-    /** One REST row → one card. Null when the row is not a card at all. */
-    private fun parseOneCard(row: JSONObject, myUserId: String?): CommunityCard? {
+    /** One REST row → one card. */
+    private fun parseOneCard(row: JSONObject, myUserId: String?): CommunityCard {
             val reactions = row.optJSONArray("community_reactions")
   var likes = 0
   var dislikes = 0
@@ -1465,18 +1441,7 @@ object CommunityApi {
                 dislikeCount = dislikes,
                 dislikedByMe = dislikedByMe,
                 commentCount = row.optJSONArray("community_comments")?.length() ?: 0,
-                mine = myUserId != null && row.optString("owner") == myUserId,
-                quoteSourceId = row.optString("quote_source_id")
-                    .takeIf { it.isNotBlank() && it != "null" },
-                quoteWords = row.optString("quote_words"),
-                quoteSource = row.optJSONObject("quote_source")?.let { q ->
-                    // The quoted post is parsed with an EMPTY viewer id: its
-                    // reaction counts arrive with the join but the viewer's
-                    // own state belongs to the outer row's reader, and a
-                    // nested parse with `myUserId` would claim reactions
-                    // that were never this member's.
-                    parseOneCard(q, myUserId = null)
-                }
+                mine = myUserId != null && row.optString("owner") == myUserId
             )
     }
 
