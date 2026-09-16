@@ -271,6 +271,11 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         ) {
                             LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
                             DownloadPill(enabled = !lookingUp) { downloadSheet = true }
+                            if (current.coverUrl.startsWith("content://")) {
+                                TextButton(onClick = {
+                                    navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
+                                }) { Text("Read") }
+                            }
                         }
                         if (lookingUp || lookupNote != null) {
                             Spacer(Modifier.height(6.dp))

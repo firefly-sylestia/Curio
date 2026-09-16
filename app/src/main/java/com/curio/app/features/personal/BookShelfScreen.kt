@@ -559,46 +559,6 @@ private fun AddBookSheet(
         addBook(name, "", uri.toString(), 0)
     }
 
-  
-  /**
-     * Puts the book on the shelf.
-     *
-     * [catalogId] and [pages] are filled when the book came from Curio's own
-     * catalog: the id is what lets the book's page read the real chapter names,
-     * page ranges and summaries back out of the topic JSON, and the page count
-     * gives "how long is this book" an answer that did not come from a guess.
-     */
-    fun addBook(
-        title: String,
-        author: String,
-        cover: String,
-        chapters: Int,
-        catalogId: String = "",
-        pages: Int = 0
-    ) {
-        val trimmed = title.trim()
-        if (trimmed.isEmpty()) return
-        val id = newPersonalBookId()
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    PersonalRepositoryHolder.repo.saveBook(
-                        PersonalBookEntity(
-                            id = id,
-                            title = trimmed,
-                            author = author.trim(),
-                            coverUrl = cover,
-                            totalChapters = chapters.coerceAtLeast(0),
-                            currentChapter = 0,
-                            catalogId = catalogId,
-                            pageCount = pages.coerceAtLeast(0)
-                        )
-                    )
-                }
-            }
-            onAdded(id)
-        }
-    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

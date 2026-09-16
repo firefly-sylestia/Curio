@@ -627,6 +627,7 @@ private fun PersonalTextBlock(
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
     val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
+    var checkboxChecked by remember(id) { mutableStateOf(false) }
     // ONE hint for the whole page: the empty-line "Write…" on every new
     // paragraph read as a page full of the word "write".
     val showHint = text.isEmpty() && !state.hasText()
@@ -697,7 +698,12 @@ private fun PersonalTextBlock(
                                 cornerRadius = CornerRadius(2.dp.toPx()),
                                 style = Stroke(width = 1.6.dp.toPx())
                             )
+                            if (checkboxChecked) {
+                                drawLine(bulletInk, Offset(3.dp.toPx(), 13.dp.toPx()), Offset(6.dp.toPx(), 16.dp.toPx()), strokeWidth = 1.8.dp.toPx())
+                                drawLine(bulletInk, Offset(6.dp.toPx(), 16.dp.toPx()), Offset(12.dp.toPx(), 8.dp.toPx()), strokeWidth = 1.8.dp.toPx())
+                            }
                         }
+                        .clickable(enabled = enabled) { checkboxChecked = !checkboxChecked }
                         .padding(start = 19.dp)
                     isBullet -> Modifier
                         .drawBehind {
