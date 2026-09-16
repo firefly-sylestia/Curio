@@ -1,6 +1,6 @@
 # Prompt Log — current request
 
-## Request (2026-09-16, IN PROGRESS — journals & books, Add take, the browser lag)
+## Request (2026-09-16, AWAITING VERIFICATION — journals & books, Add take, the browser lag)
 
 Verbatim (one message): take the create-entry-flow ideas from
 `feature/create-entry-flow` "but our design" — a **+** on Home that disappears on
@@ -41,6 +41,50 @@ so".
   id-map / `groupBy` are search-only, the last browse row set is cached for an
   instant first frame, and the indicator + back-to-top reads moved into a
   `BoxScope.ScrollScopedRead` so a scroll step no longer recomposes the page.
+
+### Decisions (ask_user, before building the writing system)
+
+1. **Home rows:** the **Saved section goes AND the saved-capture rows leave
+   Recents** — Home's shelf slot is the member's own writing now. (The saved
+   shelf keeps its data and its doors: Topic History for quotes + pins, the
+   Cabinet / Recents page / detail view for saved captures.)
+2. **Markers:** there are none. Formatting is stored BESIDE the text (a
+   per-character bitmask → merged `PersonalRun` ranges), so the words stay
+   plain prose and auto-save is exact.
+3. Earlier answers that shaped the build: **their own store, shown as their own
+   collection views**; **book search online with a manual fallback**; **photos
+   as inline blocks in the page**; **a tool applies to the selection, else to
+   that line**; the feature is **always on**.
+
+### Built (UNPUSHED, awaiting the user's go-ahead)
+
+New files — `data/PersonalDoc.kt` (block document + JSON codec + moods + ids),
+`data/PersonalEntity.kt` (`personal_notes` / `personal_books`),
+`data/PersonalDao.kt` (DAO + `PersonalRepository` + `PersonalRepositoryHolder`),
+`features/personal/PersonalRuns.kt` (the bitmask engine),
+`PersonalCanvas.kt` (canvas + state + read-only view + tool dock),
+`JournalEditorScreen.kt`, `JournalListScreen.kt`, `BookShelfScreen.kt`
+(shelf + add-book search/manual), `BookDetailScreen.kt`, `PersonalHome.kt`
+(the `+` launcher, its sheet, the Home chips row).
+
+Edited — `CurioDatabase` (v15 + `MIGRATION_14_15`), `MainActivity` (installs
+`PersonalRepositoryHolder`), `CurioRoutes` + `CurioNavHost` (4 routes: journals,
+a journal page, the shelf, a book), `HomeScreen` (Saved section replaced by
+`PersonalChipsRow`, saved entries filtered out of Recents, `+` launcher with
+scroll-direction hiding), `CaptureStudio` (+`onSelectTake`, rail pills + an
+**Add take** door, the picker's title now says Add take) and
+`SaveCaptureScreen` (wires `onSelectTake`).
+
+The Cabinet's **Personal shelf** is wired too (user decision: "push, and wire the
+Cabinet Personal shelf first"): `SHELF_LEVEL_PERSONAL` + `CabinetPersonalShelf.kt`
+show the journals and books in their own small tiles inside the Cabinet grid, the
+shelf card counts journals + books, and a `Saved in Personal` door at the foot
+keeps the shelf's old saved members reachable (nothing was removed).
+
+Still open, named so it is not mistaken for shipped: the personal store is NOT in
+the Backup & restore export (`CurioBackupManager` streams the capture table only);
+and a photo inserted at the caret is a block (it splits the paragraph around it)
+rather than a picture flowing mid-sentence.
 
 ## Request (2026-09-16, COMPLETE — portraits, the Social header, edit-by-default, the category panel)
 

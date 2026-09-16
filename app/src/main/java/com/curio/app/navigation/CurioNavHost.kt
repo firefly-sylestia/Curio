@@ -99,6 +99,10 @@ import com.curio.app.features.crash.CurioCrashScreen
 import com.curio.app.features.lightbox.LightboxScreen
 import com.curio.app.features.managecategories.ManageCategoriesScreen
 import com.curio.app.features.onboarding.OnboardingScreen
+import com.curio.app.features.personal.BookDetailScreen
+import com.curio.app.features.personal.BookShelfScreen
+import com.curio.app.features.personal.JournalEditorScreen
+import com.curio.app.features.personal.JournalListScreen
 import com.curio.app.features.profile.ProfileScreen
 import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
@@ -978,6 +982,35 @@ fun CurioNavHost(
                     categorySlug = entry.arguments?.getString("categorySlug").orEmpty(),
                     topicName    = safeDecode(entry.arguments?.getString("topicName")),
                     navController = navController
+                )
+            }
+
+            // ── v387 — the personal writing family ────────────────────────
+            // Journals are a collection of their own (a page per day) and
+            // books a shelf of their own; neither borrows the saved-entry
+            // detail view, because neither has a topic behind it.
+            composable(route = CurioRoutes.JOURNALS) {
+                JournalListScreen(navController = navController)
+            }
+            composable(
+                route = CurioRoutes.JOURNAL_EDITOR,
+                arguments = listOf(navArgument("entryId") { type = NavType.StringType })
+            ) { entry ->
+                JournalEditorScreen(
+                    navController = navController,
+                    entryIdArg = entry.arguments?.getString("entryId").orEmpty()
+                )
+            }
+            composable(route = CurioRoutes.BOOKS) {
+                BookShelfScreen(navController = navController)
+            }
+            composable(
+                route = CurioRoutes.BOOK_DETAIL,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) { entry ->
+                BookDetailScreen(
+                    navController = navController,
+                    bookId = entry.arguments?.getString("bookId").orEmpty()
                 )
             }
 

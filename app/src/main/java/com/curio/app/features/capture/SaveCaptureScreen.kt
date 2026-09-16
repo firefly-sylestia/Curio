@@ -934,9 +934,19 @@ fun SaveCaptureScreen(
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     performSave()
                 },
+                // v387 — the rail's pills switch takes (the same guard the
+                // format chips use: the take you are leaving is snapshotted
+                // first, so a half-written take is never lost by a tap).
+                onSelectTake = { i ->
+                    if (i != activeIndex) {
+                        snapshotActive()
+                        activeIndex = i
+                    }
+                },
                 onAddTake = { format ->
-                    // The New-take picker hands back what the take IS, so the
-                    // studio never has to guess a default format.
+                    // The Add-take picker hands back what the take IS, so the
+                    // studio never has to guess a default format. The new take
+                    // is appended, so its pill shows next to the saved ones.
                     snapshotActive()
                     sections.add(CaptureSectionState(nextId++, format))
                     activeIndex = sections.lastIndex

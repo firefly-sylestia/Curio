@@ -257,6 +257,20 @@ object CurioRoutes {
     // lifetime stats), reachable from the drawer and Profile.
     const val STATS = "stats"
     const val ENTRY_DETAIL = "detail/{entryId}"
+
+    // ── v387 — the personal writing family (journals + books). Their own
+    // store, their own screens: a capture's detail view is a reaction to a
+    // TOPIC, and none of these have a topic at all.
+    /** Every journal page the member has written. */
+    const val JOURNALS = "journals"
+    /** One journal day. The argument is a note id, or [PERSONAL_NEW]. */
+    const val JOURNAL_EDITOR = "journal/{entryId}"
+    /** The book shelf (covers + progress). */
+    const val BOOKS = "books"
+    /** One book: its chapters, its chapter reviews and the member's progress. */
+    const val BOOK_DETAIL = "books/{bookId}"
+    /** The "write something new" sentinel carried by [JOURNAL_EDITOR]. */
+    const val PERSONAL_NEW = "new"
     const val EDIT_MOODBOARD = "edit-moodboard/{entryId}"
     const val EDIT_ENTRY = "edit-entry/{entryId}"
     const val SETTINGS = "settings"
@@ -329,6 +343,10 @@ object CurioRoutes {
     fun captureFor(categorySlug: String, topicName: String) =
         "capture/$categorySlug/${Uri.encode(topicName)}"
     fun entryDetail(entryId: String) = "detail/$entryId"
+    /** One journal page ([PERSONAL_NEW] starts today's). */
+    fun journalEditor(entryId: String) = "journal/$entryId"
+    /** One book on the personal shelf. */
+    fun bookDetail(bookId: String) = "books/${Uri.encode(bookId)}"
     /** One community card's own view. */
     fun communityCard(cardId: String) = "community/$cardId"
     /** A member's public profile (their portrait, handle and live cards). */

@@ -99,8 +99,9 @@ private val StudioRecordRed = Color(0xFFE5484D)
  * What is here and not in the classic page:
  *  - A tinted hero card with the lane medallion, the topic, the session
  *    duration and an inline mood row that expands under the card.
- *  - A take RAIL that lives on the bottom tray (thumb reach) instead of a row
- *    pinned under the topic — each pill springs when it becomes active.
+ *  - A take RAIL that lives on the bottom tray (thumb reach): one pill per
+ *    take you already have, the active one filled, and an **Add take** door
+ *    at the end so the next take lands beside the saved ones (v387).
  *  - Format + mood + tags moved into one **tools bottom sheet**, so the
  *    canvas is never crowded by pickers. The paper notes themselves are
  *    byte-identical: the sheet and the canvas both delegate to the same
@@ -139,9 +140,15 @@ internal fun CaptureStudio(
     onBack: () -> Unit,
     onSave: () -> Unit,
     /**
-     * Starts a NEW take in the format the picker handed back. The tray shows
-     * one control (New take) that opens that picker, and the take it creates is
-     * the one that becomes active — no numbered rail, no take switcher.
+     * Moves the canvas to another take already written (the rail's pills).
+     * v387 — the rail holds the takes again, so the studio needs a door back
+     * into each of them, not only into the next one.
+     */
+    onSelectTake: (Int) -> Unit,
+    /**
+     * Starts a NEW take in the format the picker handed back. Its pill then
+     * lands BESIDE the takes already in the rail, and it becomes the active
+     * one — the picker is the only thing that decides what a take is.
      */
     onAddTake: (CaptureFormat) -> Unit,
     onRequestRemoveTake: (Int) -> Unit,
@@ -207,6 +214,8 @@ internal fun CaptureStudio(
             canSave = canSave,
             saveInProgress = saveInProgress,
             saveError = saveError,
+            onSelectTake = onSelectTake,
+            onRequestRemoveTake = onRequestRemoveTake,
             onAddTake = { newTakeOpen = true },
             onOpenTools = { toolsOpen = true },
             onSave = onSave
@@ -613,6 +622,8 @@ private fun StudioTray(
     canSave: Boolean,
     saveInProgress: Boolean,
     saveError: String?,
+    onSelectTake: (Int) -> Unit,
+    onRequestRemoveTake: (Int) -> Unit,
     onAddTake: () -> Unit,
     onOpenTools: () -> Unit,
     onSave: () -> Unit
@@ -641,7 +652,11 @@ private fun StudioTray(
             StudioTakeRail(
                 cat = cat,
                 tintWash = tintWash,
-                onAddTake = onAddTake
+                sections = sections,
+                activeIndex = activeIndex,
+                onSelect = onSelectTake,
+                onAddTake = onAddTake,
+                onRequestRemoveTake = onRequestRemoveTake
             )
             saveError?.let { message ->
                 Text(
@@ -767,35 +782,103 @@ private fun StudioSaveButton(
 }
 
 /**
- * The take rail — ONE control: New take.
+ * The take rail — the takes you have, and the door to the next one.
  *
- * It used to draw a numbered pill per take ("1 · Note", "2 · Quote") with a
- * remove cross and an active fill, which made the tray read as a tab strip and
- * buried the one thing the member actually does here. The tray now offers the
- * single door, and tapping it asks what the new take IS (the format picker)
- * before the take exists — the studio already shows the take you are working
- * on, so a switcher was never adding information.
+ * v387 — the rail is a RAIL again (user decision): one pill per take, the
+ * active one filled, and an **Add take** door at the END that the newest pill
+ * lands beside the moment the picker answers. The previous "New take" was a
+ * single control with no memory of the takes already built, so adding a second
+ * take looked like starting over — the pill you just finished vanished into
+ * nothing. Tapping a pill switches to that take; a long press asks to remove
+ * it. What the door does is unchanged: it opens the format picker, and only
+ * the answer creates the take.
  */
 @Composable
 private fun StudioTakeRail(
     cat: CurioCategory,
     tintWash: Boolean,
-    onAddTake: () -> Unit
+    sections: SnapshotStateList<CaptureSectionState>,
+    activeIndex: Int,
+    onSelect: (Int) -> Unit,
+    onAddTake: () -> Unit,
+    onRequestRemoveTake: (Int) -> Unit
 ) {
     val accent = cat.themedAccent()
+    val railSurface = if (tintWash) {
+        cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHighest)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHighest
+    }
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        sections.forEachIndexed { index, section ->
+            val active = index == activeIndex
+            val ink = if (active) accent else MaterialTheme.colorScheme.onSurface
+            Surface(
+                onClick = { onSelect(index) },
+                shape = RoundedCornerShape(50),
+                color = if (active) lerp(railSurface, accent, 0.18f) else railSurface,
+                border = BorderStroke(
+                    1.dp,
+                    if (active) accent.copy(alpha = 0.45f) else accent.copy(alpha = 0.16f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(
+                        start = 13.dp,
+                        end = if (active && sections.size > 1) 6.dp else 13.dp,
+                        top = 9.dp,
+                        bottom = 9.dp
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    Text(
+                        text = "${index + 1}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ink.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = section.format.shortName,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = ink
+                    )
+                    // The take you are ON carries its own removal door, so a
+                    // take added by mistake never needs the tools sheet.
+                    if (active && sections.size > 1) {
+                        Surface(
+                            onClick = { onRequestRemoveTake(index) },
+                            shape = CircleShape,
+                            color = accent.copy(alpha = 0.18f),
+                            modifier = Modifier.size(22.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.size(22.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Close,
+                                    contentDescription = "Remove take ${index + 1}",
+                                    tint = ink,
+                                    size = 12.dp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // The door — always the LAST pill, so a take added from here appears
+        // beside the ones already written.
         Surface(
             onClick = onAddTake,
             shape = RoundedCornerShape(50),
-            color = lerp(
-                if (tintWash) cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHighest)
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-                accent,
-                0.14f
-            ),
+            color = lerp(railSurface, accent, 0.14f),
             border = BorderStroke(1.dp, accent.copy(alpha = 0.35f))
         ) {
             Row(
@@ -810,7 +893,7 @@ private fun StudioTakeRail(
                     size = 16.dp
                 )
                 Text(
-                    text = "New take",
+                    text = "Add take",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -820,7 +903,7 @@ private fun StudioTakeRail(
 }
 
 /**
- * What the NEXT take is — the picker the New take pill opens.
+ * What the NEXT take is — the picker the Add take pill opens.
  *
  * A small sheet rather than the tools sheet: tools edit the take you are on
  * (its format, mood and tags), while this only chooses what to start, so
@@ -851,7 +934,7 @@ private fun NewTakePickerSheet(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = "New take",
+                    text = "Add take",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )

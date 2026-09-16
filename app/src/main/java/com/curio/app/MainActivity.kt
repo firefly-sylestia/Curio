@@ -146,6 +146,12 @@ class MainActivity : ComponentActivity() {
         // Initialize Room database and repository singleton
         val db = CurioDatabase.getInstance(this)
         CurioRepositoryHolder.init(db.captureDao(), db.cachedTopicDao())
+        // v387 — the personal writing store (journals, books, chapter
+        // reviews). Installed here with the capture repository so every
+        // personal screen (Home chips, journals, the book shelf, the
+        // Cabinet's personal shelf) can read it without touching the DB
+        // singleton itself.
+        PersonalRepositoryHolder.init(db.personalDao())
         // v27 — auto-delete recycle-bin captures that passed their retention
         // window (runs again whenever the recycle bin opens).
         lifecycleScope.launch { RecycleBinExpiry.purgeExpired(this@MainActivity) }

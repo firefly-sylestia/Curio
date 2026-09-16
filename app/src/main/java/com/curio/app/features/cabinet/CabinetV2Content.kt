@@ -105,6 +105,9 @@ import com.curio.app.data.CurioCollection
 import com.curio.app.data.CurioCollectionMember
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
+import com.curio.app.data.PersonalBookEntity
+import com.curio.app.data.PersonalNoteEntity
+import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
@@ -208,6 +211,23 @@ fun CabinetV2Content(navController: NavController) {
         if (archiveReady) AppPreferences.setCabinetEntryCount(context, entries.size)
     }
     val entriesById = remember(entries) { entries.associateBy { it.id } }
+    // v387 — the PERSONAL WRITING store's own lists (journals + books). The
+    // Personal shelf shows these instead of captures; they come from their own
+    // tables through their own repository, so the archive above is untouched.
+    val personalJournals by androidx.compose.runtime.produceState<List<PersonalNoteEntity>>(
+        initialValue = emptyList()
+    ) {
+        runCatching {
+            PersonalRepositoryHolder.repo.observeJournals().collect { value = it }
+        }
+    }
+    val personalBooks by androidx.compose.runtime.produceState<List<PersonalBookEntity>>(
+        initialValue = emptyList()
+    ) {
+        runCatching {
+            PersonalRepositoryHolder.repo.observeBooks().collect { value = it }
+        }
+    }
     val books = remember(AppPreferences.bookFavoritesState, AppPreferences.bookCoverUrlsState) {
         AppPreferences.getBookFavorites(context)
             .map { name -> V2Liked(name, V2Kind.BOOK, findLikedTopic(V2Kind.BOOK, name)) }
@@ -359,7 +379,10 @@ fun CabinetV2Content(navController: NavController) {
         }
         if (newCovers > 0) CabinetCoverCache.version.intValue++
     }
-    val shelfCounts = remember(allLikes.size, likedTopics.size, entries.size, noteEntries.size, seededById) {
+    val shelfCounts = remember(
+        allLikes.size, likedTopics.size, entries.size, noteEntries.size, seededById,
+        personalJournals.size, personalBooks.size
+    ) {
         mapOf(
             V2ShelfId.FAVORITES to likedTopics.size,
             V2ShelfId.CURRENTLY_READING to (seededById["shelf:currently-reading"]?.members?.size ?: 0),
@@ -367,7 +390,9 @@ fun CabinetV2Content(navController: NavController) {
             V2ShelfId.SAVED to entries.size,
             V2ShelfId.COMPLETED to likedTopics.size,
             V2ShelfId.NOTES to noteEntries.size,
-            V2ShelfId.PERSONAL to (seededById["shelf:personal"]?.members?.size ?: 0)
+            // v387 — Personal counts the WRITING now (journals + books); its
+            // saved members are still counted on the collection's own door.
+            V2ShelfId.PERSONAL to (personalJournals.size + personalBooks.size)
         )
     }
 
@@ -548,6 +573,8 @@ fun CabinetV2Content(navController: NavController) {
         openLevel == SHELF_LEVEL_COMPLETED -> "Completed"
         openLevel == SHELF_LEVEL_SAVED -> "Saved entries"
         openLevel == SHELF_LEVEL_NOTES -> "Notes"
+        // v387 — the Personal shelf holds the member's OWN writing now.
+        openLevel == SHELF_LEVEL_PERSONAL -> "Personal"
         openLevel == "everything" -> "Cupboard"
         else -> "The Cabinet"
     }
@@ -558,6 +585,11 @@ fun CabinetV2Content(navController: NavController) {
         openLevel == SHELF_LEVEL_COMPLETED -> "${likedTopics.size} completed topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
         openLevel == SHELF_LEVEL_NOTES -> "${noteEntries.size} notes & voice captures"
+        openLevel == SHELF_LEVEL_PERSONAL -> buildString {
+            append(if (personalJournals.size == 1) "1 journal" else "${personalJournals.size} journals")
+            append(" · ")
+            append(if (personalBooks.size == 1) "1 book" else "${personalBooks.size} books")
+        }
         openLevel == "everything" -> "Books · albums · series"
         else -> "Collections · Cupboard · your keepsakes"
     }
@@ -819,6 +851,43 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     }
                 )
+                // v387 — the PERSONAL shelf: journals + books, each in its
+                // own small view, with the collection's saved members one tap
+                // away at the foot (nothing that lived here was removed).
+                openLevel == SHELF_LEVEL_PERSONAL -> v2PersonalWritingItems(
+                    journals = personalJournals,
+                    books = personalBooks,
+                    searchQuery = searchQuery,
+                    savedMemberCount = builtInShelves
+                        .firstOrNull { it.id == V2ShelfId.PERSONAL }
+                        ?.seededCollectionId
+                        ?.let { seeded ->
+                            shownUserCollections.firstOrNull { it.id == seeded }?.members?.size
+                        } ?: 0,
+                    onOpenJournal = { id ->
+                        navController.navigate(CurioRoutes.journalEditor(id)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenBook = { id ->
+                        navController.navigate(CurioRoutes.bookDetail(id)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenAllJournals = {
+                        navController.navigate(CurioRoutes.JOURNALS) { launchSingleTop = true }
+                    },
+                    onOpenShelf = {
+                        navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                    },
+                    onOpenSavedMembers = {
+                        openLevel = builtInShelves
+                            .firstOrNull { it.id == V2ShelfId.PERSONAL }
+                            ?.seededCollectionId ?: "shelf:personal"
+                        searchActive = false
+                        searchQuery = ""
+                    }
+                )
                 else -> v2HomeItems(
                     everythingLikes = allLikes,
                     everythingCount = allLikes.size,
@@ -832,6 +901,10 @@ fun CabinetV2Content(navController: NavController) {
                             V2ShelfId.COMPLETED -> SHELF_LEVEL_COMPLETED
                             V2ShelfId.SAVED -> SHELF_LEVEL_SAVED
                             V2ShelfId.NOTES -> SHELF_LEVEL_NOTES
+                            // v387 — Personal opens the writing store (journals
+                            // + books); its saved members keep their door at
+                            // the foot of that level.
+                            V2ShelfId.PERSONAL -> SHELF_LEVEL_PERSONAL
                             else -> {
                                 val seeded = builtInShelves.firstOrNull { it.id == id }?.seededCollectionId
                                 seeded ?: ""

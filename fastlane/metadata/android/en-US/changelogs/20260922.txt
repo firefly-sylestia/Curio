@@ -1,4 +1,8 @@
 ADD:
+- Writing: a journal of your own — a page per day with its date, how the day felt, a title and the writing, with bold / italic / underline / strikethrough / quote / alignment tools that ride above the keyboard and apply to the line you are on. Photos drop into the writing itself.
+- Writing: a book shelf — add a book (or find it and its cover), keep your progress, and write a review for any chapter in the page you are reading it from. Everything saves itself as you write.
+- Home: a "+" that starts a journal page or a book, and a small row of chips showing your newest journals and books, each one tapping straight into it.
+- Take studio: the take rail lists your takes again, with an "Add take" door at the end — pick a format and the new take lands beside the ones you already wrote.
 - Messages: the composer takes a line break when you press Enter, so a message can run to several rows — the round button is what sends it.
 - Chats: a compose button opens your friends, so a new conversation starts right from the inbox.
 - Community: the composer is rebuilt — the topic goes first, the preview is always on, and a topic can ship as a share card or as a plain text post with one tap.
@@ -8,6 +12,7 @@ ADD:
 - Community: the moderation room now covers members too — reports can name a member, hiding an author hides their content without touching their account, and the team manages moderators with five per-person permissions.
 - Social: the 28 portraits are redrawn with real detail — proper faces with brows, noses and lips, layered hair, and accessories that look made (a ribbed beanie with a pompom, a stitched wizard hat, headphones with a mic, goggles with glass, braids).
 FIX:
+- Home: the saved shelf (bookmarked quotes and pinned topics) left the page — your own writing holds that spot now, and the saved shelf keeps its home in Topic History.
 - Wildcard: the Wildcard deck deals its own curated curiosities instead of loading every category first, so it opens instantly.
 - Speed: a restart no longer rewrites the whole topic catalog to the database or rebuilds its text rules for every topic, so the deck, the Topic Database and the composer come up faster and the phone stays cool.
 - Speed: the deck deals cards straight away on a restart instead of showing "Gathering the deck…".

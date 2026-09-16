@@ -59,6 +59,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -114,6 +115,9 @@ import com.curio.app.data.PinnedTopic
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.SavedQuote
+import com.curio.app.features.personal.CreateEntrySheet
+import com.curio.app.features.personal.PersonalCreateLauncher
+import com.curio.app.features.personal.PersonalChipsRow
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
@@ -314,6 +318,10 @@ fun HomeScreen(navController: NavController) {
     // Unpin-topic confirmation — set when the user taps unpin on a pinned
     // topic row; the dialog confirms before the pin is dropped.
     var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
+    // v387 — the writing sheet behind the floating "+" (a journal page or a
+    // book). The button itself hides while the page is scrolled down, so a
+    // long read is never covered by it.
+    var writeSheetOpen by remember { mutableStateOf(false) }
     val streakDays = StreakTracker.getStreak(context)
     val reminderEnabled = AppPreferences.reminderEnabledState
     // v8.8 — the pet's flower bed at Home (spec §10.3): the pet naps here
@@ -1036,87 +1044,20 @@ fun HomeScreen(navController: NavController) {
                 Spacer(Modifier.height(12.dp))
             }
 
-            // ── 4. Saved — bookmarked quotes + pinned topics ───────────
-            val savedQuotes = AppPreferences.savedQuotesState
-            val pinnedTopics = AppPreferences.pinnedTopicsState
-            if (savedQuotes.isNotEmpty() || pinnedTopics.isNotEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        // Wide windows: keep the section in the comfortable
-                        // centered column so rows never stretch into
-                        // disconnected plates (phone layout untouched).
-                        .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Saved",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        // v21 — View all opens Topic History (liked, disliked,
-                        // pinned & day-grouped spins).
-                        Surface(
-                            onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                            // v49 — View all reads like the section
-                            // titles (onBackground ink), text + icon the
-                            // same color — the old theme-primary mauve
-                            // washed out against the cream pill in pastel
-                            // light.
-                            Text(
-                                "View all",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            CurioIcon(
-                                CurioIcons.History,
-                                "Open Topic History",
-                                tint = MaterialTheme.colorScheme.onBackground,
-                                size = 14.dp
-                            )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        savedQuotes.forEach { quote ->
-                            SavedQuoteRow(
-                                quote = quote,
-                                onClick = {
-                                    navController.navigate(CurioRoutes.entryDetail(quote.entryId)) {
-                                        launchSingleTop = true
-                                    }
-                                },
-                                onRemove = { pendingUnsave = quote }
-                            )
-                        }
-                        pinnedTopics.forEach { pinned ->
-                            PinnedTopicRow(
-                                pinned = pinned,
-                                onClick = {
-                                    navController.navigate(
-                                        CurioRoutes.revealFor(pinned.categoryId.routeSlug, pinned.topicName)
-                                    ) { launchSingleTop = true }
-                                },
-                                onUnpin = { pendingUnpin = pinned }
-                            )
-                        }
-                    }
-                }
-            }
+            // ── 4. v387 — YOUR WRITING (journals + books) ──────────────
+            // This slot held the Saved shelf (bookmarked quotes + pinned
+            // topics); those live in Topic History, and Home's shelf is now
+            // the member's OWN writing — the journals and the books, as
+            // small fixed-shape chips that open straight into their pages.
+            PersonalChipsRow(
+                navController = navController,
+                onWrite = { writeSheetOpen = true },
+                modifier = Modifier
+                    // Wide windows: the same comfortable centered column the
+                    // sections above and below ride in (phone untouched).
+                    .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
+                    .align(Alignment.CenterHorizontally)
+            )
 
             Spacer(Modifier.height(12.dp))
 
@@ -1130,7 +1071,13 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                val recentPreview = recentFeed.take(5)
+                // v387 — the saved-capture rows left Home's recents: the
+                // member's own writing is the Home shelf now, so this list is
+                // explored / unexplored topics only (the saved archive keeps
+                // its Cabinet, its Recents page and its detail view).
+                val recentPreview = remember(recentFeed) {
+                    recentFeed.filterNot { it is RecentFeedItem.SavedEntry }.take(5)
+                }
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1279,6 +1226,46 @@ fun HomeScreen(navController: NavController) {
             Spacer(Modifier.height(navInsets.calculateBottomPadding()))
             }
             } // v241 — end of the local glass capture subtree
+
+            // ── v387 — THE WRITING "+" — a fixed accent disc that slips away
+            // while the page is being scrolled DOWN and comes back the moment
+            // the finger goes up (or the page reaches the top), so a long read
+            // is never covered by a button nobody asked for mid-scroll. It is
+            // the door to a journal page or a book.
+            var createVisible by remember { mutableStateOf(true) }
+            LaunchedEffect(homeScroll) {
+                var previous = homeScroll.value
+                snapshotFlow { homeScroll.value }.collect { now ->
+                    val delta = now - previous
+                    if (delta > 6) createVisible = false
+                    else if (delta < -6 || now <= 0) createVisible = true
+                    previous = now
+                }
+            }
+            PersonalCreateLauncher(
+                visible = createVisible,
+                onClick = { writeSheetOpen = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 18.dp)
+                    .padding(bottom = 104.dp + navInsets.calculateBottomPadding())
+            )
+
+            if (writeSheetOpen) {
+                CreateEntrySheet(
+                    onDismiss = { writeSheetOpen = false },
+                    onJournal = {
+                        writeSheetOpen = false
+                        navController.navigate(
+                            CurioRoutes.journalEditor(CurioRoutes.PERSONAL_NEW)
+                        ) { launchSingleTop = true }
+                    },
+                    onBook = {
+                        writeSheetOpen = false
+                        navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                    }
+                )
+            }
 
             // ── Sticky top bar — menu + profile pills ─────────────────
             // Pinned OUTSIDE the scroll content so they stay on screen.
