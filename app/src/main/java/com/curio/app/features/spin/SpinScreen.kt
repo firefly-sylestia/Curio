@@ -513,9 +513,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     }
     // v9.x — a failed load is NOT an empty lane. With valid data an empty
     // pool AFTER loading means the read failed (interrupted IO, a hiccup
-    // parsing the heavy merged wildcard pool), so the deck shows a retry
-    // hint instead of the misleading "Nothing here yet" dead-end. A warm
-    // seeded pool is never wiped by a failed refresh.
+    // parsing a lane), so the deck shows a retry hint instead of the
+    // misleading "Nothing here yet" dead-end. A warm seeded pool is never
+    // wiped by a failed refresh.
     var poolLoadFailed by remember(poolIds) { mutableStateOf(false) }
     var poolRetryKey by remember(poolIds) { mutableIntStateOf(0) }
     val pool by produceState(
@@ -534,9 +534,20 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // lands — the fan is keyed on the loaded pool, so it re-deals and
         // spins then draw from the FULL catalog, never the sample. No-op
         // while Room is still populating (first launch): the hint stays.
+        //
+        // v385 — the seed also CLEARS THE HINT. poolLoading only fell on the
+        // full pool, so a restart (empty in-memory cache, every lane parsing)
+        // showed "Gathering the deck…" over a deck that already had cards —
+        // the regression reported against v348, whose Room warm now carries
+        // counts only. A seeded deck is a usable deck: the sample lands in
+        // milliseconds from Room, so the hint flashes only on a genuine first
+        // launch (nothing to sample).
         if (value.isEmpty()) {
             val seed = TopicRepository.sampleTopics(context, poolIds)
-            if (seed.isNotEmpty()) value = seed
+            if (seed.isNotEmpty()) {
+                value = seed
+                poolLoading = false
+            }
         }
         poolLoadFailed = false
         val merged = mutableListOf<CurioTopic>()
@@ -1714,13 +1725,17 @@ private val NationalityTags = setOf(
     "American-French", "Austrian-Czech", "British-Welsh", "Indian-Bengali"
 )
 
+/** Compiled once — [buildFilterGroups] matches every tag in the pool. */
+private val DECADE_TAG = Regex("""\d{4}s""")
+private val CENTURY_TAG = Regex("""^\d{1,2}(st|nd|rd|th) Century$|^Ancient$""")
+
 /**
  * Derives compact, meaningful filter chips from a category's pool.
  * Eras are the most frequent decades/centuries present, genres and origins
  * are the most-used tags, each capped so the sheet stays tidy.
  * v37 — Type caps at the top-8 most frequent when a pool carries more
- * (the wildcard surprise deck merges every category, so its raw type list
- * was a 60+ chip wall; individual categories keep their full list since
+ * (a MULTI-lane deck mixes several categories, so its raw type list can
+ * still be a 60+ chip wall; single categories keep their full list since
  * they're typically well under 8). Genres/Eras/Origins caps rose (8/6/6)
  * so sparse categories expose more filters instead of a thin sheet.
  */
@@ -1728,10 +1743,10 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
     if (pool.isEmpty()) return FilterGroups(emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
     val allTypes = pool.map { it.subtype }.distinct()
     val typeCounts = pool.map { it.subtype }.groupingBy { it }.eachCount()
-    // v37 — wildcard-only: the surprise pool merges EVERY category, so the
-    // raw Type list was a wall of 60+ subtypes. Keep the compact, universal
-    // top-8 (most frequent) and drop the tail; individual categories keep
-    // their full (typically few) type list.
+    // v37 — a MIXED deck spans several categories, so the raw Type list can
+    // be a wall of 60+ subtypes. Keep the compact, universal top-8 (most
+    // frequent) and drop the tail; a single category keeps its full
+    // (typically few) type list.
     val types = if (allTypes.size > 8) {
         allTypes.sortedByDescending { typeCounts[it] ?: 0 }.take(8).sorted()
     } else {
@@ -1743,10 +1758,8 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
     // science and art. Comparing total frequency instead of mere presence
     // keeps the row coherent when a category mixes both (e.g. books has a
     // lone '2000s' tag but is dominated by '20th Century').
-    val decadeRe = Regex("""\d{4}s""")
-    val centuryRe = Regex("""^\d{1,2}(st|nd|rd|th) Century$|^Ancient$""")
-    val decades = counts.keys.filter { decadeRe.matches(it) }
-    val centuries = counts.keys.filter { centuryRe.matches(it) }
+    val decades = counts.keys.filter { DECADE_TAG.matches(it) }
+    val centuries = counts.keys.filter { CENTURY_TAG.matches(it) }
     val decadesTotal = decades.sumOf { counts[it] ?: 0 }
     val centuriesTotal = centuries.sumOf { counts[it] ?: 0 }
     val eras = (if (decadesTotal >= centuriesTotal) decades else centuries)
@@ -1767,7 +1780,7 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
         .sorted()
     val genres = counts.keys
         .filter {
-            !decadeRe.matches(it) && !centuryRe.matches(it) &&
+            !DECADE_TAG.matches(it) && !CENTURY_TAG.matches(it) &&
                 it !in NationalityTags && it !in FranchiseTags
         }
         .sortedByDescending { counts[it] ?: 0 }

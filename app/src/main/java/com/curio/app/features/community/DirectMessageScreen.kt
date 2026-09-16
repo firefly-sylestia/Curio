@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -1539,19 +1541,26 @@ private fun ReactionChip(kind: String, count: Int, mine: Boolean) {
  * The ink follows the BUBBLE, not the brand: white on my rose bubble, the
  * page's own muted ink on their neutral one. Hardcoded white made a received
  * answer's quote invisible on the light theme.
+ *
+ * v385 — IT HUGS ITS TEXT. `fillMaxWidth()` here made the quote the widest
+ * thing in the bubble, and a fill-width child forces its parent to that width:
+ * every answer ballooned to the full thread width around one small line of
+ * quoted words ("the reply box looks too big, too wide even though the text
+ * was small"). The 34dp bar was sized for a two-line quote as well, so the
+ * block towered over the single line it framed. The bar is now one line tall,
+ * the quote is capped so a long parent cannot stretch the bubble either, and
+ * the bubble is free to be as wide as its own message.
  */
 @Composable
 private fun ReplyQuoteRow(quoted: String, mine: Boolean) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 5.dp),
+        modifier = Modifier.padding(bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .width(3.dp)
-                .height(34.dp)
+                .height(18.dp)
                 .clip(RoundedCornerShape(2.dp))
                 .background(
                     if (mine) Color.White.copy(alpha = 0.55f)
@@ -1566,7 +1575,9 @@ private fun ReplyQuoteRow(quoted: String, mine: Boolean) {
             else MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
+            // No weight/fill: a bounded width keeps the row wrap-content, so
+            // the bubble stays as wide as its own words.
+            modifier = Modifier.widthIn(max = 208.dp)
         )
     }
 }
@@ -1869,7 +1880,11 @@ private fun MessageComposer(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .weight(1f)
-                    .height(52.dp)
+                    // v385 — GROWS A ROW AT A TIME. One line stays exactly the
+                    // pill it always was; Enter adds rows (up to five), then
+                    // the field scrolls inside that height so the send button
+                    // can never be pushed off the screen.
+                    .heightIn(min = 52.dp, max = 140.dp)
                     .clip(RoundedCornerShape(26.dp))
                     .background(
                         if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f)
@@ -1880,7 +1895,7 @@ private fun MessageComposer(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
                         shape = RoundedCornerShape(26.dp)
                     )
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
             ) {
                 BasicTextField(
                     value = draft,
@@ -1888,14 +1903,20 @@ private fun MessageComposer(
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface
                     ),
-cursorBrush = SolidColor(curioDialogActionColor()),
-                singleLine = true,
-                // A message is a sentence, not a word: capitals and
+                    cursorBrush = SolidColor(curioDialogActionColor()),
+                    // v385 — ENTER MAKES A LINE, IT DOES NOT SEND. A message is
+                    // often several rows (an address, a list, a thought in
+                    // two beats), and ImeAction.Send turned the key people
+                    // press at the end of a sentence into an accidental send.
+                    // The round button is the only way to send.
+                    singleLine = false,
+                    maxLines = 5,
+                    // A message is a sentence, not a word: capitals and
                     // sentence punctuation are the default here (the field is
                     // unlabelled, so this is the only cue it needs).
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Send
+                        imeAction = ImeAction.Default
                     ),
                     modifier = Modifier.weight(1f)
                 ) { inner ->

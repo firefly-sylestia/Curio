@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -85,7 +87,7 @@ import kotlinx.coroutines.launch
  * destination rather than a bottom sheet: topic, preview, writing and
  * publishing are one continuous flow.
  *
- * Shape of the flow (v349):
+ * Shape of the flow (v385):
  *  - [PostKindRail] picks what is being made: a Note, a Topic or a Quote.
  *  - A TOPIC post puts the topic chooser at the TOP — what the post is about
  *    is the first decision, everything else follows it.
@@ -98,7 +100,69 @@ import kotlinx.coroutines.launch
  *    settings, so they hide the moment the Note presentation is chosen.
  *  - A Quote keeps its credit field; a Note stays words-only. The caption is
  *    available to every kind — the wall prints it above the post body.
+ *  - The topic chooser starts COLLAPSED (v385) and its search ranks what you
+ *    typed instead of alphabetising the catalog at you.
  */
+
+/** Results offered once a query is typed — enough to choose from, short
+ *  enough that the writer is still on screen below. */
+private const val TOPIC_RESULT_COUNT = 8
+
+/** What the chooser offers with no query: a short invitation, not a catalog. */
+private const val TOPIC_SUGGESTION_COUNT = 5
+
+/**
+ * Search the topic index, best match first.
+ *
+ * v385 — this used to sort the WHOLE index (16k entries) with a comparator
+ * that ran `contains` on every name BEFORE filtering anything, on every
+ * keystroke, and then ranked by nothing but "name contains" + alphabetical
+ * order. So a query that only a teaser or a tag answers returned a row of
+ * alphabetically-first near-misses, a coincidental teaser hit could outrank a
+ * name that starts with the query, and the whole scan was the slowest thing in
+ * the composer. Now the candidates are filtered first (name, byline, subtype,
+ * tags AND teaser), and only that handful is ranked: name prefix, then a word
+ * of the name starting with it, then a name substring, then the other fields,
+ * shortest name first inside each band.
+ */
+private fun searchTopics(
+    index: List<TopicIndexEntry>,
+    query: String,
+    limit: Int
+): List<TopicIndexEntry> {
+    val q = query.trim().lowercase()
+    if (q.isEmpty()) return index.take(limit)
+    val hits = ArrayList<Pair<TopicIndexEntry, Int>>()
+    index.forEach { entry ->
+        val rank = topicMatchRank(entry, q)
+        if (rank >= 0) hits += entry to rank
+    }
+    return hits
+        .sortedWith(
+            compareBy<Pair<TopicIndexEntry, Int>> { it.second }
+                .thenBy { it.first.topic.name.length }
+                .thenBy { it.first.nameKey }
+        )
+        .take(limit)
+        .map { it.first }
+}
+
+/**
+ * Where [entry] answers [q], lower is better, -1 = no match. 0 name prefix,
+ * 1 a word of the name starts with it, 2 the name contains it, 3 byline /
+ * subtype, 4 a tag, 5 the teaser.
+ */
+private fun topicMatchRank(entry: TopicIndexEntry, q: String): Int {
+    val name = entry.nameKey
+    if (name.startsWith(q)) return 0
+    if (name.contains(" $q")) return 1
+    if (name.contains(q)) return 2
+    if (entry.bylineKey.contains(q) || entry.subtypeKey.contains(q)) return 3
+    if (entry.tagKeys.any { tag -> tag.contains(q) }) return 4
+    if (entry.teaserKey.contains(q)) return 5
+    return -1
+}
+
 @Composable
 internal fun CommunityPostScreen(
     onDismiss: () -> Unit,
@@ -115,7 +179,13 @@ internal fun CommunityPostScreen(
     var credit by remember { mutableStateOf("") }
     var query by remember { mutableStateOf("") }
     var topic by remember { mutableStateOf<CurioTopic?>(null) }
-    var index by remember { mutableStateOf<List<TopicIndexEntry>>(emptyList()) }
+    // v385 — seeded from the warm index: the app-start prewarm has usually
+    // built it already, so the search answers on the first keystroke instead
+    // of waiting behind a cold 16k-entry build.
+    var index by remember { mutableStateOf(TopicJsonLoader.cachedIndex().orEmpty()) }
+    // COLLAPSED to start (v385). It used to unroll the moment Topic was
+    // selected, so the composer opened on a wall of 18 results and everything
+    // else (the preview, the writer) was pushed below the fold.
     var topicPickerOpen by remember { mutableStateOf(false) }
     var topicPresentation by remember { mutableStateOf(TopicPresentation.CARD) }
     var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
@@ -124,7 +194,7 @@ internal fun CommunityPostScreen(
     var posting by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        index = TopicJsonLoader.loadIndex() ?: emptyList()
+        if (index.isEmpty()) index = TopicJsonLoader.loadIndex() ?: emptyList()
         if (kind != KIND_CARD) focusManager.clearFocus(force = false)
     }
     BackHandler(onBack = onDismiss)
@@ -134,20 +204,11 @@ internal fun CommunityPostScreen(
     val accentInk = if (accent.luminance() > 0.55f) Color.Black else Color.White
 
     val topicResults = remember(index, query) {
-        val q = query.trim()
-        if (q.isBlank()) {
-            index.take(18)
-        } else {
-            index.asSequence()
-                .sortedWith(compareByDescending<TopicIndexEntry> { it.topic.name.contains(q, true) }.thenBy { it.topic.name })
-                .filter {
-                    it.topic.name.contains(q, true) ||
-                        it.topic.byline.contains(q, true) ||
-                        it.topic.tags.any { tag -> tag.contains(q, true) }
-                }
-                .take(18)
-                .toList()
-        }
+        searchTopics(
+            index = index,
+            query = query,
+            limit = if (query.isBlank()) TOPIC_SUGGESTION_COUNT else TOPIC_RESULT_COUNT
+        )
     }
 
     // A topic presented as a NOTE ships as a plain text post: the topic name
@@ -220,13 +281,14 @@ internal fun CommunityPostScreen(
                     accent = accent,
                     onSelect = { selected ->
                         kind = selected
-                        if (selected == KIND_CARD) {
-                            // Entering Topic opens the chooser right away: the
-                            // topic is the first decision of a topic post.
-                            topicPickerOpen = topic == null
-                        } else {
-                            topicPresentation = TopicPresentation.CARD
-                        }
+                        // v385 — changing the kind COLLAPSES the chooser. It
+                        // used to spring open on entering Topic (the topic is
+                        // the first decision of a topic post), which meant the
+                        // writer met a long result list before they met the
+                        // writer. The picker row states what is missing and
+                        // one tap opens the search.
+                        topicPickerOpen = false
+                        if (selected != KIND_CARD) topicPresentation = TopicPresentation.CARD
                         if (selected != KIND_QUOTE) credit = ""
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     }
@@ -851,15 +913,43 @@ private fun TopicPicker(
                             }
                         }
                     )
+                    // v385 — TIGHT ROWS: one line of name (with its lane, so
+                    // two topics with the same name are told apart at a
+                    // glance) and one line of teaser. Each result used to
+                    // carry two lines of teaser, which is what made a list of
+                    // results read as a wall.
+                    if (results.isEmpty() && query.isNotBlank()) {
+                        Text(
+                            text = "No topic matches \u201c" + query.trim() + "\u201d.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(vertical = 6.dp)
+                        )
+                    }
                     results.forEach { result ->
                         Surface(
                             onClick = { onPick(result.topic) },
                             shape = RoundedCornerShape(14.dp),
                             color = MaterialTheme.colorScheme.surface
                         ) {
-                            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                Text(result.topic.name, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(result.topic.teaser, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = result.topic.name,
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = CurioCategories.byId(result.topic.categoryId).displayName,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1
+                                    )
+                                }
+                                Text(result.topic.teaser, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
                     }

@@ -1,5 +1,105 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, COMPLETE — the Wildcard lane, restart speed, the composer and the chat surface)
+
+Verbatim (one message, seven parts): the reply box in chats looks too big and too
+wide even though the text is small; Enter should make a new row in a message
+instead of sending it; there is no new chat button in Chats; in the post page the
+topic picker is expanded by default and too long (collapse it) and its topic
+search is bad; the app's Wildcard shows topic loading — exclude other category
+topics from Wildcard; the Topic Database is too laggy and takes too long to load
+the topics; and a restart now shows "Gathering the deck" where it did not before
+(they pointed at commit `1ad9c832`). Plus: the Supabase URL configuration keeps
+flipping to a preview URL and `https://curio-dwnz.vercel.app/` should be the
+default.
+
+### Decisions (ask_user, before building)
+
+1. **Wildcard = `wildcard.json` alone.** The deck's Wildcard stops merging every
+   lane (that merge is the "topic loading"): it becomes the ~500 hand-curated
+   curiosities, exactly what the Topic Database's Wildcard lane has always shown.
+2. **"The reply box" = the quote drawn INSIDE a sent answer** (their words: "the
+   reply box that shows after I send"), not the typing pill.
+3. **A compose button in Chats** that opens a friend picker, with a door into
+   Friends for anyone not a friend yet.
+4. **The domain**: `/api/config` now serves the deployment's canonical address and
+   every emailed `redirect_to` is built from it, so a preview deployment can no
+   longer mint preview links.
+
+### Root causes found (in the code, not guessed)
+
+1. **`ReplyQuoteRow` was `fillMaxWidth()`** with a 34dp accent bar. A fill-width
+   child forces its parent to that width, so every answer ballooned to the full
+   thread width around ONE small line of quoted words.
+2. **The composer was `singleLine = true` with `ImeAction.Send`** — Enter sent.
+3. **ChatsScreen had no create path at all**; the only door was Friends, and the
+   empty state said so in prose.
+4. **The composer opened the picker the moment Topic was selected
+   (`topicPickerOpen = topic == null`)** and rendered up to 18 results with two
+   lines of teaser each inside the scrolling column.
+5. **Its search sorted the WHOLE 16k-entry index on every keystroke** (a
+   comparator calling `contains` per name) before filtering, then ordered what was
+   left alphabetically; teaser hits could outrank a name that starts with the
+   query, and a name hit in a teaser read as a near-miss.
+6. **`load(WILDCARD)` merged every lane** (bounded to two parses at a time), so
+   selecting the Wildcard deck — the DEFAULT spin set on a fresh install — paid
+   for the whole catalog and showed "Gathering the deck…" while it did.
+7. **v348 made the asset the read path and dropped the Room pool warm
+   (`warmLoaderFromRoom` is counts-only now)**, so on every restart every lane
+   re-parsed AND `parseAndCache` re-wrote the whole catalog back into Room
+   (delete + ~14k inserts with chapter/track JSON) on the same IO threads, and
+   `poolLoading` only cleared on the FULL pool. That is the "Gathering the deck"
+   regression the user reported against `1ad9c832`.
+8. **`cleanText` built four `Regex` objects per call** — four calls per topic,
+   so ~16 pattern compilations for each of ~14k topics per cold catalog load.
+9. **`sampleTopics` was gated on `isInitialized()`**, i.e. the deck's instant
+   Room seed was skipped exactly when it was needed (composing before the
+   repository flipped the flag).
+10. **auth-web's `siteUrl()` used `location.origin` only** (by design, per its own
+    AGENTS.md), so a preview deployment's hostname rode into every email link
+    asked for from a preview.
+
+### Shipped
+
+- **Wildcard is a lane** (`data/TopicJsonLoader.kt`, `data/TopicRepository.kt`):
+  one file, no merge; `countFor(WILDCARD)` counts it; `sampleTopics` samples that
+  lane first (the every-lane sweep survives only for a database mirrored before
+  the change). Deck, reveal fallback and the browser now agree.
+- **Speed**: `cleanText`'s Regexes are file-scope constants; the Room mirror
+  skips a lane whose Room count already matches the parsed count; `sampleTopics`
+  is no longer gated on `isInitialized()`; Spin clears `poolLoading` as soon as
+  the seed lands.
+- **Chats (v385)**: compose button + `NewChatSheet` (friends via
+  `SocialApi.friends`, `SocialSidebarRow`, read once per opening, 72dp of list
+  padding under the last row so the button never covers a chat).
+- **Direct messages**: `ReplyQuoteRow` hugs its text (one line tall, capped
+  width); the composer grows a row at a time and Enter breaks the line
+  (`ImeAction.Default`, up to five rows, then it scrolls) with the round button as
+  the only send.
+- **Composer**: the topic chooser stays COLLAPSED (and the kind rail collapses it
+  on every switch); `searchTopics`/`topicMatchRank` filter first and rank by
+  quality (prefix → word start → substring → byline/subtype → tag → teaser, 8
+  results, 5 suggestions), each row names its lane, tighter one-line rows, and a
+  "no topic matches" line; the index is seeded from `cachedIndex()`.
+- **auth-web**: `/api/config` serves `siteUrl` (from `SITE_URL`, else Vercel's
+  `VERCEL_PROJECT_PRODUCTION_URL`, normalised to a scheme), `curio.js` builds
+  every `redirect_to` from it, and `README.md` gained a "One domain for the
+  links" section naming all three places (Vercel `SITE_URL`, the Supabase Site
+  URL + Redirect URLs, the `CURIO_AUTH_SITE_URL` repo secret).
+
+### Verified
+
+- `node --check` on every modified JavaScript file.
+- Kotlin delimiter balance on all six edited files (python scanner).
+- Not compiled locally (root AGENTS rule): CI on this push is the compile check.
+
+### Notes for the next pass
+
+- The picker's "Surprise mix" label still reads as a mix; the pool is now the
+  curated Wildcard curiosities (user-visible copy, left for the user to decide).
+- `/reset` on the account site still requires 8 characters while `/signup`
+  requires 6 (the app's own rule).
+
 ## Request (2026-09-16, COMPLETE — account site: create an account WITH a password)
 
 Verbatim: the auth web has no create-account-with-password page, it just sends a

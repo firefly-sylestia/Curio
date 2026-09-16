@@ -258,12 +258,22 @@ object TopicRepository {
      * v3xx — a SMALL random sample straight from Room (indexed LIMIT
      * queries — never maps a whole lane). Seeds the Spin deck instantly
      * while the full pool is still loading, so the fan is never empty.
-     * WILDCARD samples a few topics from EVERY canonical lane (its pool is
-     * a merge, so no single-lane sample would represent it). Empty only
-     * when Room isn't populated yet — callers keep their loading hint.
+     *
+     * v385 — no longer gated on [isInitialized]. The guard was meant to stop
+     * a sample from an empty table, but the query answers that itself: the
+     * deck asks the moment it composes, which on a restart is BEFORE init()
+     * has finished flipping the flag — so the seed was skipped exactly when it
+     * was needed and the deck sat on its loading hint while the whole catalog
+     * parsed. A stale-but-populated table (the normal restart) now seeds the
+     * fan immediately; a first launch returns nothing and the hint stays, as
+     * before.
+     *
+     * v385 — WILDCARD samples its own lane first (it is one file now). A
+     * database that predates that change holds only the merged upserts, so an
+     * empty WILDCARD lane still falls back to a few picks from every lane.
+     * Empty only when Room holds nothing yet — callers keep their hint.
      */
     suspend fun sampleTopics(context: Context, categoryIds: List<CategoryId>, perLane: Int = 14): List<CurioTopic> {
-        if (!initialized) return emptyList()
         return runCatching {
             val dao = CurioDatabase.getInstance(context).topicDao()
             val out = ArrayList<CurioTopic>()
@@ -274,11 +284,18 @@ object TopicRepository {
             }
             categoryIds.forEach { id ->
                 if (id == CategoryId.WILDCARD) {
-                    CategoryId.values()
-                        .filter { it != CategoryId.WILDCARD }
-                        .forEach { lane ->
-                            dao.getRandomTopics(lane.name, 3).forEach { add(it) }
-                        }
+                    // The lane's OWN rows first; the every-lane sweep is only
+                    // for a database mirrored before WILDCARD became a lane.
+                    val own = dao.getRandomTopics(CategoryId.WILDCARD.name, perLane)
+                    if (own.isNotEmpty()) {
+                        own.forEach { add(it) }
+                    } else {
+                        CategoryId.values()
+                            .filter { it != CategoryId.WILDCARD }
+                            .forEach { lane ->
+                                dao.getRandomTopics(lane.name, 3).forEach { add(it) }
+                            }
+                    }
                 } else {
                     dao.getRandomTopics(id.name, perLane).forEach { add(it) }
                 }

@@ -31,25 +31,37 @@ const pageName = () => document.body.dataset.page || 'home';
 
 let configRequest = null;
 
+/**
+ * The deployment's canonical address, or '' when it does not declare one.
+ * Set by [loadConfig]; read by [siteUrl].
+ */
+let canonicalSite = '';
+
 function loadConfig() {
   if (!configRequest) {
     configRequest = fetch('/api/config', { cache: 'no-store' })
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error('config ' + response.status))))
-      .then((data) => ({
-        configured: Boolean(data && data.configured),
-        problem: (data && data.problem) || '',
-        supabaseUrl: String((data && data.supabaseUrl) || '').replace(/\/+$/, ''),
-        supabaseAnonKey: (data && data.supabaseAnonKey) || '',
-        supportEmail: (data && data.supportEmail) || '',
-        appDownloadUrl: (data && data.appDownloadUrl) || '',
-        repoUrl: (data && data.repoUrl) || '',
-        siteName: (data && data.siteName) || 'Curio',
-      }))
+      .then((data) => {
+        const config = {
+          configured: Boolean(data && data.configured),
+          problem: (data && data.problem) || '',
+          supabaseUrl: String((data && data.supabaseUrl) || '').replace(/\/+$/, ''),
+          supabaseAnonKey: (data && data.supabaseAnonKey) || '',
+          siteUrl: String((data && data.siteUrl) || '').replace(/\/+$/, ''),
+          supportEmail: (data && data.supportEmail) || '',
+          appDownloadUrl: (data && data.appDownloadUrl) || '',
+          repoUrl: (data && data.repoUrl) || '',
+          siteName: (data && data.siteName) || 'Curio',
+        };
+        canonicalSite = config.siteUrl;
+        return config;
+      })
       .catch(() => ({
         configured: false,
         problem: 'This site could not reach its own configuration endpoint.',
         supabaseUrl: '',
         supabaseAnonKey: '',
+        siteUrl: '',
         supportEmail: '',
         appDownloadUrl: '',
         repoUrl: '',
@@ -387,8 +399,17 @@ function cleanUrl() {
   history.replaceState(null, '', location.pathname);
 }
 
-/** The address a link in an email should come back to. */
-const siteUrl = (path) => location.origin + path;
+/**
+ * The address a link in an email should come back to.
+ *
+ * The deployment's canonical address wins when it declares one (SITE_URL, or
+ * Vercel's own production-domain variable — see api/config.js); the page's own
+ * origin is the fallback, which is what a local preview and a fresh deploy
+ * look like. Serving the origin was the ONLY source before, and that is how a
+ * preview hostname kept riding into emails: any link asked for from a preview
+ * deployment came back to that preview.
+ */
+const siteUrl = (path) => (canonicalSite || location.origin) + path;
 
 /* ── carrying an address between pages ───────────────────────────────────── */
 

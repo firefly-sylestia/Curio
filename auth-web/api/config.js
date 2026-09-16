@@ -44,6 +44,28 @@ export default function handler(request, response) {
 
   const serviceRole = firstSet('SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SECRET_KEY');
 
+  // The canonical public address of THIS site. Every email the site sends
+  // carries it as the redirect, so a link can never be minted for whichever
+  // preview deployment someone happened to open (that is how
+  // "the URL keeps changing to a preview URL" happens: the address used to be
+  // whatever hostname the page was served from).
+  //
+  // `VERCEL_PROJECT_PRODUCTION_URL` is Vercel's own system variable — the
+  // project's production domain, the shortest custom domain or the
+  // `*.vercel.app` one — so a preview deployment still builds production
+  // links without any configuration. It carries no scheme, hence the
+  // normalisation below; an explicitly set SITE_URL always wins.
+  const rawSiteUrl = firstSet(
+    'SITE_URL',
+    'PUBLIC_SITE_URL',
+    'NEXT_PUBLIC_SITE_URL',
+    'APP_SITE_URL',
+    'VERCEL_PROJECT_PRODUCTION_URL'
+  ).replace(/\/+$/, '');
+  const canonicalSiteUrl = rawSiteUrl
+    ? (/^https?:\/\//i.test(rawSiteUrl) ? rawSiteUrl : 'https://' + rawSiteUrl)
+    : '';
+
   const problems = [];
   if (!supabaseUrl) problems.push('SUPABASE_URL');
   if (!supabaseAnonKey) problems.push('SUPABASE_ANON_KEY (or SUPABASE_PUBLISHABLE_KEY)');
@@ -58,6 +80,9 @@ export default function handler(request, response) {
       : '',
     supabaseUrl,
     supabaseAnonKey,
+    // Empty means "this page's own origin" — keep that working, it is what a
+    // local preview and a brand-new deploy look like.
+    siteUrl: canonicalSiteUrl,
     supportEmail: firstSet('SUPPORT_EMAIL', 'PRIVACY_CONTACT_EMAIL'),
     appDownloadUrl:
       firstSet('APP_DOWNLOAD_URL') || 'https://github.com/firefly-sylestia/Curio/releases/latest',

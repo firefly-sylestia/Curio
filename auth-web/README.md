@@ -42,6 +42,7 @@ a committed file.
 | `SUPABASE_URL` | yes | The project URL, e.g. `https://abcd.supabase.co` (same value the Android build uses). |
 | `SUPABASE_ANON_KEY` | yes | The publishable/anon key. `SUPABASE_PUBLISHABLE_KEY` is accepted as an alias. |
 | `SUPABASE_SERVICE_ROLE_KEY` | yes | **Server-only.** Used by `/api/delete-account` to remove the account. Never sent to the browser. |
+| `SITE_URL` | recommended | The public address of this site, e.g. `https://curio-dwnz.vercel.app`. Every email the site sends redirects here. Without it, Vercel's own `VERCEL_PROJECT_PRODUCTION_URL` is used (so a preview deploy still builds production links); with neither, the address of the page the request came from. |
 | `SUPPORT_EMAIL` | recommended | Published on `/support` and `/privacy` as the contact address. Without it those pages point at the in-app route instead. |
 | `APP_DOWNLOAD_URL` | optional | The "Get Curio" link. Defaults to the latest GitHub release. |
 | `SITE_NAME` | optional | Defaults to `Curio`. |
@@ -49,6 +50,34 @@ a committed file.
 Vercel: **New Project → import the repo → Root Directory `auth-web`** → add the
 variables above (Production and Preview) → Deploy. There is no build command and
 no output directory to configure; Vercel serves the folder and picks up `api/`.
+
+## One domain for the links
+
+Email links must always come back to ONE address. Three places decide it, and
+they should all name the same domain (this example uses
+`https://curio-dwnz.vercel.app`):
+
+1. **Vercel → Settings → Environment Variables → `SITE_URL`**, for Production
+   **and** Preview. This is what every `redirect_to` the site mints is built
+   from (see `api/config.js`), so links asked for on a preview deployment still
+   land on the real site. If `SITE_URL` is not set, the site falls back to
+   Vercel's `VERCEL_PROJECT_PRODUCTION_URL` system variable, which already
+   names the project's production domain.
+2. **Supabase → Authentication → URL Configuration → Site URL** = the same
+   domain, with `https://curio-dwnz.vercel.app/**` in **Redirect URLs**. This is
+   the fallback Supabase itself uses when a request carries no `redirect_to`,
+   and the list that decides which `redirect_to` values are honoured at all.
+   Preview wildcards (`https://*-<team>.vercel.app/**`) are what let a preview
+   hostname into that list — keep them only if you want preview deploys to act
+   as themselves.
+3. **GitHub → repository secret `CURIO_AUTH_SITE_URL`** = the same domain. The
+   Android app sends this as its confirmation redirect, so a preview URL here
+   puts preview links in the app's emails even when the site is configured
+   correctly.
+
+If the Supabase Site URL keeps changing to a preview address, nothing in this
+folder is doing it: the site no longer reads its own hostname for redirects, so
+fixing the three values above makes the mailed links stable regardless.
 
 ## Supabase dashboard checklist
 

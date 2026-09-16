@@ -65,12 +65,15 @@ can never break the Android CI and can be deployed straight from the repo.
   `error_description`). `assets/curio.js` normalises all three; a new page must
   use that normaliser rather than reading `location` itself.
 - **Requests carry `redirect_to` as a QUERY parameter**, which is what GoTrue
-  reads for `/signup`, `/recover`, `/otp` and `/resend`. It is always built from
-  `location.origin`, so the site works on any domain, dashboard domain and
-  preview URL without a hardcoded hostname. **Every path that sends an email
-  must pass it** — a missing `redirect_to` silently falls back to the project's
-  Site URL, which is the `http://localhost:3000` bug this site exists to fix
-  (this is exactly what happened to `/resend`).
+  reads for `/signup`, `/recover`, `/otp` and `/resend`. It is built by
+  `siteUrl()` in `assets/curio.js`, which prefers the deployment's CANONICAL
+  address (`SITE_URL`, or Vercel's `VERCEL_PROJECT_PRODUCTION_URL`) and only
+  falls back to `location.origin`. The canonical value is served by
+  `/api/config` and must keep precedence: serving the origin alone is how a
+  preview deployment's hostname rides into an email. **Every path that sends an
+  email must pass it** — a missing `redirect_to` silently falls back to the
+  project's Site URL, which is the `http://localhost:3000` bug this site exists
+  to fix (this is exactly what happened to `/resend`).
 - **A missing configuration is a state, not a crash.** With no environment
   variables, `/api/config` answers `{ configured: false }` and every page renders
   its own "not configured yet" notice. Keep that path working: it is what a fresh

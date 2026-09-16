@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +40,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +50,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDmThread
+import com.curio.app.data.supabase.CurioFriend
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SocialApi
@@ -111,12 +117,40 @@ fun ChatsScreen(navController: NavController) {
     var busy by remember { mutableStateOf(false) }
     var pushed by remember { mutableStateOf(0) }
     var cacheHydrated by remember { mutableStateOf(false) }
+    // ── NEW CHAT (v385) ─────────────────────────────────────────────────
+    // The inbox used to be a dead end for a conversation that does not exist
+    // yet: the only door was Friends, two screens away, and an empty inbox
+    // said so in prose. The compose button opens the people you can actually
+    // message, from here.
+    var pickerOpen by remember { mutableStateOf(false) }
+    var friends by remember { mutableStateOf<List<CurioFriend>>(emptyList()) }
+    var friendsLoading by remember { mutableStateOf(false) }
+    var friendsError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
     val eligible = account.signedIn && onlineMode && token != null && myUserId != null
+
+    // Read once per opening, not on every inbox tick: the picker is a decision
+    // surface, and a list that reshuffles under the finger is worse than one
+    // that was a minute old when it appeared.
+    LaunchedEffect(pickerOpen, eligible, token, myUserId) {
+        if (!pickerOpen || !eligible || token == null || myUserId == null) return@LaunchedEffect
+        friendsLoading = true
+        SocialApi.friends(token, myUserId).fold(
+            onSuccess = { people ->
+                friends = people
+                friendsError = null
+                // Names and portraits are cached like the inbox's, so the
+                // thread they open draws the real identity on its first frame.
+                SocialPeopleCache.remember(context, people.map { friend -> friend.person })
+            },
+            onFailure = { friendsError = it.message }
+        )
+        friendsLoading = false
+    }
 
     suspend fun load(active: String, me: String) {
         loading = true
@@ -252,8 +286,11 @@ fun ChatsScreen(navController: NavController) {
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
                     top = if (wide) 0.dp else SettingsHeroTotalHeight,
+                    // The compose button rides above the last row: the list
+                    // keeps its own space so a chat is never under it.
                     bottom = 24.dp +
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                        if (eligible) 72.dp else 0.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
@@ -364,6 +401,33 @@ fun ChatsScreen(navController: NavController) {
                 glassBackdrop = glassBackdrop
             )
         }
+
+        // The compose button: the pocket of the inbox a new conversation
+        // starts from. Hidden while the screen is not usable (signed out or
+        // Online mode off) — the settings rows in the list own those states.
+        if (eligible) {
+            Surface(
+                onClick = { pickerOpen = true },
+                shape = CircleShape,
+                color = curioDialogActionColor(),
+                shadowElevation = 6.dp,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        end = wideContentEdgePadding(),
+                        bottom = 22.dp +
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    )
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Edit,
+                    contentDescription = "New chat",
+                    tint = Color.White,
+                    size = 22.dp,
+                    modifier = Modifier.padding(15.dp)
+                )
+            }
+        }
     }
 
     actionsFor?.let { thread ->
@@ -417,6 +481,116 @@ fun ChatsScreen(navController: NavController) {
                 }
             }
         )
+    }
+
+    if (pickerOpen) {
+        NewChatSheet(
+            friends = friends,
+            loading = friendsLoading,
+            error = friendsError,
+            onDismiss = { pickerOpen = false },
+            onPick = { friend ->
+                pickerOpen = false
+                navController.navigate(
+                    CurioRoutes.directMessage(friend.person.userId, friend.person.label)
+                )
+            },
+            onFindSomeone = {
+                pickerOpen = false
+                navController.navigate(CurioRoutes.FRIENDS)
+            }
+        )
+    }
+}
+
+/**
+ * NEW CHAT.
+ *
+ * The people you can message, and nothing else: friends only (the server is
+ * what decides who that is, and a direct message needs the friendship), with
+ * the same row the inbox and the contacts list use, so a face is a face
+ * everywhere in the social surfaces. A name that is not there yet has one
+ * door out, into Friends, where a request is sent.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NewChatSheet(
+    friends: List<CurioFriend>,
+    loading: Boolean,
+    error: String?,
+    onDismiss: () -> Unit,
+    onPick: (CurioFriend) -> Unit,
+    onFindSomeone: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+        ) {
+            Text(
+                text = "New chat",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+            Spacer(Modifier.height(6.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 420.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 22.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                if (friends.isEmpty()) {
+                    item(key = "pick-state") {
+                        SettingsOptionCard {
+                            when {
+                                loading -> SettingsOptionInfoRow(
+                                    CurioIcons.Friends,
+                                    "Looking up your friends",
+                                    "One moment."
+                                )
+                                error != null -> SettingsOptionInfoRow(
+                                    CurioIcons.Warning,
+                                    "Couldn't load your friends",
+                                    error
+                                )
+                                else -> SettingsOptionInfoRow(
+                                    CurioIcons.Friends,
+                                    "No friends yet",
+                                    "A direct message needs a friendship first."
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    items(friends, key = { "pick-${it.person.userId}" }) { friend ->
+                        SocialSidebarRow(
+                            person = friend.person,
+                            subtitle = friend.person.handleLabel,
+                            onOpen = { onPick(friend) }
+                        )
+                    }
+                }
+                item(key = "pick-find") {
+                    SettingsOptionCard {
+                        SettingsOptionRow(
+                            icon = CurioIcons.Search,
+                            title = "Find someone new",
+                            subtitle = "Send a friend request in Friends",
+                            onClick = onFindSomeone
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -1,10 +1,17 @@
 ADD:
+- Messages: the composer takes a line break when you press Enter, so a message can run to several rows — the round button is what sends it.
+- Chats: a compose button opens your friends, so a new conversation starts right from the inbox.
 - Community: the composer is rebuilt — the topic goes first, the preview is always on, and a topic can ship as a share card or as a plain text post with one tap.
 - Chats: conversations, friends and the wall all run on the same rebuilt chat engine — messages, typing dots, reactions, read ticks and live updates are steadier and faster everywhere.
 - Community: replies now thread properly at any depth — fold and unfold a branch at any level, with a thread line showing where each answer belongs — and every reply can be hearted.
 - Friends: a "Start a chat" strip at the bottom of the contacts list offers your newest friends, one tap from a conversation.
 - Community: the moderation room now covers members too — reports can name a member, hiding an author hides their content without touching their account, and the team manages moderators with five per-person permissions.
 FIX:
+- Wildcard: the Wildcard deck deals its own curated curiosities instead of loading every category first, so it opens instantly.
+- Speed: a restart no longer rewrites the whole topic catalog to the database or rebuilds its text rules for every topic, so the deck, the Topic Database and the composer come up faster and the phone stays cool.
+- Speed: the deck deals cards straight away on a restart instead of showing "Gathering the deck…".
+- Community: the topic chooser in the composer starts collapsed, and its search ranks real matches — name first, then byline, tags and teaser — with each result's category shown.
+- Messages: the quoted message inside a reply is one line tall and fits its own words instead of stretching the bubble across the thread.
 - Speed: the Topic Database opens with the topics already on screen again, and the Cabinet shows your saved entries the moment you open it — no more waiting skeletons.
 - Releases: the release APK now ships with the full topic catalog — previous releases opened an empty database.
 - Accounts: confirmation and password emails now open a real Curio page instead of a link that went nowhere, and the sign-in form has a "Forgot your password?" row that sets a new one.

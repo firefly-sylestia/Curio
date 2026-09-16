@@ -84,7 +84,7 @@ object TopicJsonLoader {
     @Volatile private var cacheGeneration: Long = 0L
     /**
      * v55 — bounds how many JSON files parse AT ONCE (max 2). The cold-start
-     * prewarm, a wildcard merge and several screens can all request lanes
+     * prewarm and several screens can all request lanes
      * together; without a gate they'd parse every file in parallel and
      * saturate all cores — the lag + device heating on mid-range phones.
      * Blocking acquires are fine on Dispatchers.IO (the pool is far larger
@@ -182,43 +182,20 @@ object TopicJsonLoader {
     } catch (_: Exception) { emptyList() }
 
     /**
-     * Parses [id]'s pool (merging every lane for WILDCARD) and caches it.
-     * The shared body behind the in-flight dedupe in [load]; runs on IO.
+     * Parses [id]'s pool and caches it. The shared body behind the in-flight
+     * dedupe in [load]; runs on IO.
+     *
+     * WILDCARD is ONE file, not a merge (v385). It used to load every lane
+     * into one pool, so selecting the Wildcard deck paid for the whole
+     * catalog: ~38 files parsed behind a two-parse gate, seconds of "topic
+     * loading" on a cold start, and a pool that pulled "Bowie" out of
+     * Artists and Films. wildcard.json already holds the hand-curated
+     * curiosities the lane is FOR, and the Topic Database has shown only
+     * those in its Wildcard lane all along — the deck now matches it.
      */
     private suspend fun parseAndCache(id: CategoryId): List<CurioTopic> {
         val generation = cacheGeneration
-        val parsed = if (id == CategoryId.WILDCARD) {
-            // Wildcard = merge ALL categories into one big pool.
-            // Use cache for already-loaded categories, parse + cache
-            // the rest so subsequent per-category loads are free.
-            val merged = mutableListOf<CurioTopic>()
-            val seenIds = mutableSetOf<String>()
-            // 1. Collect from every non-wildcard category. v55 — route
-            // through the shared [load] instead of parsing the file directly:
-            // a lane the prewarm (or a screen) is already parsing is SHARED,
-            // never double-parsed by the merge, and every parse stays under
-            // the bounded [parseGate].
-            CategoryId.values()
-                .filter { it != CategoryId.WILDCARD }
-                .forEach { otherId ->
-                    val topics = load(otherId)
-                    topics.forEach { t ->
-                        if (seenIds.add(t.id)) merged.add(t)
-                    }
-                }
-            // 2. Also pull in wildcard.json for any hand-curated
-            //    topics not already covered by the category files.
-            runCatching {
-                parseAsset("$ASSET_DIR/${CategoryId.WILDCARD.routeSlug}.json", CategoryId.WILDCARD)
-            }.onFailure {
-                android.util.Log.w("TopicJsonLoader", "wildcard.json skipped: ${it.message}")
-            }.getOrNull()?.forEach { t ->
-                if (seenIds.add(t.id)) merged.add(t)
-            }
-            merged
-        } else {
-            parseAsset("$ASSET_DIR/${id.routeSlug}.json", id)
-        }
+        val parsed = parseAsset("$ASSET_DIR/${id.routeSlug}.json", id)
         // A memory callback can clear the concurrent map while this
         // parse is in progress. Never let an old parse refill a cache
         // that Android has just asked us to release.
@@ -235,6 +212,17 @@ object TopicJsonLoader {
         // JSON is parsed and Room catches up in the background. Best-effort
         // either way — [reloadFromAssets]'s callers do their own awaited
         // writes, so an authoritative refresh is unaffected.
+        //
+        // v385 — SKIP A LANE ROOM ALREADY MIRRORS. The in-memory pools are
+        // empty after process death, so every restart re-parsed every lane and
+        // this mirror then re-wrote the WHOLE catalog (delete + ~14k inserts
+        // with chapter/track/episode JSON) on IO threads that were also
+        // parsing — the restart slow-down that made the Topic Database feel
+        // like it was still loading and the deck show its loading hint. One
+        // indexed count per lane answers the same question: a lane whose Room
+        // row count already equals the parsed count is in sync (content only
+        // changes with an install, and TopicRepository's install-gated sync
+        // owns that case), so there is nothing to rewrite.
         try {
             if (com.curio.app.data.TopicRepository.isInitialized() && parsed.isNotEmpty()) {
                 val appCtx = appContext
@@ -243,19 +231,19 @@ object TopicJsonLoader {
                     val mirrorId = id
                     loadScope.launch(Dispatchers.IO) {
                         runCatching {
+                            val dao = db.topicDao()
+                            if (dao.getCount(mirrorId.name) == parsed.size) {
+                                return@runCatching
+                            }
                             // A real asset parse is authoritative: mirror the
                             // lane so rows removed from the JSON also leave
-                            // Room (the loader only parses a canonical lane
-                            // when Room doesn't serve it, so the delete is a
-                            // no-op on a healthy lane — WILDCARD is a merge of
-                            // every lane, never mirrored, just upserted).
-                            if (mirrorId != CategoryId.WILDCARD) {
-                                db.topicDao().deleteCategory(mirrorId.name)
-                            }
+                            // Room. Every lane is its own category in Room
+                            // now that WILDCARD is a single file too.
+                            dao.deleteCategory(mirrorId.name)
                             val entities = parsed.map {
                                 com.curio.app.data.TopicEntity.fromCurioTopic(it)
                             }
-                            db.topicDao().insertAll(entities)
+                            dao.insertAll(entities)
                         }
                     }
                 }
@@ -289,10 +277,9 @@ object TopicJsonLoader {
     }
 
     /**
-     * Eagerly loads + caches the ten canonical category JSON files.
-     * The derived WILDCARD pool is intentionally excluded: it duplicates
-     * references to every canonical topic and can be built on demand by
-     * [load] when the wildcard lane is actually used.
+     * Eagerly loads + caches the canonical category JSON files.
+     * WILDCARD is intentionally excluded here as well: it is its own small
+     * file (v385), loaded on demand by [load] when the wildcard lane is used.
      *
      * Callers should prefer loading only the category they need. This helper
      * remains for exhaustive tooling and compatibility, but is not used on
@@ -350,7 +337,10 @@ object TopicJsonLoader {
      * repeated label recomputes never re-parse the file.
      */
     suspend fun countFor(id: CategoryId): Int = withContext(Dispatchers.IO) {
-        if (id == CategoryId.WILDCARD) return@withContext countCanonicalTopics()
+        // v385 — WILDCARD counts its OWN file: it is a lane with its own
+        // pool now, so answering with the canonical total both described the
+        // wrong pool and (through the deck's "Mixed · N" label) claimed a
+        // count the deck could never deal.
         countsCache[id]?.let { return@withContext it }
         val am = assets ?: return@withContext 0
         val count = gated {
@@ -445,7 +435,7 @@ object TopicJsonLoader {
      *  per-category pools: routes through [load] so the parses are SHARED
      *  with the per-category caches (never double-parsed), computes the
      *  lowercased keys + sort year exactly like the build script, and reads
-     *  wildcard.json directly ([load] of WILDCARD would merge every lane).
+     *  wildcard.json directly (its own lane, v385).
      *  Cached by [loadIndex]; the app prewarm runs it once at startup, so
      *  the Topic Database still renders with zero loading. */
     private suspend fun buildIndexFromCatalog(): List<TopicIndexEntry> {
@@ -472,7 +462,7 @@ object TopicJsonLoader {
                 emptyList()
             }.forEach { add(it) }
         }
-        // Hand-curated wildcard curiosities (load(WILDCARD) merges every lane).
+        // Hand-curated wildcard curiosities (the WILDCARD lane's own file).
         runCatching {
             parseAsset("$ASSET_DIR/${CategoryId.WILDCARD.routeSlug}.json", CategoryId.WILDCARD)
         }.getOrNull()?.forEach { add(it) }
@@ -529,16 +519,26 @@ object TopicJsonLoader {
 
     // ── Internal ───────────────────────────────────────────────────────────
 
+    // Compiled ONCE (v385). cleanText runs four times for EVERY topic parsed
+    // (name, teaser, target name, instruction), so building these Regexes
+    // inline meant ~16 compilations per topic — a quarter of a million pattern
+    // compilations per cold catalog load, on top of the matching itself. That
+    // was a real slice of the "topic database is laggy / slow to load" cost.
+    private val DASH_SPACING = Regex("\\s*[\\u2014\\u2013]\\s*")
+    private val REPEATED_SPACE = Regex("\\s{2,}")
+    private val STRAY_COMMAS = Regex(",\\s*,+")
+    private val SPACE_BEFORE_PUNCT = Regex("\\s+([,.!?;:])")
+
     /**
      * Strips em dashes (U+2014) and en dashes (U+2013) from display text,
      * replacing them with a standard hyphen. Also collapses any resulting
      * double-hyphens or leading/trailing whitespace.
      */
     private fun cleanText(raw: String): String =
-        raw.replace(Regex("\\s*[\\u2014\\u2013]\\s*"), ", ")
-           .replace(Regex("\\s{2,}"), " ")
-           .replace(Regex(",\\s*,+"), ",")
-           .replace(Regex("\\s+([,.!?;:])"), "$1")
+        raw.replace(DASH_SPACING, ", ")
+           .replace(REPEATED_SPACE, " ")
+           .replace(STRAY_COMMAS, ",")
+           .replace(SPACE_BEFORE_PUNCT, "$1")
            .trim(' ', ',', ';', ':')
 
     private fun parseAsset(path: String, id: CategoryId): List<CurioTopic> {
