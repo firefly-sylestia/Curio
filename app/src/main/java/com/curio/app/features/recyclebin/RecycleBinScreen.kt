@@ -1,5 +1,7 @@
 package com.curio.app.features.recyclebin
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -248,7 +250,7 @@ fun RecycleBinScreen(navController: NavController) {
                             Text(
                                 text = "\u2726",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+                                color = settingsRoseAccent().copy(alpha = 0.75f)
                             )
                             Spacer(Modifier.width(7.dp))
                             Text(
@@ -275,7 +277,7 @@ fun RecycleBinScreen(navController: NavController) {
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.SemiBold
                                 ),
-                                color = MaterialTheme.colorScheme.primary,
+                                color = settingsRoseAccent(),
                                 modifier = Modifier.clickable {
                                     selectedIds = if (selectedIds.size == trashed.size)
                                         emptySet()
@@ -550,7 +552,7 @@ fun RecycleBinScreen(navController: NavController) {
                                 scope.launch { RecycleBinExpiry.purgeExpired(context) }
                             },
                             shape = RoundedCornerShape(16.dp),
-                            color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            color = if (selected) settingsRoseAccent().copy(alpha = 0.12f)
                             else MaterialTheme.colorScheme.surfaceContainerHigh,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -563,7 +565,7 @@ fun RecycleBinScreen(navController: NavController) {
                                     selected = selected,
                                     onClick = null,
                                     colors = RadioButtonDefaults.colors(
-                                        selectedColor = MaterialTheme.colorScheme.primary
+                                        selectedColor = settingsRoseAccent()
                                     )
                                 )
                                 Text(
@@ -648,7 +650,7 @@ private fun BinSummaryCard(
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = settingsRoseAccent(),
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
@@ -671,7 +673,7 @@ private fun TrashedEntryRow(
     val dark = isCurioDarkTheme()
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+        color = if (selected) settingsRoseAccent().copy(alpha = 0.10f)
         else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
         else Color.White.copy(alpha = 0.68f),
         modifier = Modifier
@@ -729,7 +731,7 @@ private fun TrashedEntryRow(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = if (selected) MaterialTheme.colorScheme.primary
+                    color = if (selected) settingsRoseAccent()
                     else Color.Transparent,
                     border = if (!selected) BorderStroke(
                         2.dp,
@@ -824,7 +826,7 @@ private fun SelectionBottomBar(
             Surface(
                 onClick = onRestore,
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.primary
+                color = settingsRoseAccent()
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -834,7 +836,7 @@ private fun SelectionBottomBar(
                     CurioIcon(
                         CurioIcons.Restore,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = settingsReadableInk(settingsRoseAccent()),
                         size = 18.dp
                     )
                     Text(
@@ -842,7 +844,7 @@ private fun SelectionBottomBar(
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = settingsReadableInk(settingsRoseAccent())
                     )
                 }
             }

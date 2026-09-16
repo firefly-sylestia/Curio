@@ -78,6 +78,15 @@ interface PersonalDao {
     @Query("SELECT * FROM personal_notes WHERE id = :id")
     fun observeNote(id: String): Flow<PersonalNoteEntity?>
 
+    // ── Pages by kind (a to-do list is a personal page too) ────────────
+
+    /** Every page of one [kind] (`""` = journalling, `"todo"` = a list). */
+    @Query(
+        "SELECT * FROM personal_notes WHERE deletedAt IS NULL AND bookId IS NULL " +
+            "AND topicId = '' AND kind = :kind ORDER BY dateMillis DESC, updatedAtMillis DESC"
+    )
+    fun observePagesOfKind(kind: String): Flow<List<PersonalNoteEntity>>
+
     // ── Writes ─────────────────────────────────────────────────────────
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -89,8 +98,12 @@ interface PersonalDao {
     @Query("UPDATE personal_books SET currentChapter = :chapter, updatedAtMillis = :now WHERE id = :id")
     suspend fun setProgress(id: String, chapter: Int, now: Long)
 
-    @Query("UPDATE personal_books SET finishedAtMillis = :at, updatedAtMillis = :at WHERE id = :id")
-    suspend fun setFinished(id: String, at: Long?)
+    // `now` is a SEPARATE parameter on purpose: when the book is being marked
+    // un-finished, `at` is NULL, and `updatedAtMillis = NULL` on a NOT NULL
+    // column makes SQLite reject the whole update — which is why the Mark
+    // finished pill appeared to do nothing at all.
+    @Query("UPDATE personal_books SET finishedAtMillis = :at, updatedAtMillis = :now WHERE id = :id")
+    suspend fun setFinished(id: String, at: Long?, now: Long)
 
     @Query("UPDATE personal_books SET blurb = :blurb, updatedAtMillis = :now WHERE id = :id")
     suspend fun setBlurb(id: String, blurb: String, now: Long)
@@ -107,6 +120,21 @@ interface PersonalDao {
     /** A shelf book by its exact title (the catalog matcher's second pass). */
     @Query("SELECT * FROM personal_books WHERE title = :title COLLATE NOCASE LIMIT 1")
     suspend fun bookByTitle(title: String): PersonalBookEntity?
+
+    // ── A page's own topic ─────────────────────────────────────────────
+
+    /** The member's notes written ABOUT a topic (the "note on a topic" page). */
+    @Query(
+        "SELECT * FROM personal_notes WHERE deletedAt IS NULL AND topicId = :topicId " +
+            "ORDER BY updatedAtMillis DESC"
+    )
+    fun observeTopicNotes(topicId: String): Flow<List<PersonalNoteEntity>>
+
+    @Query(
+        "SELECT * FROM personal_notes WHERE deletedAt IS NULL AND topicId = :topicId " +
+            "ORDER BY updatedAtMillis DESC LIMIT 1"
+    )
+    suspend fun latestTopicNote(topicId: String): PersonalNoteEntity?
 
     @Query("SELECT COUNT(*) FROM personal_notes WHERE deletedAt IS NULL AND bookId IS NULL")
     suspend fun journalCount(): Int
@@ -218,10 +246,37 @@ class PersonalRepository(private val dao: PersonalDao) {
         dao.setProgress(bookId, chapter, System.currentTimeMillis())
 
     suspend fun setFinished(bookId: String, finished: Boolean) =
-        dao.setFinished(bookId, if (finished) System.currentTimeMillis() else null)
+        dao.setFinished(bookId, if (finished) System.currentTimeMillis() else null, System.currentTimeMillis())
 
     suspend fun setBlurb(bookId: String, blurb: String) =
         dao.setBlurb(bookId, blurb, System.currentTimeMillis())
+
+    /**
+     * Stores the chapter list a book learned (Open Library's table of
+     * contents). The book's length follows the list when it was unknown, so
+     * the progress stepper and the chapter rows agree from the same fact.
+     */
+    suspend fun setBookChapters(bookId: String, chapters: List<PersonalChapter>) {
+        if (chapters.isEmpty()) return
+        val current = dao.book(bookId) ?: return
+        dao.upsertBook(
+            current.copy(
+                chaptersJson = PersonalChapterCodec.encode(chapters),
+                totalChapters = if (current.totalChapters <= 0) chapters.size
+                else current.totalChapters,
+                updatedAtMillis = System.currentTimeMillis()
+            )
+        )
+    }
+
+    fun observeTopicNotes(topicId: String): Flow<List<PersonalNoteEntity>> =
+        dao.observeTopicNotes(topicId)
+
+    suspend fun latestTopicNote(topicId: String): PersonalNoteEntity? =
+        dao.latestTopicNote(topicId)
+
+    fun observePagesOfKind(kind: String): Flow<List<PersonalNoteEntity>> =
+        dao.observePagesOfKind(kind)
 
     suspend fun deleteNote(id: String) = dao.deleteNote(id)
 

@@ -241,7 +241,7 @@ internal fun CurioAuthCard(
         ) {
             if (account.busy) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = settingsReadableInk(settingsRoseAccent()),
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(18.dp)
                 )
@@ -505,7 +505,7 @@ internal fun CurioAccountIdentityCard(
             ) {
                 if (savingName) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = settingsReadableInk(settingsRoseAccent()),
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(16.dp)
                     )
@@ -587,7 +587,7 @@ private fun TermsAcceptanceRow(
         Text(
             text = if (accepted) "Terms and data disclosures accepted · View" else "Review Curio's Terms and data disclosures",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = settingsRoseAccent()
         )
     }
 }
@@ -641,7 +641,7 @@ private fun AuthModePill(
             style = MaterialTheme.typography.labelLarge.copy(
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
             ),
-            color = if (selected) MaterialTheme.colorScheme.onPrimary
+            color = if (selected) settingsReadableInk(settingsRoseAccent())
             else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
@@ -703,7 +703,7 @@ private fun AccountField(
             textStyle = MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.onSurface
             ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(settingsRoseAccent()),
             modifier = Modifier.weight(1f)
         ) { inner ->
             Box {
@@ -728,7 +728,7 @@ private fun AccountField(
                 CurioIcon(
                     name = CurioIcons.VisibilityOff,
                     contentDescription = revealLabel,
-                    tint = if (revealed) MaterialTheme.colorScheme.primary
+                    tint = if (revealed) settingsRoseAccent()
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                     size = 18.dp
                 )
@@ -744,7 +744,7 @@ private fun AccountField(
 @Composable
 private fun AccountMessage(text: String, isError: Boolean) {
     val tint = if (isError) MaterialTheme.colorScheme.error
-    else MaterialTheme.colorScheme.primary
+    else settingsRoseAccent()
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = if (isError) {

@@ -251,7 +251,7 @@ fun BookCoverHubScreen(navController: NavController) {
                                     modifier = Modifier
                                         .size(18.dp)
                                         .background(
-                                            if (selected) MaterialTheme.colorScheme.primary
+                                            if (selected) settingsRoseAccent()
                                             else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
                                             CircleShape
                                         ),
@@ -260,7 +260,7 @@ fun BookCoverHubScreen(navController: NavController) {
                                     if (selected) {
                                         CurioIcon(
                                             CurioIcons.Check, null,
-                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            tint = settingsReadableInk(settingsRoseAccent()),
                                             size = 12.dp
                                         )
                                     }
@@ -511,7 +511,7 @@ private fun StatCell(value: String, label: String, modifier: Modifier = Modifier
         Text(
             value,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.primary
+            color = settingsRoseAccent()
         )
         Text(
             label,

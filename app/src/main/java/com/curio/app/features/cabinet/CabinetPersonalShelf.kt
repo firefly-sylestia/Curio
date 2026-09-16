@@ -1,5 +1,7 @@
 package com.curio.app.features.cabinet
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -192,7 +194,7 @@ private fun PersonalShelfHeading(
 @Composable
 private fun JournalShelfTile(journal: PersonalNoteEntity, onClick: () -> Unit) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = settingsRoseAccent()
     val mood = journal.moodEnum
     Surface(
         onClick = onClick,
@@ -254,7 +256,7 @@ private fun JournalShelfTile(journal: PersonalNoteEntity, onClick: () -> Unit) {
 @Composable
 private fun BookShelfTile(book: PersonalBookEntity, onClick: () -> Unit) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = settingsRoseAccent()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -364,10 +366,10 @@ private fun PersonalShelfDoor(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    .background(settingsRoseAccent().copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
-                CurioIcon(glyph, null, tint = MaterialTheme.colorScheme.primary, size = 18.dp)
+                CurioIcon(glyph, null, tint = settingsRoseAccent(), size = 18.dp)
             }
             Column(Modifier.weight(1f)) {
                 Text(
@@ -391,18 +393,18 @@ private fun PersonalShelfPill(glyph: String, label: String, onClick: () -> Unit)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+        color = settingsRoseAccent().copy(alpha = 0.12f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            CurioIcon(glyph, null, tint = MaterialTheme.colorScheme.primary, size = 16.dp)
+            CurioIcon(glyph, null, tint = settingsRoseAccent(), size = 16.dp)
             Text(
                 label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.primary
+                color = settingsRoseAccent()
             )
         }
     }

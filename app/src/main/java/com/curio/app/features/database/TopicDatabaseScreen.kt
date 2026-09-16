@@ -1,5 +1,7 @@
 package com.curio.app.features.database
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -1143,7 +1145,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     alphabetScope.launch { listState.animateScrollToItem(0) }
                 },
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary,
+                color = settingsRoseAccent(),
                 // v27r — a compact arrow: 16dp glyph + slim padding (was
                 // 20dp + 11dp, which read as a big button), flat 2dp shadow.
                 shadowElevation = 2.dp
@@ -1157,7 +1159,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     CurioIcon(
                         CurioIcons.ArrowUpward,
                         "Back to top",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = settingsReadableInk(settingsRoseAccent()),
                         size = 16.dp
                     )
                 }
@@ -1835,7 +1837,7 @@ private fun SearchGroupHeaderRow(label: String, count: Int) {
         Text(
             text = label.uppercase(),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.primary
+            color = settingsRoseAccent()
         )
         Text(
             text = "$count",

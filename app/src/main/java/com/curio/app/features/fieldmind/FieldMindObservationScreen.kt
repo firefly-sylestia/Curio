@@ -1,5 +1,7 @@
 package com.curio.app.features.fieldmind
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -152,7 +154,7 @@ fun FieldMindObservationScreen(navController: NavController) {
                 Text("FieldMind observation", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold))
                 Text("A focused field session, in Curio", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            CurioIcon(CurioIcons.ScienceGlyph, null, tint = MaterialTheme.colorScheme.primary, size = 28.dp)
+            CurioIcon(CurioIcons.ScienceGlyph, null, tint = settingsRoseAccent(), size = 28.dp)
         }
 
         Surface(
@@ -178,8 +180,8 @@ fun FieldMindObservationScreen(navController: NavController) {
                         onClick = ::finishSession,
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                            containerColor = settingsRoseAccent(),
+                            contentColor = settingsReadableInk(settingsRoseAccent())
                         )
                     ) { Text("Finish") }
                 }
@@ -201,14 +203,14 @@ fun FieldMindObservationScreen(navController: NavController) {
             // clashed with the white icon below).
             shape = RoundedCornerShape(24.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = settingsRoseAccent(),
+                contentColor = settingsReadableInk(settingsRoseAccent())
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            CurioIcon(CurioIcons.Check, null, tint = MaterialTheme.colorScheme.onPrimary, size = 18.dp)
+            CurioIcon(CurioIcons.Check, null, tint = settingsReadableInk(settingsRoseAccent()), size = 18.dp)
             Spacer(Modifier.width(6.dp))
-            Text(if (saving) "Saving…" else "Save observation", color = MaterialTheme.colorScheme.onPrimary)
+            Text(if (saving) "Saving…" else "Save observation", color = settingsReadableInk(settingsRoseAccent()))
         }
         Spacer(Modifier.height(18.dp))
     }

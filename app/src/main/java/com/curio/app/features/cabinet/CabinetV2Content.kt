@@ -1,5 +1,7 @@
 package com.curio.app.features.cabinet
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -599,7 +601,7 @@ fun CabinetV2Content(navController: NavController) {
     // grid just clears the torn hero + a breathing gap.
     val contentTop = if (wide) 0.dp else heroTotal + 12.dp
 
-    val pageAccent = MaterialTheme.colorScheme.primary
+    val pageAccent = settingsRoseAccent()
 
     val heroTrailing: @Composable (Color, Color) -> Unit = { ink, fill ->
         V2HeroTrailing(
@@ -1519,7 +1521,7 @@ private fun LazyListScope.v2EverythingMasonryItems(
                     // The fallback accent resolves INSIDE the item's composable
                     // lambda (the wall builder itself is not @Composable).
                     val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
-                        ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                        ?.themedAccent() ?: settingsRoseAccent()
                     // Every cover is sized to the shelf height by its OWN
                     // aspect, so the row fills the width exactly and no cover
                     // ever leaves space beside or below it.
@@ -1651,13 +1653,13 @@ private fun V2NewCollectionTile(onClick: () -> Unit) {
             CurioIcon(
                 name = CurioIcons.Add,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = settingsRoseAccent(),
                 size = 19.dp
             )
             Text(
                 text = "New collection",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.primary
+                color = settingsRoseAccent()
             )
         }
     }
@@ -1904,7 +1906,7 @@ private fun V2EverythingCard(
                         // (dominant color extracted from the cached art). The
                         // category fallback is computed OUTSIDE the remember
                         // (themedAccent is @Composable).
-                        val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                        val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
                         val accent = remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
                             CabinetCoverCache.dominantCoverColor(
                                 context,
@@ -1976,7 +1978,7 @@ private fun V2FilterRail(
                 shape = RoundedCornerShape(50),
                 color = if (selected) accent
                 else MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                contentColor = if (selected) settingsReadableInk(settingsRoseAccent())
                 else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.height(34.dp)
             ) {
@@ -1988,7 +1990,7 @@ private fun V2FilterRail(
                     CurioIcon(
                         name = icon,
                         contentDescription = null,
-                        tint = if (selected) MaterialTheme.colorScheme.onPrimary
+                        tint = if (selected) settingsReadableInk(settingsRoseAccent())
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         size = 15.dp
                     )
@@ -2011,7 +2013,7 @@ private fun V2AddPillCompact(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+        color = settingsRoseAccent().copy(alpha = 0.13f),
         modifier = Modifier.height(46.dp)
     ) {
         Row(
@@ -2022,13 +2024,13 @@ private fun V2AddPillCompact(onClick: () -> Unit) {
             CurioIcon(
                 name = CurioIcons.Add,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = settingsRoseAccent(),
                 size = 20.dp
             )
             Text(
                 text = "Add",
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.primary,
+                color = settingsRoseAccent(),
                 maxLines = 1
             )
         }
@@ -2061,7 +2063,7 @@ private fun V2MediaTileCard(
 ) {
     val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
     // v3xx — the tile wears ITS OWN color: the dominant color extracted from
     // its cover art (fallback = category accent while the cover is still
     // downloading). Re-keys when the cover cache warms a file.
@@ -2262,7 +2264,7 @@ private fun V2ReviewTileCard(
                     CurioIcon(
                         name = CurioIcons.Check,
                         contentDescription = "Selected",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = settingsRoseAccent(),
                         size = 18.dp
                     )
                 }
@@ -2313,7 +2315,7 @@ private fun V2LikedTileCard(
 ) {
     val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
     // v3xx — the tile wears ITS OWN color: the dominant color extracted from
     // its cover art (fallback = category accent while the cover is still
     // downloading). Re-keys when the cover cache warms a file.
@@ -2487,7 +2489,7 @@ private fun V2LikedTopicRow(
     modifier: Modifier = Modifier
 ) {
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val accent = cat?.themedAccent() ?: settingsRoseAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
@@ -2651,7 +2653,7 @@ private fun V2DetailHeader(
         Surface(
             onClick = onAdd,
             shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+            color = settingsRoseAccent().copy(alpha = 0.13f),
             modifier = Modifier.height(46.dp)
         ) {
             Row(
@@ -2662,13 +2664,13 @@ private fun V2DetailHeader(
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = "Add saved captures",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = settingsRoseAccent(),
                     size = 22.dp
                 )
                 Text(
                     text = "Add",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = settingsRoseAccent(),
                     maxLines = 1
                 )
             }
@@ -2810,7 +2812,7 @@ private fun V2CollectionNameSheet(
                             .background(if (dark) Color(t.dark) else Color(t.light))
                             .then(
                                 if (selected)
-                                    Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(21.dp))
+                                    Modifier.border(3.dp, settingsRoseAccent(), RoundedCornerShape(21.dp))
                                 else Modifier
                             )
                             .clickable { tone = if (selected) -1 else i },
@@ -2845,7 +2847,7 @@ private fun V2CollectionNameSheet(
                             .background(if (dark) Color(t.dark) else Color(t.light))
                             .then(
                                 if (selected)
-                                    Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                                    Modifier.border(3.dp, settingsRoseAccent(), RoundedCornerShape(14.dp))
                                 else Modifier
                             )
                             .clickable { art = if (selected) -1 else i }
@@ -2862,13 +2864,13 @@ private fun V2CollectionNameSheet(
                                     .padding(4.dp)
                                     .size(18.dp)
                                     .clip(RoundedCornerShape(9.dp))
-                                    .background(MaterialTheme.colorScheme.primary),
+                                    .background(settingsRoseAccent()),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CurioIcon(
                                     name = CurioIcons.Check,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    tint = settingsReadableInk(settingsRoseAccent()),
                                     size = 12.dp
                                 )
                             }
@@ -2889,12 +2891,12 @@ private fun V2CollectionNameSheet(
                             .size(44.dp)
                             .clip(RoundedCornerShape(14.dp))
                             .background(
-                                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                                if (selected) settingsRoseAccent().copy(alpha = 0.16f)
                                 else MaterialTheme.colorScheme.surfaceContainerHigh
                             )
                             .then(
                                 if (selected)
-                                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                                    Modifier.border(2.dp, settingsRoseAccent(), RoundedCornerShape(14.dp))
                                 else Modifier
                             )
                             .clickable { icon = if (selected) "" else glyph },
@@ -2903,7 +2905,7 @@ private fun V2CollectionNameSheet(
                         CurioIcon(
                             name = glyph,
                             contentDescription = null,
-                            tint = if (selected) MaterialTheme.colorScheme.primary
+                            tint = if (selected) settingsRoseAccent()
                             else MaterialTheme.colorScheme.onSurfaceVariant,
                             size = 21.dp
                         )
@@ -2916,14 +2918,14 @@ private fun V2CollectionNameSheet(
                     onConfirm(name.trim().ifBlank { "Collection" }, tone, art, icon.ifBlank { null })
                 },
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.primary,
+                color = settingsRoseAccent(),
                 modifier = Modifier.fillMaxWidth().height(46.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         text = confirmLabel,
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = settingsReadableInk(settingsRoseAccent())
                     )
                 }
             }
@@ -2953,13 +2955,13 @@ private fun V2CollectionNameSheet(
                                 modifier = Modifier
                                     .size(34.dp)
                                     .clip(RoundedCornerShape(9.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                                    .background(settingsRoseAccent().copy(alpha = 0.14f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CurioIcon(
                                     name = CurioIcons.Image,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = settingsRoseAccent(),
                                     size = 16.dp
                                 )
                             }
@@ -3005,12 +3007,12 @@ private fun StyleAutoChip(
             .height(44.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(
-                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                if (selected) settingsRoseAccent().copy(alpha = 0.16f)
                 else MaterialTheme.colorScheme.surfaceContainerHigh
             )
             .then(
                 if (selected)
-                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                    Modifier.border(2.dp, settingsRoseAccent(), RoundedCornerShape(14.dp))
                 else Modifier
             )
             .clickable(onClick = onClick)
@@ -3020,7 +3022,7 @@ private fun StyleAutoChip(
         Text(
             text = "Auto",
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = if (selected) MaterialTheme.colorScheme.primary
+            color = if (selected) settingsRoseAccent()
             else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -3043,7 +3045,7 @@ private fun V2ShelfToggleChips(
             it.kind == CurioCollectionMember.MemberKind.TOPIC &&
                 it.categoryName == categoryId.name && it.refName == topicName
         } == true
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = settingsRoseAccent()
     val onSurface = MaterialTheme.colorScheme.onSurface
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     @Composable fun chip(id: String, label: String, icon: String) {
@@ -3201,7 +3203,7 @@ private fun V2CoverSourceSheet(
                             modifier = Modifier
                                 .size(30.dp)
                                 .clip(RoundedCornerShape(9.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)),
+                                .background(settingsRoseAccent().copy(alpha = 0.13f)),
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
@@ -3211,7 +3213,7 @@ private fun V2CoverSourceSheet(
                                     else -> CurioIcons.AutoAwesome
                                 },
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = settingsRoseAccent(),
                                 size = 16.dp
                             )
                         }
@@ -3393,13 +3395,13 @@ private fun V2AddToShelfSheet(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f))
+                                .background(settingsRoseAccent().copy(alpha = 0.13f))
                                 .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
                             Text(
                                 text = "${picked.size} picked",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.primary
+                                color = settingsRoseAccent()
                             )
                         }
                     }
@@ -3491,7 +3493,7 @@ private fun V2AddToShelfSheet(
                     Surface(
                         onClick = { onAddEntries(picked.toList()) },
                         shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = settingsRoseAccent(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(46.dp)
@@ -3501,7 +3503,7 @@ private fun V2AddToShelfSheet(
                             Text(
                                 text = if (picked.size == 1) "Add 1 capture" else "Add ${picked.size} captures",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = settingsReadableInk(settingsRoseAccent())
                             )
                         }
                     }
@@ -3594,7 +3596,7 @@ private fun AddTopicPickRow(
     favoritesMode: Boolean,
     onClick: () -> Unit
 ) {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = settingsRoseAccent()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -3967,7 +3969,7 @@ private fun V2EmptySuggestions(
                 Text(
                     text = catId.name.lowercase().replaceFirstChar { it.uppercase() } + "s",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary,
+                    color = cat?.themedAccent() ?: settingsRoseAccent(),
                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
                 )
                 topics.forEach { t ->
@@ -3983,8 +3985,8 @@ private fun V2EmptySuggestions(
         Surface(
             onClick = onShuffle,
             shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
-            contentColor = MaterialTheme.colorScheme.primary,
+            color = settingsRoseAccent().copy(alpha = 0.13f),
+            contentColor = settingsRoseAccent(),
             modifier = Modifier.height(38.dp)
         ) {
             Row(
@@ -3995,13 +3997,13 @@ private fun V2EmptySuggestions(
                 CurioIcon(
                     name = CurioIcons.Shuffle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = settingsRoseAccent(),
                     size = 17.dp
                 )
                 Text(
                     text = "Shuffle suggestions",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.primary
+                    color = settingsRoseAccent()
                 )
             }
         }
@@ -4026,7 +4028,7 @@ private fun V2LikedRow(
 ) {
     val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
     // v3xx — the row wears ITS OWN color: the dominant color extracted from
     // its cover art (fallback = category accent while the cover is still
     // downloading). Re-keys when the cover cache warms a file.

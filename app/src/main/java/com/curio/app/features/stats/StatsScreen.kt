@@ -1,5 +1,7 @@
 package com.curio.app.features.stats
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -681,7 +683,7 @@ private fun JourneyCard(
                 Surface(
                     onClick = onOpenQuests,
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                    color = settingsRoseAccent().copy(alpha = 0.14f)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -691,9 +693,9 @@ private fun JourneyCard(
                         Text(
                             "Quests",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                            color = MaterialTheme.colorScheme.primary
+                            color = settingsRoseAccent()
                         )
-                        CurioIcon(CurioIcons.ChevronRight, null, tint = MaterialTheme.colorScheme.primary, size = 16.dp)
+                        CurioIcon(CurioIcons.ChevronRight, null, tint = settingsRoseAccent(), size = 16.dp)
                     }
                 }
             }

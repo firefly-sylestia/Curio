@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         // reviews). Its own tables, never the capture archive's.
         PersonalNoteEntity::class, PersonalBookEntity::class
     ],
-    version = 16,
+    version = 17,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -301,6 +301,44 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v16 → v17 (v389) — what a hand-added book learned about itself, and
+         * the two new kinds of personal page.
+         *
+         *  · `personal_books.chaptersJson` — the chapter list read from Open
+         *    Library's table of contents, so a book Curio's own catalog does
+         *    not have still opens with real chapter names and page ranges
+         *    instead of "Chapter 7".
+         *  · `personal_notes.kind` — "" for a journal day, "todo" for a
+         *    checklist page, so ONE store serves both without guessing which
+         *    is which from an empty body.
+         *  · `personal_notes.topicId` / `topicName` / `categoryId` — the page
+         *    written ABOUT a topic (the "+" sheet's note on a topic), which
+         *    is what lets the topic's own page offer it back.
+         *
+         * Every column is added with a non-null default, so an existing
+         * library reads exactly as it did before the update.
+         */
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN chaptersJson TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN kind TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN topicId TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN topicName TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN categoryId TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -315,7 +353,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

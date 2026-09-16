@@ -199,6 +199,80 @@ object PersonalDocCodec {
     fun newBlock(): PersonalBlock = PersonalBlock(id = newBlockId())
 }
 
+/**
+ * ONE CHAPTER OF A BOOK THE APP'S OWN CATALOG DOES NOT HAVE.
+ *
+ * Curio's ~800 curated books carry real chapter lists (name, pages, a
+ * one-line summary) in the topic JSON — see `BookCatalog`. A book added from
+ * Open Library, or typed in by hand, used to have nothing: every chapter row
+ * said "Chapter 7" and the member had to know how long the book was. Open
+ * Library's editions DO carry a table of contents, so this is what the shelf
+ * stores once it has read one — the same three facts the catalog gives, so
+ * the chapter page reads the same whichever door the book came in by.
+ */
+data class PersonalChapter(
+    val number: Int,
+    val title: String = "",
+    /** 1-based page range from the edition; 0 when it did not say. */
+    val pageStart: Int = 0,
+    val pageEnd: Int = 0,
+    val summary: String = ""
+)
+
+/**
+ * `personal_books.chaptersJson`'s contract.
+ *
+ * Hand-written from nullable mirrors for the same reason [PersonalDocCodec]
+ * is: Gson bypasses Kotlin constructor defaults, so a field added later would
+ * arrive as `null` inside a non-null type. An older book always decodes and a
+ * newer one never crashes an older build.
+ */
+object PersonalChapterCodec {
+
+    private val gson = Gson()
+
+    fun encode(chapters: List<PersonalChapter>): String {
+        val out = JsonArray()
+        chapters.forEach { chapter ->
+            val obj = JsonObject()
+            obj.addProperty("n", chapter.number)
+            obj.addProperty("t", chapter.title)
+            if (chapter.pageStart > 0) obj.addProperty("s", chapter.pageStart)
+            if (chapter.pageEnd > 0) obj.addProperty("e", chapter.pageEnd)
+            if (chapter.summary.isNotBlank()) obj.addProperty("m", chapter.summary)
+            out.add(obj)
+        }
+        return gson.toJson(out)
+    }
+
+    /** Never throws: an unreadable list reads as no chapters at all. */
+    fun decode(json: String?): List<PersonalChapter> {
+        if (json.isNullOrBlank()) return emptyList()
+        val array = runCatching { JsonParser.parseString(json).asJsonArray }.getOrNull()
+            ?: return emptyList()
+        return array.mapIndexedNotNull { index, element ->
+            val obj = element as? JsonObject ?: return@mapIndexedNotNull null
+            val title = obj.str("t")
+            val number = obj.int("n").takeIf { it > 0 } ?: (index + 1)
+            PersonalChapter(
+                number = number,
+                title = title,
+                pageStart = obj.int("s"),
+                pageEnd = obj.int("e"),
+                summary = obj.str("m")
+            )
+        }
+    }
+
+    private fun JsonObject.str(key: String): String {
+        val value = get(key) ?: return ""
+        return if (value.isJsonNull) "" else runCatching { value.asString }.getOrDefault("")
+    }
+
+    private fun JsonObject.int(key: String): Int =
+        runCatching { get(key)?.asInt ?: 0 }.getOrDefault(0)
+}
+
 /** Ids for blocks, notes and books. Prefixed so a stray id in a log or a
  *  backup is obvious about what it belongs to. */
 fun newBlockId(): String = "pb-" + java.util.UUID.randomUUID().toString()

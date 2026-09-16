@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -110,21 +111,29 @@ fun JournalListScreen(navController: NavController) {
                 }
             )
         } else {
+            // Grouped by MONTH: a journal is a run of days, and a month
+            // heading turns a flat list of entries into a book's chapters.
+            val months = journals.groupBy { journal ->
+                journal.dateMillis.toLocalDate().withDayOfMonth(1)
+            }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(items = journals, key = { it.id }) { journal ->
-                    JournalRow(
-                        journal = journal,
-                        onClick = {
-                            navController.navigate(CurioRoutes.journalEditor(journal.id)) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onLongPress = { pendingDelete = journal }
-                    )
+                months.forEach { (month, pages) ->
+                    item(key = "month-$month") { MonthHead(month = month) }
+                    items(items = pages, key = { it.id }) { journal ->
+                        JournalRow(
+                            journal = journal,
+                            onClick = {
+                                navController.navigate(CurioRoutes.journalEditor(journal.id)) {
+                                    launchSingleTop = true
+                                }
+                            },
+                            onLongPress = { pendingDelete = journal }
+                        )
+                    }
                 }
                 item("tail") { Spacer(Modifier.height(60.dp)) }
             }
@@ -153,6 +162,38 @@ fun JournalListScreen(navController: NavController) {
             dismissButton = {
                 TextButton(onClick = { pendingDelete = null }) { Text("Keep") }
             }
+        )
+    }
+}
+
+/** A month heading — the serif month with the year behind it, and a hairline
+ *  running to the edge so the list reads as one bound volume. */
+@Composable
+private fun MonthHead(month: java.time.LocalDate) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(9.dp)
+    ) {
+        Text(
+            month.month.name.lowercase().replaceFirstChar { it.uppercase() },
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontFamily = FrauncesFontFamily,
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = personalIconTint(personalAccent())
+        )
+        Text(
+            month.year.toString(),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = ink.copy(alpha = 0.4f)
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(1.dp)
+                .background(ink.copy(alpha = 0.08f))
         )
     }
 }
@@ -190,7 +231,18 @@ private fun JournalRow(
             )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 14.dp),
+            modifier = Modifier
+                // The margin rule: every page in the collection wears the same
+                // accent spine, so the list reads as one notebook.
+                .drawBehind {
+                    val barWidth = 3.dp.toPx()
+                    drawRoundRect(
+                        color = accent,
+                        size = androidx.compose.ui.geometry.Size(barWidth, size.height),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f)
+                    )
+                }
+                .padding(horizontal = 15.dp, vertical = 14.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(13.dp)
         ) {

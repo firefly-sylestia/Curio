@@ -1,5 +1,73 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, IN PROGRESS — shelf at three across, real chapters for open-library books, the design pass, the hero-accent sweep + the "+" additions) — ⛔ NOT PUSHED (user asked to hold)
+
+Verbatim: "now lets make the shelf 3 grid and also for the openlibrary books the
+books that got fethced they dont have chapter info so can we do something about
+it?, also improve the design of the new screens, they look plain,and anaylse
+more screens that are rose even when the theme is azure blue or material or
+maybe category hero. also the readbutton wasnt working. and also now one more +
+thing what should we add dont push it untill i say so"
+
+### Decisions (ask_user)
+
+- **"Read button" = the `Mark finished` pill on a book page** (not the
+  synopsis Read/Hide row, not the chapter's mark-read glyph).
+- **The "+" sheet gains**: *Add a book by its cover*, *A note on a topic* and
+  *a to-do list*.
+- **Nothing is pushed** until the user says so.
+
+### Shipped in this working tree
+
+1. **`Mark finished` was broken at the database.** `PersonalDao.setFinished`
+   wrote `updatedAtMillis = :at`, and un-finishing passes `at = null` — SQLite
+   rejects an UPDATE that puts NULL in a NOT NULL column, the throw was
+   swallowed by the caller's `runCatching`, so the pill did nothing at all.
+   The stamp is a separate `now` parameter now.
+2. **The shelf is three across.** `GridCells.Fixed(2)` → `Fixed(3)`, with
+   `ShelfSectionHead` groups (`READING` / `FINISHED`) and a card that fits:
+   title, a 3dp rail, "Ch 3 of 12", and an accent tick on a finished cover.
+3. **Real chapters for open-library books.** `PersonalChapter` +
+   `PersonalChapterCodec` + `personal_books.chaptersJson`, read by
+   `BookEnrichment.openLibraryChapters` from the edition's own
+   `table_of_contents` (work looked up by title, editions walked, `>= 3` rows
+   required, `pagination` parsed into the page range). `rememberBookChapters`
+   resolves the list for the book page and the chapter page from whichever
+   door the book came in by. **Room is now v17** with `MIGRATION_16_17` (that
+   column, plus `personal_notes.kind` / `topicId` / `topicName` / `categoryId`
+   for the "+" additions below — all non-null defaults).
+4. **Design pass on the new screens.** Book page: a tick-per-chapter rail in
+   the progress card, an `ABOUT THIS BOOK` label with the accent rule, and an
+   accent spine on every chapter that has writing; chapter page: a spine rail
+   showing where the chapter sits in the book and the same label treatment;
+   journals: grouped by MONTH (`MonthHead`) with the accent margin rule on
+   every row.
+5. **The hero-accent sweep.** `settingsRoseAccent()` replaces
+   `MaterialTheme.colorScheme.primary` across the Cabinet V2 content + personal
+   shelf, the recycle bin, Stats, Manage categories, the category picker, the
+   book-cover hub, the Settings page/account components, FieldMind, the Topic
+   Database, the composer and Spin (ink pairs via `settingsReadableInk`).
+   Deliberately left: `primaryContainer`/`onPrimaryContainer`, the reveal page
+   (category accents), PetDesigner, reaction colours, and `ui/components/*`
+   defaults (callers override them).
+
+### Remaining in this request (not started)
+
+- **`+` → Add a book by its cover**: needs an ISBN from a photo, and the repo
+  has NO barcode/QR dependency at all (no zxing, no ML Kit, and no camera
+  capture — only the photo picker). This one needs a dependency decision
+  (`com.google.mlkit:barcode-scanning`) plus `gradle/libs.versions.toml` +
+  `app/build.gradle.kts` entries, and `TakePicturePreview` avoids any
+  FileProvider work.
+- **`+` → A note on a topic**: the schema is ready (`kind`/`topicId`/
+  `topicName`/`categoryId` on `personal_notes`); needs a topic picker in the
+  sheet, the page's topic header, and the door back from the reveal page.
+- **`+` → A to-do list**: a `PAGE_KIND_TODO` page — `PersonalRun` gains a
+  `done` flag (codec key), the canvas draws a checkbox per block and toggles
+  it on tap, and the journals list shows a "3 of 7 done" line.
+
+---
+
 ## Request (2026-09-16, COMPLETE — chat notifications that act, and the writing/books refinement)
 
 Verbatim: the request logged in this file's "Next prompt" slot (messenger-style

@@ -1,5 +1,7 @@
 package com.curio.app.features.community
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -266,7 +268,7 @@ internal fun CommunityPostScreen(
     BackHandler(onBack = onDismiss)
 
     val category = topic?.categoryId?.let(CurioCategories::byId)
-    val accent = category?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val accent = category?.themedAccent() ?: settingsRoseAccent()
     val accentInk = if (accent.luminance() > 0.55f) Color.Black else Color.White
 
     val topicResults = remember(index, query) {
@@ -1082,7 +1084,7 @@ private fun LabeledTextField(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = if (singleLine) ImeAction.Done else ImeAction.Default
                 ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                cursorBrush = SolidColor(settingsRoseAccent()),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (value.isBlank()) {

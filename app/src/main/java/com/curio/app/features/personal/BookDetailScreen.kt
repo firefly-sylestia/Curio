@@ -39,6 +39,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +51,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.curio.app.data.BookChapter
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.navigation.CurioRoutes
@@ -86,15 +88,11 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
     // topic id, so its chapter rows can wear the book's REAL chapter names, page
     // ranges and summaries instead of "Chapter 7" — the catalog is the reason
-    // the shelf can be more than a list of titles.
-    val catalogId by produceState(initialValue = "", book) { value = book?.catalogId.orEmpty() }
-    val catalogChapters by produceState(
-        initialValue = emptyList<BookChapter>(),
-        catalogId
-    ) {
-        value = if (catalogId.isBlank()) emptyList() else BookCatalog.chapters(catalogId)
-    }
-
+    // the shelf can be more than a list of titles.    val catalogId by produceState(initialValue = "", book) { value = book?.catalogId.orEmpty() }
+    // THE CHAPTERS, from whichever door the book came in by: Curio's own lane
+    // when it has the book, else the table of contents read from Open Library
+    // (see BookEnrichment) — so a hand-added book has real chapter names too.
+    val chapters = rememberBookChapters(book)
     // The catalog's own blurb for this book — shown when it has one.
     val catalogSynopsis by produceState(initialValue = "", catalogId) {
         value = BookCatalog.synopsis(catalogId)
@@ -172,10 +170,12 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             return@Column
         }
 
-        val total = current.totalChapters
+        // The learned list is a length too: a book whose ToC arrived after the
+        // member added it should read as complete, not as "set the length".
+        val total = if (current.totalChapters > 0) current.totalChapters else chapters.size
         val writtenChapters = notes.mapNotNull { it.chapterIndex }.toSet()
         val highestWritten = writtenChapters.maxOrNull() ?: 0
-        val chapterCount = maxOf(total, highestWritten, 1)
+        val chapterCount = maxOf(total, chapters.size, highestWritten, 1)
 
         LazyColumn(
             // weight, not fillMaxSize: the tool dock is the column's LAST child
@@ -304,8 +304,8 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                     chapter = chapter,
                     // The catalog's own words for this chapter, when the book came
                     // from Curio's lane: a name, and the pages it spans.
-                    catalogTitle = catalogChapters.getOrNull(chapter - 1)?.title.orEmpty(),
-                    catalogPages = catalogChapters.getOrNull(chapter - 1)
+                    catalogTitle = chapters.getOrNull(chapter - 1)?.title.orEmpty(),
+                    catalogPages = chapters.getOrNull(chapter - 1)
                         ?.takeIf { it.pageStart > 0 && it.pageEnd > 0 }
                         ?.let { "pp. ${it.pageStart}\u2013${it.pageEnd}" }
                         .orEmpty(),
@@ -420,6 +420,34 @@ private fun ProgressCard(
                 color = accent,
                 trackColor = accent.copy(alpha = 0.16f)
             )
+            // One tick per chapter, so the number is a PLACE and not a figure:
+            // you can see the run you are in and how much is left at a glance.
+            if (total in 1..MAX_TICKS) {
+                Spacer(Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(total) { index ->
+                        val done = finished || index < current
+                        val here = !finished && index == current - 1
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(if (here) 7.dp else 3.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(
+                                    when {
+                                        done -> accent
+                                        here -> accent.copy(alpha = 0.45f)
+                                        else -> ink.copy(alpha = 0.12f)
+                                    }
+                                )
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.height(14.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -524,7 +552,22 @@ private fun ChapterCard(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth().clickable(onClick = onOpen)
     ) {
-        Column(Modifier.padding(horizontal = 15.dp, vertical = 13.dp)) {
+        Column(
+            modifier = Modifier
+                // A written chapter wears the accent rule down its side — the
+                // same language the page's quotes use, so "there is writing
+                // here" is visible before a single word is read.
+                .drawBehind {
+                    if (review == null) return@drawBehind
+                    val barWidth = 3.dp.toPx()
+                    drawRoundRect(
+                        color = accent,
+                        size = Size(barWidth, size.height),
+                        cornerRadius = CornerRadius(barWidth / 2f)
+                    )
+                }
+                .padding(horizontal = 15.dp, vertical = 13.dp)
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     shape = CircleShape,
@@ -651,26 +694,45 @@ private fun LookUpPill(lookingUp: Boolean, onClick: () -> Unit) {
 @Composable
 private fun SynopsisCard(synopsis: String) {
     val ink = MaterialTheme.colorScheme.onSurface
+    val accent = personalAccent()
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(
-                "About this book",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = personalIconTint(personalAccent())
-            )
-            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 3.dp, height = 12.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(accent)
+                )
+                Text(
+                    "ABOUT THIS BOOK",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = personalIconTint(accent)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
             Text(
                 synopsis,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = LoraFontFamily,
-                    lineHeight = 23.sp
+                    fontSize = 14.sp,
+                    lineHeight = 24.sp
                 ),
                 color = ink.copy(alpha = 0.82f)
             )
         }
     }
 }
+
+/** Past this many chapters the tick rail stops being readable. */
+private const val MAX_TICKS = 48

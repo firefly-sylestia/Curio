@@ -1,5 +1,7 @@
 package com.curio.app.features.picker
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -1188,7 +1190,7 @@ private fun ClassicPickerPage(
                             }
                         },
                         shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = settingsRoseAccent(),
                         shadowElevation = 3.dp
                     ) {
                         Row(
@@ -1200,12 +1202,12 @@ private fun ClassicPickerPage(
                                 name = CurioIcons.Check,
                                 contentDescription = null,
                                 size = 16.dp,
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                tint = settingsReadableInk(settingsRoseAccent())
                             )
                             Text(
                                 "Mix · ${selectedSlugs.size}",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = settingsReadableInk(settingsRoseAccent())
                             )
                         }
                     }
@@ -1848,8 +1850,8 @@ internal fun CategoryOptionPill(
                 HoldAction(
                     CurioIcons.PlayArrow,
                     "Spin",
-                    MaterialTheme.colorScheme.primary,
-                    MaterialTheme.colorScheme.onPrimary,
+                    settingsRoseAccent(),
+                    settingsReadableInk(settingsRoseAccent()),
                     onSpin
                 )
             )
@@ -2045,7 +2047,7 @@ internal fun NewPrimaryCapsule(
     Surface(
         onClick = onClick,
         shape = shape,
-        color = MaterialTheme.colorScheme.primary,
+        color = settingsRoseAccent(),
         shadowElevation = 0.dp,
         modifier = modifier.height(52.dp)
     ) {
@@ -2058,12 +2060,12 @@ internal fun NewPrimaryCapsule(
                 name = glyph,
                 contentDescription = null,
                 size = 20.dp,
-                tint = MaterialTheme.colorScheme.onPrimary
+                tint = settingsReadableInk(settingsRoseAccent())
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = settingsReadableInk(settingsRoseAccent()),
                 maxLines = 1,
                 modifier = Modifier.padding(start = 8.dp)
             )

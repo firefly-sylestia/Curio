@@ -12,6 +12,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,7 +55,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import com.curio.app.data.BookChapter
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
@@ -112,13 +112,10 @@ fun ChapterScreen(navController: NavController, bookId: String, chapter: Int) {
     var notesLoaded by remember { mutableStateOf(false) }
     LaunchedEffect(notes) { notesLoaded = true }
 
-    // The catalog's record of this chapter: its real name, the pages it spans
-    // and the one-line summary — when the book came from Curio's own lane.
-    val catalogId by produceState(initialValue = "", book) { value = book?.catalogId.orEmpty() }
-    val chapterMeta by produceState(initialValue = null as BookChapter?, catalogId, chapter) {
-        value = if (catalogId.isBlank()) null
-        else BookCatalog.chapters(catalogId).getOrNull(chapter - 1)
-    }
+    // The chapter's own record: its real name, the pages it spans and the
+    // one-line summary — Curio's catalog when the book came from the lane,
+    // else the table of contents the shelf read for it (BookEnrichment).
+    val chapterMeta = rememberBookChapters(book).getOrNull(chapter - 1)
 
     var editing by remember(chapter) { mutableStateOf(false) }
     var draft by remember(chapter) { mutableStateOf(PersonalDoc(emptyList())) }
@@ -275,6 +272,16 @@ fun ChapterScreen(navController: NavController, bookId: String, chapter: Int) {
             }
         }
 
+        // Where this chapter sits in the book: a hairline rail with one mark,
+        // so the page always knows how much of the book surrounds it.
+        ChapterRail(
+            chapter = chapter,
+            total = if ((book?.totalChapters ?: 0) > 0) book?.totalChapters ?: 0
+            else rememberBookChapters(book).size,
+            accent = accent,
+            ink = ink
+        )
+
         Crossfade(
             targetState = editing,
             animationSpec = tween(220),
@@ -381,12 +388,26 @@ private fun ChapterSummaryCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(
-                "About this chapter",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = personalIconTint(accent)
-            )
-            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 3.dp, height = 12.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(accent)
+                )
+                Text(
+                    "ABOUT THIS CHAPTER",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = personalIconTint(accent)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
             Text(
                 summary,
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -397,6 +418,34 @@ private fun ChapterSummaryCard(
                 color = ink.copy(alpha = 0.85f)
             )
         }
+    }
+}
+
+/** The book's spine, with this chapter marked on it. */
+@Composable
+private fun ChapterRail(
+    chapter: Int,
+    total: Int,
+    accent: androidx.compose.ui.graphics.Color,
+    ink: androidx.compose.ui.graphics.Color
+) {
+    if (total <= 0) return
+    val fraction = (chapter.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(2.dp)
+            .clip(RoundedCornerShape(50))
+            .background(ink.copy(alpha = 0.1f))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(fraction)
+                .height(2.dp)
+                .clip(RoundedCornerShape(50))
+                .background(accent)
+        )
     }
 }
 

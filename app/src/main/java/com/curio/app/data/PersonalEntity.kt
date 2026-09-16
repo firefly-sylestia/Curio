@@ -41,11 +41,36 @@ data class PersonalNoteEntity(
     val updatedAtMillis: Long = 0L,
     /** Soft delete — a removed journal is recoverable inside the bin flow
      *  (the Cabinet's personal view offers restore). NULL = live. */
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    /**
+     * WHAT KIND OF PAGE THIS IS. [PAGE_KIND_JOURNAL] is a day's journal,
+     * [PAGE_KIND_TODO] a checklist — deliberately a string, so a third kind
+     * is a value rather than a migration.
+     */
+    val kind: String = PAGE_KIND_JOURNAL,
+    /**
+     * Set when the page was written ABOUT a topic (the "+" sheet's *A note on
+     * a topic*): the topic's id, its name and its lane. That is what lets the
+     * topic's own reveal page offer the member's page back, and lets the
+     * journals list say what a page is about.
+     */
+    val topicId: String = "",
+    val topicName: String = "",
+    val categoryId: String = ""
 ) {
     val doc: PersonalDoc get() = PersonalDocCodec.decode(bodyJson)
     val moodEnum: PersonalMood? get() = PersonalMood.fromKey(mood)
+
+    /** True for a checklist page (its rows are tickable). */
+    val isTodo: Boolean get() = kind == PAGE_KIND_TODO
+
+    /** True when this page was written about a topic. */
+    val hasTopic: Boolean get() = topicId.isNotBlank()
 }
+
+/** A page's kind. Stored in `personal_notes.kind`. */
+const val PAGE_KIND_JOURNAL = ""
+const val PAGE_KIND_TODO = "todo"
 
 /**
  * v387 — ONE BOOK ON THE PERSONAL SHELF.
@@ -85,7 +110,14 @@ data class PersonalBookEntity(
     val createdAtMillis: Long = 0L,
     val updatedAtMillis: Long = 0L,
     /** Non-null when the member marked the book finished. */
-    val finishedAtMillis: Long? = null
+    val finishedAtMillis: Long? = null,
+    /**
+     * THE BOOK'S CHAPTER LIST when it did not come from Curio's own catalog —
+     * the table of contents read out of Open Library ([PersonalChapterCodec]).
+     * A catalog book leaves this empty and reads its chapters from the topic
+     * JSON instead (see `BookCatalog`), which is the same list its lane shows.
+     */
+    val chaptersJson: String = ""
 ) {
     /** 0f..1f reading progress, 0 when the length is unknown. */
     val progress: Float
@@ -93,4 +125,7 @@ data class PersonalBookEntity(
         else (currentChapter.toFloat() / totalChapters.toFloat()).coerceIn(0f, 1f)
 
     val isFinished: Boolean get() = finishedAtMillis != null
+
+    /** The learned chapter list, in order. */
+    val chapters: List<PersonalChapter> get() = PersonalChapterCodec.decode(chaptersJson)
 }

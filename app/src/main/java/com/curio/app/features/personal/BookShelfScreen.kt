@@ -137,13 +137,46 @@ fun BookShelfScreen(navController: NavController) {
             )
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                // THREE across, like a real shelf: covers read as spines and a
+                // library fits without scrolling past a wall of half-empty
+                // rows. The grid is SECTIONED, so what is being read and what
+                // is done are never mixed into one anonymous block.
+                columns = GridCells.Fixed(3),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(11.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                items(items = books, key = { it.id }) { book ->
+                val reading = books.filterNot { it.isFinished }
+                val finished = books.filter { it.isFinished }
+                if (reading.isNotEmpty()) {
+                    item(
+                        key = "shelf-head-reading",
+                        span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }
+                    ) {
+                        ShelfSectionHead(label = "READING", count = reading.size)
+                    }
+                }
+                items(items = reading, key = { it.id }) { book ->
+                    BookShelfCard(
+                        book = book,
+                        onClick = {
+                            navController.navigate(CurioRoutes.bookDetail(book.id)) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onLongPress = { pendingDelete = book }
+                    )
+                }
+                if (finished.isNotEmpty()) {
+                    item(
+                        key = "shelf-head-finished",
+                        span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }
+                    ) {
+                        ShelfSectionHead(label = "FINISHED", count = finished.size)
+                    }
+                }
+                items(items = finished, key = { it.id }) { book ->
                     BookShelfCard(
                         book = book,
                         onClick = {
@@ -194,7 +227,44 @@ fun BookShelfScreen(navController: NavController) {
     }
 }
 
-/** One book on the shelf: cover, name, progress. */
+/** The shelf's own section label ("READING", "FINISHED"). */
+@Composable
+private fun ShelfSectionHead(label: String, count: Int) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.4.sp
+            ),
+            color = personalIconTint(personalAccent())
+        )
+        Text(
+            count.toString(),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = ink.copy(alpha = 0.4f)
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(1.dp)
+                .background(ink.copy(alpha = 0.08f))
+        )
+    }
+}
+
+/**
+ * One book on the shelf: cover, name, progress. At three across there is no
+ * room for a paragraph under every cover, so the card says one thing well —
+ * where the member is — and the finished ones simply wear their tick.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BookShelfCard(
@@ -216,42 +286,61 @@ private fun BookShelfCard(
                 onLongClick = onLongPress
             )
     ) {
-        BookCover(
-            title = book.title,
-            author = book.author,
-            coverUrl = book.coverUrl,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(0.66f)
-                .clip(RoundedCornerShape(14.dp)),
-            corner = 14.dp
-        )
-        Spacer(Modifier.height(9.dp))
+        Box {
+            BookCover(
+                title = book.title,
+                author = book.author,
+                coverUrl = book.coverUrl,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(0.66f)
+                    .clip(RoundedCornerShape(12.dp)),
+                corner = 12.dp
+            )
+            if (book.isFinished) {
+                Surface(
+                    shape = CircleShape,
+                    color = accent,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .size(22.dp)
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            CurioIcons.Check,
+                            "Finished",
+                            tint = personalOnAccent(),
+                            size = 13.dp
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
         Text(
             book.title,
-            style = MaterialTheme.typography.titleSmall.copy(
+            style = MaterialTheme.typography.labelLarge.copy(
                 fontFamily = FrauncesFontFamily,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 17.sp
             ),
             color = ink,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
-        if (book.author.isNotBlank()) {
-            Text(
-                book.author,
-                style = MaterialTheme.typography.labelSmall,
-                color = ink.copy(alpha = 0.55f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(6.dp))
+        // The rail is the card's quiet sentence: how far in, out of how long.
         LinearProgressIndicator(
-            progress = { book.progress },
+            progress = {
+                if (book.isFinished) 1f
+                else if (book.totalChapters <= 0) 0f
+                else (book.currentChapter.toFloat() / book.totalChapters.toFloat())
+                    .coerceIn(0f, 1f)
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(4.dp)
+                .height(3.dp)
                 .clip(RoundedCornerShape(50)),
             color = accent,
             trackColor = accent.copy(alpha = 0.16f)
@@ -260,12 +349,14 @@ private fun BookShelfCard(
         Text(
             when {
                 book.isFinished -> "Finished"
-                book.totalChapters <= 0 -> "Chapters not set"
+                book.totalChapters <= 0 -> "Not started"
                 book.currentChapter <= 0 -> "${book.totalChapters} chapters"
                 else -> "Ch ${book.currentChapter} of ${book.totalChapters}"
             },
             style = MaterialTheme.typography.labelSmall,
-            color = ink.copy(alpha = 0.62f)
+            color = ink.copy(alpha = 0.58f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

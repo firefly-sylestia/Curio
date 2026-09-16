@@ -1,5 +1,7 @@
 package com.curio.app.features.managecategories
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -544,7 +546,7 @@ private fun CategoryRow(
                 if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest
                 else Color(0xFFF7F1E6)
             )
-            .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
+            .border(1.5.dp, settingsRoseAccent().copy(alpha = 0.55f), RoundedCornerShape(14.dp))
     else Modifier
 
     // Flat row — no card shell: a tinted icon chip, the name + Hidden
@@ -607,7 +609,7 @@ private fun CategoryRow(
                 name = CurioIcons.DragHandle,
                 contentDescription = if (reorderEnabled) "Drag to reorder" else "Locked · reach the lane-order level",
                 tint = if (isDragging) {
-                    MaterialTheme.colorScheme.primary
+                    settingsRoseAccent()
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (reorderEnabled) 1f else 0.45f)
                 },
@@ -664,8 +666,8 @@ private fun CategoryRow(
             checked = !category.isHidden,
             onCheckedChange = { newVisible -> tick { onVisibilityToggle(newVisible) } },
             colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                checkedThumbColor = settingsReadableInk(settingsRoseAccent()),
+                checkedTrackColor = settingsRoseAccent(),
                 uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                 uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
             )

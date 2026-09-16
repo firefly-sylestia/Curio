@@ -1,5 +1,7 @@
 package com.curio.app.features.spin
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -720,7 +722,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // primary (user: "make it the material color when they get mixed") —
     // instead of a blend; single lanes keep their muted family fill.
     val materialPrimary = if (materialThemeOn && activeCatIds.distinct().size > 1) {
-        MaterialTheme.colorScheme.primary
+        settingsRoseAccent()
     } else null
     val deckAccent = remember(deckAccents, pastelMode, darkMode, materialPrimary) {
         CurioMixedDeck.mixedDeckAccent(
@@ -2223,7 +2225,7 @@ private fun FilterSheet(
             // v113 — the SOLID accent fill (the chip's selected state);
             // the accent's readable ink keeps the label crisp.
             // v270 — Material look under the Material theme.
-            color = if (materialThemeOn) MaterialTheme.colorScheme.primary
+            color = if (materialThemeOn) settingsRoseAccent()
                 else cat.themedButtonFill(),
             shadowElevation = 4.dp,
             modifier = Modifier
@@ -2245,7 +2247,7 @@ private fun FilterSheet(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.ExtraBold
                     ),
-                    color = if (materialThemeOn) MaterialTheme.colorScheme.onPrimary
+                    color = if (materialThemeOn) settingsReadableInk(settingsRoseAccent())
                         else cat.themedButtonInk()
                 )
             }
