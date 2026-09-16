@@ -462,12 +462,12 @@ private fun ProgressCard(
                     Surface(
                         onClick = { onFinished(true) },
                         shape = RoundedCornerShape(50),
-                        color = accent.copy(alpha = 0.22f)
+                        color = accent.copy(alpha = 0.16f)
                     ) {
                         Text(
                             "Mark finished",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = accent,
+                            color = personalAccentInk(),
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                         )
                     }
@@ -494,7 +494,7 @@ private fun ProgressCard(
                                 .background(
                                     when {
                                         done -> accent
-                                        here -> accent.copy(alpha = 0.45f)
+                                        here -> personalAccentInk()
                                         else -> ink.copy(alpha = 0.12f)
                                     }
                                 )

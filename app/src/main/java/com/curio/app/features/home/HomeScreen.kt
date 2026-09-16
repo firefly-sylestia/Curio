@@ -316,7 +316,7 @@ fun HomeScreen(navController: NavController) {
     // Saved-shelf unsave confirmation — set when the user taps the remove
     // bookmark on a saved quote row; the dialog confirms before removal.
     var pendingUnsave by remember { mutableStateOf<SavedQuote?>(null) }
-    // Unpin-topic confirmation — set when the user taps unpin on a pinned
+    // Unpin-topic confirmation �� set when the user taps unpin on a pinned
     // topic row; the dialog confirms before the pin is dropped.
     var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
     // v387 — the writing sheet behind the floating "+" (a journal page or a
@@ -1121,7 +1121,7 @@ fun HomeScreen(navController: NavController) {
                     FirstTimeEmpty(
                         surface = MaterialTheme.colorScheme.surfaceContainerLow,
                         onPickCategory = {
-                            // v142 — wire the first-run "Pick a lane" to the
+                            // v142 ��� wire the first-run "Pick a lane" to the
                             // SPIN screen's own category picker sheet (the same
                             // lane chips + Mix presets the deck uses) instead
                             // of the separate full-screen picker page.
@@ -1250,7 +1250,7 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp)
-                    .padding(bottom = 104.dp + navInsets.calculateBottomPadding())
+                    .padding(bottom = 92.dp + navInsets.calculateBottomPadding())
             )
 
             if (writeSheetOpen) {
@@ -2107,9 +2107,9 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
     else -> "${d}d ago"
 }
 
-// ═══════════════════════════════════════════════════════════════════════
+// ════════════════���══════════════════════════════════════════════════════
 // First-time empty state
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════���═══════════════
 
 /**
  * The Home accent, resolved like the hero banner: the muted rose-wood base
@@ -3334,7 +3334,7 @@ private fun greetingWordForNow(): String {
 
 // ═══════════════════════════════════════════════════════════════════════
 // Explore-session topic row (recently explored / recently unexplored)
-// ═══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════��════════════════════════
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -3500,7 +3500,7 @@ private fun CurrentlyExploringCard(
                     .align(Alignment.CenterEnd)
                     .padding(end = 10.dp)
             )
-            // ── End session — the card's top corner ─────────────────
+            // ─��� End session ��� the card's top corner ─────────────────
             // The floating bubble no longer carries a Stop button; the end
             // control lives here, at the session card's top-end corner,
             // where it's reachable the moment a session starts.

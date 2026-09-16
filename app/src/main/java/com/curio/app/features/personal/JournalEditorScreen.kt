@@ -40,6 +40,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -384,9 +385,11 @@ fun JournalEditorScreen(
 
     if (showDatePicker) {
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = pickerForDate)
-        DatePickerDialog(
+DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
-                confirmButton = {
+            shape = RoundedCornerShape(12.dp),
+            tonalElevation = 0.dp,
+            confirmButton = {
                 androidx.compose.material3.Button(
                     onClick = {
                         pickerState.selectedDateMillis?.let { dateMillis = it }
@@ -404,13 +407,21 @@ fun JournalEditorScreen(
                     onClick = { showDatePicker = false },
                     shape = RoundedCornerShape(50),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = personalAccent().copy(alpha = 0.16f),
+                        containerColor = personalAccent().copy(alpha = 0.24f),
                         contentColor = personalAccentInk()
                     )
                 ) { Text("Cancel") }
             }
         ) {
-            DatePicker(state = pickerState)
+            DatePicker(
+                state = pickerState,
+                colors = DatePickerDefaults.colors(
+                    selectedDayContainerColor = personalAccentInk(),
+                    selectedDayContentColor = personalOnAccent(),
+                    todayDateBorderColor = personalAccentInk(),
+                    todayContentColor = personalAccentInk()
+                )
+            )
         }
     }
 }
@@ -476,11 +487,11 @@ private fun JournalTopBar(
                     Text(
                         if (today) "Today" else dateMillis.prettyDate(),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = ink
-                    )
-                }
+color = personalAccentInk()
+                )
             }
-            if (editing) Surface(
+        }
+        if (editing) Surface(
                 onClick = { onShiftDate(1L) },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainer,

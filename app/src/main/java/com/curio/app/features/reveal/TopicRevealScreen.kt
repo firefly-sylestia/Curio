@@ -58,6 +58,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.Image
@@ -69,6 +70,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -342,7 +344,7 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
-    // v3xx ������� the episode an EPISODES chip opens the series sheet at (null =
+    // The episode an EPISODES chip opens the series sheet at (null =
     // opened from the poster card, list starts at the top). Mirrors the
     // album sheet's [selectedAlbumTrack].
     var selectedSeriesEpisode by remember { mutableStateOf<com.curio.app.data.SeriesEpisode?>(null) }
@@ -1293,6 +1295,25 @@ fun TopicRevealScreen(
             onDismiss = {
                 showAlbumSheet = false
                 selectedAlbumTrack = null
+            }
+        )
+    }
+
+    val posterSheetTopic = resolved
+    val posterSheetKind = when (posterSheetTopic?.categoryId) {
+        CategoryId.FILMS, CategoryId.ANIMATED_MOVIES -> if (showFilmSheet) "Movie" else null
+        CategoryId.ANIME -> if (showAnimeSheet) "Anime" else null
+        CategoryId.SONGS -> if (showSongSheet) "Song" else null
+        else -> null
+    }
+    if (posterSheetTopic != null && posterSheetKind != null) {
+        PosterSimilarSheet(
+            topic = posterSheetTopic,
+            kind = posterSheetKind,
+            onDismiss = {
+                showFilmSheet = false
+                showAnimeSheet = false
+                showSongSheet = false
             }
         )
     }
@@ -5989,6 +6010,73 @@ private fun albumListenUrl(topic: CurioTopic, service: String): String {
  * FILM section — poster card with film details. Mirrors [SeriesInfoSection]
  * for TV shows. The poster is fetched from iTunes/TVMaze on demand.
  */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PosterSimilarSheet(
+    topic: CurioTopic,
+    kind: String,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Text(
+                "Similar $kind",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                topic.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = personalAccentInkForReveal()
+            )
+            if (topic.teaser.isNotBlank()) {
+                Text(
+                    topic.teaser,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (topic.tags.isNotEmpty()) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(topic.tags.take(8)) { tag ->
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        ) {
+                            Text(
+                                tag,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            Text(
+                "Explore related ${kind.lowercase()} topics from this reveal.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun personalAccentInkForReveal(): Color = com.curio.app.ui.theme.curioRoseInk()
+
 @Composable
 private fun FilmInfoSection(
     cat: com.curio.app.data.CurioCategory,
@@ -6505,7 +6593,7 @@ private fun RevealTagChip(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ══════════════���════════════════════════════════════════════════════════════
 // Teaser card ("One quirky fact to get you curious")
 // ═══════════════════════════════════════════════════════════════════════════
 

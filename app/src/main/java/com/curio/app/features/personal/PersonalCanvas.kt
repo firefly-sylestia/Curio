@@ -3,6 +3,7 @@ package com.curio.app.features.personal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -387,6 +388,31 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * the whole line otherwise. An empty line arms the tool instead, so the
      * first words typed arrive already styled.
      */
+    fun cycleListStyle() {
+        val id = focusedId ?: return
+        val current = activeFlags()
+        val next = if (current and FLAG_BULLET != 0) FLAG_CHECKBOX else FLAG_BULLET
+        toggleListStyle(next)
+    }
+
+    fun toggleListStyle(flag: Int) {
+        val id = focusedId ?: return
+        val mask = mask(id)
+        val selection = selections[id]
+        val range = if (selection != null && !selection.collapsed) selection.min to selection.max else 0 to text(id).length
+        if (range.second <= range.first) {
+            armed = if (armed and flag != 0) armed and flag.inv() else (armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()) or flag
+        } else {
+            val current = maskCovers(mask, range.first, range.second, flag)
+            var updated = maskApply(mask, range.first, range.second, flag, !current)
+            val other = if (flag == FLAG_BULLET) FLAG_CHECKBOX else FLAG_BULLET
+            if (!current) updated = maskApply(updated, range.first, range.second, other, false)
+            masks[id] = updated
+            armed = armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()
+        }
+        onDocChanged(doc())
+    }
+
     fun toggle(flag: Int) {
         val id = focusedId ?: return
         val blockMask = mask(id)
@@ -534,9 +560,9 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Canvas
-// ────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * The writing surface. It does NOT scroll: the caller owns the scroll
@@ -596,6 +622,7 @@ private fun PersonalTextBlock(
     val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+    val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
     // ONE hint for the whole page: the empty-line "Write…" on every new
     // paragraph read as a page full of the word "write".
     val showHint = text.isEmpty() && !state.hasText()
@@ -657,6 +684,17 @@ private fun PersonalTextBlock(
                             )
                         }
                         .padding(start = 13.dp)
+                    isCheckbox -> Modifier
+                        .drawBehind {
+                            drawRoundRect(
+                                color = bulletInk,
+                                topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
+                                size = Size(11.dp.toPx(), 11.dp.toPx()),
+                                cornerRadius = CornerRadius(2.dp.toPx()),
+                                style = Stroke(width = 1.6.dp.toPx())
+                            )
+                        }
+                        .padding(start = 19.dp)
                     isBullet -> Modifier
                         .drawBehind {
                             drawCircle(
@@ -866,6 +904,7 @@ internal fun PersonalDocView(
                 val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
                 val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
                 val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+                val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
                 val alignOf = if (block.align == PersonalAlign.CENTER) TextAlign.Center
                 else TextAlign.Start
                 Box(
@@ -883,6 +922,17 @@ internal fun PersonalDocView(
                                         )
                                     }
                                     .padding(start = 13.dp)
+                                isCheckbox -> Modifier
+                                    .drawBehind {
+                                        drawRoundRect(
+                                            color = bulletInk,
+                                            topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
+                                            size = Size(11.dp.toPx(), 11.dp.toPx()),
+                                            cornerRadius = CornerRadius(2.dp.toPx()),
+                                            style = Stroke(width = 1.6.dp.toPx())
+                                        )
+                                    }
+                                    .padding(start = 19.dp)
                                 isBullet -> Modifier
                                     .drawBehind {
                                         drawCircle(
@@ -1029,11 +1079,13 @@ internal fun PersonalToolDock(
             }
             PersonalToolButton(
                 label = "Todo checkbox",
-                active = active and FLAG_BULLET != 0,
-                accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_BULLET) }
+                active = active and FLAG_CHECKBOX != 0,
+                accent = accentInk,
+                ink = ink,
+                onClick = { state.toggleListStyle(FLAG_CHECKBOX) },
+                onLongClick = { state.cycleListStyle() }
             ) {
-                Text("□", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 19.sp))
+                CurioIcon(CurioIcons.TaskAlt, null, size = 19.dp)
             }
             PersonalToolButton(
                 label = "Small text",
@@ -1050,7 +1102,8 @@ internal fun PersonalToolDock(
                 label = "Bullet",
                 active = active and FLAG_BULLET != 0,
                 accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_BULLET) }
+                onClick = { state.toggleListStyle(FLAG_BULLET) },
+                onLongClick = { state.cycleListStyle() }
             ) {
                 BulletGlyph()
             }
@@ -1143,13 +1196,18 @@ private fun PersonalToolButton(
     accent: Color,
     ink: Color,
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        color = if (active) accent.copy(alpha = 0.18f) else Color.Transparent,
-        modifier = Modifier.size(36.dp)
+        shape = RoundedCornerShape(50),
+        color = if (active) accent.copy(alpha = 0.24f) else Color.Transparent,
+        modifier = Modifier
+            .size(36.dp)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),

@@ -1,5 +1,18 @@
 # Prompt Log — current request
 
+## Request (2026-09-16, IN PROGRESS — accent contrast, floating create action, journal controls, and media sheets)
+
+Verbatim: "the accent fix is still remaining ... also add the similiar series buttom sheet style with episodes view to anime as well, and movies, songs too ... also add touch and hold to switch differnt bullet point styles ... fix them too"
+
+### Current pass
+
+- Repaired the journal editor parser issue that caused the cascading unresolved-reference CI errors, and removed the unsupported DatePickerDialog color argument.
+- Personal shelf/journal create actions now float above the bottom inset, and the personal editor now has a persisted checklist style distinct from bullets; list-style toggles prevent checkbox rows from becoming bullet rows.
+- The personal accent pass now darkens the journal rail, shelf actions, and chapter-count foregrounds; pale accent remains reserved for fills/tracks.
+- Remaining active editor work is bullet-style cycling on long press and the final toolbar interaction polish; cross-media similar sheets still require a dedicated implementation pass.
+- The garbled `���` text in the pasted report is CI/log encoding noise, not an intentional app label. The compiler diagnostics are build output and should not be rendered in the app UI.
+
+
 ## Request (2026-09-16, IN PROGRESS — shelf at three across, real chapters for open-library books, the design pass, the hero-accent sweep + the "+" additions) — ⛔ NOT PUSHED (user asked to hold)
 
 Verbatim: "now lets make the shelf 3 grid and also for the openlibrary books the
