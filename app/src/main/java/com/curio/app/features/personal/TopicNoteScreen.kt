@@ -141,8 +141,10 @@ fun TopicNoteScreen(
                 onToggleMode = onEditing,
                 onOpenTopic = topicName.takeIf { it.isNotBlank() }?.let { name ->
                     {
-                        val slug = category?.routeSlug
-                            ?: CurioCategories.byId(CategoryId.WILDCARD).routeSlug
+                        // The route slug lives on the category ID, not on the
+                        // category: a lane's id is what the routes speak.
+                        val slug = category?.id?.routeSlug
+                            ?: CurioCategories.byId(CategoryId.WILDCARD).id.routeSlug
                         navController.navigate(CurioRoutes.revealFor(slug, name)) {
                             launchSingleTop = true
                         }

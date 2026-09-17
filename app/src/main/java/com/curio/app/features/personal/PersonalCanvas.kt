@@ -51,7 +51,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
@@ -515,7 +514,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * turns it on.
      */
     var keepsChecklistRows: Boolean = false
-        private set
 
     private var caret by mutableStateOf<PersonalCaret?>(null)
 
@@ -1179,8 +1177,7 @@ private fun PersonalTextBlock(
 internal fun PersonalPagePhoto(
     uri: String,
     height: Dp,
-    modifier: Modifier = Modifier,
-    filterQuality: FilterQuality = FilterQuality.High
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     var box by remember(uri) { mutableStateOf(IntSize.Zero) }
@@ -1191,11 +1188,14 @@ internal fun PersonalPagePhoto(
             .apply { if (box.width > 0 && box.height > 0) size(box.width, box.height) }
             .build()
     }
+    // The PAINTER overload is the one this project already uses for a page's
+    // photos (see PersonalPhotoOverlay): it carries no `filterQuality`, so the
+    // crispness has to come from the DECODE — which is exactly what the request
+    // above asks for (a size that covers the box, never upscaled afterwards).
     androidx.compose.foundation.Image(
         painter = rememberAsyncImagePainter(request),
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        filterQuality = filterQuality,
         modifier = modifier
             .fillMaxWidth()
             .height(height)
