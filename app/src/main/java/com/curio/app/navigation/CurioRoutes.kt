@@ -265,6 +265,14 @@ object CurioRoutes {
     const val JOURNALS = "journals"
     /** One journal day. The argument is a note id, or [PERSONAL_NEW]. */
     const val JOURNAL_EDITOR = "journal/{entryId}"
+    /** A NOTE ON A TOPIC — its OWN page (v389). The argument is a note id, or
+     *  [PERSONAL_NEW]. It used to be the journal editor with topic route-params,
+     *  which meant a page about, say, the Voyager probes opened asking how the
+     *  DAY felt. */
+    const val TOPIC_NOTE = "notes/topic/{entryId}"
+    /** A TO-DO LIST — its OWN page (v389). Same argument. It used to be the
+     *  journal editor with `kind = todo`, checklist hidden behind one tool. */
+    const val TODO = "todo/{entryId}"
     /** The book shelf (covers + progress). */
     const val BOOKS = "books"
     /** One book: its chapters, its chapter reviews and the member's progress. */
@@ -348,27 +356,31 @@ object CurioRoutes {
     fun captureFor(categorySlug: String, topicName: String) =
         "capture/$categorySlug/${Uri.encode(topicName)}"
     fun entryDetail(entryId: String) = "detail/$entryId"
-    /** One journal page ([PERSONAL_NEW] starts today's).
-     *  When [topicId]/[topicName]/[categoryId] are supplied, the page is a
-     *  "note on a topic" (the "+" sheet's new door). When [pageKind] is
-     *  [PAGE_KIND_TODO], the page is a checklist. */
-    fun journalEditor(
+    /** One journal day ([PERSONAL_NEW] starts today's). */
+    fun journalEditor(entryId: String) = "journal/$entryId"
+    /**
+     * One note about a topic ([PERSONAL_NEW] starts a blank one).
+     *
+     * The topic params SEED the page for a caller that already knows the topic;
+     * left empty, the page opens with its topic picker in front of the writer —
+     * the catalog (the merged index, ranked like the composer's chooser) or a
+     * name typed in by hand. See TopicNoteScreen.
+     */
+    fun topicNote(
         entryId: String,
         topicId: String = "",
         topicName: String = "",
-        categoryId: String = "",
-        pageKind: String = ""
-    ): String = buildString {
-        append("journal/$entryId")
+        categoryId: String = ""
+    ): String {
         val params = mutableListOf<String>()
         if (topicId.isNotBlank()) params += "topicId=${Uri.encode(topicId)}"
         if (topicName.isNotBlank()) params += "topicName=${Uri.encode(topicName)}"
         if (categoryId.isNotBlank()) params += "categoryId=${Uri.encode(categoryId)}"
-        if (pageKind.isNotBlank()) params += "kind=$pageKind"
-        if (params.isNotEmpty()) {
-            params.joinToString("&").let { append("?$it") }
-        }
+        val query = if (params.isEmpty()) "" else "?" + params.joinToString("&")
+        return "notes/topic/$entryId$query"
     }
+    /** One to-do list ([PERSONAL_NEW] starts a blank one). */
+    fun todo(entryId: String) = "todo/$entryId"
     /** One book on the personal shelf. */
     const val BOOK_READER = "books/{bookId}/reader"
     fun bookDetail(bookId: String) = "books/${Uri.encode(bookId)}"

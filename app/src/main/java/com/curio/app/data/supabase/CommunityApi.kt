@@ -1301,7 +1301,7 @@ object CommunityApi {
             }
         }
 
-    // ── internals ──────���─────────────────────────────────────────────────
+    // ── internals ──────────────────────────────────────────────────────────
 
     /** One reply row, parsed in exactly one place (sheet and queue share it). */
     private fun parseComments(body: String, myUserId: String?): List<CommunityComment> {

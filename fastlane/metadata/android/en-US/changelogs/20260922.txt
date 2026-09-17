@@ -16,7 +16,13 @@ ADD:
 - Community: an unfinished post is kept as a draft and offered back the next time you open the composer.
 - Books: the add-book sheet searches Curio's own book shelf first, then the open library — and says which one it found the book in.
 - Profile: your profile (and every member's) now lives inside the header itself — portrait, counts, bio and actions on the banner, with a proper Message pill.
+- Writing: a note on a topic is its own page — the topic sits at the top as a card (with a way through to it), and you can pick that topic by searching Curio's catalog or by typing a name of your own.
+- Writing: a to-do list is its own page too — give it a name, type a row and it arrives as a checkbox, with a running count of what is left and the day it was started.
+- Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 FIX:
+- Writing: a ticked checklist row stays ticked — the tick is saved with the page, so reopening a list shows what you finished instead of an empty box.
+- Writing: the checklist box is a clean hairline outline in your own ink instead of a pale accent smudge, the tick sits inside it properly, and the box lines up level with the row's words.
+- Writing: searching for a topic ranks the same everywhere — the composer, the Share Hub and the note page all put a name match first instead of an alphabetical guess.
 - Performance: the app hands the topic catalog's memory back when Android asks for it (it could not before, so the app stayed heavy in the background), with no cost to how fast the Topic Database opens.
 - Books: a lookup that failed (no connection, a timeout) is no longer remembered as done — the book is looked up again on your next visit instead of staying blank forever.
 - Books: "Mark finished" really finishes the book now (un-finishing had silently failed), and a chapter you have written wears the accent line down its side.

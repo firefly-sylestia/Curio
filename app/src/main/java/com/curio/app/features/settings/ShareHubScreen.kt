@@ -49,6 +49,7 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.searchTopicIndex
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -97,24 +98,14 @@ fun ShareHubScreen(navController: NavController) {
         value = runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
     }
 
-    val needle = query.trim().lowercase()
+    val needle = query.trim()
     val results = remember(index, needle) {
+        // v389 — the ONE index search (data/TopicSearch.kt): the hub used to
+        // filter by substring and then sort purely alphabetically, so a weak
+        // hit could outrank the topic whose NAME matched the words. It now
+        // ranks exactly like the composer's chooser and the note page.
         if (needle.isEmpty()) emptyList()
-        else index.orEmpty()
-            .filter { entry ->
-                entry.nameKey.contains(needle) ||
-                    entry.subtypeKey.contains(needle) ||
-                    entry.bylineKey.contains(needle) ||
-                    entry.teaserKey.contains(needle) ||
-                    entry.tagKeys.any { it.contains(needle) }
-            }
-            .sortedWith(
-                compareBy<TopicIndexEntry>(
-                    { if (it.nameKey == needle) 0 else if (it.nameKey.startsWith(needle)) 1 else 2 },
-                    { it.nameKey }
-                )
-            )
-            .take(40)
+        else searchTopicIndex(index.orEmpty(), needle, 40)
     }
 
     // v389 — the merged index carries a topic's identity and search keys, not

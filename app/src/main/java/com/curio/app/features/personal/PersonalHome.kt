@@ -43,13 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalNoteEntity
@@ -58,7 +54,6 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
-import com.curio.app.ui.theme.WritingFontFamily
 
 /**
  * v387 — THE PERSONAL FAMILY ON HOME.
@@ -119,9 +114,11 @@ fun PersonalCreateLauncher(
 }
 
 /**
- * What the "+" opens: the two things a member can start writing here. A
- * journal page for a day, or a book they are reading with somewhere to put
- * the chapters.
+ * What the "+" opens: the four things a member can start writing here — a
+ * journal page for a day, a book they are reading with somewhere to put the
+ * chapters, a note about one topic, and a to-do list. Each door opens the
+ * page's OWN screen (see [personalRouteFor]); none of them is a journal day
+ * wearing route params.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -236,84 +233,6 @@ private fun CreateEntryOption(
 }
 
 /**
- * A tiny sheet asking for the topic name. The name is the handle: it becomes
- * the topic id (lowercased, hyphenated) and the label the journal list shows.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopicNoteInputSheet(
-    onDismiss: () -> Unit,
-    onSubmit: (String) -> Unit
-) {
-    var name by remember { mutableStateOf("") }
-    val accent = personalAccent()
-    val ink = MaterialTheme.colorScheme.onSurface
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = { BottomSheetDefaults.DragHandle() }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 26.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                "A note on a topic",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FrauncesFontFamily,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = ink
-            )
-            BasicTextField(
-                value = name,
-                onValueChange = { name = it },
-                singleLine = true,
-                textStyle = TextStyle(
-                    fontFamily = WritingFontFamily,
-                    fontSize = 16.sp,
-                    color = ink
-                ),
-                cursorBrush = SolidColor(accent),
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { inner ->
-                    Box {
-                        if (name.isEmpty()) {
-                            Text(
-                                "What topic?",
-                                style = TextStyle(
-                                    fontFamily = WritingFontFamily,
-                                    fontSize = 16.sp,
-                                    color = ink.copy(alpha = 0.4f)
-                                )
-                            )
-                        }
-                        inner()
-                    }
-                }
-            )
-            Surface(
-                onClick = { if (name.isNotBlank()) onSubmit(name.trim()) },
-                shape = RoundedCornerShape(50),
-                color = accent
-            ) {
-                Text(
-                    "Start writing",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = personalOnAccent(),
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-                )
-            }
-        }
-    }
-}
-
-/**
  * The Home row: what the member is writing, as chips. The first chip is
  * always the way in ("New"), then the newest journals, then the books being
  * read, then a door to the full journal list — a fixed-height row that never
@@ -352,7 +271,9 @@ fun PersonalChipsRow(
             }
             items(items = journals.take(3), key = { it.id }) { journal ->
                 JournalChip(journal = journal, onClick = {
-                    navController.navigate(CurioRoutes.journalEditor(journal.id)) { launchSingleTop = true }
+                    // v389 — the chip opens the page's OWN screen (a to-do list is
+                    // not a journal day; see personalRouteFor).
+                    navController.navigate(personalRouteFor(journal)) { launchSingleTop = true }
                 })
             }
         }

@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,7 +51,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -80,6 +86,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.curio.app.data.PersonalAlign
 import com.curio.app.data.PersonalBlock
 import com.curio.app.data.PersonalDoc
+import com.curio.app.data.PersonalMarker
 import com.curio.app.data.newBlockId
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -150,6 +157,223 @@ internal fun personalBlockCarries(text: String, mask: IntArray, flag: Int): Bool
 /** Kept as the quote's own name — everything else calls the general one. */
 internal fun personalBlockIsQuote(text: String, mask: IntArray): Boolean =
     personalBlockCarries(text, mask, FLAG_QUOTE)
+
+/**
+ * v389 — how far along a checklist is: `done to total`, counting only rows with
+ * words in them (an empty row the writer has not filled in is not a task yet).
+ * Decoded from the STORED runs, so the to-do page's count, the journal list's
+ * "3 of 7 done" line and a book chapter's checklist all read the same document
+ * the same way.
+ */
+internal fun PersonalDoc.checklistProgress(): Pair<Int, Int> {
+    var done = 0
+    var total = 0
+    blocks.forEach { block ->
+        if (block.isPhoto || block.text.isBlank()) return@forEach
+        val mask = runsToMask(block.text.length, block.runs)
+        if (!personalBlockCarries(block.text, mask, FLAG_CHECKBOX)) return@forEach
+        total++
+        if (block.checked) done++
+    }
+    return done to total
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// List furniture (v389)
+// ────────────────────────────────────────────────────────────────────────────
+
+/** The marker's box: the glyph width every list line reserves. */
+internal val PERSONAL_MARKER_SIZE = 18.dp
+
+/** The air between the marker and the first word. */
+internal val PERSONAL_MARKER_GAP = 10.dp
+
+/** The whole lead-in — what a list line indents its TEXT by, so a wrapped line
+ *  lines up under the first word instead of under the marker. */
+internal val PERSONAL_MARKER_LEAD = PERSONAL_MARKER_SIZE + PERSONAL_MARKER_GAP
+
+/**
+ * v389 — ONE BULLET RENDERER for the whole family: the editor, every read-only
+ * view (journal previews, book reviews, chapter pages) and the tool dock's own
+ * menu all draw through this, so a star list reads as a star list everywhere.
+ *
+ * [lineHeight] is the FIRST line's height in pixels and the marker centres on
+ * it. The old drawing hard-coded a vertical offset per style (8 / 11 / 12 / 15 /
+ * 18dp), which is why a box never sat level with its words at another font
+ * scale, and why the editor's box and the read-only box were two different
+ * sizes with two different ticks.
+ */
+internal fun DrawScope.drawPersonalMarker(
+    marker: PersonalMarker,
+    ink: Color,
+    lineHeight: Float
+) {
+    val size = PERSONAL_MARKER_SIZE.toPx()
+    val cx = size / 2f
+    val cy = lineHeight / 2f
+    val r = size * 0.46f
+    when (marker) {
+        PersonalMarker.DOT -> drawCircle(
+            color = ink,
+            radius = size * 0.17f,
+            center = Offset(cx, cy)
+        )
+        PersonalMarker.RING -> drawCircle(
+            color = ink,
+            radius = size * 0.23f,
+            center = Offset(cx, cy),
+            style = Stroke(width = size * 0.14f)
+        )
+        PersonalMarker.DASH -> drawRoundRect(
+            color = ink,
+            topLeft = Offset(0f, cy - size * 0.055f),
+            size = Size(size * 0.92f, size * 0.11f),
+            cornerRadius = CornerRadius(size * 0.055f)
+        )
+        PersonalMarker.STAR, PersonalMarker.SPARK -> {
+            // A four-point sparkle (SPARK is the same shape with a tighter
+            // waist). Straight edges only, so it stays crisp at 18dp.
+            val w = r * if (marker == PersonalMarker.SPARK) 0.155f else 0.212f
+            val path = Path().apply {
+                moveTo(cx, cy - r)
+                lineTo(cx + w, cy - w)
+                lineTo(cx + r, cy)
+                lineTo(cx + w, cy + w)
+                lineTo(cx, cy + r)
+                lineTo(cx - w, cy + w)
+                lineTo(cx - r, cy)
+                lineTo(cx - w, cy - w)
+                close()
+            }
+            drawPath(path, color = ink)
+        }
+        PersonalMarker.CRYSTAL -> {
+            val path = Path().apply {
+                moveTo(cx, cy - r)
+                lineTo(cx + r * 0.76f, cy)
+                lineTo(cx, cy + r)
+                lineTo(cx - r * 0.76f, cy)
+                close()
+            }
+            drawPath(
+                path = path,
+                color = ink,
+                style = Stroke(width = size * 0.135f, join = StrokeJoin.Round)
+            )
+            // The facet: one rule across the middle, so the shape reads as a
+            // cut stone rather than a plain lozenge.
+            drawLine(
+                color = ink,
+                start = Offset(cx - r * 0.5f, cy),
+                end = Offset(cx + r * 0.5f, cy),
+                strokeWidth = size * 0.10f,
+                cap = StrokeCap.Round
+            )
+        }
+        PersonalMarker.ARROW -> {
+            val path = Path().apply {
+                moveTo(cx - r * 0.40f, cy - r * 0.52f)
+                lineTo(cx + r * 0.42f, cy)
+                lineTo(cx - r * 0.40f, cy + r * 0.52f)
+            }
+            drawPath(
+                path = path,
+                color = ink,
+                style = Stroke(
+                    width = size * 0.15f,
+                    cap = StrokeCap.Round,
+                    join = StrokeJoin.Round
+                )
+            )
+        }
+        PersonalMarker.LEAF -> {
+            val path = Path().apply {
+                moveTo(cx, cy - r)
+                cubicTo(cx + r * 0.95f, cy - r * 0.35f, cx + r * 0.35f, cy + r * 0.95f, cx, cy + r)
+                cubicTo(cx - r * 0.35f, cy + r * 0.95f, cx - r * 0.95f, cy - r * 0.35f, cx, cy - r)
+                close()
+            }
+            drawPath(path, color = ink)
+        }
+        PersonalMarker.HEART -> {
+            // Two lobes and a point — circles plus a triangle, so the shape is
+            // exact at any size (hand-tuned curves drift the moment the marker
+            // is drawn at another scale).
+            val lobe = r * 0.46f
+            drawCircle(color = ink, radius = lobe, center = Offset(cx - r * 0.40f, cy - r * 0.30f))
+            drawCircle(color = ink, radius = lobe, center = Offset(cx + r * 0.40f, cy - r * 0.30f))
+            val path = Path().apply {
+                moveTo(cx - r * 0.84f, cy - r * 0.22f)
+                lineTo(cx + r * 0.84f, cy - r * 0.22f)
+                lineTo(cx, cy + r)
+                close()
+            }
+            drawPath(path, color = ink)
+        }
+        PersonalMarker.BOLT -> {
+            val path = Path().apply {
+                moveTo(cx + r * 0.18f, cy - r)
+                lineTo(cx - r * 0.62f, cy + r * 0.12f)
+                lineTo(cx - r * 0.10f, cy + r * 0.12f)
+                lineTo(cx - r * 0.18f, cy + r)
+                lineTo(cx + r * 0.62f, cy - r * 0.12f)
+                lineTo(cx + r * 0.10f, cy - r * 0.12f)
+                close()
+            }
+            drawPath(path, color = ink)
+        }
+    }
+}
+
+/**
+ * v389 — the checklist box, drawn identically in the editor and in every
+ * read-only view.
+ *
+ * OPEN: a NEUTRAL hairline outline in the theme's own ink — never the pale
+ * accent, which read as a smudge on a light page (what the member called out).
+ * DONE: the DEEP accent as a solid fill with a page-coloured tick, so finished
+ * rows are the page's one strong accent. The box is centred on [lineHeight], so
+ * it sits level with the first line's words, and the tick is ONE path with
+ * round caps and joins — two butt-capped hairlines meeting at a sharp corner
+ * was the "broken tick" inside the box.
+ */
+internal fun DrawScope.drawPersonalCheckbox(
+    checked: Boolean,
+    outline: Color,
+    fill: Color,
+    onFill: Color,
+    lineHeight: Float
+) {
+    val size = PERSONAL_MARKER_SIZE.toPx()
+    val top = ((lineHeight - size) / 2f).coerceAtLeast(0f)
+    val corner = CornerRadius(size * 0.30f)
+    if (!checked) {
+        drawRoundRect(
+            color = outline,
+            topLeft = Offset(0f, top),
+            size = Size(size, size),
+            cornerRadius = corner,
+            style = Stroke(width = size * 0.085f)
+        )
+        return
+    }
+    drawRoundRect(
+        color = fill,
+        topLeft = Offset(0f, top),
+        size = Size(size, size),
+        cornerRadius = corner
+    )
+    val tick = Path().apply {
+        moveTo(size * 0.24f, top + size * 0.53f)
+        lineTo(size * 0.42f, top + size * 0.70f)
+        lineTo(size * 0.77f, top + size * 0.30f)
+    }
+    drawPath(
+        path = tick,
+        color = onFill,
+        style = Stroke(width = size * 0.135f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+    )
+}
 
 /**
  * Renders one block's text with its per-character flags applied.
@@ -252,6 +476,17 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /** Tools switched on with nothing to apply them to (an empty line). */
     var armed by mutableIntStateOf(0)
+
+    /**
+     * v389 — a CHECKLIST page keeps making rows: Enter at the END of a row
+     * starts the next line as a row already, and Enter on an EMPTY row ends the
+     * list (the way every checklist behaves). Off by default, because on a
+     * journal day or a review the line after a checklist line is prose — the
+     * canvas' long-standing rule that an ARMED tool never crosses the break.
+     * Set from [PersonalWritingPage]'s `checklistFirst`, so only the to-do page
+     * turns it on.
+     */
+    var keepsChecklistRows: Boolean = false
         private set
 
     private var caret by mutableStateOf<PersonalCaret?>(null)
@@ -324,6 +559,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun caption(id: String): String = blocks[id]?.caption.orEmpty()
 
     fun align(id: String): PersonalAlign = blocks[id]?.align ?: PersonalAlign.START
+
+    /** A checklist line's tick — stored with the block (v389). */
+    fun checked(id: String): Boolean = blocks[id]?.checked == true
+
+    /** The line's bullet marker (the default dot when it never picked one). */
+    fun marker(id: String): PersonalMarker = blocks[id]?.markerStyle ?: PersonalMarker.DOT
 
     fun selection(id: String): TextRange? = selections[id]
 
@@ -425,6 +666,53 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             armed = armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()
         }
         onDocChanged(doc())
+    }
+
+    /**
+     * v389 — ticks / un-ticks a checklist line. The tick is stored WITH THE
+     * BLOCK, so it survives a reload, an app switch and the read-only views;
+     * before this it lived in the row's own widget state and a page forgot
+     * everything the member had finished.
+     */
+    fun setChecked(id: String, value: Boolean) {
+        val block = blocks[id] ?: return
+        if (block.checked == value) return
+        blocks[id] = block.copy(checked = value)
+        onDocChanged(doc())
+    }
+
+    /**
+     * v389 — what the dock's MARKER MENU applies: gives the focused line a
+     * bullet in [marker]'s style, or takes the list off it altogether with
+     * `null`. A marker belongs to a bulleted line, so picking one clears the
+     * checklist flag and "No list" clears both — the same one-list-per-line
+     * rule the two list tools already followed.
+     */
+    fun applyMarker(marker: PersonalMarker?) {
+        val id = focusedId ?: order.firstOrNull() ?: return
+        val block = blocks[id] ?: return
+        val text = block.text
+        val listFlags = FLAG_BULLET or FLAG_CHECKBOX
+        if (text.isEmpty()) {
+            // Nothing to mark yet: arm the tool so the first words typed arrive
+            // as the list the writer asked for.
+            armed = if (marker == null) armed and listFlags.inv()
+            else (armed and listFlags.inv()) or FLAG_BULLET
+        } else {
+            var updated = mask(id)
+            updated = maskApply(updated, 0, text.length, FLAG_CHECKBOX, false)
+            updated = maskApply(updated, 0, text.length, FLAG_BULLET, marker != null)
+            masks[id] = updated
+            armed = armed and listFlags.inv()
+        }
+        blocks[id] = block.copy(marker = marker?.key.orEmpty())
+        onDocChanged(doc())
+    }
+
+    /** The focused line's marker — the dock's bullet button wears it. */
+    fun markerOfFocused(): PersonalMarker {
+        val id = focusedId ?: order.firstOrNull() ?: return PersonalMarker.DOT
+        return marker(id)
     }
 
     fun toggle(flag: Int) {
@@ -538,11 +826,16 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /**
      * Enter: the paragraph splits at the caret and the caret lands at the
-     * start of the new one. Style is NOT carried across the break — a new
-     * line starts as plain prose unless a tool is armed.
+     * start of the new one. The style of the characters travels with them (the
+     * mask is cut in two), but an ARMED tool does not cross the break: a new
+     * line is plain prose unless a tool is armed — or unless this is a
+     * checklist page, which arms its own rows (see [keepsChecklistRows]).
      */
     fun splitAtCaret(id: String) {
         val block = blocks[id] ?: return
+        // Read the row's own flags BEFORE the split rewrites the mask: a
+        // checklist page needs to know whether the line being left was a row.
+        val wasChecklistRow = personalBlockCarries(block.text, mask(id), FLAG_CHECKBOX)
         val caretIndex = (selections[id]?.start ?: block.text.length)
             .coerceIn(0, block.text.length)
         val index = order.indexOf(id)
@@ -565,6 +858,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         selections[tail.id] = TextRange(0)
         focusedId = tail.id
         caret = PersonalCaret(tail.id, 0)
+        // A checklist page (see [keepsChecklistRows]): Enter after a row with
+        // words in it makes the NEXT row; Enter on an empty row ends the list.
+        if (keepsChecklistRows && wasChecklistRow && tail.text.isEmpty() && head.text.isNotBlank()) {
+            armed = FLAG_CHECKBOX
+        }
         onDocChanged(doc())
     }
 
@@ -640,7 +938,15 @@ private fun PersonalTextBlock(
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
     val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
-    var checkboxChecked by remember(id) { mutableStateOf(false) }
+    // v389 — the list furniture's own metrics: the marker centres on the FIRST
+    // line's height, which is what puts a box level with the words it labels.
+    val lineHeight = if (isTitle) 34.sp else if (isSmall) 22.sp else 29.sp
+    // The tick the writer actually made is on the BLOCK now, not in this row's
+    // widget state, so a reload cannot lose it.
+    val checked = state.checked(id)
+    val markerFill = personalAccentInk()
+    val markerOnFill = MaterialTheme.colorScheme.surface
+    val markerOutline = ink.copy(alpha = 0.42f)
     // ONE hint for the whole page: the empty-line "Write…" on every new
     // paragraph read as a page full of the word "write".
     val showHint = text.isEmpty() && !state.hasText()
@@ -707,34 +1013,32 @@ private fun PersonalTextBlock(
                             )
                         }
                         .padding(start = 13.dp)
+                    // v389 — both list styles draw through the ONE shared
+                    // renderer (see drawPersonalCheckbox / drawPersonalMarker)
+                    // and indent by the same lead, so the editor and the
+                    // read-only views can never disagree about a checklist row
+                    // again.
                     isCheckbox -> Modifier
                         .drawBehind {
-                            drawRoundRect(
-                                color = bulletInk,
-                                topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
-                                size = Size(19.dp.toPx(), 19.dp.toPx()),
-                                cornerRadius = CornerRadius(4.dp.toPx()),
-                                style = Stroke(width = 2.2.dp.toPx())
+                            drawPersonalCheckbox(
+                                checked = checked,
+                                outline = markerOutline,
+                                fill = markerFill,
+                                onFill = markerOnFill,
+                                lineHeight = lineHeight.toPx()
                             )
-                            if (checkboxChecked) {
-                                drawLine(bulletInk, Offset(4.dp.toPx(), 17.dp.toPx()), Offset(8.dp.toPx(), 21.dp.toPx()), strokeWidth = 2.4.dp.toPx())
-                                drawLine(bulletInk, Offset(8.dp.toPx(), 21.dp.toPx()), Offset(16.dp.toPx(), 10.dp.toPx()), strokeWidth = 2.4.dp.toPx())
-                            }
                         }
-                        .clickable(enabled = enabled) { checkboxChecked = !checkboxChecked }
-                        .padding(start = 19.dp)
+                        .clickable(enabled = enabled) { state.setChecked(id, !checked) }
+                        .padding(start = PERSONAL_MARKER_LEAD)
                     isBullet -> Modifier
                         .drawBehind {
-                            drawCircle(
-                                color = bulletInk,
-                                radius = 2.6.dp.toPx(),
-                                center = Offset(
-                                    x = 3.dp.toPx(),
-                                    y = (if (isTitle) 18.dp else if (isSmall) 12.dp else 15.dp).toPx()
-                                )
+                            drawPersonalMarker(
+                                marker = state.marker(id),
+                                ink = bulletInk,
+                                lineHeight = lineHeight.toPx()
                             )
                         }
-                        .padding(start = 17.dp)
+                        .padding(start = PERSONAL_MARKER_LEAD)
                     else -> Modifier
                 }
             )
@@ -933,6 +1237,12 @@ internal fun PersonalDocView(
                 val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
                 val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
                 val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
+                // v389 — the same metrics and the same renderers as the editor
+                // (this view draws a checklist row that the editor ticked).
+                val lineHeight = if (isTitle) 31.sp else if (isSmall) 21.sp else 27.sp
+                val markerFill = personalAccentInk()
+                val markerOnFill = MaterialTheme.colorScheme.surface
+                val markerOutline = ink.copy(alpha = 0.42f)
                 val alignOf = if (block.align == PersonalAlign.CENTER) TextAlign.Center
                 else TextAlign.Start
                 Box(
@@ -952,27 +1262,24 @@ internal fun PersonalDocView(
                                     .padding(start = 13.dp)
                                 isCheckbox -> Modifier
                                     .drawBehind {
-                                        drawRoundRect(
-                                            color = bulletInk,
-                                            topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
-size = Size(16.dp.toPx(), 16.dp.toPx()),
-                                            cornerRadius = CornerRadius(2.dp.toPx()),
-                                            style = Stroke(width = 1.6.dp.toPx())
+                                        drawPersonalCheckbox(
+                                            checked = block.checked,
+                                            outline = markerOutline,
+                                            fill = markerFill,
+                                            onFill = markerOnFill,
+                                            lineHeight = lineHeight.toPx()
                                         )
                                     }
-                                    .padding(start = 19.dp)
+                                    .padding(start = PERSONAL_MARKER_LEAD)
                                 isBullet -> Modifier
                                     .drawBehind {
-                                        drawCircle(
-                                            color = bulletInk,
-                                            radius = 2.4.dp.toPx(),
-                                            center = Offset(
-                                                x = 3.dp.toPx(),
-                                                y = (if (isTitle) 16.dp else 14.dp).toPx()
-                                            )
+                                        drawPersonalMarker(
+                                            marker = block.markerStyle,
+                                            ink = bulletInk,
+                                            lineHeight = lineHeight.toPx()
                                         )
                                     }
-                                    .padding(start = 16.dp)
+                                    .padding(start = PERSONAL_MARKER_LEAD)
                                 else -> Modifier
                             }
                         )
@@ -1109,13 +1416,61 @@ internal fun PersonalToolDock(
             ) {
   CurioIcon(CurioIcons.TextDecrease, null, size = 20.dp)
             }
-            PersonalToolButton(
-                label = "Bullet",
-                active = active and FLAG_BULLET != 0,
-                accent = accentInk, ink = ink,
-                onClick = { state.toggleListStyle(FLAG_BULLET) }
-            ) {
-                BulletGlyph()
+            // v389 — THE MARKER MENU. The bullet tool opens a small anchored
+            // menu of list styles instead of toggling one hard-coded dot: the
+            // first row takes the list OFF the line, the rest give it that
+            // marker (stored per line — see PersonalBlock.marker). The button
+            // itself wears the focused line's own marker, so the dock always
+            // echoes what the line is wearing.
+            Box {
+                var markerMenuOpen by remember { mutableStateOf(false) }
+                val focusedMarker = state.markerOfFocused()
+                PersonalToolButton(
+                    label = "Bullet style",
+                    active = active and FLAG_BULLET != 0,
+                    accent = accentInk, ink = ink,
+                    onClick = { markerMenuOpen = true }
+                ) {
+                    MarkerGlyph(focusedMarker)
+                }
+                DropdownMenu(
+                    expanded = markerMenuOpen,
+                    onDismissRequest = { markerMenuOpen = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { MarkerMenuLabel("No list") },
+                        leadingIcon = {
+                            CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp)
+                        },
+                        trailingIcon = {
+                            if (active and (FLAG_BULLET or FLAG_CHECKBOX) == 0) {
+                                CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                            }
+                        },
+                        onClick = {
+                            state.applyMarker(null)
+                            markerMenuOpen = false
+                        }
+                    )
+                    PersonalMarker.entries.forEach { marker ->
+                        DropdownMenuItem(
+                            text = { MarkerMenuLabel(marker.label) },
+                            leadingIcon = { MarkerGlyph(marker) },
+                            trailingIcon = {
+                                if (
+                                    active and FLAG_BULLET != 0 &&
+                                    focusedMarker == marker
+                                ) {
+                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                                }
+                            },
+                            onClick = {
+                                state.applyMarker(marker)
+                                markerMenuOpen = false
+                            }
+                        )
+                    }
+                }
             }
             if (showJournalTools) PersonalToolButton(
                 label = "Quote",
@@ -1171,26 +1526,28 @@ private fun StrikeGlyph() {
     )
 }
 
-/** The bullet tool's own glyph — a dot and two hanging rules. */
+/**
+ * The marker as the DOCK draws it: the very renderer the page uses, so the
+ * menu's preview is literally the glyph the line will wear (v389 — it used to
+ * be a separate dot-and-rules drawing that matched nothing).
+ */
 @Composable
-private fun BulletGlyph() {
+private fun MarkerGlyph(marker: PersonalMarker) {
     val ink = LocalContentColor.current
     androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
-        val stroke = 1.8f.dp.toPx()
-        val dot = 1.9f.dp.toPx()
-        val textLeft = size.width * 0.42f
-        listOf(0.3f to 1f, 0.72f to 0.72f).forEach { (yFraction, width) ->
-            val y = size.height * yFraction
-            drawLine(
-                color = ink,
-                start = Offset(textLeft, y),
-                end = Offset(textLeft + (size.width - textLeft) * width, y),
-                strokeWidth = stroke,
-                cap = androidx.compose.ui.graphics.StrokeCap.Round
-            )
-        }
-        drawCircle(color = ink, radius = dot, center = Offset(size.width * 0.16f, size.height * 0.3f))
+        drawPersonalMarker(marker = marker, ink = ink, lineHeight = size.height)
     }
+}
+
+/** The marker menu's row label — the writing face, so the menu belongs to the
+ *  page it edits. */
+@Composable
+private fun MarkerMenuLabel(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = WritingFontFamily),
+        color = MaterialTheme.colorScheme.onSurface
+    )
 }
 
 /** The alignment tools draw their own glyph (three rules), so the dock never

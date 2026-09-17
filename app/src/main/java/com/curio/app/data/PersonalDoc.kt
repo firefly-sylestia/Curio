@@ -68,9 +68,27 @@ data class PersonalBlock(
     val photo: String? = null,
     /** Optional one-line caption shown under a photo. */
     val caption: String = "",
-    val align: PersonalAlign = PersonalAlign.START
+    val align: PersonalAlign = PersonalAlign.START,
+    /**
+     * A checklist line's TICK (v389). Stored WITH THE BLOCK, which is the whole
+     * point of a to-do page: the tick used to live in the editor's own widget
+     * state, so it vanished the moment the page reloaded and the read-only view
+     * (journals, previews, book reviews) could not draw it at all — a checklist
+     * that forgets what you finished is not a checklist.
+     */
+    val checked: Boolean = false,
+    /**
+     * The BULLET MARKER this line wears (v389): [PersonalMarker.key], "" for
+     * the default dot. Per LINE rather than per page, so one page can run a
+     * star list and a crystal list, and a re-opened note keeps what it wore.
+     * Only meaningful on a line that carries the bullet flag.
+     */
+    val marker: String = ""
 ) {
     val isPhoto: Boolean get() = photo != null
+
+    /** The line's marker, or the default dot when it never picked one. */
+    val markerStyle: PersonalMarker get() = PersonalMarker.fromKey(marker) ?: PersonalMarker.DOT
 }
 
 /** The whole body of one note. */
@@ -95,6 +113,35 @@ data class PersonalDoc(
 /** How many words [plainText] holds (previews and journal stats). */
 fun PersonalDoc.wordCount(): Int =
     plainText.split(' ', '\n', '\t').count { it.isNotBlank() }
+
+/**
+ * v389 — THE BULLET MARKER.
+ *
+ * A list line used to wear one hard-coded dot. The dock's bullet tool now
+ * opens a menu of markers, and the pick is STORED ([PersonalBlock.marker]) so a
+ * page keeps its look across a reload, a device and the read-only views.
+ *
+ * Keys are stable strings in the stored document — they are what a saved note
+ * says, so they must never be renamed; a marker added later is a new value and
+ * an unknown key reads as the default dot on an older build.
+ */
+enum class PersonalMarker(val key: String, val label: String) {
+    DOT("dot", "Dot"),
+    RING("ring", "Ring"),
+    DASH("dash", "Dash"),
+    STAR("star", "Star"),
+    SPARK("spark", "Spark"),
+    CRYSTAL("crystal", "Crystal"),
+    ARROW("arrow", "Arrow"),
+    LEAF("leaf", "Leaf"),
+    HEART("heart", "Heart"),
+    BOLT("bolt", "Bolt");
+
+    companion object {
+        fun fromKey(key: String?): PersonalMarker? =
+            entries.firstOrNull { it.key == key }
+    }
+}
 
 /** The mood of a journal day. Keys are stable strings in the DB. */
 enum class PersonalMood(val key: String, val label: String) {
@@ -135,6 +182,11 @@ object PersonalDocCodec {
             b.addProperty("photo", block.photo)
             b.addProperty("caption", block.caption)
             b.addProperty("align", block.align.name)
+            // v389 — a ticked checklist line and a line's bullet marker. Both
+            // are omitted at their defaults, so every page written before this
+            // version encodes byte-for-byte as it did.
+            if (block.checked) b.addProperty("ck", true)
+            if (block.marker.isNotBlank()) b.addProperty("mk", block.marker)
             val runs = JsonArray()
             block.runs.forEach { run ->
                 val r = JsonObject()
@@ -192,7 +244,11 @@ object PersonalDocCodec {
                 caption = b.str("caption"),
                 align = runCatching {
                     PersonalAlign.valueOf(b.str("align").ifBlank { PersonalAlign.START.name })
-                }.getOrDefault(PersonalAlign.START)
+                }.getOrDefault(PersonalAlign.START),
+                // v389 — the tick and the bullet marker. An older note has
+                // neither key: it decodes as unticked, with the default dot.
+                checked = b.flag("ck"),
+                marker = b.str("mk")
             )
         }
         // A note whose body decoded to nothing still needs ONE writable block,

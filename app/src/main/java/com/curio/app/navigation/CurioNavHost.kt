@@ -105,7 +105,8 @@ import com.curio.app.features.personal.BookReaderScreen
 import com.curio.app.features.personal.ChapterScreen
 import com.curio.app.features.personal.JournalEditorScreen
 import com.curio.app.features.personal.JournalListScreen
-import com.curio.app.data.PAGE_KIND_JOURNAL
+import com.curio.app.features.personal.TodoScreen
+import com.curio.app.features.personal.TopicNoteScreen
 import com.curio.app.features.personal.PersonalPhotoOverlay
 import com.curio.app.features.personal.rememberPersonalPhotoOverlayState
 import com.curio.app.features.profile.ProfileScreen
@@ -1005,19 +1006,45 @@ fun CurioNavHost(
                 // it by this route, so a tapped picture grows out of the page
                 // instead of pushing a whole Lightbox screen on top of it.
                 val photos = rememberPersonalPhotoOverlayState()
-                val topicId = entry.arguments?.getString("topicId").orEmpty()
-                val topicName = entry.arguments?.getString("topicName").orEmpty()
-                val categoryId = entry.arguments?.getString("categoryId").orEmpty()
-                val kind = entry.arguments?.getString("kind").orEmpty()
                 Box(Modifier.fillMaxSize()) {
                     JournalEditorScreen(
                         navController = navController,
                         entryIdArg = entry.arguments?.getString("entryId").orEmpty(),
-                        photos = photos,
-                        initialTopicId = topicId,
-                        initialTopicName = topicName,
-                        initialCategoryId = categoryId,
-                        initialKind = kind.ifBlank { PAGE_KIND_JOURNAL }
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
+            // v389 — a note about a topic and a to-do list are their OWN pages:
+            // a journal day wears a date bar and a mood pill, and neither of
+            // those belongs on a page about a topic or on a list of things to do.
+            composable(
+                route = CurioRoutes.TOPIC_NOTE,
+                arguments = listOf(navArgument("entryId") { type = NavType.StringType })
+            ) { entry ->
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    TopicNoteScreen(
+                        navController = navController,
+                        entryIdArg = entry.arguments?.getString("entryId").orEmpty(),
+                        initialTopicId = entry.arguments?.getString("topicId").orEmpty(),
+                        initialTopicName = entry.arguments?.getString("topicName").orEmpty(),
+                        initialCategoryId = entry.arguments?.getString("categoryId").orEmpty(),
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
+            composable(
+                route = CurioRoutes.TODO,
+                arguments = listOf(navArgument("entryId") { type = NavType.StringType })
+            ) { entry ->
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    TodoScreen(
+                        navController = navController,
+                        entryIdArg = entry.arguments?.getString("entryId").orEmpty(),
+                        photos = photos
                     )
                     PersonalPhotoOverlay(photos)
                 }

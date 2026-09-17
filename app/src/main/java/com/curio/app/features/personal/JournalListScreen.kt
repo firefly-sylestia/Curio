@@ -128,8 +128,11 @@ fun JournalListScreen(navController: NavController) {
                     items(items = pages, key = { it.id }) { journal ->
                         JournalRow(
                             journal = journal,
+                            // v389 — a row opens ITS OWN page: a journal day the
+                            // editor, a to-do list the checklist page, a note on a
+                            // topic the topic page. See personalRouteFor.
                             onClick = {
-                                navController.navigate(CurioRoutes.journalEditor(journal.id)) {
+                                navController.navigate(personalRouteFor(journal)) {
                                     launchSingleTop = true
                                 }
                             },

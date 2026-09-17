@@ -1,5 +1,82 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, COMPLETE — the personal writing family split into its own pages)
+
+Verbatim: "add a proper a note on a topic screen, a screen of its own, and also a
+todo list same a screen of its own to note down todo also the check box in
+journal tool, its not good its light theme accent which is bad, and the tick
+doestn look good within gthe box and th ebox isnt allinged with th etetx, also
+add multiple differnt bullet style for bulletpoint dot, like tar crstal arrow etc
+etc. as a drop down."
+
+### Decisions (ask_user)
+
+The two "+" doors **replace** their old journal-with-route-params paths (the pages
+are their own screens); **always on** (no settings toggle); markers asked for:
+dot, ring, dash, star, crystal, arrow "and some more"; the topic picker offers
+Curio's own catalog **and** a name typed by hand.
+
+### Shipped
+
+1. **One editor core, three page heads (`PersonalPage.kt`).** `PersonalWritingPage`
+   owns the entry id, the document, the 700ms debounce, the `ON_STOP` flush, the
+   photo picker, the read/write crossfade and the dock; a page is its `header`,
+   `aboveCanvas` and `readView`. `JournalEditorScreen` lost its topic / `kind`
+   route params (and 31 orphaned imports) and is now only a date bar, a mood pill
+   and a title.
+2. **`TopicNoteScreen` (`notes/topic/{entryId}`)** — the topic as a card at the
+   head (lane glyph, name, a way through to its reveal page), the writing under
+   it, and a picker sheet that searches the merged index with the app's ONE
+   ranking or takes a typed name. The old `TopicNoteInputSheet` (name box →
+   journal day with topic params) is deleted.
+3. **`TodoScreen` (`todo/{entryId}`)** — a name, "3 of 7 done", rows. It opens
+   with the pen down and its first line armed as a row, and
+   `PersonalEditorState.keepsChecklistRows` (set by the page core's
+   `checklistFirst`) makes Enter at the end of a row start the next row while
+   Enter on an empty row ends the list.
+4. **The tick is STORED** (`PersonalBlock.checked`, codec key `ck`): it used to
+   live in the row's own widget state, so a reopened checklist had forgotten
+   everything the member finished and no read-only view could draw it.
+5. **The box and the tick are redrawn** — one `drawPersonalCheckbox` for the
+   editor and every read-only view: a neutral ink hairline when open (the pale
+   accent read as a smudge in light mode), the deep accent fill with a
+   page-coloured tick when done, centred on the line's own height (`sp` of the
+   style), so the box sits level with the words at any font scale.
+6. **A MARKER MENU on the bullet tool** (`PersonalMarker`, stored per line in
+   `PersonalBlock.marker`, codec key `mk`): dot, ring, dash, star, spark,
+   crystal, arrow, leaf, heart, bolt. The dock button wears the focused line's
+   marker, the menu's previews and the page glyphs are the SAME renderers
+   (`drawPersonalMarker`), and "No list" clears the line.
+7. **`personalRouteFor(note)`** — the journal list, Home's chips, the Cabinet's
+   Personal shelf and the note page all route by kind now, so a checklist can
+   never open in the journal editor.
+8. **`data/TopicSearch.kt`** — the composer's ranking extracted as
+   `searchTopicIndex`; the Share Hub's picker (a substring filter sorted
+   alphabetically) and the note page ask it too.
+9. **Text/cleanup:** `CreateEntrySheet`'s "two things" doc now says four,
+   `PersonalEntity.topicId`'s doc no longer claims the reveal page offers a note
+   back (nothing does that — the routes' topic seeds are for callers, which the
+   `CurioRoutes.topicNote` doc now says), and one mojibake comment rule in
+   `data/supabase/CommunityApi.kt` is repaired.
+
+### Verified
+
+`scripts/check_braces.js` on all 16 touched files (OK), `git diff --check` clean,
+a U+FFFD sweep over the touched trees, plus sweeps for every removed symbol
+(`TopicNoteInputSheet`, `initialKind`, `pageKind`, the topic params on
+`journalEditor`), for every new symbol's definition vs use, and for the
+`checklistProgress` / `personalRouteFor` / `searchTopicIndex` call sites. No
+Gradle here (root AGENTS rule) — CI is the compile check.
+
+### Docs
+
+`app/AGENTS.md`: the journal bullet now says three pages share the canvas, and
+the "+" sheet bullet became the v389 contract — the core, the router, the stored
+tick + marker menu (and row continuation), and the one topic search. Store
+changelog `20260922.txt` gained three ADD and three FIX lines.
+
+---
+
 ## Request (2026-09-17, COMPLETE — the memory rework of `v0/reduce-book-lookup-memory`)
 
 Verbatim: the branch link with "compare but first do git pull and tell is the

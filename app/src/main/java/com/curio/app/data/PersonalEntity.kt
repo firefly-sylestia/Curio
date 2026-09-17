@@ -50,9 +50,10 @@ data class PersonalNoteEntity(
     val kind: String = PAGE_KIND_JOURNAL,
     /**
      * Set when the page was written ABOUT a topic (the "+" sheet's *A note on
-     * a topic*): the topic's id, its name and its lane. That is what lets the
-     * topic's own reveal page offer the member's page back, and lets the
-     * journals list say what a page is about.
+     * a topic*, or the topic picker on the note page itself): the topic's id,
+     * its name and its lane. That is what puts the topic at the head of the
+     * saved page, tells the journals list what a page is about, and gives the
+     * page its way through to the topic's own reveal page.
      */
     val topicId: String = "",
     val topicName: String = "",

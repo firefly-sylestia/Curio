@@ -81,6 +81,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.searchTopicIndex
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
 import com.curio.app.data.supabase.KIND_CARD
@@ -139,43 +140,9 @@ private const val TOPIC_SUGGESTION_COUNT = 5
  * of the name starting with it, then a name substring, then the other fields,
  * shortest name first inside each band.
  */
-private fun searchTopics(
-    index: List<TopicIndexEntry>,
-    query: String,
-    limit: Int
-): List<TopicIndexEntry> {
-    val q = query.trim().lowercase()
-    if (q.isEmpty()) return index.take(limit)
-    val hits = ArrayList<Pair<TopicIndexEntry, Int>>()
-    index.forEach { entry ->
-        val rank = topicMatchRank(entry, q)
-        if (rank >= 0) hits += entry to rank
-    }
-    return hits
-        .sortedWith(
-            compareBy<Pair<TopicIndexEntry, Int>> { it.second }
-                .thenBy { it.first.name.length }
-                .thenBy { it.first.nameKey }
-        )
-        .take(limit)
-        .map { it.first }
-}
-
-/**
- * Where [entry] answers [q], lower is better, -1 = no match. 0 name prefix,
- * 1 a word of the name starts with it, 2 the name contains it, 3 byline /
- * subtype, 4 a tag, 5 the teaser.
- */
-private fun topicMatchRank(entry: TopicIndexEntry, q: String): Int {
-    val name = entry.nameKey
-    if (name.startsWith(q)) return 0
-    if (name.contains(" $q")) return 1
-    if (name.contains(q)) return 2
-    if (entry.bylineKey.contains(q) || entry.subtypeKey.contains(q)) return 3
-    if (entry.tagKeys.any { tag -> tag.contains(q) }) return 4
-    if (entry.teaserKey.contains(q)) return 5
-    return -1
-}
+// v389 — the ranking that used to live here as searchTopics/topicMatchRank is
+// `searchTopicIndex` / `topicMatchRank` in data/TopicSearch.kt now, shared with
+// the Share Hub's picker and the note-on-a-topic page.
 
 @Composable
 internal fun CommunityPostScreen(
@@ -275,7 +242,10 @@ internal fun CommunityPostScreen(
     val accentInk = settingsAccentInk()
 
     val topicResults = remember(index, query) {
-        searchTopics(
+        // v389 — the ONE index search (data/TopicSearch.kt), shared with the
+        // Share Hub's picker and the note-on-a-topic page, so the same words
+        // rank the same everywhere.
+        searchTopicIndex(
             index = index,
             query = query,
             limit = if (query.isBlank()) TOPIC_SUGGESTION_COUNT else TOPIC_RESULT_COUNT

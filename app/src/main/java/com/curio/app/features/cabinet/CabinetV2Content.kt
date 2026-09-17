@@ -117,6 +117,7 @@ import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.matchesSavedName
 import com.curio.app.data.matchesSavedNameStrict
 import com.curio.app.data.shortName
+import com.curio.app.features.personal.personalRouteFor
 import com.curio.app.features.reveal.AlbumArtFetch
 import com.curio.app.features.reveal.SeriesPosterFetch
 import com.curio.app.features.settings.BookCoverFetch
@@ -867,8 +868,16 @@ fun CabinetV2Content(navController: NavController) {
                         ?.let { seeded ->
                             shownUserCollections.firstOrNull { it.id == seeded }?.members?.size
                         } ?: 0,
+                    // v389 — the shelf holds all three kinds of personal page,
+                    // so a row opens its OWN screen: a journal day the editor,
+                    // a to-do list the checklist page, a topic note the topic
+                    // page (see personalRouteFor in PersonalPage.kt).
                     onOpenJournal = { id ->
-                        navController.navigate(CurioRoutes.journalEditor(id)) {
+                        val note = personalJournals.firstOrNull { it.id == id }
+                        navController.navigate(
+                            note?.let { personalRouteFor(it) }
+                                ?: CurioRoutes.journalEditor(id)
+                        ) {
                             launchSingleTop = true
                         }
                     },
