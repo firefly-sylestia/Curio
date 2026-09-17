@@ -52,6 +52,10 @@ first; the ask is pending).**
 - The "side by side" half of the photo ask (two small prints sharing a row).
 - The avatars' EYE CHECK is the user's to make; I can only see the table, not the render.
 
+## Request (2026-09-17, compile repair from CI log)
+
+The pasted CI failure was caused by the photo-size field being attached to `PersonalRun` instead of `PersonalBlock`, an invalid `@Composable` annotation on `PersonalPhotoSize`, a missing `fillMaxSize` import, and a `BasicTextField` text alignment argument placed outside `TextStyle`. Moved the field to the block model, corrected the annotation/import/API usage, and left Gradle verification to CI per the repository rule.
+
 ## Request (2026-09-17, batch C — the universal writing dock)
 
 Verbatim summary: the add-chapter flow double-names a chapter ("Chapter 1 · Chapter 1");

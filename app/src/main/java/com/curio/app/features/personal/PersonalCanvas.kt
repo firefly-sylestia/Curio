@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -2257,7 +2258,6 @@ internal fun PersonalPagePhoto(
     )
 }
 
-@Composable
 /**
  * v389 — HOW BIG A PRINT SITS ON THE COLUMN.
  *
@@ -2386,8 +2386,8 @@ private fun PersonalPhotoBlock(
                     value = caption,
                     onValueChange = onCaption,
                     singleLine = true,
-                    textAlign = TextAlign.Center,
                     textStyle = TextStyle(
+                        textAlign = TextAlign.Center,
                         fontFamily = WritingFontFamily,
                         fontSize = captionSize,
                         color = ink.copy(alpha = 0.72f)
