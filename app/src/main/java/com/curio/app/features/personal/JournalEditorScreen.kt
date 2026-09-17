@@ -60,6 +60,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
@@ -146,13 +148,15 @@ fun JournalEditorScreen(
     // READ FIRST, write on request: a saved page OPENS as the page it is (the
     // date, the title, the writing) and the pen switches the tools on. A brand
     // new page has nothing to read, so it opens with the pen already down.
-    var editing by remember(entryId) { mutableStateOf(isNew) }
+    var editing by remember(entryId, isTodo) { mutableStateOf(isNew || isTodo) }
     var dateMillis by remember { mutableLongStateOf(startOfToday()) }
     var createdAt by remember { mutableLongStateOf(0L) }
     var loaded by remember { mutableStateOf(isNew) }
     var saving by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var pickerForDate by remember { mutableLongStateOf(dateMillis) }
+    val titleFocusRequester = remember(entryId) { FocusRequester() }
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
 
     // The editor state is rebuilt ONCE per entry (never per keystroke — that
     // would drop the caret, which is exactly the bug RichTextEditor's own
@@ -176,6 +180,16 @@ fun JournalEditorScreen(
             editor.replace(decoded)
         }
         loaded = true
+    }
+
+    LaunchedEffect(loaded, editing, isTodo) {
+        if (!loaded || !editing) return@LaunchedEffect
+        if (!isTodo) {
+            titleFocusRequester.requestFocus()
+            keyboardController?.show()
+        } else {
+            editor.requestFocusOnEmptyLine()
+        }
     }
 
     // ── Auto-save ──────────────────────────────────────────────────────
@@ -276,10 +290,6 @@ fun JournalEditorScreen(
             saving = saving,
             editing = editing,
             onToggleMode = { mode -> editing = mode },
-            onBack = {
-                saveNow()
-                navController.popBackStack()
-            },
             onShiftDate = { days ->
                 dateMillis = shiftDay(dateMillis, days)
             },
@@ -334,7 +344,9 @@ fun JournalEditorScreen(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(titleFocusRequester),
                 decorationBox = { inner ->
                     Box {
                         if (title.isEmpty()) {
@@ -438,7 +450,6 @@ private fun JournalTopBar(
     saving: Boolean,
     editing: Boolean,
     onToggleMode: (Boolean) -> Unit,
-    onBack: () -> Unit,
     onShiftDate: (Long) -> Unit,
     onPickDate: () -> Unit
 ) {
@@ -452,17 +463,6 @@ private fun JournalTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp)
     ) {
-        Surface(
-            onClick = onBack,
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.size(42.dp)
-        ) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CurioIcon(CurioIcons.ArrowBack, "Back", tint = ink, size = 20.dp)
-            }
-        }
-
         // The day sits just after the back button (not floating in the middle
         // of the bar) — it is the page's title, so it belongs to its head.
         Row(
@@ -492,7 +492,7 @@ private fun JournalTopBar(
                     CurioIcon(CurioIcons.CalendarToday, null, tint = personalAccentInk(), size = 15.dp)
                     Text(
                         if (today) "Today" else dateMillis.prettyDate(),
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
 color = personalAccentInk()
                 )
             }
