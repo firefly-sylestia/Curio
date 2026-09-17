@@ -8632,6 +8632,51 @@ These patterns and anti-patterns were learned the hard way (CI compile failures,
 ### Compose inline forEach — composable calls only IN the inline body
 - `forEach` is `inline`, so calling `@Composable` functions DIRECTLY inside its lambda body is legal (the body is inlined into the composable call site). BUT — **calling a composable through a `val` lambda reference inside forEach FAILS** because the lambda variable is not inlined. Bad: `val chip = { fmt -> FormatChip(...) }; forEach { chip(it) }`. Good: `forEach { fmt -> FormatChip(...) }`. If both branches need the same content, either duplicate the inline block or extract a `private @Composable fun` and call it inline in both forEach slots.
 
+### The style mask carries MORE than flags now (v389)
+
+`PersonalRuns.kt`'s per-character mask began as one bit per boolean tool. It now
+carries two more AXES above those bits, in the same int:
+
+- bits 9–11 — the MARKER PEN (`HIGHLIGHT_BITS`), one of `PERSONAL_HIGHLIGHT_KEYS`
+- bits 12–13 — the FACE (`FONT_BITS`), one of `PERSONAL_FONT_KEYS`
+
+This is not decoration. `maskToRuns` merges neighbouring characters by comparing
+their ints, so two words written with different pens (or set in different faces)
+are ALREADY two runs and two words that agree are already one — neither axis
+needs merging logic of its own, and every edit that copies the mask (a split, a
+merge, a paste) carries both for free.
+
+Consequences worth knowing before touching this:
+
+1. `ALL_FLAGS_MASK` is flags-ONLY, and so is `lineFlags`. If two names appear to
+   mean the same thing, they do not — the mask is the toolbar's OR, the array is
+   its ORDER (see the comment on `ALL_FLAGS_MASK`).
+2. `flags != 0` no longer means "some tool is on": a marker-only or font-only
+   stretch is nonzero too, which is why `personalAnnotated` paints its background
+   inside that branch rather than in one of its own.
+3. `PersonalRun` stores a KEY (`"rose"`, `"mono"`), never a colour or a file. An
+   unknown key degrades to none. The codec writes `g`/`f` only when set, so a
+   note written before either axis is byte-for-byte the note it was.
+4. A pen or a face chosen with the caret alone is an INPUT STYLE, and the
+   override is `Int?` — `null` is "unchanged" and `0` is "take it off". A plain
+   `Int` cannot say both, which is why `maskAfterEdit` takes nullable overrides.
+
+### The writing dock is a typing instrument, not furniture (v389)
+
+`PersonalToolDock` (the journal's) and `RichTextDock` (the full-screen rich-text
+editors') are the same dock in shape, tokens and manners — a member who has
+written on a page knows where everything is on the other. `RichTextDock` is now
+FOCUS-gated: it rises out of the field's foot when the field takes focus and
+folds away when focus leaves, because a formatting row parked under every
+completed note on "Save your take" was never a tool, it was furniture. The blur
+has a grace period (`DOCK_BLUR_GRACE_MS`) since a tap on a dock button can blur
+the field for an instant; only a blur that sticks hides it.
+
+Companion rule: a tap on the page must actually END the typing. Tapping blank
+space does not clear focus in Compose, so the save page puts a tap detector on
+its scroller, under every card — children consume their own taps first, so it
+only ever catches taps that mean "not in any of these".
+
 ### Per-frame blur is a GPU sink
 - `Modifier.blur(N.dp)` over a **flat color or smooth gradient** is a visual no-op — the unblurred result looks identical — but the RenderEffect pass runs on every frame during scroll. Replace with a static gradient (`Brush.verticalGradient` with slightly different alphas or stops) for the same "frosted glow" look at zero per-frame cost. (This was the root cause of "laggy scrolling" on the detail page.)
 

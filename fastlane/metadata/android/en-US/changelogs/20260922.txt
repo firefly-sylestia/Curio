@@ -1,4 +1,6 @@
 FIX:
+- Save your take: a note's tool bar appears while you are writing in it and folds away when you stop — tap the blank space beside a note to end the typing — instead of a formatting row parked under every note on the page.
+- Writing: a marker's colour and the face a line is set in travel with the words, so both survive Enter, a paste and reopening the page.
 - Reading: tapping the page brings the head and foot back — they used to hide themselves and then be unreachable, because every paragraph swallowed the tap.
 - Writing: tapping bold, italic, underline, strike, size or quote with nothing selected now sets what you type NEXT instead of rewriting the line you are on.
 - Writing: Enter is a new line — paste a paragraph and it arrives as its own lines, so you can drop a voice note between them and Select all works.
@@ -8,6 +10,10 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Writing: a marker pen on the dock — four inks (amber, rose, sage, sky), the same four a book is marked with. Mark a selection outright, or arm a pen for the words you type next; the button wears the pen it is about to lay down.
+- Writing: a font menu — the four faces the app already bundles (serif, sans, mono, display), with the menu itself set in each face and the button a lettered specimen of the face in use.
+- Writing: right and justified now join left and centred, so every alignment a line can wear is one tap on the dock.
+- Writing: text history is the dock's first tool — the line you are in is snapshotted as you write, and a version you restore lands back on that line.
 - Reading: pinch a book to zoom — a page magnifies and pans, a reflowed book re-lays itself out at a larger type size.
 - Reading: search any book from the foot of the page, and every find is washed where it sits.
 - Reading: highlight a whole chapter at once from its heading, instead of marking it paragraph by paragraph.

@@ -7,6 +7,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -245,6 +248,9 @@ fun SaveCaptureScreen(
     }
     // The shared-note button expands into a small editor card.
     var showNoteEditor by remember { mutableStateOf(false) }
+    // v389 — the screen's focus, so a tap on the page itself can end the typing
+    // (see the tap detector under the format body).
+    val saveFocusManager = LocalFocusManager.current
     // The floating note button shows when a pending write handoff exists
     // for THIS exact topic (fresh save) or the entry already carries a note
     // (edit mode), plus whenever a note has been typed. topic is a delegated
@@ -1003,10 +1009,26 @@ fun SaveCaptureScreen(
         // v27k — wrapped in a Box so the shared session-note pill can float
         // over the scrolling content (pinned above the save CTA, reachable
         // no matter how far the body is scrolled).
+        // v389 — A TAP ON THE PAGE ENDS THE TYPING.
+        //
+        // Nothing on this screen ever took the focus OFF a note: tapping the
+        // blank space beside one left the caret in it, the keyboard up and the
+        // field's tools with it, so a note the member had finished with went on
+        // behaving as though they were still in it (user request: "when i tap
+        // outside of the note remove the typing state from it please. so the
+        // tool bar doesnt always stay when im not typing").
+        //
+        // The detector sits on the SCROLLER, under every card, so a tap that a
+        // field, a button or a tile wants is consumed by that child first and
+        // never reaches here — this only ever catches the taps that mean "not in
+        // any of these". It is not a press detector: nothing else changes.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { saveFocusManager.clearFocus() })
+                }
         ) {
         Column(
             modifier = Modifier

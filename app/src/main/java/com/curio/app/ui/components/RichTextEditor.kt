@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -113,6 +114,18 @@ private val SIZE_OPTIONS: List<Float> =
         .filterNot { it == BASE_FONT_SP }
 
 /** How the formatting toolbar is presented. */
+/**
+ * v389 — HOW LONG A BLUR IS ALLOWED TO LAST before the dock believes the member
+ * has left the field.
+ *
+ * A tap on a dock button can blur the field for an instant, and a floating dock
+ * that folded away the moment it was touched would be a dock nobody could use.
+ * Only a blur that sticks — moving to another note, tapping the page — is long
+ * enough to mean "stopped writing", and a quarter of a second is the shortest
+ * delay that survives a tap without feeling laggy when it is real.
+ */
+private const val DOCK_BLUR_GRACE_MS = 250L
+
 enum class RichTextToolbarMode {
     /** The Marginalia journal + quote cards (main option). */
     MAIN,
@@ -1086,6 +1099,32 @@ fun RichTextEditor(
         // FOOT of the field, so this head strip appears only when it still has
         // something of its own to say — the paper tools, a trailing action or
         // the text history. In the other modes it is the dock, as before.
+        // ── v389 — THE DOCK IS A TYPING INSTRUMENT, NOT FURNITURE ───────
+        //
+        // In DOCK mode the tools used to stand at the foot of every note field
+        // for as long as the note existed, whether or not anyone was writing in
+        // it — a row of formatting buttons parked under a filled-in note, and
+        // the same row under the next one, and the next (user request: "in save
+        // your take where the tool bar is for every notes, remove it and use a
+        // floating bottom tool bar style … remember it only appears when i open
+        // the keyboard to type in that text box … so the tool bar doesnt always
+        // stay when im not typing").
+        //
+        // So it follows the FIELD's focus, which is what "typing in this box"
+        // means — and the fleeting part is deliberate: a tap on a dock button
+        // can blur the field for an instant, and a dock that vanished the moment
+        // it was touched would be a dock nobody could use. Only a blur that
+        // STICKS (the member moved to another note, or tapped the page) hides it.
+        var fieldFocused by remember { mutableStateOf(false) }
+        var dockVisible by remember { mutableStateOf(false) }
+        LaunchedEffect(fieldFocused) {
+            if (fieldFocused) {
+                dockVisible = true
+            } else {
+                delay(DOCK_BLUR_GRACE_MS)
+                dockVisible = false
+            }
+        }
         val showTopStrip = toolbarMode != RichTextToolbarMode.DOCK ||
             paper || trailingAction != null || historyField != null
         if (showTopStrip) Surface(
@@ -1240,7 +1279,10 @@ fun RichTextEditor(
                             .fillMaxWidth()
                             .heightIn(min = minHeight)
                             .padding(effectiveFieldPadding)
-                            .onFocusChanged { onFocusChanged?.invoke(it.isFocused) }
+                            .onFocusChanged {
+                                fieldFocused = it.isFocused
+                                onFocusChanged?.invoke(it.isFocused)
+                            }
                     )
                 }
 
@@ -1370,30 +1412,47 @@ fun RichTextEditor(
         // tool its own button (no grouped menus) — so the app's full-screen
         // editors and the journal read as ONE writing surface.
         if (toolbarMode == RichTextToolbarMode.DOCK) {
-            Spacer(Modifier.height(8.dp))
-            RichTextDock(
-                boldActive = hasFlagAt(RichFlag.BOLD),
-                italicActive = hasFlagAt(RichFlag.ITALIC),
-                underlineActive = hasUnderlineAt(),
-                highlightActive = hasFlagAt(RichFlag.HIGHLIGHT),
-                sizeActive = pendingSizeSp != null,
-                accent = effectiveAccent,
-                ink = MaterialTheme.colorScheme.onSurfaceVariant,
-                enabled = enabled,
-                currentSp = currentSizeSp(),
-                onBold = { applyFlag(RichFlag.BOLD) },
-                onItalic = { applyFlag(RichFlag.ITALIC) },
-                onUnderline = { applyUnderline() },
-                onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
-                onSizePick = { applyExactSize(it) },
-                // The line's own justification and its hand, both read from the
-                // run under the caret (the dock echoes what the line is wearing).
-                alignKey = alignKeyAt(extractRichSpans(tfv.annotatedString), tfv.selection.start),
-                fontKey = fontKeyAt(extractRichSpans(tfv.annotatedString), tfv.selection.start),
-                onAlign = { applyAlign(it) },
-                onFont = { applyFont(it) },
-                modifier = Modifier.fillMaxWidth()
-            )
+            // The dock rises out of the field's own foot as the writing starts
+            // and folds away when it stops, which is also what keeps it clear of
+            // the save page's own buttons while a note is being READ rather
+            // than written.
+            AnimatedVisibility(
+                visible = dockVisible,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    Spacer(Modifier.height(8.dp))
+                    RichTextDock(
+                        boldActive = hasFlagAt(RichFlag.BOLD),
+                        italicActive = hasFlagAt(RichFlag.ITALIC),
+                        underlineActive = hasUnderlineAt(),
+                        highlightActive = hasFlagAt(RichFlag.HIGHLIGHT),
+                        sizeActive = pendingSizeSp != null,
+                        accent = effectiveAccent,
+                        ink = MaterialTheme.colorScheme.onSurfaceVariant,
+                        enabled = enabled,
+                        currentSp = currentSizeSp(),
+                        onBold = { applyFlag(RichFlag.BOLD) },
+                        onItalic = { applyFlag(RichFlag.ITALIC) },
+                        onUnderline = { applyUnderline() },
+                        onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
+                        onSizePick = { applyExactSize(it) },
+                        // The line's own justification and its hand, both read
+                        // from the run under the caret (the dock echoes what the
+                        // line is wearing).
+                        alignKey = alignKeyAt(
+                            extractRichSpans(tfv.annotatedString), tfv.selection.start
+                        ),
+                        fontKey = fontKeyAt(
+                            extractRichSpans(tfv.annotatedString), tfv.selection.start
+                        ),
+                        onAlign = { applyAlign(it) },
+                        onFont = { applyFont(it) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
 
         // The text-history browser for this field — self-contained: pill in

@@ -1,5 +1,48 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, batch C — the universal writing dock)
+
+Verbatim summary: the add-chapter flow double-names a chapter ("Chapter 1 · Chapter 1");
+the book page's "why I picked it up" is invisible in the read view; the full-screen note
+editor and the share card's expand should wear the journal's chrome; the journal's dock
+wants a text-history pill FIRST and a watermark/marker with colour options; the dock's
+alignments (left / right / centre / justified) and the font and text size should all live
+in ONE universal toolbar; "Save your take" should lose its per-note toolbar for a floating
+one that appears only while typing and goes when the note is left; EPUBs that already
+print their own page numbers must not get Curio's as well; the reader's Chapters tab must
+list the file's real table of contents with a floating page bar for pages; horizontal
+reading and continuous vertical page styles for both formats; and the system status bar
+hidden in the reader.
+
+**Status (2026-09-17): PARTIAL — pushed; the reader items were already shipped.**
+
+Already delivered in `cb4e8113` (the user is describing the released build, not the
+branch): the reader's Chapters tab IS the file's own contents (EPUB 3 nav document, EPUB 2
+NCX, a PDF's outline — `BookOutline.kt`), the system status bar IS hidden in the reader,
+`carriesOwnPageMarkers` DOES detect a file that prints its own page numbers,
+`chapterMarkerLabel` DOES strip a book's own "Chapter 7" so it cannot be printed twice, and
+the book page DOES read "Why I picked it up" back on the reading side.
+
+Delivered this batch:
+
+- `c8d933c2` — the dock's marker pen (four inks, shared with the reader's), four-way
+alignment (right and justified are new), and text history as the dock's FIRST tool.
+- `3edbf668` — the dock's font menu (four faces the app already bundles).
+- The `RichTextDock` on "Save your take" and the full-screen editors is now FOCUS-gated:
+it rises out of the field's foot while writing and folds away when the note is left, with a
+grace period so a tap on a dock button cannot dismiss the dock. Tapping blank space on the
+save page now ends the typing (a tap detector on the scroller, under every card).
+
+Still open (they fit the ORIGINAL reader pass, not a new one): horizontal reading, the
+continuous vertical page styles for PDF and EPUB, and the floating page bar in the reader's
+tool bar. And the "## next prompt" at the foot of this file (avatars, the voice note's
+backgroundless graph, photo reorder, polaroid photos) is still pending.
+
+**Decided with the user (ask_user, this batch):** the font menu ships WITHOUT a separate
+text-size control, because Title and Small already are the two sizes the dock has (no third
+overlapping concept); and the save page's dock is flat above the Add take area when idle
+while it disappears the moment no field is focused.
+
 ## Request (2026-09-17, batch B — the reader deepened, the writing rules tightened)
 
 Verbatim summary: deepen the book reader (pinch-to-zoom, EPUB images/styled headings,
@@ -2717,4 +2760,4 @@ sits at the bottom-LEFT to keep clear of the Add-chapter pill.
 ## next prompt
 , now i want you to fully redesign these avatar, like fully chnage avatar no. 1,5,7,9,10,11,12,15,16,17,
 also many of them still dont match the eye properly so fix it and refine the others details. also the note on a topic, it shows duplicate topic name in view fix that too. 
-and for voice note on journal and all, it shows on the page as a box, but i want it with the graph only and the play and cross button no backgroud, also the cross button should ask for confimation before deleting it. also similiar to voive note reorder add for photo reorder too. and for the photo preview on page, mak eit polaroid style but make sure it follows the text wrapper style so texts doesnt overlap, when i say polaroid not the whole polaroid phot but a smal lstyle kind of, and support multiple photos and also sizes of polaroid. make them be next to each other or wherver the user wants them. 
+and for voice note on journal and all, it shows on the page as a box, but i want it with the graph only and the play and cross button no backgroud, also the cross button should ask for confimation before deleting it. also similiar to voive note reorder add for photo reorder too. and for the photo preview on page, mak eit polaroid style but make sure it follows the text wrapper style so texts doesnt overlap, when i say polaroid not the whole polaroid phot but a smal lstyle kind of, and support multiple photos and also sizes of polaroid. make them be next to each other or wherver the user wants them. and before pushing use ask user to ask me
