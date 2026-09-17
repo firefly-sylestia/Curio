@@ -42,6 +42,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -713,6 +714,22 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             val b = blocks[block]
             b != null && !b.isPhoto && b.audio == null
         } ?: return
+        // ── A TAP ELSEWHERE LETS GO OF WHAT WAS SELECTED (v389d) ────────
+        //
+        // A selected passage used to survive a tap on the blank part of the
+        // page: the only way to drop it was to tap the SAME line again and put
+        // the caret somewhere in it, which is not how any editor behaves (user
+        // report: "when I've something selected in the text for journal book
+        // review and all and i click the blank area below it should auto
+        // deselect. instead i have to tap that exact line to deselect it").
+        // Tapping the page is a deliberate "not that" — so every range is
+        // collapsed and the page-wide wash goes with it.
+        if (selections.any { (_, range) -> !range.collapsed } || pageSelected) {
+            selections.keys.toList().forEach { key ->
+                selections[key] = TextRange(text(key).length)
+            }
+            pageSelected = false
+        }
         focusedId = id
         caret = PersonalCaret(id, text(id).length)
         // A pending OFF belongs to the place the caret was, not to this one.
@@ -908,6 +925,25 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         if (caret?.blockId == id) caret = null
     }
 
+    /**
+     * v389d — A PASTE WAITING TO BE CUT INTO LINES.
+     *
+     * A paragraph pasted into a line arrives as ONE value with newlines inside
+     * it, and the page's shape has to change to match (a block per line). That
+     * shape change must not happen inside the keyboard's own edit batch — see
+     * [onFieldChange] — so the words land first and this is what the canvas runs
+     * on its next frame.
+     */
+    var pendingSplit by mutableStateOf<PersonalCaret?>(null)
+        private set
+
+    /** Runs the deferred cut, once the IME's batch is behind us. */
+    fun runPendingSplit(caret: PersonalCaret) {
+        pendingSplit = null
+        splitOnNewlines(caret.blockId, caret.index)
+        onDocChanged(doc())
+    }
+
     init {
         val source = if (initial.blocks.isEmpty()) listOf(PersonalBlock(id = newBlockId()))
         else initial.blocks
@@ -979,9 +1015,37 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** The line's bullet marker (the default dot when it never picked one). */
     fun marker(id: String): PersonalMarker = blocks[id]?.markerStyle ?: PersonalMarker.DOT
 
-    fun selection(id: String): TextRange? = selections[id]
+    /**
+     * v389d — THE CARET, FITTED TO THE TEXT IT IS ABOUT TO SIT IN.
+     *
+     * These ranges arrive from the IME (its selection, and its COMPOSING region
+     * while a keyboard is mid-word) and were being handed straight back to
+     * Compose by whatever the block's text happened to be a moment later — and a
+     * block's text does not only change by typing: a tool rewrites a line, a
+     * paste splits it into new lines, a merge puts two together, the page
+     * reloads. When the text got SHORTER than a composing range, the next
+     * `TextFieldValue` carried a region past the end of its own string, and the
+     * IME's own batch-edit then fell over on it (crash report: 
+     * `IndexOutOfBoundsException: toIndex (776) is greater than size (768)` out
+     * of `endBatchEdit`, while deleting text in a book review — the 776 was the
+     * composing region, the 768 the text it no longer fitted).
+     *
+     * So the two ranges are read FITTED: a composition that no longer fits is
+     * gone (it is over — the words it belonged to are not there any more), and a
+     * selection that no longer fits collapses to the end, which is where a caret
+     * that was past the new end belongs.
+     */
+    fun selection(id: String): TextRange? {
+        val length = blocks[id]?.text?.length ?: return null
+        val range = selections[id] ?: return null
+        return range.takeIf { it.min >= 0 && it.max <= length } ?: TextRange(length)
+    }
 
-    fun composition(id: String): TextRange? = compositions[id]
+    fun composition(id: String): TextRange? {
+        val length = blocks[id]?.text?.length ?: return null
+        val range = compositions[id] ?: return null
+        return range.takeIf { it.min >= 0 && it.min <= it.max && it.max <= length }
+    }
 
     /** True when nothing has been written yet (the screen's save gate). */
     fun isEmpty(): Boolean = doc().isEmpty
@@ -1030,7 +1094,31 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // exactly as before — because the key handler consumes it before it
             // ever reaches the field.
             if (newText.indexOf('\n') >= 0) {
-                splitOnNewlines(id, value)
+                // ── THE PASTE LANDS AS TEXT FIRST (v389d) ──────────────
+                //
+                // A pasted paragraph used to be cut into lines RIGHT HERE —
+                // inside the IME's own commit/`endBatchEdit` batch. Whatever the
+                // page did to its shape at that moment (a block removed, a
+                // block added, the focus handed to a field that did not exist a
+                // frame ago) was done underneath a keyboard still holding the
+                // edit open, which is why a long paste could not be made to
+                // stick at all (user report: "i wasn't able to paste long larger
+                // paragraph"). The words are therefore accepted first — the
+                // field's own value is never invalidated under the IME — and the
+                // line-cutting is deferred to the next frame ([pendingSplit]).
+                masks[id] = maskAfterEdit(
+                    old.text, newText, mask(id), armed, armedOff, armedHighlight, armedFont
+                )
+                blocks[id] = old.copy(text = newText)
+                if (armed != 0) armed = 0
+                if (armedOff != 0) armedOff = 0
+                if (armedHighlight != null) armedHighlight = null
+                if (armedFont != null) armedFont = null
+                selections[id] = value.selection
+                compositions[id] = value.composition
+                caret = PersonalCaret(id, value.selection.start.coerceIn(0, newText.length))
+                pendingSplit = caret
+                onDocChanged(doc())
                 return
             }
             masks[id] = maskAfterEdit(
@@ -1051,9 +1139,21 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         onDocChanged(doc())
     }
 
+    /**
+     * v389d — THE LINE THE TOOLS ACT ON STAYS THE LINE.
+     *
+     * This used to forget the focused block the moment it lost focus — and a
+     * block loses focus for all sorts of momentary reasons: a tap on a dock
+     * button, the photo picker coming up, the eye/pen switch. Every tool that
+     * falls back to "the focused line, else the first one" then quietly acted on
+     * the FIRST LINE of the page instead, which is exactly what a broken align
+     * button looks like (user report: "the left side format doesn't work in
+     * journal and all" — it was setting the first line's alignment, not the one
+     * being written). The last line the caret was in is remembered and used as
+     * that fallback; the caret itself still moves where the member puts it.
+     */
     fun onFocusChanged(id: String, focused: Boolean) {
         if (focused) focusedId = id
-        else if (focusedId == id) focusedId = null
     }
 
     /** The flags of whatever the focused tool bar would act on right now —
@@ -1592,36 +1692,59 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * its own characters had. The caret then lands where the writer's cursor
      * actually was — in whichever line of the paste it belongs to — so carrying
      * on typing does what the member expects.
+     *
+     * v389d — THE BREAK IS THE NEWLINE, NOT A CHARACTER OF A LINE. The split
+     * used to be made AT the newline, which left that character at the front of
+     * the tail block — so the next pass found a newline at offset 0 and split
+     * again, and every pasted paragraph came in with a phantom EMPTY line for
+     * each real one (user report: "why does it create like a separate line i mean
+     * enter should behave like enter but it creates some disconnected line"). The
+     * split is now made AFTER the break and the break is taken off the head, so a
+     * paste of N lines is N lines. The loop's own guard is generous on purpose: a
+     * long paste is exactly the case this exists for.
      */
-    private fun splitOnNewlines(id: String, value: TextFieldValue) {
-        val old = blocks[id] ?: return
-        val whole = maskAfterEdit(old.text, value.text, mask(id), armed, armedOff)
-        val caretAt = value.selection.start.coerceIn(0, value.text.length)
-        // Where each line of the typed text begins: what the caret's own line and
-        // the offset inside it are read from at the end.
-        val lineStarts = value.text.indices.filter { value.text[it] == '\n' }.map { it + 1 }
+    private fun splitOnNewlines(id: String, caretAt: Int) {
+        val block = blocks[id] ?: return
+        if (block.text.indexOf('\n') < 0) return
+        val at = caretAt.coerceIn(0, block.text.length)
+        // Where each line begins: what the caret's own line and the offset
+        // inside it are read from at the end.
+        val lineStarts = block.text.indices.filter { block.text[it] == '\n' }.map { it + 1 }
         val lineIds = ArrayList<String>()
         lineIds.add(id)
-        var remaining = old
-        var remainingMask = whole
+        var remaining = block
         var guard = 0
-        while (guard++ < 64) {
+        while (guard++ < 500) {
             val breakAt = remaining.text.indexOf('\n')
             if (breakAt < 0) break
-            val tailId = splitBlock(remaining.id, breakAt, remainingMask)
+            val tailId = splitBlock(remaining.id, breakAt + 1, mask(remaining.id))
+            if (tailId.isBlank()) break
+            dropBreakCharacter(remaining.id)
             val tail = blocks[tailId] ?: break
             lineIds.add(tailId)
             remaining = tail
-            remainingMask = runsToMask(tail.text.length, tail.runs)
         }
         // Where the writer's cursor was: the line it falls in, at the offset it
         // was at within that line.
-        val line = lineStarts.count { it <= caretAt }.coerceIn(0, lineIds.size - 1)
+        val line = lineStarts.count { it <= at }.coerceIn(0, (lineIds.size - 1).coerceAtLeast(0))
         val lineId = lineIds.getOrNull(line) ?: return
         val from = if (line == 0) 0 else lineStarts[line - 1]
-        val at = (caretAt - from).coerceIn(0, text(lineId).length)
+        val into = (at - from).coerceIn(0, text(lineId).length)
         focusedId = lineId
-        caret = PersonalCaret(lineId, at)
+        caret = PersonalCaret(lineId, into)
+    }
+
+    /**
+     * The newline a break is made on belongs to neither line — take it off the
+     * head, words and mask together, so the two stay the same length.
+     */
+    private fun dropBreakCharacter(id: String) {
+        val block = blocks[id] ?: return
+        if (!block.text.endsWith("\n")) return
+        val shorter = block.text.dropLast(1)
+        val trimmed = mask(id).copyOf(shorter.length)
+        masks[id] = trimmed
+        blocks[id] = block.copy(text = shorter, runs = maskToRuns(trimmed))
     }
 
     /**
@@ -1751,6 +1874,16 @@ internal fun PersonalCanvas(
      */
     onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
 ) {
+    // v389d — THE DEFERRED PASTE. A pasted paragraph is accepted as TEXT inside
+    // the keyboard's own edit batch and cut into the page's lines one frame
+    // later, so the block list never changes shape while the IME still holds the
+    // edit open (see PersonalEditorState.onFieldChange).
+    val pendingSplit = state.pendingSplit
+    LaunchedEffect(pendingSplit) {
+        val waiting = pendingSplit ?: return@LaunchedEffect
+        withFrameNanos { }
+        state.runPendingSplit(waiting)
+    }
     // The page's own reporter, or the one its host provided (see
     // [LocalPersonalTitleReport]).
     val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
@@ -1927,7 +2060,8 @@ internal fun PersonalCanvas(
                         index = index,
                         state = state,
                         drag = rowDrag,
-                        enabled = enabled
+                        enabled = enabled,
+                        ink = ink
                     ) {
                         PersonalTextBlock(
                             id = id,
@@ -2145,6 +2279,18 @@ private fun PersonalTextBlock(
                     !event.isShiftPressed
                 ) {
                     state.splitAtCaret(id)
+                    return@onPreviewKeyEvent true
+                }
+                // ── v389d — SELECT ALL MEANS THE PAGE ────────────────────
+                // The keyboard's own Ctrl+A selects the text of the field the
+                // caret is in, and a field here is a LINE — so "select all"
+                // selected one line of a page, which is not what the words mean
+                // (user report: "i can't even do select all as it only selects
+                // one line"). The toolbar's own Select all was already
+                // re-pointed at the page (see the page toolbar above); this is
+                // the same answer for the keyboard, so both doors agree.
+                if (event.isCtrlPressed && event.key == Key.A) {
+                    state.selectPage()
                     return@onPreviewKeyEvent true
                 }
                 // BACKSPACE AT THE START OF A LINE takes the line back into the

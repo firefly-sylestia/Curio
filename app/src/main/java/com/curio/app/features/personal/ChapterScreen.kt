@@ -150,9 +150,17 @@ fun ChapterScreen(
 
     val liveDraft = rememberUpdatedState(draft)
 
+    /**
+     * v389d — AN EMPTIED CHAPTER NOTE IS AN EDIT (see the book review's own):
+     * deleting every word and leaving must clear what is stored, not be skipped
+     * because there is now nothing to write.
+     */
+    fun shouldWrite(): Boolean =
+        !liveDraft.value.isEmpty || review?.doc?.isEmpty == false
+
     fun saveNow() {
         val body = liveDraft.value
-        if (body.isEmpty) return
+        if (!shouldWrite()) return
         val title = chapterMeta?.title.orEmpty()
         scope.launch {
             withContext(Dispatchers.IO + NonCancellable) {
@@ -165,8 +173,7 @@ fun ChapterScreen(
 
     // Debounced while typing…
     LaunchedEffect(editing, draft) {
-        if (!editing) return@LaunchedEffect
-        if (draft.isEmpty) return@LaunchedEffect
+        if (!editing || !shouldWrite()) return@LaunchedEffect
         delay(700)
         withContext(Dispatchers.IO) {
             runCatching {

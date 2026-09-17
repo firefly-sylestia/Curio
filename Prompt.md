@@ -3040,3 +3040,13 @@ unlocked.
 https://github.com/firefly-sylestia/mcu-viewing-order lets add this as a secret, so i think it have all of the movies and series of marvel and x men etc i want you to add them, but they are not visible to normal user at all. also properly categories the movies and series, and make a new screen with marvel, sony, x men, option with the list with proper viewing order etc. from that repo, and essential etc. no trailer info, just watch and bookmark save and drop and etc status, in list and grid view, with its own buttm nav page style, and this screen can be acessed if the user types, " i love you 3000" and the button will be in home screen floating ith name as incursion. 
 
 ## next prompt, also 
+also for photos in journal add side by side photos and also text writing to the side of the photos in small view for photos where there's space remaining
+also fix the voice note drag and move placing issues with lines where they weirdly shifts and switches places it's really buggy and glitchy fix it and same pass for the photo drag and move too
+
+features adding
+add clicable links in journal too i mean when i add a link make it clickable with proper coffee dark view.
+in quotes when i enter to create a new line don't create a new quote stay in that quote and keep it with style.
+add proper chapter no. look it up for books and also chapter titles too for browsed books. add more free providers if there's any or if there's any with free api key add guide in env example , add them please.
+for animes, movies and songs etc the button sheet they are opening they are so bad. remove them and use the same style as book button sheet album button sheet series button sheet style. for topic reveal screen.
+also add artwork button sheet too and author button sheet with authors written books, and similar more with their free apis added or if some need manual addition, add proper guide in env.example which have free tiers
+in home screen the stikky pages and your my shelf. they have a white background which creates weird theme issues with background fix it and also why only 3 books and 3 journal shows. add more keeping scroll too.

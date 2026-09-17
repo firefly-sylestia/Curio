@@ -142,7 +142,21 @@ internal fun runsToMask(textLength: Int, runs: List<PersonalRun>): IntArray {
     runs.forEach { run ->
         val start = run.start.coerceIn(0, textLength)
         val end = run.end.coerceIn(start, textLength)
-        var flags = 0
+        // ── THE PEN AND THE FACE COME FIRST (v389d) ────────────────────
+        //
+        // They travel in the same int as the flags, but they are NOT flags: a
+        // stretch of words can be marked up with a highlighter and nothing else,
+        // and this used to skip exactly that case — the pen and the face were
+        // only OR-ed in once some OTHER flag was already set, and a run with
+        // neither then bailed out entirely (`if (flags == 0) return`). So a
+        // pen-only run was silently dropped every time runs were turned back
+        // into a mask, which is every page load, every save's read-back, and
+        // every Enter (splitting a line REBUILDS its runs) — the marker the
+        // member had just laid down vanished the moment they pressed Enter, and
+        // a page read back showed no highlights at all (user reports: "when i do
+        // enter then the highlighter of the previous texts disappear also in eye
+        // view the highlighter doest show").
+        var flags = highlightMaskFor(run.highlight) or fontMaskFor(run.font)
         if (run.bold) flags = flags or FLAG_BOLD
         if (run.italic) flags = flags or FLAG_ITALIC
         if (run.underline) flags = flags or FLAG_UNDERLINE
@@ -152,9 +166,6 @@ internal fun runsToMask(textLength: Int, runs: List<PersonalRun>): IntArray {
         if (run.small) flags = flags or FLAG_SMALL
         if (run.bullet) flags = flags or FLAG_BULLET
         if (run.checkbox) flags = flags or FLAG_CHECKBOX
-        // The marker travels in the same int as the flags (see HIGHLIGHT_BITS).
-        if (flags != 0) flags = flags or highlightMaskFor(run.highlight)
-        if (flags != 0) flags = flags or fontMaskFor(run.font)
         if (flags == 0) return@forEach
         for (i in start until end) mask[i] = mask[i] or flags
     }

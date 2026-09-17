@@ -46,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -56,6 +57,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -196,8 +198,18 @@ fun BookReviewScreen(
         val alive = (draft.blocks + (review?.doc?.blocks ?: emptyList())).map { it.id }.toSet()
         chapterLines.keys.retainAll(alive)
     }
+    // v389d — THE MARKER IS MEASURED IN THE SCROLL'S OWN SPACE.
+    //
+    // A chapter marker reports where it sits inside the WRITING COLUMN, and the
+    // column is a child of the scrolling page — so the spacer above it was
+    // missing from every number. The pin therefore lit up before its heading had
+    // actually gone (user report: "it's very buggy in books … shows the floating
+    // pin but sometimes it doesn't"), and tapping it scrolled to the wrong place.
+    // The canvas' own place in the scroll is measured and added, so the judge and
+    // the jump agree.
+    var canvasTop by remember { mutableFloatStateOf(0f) }
     val reportChapterLine: (String, String, Float, Float) -> Unit = { id, label, top, bottom ->
-        chapterLines[id] = PinnedChapterLine(label, top, bottom)
+        chapterLines[id] = PinnedChapterLine(label, top + canvasTop, bottom + canvasTop)
     }
 
     // Entering the canvas seeds it from the stored review exactly once (re-
@@ -212,9 +224,23 @@ fun BookReviewScreen(
 
     val liveDraft = rememberUpdatedState(draft)
 
+    /**
+     * v389d — AN EMPTIED REVIEW IS AN EDIT.
+     *
+     * Refusing to write an empty body is right for a book nobody has written
+     * about, and wrong for one the member has just cleared: deleting the whole
+     * review and leaving skipped the save, so the next visit put back exactly
+     * what was deleted (user report: "in book review or any page i can't leave
+     * the page blank after saving once, and each time i delete all text it keeps
+     * coming back when i exit"). A write is allowed when there are words OR when
+     * the stored review HAD words — deleting them is the edit.
+     */
+    fun shouldWrite(): Boolean =
+        !liveDraft.value.isEmpty || review?.doc?.isEmpty == false
+
     fun saveNow() {
         val body = liveDraft.value
-        if (body.isEmpty) return
+        if (!shouldWrite()) return
         scope.launch {
             withContext(Dispatchers.IO + NonCancellable) {
                 runCatching { PersonalRepositoryHolder.repo.saveBookReview(bookId, body) }
@@ -229,7 +255,7 @@ fun BookReviewScreen(
 
     // Debounced while typing…
     LaunchedEffect(editing, draft) {
-        if (!editing || draft.isEmpty) return@LaunchedEffect
+        if (!editing || !shouldWrite()) return@LaunchedEffect
         delay(700)
         withContext(Dispatchers.IO) {
             runCatching { PersonalRepositoryHolder.repo.saveBookReview(bookId, draft) }
@@ -253,7 +279,7 @@ fun BookReviewScreen(
         val flushScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         onDispose {
             val body = liveDraft.value
-            if (!body.isEmpty) {
+            if (shouldWrite()) {
                 flushScope.launch {
                     runCatching { PersonalRepositoryHolder.repo.saveBookReview(bookId, body) }
                 }
@@ -391,7 +417,11 @@ fun BookReviewScreen(
                         Spacer(Modifier.height(4.dp))
                         PersonalCanvas(
                             state = editor,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onGloballyPositioned { coordinates ->
+                                    canvasTop = coordinates.positionInParent().y
+                                },
                             accent = accent,
                             onTitlePosition = reportChapterLine,
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }

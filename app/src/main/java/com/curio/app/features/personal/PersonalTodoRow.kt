@@ -6,6 +6,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -186,6 +189,20 @@ internal class PersonalRowDragState {
 private const val SWIPE_AWAY_FRACTION = 0.34f
 
 /**
+ * v389d — THE GRIP'S OWN ARM WIDTH.
+ *
+ * A to-do row is one text field from edge to edge, and a text field keeps the
+ * long press for itself (that is how a word gets selected in it) — so a long
+ * press meant to PICK THE ROW UP never reached the row at all: the first report
+ * of a broken reorder was simply a row that would not lift (user report: "the
+ * todo list doesn't reorder and it doesn't tap and hold it just sits right
+ * after"). The row therefore gives up this strip of its trailing edge to a grip
+ * that answers a PLAIN drag — no long press to wait through, nothing else living
+ * there to argue with — and the writing keeps the rest.
+ */
+private val TODO_GRIP_WIDTH = 32.dp
+
+/**
  * v389 — IS A BLOCK BEING CARRIED?
  *
  * A carried VOICE NOTE is a waveform strip whose own gesture seeks (see
@@ -312,6 +329,8 @@ internal fun PersonalTodoRow(
     state: PersonalEditorState,
     drag: PersonalRowDragState,
     enabled: Boolean,
+    /** The page's ink, for the grip. */
+    ink: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -447,7 +466,62 @@ internal fun PersonalTodoRow(
                 }
             )
     ) {
-        content()
+        // The writing steps aside for the grip rather than running under it.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = TODO_GRIP_WIDTH)
+        ) {
+            content()
+        }
+        // ── THE GRIP ────────────────────────────────────────────────────
+        //
+        // Its own arm of the row, and its own gesture: a plain DRAG (no long
+        // press — a handle is already an invitation, and waiting half a second
+        // on one reads as a dead row). The height is the row's own measured
+        // height, because a row WRAPS: the target has to be the row, not a
+        // standard 48dp that a two-line task would overshoot.
+        val density = LocalDensity.current
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(TODO_GRIP_WIDTH)
+                .height(with(density) { rowHeight.toDp().coerceAtLeast(1.dp) })
+                .zIndex(if (isDragged) 1f else 0f)
+                .pointerInput(id, enabled) {
+                    if (!enabled) return@pointerInput
+                    detectDragGestures(
+                        onDragStart = {
+                            if (rowHeight > 0f) drag.begin(id, index, rowHeight + gapPx)
+                        },
+                        onDrag = { change, amount ->
+                            change.consume()
+                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
+                        },
+                        onDragEnd = {
+                            val from = drag.fromIndex
+                            val to = drag.targetIndex(state.blockIds.lastIndex)
+                            if (from in 0..state.blockIds.lastIndex && from != to) {
+                                state.moveBlock(from, to)
+                            }
+                            drag.reset()
+                        },
+                        onDragCancel = { drag.reset() }
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                CurioIcons.DragHandle,
+                "Hold to move this row",
+                // The page's own ink, held back — a handle is furniture, not
+                // writing (and Unspecified only happens for a caller that did
+                // not say, which no caller does).
+                tint = if (ink == Color.Unspecified) MaterialTheme.colorScheme.onSurfaceVariant
+                else ink.copy(alpha = 0.34f),
+                size = 19.dp
+            )
+        }
     }
 }
 

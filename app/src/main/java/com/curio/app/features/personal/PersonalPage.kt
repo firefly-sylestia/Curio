@@ -51,6 +51,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +69,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -210,6 +212,12 @@ internal fun PersonalWritingPage(
     // it opens with the pen already down — and so does a checklist.
     var editing by remember(entryId) { mutableStateOf(isNew || checklistFirst) }
     var loaded by remember { mutableStateOf(isNew) }
+    /**
+     * v389d — DID THIS PAGE HAVE ANYTHING ON IT when it was opened? A page that
+     * DID can be saved EMPTY (the member deleted their words — see [shouldWrite]);
+     * one that never did is left alone rather than written as a blank entry.
+     */
+    var storedEmpty by remember(entryId) { mutableStateOf(true) }
     var saving by remember { mutableStateOf(false) }
     var createdAt by remember { mutableLongStateOf(0L) }
 
@@ -268,6 +276,7 @@ internal fun PersonalWritingPage(
             doc = decoded
             editor.replace(decoded)
             createdAt = existing.createdAtMillis
+            storedEmpty = decoded.isEmpty && existing.title.isBlank()
             onLoaded(existing)
             // v389 — WHICH SIDE AN EXISTING PAGE OPENS ON (user decision):
             // opening a journal from Home, from the list or from the Cabinet
@@ -338,15 +347,31 @@ internal fun PersonalWritingPage(
             )
         }
 
+    /**
+     * v389d — AN EMPTIED PAGE IS AN EDIT, NOT AN ABSENCE.
+     *
+     * Every write path here refused an empty body, which is right for a page
+     * nobody has written on yet — and wrong for one the member has just cleared:
+     * deleting all the words and leaving skipped the save entirely, so the next
+     * visit restored exactly what they had deleted (user report: "in book review
+     * or any page i can't leave the page blank after saving once, and each time
+     * i delete all text it keeps coming back when i exit"). So a write is
+     * allowed when there is something to write OR when the page HAD something
+     * before — [storedEmpty] is that fact, and it follows every save.
+     */
+    fun shouldWrite(body: PersonalDoc): Boolean =
+        !body.isEmpty || liveMeta.value().title.isNotBlank() || !storedEmpty
+
     fun saveNow() {
         val body = liveDoc.value
         val page = liveMeta.value()
-        if (body.isEmpty && page.title.isBlank()) return
+        if (!shouldWrite(body)) return
         saving = true
         scope.launch {
             val saved = writePage(body, page)
             entryId = saved.id
             createdAt = saved.createdAtMillis
+            storedEmpty = body.isEmpty && page.title.isBlank()
             saving = false
         }
     }
@@ -357,7 +382,7 @@ internal fun PersonalWritingPage(
     val pageNow = meta()
     LaunchedEffect(loaded, doc, pageNow) {
         if (!loaded) return@LaunchedEffect
-        if (doc.isEmpty && pageNow.title.isBlank()) return@LaunchedEffect
+        if (!shouldWrite(doc)) return@LaunchedEffect
         delay(700)
         saveNow()
     }
@@ -385,7 +410,7 @@ internal fun PersonalWritingPage(
         onDispose {
             val body = liveDoc.value
             val page = liveMeta.value()
-            if (body.isEmpty && page.title.isBlank()) return@onDispose
+            if (!shouldWrite(body)) return@onDispose
             flushScope.launch { writePage(body, page) }
         }
     }
@@ -433,8 +458,20 @@ internal fun PersonalWritingPage(
                 .maxByOrNull { it.value.bottom }
         }
     }
+    // v389d — THE TITLE IS REPORTED IN THE SCROLL'S OWN COORDINATES.
+    //
+    // A title reports where it sits inside the WRITING COLUMN, and the column is
+    // itself a child of the scrolling page — so the offsets above it (the small
+    // spacer and whatever [aboveCanvas] draws) were missing from every number,
+    // and the pinned bar therefore lit up a little early and, when tapped, took
+    // the member to the TOP of the page instead of to the heading it named (user
+    // report: "it should only show when it's swiped aways … also tapping it
+    // should take me to that title point not to the full top"). The canvas' own
+    // place in the scroll is measured here and added, so "scrolled past" and
+    // "go there" both mean the same scroll value the pin is judged against.
+    var canvasTop by remember { mutableFloatStateOf(0f) }
     val reportSectionLine: (String, String, Float, Float) -> Unit = { id, label, top, bottom ->
-        sectionLines[id] = PersonalSectionLine(label, top, bottom)
+        sectionLines[id] = PersonalSectionLine(label, top + canvasTop, bottom + canvasTop)
     }
     // A line the member deleted (or stopped being a title) stops being a place
     // to pin.
@@ -472,16 +509,22 @@ internal fun PersonalWritingPage(
             // enough (200ms) that the keyboard's own rise is the motion the eye
             // follows. Nothing is measured differently either: both sides fill
             // the same box, so no clip and no jump while the inset animates.
+            // v389d — AND THE TURN IS A FADE, NOT A SLIDE.
+            //
+            // The travel was the last thing that could still be seen moving in
+            // the wrong direction: `imePadding()` resizes this box WHILE the
+            // keyboard rises, so the vertical offset being animated (a fraction
+            // of the box's own height) was computed from a height that was
+            // changing under it — the page visibly ducked and jumped at exactly
+            // the moment the member was switching (user report: "the keyboard
+            // open really makes the eye view to pen buggy. like the animation
+            // shifts fir the page"). A cross-fade cannot be moved by a resize,
+            // so the keyboard is now the only thing that travels, and the two
+            // sides simply trade places.
             AnimatedContent(
                 targetState = editing,
                 transitionSpec = {
-                    (
-                        fadeIn(tween(200)) +
-                            slideInVertically(tween(240)) { height -> height / 40 }
-                        ) togetherWith (
-                        fadeOut(tween(150)) +
-                            slideOutVertically(tween(180)) { height -> -height / 60 }
-                        )
+                    fadeIn(tween(190)) togetherWith fadeOut(tween(150))
                 },
                 label = "personal-page-mode",
                 modifier = Modifier.fillMaxSize()
@@ -536,7 +579,11 @@ internal fun PersonalWritingPage(
                         aboveCanvas()
                         PersonalCanvas(
                             state = editor,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onGloballyPositioned { coordinates ->
+                                    canvasTop = coordinates.positionInParent().y
+                                },
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
                             onTitlePosition = reportSectionLine
                         )
