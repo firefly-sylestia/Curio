@@ -69,9 +69,14 @@ Undo pill, ~5 s**.
    after the picked file (it is the only name available for a brand-new book).
    The attach path never renames — flag this to the user before changing the
    door's behaviour (removing it would need confirmation).
-5. **Currently Reading, wired:** shelf books appear in the Cabinet's collection
-   with a correct count, and the chapter notes from the topic's Book Notes sheet
-   and the shelf's chapter page are provably one row (the `bookForCatalog` bridge).
+5. **Currently Reading: COUNT + LIST DONE (this slice).** "Curiying now" adds the
+   member's own shelf books that are part-way through (`readingBooks`), counted by
+   title against its saved members so nothing doubles, and `v2ReadingNowItems`
+   emits them as a "Your books" section inside that shelf level (additive — the
+   saved members keep their grid and their door).
+   STILL OPEN: the `bookForCatalog` bridge proof (chapter notes from the topic's
+   Book Notes sheet and from the shelf's chapter page being one row) — the
+   existing `ChapterNoteBridge` should already do this; needs a read-through.
 6. **The universal review:** one writing page per book holding the whole-book
    review, a floating "add chapter" button inserting a title-style chapter line
    into that same page, existing chapter reviews folded in at their markers when

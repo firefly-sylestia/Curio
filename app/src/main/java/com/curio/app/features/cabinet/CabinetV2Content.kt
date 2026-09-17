@@ -383,13 +383,28 @@ fun CabinetV2Content(navController: NavController) {
         }
         if (newCovers > 0) CabinetCoverCache.version.intValue++
     }
+    // v389 — the shelf's BOOKS are being read too. "Curiying now" counted only
+    // the members saved into its seeded collection, so a book the member had
+    // ADDED to the shelf and was part-way through was missing from the number
+    // (and from the shelf itself) — the reported wrong count. The extra books
+    // are counted by TITLE against the saved members, so a hearted book that is
+    // also on the shelf is not counted twice.
+    val readingBooks = remember(personalBooks) { personalBooks.filter { !it.isFinished } }
+    val readingNowExtra = remember(seededById, readingBooks) {
+        val saved = seededById["shelf:currently-reading"]?.members
+            ?.map { it.refName.trim().lowercase() }
+            ?.toSet()
+            ?: emptySet()
+        readingBooks.count { it.title.trim().lowercase() !in saved }
+    }
     val shelfCounts = remember(
         allLikes.size, likedTopics.size, entries.size, noteEntries.size, seededById,
-        personalJournals.size, personalBooks.size
+        personalJournals.size, personalBooks.size, readingNowExtra
     ) {
         mapOf(
             V2ShelfId.FAVORITES to likedTopics.size,
-            V2ShelfId.CURRENTLY_READING to (seededById["shelf:currently-reading"]?.members?.size ?: 0),
+            V2ShelfId.CURRENTLY_READING to
+                ((seededById["shelf:currently-reading"]?.members?.size ?: 0) + readingNowExtra),
             V2ShelfId.WANT_TO_READ to (seededById["shelf:want-to-read"]?.members?.size ?: 0),
             V2ShelfId.SAVED to entries.size,
             V2ShelfId.COMPLETED to likedTopics.size,
@@ -584,7 +599,11 @@ fun CabinetV2Content(navController: NavController) {
     }
     val heroSubtitle = when {
         selectionMode -> "Long-press cards to select"
-        openCollection != null -> "${openCollection.members.size} item${if (openCollection.members.size == 1) "" else "s"}"
+        openCollection != null -> {
+            val total = openCollection.members.size +
+                (if (openCollection.id == "shelf:currently-reading") readingNowExtra else 0)
+            "$total item${if (total == 1) "" else "s"}"
+        }
         openLevel == SHELF_LEVEL_FAVORITES -> "${likedTopics.size} liked topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_COMPLETED -> "${likedTopics.size} completed topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
@@ -768,7 +787,8 @@ fun CabinetV2Content(navController: NavController) {
             }
 
             when {
-                openCollection != null -> v2DetailItems(
+                openCollection != null -> {
+                v2DetailItems(
                     collection = openCollection,
                     entriesById = entriesById,
                     searching = searching,
@@ -791,6 +811,24 @@ fun CabinetV2Content(navController: NavController) {
                     onRename = { renameTarget = openCollection.id },
                     onDelete = { deleteTarget = openCollection.id }
                 )
+                // v389 — "Curiying now" also holds the member's OWN shelf books
+                // that are part-way through (additive: the collection's saved
+                // members keep their grid above and their door below).
+                if (openCollection.id == "shelf:currently-reading") {
+                    v2ReadingNowItems(
+                        books = readingBooks,
+                        searchQuery = searchQuery,
+                        onOpenBook = { id ->
+                            navController.navigate(CurioRoutes.bookDetail(id)) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onOpenShelf = {
+                            navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                        }
+                    )
+                }
+                }
                 // v3xx43 — FAVORITES = the topics you liked (the reveal
                 // heart), listed as topic rows; the media covers live in the
                 // Cupboard, so the two shelves are no longer identical.

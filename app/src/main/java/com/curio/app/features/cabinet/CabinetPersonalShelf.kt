@@ -151,6 +151,46 @@ internal fun LazyGridScope.v2PersonalWritingItems(
     }
 }
 
+/**
+ * v389 — "CURIYING NOW"'S OWN BOOKS.
+ *
+ * The shelf counted only the members saved into its seeded collection, so a
+ * book the member had ADDED to the shelf and was part-way through was missing
+ * from its number and from its grid — the reported wrong count. These are
+ * exactly those books: on the shelf, not finished yet.
+ *
+ * It is ADDITIVE: the collection's own saved members keep the grid above this
+ * and their door below it, so nothing that lived on that shelf lost its way in.
+ * Each tile is the personal shelf's own book tile, so a book reads the same in
+ * both places, and the heading opens the shelf for the whole list.
+ */
+internal fun LazyGridScope.v2ReadingNowItems(
+    books: List<PersonalBookEntity>,
+    searchQuery: String,
+    onOpenBook: (String) -> Unit,
+    onOpenShelf: () -> Unit
+) {
+    val needle = searchQuery.trim().lowercase()
+    val shown = books.filter {
+        needle.isEmpty() ||
+            it.title.lowercase().contains(needle) ||
+            it.author.lowercase().contains(needle)
+    }
+    if (shown.isEmpty()) return
+    item(key = "reading-now-head", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
+        PersonalShelfHeading(
+            title = "Your books",
+            caption = if (books.size == 1) "1 book" else "${books.size} books",
+            onClick = onOpenShelf
+        )
+    }
+    shown.forEach { book ->
+        item(key = "reading-now-book-${book.id}", contentType = "book") {
+            BookShelfTile(book = book, onClick = { onOpenBook(book.id) })
+        }
+    }
+}
+
 @Composable
 private fun PersonalShelfHeading(
     title: String,

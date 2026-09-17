@@ -26,6 +26,7 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Cabinet: "Curiying now" counts and lists the shelf books you are part-way through, instead of only the items saved onto that shelf.
 - Books: a file you add is COPIED into Curio's own storage, so the book keeps opening offline instead of dying with the picker's permission — and the file no longer takes the book's name (a book keeps the name it has).
 - Books: a book added from a file draws its own cover instead of trying to show the PDF as a picture.
 - Writing: the in-page photo is crisp now — it is loaded at the size it is drawn, with high-quality filtering, instead of being decoded small and stretched back up.
