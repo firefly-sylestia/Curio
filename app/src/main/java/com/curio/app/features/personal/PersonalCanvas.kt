@@ -1501,7 +1501,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         if (from == to) return
         if (from !in order.indices || to !in order.indices) return
         val id = order.removeAt(from)
-        order.add(to, id)
+        // v389d — removeAt shifts every index past the hole, so the target
+        // for a downward move has to be adjusted: [to] was counted against
+        // the ORIGINAL list, but the list is one shorter now. Without this,
+        // a row dragged one step down always landed two positions away (user
+        // report: "the todo rearrange works but also sometimes buggy" —
+        // "other items shuffle wrongly").
+        val adjustedTo = if (from < to) to - 1 else to
+        order.add(adjustedTo, id)
         onDocChanged(doc())
     }
 
@@ -1933,6 +1940,31 @@ internal fun PersonalCanvas(
         modifier = modifier.clickable(enabled = enabled) { state.focusLastLine() },
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+        // v389d — TWO SMALL OR HALF PHOTOS SHARE A ROW.
+        //
+        // Two consecutive non-PAGE photos that sit next to each other split
+        // the text wrapper's width between them, like the "side by side" the
+        // member asked for. The SECOND of each pair is flagged so the loop
+        // skips it as a standalone block.
+        val pairSkips = remember(state.blockIds) {
+            val ids = state.blockIds
+            val skips = mutableSetOf<String>()
+            var i = 0
+            while (i < ids.size - 1) {
+                val a = state.block(ids[i])
+                val b = state.block(ids[i + 1])
+                if (a?.isPhoto == true && b?.isPhoto == true &&
+                    state.photoSize(ids[i]) != PersonalPhotoSize.PAGE &&
+                    state.photoSize(ids[i + 1]) != PersonalPhotoSize.PAGE
+                ) {
+                    skips.add(ids[i + 1])
+                    i += 2
+                } else {
+                    i += 1
+                }
+            }
+            skips
+        }
         state.blockIds.forEachIndexed { index, id ->
             val block = state.block(id) ?: return@forEachIndexed
             // v389 — the blocks are KEYED by their own id. The to-do page can
@@ -2003,31 +2035,92 @@ internal fun PersonalCanvas(
                         )
                 ) {
                 if (block.isPhoto) {
-                    // v389 — A PHOTO CAN BE CARRIED TOO (user request: "similiar
-                    // to voive note reorder add for photo reorder too"). Exactly
-                    // the voice note's manner: press and hold, then drag — the
-                    // rows make room, a drop-line says where it lands, and the
-                    // photo's own tap-to-open stands down while it is in the
-                    // air (it reads LocalPersonalBlockCarried).
-                    PersonalMovableBlock(
-                        id = id,
-                        index = index,
-                        state = state,
-                        drag = rowDrag,
-                        enabled = enabled
-                    ) {
-                        PersonalPhotoBlock(
-                            uri = block.photo.orEmpty(),
-                            caption = state.caption(id),
-                            size = state.photoSize(id),
-                            ink = ink,
-                            accent = accent,
-                            enabled = enabled,
-                            onCaption = { state.setCaption(id, it) },
-                            onSize = { state.setPhotoSize(id, it) },
-                            onRemove = { state.removeBlock(id) },
-                            onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
-                        )
+                    // v389d — SIDE-BY-SIDE PHOTOS.
+                    //
+                    // Two consecutive small or half photos share the row,
+                    // splitting the text wrapper between them. The SECOND of
+                    // each pair was flagged by [pairSkips] and is skipped here;
+                    // the FIRST renders both photos in a Row. Two PAGE-size
+                    // photos never pair — each is the width of the page.
+                    if (pairSkips.contains(id)) return@key
+                    val nextIndex = index + 1
+                    val nextId = state.blockIds.getOrNull(nextIndex)
+                    val nextBlock = nextId?.let { state.block(it) }
+                    val isPaired = nextBlock?.isPhoto == true &&
+                        state.photoSize(id) != PersonalPhotoSize.PAGE &&
+                        state.photoSize(nextId) != PersonalPhotoSize.PAGE
+                    if (isPaired && nextBlock != null && nextId != null) {
+                        // The two photos share the text measure. Each keeps
+                        // its own carry — a held photo lifts out of the pair
+                        // and the other stays — and the Row's spacing keeps
+                        // them from touching.
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(Modifier.weight(1f)) {
+                                PersonalMovableBlock(
+                                    id = id, index = index, state = state,
+                                    drag = rowDrag, enabled = enabled
+                                ) {
+                                    PersonalPhotoBlock(
+                                        uri = block.photo.orEmpty(),
+                                        caption = state.caption(id),
+                                        size = state.photoSize(id),
+                                        paired = true,
+                                        ink = ink, accent = accent,
+                                        enabled = enabled,
+                                        onCaption = { state.setCaption(id, it) },
+                                        onSize = { state.setPhotoSize(id, it) },
+                                        onRemove = { state.removeBlock(id) },
+                                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                                    )
+                                }
+                            }
+                            Box(Modifier.weight(1f)) {
+                                PersonalMovableBlock(
+                                    id = nextId, index = nextIndex, state = state,
+                                    drag = rowDrag, enabled = enabled
+                                ) {
+                                    PersonalPhotoBlock(
+                                        uri = nextBlock.photo.orEmpty(),
+                                        caption = state.caption(nextId),
+                                        size = state.photoSize(nextId),
+                                        paired = true,
+                                        ink = ink, accent = accent,
+                                        enabled = enabled,
+                                        onCaption = { state.setCaption(nextId, it) },
+                                        onSize = { state.setPhotoSize(nextId, it) },
+                                        onRemove = { state.removeBlock(nextId) },
+                                        onOpen = { bounds -> onOpenPhoto(nextBlock.photo.orEmpty(), bounds) }
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // v389 — A PHOTO CAN BE CARRIED TOO (user request:
+                        // "similiar to voive note reorder add for photo reorder
+                        // too"). Exactly the voice note's manner: press and hold,
+                        // then drag — the rows make room, a drop-line says where
+                        // it lands, and the photo's own tap-to-open stands down
+                        // while it is in the air (it reads
+                        // LocalPersonalBlockCarried).
+                        PersonalMovableBlock(
+                            id = id, index = index, state = state,
+                            drag = rowDrag, enabled = enabled
+                        ) {
+                            PersonalPhotoBlock(
+                                uri = block.photo.orEmpty(),
+                                caption = state.caption(id),
+                                size = state.photoSize(id),
+                                ink = ink, accent = accent,
+                                enabled = enabled,
+                                onCaption = { state.setCaption(id, it) },
+                                onSize = { state.setPhotoSize(id, it) },
+                                onRemove = { state.removeBlock(id) },
+                                onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                            )
+                        }
                     }
                 } else if (block.isAudio) {
                     // v389 — a voice note in the page: the waveform is the block, and
@@ -2446,6 +2539,11 @@ private fun PersonalPhotoBlock(
     uri: String,
     caption: String,
     size: PersonalPhotoSize,
+    /**
+     * v389d — SIDE BY SIDE. A paired photo fills its own half of a shared row,
+     * rather than taking the full text measure at the size's usual fraction.
+     */
+    paired: Boolean = false,
     ink: Color,
     accent: Color,
     enabled: Boolean,
@@ -2478,7 +2576,7 @@ private fun PersonalPhotoBlock(
         modifier = Modifier
             // A FRACTION of the wrapper's width, so the print can never be
             // wider than the words it sits among.
-            .fillMaxWidth(size.fraction)
+            .fillMaxWidth(if (paired) 1f else size.fraction)
             // Shadow BEFORE the fill, and the fill OPAQUE — a translucent one
             // lets the shadow bleed through the print (see AGENTS rule 11).
             .shadow(5.dp, RoundedCornerShape(6.dp))
