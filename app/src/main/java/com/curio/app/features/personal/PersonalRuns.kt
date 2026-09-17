@@ -70,6 +70,42 @@ internal val PERSONAL_HIGHLIGHT_KEYS = listOf("amber", "rose", "sage", "sky")
 internal const val HIGHLIGHT_SHIFT = 9
 internal const val HIGHLIGHT_BITS = 0x0E00
 
+// ── v389 — THE FACE ───────────────────────────────────────────────────
+//
+// Two bits above the marker, giving FOUR faces: the page's own writing serif
+// (0 — so an old note is byte-for-byte the note it was), a sans, a mono and a
+// display serif. Same reasoning as [HIGHLIGHT_BITS]: the mask is one int per
+// character, the merge already splits runs by value, and a face is copied
+// around by every edit that copies the mask.
+
+/** The faces, in the order the menu lists them. Index 0 is the page's own. */
+internal val PERSONAL_FONT_KEYS = listOf("", "sans", "mono", "display")
+
+internal const val FONT_SHIFT = 12
+internal const val FONT_BITS = 0x3000
+
+/** The face a mask was set in — "" for the page's own. */
+internal fun fontKeyOf(mask: Int): String =
+    PERSONAL_FONT_KEYS.getOrNull((mask and FONT_BITS) shr FONT_SHIFT).orEmpty()
+
+/** The bits a face key means; 0 for the page's own, which is the default. */
+internal fun fontMaskFor(key: String?): Int {
+    val index = PERSONAL_FONT_KEYS.indexOf(key.orEmpty())
+    return (if (index < 0) 0 else index) shl FONT_SHIFT
+}
+
+/** A copy of [mask] with every character from [start] to [end] set in the face
+ *  [key] names. */
+internal fun maskApplyFont(mask: IntArray, start: Int, end: Int, key: String): IntArray {
+    if (end <= start) return mask
+    val bits = fontMaskFor(key)
+    val out = mask.copyOf()
+    for (i in start until end.coerceAtMost(out.size)) {
+        out[i] = (out[i] and FONT_BITS.inv()) or bits
+    }
+    return out
+}
+
 /** The pen a mask was written with: "" for none. */
 internal fun highlightKeyOf(mask: Int): String =
     PERSONAL_HIGHLIGHT_KEYS.getOrNull(((mask and HIGHLIGHT_BITS) shr HIGHLIGHT_SHIFT) - 1).orEmpty()
@@ -118,6 +154,7 @@ internal fun runsToMask(textLength: Int, runs: List<PersonalRun>): IntArray {
         if (run.checkbox) flags = flags or FLAG_CHECKBOX
         // The marker travels in the same int as the flags (see HIGHLIGHT_BITS).
         if (flags != 0) flags = flags or highlightMaskFor(run.highlight)
+        if (flags != 0) flags = flags or fontMaskFor(run.font)
         if (flags == 0) return@forEach
         for (i in start until end) mask[i] = mask[i] or flags
     }
@@ -150,7 +187,8 @@ internal fun maskToRuns(mask: IntArray): List<PersonalRun> {
                 small = flags and FLAG_SMALL != 0,
                 bullet = flags and FLAG_BULLET != 0,
                 checkbox = flags and FLAG_CHECKBOX != 0,
-                highlight = highlightKeyOf(flags)
+                highlight = highlightKeyOf(flags),
+                font = fontKeyOf(flags)
             )
         )
         i = j
@@ -185,7 +223,9 @@ internal fun maskAfterEdit(
      * already sat in (the same rule the flags follow), and `0` is the pen being
      * taken off, which a nullable Int says and a plain Int cannot.
      */
-    highlightOverride: Int? = null
+    highlightOverride: Int? = null,
+    /** v389 — the FACE the typed words are set in, on the same terms. */
+    fontOverride: Int? = null
 ): IntArray {
     val oldLength = oldText.length
     val newLength = newText.length
@@ -212,7 +252,9 @@ internal fun maskAfterEdit(
     // outright), then the tools switched off taken back out of it. The marker is
     // its own axis — a pen is not a bold.
     val typedFlags = ((if (armed != 0) 0 else inherited and ALL_FLAGS_MASK) and cleared.inv()) or armed
-    val typed = typedFlags or (highlightOverride ?: (inherited and HIGHLIGHT_BITS))
+    val typed = typedFlags or
+        (highlightOverride ?: (inherited and HIGHLIGHT_BITS)) or
+        (fontOverride ?: (inherited and FONT_BITS))
 
     val out = IntArray(newLength)
     for (i in 0 until prefix.coerceAtMost(newLength)) out[i] = mask.getOrZero(i)

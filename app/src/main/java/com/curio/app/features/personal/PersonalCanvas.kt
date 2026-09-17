@@ -116,6 +116,8 @@ import com.curio.app.data.newBlockId
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.GeomFontFamily
+import com.curio.app.ui.theme.SpaceMonoFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
 import com.curio.app.ui.theme.isCurioDarkTheme
 
@@ -230,6 +232,45 @@ internal fun PersonalAlign.toTextAlign(): TextAlign = when (this) {
     PersonalAlign.CENTER -> TextAlign.Center
     PersonalAlign.END -> TextAlign.End
     PersonalAlign.JUSTIFY -> TextAlign.Justify
+}
+
+/**
+ * v389 — A FACE, AS THE TEXT ENGINE WANTS IT.
+ *
+ * The four are what [PERSONAL_FONT_KEYS] names, and each is a family the app
+ * ALREADY bundles, chosen so the menu is four genuinely different voices rather
+ * than four weights of one: the page's own writing serif (Lora, by far the best
+ * reading face at writing size, and what every note written before this menu
+ * already is), a geometric sans for notes that are lists and fragments, a mono
+ * for anything with code or numbers in it, and the display serif the titles
+ * already wear.
+ *
+ * A TITLE still forces the display serif when no face was picked, because that
+ * is what the title tool has always meant; an explicit face wins, because a
+ * member who chose one meant it.
+ */
+internal fun personalFontFamilyOf(flags: Int): FontFamily? = when (fontKeyOf(flags)) {
+    "sans" -> GeomFontFamily
+    "mono" -> SpaceMonoFontFamily
+    "display" -> FrauncesFontFamily
+    else -> if (flags and FLAG_TITLE != 0) FrauncesFontFamily else null
+}
+
+/** The face's name as the menu shows it. */
+internal fun personalFontLabel(key: String): String = when (key) {
+    "sans" -> "Sans"
+    "mono" -> "Mono"
+    "display" -> "Display"
+    else -> "Serif"
+}
+
+/** The family the menu previews that name in — the menu is the four faces, so
+ *  the row itself is set in the face it is offering. */
+internal fun personalFontPreview(key: String): FontFamily = when (key) {
+    "sans" -> GeomFontFamily
+    "mono" -> SpaceMonoFontFamily
+    "display" -> FrauncesFontFamily
+    else -> WritingFontFamily
 }
 
 internal fun personalHighlightLabel(key: String): String = when (key) {
@@ -545,7 +586,7 @@ internal fun personalAnnotated(
                         flags and FLAG_SMALL != 0 -> smallSize
                         else -> TextUnit.Unspecified
                     },
-                    fontFamily = if (flags and FLAG_TITLE != 0) FrauncesFontFamily else null,
+                    fontFamily = personalFontFamilyOf(flags),
                     fontWeight = when {
                         flags and FLAG_BOLD != 0 -> FontWeight.Bold
                         flags and FLAG_TITLE != 0 -> FontWeight.SemiBold
@@ -711,6 +752,51 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      */
     var armedHighlight by mutableStateOf<Int?>(null)
         private set
+
+    /** v389 — THE FACE SWITCHED ON FOR WHAT IS TYPED NEXT, with [armedHighlight]'s
+     *  own meaning of null ("unchanged"), so the page's own face can be chosen
+     *  deliberately as well as inherited. */
+    var armedFont by mutableStateOf<Int?>(null)
+        private set
+
+    /** The face the caret sits in — "" for the page's own. What the dock's font
+     *  menu ticks. */
+    fun fontOfFocused(): String {
+        val id = focusedId ?: return fontKeyOf(armedFont ?: 0)
+        val blockMask = mask(id)
+        val selection = selections[id]
+        val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
+        return fontKeyOf(caretFlags(id)).ifEmpty {
+            if (selection?.collapsed != false && at == 0) fontKeyOf(armedFont ?: 0) else ""
+        }
+    }
+
+    /**
+     * v389 — THE FONT MENU.
+     *
+     * Exactly the marker's manner: a selection is re-set outright, and with the
+     * caret alone the face becomes the style of the next words typed — except
+     * when they are already set in that face, which chooses the page's own
+     * again, so the menu is a toggle and not a one-way door.
+     */
+    fun applyFont(key: String) {
+        val id = focusedId ?: run {
+            armedFont = fontMaskFor(key)
+            return
+        }
+        val block = blocks[id] ?: return
+        val selection = selections[id]
+        if (selection != null && !selection.collapsed) {
+            val start = selection.min.coerceIn(0, block.text.length)
+            val end = selection.max.coerceIn(0, block.text.length)
+            masks[id] = maskApplyFont(mask(id), start, end, key)
+            armedFont = null
+            onDocChanged(doc())
+            return
+        }
+        val current = fontOfFocused()
+        armedFont = if (current == key) fontMaskFor("") else fontMaskFor(key)
+    }
 
     /** The pen the caret sits in right now — what the dock's marker button
      *  lights from and names. "" for none. */
@@ -930,7 +1016,9 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 splitOnNewlines(id, value)
                 return
             }
-            masks[id] = maskAfterEdit(old.text, newText, mask(id), armed, armedOff, armedHighlight)
+            masks[id] = maskAfterEdit(
+                old.text, newText, mask(id), armed, armedOff, armedHighlight, armedFont
+            )
             blocks[id] = old.copy(text = newText)
             // A pending tool has now been used: what follows continues in the
             // style just typed, so the buttons stop being "pending".
@@ -939,6 +1027,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // The pen is consumed the same way — the words just typed wear it
             // and the pen after them is whatever they wear.
             if (armedHighlight != null) armedHighlight = null
+            if (armedFont != null) armedFont = null
         }
         selections[id] = value.selection
         compositions[id] = value.composition
@@ -1449,7 +1538,8 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // character was written with is its own and rides across untouched,
             // or a marked line would come out of an Enter with its marker gone.
             IntArray(afterText.length) { i ->
-                headFlags or (maskBefore.getOrElse(caretIndex + i) { 0 } and HIGHLIGHT_BITS)
+                headFlags or
+                    (maskBefore.getOrElse(caretIndex + i) { 0 } and (HIGHLIGHT_BITS or FONT_BITS))
             }
         } else {
             maskBefore.copyOfRange(caretIndex, block.text.length)
@@ -2540,6 +2630,53 @@ internal fun PersonalToolDock(
             ) {
                 StrikeGlyph()
             }
+            // v389 — THE FACE. Four voices the app already bundles, one tap
+            // from a menu that is set IN each of them, because a font menu
+            // written in one font is a list of words (user request: "the font
+            // chnage … add in the universal tool bar").
+            Box {
+                var fontMenuOpen by remember { mutableStateOf(false) }
+                val face = state.fontOfFocused()
+                PersonalToolButton(
+                    label = "Font: ${personalFontLabel(face)}",
+                    // Lit only when a face was actually CHOSEN: the page's own
+                    // serif is not a setting, it is where a line starts.
+                    active = face.isNotEmpty(),
+                    accent = accentInk, ink = ink,
+                    onClick = { fontMenuOpen = true }
+                ) {
+                    FontGlyph(face)
+                }
+                DropdownMenu(
+                    expanded = fontMenuOpen,
+                    onDismissRequest = { fontMenuOpen = false }
+                ) {
+                    PERSONAL_FONT_KEYS.forEach { key ->
+                        DropdownMenuItem(
+                            text = {
+                                // Set in the face it offers — the preview and the
+                                // result are the same bytes.
+                                Text(
+                                    personalFontLabel(key),
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontFamily = personalFontPreview(key)
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            trailingIcon = {
+                                if (face == key) {
+                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                                }
+                            },
+                            onClick = {
+                                state.applyFont(key)
+                                fontMenuOpen = false
+                            }
+                        )
+                    }
+                }
+            }
             // v389 — THE MARKER PEN, the first tool in the dock that is a
             // COLOUR. It follows the bullet tool's manner exactly, because that
             // is the manner this dock already taught the member: the first tap
@@ -2903,6 +3040,27 @@ private fun MarkerMenuLabel(text: String) {
 /** Which of the four alignments a glyph draws. One enum rather than a
  *  `center: Boolean`, which could never say "right" let alone "justify". */
 internal enum class AlignKind { START, CENTER, END, JUSTIFY }
+
+/**
+ * THE FONT BUTTON is a specimen: "Aa" drawn in the face the next words will be
+ * set in, so the dock answers "which font?" before the menu is even opened.
+ *
+ * The sample is deliberately short — two characters, at label size. A preview
+ * long enough to be readable is also long enough to change the dock's own
+ * layout as the face changes, and a dock that twitches when a font is picked
+ * reads as a bug rather than as an effect.
+ */
+@Composable
+private fun FontGlyph(key: String) {
+    Text(
+        text = "Aa",
+        style = MaterialTheme.typography.labelLarge.copy(
+            fontFamily = personalFontPreview(key),
+            fontWeight = FontWeight.Medium
+        ),
+        color = LocalContentColor.current
+    )
+}
 
 /**
  * The alignment tools draw their own glyph (four rules), so the dock never

@@ -63,7 +63,17 @@ data class PersonalRun(
      * rewriting anybody's notes, and an unseen key degrades to no marker rather
      * than to a wrong colour.
      */
-    val highlight: String = ""
+    val highlight: String = "",
+    /**
+     * v389 — THE FACE this stretch of words is set in: one of
+     * [PERSONAL_FONT_KEYS], or "" for the page's own writing face.
+     *
+     * A key again, and for the same reason as [highlight]: the family is chosen
+     * where it is painted, so a saved note names a CHOICE ("mono") rather than
+     * a file — and a build that does not know the key sets the page's own face,
+     * which is a note that looks plain, never a note that looks broken.
+     */
+    val font: String = ""
 )
 
 /** Alignment of one block's paragraph. */
@@ -305,6 +315,8 @@ object PersonalDocCodec {
                 // v389 — the marker pen, written only when a pen is down, so an
                 // unmarked note is byte-for-byte what it was before.
                 if (run.highlight.isNotEmpty()) r.addProperty("g", run.highlight)
+                // v389 — the face, written only when one was chosen.
+                if (run.font.isNotEmpty()) r.addProperty("f", run.font)
                 runs.add(r)
             }
             b.add("runs", runs)
@@ -343,7 +355,11 @@ object PersonalDocCodec {
                     // decodes as unmarked too rather than throwing, because
                     // [personalHighlightInk] answers "" with the default pen and
                     // a wrong colour is worse than no colour.
-                    highlight = r.str("g")
+                    highlight = r.str("g"),
+                    // v389 — absent on an older note (the page's own face), and
+                    // an unknown key falls back to the same place rather than
+                    // throwing away the whole run.
+                    font = r.str("f")
                 ).takeIf { it.end > it.start }
             }.orEmpty()
             PersonalBlock(
