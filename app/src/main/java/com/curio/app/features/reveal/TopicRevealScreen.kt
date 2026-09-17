@@ -136,6 +136,7 @@ import kotlinx.coroutines.Dispatchers
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.data.newPersonalBookId
 // Aliased: this file's own `chapterNoteSpans` / `chapterNotes` locals hold the
 // AppPreferences maps, and a local always shadows an import — the bridge's
 // converters have to be callable next to them.
@@ -3144,15 +3145,58 @@ private fun chapterDisplayLabel(number: Int, title: String): String {
 @Composable
 private fun CabinetShelfToggleChips(
     context: Context,
+    topicId: String,
     topicName: String,
+    byline: String,
     categoryId: CategoryId,
     ink: Color,
     onSurface: Color,
     surface: Color
 ) {
     val haptics = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
     // Reactive: recomposes whenever a shelf toggle writes collections.
     val collections = AppPreferences.collectionsState
+
+    /**
+     * v389 — "CURIYING NOW" PUTS THE BOOK ON YOUR OWN SHELF TOO (user request:
+     * "from the bottom sheet book detail view when i tap curiying now it should
+     * also appear in my shelf too").
+     *
+     * The Cabinet's shelf and the member's shelf were two unrelated stores: the
+     * toggle filed the TOPIC into "Curiying now" and nothing into My shelf — so
+     * Home's shelf never showed the book, and this very sheet's chapter notes
+     * had no book to attach to (the shelf bridge looks a book up BY CATALOG ID,
+     * see the bridge above). Adding is ADDITIVE on purpose: taking the topic
+     * back out of "Curiying now" must never delete a book the member is reading
+     * or writing in.
+     */
+    fun shelveBook() {
+        val id = newPersonalBookId()
+        scope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val already = PersonalRepositoryHolder.repo.books().any {
+                        (topicId.isNotBlank() && it.catalogId == topicId) ||
+                            it.title.trim().equals(topicName.trim(), ignoreCase = true)
+                    }
+                    if (!already) {
+                        val now = System.currentTimeMillis()
+                        PersonalRepositoryHolder.repo.saveBook(
+                            PersonalBookEntity(
+                                id = id,
+                                title = topicName,
+                                author = byline,
+                                catalogId = topicId,
+                                createdAtMillis = now,
+                                updatedAtMillis = now
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
     fun inShelf(id: String): Boolean = collections.firstOrNull { it.id == id }
         ?.members?.any {
             it.kind == CurioCollectionMember.MemberKind.TOPIC &&
@@ -3170,8 +3214,12 @@ private fun CabinetShelfToggleChips(
             active = inShelf("shelf:currently-reading"),
             ink = ink, onSurface = onSurface, surface = surface,
             onClick = {
+                // Read the chip's own state BEFORE the toggle writes it: only
+                // the ADDING direction shelves the book.
+                val wasOn = inShelf("shelf:currently-reading")
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                 AppPreferences.toggleShelfTopic(context, "shelf:currently-reading", categoryId, topicName)
+                if (!wasOn && categoryId == CategoryId.BOOKS) shelveBook()
             }
         )
         ShelfToggleChip(
@@ -3331,18 +3379,26 @@ private fun BookNotesSheet(
     var pendingWrite by remember(topic.id) {
         mutableStateOf<Pair<Int, Pair<String, List<TextSpan>>>?>(null)
     }
+    // v389 — REACTIVE, in two effects. The link can be BORN while this sheet is
+    // open — tapping "Curiying now" creates the shelf book (see
+    // CabinetShelfToggleChips) — and reading the link ONCE, on the way in, was
+    // how a book added from here stayed invisible to the sheet that added it
+    // (its chapter notes had nothing to attach to). The notes collector follows
+    // whichever book is linked, so it starts on its own the moment there is one.
     LaunchedEffect(topic.id) {
-        val linked = withContext(Dispatchers.IO) {
-            runCatching { PersonalRepositoryHolder.repo.bookForCatalog(topic.id) }.getOrNull()
+        runCatching {
+            PersonalRepositoryHolder.repo.observeBooks().collect { books ->
+                shelfBook = books.firstOrNull { it.catalogId == topic.id }
+            }
         }
-        shelfBook = linked
-        if (linked != null) {
-            runCatching {
-                PersonalRepositoryHolder.repo.observeBookNotes(linked.id).collect { list ->
-                    shelfNotes = list.mapNotNull { note ->
-                        note.chapterIndex?.let { index -> index to note }
-                    }.toMap()
-                }
+    }
+    LaunchedEffect(shelfBook?.id) {
+        val linked = shelfBook ?: return@LaunchedEffect
+        runCatching {
+            PersonalRepositoryHolder.repo.observeBookNotes(linked.id).collect { list ->
+                shelfNotes = list.mapNotNull { note ->
+                    note.chapterIndex?.let { index -> index to note }
+                }.toMap()
             }
         }
     }
@@ -3555,7 +3611,9 @@ private fun BookNotesSheet(
             Spacer(Modifier.height(14.dp))
             CabinetShelfToggleChips(
                 context = context,
+                topicId = topic.id,
                 topicName = topic.name,
+                byline = topic.byline,
                 categoryId = cat.id,
                 ink = ink,
                 onSurface = onSurface,
@@ -4844,7 +4902,9 @@ private fun AlbumNotesSheet(
             Spacer(Modifier.height(12.dp))
             CabinetShelfToggleChips(
                 context = context,
+                topicId = topic.id,
                 topicName = topic.name,
+                byline = topic.byline,
                 categoryId = cat.id,
                 ink = ink,
                 onSurface = onSurface,
@@ -5703,7 +5763,9 @@ private fun EpisodeNotesSheet(
             // v3xx33 — Cabinet shelf toggles: Curiying now / Want to read.
             CabinetShelfToggleChips(
                 context = context,
+                topicId = topic.id,
                 topicName = topic.name,
+                byline = topic.byline,
                 categoryId = cat.id,
                 ink = ink,
                 onSurface = onSurface,

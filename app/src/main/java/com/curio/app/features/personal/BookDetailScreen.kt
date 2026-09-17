@@ -237,11 +237,23 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // on (the seed runs ONCE, when the notes first arrive, so it can never
     // override a toggle they just made).
     var editing by remember(bookId) { mutableStateOf(true) }
-    var modeSeeded by remember(bookId) { mutableStateOf(false) }
-    LaunchedEffect(notes) {
-        if (modeSeeded) return@LaunchedEffect
-        modeSeeded = true
-        if (notes.isNotEmpty()) editing = false
+    // v389 — the seed keeps FOLLOWING the shelf until the member touches the
+    // switch, which is what makes it right on a slow first read: `notes` is a
+    // FLOW, so it emits an empty list first and the real rows a moment later,
+    // and deciding on that first emission read "nothing written" before
+    // anything had been read — a book WITH writing still opened as the book
+    // view (user report: "why i picked for book in eye it doesnt show that",
+    // and "similar to journal opening in view do the same for saved books
+    // too"). It also asks for actual WRITING rather than for a row: a review
+    // that was opened and left empty is nothing to read back, and a book with
+    // nothing written opens with the pen down exactly like a journal page.
+    var modeTouched by remember(bookId) { mutableStateOf(false) }
+    LaunchedEffect(notes, book) {
+        if (modeTouched) return@LaunchedEffect
+        // Wait for the book row itself: "has writing" is a question for the
+        // store, and it is only worth asking once the store has answered.
+        if (book == null) return@LaunchedEffect
+        editing = notes.none { !it.doc.isEmpty }
     }
 
     Column(
@@ -257,7 +269,12 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             subtitle = current?.author.orEmpty().ifBlank { "Your book" },
             onBack = { navController.popBackStack() },
             action = {
-                PersonalModeSwitch(editing = editing, onToggleMode = { editing = it })
+                PersonalModeSwitch(
+                    editing = editing,
+                    // The member's own toggle wins from here on — the seed above
+                    // never overrides a side they have chosen.
+                    onToggleMode = { modeTouched = true; editing = it }
+                )
             }
         )
 

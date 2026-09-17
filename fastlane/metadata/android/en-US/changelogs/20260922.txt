@@ -28,6 +28,9 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Books: a saved book opens the way a journal does — the reading side when it has writing and the pen when it has none (the shelf was being asked before it had answered, so a book with writing still opened as the book view).
+- To-do: picking a row up to move it no longer fights the swipe — a carried row cannot also be swiped off the list, and a task that wraps onto two lines counts for its own height, so the list lands where your finger put it.
+- Cabinet: tapping "Curiying now" on a book also puts it on your own shelf, so it shows up in My shelf on Home and the book's chapter notes attach to it — taking it back out of the shelf never deletes the book.
 - Writing: the blank part of a book or chapter review starts the writing — tap the empty space and the caret and the keyboard follow, instead of the page sitting there dead.
 - Books: "Add chapter" offers the book's own chapter list (its number and its name) and drops the one you pick straight in, instead of handing you a blank heading to type.
 - Journals: opening a saved journal lands on the reading side, while a page with nothing written on it still opens ready to write.

@@ -43,7 +43,6 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * v389 — A TO-DO ROW'S OWN GESTURES: pick it up, carry it, or swipe it away.
@@ -98,6 +97,26 @@ internal class PersonalRowDragState {
     var stride: Float = 0f
         private set
 
+    /**
+     * v389 — EVERY ROW'S OWN HEIGHT, by row id.
+     *
+     * A to-do row WRAPS: a two-line task is twice the height of a one-line one,
+     * so a list's slots are not equal and ONE uniform `stride` for the whole list
+     * is what made a reorder of uneven rows land a place early or late — the
+     * finger had travelled past a tall row without the list noticing, or the list
+     * stepped before the finger had really cleared a short one (user report: "the
+     * todo rearrange works but also sometimes buggy"). Written from each row's own
+     * layout pass, read only by the gesture.
+     */
+    private val rowHeights = mutableMapOf<String, Float>()
+
+    fun measure(id: String, height: Float) {
+        if (height > 0f) rowHeights[id] = height
+    }
+
+    /** [id]'s measured height, or the carried row's own slot before it is known. */
+    private fun heightOf(id: String): Float = rowHeights[id] ?: stride
+
     val isDragging: Boolean get() = draggedId != null
 
     fun begin(id: String, index: Int, slotStride: Float) {
@@ -108,11 +127,31 @@ internal class PersonalRowDragState {
         stride = slotStride.coerceAtLeast(1f)
     }
 
-    fun dragBy(amountY: Float, lastIndex: Int) {
+    /**
+     * The finger moved [amountY] with [ids] as the list in its current order.
+     *
+     * Each step is charged the height of the row being PASSED — never less than
+     * the carried row's own slot — so crossing a wrapped, two-line task costs
+     * two lines' travel and the list steps exactly when the eye says it should.
+     * With equal rows this is the plain "half a slot per step" the list always
+     * had; with uneven ones it is the whole reason it now lands where the finger
+     * put it.
+     */
+    fun dragBy(amountY: Float, ids: List<String>, lastIndex: Int) {
         travel.floatValue += amountY
-        steps = (travel.floatValue / stride).roundToInt().let { raw ->
-            (fromIndex + raw).coerceIn(0, lastIndex) - fromIndex
+        val travel = travel.floatValue
+        val down = travel > 0f
+        var index = fromIndex
+        var spent = 0f
+        while ((down && index < lastIndex) || (!down && travel < 0f && index > 0)) {
+            val neighbour = ids.getOrElse(if (down) index + 1 else index - 1) { "" }
+            val cost = heightOf(neighbour).coerceAtLeast(stride)
+            val remaining = if (down) travel - spent else -travel - spent
+            if (remaining < cost / 2f) break
+            spent += cost
+            index += if (down) 1 else -1
         }
+        steps = index - fromIndex
     }
 
     fun targetIndex(lastIndex: Int): Int = (fromIndex + steps).coerceIn(0, lastIndex)
@@ -203,6 +242,10 @@ internal fun PersonalTodoRow(
             .onSizeChanged {
                 if (it.height > 0) rowHeight = it.height.toFloat()
                 if (it.width > 0) rowWidth = it.width.toFloat()
+                // The list needs to know how TALL each of its rows is, not just
+                // this one — a reorder is measured against the rows it passes
+                // (see PersonalRowDragState.dragBy).
+                drag.measure(id, it.height.toFloat())
             }
             .zIndex(if (isDragged) 1f else 0f)
             .graphicsLayer {
@@ -228,7 +271,7 @@ internal fun PersonalTodoRow(
                         },
                         onDrag = { change, amount ->
                             change.consume()
-                            drag.dragBy(amount.y, state.blockIds.lastIndex)
+                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
                         },
                         onDragEnd = {
                             val from = drag.fromIndex
@@ -246,25 +289,39 @@ internal fun PersonalTodoRow(
                 if (!enabled) Modifier
                 else Modifier.pointerInput(id, enabled) {
                     detectHorizontalDragGestures(
-                        onDragStart = { swipeRaw.floatValue = 0f },
+                        // v389 — A ROW BEING CARRIED UP OR DOWN IS NOT BEING
+                        // SWIPED. Both detectors sat on the same row, so one
+                        // gesture could satisfy both: a reorder with a sideways
+                        // wobble in it also dragged the row off the list, and a
+                        // swipe could nudge the order on its way out. The
+                        // long-press drag claims the gesture, and this one stands
+                        // down for as long as it holds it (user report: "the
+                        // todo rearrange works but also sometimes buggy").
+                        onDragStart = { if (!drag.isDragging) swipeRaw.floatValue = 0f },
                         onHorizontalDrag = { change, amount ->
-                            change.consume()
-                            swipeRaw.floatValue += amount
+                            if (!drag.isDragging) {
+                                change.consume()
+                                swipeRaw.floatValue += amount
+                            }
                         },
                         onDragEnd = {
-                            val gone = rowWidth > 0f &&
-                                abs(swipeRaw.floatValue) > rowWidth * SWIPE_AWAY_FRACTION
-                            val from = swipeRaw.floatValue
-                            if (gone) {
+                            if (drag.isDragging) {
                                 swipeRaw.floatValue = 0f
-                                state.removeRow(id)
-                            } else if (from != 0f) {
-                                swipeRaw.floatValue = 0f
-                                settling = true
-                                scope.launch {
-                                    settle.snapTo(from)
-                                    settle.animateTo(0f, tween(190))
-                                    settling = false
+                            } else {
+                                val gone = rowWidth > 0f &&
+                                    abs(swipeRaw.floatValue) > rowWidth * SWIPE_AWAY_FRACTION
+                                val from = swipeRaw.floatValue
+                                if (gone) {
+                                    swipeRaw.floatValue = 0f
+                                    state.removeRow(id)
+                                } else if (from != 0f) {
+                                    swipeRaw.floatValue = 0f
+                                    settling = true
+                                    scope.launch {
+                                        settle.snapTo(from)
+                                        settle.animateTo(0f, tween(190))
+                                        settling = false
+                                    }
                                 }
                             }
                         },
