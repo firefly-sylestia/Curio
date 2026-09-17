@@ -262,7 +262,7 @@ internal fun ChecklistPreview(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                TodoGlyph(active = row.checked, size = 14.dp)
+                TodoGlyph(active = row.checked, iconSize = 14.dp)
                 Text(
                     row.text,
                     style = MaterialTheme.typography.bodyMedium,

@@ -67,6 +67,7 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -93,6 +94,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -1318,7 +1320,7 @@ internal fun PersonalCanvas(
     // v389 — one drag for the whole list: the to-do page's rows share it, so
     // the row under the finger and the rows it passes agree about one gesture.
     val rowDrag = remember { PersonalRowDragState() }
-    val selectionWash = LocalTextSelectionColors.current.background
+    val selectionWash = LocalTextSelectionColors.current.backgroundColor
     // v389 — SELECT ALL MEANS THE PAGE (see [PersonalEditorState.selectPage]).
     // The platform's toolbar keeps its own look and every one of its actions;
     // only what "Select all" DOES changes, and Copy is re-pointed with it so the
@@ -2198,10 +2200,12 @@ internal fun PersonalToolDock(
  * already a row.
  */
 @Composable
-internal fun TodoGlyph(active: Boolean, size: Dp = 19.dp) {
+internal fun TodoGlyph(active: Boolean, iconSize: Dp = 19.dp) {
     val ink = LocalContentColor.current
     val onFill = MaterialTheme.colorScheme.surface
-    androidx.compose.foundation.Canvas(modifier = Modifier.size(size)) {
+    // NB: the Canvas parameter must NOT be named `size` — it would shadow
+    // DrawScope.size, which the geometry below reads (see AGENTS rule 7).
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(iconSize)) {
         val stroke = 1.7f.dp.toPx()
         val side = size.minDimension * 0.80f
         val left = (size.width - side) / 2f

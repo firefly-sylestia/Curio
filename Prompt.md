@@ -2564,3 +2564,6 @@ also in the post topic screen the choose a topic area gets hidden as it's not on
 
 ## next prompt 
 and importantly for the profile social avatars, all of them are bad like the black is the worse and also all of the design is bad and the eyes is same and also very weird too the eye should be different per individual matching the style. fix redesign all of them properly
+
+## next promot
+see if the previous prompts are implemented if so makr them pass and do the thing, then in home screen the pages and my shelf they are caring a backgroud or something which i ca ntoice, also the journal card and books cards they dont wear the aceen like the pages and  my shelf do so fix that, also make the journl date darker shade please, 

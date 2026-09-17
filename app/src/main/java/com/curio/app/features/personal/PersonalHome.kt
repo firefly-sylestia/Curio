@@ -214,7 +214,7 @@ fun CreateEntrySheet(
                 body = "Check off tasks as you go",
                 accent = personalAccent(),
                 onClick = onTodoList,
-                drawn = { TodoGlyph(active = false, size = 20.dp) }
+                drawn = { TodoGlyph(active = false, iconSize = 20.dp) }
             )
         }
     }
