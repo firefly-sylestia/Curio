@@ -1,69 +1,39 @@
 package com.curio.app.features.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.OnlineAccount
-import com.curio.app.data.supabase.SocialApi
-import com.curio.app.features.community.AvatarPickerIcon
-import com.curio.app.navigation.CurioRoutes
+import com.curio.app.features.community.SocialConfirmDialog
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioDialogActionButtonColors
-import com.curio.app.ui.theme.curioDialogActionColor
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.launch
@@ -72,9 +42,10 @@ import kotlinx.coroutines.launch
  * ONLINE MODE — the account page for Curio's online layer.
  *
  * Signed out it is the email/password form (sign in + create account);
- * signed in it shows the account and the Online Mode switch. The switch is
- * the contract the rest of the online work hangs off: with it off, Curio
- * behaves exactly like the local-only app, and Room stays the source of
+ * signed in it shows the account, the Social tab switch, the member's own
+ * privacy rules ([SocialPrivacyOptions]) and the Online Mode switch. The
+ * switch is the contract the rest of the online work hangs off: with it off,
+ * Curio behaves exactly like the local-only app, and Room stays the source of
  * truth for everything.
  *
  * Text only by design — captures' media never leaves the device, which is
@@ -85,15 +56,13 @@ fun OnlineModeScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val account = OnlineAccount.state
-    var username by rememberSaveable { mutableStateOf(AppPreferences.getUsername(context)) }
-    var avatarStyle by rememberSaveable { mutableStateOf(AppPreferences.getSocialAvatarStyle(context)) }
     val wide = windowWidthSizeClass().isWide
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
-
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var revealPassword by rememberSaveable { mutableStateOf(false) }
+    // Signing out drops the session and takes Online mode with it, so it asks
+    // first instead of firing on the tap.
+    var confirmingSignOut by remember { mutableStateOf(false) }
+    var signingOut by remember { mutableStateOf(false) }
     // The switch reads the OBSERVABLE mirror (seeded in AppPreferences
     // .initThemeMode), so signing in / out — which flips the same pref through
     // OnlineAccount — moves it here too. Before it was a local copy synced off
@@ -155,161 +124,38 @@ fun OnlineModeScreen(navController: NavController) {
                 SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         if (account.signedIn) {
-                            SettingsOptionInfoRow(
-                                CurioIcons.Person,
-                                account.email ?: "Signed in",
-                                "Curio account"
-                            )
-                            SettingsOptionDivider()
-                            OnlineAuthField(
-                                placeholder = "Username (friends see this)",
-                                value = username,
-                                enabled = !account.busy,
-                                isPassword = false,
-                                revealed = false,
-                                onValueChange = { username = it.removePrefix("@") }
-                            )
-                            TextButton(
-                                onClick = {
-                                    val token = account.session?.accessToken ?: return@TextButton
-                                    scope.launch {
-                                        SocialApi.updateUsername(token, username).fold(
-                                            onSuccess = { AppPreferences.setUsername(context, username) },
-                                            onFailure = { /* Online account owns safe auth messaging. */ }
-                                        )
-                                    }
-                                },
-                                enabled = !account.busy && username.trim().length in 3..24,
-                                colors = ButtonDefaults.textButtonColors(
-                                    contentColor = curioDialogActionColor()
-                                ),
-                                modifier = Modifier.padding(start = 12.dp, bottom = 4.dp)
-                            ) { Text("Save username") }
-                            SettingsOptionDivider()
-                            Text(
-                                "Profile icon",
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier.padding(start = 16.dp, top = 10.dp)
-                            )
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-                            ) {
-                                items((0..15).toList()) { style ->
-                                    AvatarPickerIcon(style, style == avatarStyle) {
-                                        avatarStyle = style
-                                        AppPreferences.setSocialAvatarStyle(context, style)
-                                        account.session?.accessToken?.let { token ->
-                                            scope.launch { SocialApi.updateAvatarStyle(token, style) }
-                                        }
-                                    }
-                                }
+                            Column(modifier = Modifier.padding(14.dp)) {
+                                CurioAccountIdentityCard(email = account.email)
                             }
                             SettingsOptionDivider()
                             SettingsOptionRow(
                                 icon = CurioIcons.Close,
                                 title = "Sign out",
                                 subtitle = "Your captures stay on this device",
-                                onClick = { scope.launch { OnlineAccount.signOut(context) } }
+                                onClick = { confirmingSignOut = true }
                             )
                         } else {
-                            OnlineAuthField(
-                                placeholder = "Email",
-                                value = email,
-                                enabled = !account.busy,
-                                isPassword = false,
-                                revealed = false,
-                                onValueChange = { email = it }
-                            )
-                            SettingsOptionDivider()
-                            OnlineAuthField(
-                                placeholder = "Password",
-                                value = password,
-                                enabled = !account.busy,
-                                isPassword = true,
-                                revealed = revealPassword,
-                                revealLabel = if (revealPassword) "Hide password" else "Show password",
-                                onToggleReveal = { revealPassword = !revealPassword },
-                                onValueChange = { password = it }
-                            )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 6.dp, bottom = 10.dp)
-                            ) {
-                                Button(
-                                    onClick = {
-                                        scope.launch {
-                                            if (OnlineAccount.signIn(context, email, password)) {
-                                                password = ""
-                                            }
-                                        }
-                                    },
-                                    enabled = !account.busy && email.trim().isNotEmpty() && password.isNotEmpty(),
-                                    shape = RoundedCornerShape(50),
-                                    colors = curioDialogActionButtonColors(),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(
-                                        text = if (account.busy) "Signing in…" else "Sign in",
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                    )
-                                }
-                                TextButton(
-                                    onClick = {
-                                        scope.launch { OnlineAccount.signUp(context, email, password) }
-                                    },
-                                    enabled = !account.busy && email.trim().isNotEmpty() && password.isNotEmpty(),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = curioDialogActionColor()
-                                    )
-                                ) {
-                                    Text(
-                                        text = "Create account",
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    )
-                                }
-                            }
-                            account.error?.let { message ->
-                                Text(
-                                    text = message,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.padding(bottom = 10.dp)
-                                )
-                            }
-                            account.notice?.let { message ->
-                                Text(
-                                    text = message,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(bottom = 10.dp)
-                                )
+                            Column(modifier = Modifier.padding(14.dp)) {
+                                CurioAuthCard()
                             }
                         }
                     }
                 }
             }
 
-            item { SettingsSectionHeading("Community") }
+            item { SettingsSectionHeading("Social") }
             item {
                 SettingsOptionCard {
-                    // The tab is strictly opt-in and is the only Community control
-                    // kept in Settings; the full Community and Friends experiences
-                    // are available from the app navigation.
+                    // Strictly opt-in, and turned ON for you the moment Online
+                    // mode goes on (see OnlineAccount.enableOnlineMode), since
+                    // the wall is what most members came here for.
                     SettingsOptionSwitchRow(
-                        icon = CurioIcons.Hub,
-                        title = "Community tab",
+                        icon = CurioIcons.Public,
+                        title = "Social tab",
                         subtitle = if (onlineMode && account.signedIn) {
-                            "Show Community in the app navigation."
+                            "Show Social in the app navigation. It is turned on with Online mode."
                         } else {
-                            "Turn on Online mode and sign in to show Community."
+                            "Turn on Online mode and sign in to show Social."
                         },
                         checked = AppPreferences.communityTabVisible,
                         enabled = onlineMode && account.signedIn,
@@ -319,6 +165,13 @@ fun OnlineModeScreen(navController: NavController) {
                     )
                 }
             }
+
+            // The privacy controls used to live behind their own card in the
+            // Settings hub, one page away from the account they actually
+            // belong to. They are the account's own rules, so they are stated
+            // here, on the page where the account is.
+            item { SettingsSectionHeading("Privacy") }
+            item { SocialPrivacyOptions() }
 
             item { SettingsSectionHeading("Sync") }
             item {
@@ -364,94 +217,23 @@ fun OnlineModeScreen(navController: NavController) {
             )
         }
     }
-}
 
-/**
- * One frosted account field — the settings family's search-field surface
- * (frosted fill, hairline, 17dp rounding), with an optional reveal toggle
- * for the password. The placeholder is the field's only label: the form is
- * two fields, so a caption would be filler.
- */
-@Composable
-private fun OnlineAuthField(
-    placeholder: String,
-    value: String,
-    enabled: Boolean,
-    isPassword: Boolean,
-    revealed: Boolean,
-    revealLabel: String? = null,
-    onToggleReveal: (() -> Unit)? = null,
-    onValueChange: (String) -> Unit
-) {
-    val dark = isCurioDarkTheme()
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .height(50.dp)
-            .clip(RoundedCornerShape(17.dp))
-            .background(
-                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
-                else Color.White.copy(alpha = 0.70f)
-            )
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
-                RoundedCornerShape(17.dp)
-            )
-            .padding(horizontal = 14.dp)
-    ) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            enabled = enabled,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Email,
-                imeAction = ImeAction.Next
-            ),
-            visualTransformation = if (isPassword && !revealed) {
-                PasswordVisualTransformation()
-            } else {
-                VisualTransformation.None
-            },
-            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.onSurface
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            modifier = Modifier.weight(1f)
-        ) { inner ->
-            Box {
-                if (value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+    if (confirmingSignOut) {
+        SocialConfirmDialog(
+            title = "Sign out of Curio?",
+            body = "Online mode turns off and nothing online loads until you sign in again. " +
+                "Your captures, recordings and conversations stay on this device.",
+            confirmLabel = "Sign out",
+            busy = signingOut,
+            onDismiss = { if (!signingOut) confirmingSignOut = false },
+            onConfirm = {
+                signingOut = true
+                scope.launch {
+                    OnlineAccount.signOut(context)
+                    signingOut = false
+                    confirmingSignOut = false
                 }
-                inner()
             }
-        }
-        if (onToggleReveal != null) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onToggleReveal),
-                contentAlignment = Alignment.Center
-            ) {
-                CurioIcon(
-                    name = CurioIcons.VisibilityOff,
-                    contentDescription = revealLabel,
-                    tint = if (revealed) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    size = 18.dp
-                )
-            }
-        }
+        )
     }
 }

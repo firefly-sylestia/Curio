@@ -257,22 +257,37 @@ fun EntryDetailScreen(
     // decode per DB change that lagged opening saved entries. The DAO
     // now queries the single row by primary key; the sample fallback is
     // resolved once, before the flow (it never changes while open).
+    // v3xx52 — AVAILABILITY: this tracks whether the DATABASE has actually
+    // answered yet. The page used to pop after a flat 400ms whenever the row
+    // had not arrived, so a cold Room open (or a slow read on a big archive)
+    // bounced the user straight back out of an entry that was sitting in the
+    // Cabinet — the reported "my saved entry isn't always available". The page
+    // now leaves only once the read has genuinely answered with no row.
+    var rowRead by remember(entryId) { mutableStateOf(false) }
     val entry by produceState<CurioEntry?>(initialValue = null, entryId) {
         val sampleFallback = runCatching {
             TopicCatalog.sampleEntries().find { it.id == entryId }
         }.getOrNull()
         runCatching {
             CurioRepositoryHolder.repo.observeById(entryId).collect { e ->
+                rowRead = true
                 value = e ?: sampleFallback
             }
         }
     }
 
-    LaunchedEffect(entry) {
-        if (entry == null) {
-            kotlinx.coroutines.delay(400)
-            if (entry == null) navController.popBackStack()
+    LaunchedEffect(entry, rowRead) {
+        if (entry != null) return@LaunchedEffect
+        // Wait for the first real emission — a stalled read is given a
+        // generous window (the skeleton stays on screen meanwhile) so the
+        // page can never be yanked out from under a legitimately saved entry.
+        var waited = 0
+        while (!rowRead && waited < 6000) {
+            kotlinx.coroutines.delay(100)
+            waited += 100
         }
+        kotlinx.coroutines.delay(150)
+        if (entry == null) navController.popBackStack()
     }
 
     val resolvedEntry = entry ?: return

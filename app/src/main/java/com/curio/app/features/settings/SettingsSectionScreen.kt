@@ -420,6 +420,10 @@ private fun PreferencesSection(highlightKey: String? = null) {
     var reminderMinute by remember { mutableStateOf(AppPreferences.getReminderMinute(context)) }
     var showReminderTimePicker by remember { mutableStateOf(false) }
     var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
+    // v3xx54 — messages + community notifications (default ON).
+    var socialNotificationsEnabled by remember {
+        mutableStateOf(AppPreferences.socialNotificationsState)
+    }
     // v19 — the explore search-engine picker (which engine the "Explore in
     // browser" button opens).
     var showSearchEngineDialog by remember { mutableStateOf(false) }
@@ -438,6 +442,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 reminderHour = AppPreferences.getReminderHour(context)
                 reminderMinute = AppPreferences.getReminderMinute(context)
                 showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
+                socialNotificationsEnabled = AppPreferences.socialNotificationsState
                 // v8.1 — returning from the system overlay-settings page: a
                 // grant re-enables the bubble and clears the declined flag;
                 // coming back without granting records the "no" so automatic
@@ -583,6 +588,42 @@ private fun PreferencesSection(highlightKey: String? = null) {
             val presetHours = listOf(9, 12, 15, 18, 21)
             val customTime = reminderMinute != 0 || reminderHour !in presetHours
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 6.dp)) {
+                // v3xx58 — the CLOCK LEADS (user request: it used to sit last,
+                // after the hour presets). It is the one control that can pick
+                // ANY time, so it opens the row — and it wears the screen's
+                // rose accent instead of the presets' plain fill, so it reads
+                // as a different kind of choice at a glance.
+                item {
+                    val rose = settingsRoseAccent()
+                    Surface(
+                        onClick = { showReminderTimePicker = true },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                        // v389 — when the time is a preset the chip sits between the
+                        // one-tap hour pills and the clock picker; it was 16% alpha
+                        // rose ("transparent") until a custom time was set, so it read
+                        // as a placeholder rather than a solid door (user request).
+                        color = if (customTime) rose else MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = if (customTime) Color.White else rose,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Schedule,
+                                contentDescription = null,
+                                tint = if (customTime) Color.White else rose,
+                                size = 15.dp
+                            )
+                            Text(
+                                formatReminderTime(reminderHour, reminderMinute),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
+                    }
+                }
                 items(presetHours) { hour ->
                     val selected = hour == reminderHour && reminderMinute == 0
                     // AMOLED: the selected chip swaps to pitch-black glass
@@ -613,36 +654,6 @@ private fun PreferencesSection(highlightKey: String? = null) {
                         )
                     }
                 }
-                item {
-                    Surface(
-                        onClick = { showReminderTimePicker = true },
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                        color = if (customTime) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = if (customTime) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface,
-                        shadowElevation = 2.dp,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Schedule,
-                                contentDescription = null,
-                                tint = if (customTime) MaterialTheme.colorScheme.onPrimary
-                                else MaterialTheme.colorScheme.onSurface,
-                                size = 15.dp
-                            )
-                            Text(
-                                formatReminderTime(reminderHour, reminderMinute),
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                            )
-                        }
-                    }
-                }
             }
         }
         SettingsOptionDivider()
@@ -657,6 +668,21 @@ private fun PreferencesSection(highlightKey: String? = null) {
             ) {
                 showBubbleOptInDialogEnabled = it
                 AppPreferences.setShowBubbleOptInDialog(context, it)
+            }
+        }
+        SettingsOptionDivider()
+        // v3xx54 — one switch for the whole social layer: a friend's message
+        // and a new community post. With it off nothing else changes — sync,
+        // unread badges and the wall stay exactly as they are.
+        SettingsRowPulse(highlightKey == "pref-social-notify") {
+            CompactSwitchRow(
+                CurioIcons.Hub,
+                "Messages and community",
+                "Notify when a friend messages you or someone posts",
+                socialNotificationsEnabled
+            ) {
+                socialNotificationsEnabled = it
+                AppPreferences.setSocialNotifications(context, it)
             }
         }
     }

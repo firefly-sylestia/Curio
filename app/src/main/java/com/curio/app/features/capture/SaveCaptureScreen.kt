@@ -338,11 +338,21 @@ fun SaveCaptureScreen(
 
                     // Local capture: editingEntry is a delegated property (produceState),
                     // so the compiler can't smart-cast it — grab a stable local first.
+                    // v3xx52 — AVAILABILITY: the prefill loads asynchronously, so a
+                    // quick tap on Save (or a cold DB read) used to hit an empty
+                    // `editingEntry` and abort with "This entry is no longer
+                    // available" for an entry that was in the Cabinet all along.
+                    // Edit mode re-reads the row here, on the save coroutine, and
+                    // only gives up when it is genuinely gone.
+                    val stableEditId = editEntryId
                     val existingEntry = editingEntry
+                        ?: stableEditId?.let { id ->
+                            runCatching { CurioRepositoryHolder.repo.getById(id) }.getOrNull()
+                        }
                     // Edit mode must NEVER write a fresh entry: Room REPLACEs by id,
                     // so a fresh entry here would overwrite the original with blank
-                    // data. If the source entry is somehow missing, abort instead.
-                    if (editEntryId != null && existingEntry == null) {
+                    // data. If the source entry is genuinely missing, abort instead.
+                    if (stableEditId != null && existingEntry == null) {
                         saveError = "This entry is no longer available. Please go back and try again."
                         return@launch
                     }
@@ -924,10 +934,21 @@ fun SaveCaptureScreen(
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     performSave()
                 },
-                onSelectTake = { i -> snapshotActive(); activeIndex = i },
-                onAddTake = {
+                // v387 — the rail's pills switch takes (the same guard the
+                // format chips use: the take you are leaving is snapshotted
+                // first, so a half-written take is never lost by a tap).
+                onSelectTake = { i ->
+                    if (i != activeIndex) {
+                        snapshotActive()
+                        activeIndex = i
+                    }
+                },
+                onAddTake = { format ->
+                    // The Add-take picker hands back what the take IS, so the
+                    // studio never has to guess a default format. The new take
+                    // is appended, so its pill shows next to the saved ones.
                     snapshotActive()
-                    sections.add(CaptureSectionState(nextId++, defaultFormat))
+                    sections.add(CaptureSectionState(nextId++, format))
                     activeIndex = sections.lastIndex
                 },
                 onRequestRemoveTake = { i ->

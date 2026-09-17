@@ -11,6 +11,11 @@
     <include domain="sharedpref" path="." />
     <exclude domain="sharedpref" path="curio_crash_logs.xml" />
     <!-- Mirrors data_extraction_rules.xml: the account session's tokens are
-         never cloud-backed-up. -->
+         never cloud-backed-up — neither the old plaintext file nor the sealed
+         vault that replaced it (and whose key is device-bound anyway). -->
     <exclude domain="sharedpref" path="curio_supabase_session.xml" />
+    <exclude domain="sharedpref" path="curio_secure_store.xml" />
+    <!-- Cached social content (conversations, names, cards) is a device cache:
+         it must never be uploaded, and it is deleted on sign-out. -->
+    <exclude domain="sharedpref" path="curio_social_cache.xml" />
 </full-backup-content>

@@ -14,9 +14,11 @@ This file is part of the **DOX framework** defined in `master.md`. All agents MU
 
 Top-level instruction file for all AI agents (Codebuff/Buffy and spawned sub-agents) working on the Curio Android project. Project-wide rules, global preferences, and the top-level Child DOX Index.
 
-**⚠️ SCOPE: This project's active workstream is the Android app (`app/`)
-ONLY. `web/` and `desktop/` are separate projects on hold — do not touch
-them unless the user explicitly asks (see the 🔒 Scope section below).**
+**⚠️ SCOPE: This project's active workstream is the Android app (`app/`) plus
+the account site (`auth-web/`, which is live infrastructure for that app's
+accounts, not a port). `web/` and `desktop/` are separate projects on hold — do
+not touch them unless the user explicitly asks (see the 🔒 Scope section
+below).**
 
 ## ❓ ASK WHEN UNSURE
 
@@ -396,9 +398,39 @@ npm install
 npm run dev
 ```
 
+## Curio Account Web (auth-web/) — ACTIVE (account infrastructure)
+
+The `auth-web/` directory is **the web side of Curio's online accounts**: the
+pages Supabase email links land on (email confirmation, sign-in link, password
+reset) plus a small account desk that can create an account with a password,
+sign in, review the account and delete it. It exists because a Supabase email link has to open somewhere, and without a
+real destination the project's Site URL answers instead, whose default is
+`http://localhost:3000`.
+
+**Key facts:**- **A static site with two serverless functions and no build step.** Plain
+  HTML/CSS/JS, no framework, no npm dependencies: `index.html`, one folder per
+  page (`confirm/`, `link/`, `reset/`, `signup/`, `signin/`, `account/`,
+  `support/`, `privacy/`, `terms/`), `assets/theme.css`, `assets/curio.js`,
+  `api/config.js`, `api/delete-account.js`. Nothing here participates in the
+  Android, desktop or `web/` builds.
+- **The one secret is server-side.** `/api/config` serves only the public project
+  URL + anon key (the same pair the APK carries) from Vercel environment
+  variables; `/api/delete-account` is the only holder of the service-role key and
+  it verifies the caller's own access token against GoTrue before deleting the id
+  that call returns. A client-supplied user id is never honoured.
+- **Vercel:** Root Directory `auth-web`, no build command, no output directory.
+  Environment variables and the Supabase dashboard checklist (Site URL, Redirect
+  URLs, `{{ .RedirectTo }}` email templates) are in `auth-web/README.md`.
+- **The app points at it through `BuildConfig.CURIO_AUTH_SITE_URL`** (see
+  `app/build.gradle.kts`): an empty value sends no `redirect_to` and hides the
+  sign-in form's password-recovery row, so a build without the site behaves
+  exactly as before. Set the `CURIO_AUTH_SITE_URL` repo secret to switch it on.
+- **Read [`auth-web/AGENTS.md`](auth-web/AGENTS.md) before editing it.**
+
 ## Child DOX Index
 
 - [app/AGENTS.md](app/AGENTS.md) — Active Curio Android app module
+- [auth-web/AGENTS.md](auth-web/AGENTS.md) — Curio account web (Supabase email links, password reset, account desk)
 - [app/CURIO_DATA_PLAN.md](app/CURIO_DATA_PLAN.md) — Curio topic data contract
 - [gradle/AGENTS.md](gradle/AGENTS.md) — Gradle version catalog and wrapper
 - [supabase/AGENTS.md](supabase/AGENTS.md) — Online backend schema + RLS (`schema.sql`, pasted into the Supabase dashboard; RLS is the security boundary)

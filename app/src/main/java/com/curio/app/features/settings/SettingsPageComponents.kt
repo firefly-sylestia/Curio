@@ -61,7 +61,7 @@ fun SettingsSectionHeading(
             Text(
                 text = glyph,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+                color = settingsAccentInk().copy(alpha = 0.75f)
             )
         } else {
             // Multi-char values are CurioIcons names (e.g. topic history's
@@ -70,7 +70,7 @@ fun SettingsSectionHeading(
             CurioIcon(
                 name = glyph,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                tint = settingsAccentInk().copy(alpha = 0.8f),
                 size = 18.dp
             )
         }

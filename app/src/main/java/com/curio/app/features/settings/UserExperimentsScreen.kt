@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioAlivePreferences
 import com.curio.app.data.CurioCategories
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -49,10 +50,10 @@ private const val KEY_EXPERIMENTS_SEEN = "user_experiments_dialog_seen"
 @Composable
 fun UserExperimentsScreen(navController: NavController) {
     val context = LocalContext.current
+    CurioAlivePreferences.seed(context)
     val prefs = context.getSharedPreferences("curio_prefs", 0)
     var dialogSeen by remember { mutableStateOf(prefs.getBoolean(KEY_EXPERIMENTS_SEEN, false)) }
 
-    // First-time warning dialog
     if (!dialogSeen) {
         AlertDialog(
             containerColor = com.curio.app.ui.theme.curioDialogContainerColor(),
@@ -89,9 +90,6 @@ fun UserExperimentsScreen(navController: NavController) {
         }
         val listState = rememberLazyListState()
         val glassBackdrop = rememberLayerBackdrop()
-        // v-tablet — the torn hero is NOT sticky on wide windows (landscape
-        // tablet): it leads the list as its first item and scrolls away with
-        // it; the pinned glass overlay stays phone-only.
         val wide = windowWidthSizeClass().isWide
         LazyColumn(
             state = listState,
@@ -108,8 +106,6 @@ fun UserExperimentsScreen(navController: NavController) {
                     )
                 }
             }
-            // v3xx — the shared settings nav rail: switch sections without
-            // going back to the hub (the open page sits in the 2nd slot).
             item(key = "settings-nav", contentType = "settings-nav") {
                 SettingsNavRail(
                     active = "experiments",
@@ -117,7 +113,20 @@ fun UserExperimentsScreen(navController: NavController) {
                     navController = navController
                 )
             }
-            // Liquid glass section
+
+            item { SettingsSectionHeading("Motion") }
+            item {
+                SettingsOptionCard {
+                    ExperimentSwitchRow(
+                        "Curio Alive",
+                        "Upgrades press feedback, transitions, card arrivals and interaction motion across the app. Turn it off anytime to return to the classic motion.",
+                        CurioAlivePreferences.enabledState
+                    ) { wanted ->
+                        CurioAlivePreferences.setEnabled(context, wanted)
+                    }
+                }
+            }
+
             item { SettingsSectionHeading("Liquid glass") }
             item {
                 SettingsOptionCard {
@@ -149,13 +158,6 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // v3xx — the "Subtle pill glow" experiment concluded: subtle is
-            // the always-on default (toggle removed).
-
-            // v3xx — the app-wide HEADER STYLE: torn paper banner (default)
-            // or the content-height glass toolbar (the old Cabinet v2 look,
-            // more blurry + its own tint). Applies to every Settings/Cabinet
-            // hero plus Home and Profile (Spin keeps its own chrome).
             item { SettingsSectionHeading("Headers") }
             item {
                 SettingsOptionCard {
@@ -174,12 +176,6 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // Cover fetching — v3xx51 MERGED: the separate Books / Albums /
-            // Series toggles (v350) collapse into ONE consent. Every reader
-            // (reveal resolvers, the Cabinet cover cache, share cards) now
-            // checks this single switch, and with it OFF nothing reaches the
-            // network — the old per-category split meant fetching kept
-            // happening on the paths that only checked one of the keys.
             item { SettingsSectionHeading("Cover fetching") }
             item {
                 SettingsOptionCard {
@@ -195,10 +191,6 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // v3xx52 — CAPTURE STUDIO: the Save-your-take page becomes a
-            // designed workspace (tinted hero, take rail on the bottom tray,
-            // pickers in one tools sheet, live recording pulse). OFF = the
-            // capture page exactly as it is today.
             item { SettingsSectionHeading("Capture") }
             item {
                 SettingsOptionCard {
@@ -214,17 +206,23 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // Content tools — non-toggle experiments
+            item { SettingsSectionHeading("Social") }
+            item {
+                SettingsOptionCard {
+                    ExperimentSwitchRow(
+                        "Social text editing",
+                        "Show edit controls for your own direct messages and comments. Experimental.",
+                        AppPreferences.socialTextEditingState
+                    ) { AppPreferences.setSocialTextEditingEnabled(context, it) }
+                }
+            }
+
             item { SettingsSectionHeading("Content tools") }
             item {
                 SettingsOptionCard {
-                    // v320 — the book-cover fetch is now a HUB of its own
-                    // (provider picker, retry-failed, keyless ratings).
                     SettingsOptionRow(
                         CurioIcons.MenuBook,
                         "Book covers & ratings",
-                        // v320b — opt-out by default: surface the OFF state so
-                        // the row explains why nothing is downloading.
                         if (!AppPreferences.bookFetchEnabledState) "OFF · open the hub to turn fetching on"
                         else if (AppPreferences.bookCoverFailedState.isNotEmpty())
                             "Open the hub · ${AppPreferences.bookCoverFailedState.size} failed covers to retry"
@@ -235,8 +233,6 @@ fun UserExperimentsScreen(navController: NavController) {
                             }
                         }
                     )
-                    // v3xx — the Book browser moved OUT of the hub's horizontal
-                    // cover strip into its own scrollable line-by-line list.
                     SettingsOptionDivider()
                     SettingsOptionRow(
                         CurioIcons.MenuBook,
@@ -251,7 +247,6 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // Pet & explore
             item { SettingsSectionHeading("Pet & explore") }
             item {
                 SettingsOptionCard {
@@ -261,7 +256,6 @@ fun UserExperimentsScreen(navController: NavController) {
                     }
                     CurioSettingsDivider()
                     CurioSettingsDivider()
-                    // Pet outside app
                     ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps. Long-press to bring it home.", AppPreferences.petOutsideAppState) { wanted ->
                         if (wanted && !android.provider.Settings.canDrawOverlays(context)) {
                             runCatching {
@@ -278,7 +272,6 @@ fun UserExperimentsScreen(navController: NavController) {
                         }
                     }
                     CurioSettingsDivider()
-                    // Pet chatter
                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                         androidx.compose.foundation.layout.Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
@@ -301,7 +294,6 @@ fun UserExperimentsScreen(navController: NavController) {
                         }
                     }
                     CurioSettingsDivider()
-                    // Pet games
                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                         androidx.compose.foundation.layout.Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
@@ -333,8 +325,6 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
         }
-        // v-tablet — pinned glass overlay is phone-only; wide windows scroll
-        // the hero as the list's first item instead.
         if (!wide) {
             SettingsHeroHeader(
                 title = "Experiments",

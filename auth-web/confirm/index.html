@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirm your email · Curio</title>
+<meta name="description" content="Where a Curio email confirmation link lands.">
+<meta name="theme-color" content="#100c11">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+<body data-page="confirm">
+<div class="aurora" aria-hidden="true"></div>
+<a class="skip" href="#page">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
+  <nav class="topnav" aria-label="Account">
+    <a href="/signin">Sign in</a>
+    <a href="/signup">Create account</a>
+    <a href="/reset">Password</a>
+    <a href="/account">Account</a>
+    <a href="/support">Support</a>
+  </nav>
+</header>
+
+<main id="page" class="shell">
+  <div class="rise">
+    <span class="eyebrow">Curio account</span>
+    <h1>Confirming your email</h1>
+    <p class="lede">One moment while this link is checked.</p>
+  </div>
+
+  <p class="notice" id="page-status" role="status"></p>
+
+  <section class="state" data-state="done">
+    <div class="card rise-1">
+      <h2>Your email is confirmed</h2>
+      <p class="muted">
+        <span id="done-email" class="faint"></span>
+        is ready to use with Curio.
+      </p>
+      <div class="row mt-2">
+        <a class="btn btn-primary" href="/account">See your account</a>
+        <a class="btn btn-ghost" href="https://github.com/firefly-sylestia/Curio/releases/latest" data-app-download>Download Curio</a>
+      </div>
+      <p class="faint mt-2">You can close this tab. In the app, sign in with the same email and password.</p>
+    </div>
+  </section>
+
+  <section class="state show" data-state="waiting">
+    <div class="card rise-1">
+      <h2>Open the link from your inbox</h2>
+      <p class="muted">
+        This is where a Curio confirmation link lands. Open the link we emailed you and the
+        address is confirmed here. If you are signing in without confirming first, the app will
+        tell you so.
+      </p>
+    </div>
+  </section>
+
+  <section class="state" data-state="expired">
+    <div class="card rise-1">
+      <h2>That link no longer works</h2>
+      <p class="muted">
+        Confirmation links can only be used once, and they expire. Nothing is wrong with your
+        account: send yourself a new one below.
+      </p>
+      <p class="notice" id="expired-status" role="status"></p>
+    </div>
+  </section>
+
+  <section class="card plain rise-2" id="resend-block">
+    <h2>Send a new confirmation email</h2>
+    <p class="muted tight">Enter the address you signed up with. The older link stops working.</p>
+    <form id="resend-form" class="stack" novalidate>
+      <div class="field">
+        <label for="resend-email">Email</label>
+        <input id="resend-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" id="resend-button" type="submit">Send a new link</button>
+        <a class="btn btn-quiet" href="/support">Need help?</a>
+      </div>
+    </form>
+    <p class="notice" id="resend-status" role="status"></p>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <span>Curio account desk</span>
+    <span class="dot" aria-hidden="true">•</span>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/support">Support</a>
+    <a href="/account">Account</a>
+  </div>
+</footer>
+
+<script type="module" src="/assets/curio.js"></script>
+</body>
+</html>

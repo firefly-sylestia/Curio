@@ -1,3 +1,146 @@
+ADD:
+- Moderation: reports now cover posts, replies AND members, each with a reason and an optional note — and reporting the same thing again refreshes your report instead of being refused.
+- Moderation: a control room for the team. The queue removes content, hides an author, or dismisses and reopens a report — always with a reason — and the team half adds moderators by @username with five permissions each. @jugnu is the owner and cannot be removed.
+- Hiding a member hides their content and pauses their posting; their account keeps working, and a moderator can restore them from their profile.
+
+FIX:
+- Messages: received bubbles sit on the left again, and the reply banner says "Replying to you" instead of "yourself".
+- Messages: swiping answers sideways only, so a long message scrolls normally instead of fighting the reply gesture.
+- Messages: replies show the words they answer — comfortably readable in both themes — and a quote that has aged out says so instead of disappearing.
+- Messages: older plain messages show their real words again instead of "re-encryption required", and Edit works on them.
+- Messages and replies: editing goes through the server, so a saved edit really saves (the reply editor used to fail outright).
+- Messages: "Delete for everyone" is a solid red action instead of a see-through one.
+- Replies: a compact sheet — the age instead of the @username under each name, and a proper bordered typing box.
+
+FIX:
+- Topic cards render whole and crisp at the size the card editor shows: no more shrunken art, cropped corners, off-centre cards or an empty band between a card and its like row.
+- Profiles: a topic post's grid tile is the topic itself — the lane's colour wash, the lane's icon and the topic name — instead of a share card squeezed into a square.
+
+ADD:
+- Posting goes full screen: Post opens a proper Create page. Write first, the post renders live above as you type, and topic, look and shape attach from quiet controls. The old bottom sheet is gone.
+- Messages: hold a bubble for Instagram-style actions — the emoji palette sits in its own pill, text options (Reply, Copy, Edit, Remove) float as separate chips below. Tap outside to dismiss.
+- Messages: swipe-to-reply is reversed for your own bubbles (right-to-left like Instagram) and the gesture covers the full message row.
+- Messages: sending always scrolls to the bottom, even when reading history.
+- Cabinet v2 is now on by default. Saved entries only appear inside their collection, not as a separate home section. Empty-cabinet suggestions are grouped by category (Books, Series, Albums, Places, People, Science).
+- Delete post now asks for confirmation before removing it from the wall.
+- Curio Alive motion layer is on by default for new installs.
+- Series episodes now show TVMaze metadata: airdate, runtime, rating, and episode still images are fetched and displayed in the expanded episode card.
+- Messages: swipe any bubble to reply. The conversation is threaded now, with the words you are answering shown inside the answer.
+- Messages: hold a bubble for Instagram-style actions. The emoji palette, Copy, Edit, Remove and Reply float right on the thread instead of a dialog, and a double-tap is the heart.
+- Messages: your bubbles wear the brand rose and theirs stay calm neutral, so a conversation reads at a glance in both themes.
+- Messages: WhatsApp-style ticks. One tick is sent, two in color are read, and the header now shows who you are talking to with their @username.
+- Messages: the thread follows the newest line on its own, so a sent message is always in view.
+- Cleaner Social and Chats headers: the expiry hint lines and dash punctuation are gone.
+- Messages: holding a bubble opens everything at once — the reaction palette, copy, edit, remove. A tap only reacts. Bubbles are opaque with a cleaner shape and a soft press squish; a sent bubble stays put instead of vanishing and coming back.
+- A conversation's header is the person: their portrait, name and @username ride the title bar, with a live "Typing…" line.
+- Chats and Friends get their own icons (a speech bubble and two people) instead of borrowed ones.
+- Replies now branch: answer a reply directly, long branches fold behind a "show more" door, and both replies and messages can be edited with an "edited" mark. Messages gain hold-to-remove; encrypted messaging moves behind an opt-in switch in Settings → Online mode while it is reworked.
+- Profiles: the community page wears the app's own stat style (rose numbers over labels), shows the member's bio, and adds your streak as flame plus days on your own page. Every post has a square preview tile that opens it.
+- Liking and disliking pop.
+
+FIX:
+- Share-card previews on the wall are drawn at the card editor's own size and centred in the row, so the feed reads as posts instead of full-bleed posters.
+- The composer's card preview shows the card at the size the wall will show it, instead of a small thumbnail.
+- Post composer sits below the status bar instead of running under it.
+- Post counts on a profile are readable on any theme.
+- Error notes across the social screens are quiet on-surface sentences with a small glyph, not red slabs that read like a tester build.
+- Encrypted sends: the server now names the devices still missing a key envelope (with their public keys), so a send wraps exactly what the server will check, instead of failing with "missing a device envelope".
+- Opening a post hides the bottom navigation so the card owns the whole screen, and the comments live right under the post now, in the same list, updating live.
+- Community wall doors (Chats, Friends, You) are compact icon tiles without the extra captions.
+
+FIX:
+- Messages: registering this device's encrypted identity goes through a server RPC that cannot trip the "violates row level security policy" error, and a failed registration no longer blocks the conversation: plain messages always send and render, encrypted ones stay sealed with a clear note until the device registers.
+- Server setup: re-pasting the SQL no longer silently drops the policy that lets a sender read their friend's device keys, which was breaking encrypted sends between healthy accounts.
+
+ADD:
+- Post a topic: a two-step composer. Step one is a compact sheet (kind, topic, words); Preview opens a full-height editor with the card drawn exactly as the wall will show it, where shape, style, caption and wording can still be changed before posting.
+- Profiles: the member page is Instagram-shaped now: one portrait-plus-identity row, the posts/likes/replies counts as columns underneath, the bio, and a full-width action. The grid is square tiles with the card art cropped to fill, so previews read as a gallery.
+- Community: posting, takedowns and reports use a tighter icon set, the wall's rows animate into place as the feed builds, and the composer button, cards and sheets keep one visual language.
+
+FIX:
+- Messages: encrypted sends no longer fail with "missing a device envelope for its key version" after a reinstall or a second device: old device identities are retired when a new one publishes, the server gives freshly registered devices a two-minute grace window, and every conversation you open heals its device list automatically.
+
+ADD:
+- Edit profile: a real editor — the page's own colours instead of the cream slab, the portrait picker beside your photo in one place, sectioned layout with soft reveal animation, your username stated in one line, and Sign out right there with the account.
+- Settings: your privacy rules (profile visibility, activity, blocked people) now live inside Online mode next to the account they belong to; the separate Privacy card is gone.
+- Accounts: a brand-new account is given a friendly username automatically (like amber_otter_4821), so adding friends works from the first minute — change it in Edit profile whenever you like.
+- Messages: if an encrypted message fails to send, the app says what to do — turn encryption off for that chat to keep talking while encryption is being reworked.
+- Profile: Sign out now also lives in Edit profile, confirmed before it signs you out.
+
+FIX:
+- Accounts: signing out forgets the username — the next account on this device gets its own handle and its own chats, not the previous member's.
+- Accounts: creating an account with email confirmation on no longer says "something went wrong" — it confirms the account was made and tells you to check your inbox, right from the sign-up form.
+- Messages: encryption is OFF by default for new chats, so a message always sends — turn it on per chat when you both want it.
+- Online mode: turning it on now brings the Social tab with it, so the wall is one tap away instead of a second switch.
+
+ADD:
+- Chats: your conversations have their own screen now — the last line, when it arrived and an unread badge per person, reached from the wall's action row beside Friends.
+- Friends: the list is a contacts sidebar — filed A–Z under letter headings, with a green dot on anyone who is active right now, and tapping a friend opens your chat with them. The Friends glyph is a people mark instead of a notepad.
+- Messages: hold a chat in the list to delete it — for you, or for both of you. "For you" leaves the other person's copy alone (and the chat returns if they write again); "for both of you" deletes the whole conversation for both accounts.
+- Social: pull down on the wall to refresh the latest posts.
+- Profiles: a member's page is a real page now — a big portrait, their name and @handle, live counts for their posts, likes and replies, their bio, the one action that fits how you know them (Message or Add friend) with blocking tucked behind the ⋮, and a grid of small post previews that opens the post when tapped.
+- Messages: the other person's "typing…" line and their reactions arrive the instant they happen over the live connection, and both only fall back to a slow safety check when it is unavailable.
+- Messages: encrypted deliveries decrypt before rendering and load key envelopes in one fast batch.
+- Messages: shared per-chat encryption switch, reliable versioned decryption, and plaintext fallback.
+- Messages: delete locally or unsend your sent message for both people.
+
+FIX: Social — new accounts now create and mirror their Online mode profile before opening the wall, so they can see and post immediately.
+FIX: Messages — exact device envelopes now restore safely with clear encrypted-message recovery states.
+FIX: Messages — sending an encrypted message works again: the key envelope a sender wraps for its OWN devices was refused by the server, which blocked every encrypted send with a "conversation does not match participants" error.
+FIX: Messages and Community — live updates stay live: the sign-in token is refreshed in the background before it expires, a channel the server closes is noticed instead of silently going quiet, and a screen that changes what it listens to re-joins instead of keeping the old subscription.
+FIX: Messages — encrypted multi-device delivery no longer trips envelope security on duplicate sends.
+FIX: Messages — a conversation from an older install can rotate an unreadable encryption key and send again instead of failing before delivery.
+FIX: Messages — the composer now stays directly above the keyboard when an empty chat first opens, and recipients load the exact encryption-key version used by each message.
+FIX: Messages — the message box no longer sits under the keyboard: it lifts with the keyboard in every conversation, empty or full.
+FIX: Social safety — public text now names the matched safety term, avoids accidental substring blocks, and no longer filters the `fuck` word family.
+FIX: Social profiles — notes and quotes now stay as text posts with their quote credit, instead of rendering as unrelated topic cards.
+
+ADD: A word filter with teeth — slurs, sexual content, harassment and threats are refused everywhere in Curio (cards, replies, messages, usernames, names and bios), spaced-out or symbol-dodged spellings included. The send button sleeps and tells you why, the account form carries a permanent warning that names like that get the account banned, and the server refuses them again so a modified app can't post around it.
+ADD: The bar's optional tab is SOCIAL now, with a globe for its icon — same wall, friends and messages, a clearer name.
+ADD: Messages vanish from the server 24 hours after they are sent, and what you received stays in Curio: a conversation keeps its older lines on your device while the server only ever holds the last day.
+ADD: A content filter — slurs, sexual content and harassment are refused before a post, a reply, a username, a display name or a bio can leave the app, and the same check runs on the server so a modified client can't get around it. It sees through the tricks: spacing (`f u c k`), symbols (`f.u.c.k`, `f4ck`, `f@ck`), doubled letters and look-alike characters all fold to the same word. Direct messages are yours — a private chat is not filtered.
+ADD: A conduct warning where your name is chosen: slurs, sexual content, harassment or impersonation in a name, username or bio get the account banned.
+ADD: The tab is SOCIAL now instead of Community — a globe in the bar instead of connected dots, and the Settings switch, hub row and empty states say Social too.
+ADD: Messages live 24 hours on the server and then stay on YOUR device: an expired message is gone even for the two people in it, while what you received stays in Curio — opening a conversation merges the server's window into what the phone already has, so a day-old thread never loses its older lines.
+ADD: 12 more profile portraits — the soft set: long waves, a high ponytail, twin braids, a hime cut, a bob with a headband bow, a half-up bun, a flower crown, star clips, a pixie with a heart clip, waves with glasses, an afro puff with a bow and a braided crown, in a wider spread of skin and hair tones (28 to choose from, all still no photo upload).
+ADD: Profile portraits — the faces are alive now: real eyes with a lash line, a catch-light and brows instead of two dots, a soft hair sheen, and round glasses that finally have their temple arms.
+FIX: Cabinet — the shelf drawings are redrawn again and now FILL the card: Favorites is one glossy rose heart with a gold star on its lobe, Curiying now is a clean open book with a steaming mug beside it, and Want to Read is a hero hardcover with two books leaning behind it.
+FIX: Saved entries — opening one (or editing it) no longer bounces you back to the Cabinet or claims it is "no longer available": the page waits for the archive to actually answer instead of giving up after a fixed moment.
+ADD: Messages, Friends and the community wall are LIVE now: a message, a friend request or a new post reaches you the instant it happens instead of waiting for the app's next check-in. When the live connection is unavailable the old refreshing keeps working, just at a calmer pace.
+ADD: Settings → Privacy — your own rules in one place: make your profile friends-only, hide your activity so nothing is ever shown about when you were last around, and see and lift the people you have blocked. A block stops messages, friend requests and each other's cards, both ways. There is a Privacy button in Edit profile now too, and blocking someone lives on their profile.
+ADD: Profile — your Bio is on your public page now, not only on your own hero: write it in Edit profile and other members read it under your name.
+ADD: Community — a name and a @username are two different things now: every card, reply, profile and conversation leads with the member's NAME and shows their @handle on the line underneath, so people read as people rather than as handles.
+ADD: Profile — a Bio and a Streak row under the hero, so your own words and your run of days are readable in full (the hero still shows them at a glance), and Edit profile is a wider dialog that finally fits the account form.
+FIX: Messages and Community — everything arrives far sooner: an open conversation checks for a reply every 1.2 seconds (was 2.5), the Messages list refreshes every 5 seconds (was 12), "typing…" every 1.5 (was 3), and the notification watcher every 8 seconds for messages and 30 for the wall (was 15 and 60).
+ADD: Messages and Community — the device remembers far more, for far longer, and forgets it on a timer: conversations, the Messages list with its unread badges, friends, the last wall page and each card's replies all open instantly — even with no connection — and stale copies expire instead of showing a month-old thread as current.
+FIX: Settings — a saved display name now reaches your account too, so the name you see on your own profile is the name other members read on your cards.
+ADD: Messages — an open conversation now updates while you watch: a reply appears the moment it arrives instead of after you leave the screen and come back, and the Messages list refreshes itself too.
+ADD: Messages — the header names who you are talking to on the very first frame (Curio remembers the people it has met), so a conversation never opens with a placeholder.
+CHANGE: Messages — reactions are proper emoji now (tap a bubble for ❤️ 😂 😮 😢 👍 🙏) instead of the app's own icons; your old reactions still show.
+FIX: Messages — the typing box sits exactly on the keyboard. It used to be lifted a navigation bar too high and left a strip of empty page under it.
+ADD: Messages — the standing privacy paragraph inside a conversation is gone; the header keeps the name and the live "Typing…" line and nothing else.
+FIX: Signing out forgets the device's cached conversations and remembered names.
+ADD: Notifications — a new "Messages and community" switch (Settings → Notifications, on by default). Tapping a message notification opens that conversation; tapping a post notification opens the community wall.
+ADD: Community — the wall's cards are full width, and the actions are pills that respond to your touch (like / reply / share / report) instead of bare text buttons.
+ADD: Community — three kinds of post: a TOPIC CARD (seeded with the topic's own quick fact), a tweet-style NOTE, and a credited QUOTE. Notes and quotes render as text — never as a card for a topic they are not about.
+ADD: Community — replies BRANCH now: reply to a reply and it sits under the line it answers, with a "Replying to @name" chip above the composer.
+ADD: Community — the wall keeps a copy on the device, so opening it with no connection shows the last 24 hours instead of nothing (with a quiet offline line).
+ADD: Topic Reveal — sharing is split by what is being shared: the card editor for the topic's art, plus "Write a note" and "Share a quote" that post straight to the community.
+FIX: Community — a card's own page no longer drags the settings rail along (the community is not a settings page), and taking your own card down asks first.
+ADD: Friends and Community — adding someone is an icon button now, matching Remove.
+ADD: Settings → Online mode — signing out asks first: the dialog says Online mode turns off and that your captures, recordings and conversations stay on this device.
+ADD: Friends — removing a friend asks first, naming the person, and says neither of you can message the other until you add each other again.
+ADD: Friends — every person is a box card now: their portrait, their live name and @username, and the actions that match where you actually stand — Message for a friend, Accept or Decline for a request waiting on you, Cancel for one you sent, Add friend for a stranger. Adding someone you are already friends with is impossible now.
+ADD: Messages — the conversation reads like a chat: day rules, messages from one person grouped into one block with a single timestamp, and "Seen" on your last delivered line.
+ADD: Messages — reactions. Tap any bubble and a palette slides in; a reaction is one of Curio's own drawn glyphs (never an upload), and tapping the same one again takes it off.
+ADD: Messages — a live "Typing…" line in the header and a breathing bubble in the thread while the other person is writing.
+ADD: Messages — a conversation opens instantly from what this phone already has (the last 200 lines are kept on the device), so losing signal no longer blanks a thread.
+ADD: Messages — sending is instant: the bubble springs in the moment you tap Send, the field empties, and delivery follows.
+ADD: Messages — the composer is one frosted pill with a round send button that grows as soon as there is something to send.
+ADD: Friends — search is the same frosted pill as the message composer, with a one-line result state instead of a hint line.
+ADD: Settings → Online mode and Edit profile — signing in and claiming a username are one form with two clear modes (Sign in · Create account): every rule is stated before you press the button and the server's answer is always shown, so a taken username finally says it is taken.
+ADD: Profile — Edit profile carries your Curio account now: sign in, your username and your portrait pick, all in one place.
+REMOVE: Profile — the Community row is gone; the community is reached from the app navigation and Settings → Online mode, and signing in lives in Edit profile.
 ADD: Community — every card and reply now shows the author's PORTRAIT and their CURRENT username, and tapping either one opens their profile page.
 FIX: Community — changing your username updates the name on everything you already posted (old cards used to keep the name you had when you posted them).
 ADD: Community — a member profile page: the portrait, the username, their live cards from the last 24 hours, and Add friend or Message depending on where you stand.

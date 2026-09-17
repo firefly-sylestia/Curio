@@ -1,8 +1,12 @@
 package com.curio.app.features.community
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,76 +15,72 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.SocialPostArchive
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
-import com.curio.app.data.CurioTopic
-import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.supabase.CommunityApi
+import com.curio.app.data.supabase.CommunityReportReasons
+import com.curio.app.data.supabase.CurioModerationStatus
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
+import com.curio.app.data.supabase.CurioPerson
+import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
-import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
 import com.curio.app.features.settings.SettingsOptionRow
 import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
-import com.curio.app.features.settings.navigateToSettingsSection
+import com.curio.app.features.settings.settingsHeroPillFill
+import com.curio.app.features.settings.settingsHeroTotalHeight
 import com.curio.app.features.settings.settingsRoseAccent
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -92,12 +92,16 @@ import com.curio.app.ui.components.TopicShareCard
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioDialogShape
-import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.data.supabase.RealtimeWatch
+import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * COMMUNITY — the 24-hour wall of text share cards.
@@ -132,15 +136,89 @@ fun CommunityScreen(navController: NavController) {
     val asTab = AppPreferences.communityTabVisible
     var cards by remember { mutableStateOf<List<CommunityCard>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
+    // The FOLLOWING filter (v389): off shows the whole wall; on shows only the
+    // posts of members this account follows. The ids are read once when the
+    // wall opens (and after each refresh), so the filter costs the feed
+    // nothing extra.
+    var followingIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var followingOnly by remember { mutableStateOf(false) }
+    // ONLY a pull-down sets this: the wall's own refresh indicator belongs to
+    // the user's gesture, never to a background read (a like used to flash a
+    // spinner because every action funnelled through `load()`).
+    var refreshing by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // True while the WALL on screen is the device's own copy (the first
+    // request failed), so the page can say so instead of pretending.
+    var offlineCopy by remember { mutableStateOf(false) }
     var composing by remember { mutableStateOf(false) }
     var reporting by remember { mutableStateOf<CommunityCard?>(null) }
+    var deleteTarget by remember { mutableStateOf<CommunityCard?>(null) }
     var commentsFor by remember { mutableStateOf<CommunityCard?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    // A server push bumps this; the wall then refreshes QUIETLY (no spinner, no
+    // scroll reset, no offline flag) so a post landing while you read is simply
+    // there the next time you look up.
+    var pushed by remember { mutableStateOf(0) }
+    var isCommunityAdmin by remember { mutableStateOf(false) }
+    // May THIS account remove someone else's reply — the sheet's one moderator
+    // move. The database asks again; this only decides what is offered.
+    var canModerateReplies by remember { mutableStateOf(false) }
+    // My OWN moderation state — only ever used to explain a hidden account to
+    // the person it applies to.
+    var moderation by remember { mutableStateOf<CurioModerationStatus?>(null) }
+
+    // The post button slips away while the wall is being scrolled DOWN and
+    // comes back the moment the finger goes up or the wall reaches the top —
+    // the Home "+" behaviour, applied to the wall's own list. A wall is a long
+    // read, and a button nobody asked for must not sit on top of it.
+    var postVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(listState) {
+        var previous = listState.firstVisibleItemIndex * 100_000 + listState.firstVisibleItemScrollOffset
+        snapshotFlow {
+            listState.firstVisibleItemIndex * 100_000 + listState.firstVisibleItemScrollOffset
+        }.collect { now ->
+            val delta = now - previous
+            if (delta > 6) postVisible = false
+            else if (delta < -6 || now <= 0) postVisible = true
+            previous = now
+        }
+    }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
+    // The follow map the Following filter reads: one small request when the
+    // wall opens, refreshed alongside the feed so a follow made on a profile
+    // is honoured the next time the wall reloads.
+    LaunchedEffect(token, account.session?.userId) {
+        val active = token
+        val me = account.session?.userId
+        if (active != null && me != null) {
+            CommunityApi.followingIds(active, me).onSuccess { followingIds = it }
+        } else {
+            followingIds = emptySet()
+        }
+    }
+    LaunchedEffect(token, account.session?.userId) {
+        val active = token
+        val userId = account.session?.userId
+        if (active != null && userId != null) {
+            CommunityApi.myAdminRow(active, userId).onSuccess { row ->
+                isCommunityAdmin = row != null
+                canModerateReplies = row?.allows("replies") == true
+            }
+            SocialApi.moderationStatus(active, userId).onSuccess { moderation = it }
+        } else {
+            isCommunityAdmin = false
+            canModerateReplies = false
+            moderation = null
+        }
+    }
+
     val eligible = account.signedIn && onlineMode && token != null
+    // A ban with a wall tier takes the compose door away: the server refuses
+    // the write anyway, and offering a button that can only fail is worse than
+    // not offering it. Until my own status has been read, the door is open.
+    val canWriteWall = moderation?.let { !it.readOnly && !it.locked } ?: true
 
     suspend fun load() {
         val active = token ?: return
@@ -149,14 +227,122 @@ fun CommunityScreen(navController: NavController) {
             onSuccess = {
                 cards = it
                 error = null
+                offlineCopy = false
+                // The page the device just saw is kept, so the next open (in a
+                // lift, in a tunnel, in airplane mode) still shows a wall.
+                SocialFeedCache.write(context, it)
+                // Every author on the wall is remembered too, so a profile or
+                // a conversation opened from a card names them at once.
+                SocialPeopleCache.remember(
+                    context,
+                    it.map { card ->
+                        CurioPerson(
+                            userId = card.authorId,
+                            displayName = card.authorName,
+                            username = card.authorName.ifBlank { card.authorHandle },
+                            avatarStyle = card.authorAvatar
+                        )
+                    }
+                )
             },
-            onFailure = { error = it.message }
+            onFailure = { failure ->
+                // The device's own copy is already on screen: say nothing at
+                // all unless there was nothing to fall back on.
+                if (cards.isEmpty()) error = failure.message else offlineCopy = true
+            }
         )
         loading = false
     }
 
+    /**
+     * The background refresh a realtime push triggers: the same read as [load],
+     * but it never touches the loading state, the error, or the offline flag —
+     * a wall that is already on screen must not flash or move because somebody
+     * posted.
+     */
+    suspend fun refreshQuietly() {
+        val active = token ?: return
+        CommunityApi.feed(active, account.session?.userId).onSuccess { fresh ->
+            cards = fresh
+            error = null
+            offlineCopy = false
+            SocialFeedCache.write(context, fresh)
+        }
+    }
+
+    /**
+     * Moves ONE card on screen without asking the server anything.
+     *
+     * This is what makes the wall feel instant: a like, a dislike or a count
+     * change answers the tap immediately and the network catches up behind it.
+     * A failed call resyncs through [refreshQuietly], so the screen is never
+     * left disagreeing with the row.
+     */
+    fun patchCard(cardId: String, transform: (CommunityCard) -> CommunityCard) {
+        cards = cards.map { if (it.id == cardId) transform(it) else it }
+    }
+
     LaunchedEffect(eligible, token) {
-        if (eligible) load() else cards = emptyList()
+        if (eligible) {
+            // The device's copy FIRST — an offline open is a wall, not a blank
+            // screen — then the server's answer replaces it in place.
+            val cached = SocialFeedCache.read(context)
+            if (cards.isEmpty()) cards = cached
+            load()
+        } else {
+            cards = emptyList()
+        }
+    }
+
+    // REALTIME — the wall is no longer a snapshot from the moment it composed.
+    // The server announces a new (or deleted) card and the wall quietly pulls
+    // the live page again, so a post appears while you are looking at it.
+    DisposableEffect(eligible, token) {
+        val active = token
+        val owner = "wall"
+        if (eligible && active != null) {
+            SupabaseRealtime.watch(
+                owner = owner,
+                accessToken = active,
+                watches = listOf(
+                    RealtimeWatch(table = "community_cards", events = listOf("INSERT", "DELETE"))
+                )
+            ) {
+                scope.launch { pushed++ }
+            }
+        }
+        onDispose { SupabaseRealtime.unwatch(owner) }
+    }
+
+    LaunchedEffect(pushed, eligible, token) {
+        if (!eligible || token == null || pushed == 0) return@LaunchedEffect
+        // One refresh per burst: the push is a hint, and a lively wall would
+        // otherwise rebuild all forty cards once per post.
+        delay(400)
+        refreshQuietly()
+    }
+
+    // v386 — the wall's doors (Chats / Friends / You), rendered INSIDE the
+    // hero banner through SettingsHeroHeader's footer slot so they paint WITH
+    // the header. They used to be a list item under “Last 24 hours”, which
+    // meant they only showed up once the account check landed — the row was
+    // missing every time the wall opened. Defined once here because both hero
+    // placements (the pinned phone overlay, the wide in-list hero) wear it.
+    val doorsFooter: @Composable (Color) -> Unit = { ink ->
+        SocialDoorsRow(
+            ink = ink,
+            onChats = { navController.navigate(CurioRoutes.CHATS) },
+            onFriends = { navController.navigate(CurioRoutes.FRIENDS) },
+            onYou = {
+                // Guarded: an unmatched person/ route would throw.
+                val me = account.session?.userId
+                if (!me.isNullOrBlank()) {
+                    navController.navigate(CurioRoutes.socialProfile(me)) {
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
     }
 
     Box(
@@ -179,6 +365,17 @@ fun CommunityScreen(navController: NavController) {
             )
         }
 
+        PullToRefreshBox(
+            isRefreshing = refreshing,
+            onRefresh = {
+                refreshing = true
+                scope.launch {
+                    load()
+                    refreshing = false
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        ) {
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -187,7 +384,9 @@ fun CommunityScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = if (wide) 0.dp else SettingsHeroTotalHeight,
+                // v386 — the hero now carries the doors row (see [SocialDoorsRow]),
+                // so the wall starts below the EXTENDED banner.
+                top = if (wide) 0.dp else settingsHeroTotalHeight(SocialDoorRowHeight),
                 // As a tab root the last card has to clear the floating pill
                 // bar (the NavHost drops the system nav inset on tab routes
                 // because the bar carries it) — same 84dp the Cabinet uses.
@@ -202,10 +401,75 @@ fun CommunityScreen(navController: NavController) {
             if (wide) {
                 item(key = "hero", contentType = "hero") {
                     SettingsHeroHeader(
-                        title = "Community",
-                        subtitle = "Text cards — gone in 24 hours",
-                        onBack = if (asTab) null else ({ navController.popBackStack() })
+                        title = "Social",
+                        subtitle = "",
+                        onBack = if (asTab) null else ({ navController.popBackStack() }),
+                        footer = doorsFooter,
+                        footerHeight = SocialDoorRowHeight
                     )
+                }
+            }
+            if (isCommunityAdmin) {
+                item { SettingsSectionHeading("Moderation") }
+                item {
+                    SettingsOptionCard {
+                        SettingsOptionRow(
+                            icon = CurioIcons.Warning,
+                            title = "Moderation",
+                            subtitle = "Work the reports, and manage the team",
+                            onClick = { navController.navigate(CurioRoutes.MODERATION) }
+                        )
+                    }
+                }
+            }
+            // A hidden member is told WHY, in their own words: the ban lives on
+            // their profile row, so the app can explain it instead of letting
+            // posting fail with a raw server error.
+            // A ban, explained in the TIER's own words. The member is told
+            // exactly how far it reaches and — when it is on a clock — when it
+            // lifts itself, instead of being left to guess at a raw refusal.
+            moderation?.takeIf { it.banned }?.let { status ->
+                item(key = "hidden-notice") {
+                    SettingsOptionCard {
+                        SettingsOptionInfoRow(
+                            if (status.locked) CurioIcons.Lock else CurioIcons.VisibilityOff,
+                            when {
+                                status.locked -> "This account is banned"
+                                status.readOnly -> "Your account is read-only"
+                                status.socialOnly -> "Friends and messages are paused"
+                                else -> "Your account is hidden"
+                            },
+                            buildString {
+                                append(status.reason ?: "A moderator acted on this account.")
+                                append(' ')
+                                append(
+                                    when {
+                                        status.locked ->
+                                            "No post, reply, reaction, message or edit is accepted " +
+                                                "while it stands — reach out if you think this is a mistake."
+                                        status.readOnly ->
+                                            "You can still read the wall, but posting, replying, " +
+                                                "reacting, friends and messages are paused meanwhile."
+                                        status.socialOnly ->
+                                            "The wall works as usual; friends, requests and messages " +
+                                                "are paused meanwhile."
+                                        else ->
+                                            "Your posts and replies are hidden and you cannot post " +
+                                                "meanwhile — reach out if you think this is a mistake."
+                                    }
+                                )
+                                status.untilMillis?.let { until ->
+                                    append(" It lifts by itself on ")
+                                    append(
+                                        java.time.Instant.ofEpochMilli(until)
+                                            .atZone(java.time.ZoneId.systemDefault())
+                                            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
+                                    )
+                                    append('.')
+                                }
+                            }
+                        )
+                    }
                 }
             }
             if (!eligible) {
@@ -216,12 +480,12 @@ fun CommunityScreen(navController: NavController) {
                             !OnlineAccount.configured -> SettingsOptionInfoRow(
                                 CurioIcons.Warning,
                                 "Not set up in this build",
-                                "This build has no Curio online project, so there is no community to load."
+                                "This build has no Curio online project, so there is no social wall to load."
                             )
                             !account.signedIn -> {
                                 SettingsOptionInfoRow(
                                     CurioIcons.Info,
-                                    "Sign in to see the community",
+                                    "Sign in to see the social wall",
                                     "Cards are only shown to accounts with Online mode on."
                                 )
                                 SettingsOptionRow(
@@ -249,57 +513,52 @@ fun CommunityScreen(navController: NavController) {
                 }
             } else {
                 item { SettingsSectionHeading("Last 24 hours") }
-                item {
-                    // The wall's actions. Posting lives on the floating button
-                    // at the bottom (one clear door), so this row only carries
-                    // the two places you go FROM the wall.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp)
-                    ) {
-                        TextButton(onClick = { navController.navigate(CurioRoutes.FRIENDS) }) {
-                            CurioIcon(
-                                name = CurioIcons.Notes,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("Friends")
-                        }
-                        Spacer(Modifier.weight(1f))
-                        TextButton(onClick = {
-                            // Guarded: an unmatched person/ route would throw.
-                            val me = account.session?.userId
-                            if (!me.isNullOrBlank()) {
-                                navController.navigate(CurioRoutes.socialProfile(me)) {
-                                    launchSingleTop = true
-                                }
-                            }
-                        }) {
-                            CurioIcon(
-                                name = CurioIcons.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("You")
-                        }
-                        if (loading) {
-                            CircularProgressIndicator(
-                                strokeWidth = 2.dp,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        } else {
-                            TextButton(onClick = { scope.launch { load() } }) {
-                                Text("Refresh")
+
+                // The wall's one filter: EVERYTHING, or only the members you
+                // follow. A follow is how a member's posts survive the wall's
+                // 24-hour churn at a glance, so the chip is the filter's whole
+                // interface — one tap on, one tap off.
+                if (followingIds.isNotEmpty()) {
+                    item(key = "follow-filter") {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(horizontal = wideContentEdgePadding())
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = if (followingOnly) settingsRoseAccent()
+                                else MaterialTheme.colorScheme.surfaceContainerLow,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .clickable { followingOnly = !followingOnly }
+                            ) {
+                                Text(
+                                    text = if (followingOnly) "Following" else "Everyone",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = if (followingOnly) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                                )
                             }
                         }
                     }
                 }
+                if (offlineCopy) {
+                    // Honest, quiet, and only when it is true: the wall below is
+                    // the device's own copy because the request failed.
+                    item(key = "offline-copy") {
+                        SocialNote(
+                            "Offline — showing the wall as you last saw it.",
+                            false
+                        )
+                    }
+                }
+                // v386 — the doors row (Chats / Friends / You) is gone from
+                // here: it rides the hero itself now, so it is on screen the
+                // moment the wall opens instead of after the account check.
 
                 notice?.let { message ->
                     item {
@@ -312,80 +571,120 @@ fun CommunityScreen(navController: NavController) {
                 }
                 error?.let { message ->
                     item {
+                        // Quiet on-surface ink — a red slab atop the wall read
+                        // as a tester build's log, not a sentence.
                         Text(
                             message,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
-                if (cards.isEmpty() && !loading && error == null) {
+                // The list actually shown: the whole live wall, or only the
+                // followed members' slice of it. The filter is applied HERE
+                // (not on the fetch) so a fresh post by a followed member
+                // still lands through the same feed read.
+                val visibleCards = if (followingOnly) {
+                    cards.filter { it.authorId in followingIds }
+                } else cards
+
+                if (visibleCards.isEmpty() && !loading && error == null) {
                     item {
                         SettingsOptionCard {
                             SettingsOptionInfoRow(
                                 CurioIcons.Info,
-                                "Nothing here yet",
-                                "Cards only last a day — be the first to pin one up."
+                                if (followingOnly) "Nothing from who you follow" else "Nothing here yet",
+                                if (followingOnly) {
+                                    "Nobody you followed has posted in the last 24 hours."
+                                } else {
+                                    "Cards only last a day — be the first to pin one up."
+                                }
                             )
                         }
                     }
                 }
 
-                items(cards, key = { it.id }) { card ->
-                    CommunityCardItem(
-                        card = card,
-                        onOpen = { navController.navigate(CurioRoutes.communityCard(card.id)) },
-                        onAuthor = {
-                            if (card.authorId.isNotBlank()) {
-                                navController.navigate(CurioRoutes.socialProfile(card.authorId)) {
-                                    launchSingleTop = true
+                items(visibleCards, key = { it.id }) { card ->
+                    // Each row rises into place as the feed builds, so a
+                    // refresh reads as cards arriving rather than a page
+                    // blinking in.
+                    Box(Modifier.animateItem()) {
+                        CommunityCardItem(
+                            card = card,
+                            onOpen = { navController.navigate(CurioRoutes.communityCard(card.id)) },
+                            onAuthor = {
+                                if (card.authorId.isNotBlank()) {
+                                    navController.navigate(CurioRoutes.socialProfile(card.authorId)) {
+                                        launchSingleTop = true
+                                    }
                                 }
-                            }
-                        },
-                        onComments = { commentsFor = card },
-                        onLike = {
-                            val active = token ?: return@CommunityCardItem
-                            val userId = account.session?.userId
-                            scope.launch {
-                                val call = if (card.likedByMe && userId != null) {
-                                    CommunityApi.unlike(active, card.id, userId)
-                                } else {
-                                    CommunityApi.like(active, card.id)
+                            },
+                            onComments = { commentsFor = card },
+                            // The pill answers the tap NOW and the server is told
+                            // afterwards: a like used to wait for a round trip AND
+                            // a full feed rebuild before the count moved, which is
+                            // exactly the "slow" the wall was feeling. A rejected
+                            // call resyncs the wall from the server instead of
+                            // leaving the tap on screen as a lie.
+                            onLike = {
+                                val active = token ?: return@CommunityCardItem
+                                val userId = account.session?.userId ?: return@CommunityCardItem
+                                val liking = !card.likedByMe
+                                patchCard(card.id) { it.toggleLike() }
+                                scope.launch {
+                                    val call = if (liking) {
+                                        CommunityApi.like(active, card.id, userId)
+                                    } else {
+                                        CommunityApi.unlike(active, card.id, userId)
+                                    }
+                                    call.fold(
+                                        onSuccess = { SocialFeedCache.write(context, cards) },
+                                        onFailure = { failure ->
+                                            error = failure.message
+                                            refreshQuietly()
+                                        }
+                                    )
                                 }
-                                call.fold(
-                                    onSuccess = { load() },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        },
-                        onReport = { reporting = card },
-                        onDelete = {
-                            val active = token ?: return@CommunityCardItem
-                            scope.launch {
-                                CommunityApi.delete(active, card.id).fold(
-                                    onSuccess = {
-                                        notice = "Your card was taken down."
-                                        load()
-                                    },
-                                    onFailure = { error = it.message }
-                                )
-                            }
-                        }
-                    )
+                            },
+                            onDislike = {
+                                val active = token ?: return@CommunityCardItem
+                                val userId = account.session?.userId ?: return@CommunityCardItem
+                                val disliking = !card.dislikedByMe
+                                patchCard(card.id) { it.toggleDislike() }
+                                scope.launch {
+                                    val call = if (disliking) {
+                                        CommunityApi.dislike(active, card.id, userId)
+                                    } else {
+                                        CommunityApi.undislike(active, card.id, userId)
+                                    }
+                                    call.fold(
+                                        onSuccess = { SocialFeedCache.write(context, cards) },
+                                        onFailure = { failure ->
+                                            error = failure.message
+                                            refreshQuietly()
+                                        }
+                                    )
+                                }
+                            },
+                            onReport = { reporting = card },
+                            onDelete = { deleteTarget = card }
+                        )
+                    }
                 }
             }
         }
+    }
 
         // The one way to post: a floating pill above the wall, labelled with
         // what it actually does (sharing a TOPIC as a card). It clears the
-        // floating nav bar when this page is a tab root.
-        if (eligible) {
-            ExtendedFloatingActionButton(
-                onClick = { composing = true },
-                containerColor = curioDialogActionColor(),
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(50),
+        // floating nav bar when this page is a tab root, and it leaves while
+        // the wall is scrolling down.
+        if (eligible && canWriteWall) {
+            AnimatedVisibility(
+                visible = postVisible,
+                enter = fadeIn() + slideInVertically { it / 2 },
+                exit = fadeOut() + slideOutVertically { it / 2 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(
@@ -396,6 +695,12 @@ fun CommunityScreen(navController: NavController) {
                         } else 0.dp
                     )
             ) {
+            ExtendedFloatingActionButton(
+                onClick = { composing = true },
+                containerColor = curioDialogActionColor(),
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(50)
+            ) {
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = null,
@@ -404,38 +709,63 @@ fun CommunityScreen(navController: NavController) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Share a topic",
+                    "Post",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     )
                 )
             }
+            }
         }
 
         if (!wide) {
             SettingsHeroHeader(
-                title = "Community",
-                subtitle = "Text cards — gone in 24 hours",
+                title = "Social",
+                subtitle = "",
                 onBack = if (asTab) null else ({ navController.popBackStack() }),
+                footer = doorsFooter,
+                footerHeight = SocialDoorRowHeight,
                 glassBackdrop = glassBackdrop
             )
         }
     }
 
     if (composing && token != null) {
-        CommunityComposerSheet(
+        CommunityPostScreen(
             onDismiss = { composing = false },
-            onPost = { draft ->
+            onPost = { draft, repostOf ->
                 scope.launch {
                     CommunityApi.post(
                         token,
                         draft,
-                        AppPreferences.getDisplayName(context)
+                        AppPreferences.getDisplayName(context),
+                        account.session?.userId
                     ).fold(
-                        onSuccess = {
+                        onSuccess = { posted ->
                             composing = false
-                            notice = "Posted — it disappears in 24 hours."
-                            load()
+                            notice = if (repostOf != null) "Posted again." else "Posted."
+                            // The composer's own memory follows the post: the
+                            // draft is finished with, and a kept post that has
+                            // gone back up leaves the local archive (it is on
+                            // the wall again — keeping it would be a duplicate
+                            // waiting to happen).
+                            withContext(Dispatchers.IO) {
+                                SocialPostArchive.clearDraft(context, draft.kind)
+                                repostOf?.let { SocialPostArchive.forgetDeleted(context, it) }
+                            }
+                            // On the wall before the sheet is even gone, in
+                            // this device's own name and portrait: the row the
+                            // server stored IS the card. The rest of the feed
+                            // is reconciled quietly behind it, so nobody waits
+                            // on a full-page read to see their own post.
+                            val shown = posted.copy(
+                                authorDisplayName = AppPreferences.getDisplayName(context),
+                                authorName = AppPreferences.getUsername(context),
+                                authorAvatar = AppPreferences.getSocialAvatarStyle(context)
+                            )
+                            cards = listOf(shown) + cards.filterNot { it.id == shown.id }
+                            SocialFeedCache.write(context, cards)
+                            refreshQuietly()
                         },
                         onFailure = { error = it.message }
                     )
@@ -450,8 +780,9 @@ fun CommunityScreen(navController: NavController) {
                 card = open,
                 accessToken = active,
                 myUserId = account.session?.userId,
+                canModerateReplies = canModerateReplies,
                 onDismiss = { commentsFor = null },
-                onChanged = { scope.launch { load() } },
+                onChanged = { scope.launch { refreshQuietly() } },
                 onOpenProfile = { id ->
                     navController.navigate(CurioRoutes.socialProfile(id)) { launchSingleTop = true }
                 }
@@ -460,12 +791,15 @@ fun CommunityScreen(navController: NavController) {
     }
 
     reporting?.let { card ->
-        ReportCardDialog(
+        ReportTargetDialog(
+            title = "Report this post",
+            subtitle = "Reports go to the moderation team, with your reason.",
+            reasons = CommunityReportReasons.CONTENT,
             onDismiss = { reporting = null },
-            onReport = { reason ->
-                val active = token ?: return@ReportCardDialog
+            onReport = { reason, note ->
+                val active = token ?: return@ReportTargetDialog
                 scope.launch {
-                    CommunityApi.report(active, card.id, reason).fold(
+                    CommunityApi.report(active, "card", card.id, reason, note).fold(
                         onSuccess = {
                             reporting = null
                             notice = "Thanks — we'll take a look."
@@ -476,15 +810,65 @@ fun CommunityScreen(navController: NavController) {
             }
         )
     }
+
+    deleteTarget?.let { card ->
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            title = { Text("Delete post?") },
+            text = {
+                Text(
+                    "It leaves the community wall right away. A copy is kept on this phone, so " +
+                        "you can post it again from the composer if you change your mind."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val active = token ?: return@TextButton
+                    deleteTarget = null
+                    scope.launch {
+                        CommunityApi.delete(active, card.id).fold(
+                            onSuccess = {
+                                // Deleting a post used to be final the instant the
+                                // server was told. The words are the member's
+                                // own, so a copy stays on this phone — never
+                                // re-uploaded unless they ask — and the composer
+                                // offers it back at the foot of the page.
+                                withContext(Dispatchers.IO) {
+                                    SocialPostArchive.rememberDeleted(
+                                        context,
+                                        SocialPostArchive.DeletedPost(
+                                            id = card.id,
+                                            title = "",
+                                            draft = SocialPostArchive.draftOf(card),
+                                            postedAtMillis = card.createdAtMillis,
+                                            deletedAtMillis = System.currentTimeMillis()
+                                        )
+                                    )
+                                }
+                                notice = "Taken down — it is kept on this phone if you change your mind."
+                                load()
+                            },
+                            onFailure = { error = it.message }
+                        )
+                    }
+                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) { Text("Cancel") }
+            }
+        )
+    }
 }
 
 /**
  * A community card drawn at whatever width it is given.
  *
- * The REAL share card is rendered (never a simplified lookalike), scaled as a
- * LAYER: its own geometry is 405×720 / 450×600 dp, so scaling keeps the
- * internal layout and text wrapping identical to the exported image while the
- * feed and the card view can show it at their own width.
+ * The REAL share card is rendered (never a simplified lookalike), laid out
+ * DIRECTLY at the width its row offers — the same way the card editor draws
+ * its own preview (a 280dp base). The card's own layout and smart fit size the
+ * title, the fact box and the text for the size they are handed, so a post
+ * shows the WHOLE card, crisp: nothing is scaled as a layer, nothing is
+ * cropped, and no row reserves height the art does not use.
  */
 @Composable
 internal fun CommunityCardCanvas(
@@ -493,10 +877,9 @@ internal fun CommunityCardCanvas(
     /**
      * How much of the available width the card claims, centred.
      *
-     * The wall uses less than the full width: a share card is a TALL portrait
-     * (405×720dp), so at full width one card fills the whole screen and the
-     * feed stops feeling like a feed. The card's own view and a profile page
-     * pass 1f and show it whole.
+     * The wall claims less than the full width: a share card is a tall poster,
+     * and one drawn edge to edge stops reading as a post among others. The
+     * card's own view passes 1f and fills the page it owns.
      */
     widthFraction: Float = 1f
 ) {
@@ -504,47 +887,38 @@ internal fun CommunityCardCanvas(
         .getOrDefault(ShareCardStyle.PAPER)
     val aspect = runCatching { ShareCardAspect.valueOf(card.aspect) }
         .getOrDefault(ShareCardAspect.CLASSIC)
-    val cardWidth = aspect.widthDp.dp
-    val cardHeight = aspect.heightDp.dp
     val accent = remember(card.accentHex) { parseAccent(card.accentHex) }
 
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth(widthFraction)) {
-        val density = LocalDensity.current
-        val scale = with(density) {
-            (maxWidth.toPx() / cardWidth.toPx()).coerceAtMost(1f)
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(cardHeight * scale)
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth(widthFraction.coerceIn(0.2f, 1f)),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
+            // The card keeps its own aspect ratio and is capped at its design
+            // width, so a wide window shows it at its natural size instead of
+            // inflating the art.
+            val targetWidth = minOf(maxWidth, aspect.widthDp.dp)
+            TopicShareCard(
+                topicName = card.topicName,
+                categoryName = card.categoryName,
+                categoryGlyph = card.categoryGlyph,
+                accent = accent,
+                factText = card.factText,
+                // The card wears the author's CURRENT username, so renaming
+                // yourself updates everything you ever posted.
+                sharerName = card.authorLabel,
+                aspect = aspect,
+                style = style,
+                byline = card.byline,
+                bodyScale = card.bodyScale,
                 modifier = Modifier
-                    .size(cardWidth, cardHeight)
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        transformOrigin = TransformOrigin(0f, 0f)
-                    )
-            ) {
-                TopicShareCard(
-                    topicName = card.topicName,
-                    categoryName = card.categoryName,
-                    categoryGlyph = card.categoryGlyph,
-                    accent = accent,
-                    factText = card.factText,
-                    // The card wears the author's CURRENT username, so renaming
-                    // yourself updates everything you ever posted.
-                    sharerName = card.authorLabel,
-                    aspect = aspect,
-                    style = style,
-                    byline = card.byline,
-                    bodyScale = card.bodyScale
-                )
-            }
+                    .width(targetWidth)
+                    .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+            )
         }
-    }
     }
 }
 
@@ -559,20 +933,21 @@ private fun CommunityCardItem(
     card: CommunityCard,
     onOpen: () -> Unit,
     onAuthor: () -> Unit,
-    onComments: () -> Unit,
-    onLike: () -> Unit,
-    onReport: () -> Unit,
+  onComments: () -> Unit,
+  onLike: () -> Unit,
+  onDislike: () -> Unit,
+  onReport: () -> Unit,
     onDelete: () -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        // The ACCENT's own tint, never the plain cream container: the wall is
+        // the community's surface, and it should wear the app's colour the way
+        // every other surface does.
+        color = communityCardFill(),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Column(modifier = Modifier.padding(12.dp)) {
             // ── Who posted it ────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -588,8 +963,11 @@ private fun CommunityCardItem(
                         .weight(1f)
                         .padding(start = 10.dp)
                 ) {
+                    // The DISPLAY name leads and the @username rides the line
+                    // beneath it, beside the card's age: a name and a handle
+                    // are two different things, and a card wears both.
                     Text(
-                        text = "@${card.authorLabel}",
+                        text = card.authorLabel,
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
@@ -597,10 +975,14 @@ private fun CommunityCardItem(
                         maxLines = 1
                     )
                     Text(
-                        text = if (card.hoursLeft <= 0L) "Expiring now"
-                        else "${card.hoursLeft}h left",
+                        text = if (card.hoursLeft <= 0L) {
+                            "${card.authorHandleLabel} · expiring now"
+                        } else {
+                            "${card.authorHandleLabel} · ${card.hoursLeft}h left"
+                        },
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
                 CurioIcon(
@@ -612,6 +994,7 @@ private fun CommunityCardItem(
             }
 
             if (card.caption.isNotBlank()) {
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = card.caption,
                     style = MaterialTheme.typography.bodyMedium,
@@ -620,14 +1003,25 @@ private fun CommunityCardItem(
                 )
             }
 
-            CommunityCardCanvas(
-                card = card,
-                modifier = Modifier
-                    .clipToBounds()
-                    .clickable(onClick = onOpen),
-                widthFraction = FEED_CARD_WIDTH
-            )
+            Spacer(Modifier.height(8.dp))
+            if (card.kind == KIND_CARD) {
+                CommunityCardCanvas(
+                    card = card,
+                    modifier = Modifier
+                        .clipToBounds()
+                        .clickable(onClick = onOpen),
+                    widthFraction = FEED_CARD_WIDTH
+                )
+            } else {
+                // A NOTE or a QUOTE has no topic and no card art: the words ARE
+                // the post, so they get the room the art would have taken.
+                SocialTextPost(card = card, onClick = onOpen)
+            }
 
+            // The art and its actions are ONE object: a tight seam keeps the
+            // like/dislike row attached to the card instead of floating in an
+            // empty band under it.
+            Spacer(Modifier.height(4.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -635,386 +1029,266 @@ private fun CommunityCardItem(
             ) {
                 CommunityAction(
                     glyph = CurioIcons.ThumbUp,
-                    label = if (card.likeCount > 0) card.likeCount.toString() else "Like",
+                    label = if (card.likeCount > 0) card.likeCount.toString() else "",
                     tinted = card.likedByMe,
+                    animate = true,
                     onClick = onLike
                 )
                 CommunityAction(
+                    glyph = CurioIcons.ThumbDown,
+                    label = if (card.dislikeCount > 0) card.dislikeCount.toString() else "",
+                    tinted = card.dislikedByMe,
+                    animate = true,
+                    onClick = onDislike
+                )
+                CommunityAction(
                     glyph = CurioIcons.FormatQuote,
-                    label = if (card.commentCount > 0) card.commentCount.toString() else "Reply",
+                    label = if (card.commentCount > 0) card.commentCount.toString() else "",
                     tinted = false,
                     onClick = onComments
                 )
                 Spacer(Modifier.weight(1f))
+                // The rare actions are ICONS, not words: a take-down or a
+                // report is a decision, not a reading task, and two worded
+                // pills crowded the row's tail. The icon keeps its label for
+                // accessibility, so the tap target never loses its meaning.
                 if (card.mine) {
-                    CommunityAction(CurioIcons.Delete, "Take down", false, onDelete)
+                    CommunityAction(CurioIcons.Delete, "", false, onDelete)
                 }
-                CommunityAction(CurioIcons.Flag, "Report", false, onReport)
+                CommunityAction(CurioIcons.Flag, "", false, onReport)
             }
         }
     }
 }
 
-/** How much of the wall's width one card claims (centred). */
-private const val FEED_CARD_WIDTH = 0.74f
+/**
+ * The fill one WALL card wears.
+ *
+ * The wall's rows used to sit on the plain `surfaceContainerLow` — the app's
+ * warm cream — which made the community's own surface the only one in the app
+ * that ignored the accent entirely. The accent now tints the container: a
+ * whisper in light mode (the cream is still the base, so text contrast is
+ * untouched), a little more in the dark, where the surface needs the lift to
+ * read as a card at all.
+ *
+ * The SAME fill is used by every community surface that draws a panel, so the
+ * wall, a post's page and a profile's cards stay one family.
+ */
+@Composable
+internal fun communityCardFill(): Color {
+    val accent = settingsRoseAccent()
+    val base = MaterialTheme.colorScheme.surfaceContainerLow
+    return if (isCurioDarkTheme()) lerp(base, accent, 0.16f) else lerp(base, accent, 0.10f)
+}
 
+/**
+ * How much of the wall's width one card claims.
+ *
+ * A card is drawn just under the editor's own 280dp base, so the wall and the
+ * card editor agree on what a post looks like, and the row's box keeps a small
+ * even gutter around the art instead of framing a full-bleed poster.
+ */
+private const val FEED_CARD_WIDTH = 0.78f
+
+/**
+ * One action on a card, as a PILL: an icon and its count on one rounded
+ * surface, accent-filled while it is the state you are in (a like you left),
+ * quiet when it is a door (reply, share, report). TextButton's bare label was
+ * the "bad" action row — a pill reads as one touchable thing, and the press
+ * squish is the feedback that says the tap landed.
+ */
 @Composable
 internal fun CommunityAction(
     glyph: String,
     label: String,
     tinted: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    /** When true, a state change (a like landing) pops the icon. */
+    animate: Boolean = false
 ) {
-    TextButton(onClick = onClick) {
-        CurioIcon(
-            name = glyph,
-            contentDescription = null,
-            tint = if (tinted) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant,
-            size = 16.dp
-        )
-        Spacer(Modifier.width(6.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (tinted) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-/**
- * The composer: pick a TOPIC, write the words, choose a card style.
- *
- * The topic is chosen from the app's own catalog rather than typed, which is
- * the whole point of the flow — a card IS a topic being passed on, so its
- * name, lane, glyph and accent come from the catalog entry and can never
- * disagree with the card that renders. Searching covers every lane through
- * the loader's lightweight index (the same one the Topic Database searches),
- * with the warm lane pools as the fallback on a cold install.
- *
- * Lane chips are gone with the free-text field: a topic already knows its
- * lane, so there is nothing left to get wrong.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CommunityComposerSheet(
-    onDismiss: () -> Unit,
-    onPost: (CommunityCardDraft) -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var picked by remember { mutableStateOf<CurioTopic?>(null) }
-    var query by remember { mutableStateOf("") }
-    var caption by remember { mutableStateOf("") }
-    var fact by remember { mutableStateOf("") }
-    var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
-    // The whole-catalog index, loaded once. It is the prebuilt lightweight
-    // index (name/byline keys only), so searching never parses a lane.
-    var index by remember { mutableStateOf<List<com.curio.app.data.TopicIndexEntry>?>(null) }
-    LaunchedEffect(Unit) { index = TopicJsonLoader.loadIndex() }
-
-    val q = query.trim()
-    val results: List<CurioTopic> = remember(index, q) {
-        if (q.length < 2) emptyList()
-        else {
-            val pool = index?.map { it.topic }.orEmpty().ifEmpty {
-                // No index asset (a very cold install): fall back to whatever
-                // lane pools are already warm.
-                CurioCategories.all.filter { !it.isHidden }
-                    .flatMap { TopicJsonLoader.cached(it.id).orEmpty() }
-            }
-            pool.filter { topic ->
-                topic.name.contains(q, ignoreCase = true) ||
-                    topic.byline?.contains(q, ignoreCase = true) == true
-            }
-                .distinctBy { "${it.categoryId.name}|${it.name}" }
-                .sortedBy { it.name.lowercase() }
-                .take(30)
+    val ink = if (tinted) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
+    // The POP: whenever `tinted` flips (a like or dislike landing), the icon
+    // springs past its resting size and settles — the tactile answer to "did
+    // that count?". Driven by one Animatable so repeats restart cleanly.
+    val pop = remember { androidx.compose.animation.core.Animatable(1f) }
+    LaunchedEffect(tinted) {
+        if (animate) {
+            pop.snapTo(1.35f)
+            pop.animateTo(
+                1f,
+                androidx.compose.animation.core.spring(
+                    dampingRatio = 0.45f,
+                    stiffness = 700f
+                )
+            )
         }
     }
-    val lane = picked?.let { CurioCategories.byId(it.categoryId) }
-    val styles = remember {
-        listOf(
-            ShareCardStyle.PAPER,
-            ShareCardStyle.MINIMAL,
-            ShareCardStyle.EDITORIAL,
-            ShareCardStyle.COLLAGE,
-            ShareCardStyle.VINYL,
-            ShareCardStyle.SIGNATURE
-        )
-    }
-    val draft = CommunityCardDraft(
-        topicName = picked?.name.orEmpty(),
-        categoryName = lane?.displayName.orEmpty(),
-        categorySlug = lane?.id?.name?.lowercase().orEmpty(),
-        categoryGlyph = lane?.iconGlyph.orEmpty(),
-        accentHex = lane?.let { hexOf(it.accent) }.orEmpty(),
-        factText = fact,
-        caption = caption
-    )
-    val problem = CommunityApi.draftProblem(draft)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = { BottomSheetDefaults.DragHandle() }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = "Share a topic",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-            )
-            Text(
-                text = "Pick a topic and write the words that go on its card. It shows on the wall for 24 hours, " +
-                    "and only this text is ever posted.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            if (picked == null) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    singleLine = true,
-                    label = { Text("Search topics") },
-                    placeholder = { Text("A book, a film, a dish…") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                when {
-                    q.length < 2 -> Text(
-                        text = "Type at least two letters to search the catalog.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    results.isEmpty() -> Text(
-                        text = "Nothing matches that. Try another spelling.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    else -> LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 260.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        items(results, key = { "${it.categoryId.name}|${it.name}" }) { topic ->
-                            TopicPickRow(
-                                topic = topic,
-                                onClick = {
-                                    picked = topic
-                                    query = ""
-                                }
-                            )
-                        }
-                    }
-                }
-            } else {
-                // The chosen topic, wearing its lane — tap to pick again.
-                Surface(
-                    onClick = { picked = null },
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
-                    ) {
-                        CurioIcon(
-                            name = lane?.iconGlyph ?: CurioIcons.Wildcard,
-                            contentDescription = null,
-                            tint = lane?.accent ?: MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 20.dp
-                        )
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 10.dp)
-                        ) {
-                            Text(
-                                text = picked?.name.orEmpty(),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1
-                            )
-                            Text(
-                                text = lane?.displayName.orEmpty(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Text(
-                            text = "Change",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = curioDialogActionColor()
-                        )
-                    }
-                }
-            }
-
-            OutlinedTextField(
-                value = caption,
-                onValueChange = {
-                    if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
-                },
-                singleLine = true,
-                label = { Text("A caption above the card (optional)") },
-                supportingText = { Text("${caption.length}/${CommunityApi.MAX_CAPTION_CHARS}") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = fact,
-                onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
-                minLines = 3,
-                label = { Text("The words on the card") },
-                supportingText = { Text("${fact.length}/${CommunityApi.MAX_FACT_CHARS}") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text(
-                text = "STYLE",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.2.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.horizontalScroll(rememberScrollState())
-            ) {
-                styles.forEach { option ->
-                    FilterChip(
-                        selected = option == style,
-                        onClick = { style = option },
-                        label = {
-                            Text(option.label, style = MaterialTheme.typography.labelSmall)
-                        }
-                    )
-                }
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Spacer(Modifier.weight(1f))
-                TextButton(onClick = onDismiss) { Text("Cancel") }
-                Spacer(Modifier.width(8.dp))
-                Button(
-                    onClick = { onPost(draft.copy(style = style.name)) },
-                    enabled = problem == null,
-                    shape = RoundedCornerShape(50),
-                    colors = curioDialogActionButtonColors()
-                ) {
-                    Text("Post")
-                }
-            }
-            problem?.let { reason ->
-                Text(
-                    text = reason,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-/**
- * One catalog hit in the composer's picker: the topic's lane glyph, its name
- * and its byline, so two similarly named topics (a book and its film) can be
- * told apart before they are picked.
- */
-@Composable
-private fun TopicPickRow(topic: CurioTopic, onClick: () -> Unit) {
-    val lane = CurioCategories.byId(topic.categoryId)
     Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(50),
+        color = if (tinted) {
+            curioDialogActionColor().copy(alpha = 0.16f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+        },
+        modifier = Modifier
+            .graphicsLayer(scaleX = pop.value, scaleY = pop.value)
+            .curioPressClickable(
+                pressedScale = 0.94f,
+                hapticOnPress = false,
+                onClickLabel = label.ifBlank { glyph },
+                onClick = onClick
+            )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(if (label.isBlank()) 0.dp else 5.dp),
+            // An icon-only action is a SQUARE tap target, not a squat pill:
+            // equal padding all round keeps it thumb-sized and calm.
+            modifier = Modifier.padding(
+                horizontal = if (label.isBlank()) 8.dp else 10.dp,
+                vertical = 7.dp
+            )
         ) {
             CurioIcon(
-                name = lane.iconGlyph,
-                contentDescription = null,
-                tint = lane.accent,
+                name = glyph,
+                contentDescription = label.ifBlank { null }
+                    ?: when (glyph) {
+                        CurioIcons.Delete -> "Take down this card"
+                        CurioIcons.Flag -> "Report this card"
+                        else -> "Community action"
+                    },
+                tint = ink,
                 size = 18.dp
             )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
-            ) {
-                Text(
-                    text = topic.name,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1
-                )
-                val byline = topic.byline.orEmpty()
-                if (byline.isNotBlank()) {
-                    Text(
-                        text = byline,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-            }
-            Text(
-                text = lane.displayName,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (label.isNotBlank()) Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (tinted) FontWeight.Bold else FontWeight.Medium
+                ),
+                color = ink                    )
         }
     }
 }
 
-/** The report reasons the dialog offers — one tap, no free text. */
+/**
+ * v386 — the height the Social hero's doors row ADDS to the banner: the row's
+ * own height plus the gap the header leaves above it. Passed to
+ * [SettingsHeroHeader] as `footerHeight` and to [settingsHeroTotalHeight] as
+ * the reservation, so the wall always starts below the extended banner. Keep
+ * it in step with [SocialDoorsRow]'s natural height (a 31dp icon well plus 7dp
+ * of padding either side = 45dp, plus the 12dp gap, plus a little slack).
+ */
+private val SocialDoorRowHeight = 58.dp
+
+/**
+ * The wall's three doors (Chats / Friends / You) as ONE row for the hero
+ * banner: an icon in a rounded well beside the label, no narration under it.
+ *
+ * On the banner by design — as a list item under “Last 24 hours” the row only
+ * appeared once the account check landed, so it was missing every time the
+ * wall opened. Here it paints with the header itself.
+ */
 @Composable
-internal fun ReportCardDialog(
-    onDismiss: () -> Unit,
-    onReport: (String) -> Unit
+private fun SocialDoorsRow(
+    ink: Color,
+    onChats: () -> Unit,
+    onFriends: () -> Unit,
+    onYou: () -> Unit
 ) {
-    val reasons = listOf(
-        "spam" to "Spam or a repeated card",
-        "offensive" to "Offensive or harmful",
-        "off_topic" to "Not what it claims to be"
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = curioDialogContainerColor(),
-        shape = CurioDialogShape,
-        title = { Text("Report this card") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                reasons.forEach { (id, label) ->
-                    TextButton(onClick = { onReport(id) }) { Text(label) }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        },
-        dismissButton = {}
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        CommunityDoorTile(
+            icon = CurioIcons.Chats,
+            label = "Chats",
+            ink = ink,
+            onClick = onChats,
+            modifier = Modifier.weight(1f)
+        )
+        CommunityDoorTile(
+            // Groups: two people side by side — the mark a friends list
+            // deserves; the chats tile takes the speech bubble so the two
+            // never blur.
+            icon = CurioIcons.Friends,
+            label = "Friends",
+            ink = ink,
+            onClick = onFriends,
+            modifier = Modifier.weight(1f)
+        )
+        CommunityDoorTile(
+            icon = CurioIcons.Person,
+            label = "You",
+            ink = ink,
+            onClick = onYou,
+            modifier = Modifier.weight(1f)
+        )
+    }
 }
 
-/** `#RRGGBB` from a Color, and back again (the card stores the hex). */
-private fun hexOf(color: Color): String = "#%06X".format(0xFFFFFF and color.toArgb())
+/**
+ * One of the wall's three doors as a compact TILE: an icon in a rounded well
+ * beside the label, wearing the hero's readable [ink] on the hero's own pill
+ * glass so it reads as part of the torn paper. The press squish every other
+ * surface on this screen wears; equal weights keep the row balanced on any
+ * width.
+ */
+@Composable
+internal fun CommunityDoorTile(
+    icon: String,
+    label: String,
+    ink: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        // v27n — OPAQUE hero glass: a translucent fill lets the elevation
+        // shadow bleed through the tile as a blurry smudge.
+        color = settingsHeroPillFill(),
+        shadowElevation = 3.dp,
+        modifier = modifier
+            .curioDarkGlow(3.dp, RoundedCornerShape(18.dp))
+            .curioPressClickable(
+                pressedScale = 0.96f,
+                hapticOnPress = false,
+                onClickLabel = label,
+                onClick = onClick
+            )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 7.dp, vertical = 7.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = ink.copy(alpha = 0.14f)
+            ) {
+                CurioIcon(
+                    name = icon,
+                    contentDescription = null,
+                    tint = ink,
+                    size = 17.dp,
+                    modifier = Modifier.padding(7.dp)
+                )
+            }
+            Text(
+                text = label,
+                // labelMedium: three tiles share one phone's width and
+                // “Friends” must not ellipsize on a 320dp screen — labelLarge
+                // was already tight before the row moved onto the banner.
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = ink
+            )
+        }
+    }
+}
 
 internal fun parseAccent(hex: String): Color =
     runCatching { Color(0xFF000000 or hex.removePrefix("#").toLong(16)) }

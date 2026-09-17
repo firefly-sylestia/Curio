@@ -60,6 +60,9 @@ composeMaterial3 = "1.11.0-alpha07"
 kotlinxSerializationJson = "1.8.0"
 # Offline voice-to-text for pre-recorded sound bites (Vosk — on-device ASR).
 vosk = "0.3.47"
+  mlkitBarcode = "17.3.0"
+  cameraX = "1.4.2"
+  kotlinxCoroutinesPlayServices = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -134,6 +137,14 @@ backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 # Compose Multiplatform material3 (desktop port) — declared directly because
 # the `compose.material3` String accessor is deprecated in CMP 1.11+.
 compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3" }
+
+# ML Kit barcode scanning (ISBN scanner for the book shelf)
+  mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+  androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
+  androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+  androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+  androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+  kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

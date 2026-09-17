@@ -26,11 +26,20 @@
              outlive the device it was issued to. Signing in again after a
              reinstall/device setup is the intended cost. -->
         <exclude domain="sharedpref" path="curio_supabase_session.xml" />
+        <!-- The sealed vault (see CurioSecureStore) is device-bound by design:
+             its Keystore key cannot travel, and the sealed blob is useless
+             without it. Excluded so a backup never carries even ciphertext. -->
+        <exclude domain="sharedpref" path="curio_secure_store.xml" />
+        <!-- Cached social content (conversations, names, cards) is a device
+             cache: never uploaded, and deleted on sign-out. -->
+        <exclude domain="sharedpref" path="curio_social_cache.xml" />
     </cloud-backup>
     <device-transfer>
         <include domain="database" path="." />
         <include domain="sharedpref" path="." />
         <exclude domain="sharedpref" path="curio_crash_logs.xml" />
         <exclude domain="sharedpref" path="curio_supabase_session.xml" />
+        <exclude domain="sharedpref" path="curio_secure_store.xml" />
+        <exclude domain="sharedpref" path="curio_social_cache.xml" />
     </device-transfer>
 </data-extraction-rules>

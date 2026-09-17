@@ -1,0 +1,15 @@
+{
+  "name": "curio-auth-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "The Curio account site: Supabase email links, password recovery, and account self-service.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check assets/curio.js && node --check api/config.js && node --check api/delete-account.js",
+    "dev": "vercel dev"
+  },
+  "dependencies": {}
+}

@@ -76,6 +76,38 @@ fun BackupToolsScreen(navController: NavController) {
     var autoBackupEnabled by remember { mutableStateOf(AppPreferences.isAutoBackupEnabled(context)) }
     var autoBackupUriStr by remember { mutableStateOf(AppPreferences.getAutoBackupUri(context)) }
     var lastAutoBackupAt by remember { mutableStateOf(AppPreferences.getAutoBackupLastAtMillis(context)) }
+    // What the auto-backup row said the last time one ran (or failed).
+    var autoBackupStatus by remember { mutableStateOf<Pair<Boolean, String>?>(null) }
+    var autoBackupBusy by remember { mutableStateOf(false) }
+
+    /**
+     * Writes the SAME complete archive "Back up now" writes into the
+     * auto-backup location, right away.
+     *
+     * Turning auto backup on used to only ARM it: the first file appeared
+     * whenever the schedule next came due, which reads as "it did nothing".
+     * One export runs the moment a destination exists (on the toggle and after
+     * the picker), so the member sees the file and the timestamp immediately.
+     */
+    fun writeAutoBackupNow(uriString: String) {
+        val trimmed = uriString.trim()
+        if (trimmed.isEmpty()) return
+        scope.launch {
+            autoBackupBusy = true
+            runCatching { CurioBackupManager.export(context, Uri.parse(trimmed)) }
+                .onSuccess { result ->
+                    AppPreferences.setAutoBackupLastAtMillis(context, result.exportedAtMillis)
+                    lastAutoBackupAt = result.exportedAtMillis
+                    autoBackupStatus = true to
+                        "Saved ${result.captureCount} capture(s) to your location just now."
+                }
+                .onFailure { failure ->
+                    autoBackupStatus = false to
+                        "Couldn't write to that location: ${failure.message ?: "unknown error"}"
+                }
+            autoBackupBusy = false
+        }
+    }
 
     // Refresh the backup timestamps whenever the screen resumes — a backup
     // (manual or the background auto-backup) can complete while the screen
@@ -153,6 +185,8 @@ fun BackupToolsScreen(navController: NavController) {
             AppPreferences.setAutoBackupEnabled(context, true)
             autoBackupUriStr = uri.toString()
             autoBackupEnabled = true
+            // The file exists the moment the location is chosen.
+            writeAutoBackupNow(uri.toString())
         }
     }
 
@@ -365,25 +399,26 @@ val glassBackdrop = rememberLayerBackdrop()
                         SimpleDateFormat("MMM d, yyyy · h:mm a", locale).format(Date(lastBackupAt))
                     } else "Never"
                     SettingsOptionInfoRow(CurioIcons.History, "Last backup", backupLabel)
-                }
-                }
-            }
-            item { SettingsSectionHeading("Auto backup") }
-            item {
-                SettingsOptionCard {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                    SettingsOptionDivider()
+                    // ── AUTO BACKUP LIVES IN THIS CARD (user request: it was a
+                    // separate "Auto backup" group, which read as a different
+                    // feature). It is the SAME complete archive as "Back up
+                    // now" — captures, settings and recordings — written on a
+                    // schedule the member chooses below.
                     // Toggle row — pick the location the FIRST time it's
                     // switched on; afterwards the saved destination is reused.
                     SettingsOptionSwitchRow(
-                        CurioIcons.Backup,
+                        CurioIcons.Restore,
                         "Auto backup",
-                        if (autoBackupEnabled)
-                            "Saves to your location " + when (AppPreferences.autoBackupFrequencyDaysState) {
-                                1 -> "about once a day"
-                                3 -> "about every 3 days"
-                                else -> "about once a week"
+                        when {
+                            !autoBackupEnabled ->
+                                "Same complete backup, saved to a location you pick"
+                            else -> "Saving the full backup " + when (AppPreferences.autoBackupFrequencyDaysState) {
+                                1 -> "every day"
+                                3 -> "every 3 days"
+                                else -> "every week"
                             }
-                        else "Pick a location once, back up on its own",
+                        },
                         autoBackupEnabled
                     ) { enabled ->
                         if (enabled && autoBackupUriStr.isBlank()) {
@@ -392,6 +427,8 @@ val glassBackdrop = rememberLayerBackdrop()
                         } else {
                             AppPreferences.setAutoBackupEnabled(context, enabled)
                             autoBackupEnabled = enabled
+                            // Turning it ON writes the first file immediately.
+                            if (enabled) writeAutoBackupNow(autoBackupUriStr)
                         }
                     }
                     if (autoBackupEnabled) {
@@ -450,6 +487,14 @@ val glassBackdrop = rememberLayerBackdrop()
                             SimpleDateFormat("MMM d, yyyy · h:mm a", locale).format(Date(lastAutoBackupAt))
                         } else "Not yet"
                         SettingsOptionInfoRow(CurioIcons.History, "Last auto backup", autoLabel)
+                    }
+                    autoBackupStatus?.let { (ok, line) ->
+                        SettingsOptionDivider()
+                        SettingsOptionInfoRow(
+                            if (ok) CurioIcons.Check else CurioIcons.Warning,
+                            if (autoBackupBusy) "Auto backup…" else if (ok) "Auto backup saved" else "Auto backup failed",
+                            line
+                        )
                     }
                 }
                 }

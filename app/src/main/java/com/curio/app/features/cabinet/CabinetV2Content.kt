@@ -1,5 +1,8 @@
 package com.curio.app.features.cabinet
 
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsAccentInk
+import com.curio.app.features.settings.settingsRoseAccent
 import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -105,12 +108,16 @@ import com.curio.app.data.CurioCollection
 import com.curio.app.data.CurioCollectionMember
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
+import com.curio.app.data.PersonalBookEntity
+import com.curio.app.data.PersonalNoteEntity
+import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.matchesSavedName
 import com.curio.app.data.matchesSavedNameStrict
 import com.curio.app.data.shortName
+import com.curio.app.features.personal.personalRouteFor
 import com.curio.app.features.reveal.AlbumArtFetch
 import com.curio.app.features.reveal.SeriesPosterFetch
 import com.curio.app.features.settings.BookCoverFetch
@@ -208,6 +215,23 @@ fun CabinetV2Content(navController: NavController) {
         if (archiveReady) AppPreferences.setCabinetEntryCount(context, entries.size)
     }
     val entriesById = remember(entries) { entries.associateBy { it.id } }
+    // v387 — the PERSONAL WRITING store's own lists (journals + books). The
+    // Personal shelf shows these instead of captures; they come from their own
+    // tables through their own repository, so the archive above is untouched.
+    val personalJournals by androidx.compose.runtime.produceState<List<PersonalNoteEntity>>(
+        initialValue = emptyList()
+    ) {
+        runCatching {
+            PersonalRepositoryHolder.repo.observeJournals().collect { value = it }
+        }
+    }
+    val personalBooks by androidx.compose.runtime.produceState<List<PersonalBookEntity>>(
+        initialValue = emptyList()
+    ) {
+        runCatching {
+            PersonalRepositoryHolder.repo.observeBooks().collect { value = it }
+        }
+    }
     val books = remember(AppPreferences.bookFavoritesState, AppPreferences.bookCoverUrlsState) {
         AppPreferences.getBookFavorites(context)
             .map { name -> V2Liked(name, V2Kind.BOOK, findLikedTopic(V2Kind.BOOK, name)) }
@@ -359,15 +383,35 @@ fun CabinetV2Content(navController: NavController) {
         }
         if (newCovers > 0) CabinetCoverCache.version.intValue++
     }
-    val shelfCounts = remember(allLikes.size, likedTopics.size, entries.size, noteEntries.size, seededById) {
+    // v389 — the shelf's BOOKS are being read too. "Curiying now" counted only
+    // the members saved into its seeded collection, so a book the member had
+    // ADDED to the shelf and was part-way through was missing from the number
+    // (and from the shelf itself) — the reported wrong count. The extra books
+    // are counted by TITLE against the saved members, so a hearted book that is
+    // also on the shelf is not counted twice.
+    val readingBooks = remember(personalBooks) { personalBooks.filter { !it.isFinished } }
+    val readingNowExtra = remember(seededById, readingBooks) {
+        val saved = seededById["shelf:currently-reading"]?.members
+            ?.map { it.refName.trim().lowercase() }
+            ?.toSet()
+            ?: emptySet()
+        readingBooks.count { it.title.trim().lowercase() !in saved }
+    }
+    val shelfCounts = remember(
+        allLikes.size, likedTopics.size, entries.size, noteEntries.size, seededById,
+        personalJournals.size, personalBooks.size, readingNowExtra
+    ) {
         mapOf(
             V2ShelfId.FAVORITES to likedTopics.size,
-            V2ShelfId.CURRENTLY_READING to (seededById["shelf:currently-reading"]?.members?.size ?: 0),
+            V2ShelfId.CURRENTLY_READING to
+                ((seededById["shelf:currently-reading"]?.members?.size ?: 0) + readingNowExtra),
             V2ShelfId.WANT_TO_READ to (seededById["shelf:want-to-read"]?.members?.size ?: 0),
             V2ShelfId.SAVED to entries.size,
-            V2ShelfId.COMPLETED to (seededById["shelf:completed"]?.members?.size ?: 0),
+            V2ShelfId.COMPLETED to likedTopics.size,
             V2ShelfId.NOTES to noteEntries.size,
-            V2ShelfId.PERSONAL to (seededById["shelf:personal"]?.members?.size ?: 0)
+            // v387 — Personal counts the WRITING now (journals + books); its
+            // saved members are still counted on the collection's own door.
+            V2ShelfId.PERSONAL to (personalJournals.size + personalBooks.size)
         )
     }
 
@@ -505,22 +549,27 @@ fun CabinetV2Content(navController: NavController) {
     val rawContent = entries.isNotEmpty() || books.isNotEmpty() ||
         albums.isNotEmpty() || series.isNotEmpty() || userCollections.isNotEmpty()
 
-    // ── Empty-Cabinet suggestions (existing v2 behavior).
-    var suggestions by remember { mutableStateOf<List<CurioTopic>>(emptyList()) }
-    var suggestionSeed by remember { mutableIntStateOf(0) }
+    // ── Empty-Cabinet suggestions: exactly three shuffled picks from the
+    // shelves members can collect here — one book, series, and album.
+    var suggestions by remember { mutableStateOf<Map<CategoryId, List<CurioTopic>>>(emptyMap()) }
+    var suggestionSeed by remember { mutableStateOf(0) }
+    val suggestionCats = remember {
+        listOf(CategoryId.BOOKS, CategoryId.SERIES, CategoryId.ALBUMS)
+    }
     LaunchedEffect(suggestionSeed) {
-        val picked = mutableListOf<CurioTopic>()
-        val seen = mutableSetOf<String>()
-        var guard = 0
-        while (picked.size < 3 && guard < 40) {
-            guard++
-            val t = runCatching { TopicCatalog.randomFor(CategoryId.WILDCARD) }.getOrNull() ?: break
-            if (t.name !in seen) {
-                seen.add(t.name)
-                picked.add(t)
+        val grouped = mutableMapOf<CategoryId, MutableList<CurioTopic>>()
+        for (cat in suggestionCats) {
+            val picks = mutableListOf<CurioTopic>()
+            val seen = mutableSetOf<String>()
+            var guard = 0
+            while (picks.size < 1 && guard < 20) {
+                guard++
+                val t = runCatching { TopicCatalog.randomFor(cat) }.getOrNull() ?: break
+                if (t.name !in seen) { seen.add(t.name); picks.add(t) }
             }
+            if (picks.isNotEmpty()) grouped[cat] = picks
         }
-        suggestions = picked
+        suggestions = grouped
     }
 
     // ── Collection edit state.
@@ -540,17 +589,30 @@ fun CabinetV2Content(navController: NavController) {
         selectionMode -> "${selectedEntryIds.size} selected"
         openCollection != null -> openCollection.name
         openLevel == SHELF_LEVEL_FAVORITES -> "Favorites"
+        openLevel == SHELF_LEVEL_COMPLETED -> "Completed"
         openLevel == SHELF_LEVEL_SAVED -> "Saved entries"
         openLevel == SHELF_LEVEL_NOTES -> "Notes"
+        // v387 — the Personal shelf holds the member's OWN writing now.
+        openLevel == SHELF_LEVEL_PERSONAL -> "Personal"
         openLevel == "everything" -> "Cupboard"
         else -> "The Cabinet"
     }
     val heroSubtitle = when {
         selectionMode -> "Long-press cards to select"
-        openCollection != null -> "${openCollection.members.size} item${if (openCollection.members.size == 1) "" else "s"}"
+        openCollection != null -> {
+            val total = openCollection.members.size +
+                (if (openCollection.id == "shelf:currently-reading") readingNowExtra else 0)
+            "$total item${if (total == 1) "" else "s"}"
+        }
         openLevel == SHELF_LEVEL_FAVORITES -> "${likedTopics.size} liked topic${if (likedTopics.size == 1) "" else "s"}"
+        openLevel == SHELF_LEVEL_COMPLETED -> "${likedTopics.size} completed topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
         openLevel == SHELF_LEVEL_NOTES -> "${noteEntries.size} notes & voice captures"
+        openLevel == SHELF_LEVEL_PERSONAL -> buildString {
+            append(if (personalJournals.size == 1) "1 journal" else "${personalJournals.size} journals")
+            append(" · ")
+            append(if (personalBooks.size == 1) "1 book" else "${personalBooks.size} books")
+        }
         openLevel == "everything" -> "Books · albums · series"
         else -> "Collections · Cupboard · your keepsakes"
     }
@@ -560,7 +622,7 @@ fun CabinetV2Content(navController: NavController) {
     // grid just clears the torn hero + a breathing gap.
     val contentTop = if (wide) 0.dp else heroTotal + 12.dp
 
-    val pageAccent = MaterialTheme.colorScheme.primary
+    val pageAccent = settingsRoseAccent()
 
     val heroTrailing: @Composable (Color, Color) -> Unit = { ink, fill ->
         V2HeroTrailing(
@@ -725,7 +787,8 @@ fun CabinetV2Content(navController: NavController) {
             }
 
             when {
-                openCollection != null -> v2DetailItems(
+                openCollection != null -> {
+                v2DetailItems(
                     collection = openCollection,
                     entriesById = entriesById,
                     searching = searching,
@@ -748,10 +811,28 @@ fun CabinetV2Content(navController: NavController) {
                     onRename = { renameTarget = openCollection.id },
                     onDelete = { deleteTarget = openCollection.id }
                 )
+                // v389 — "Curiying now" also holds the member's OWN shelf books
+                // that are part-way through (additive: the collection's saved
+                // members keep their grid above and their door below).
+                if (openCollection.id == "shelf:currently-reading") {
+                    v2ReadingNowItems(
+                        books = readingBooks,
+                        searchQuery = searchQuery,
+                        onOpenBook = { id ->
+                            navController.navigate(CurioRoutes.bookDetail(id)) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onOpenShelf = {
+                            navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                        }
+                    )
+                }
+                }
                 // v3xx43 — FAVORITES = the topics you liked (the reveal
                 // heart), listed as topic rows; the media covers live in the
                 // Cupboard, so the two shelves are no longer identical.
-                openLevel == SHELF_LEVEL_FAVORITES -> v2LikedTopicItems(
+                openLevel == SHELF_LEVEL_FAVORITES || openLevel == SHELF_LEVEL_COMPLETED -> v2LikedTopicItems(
                     likes = likedTopics,
                     searchQuery = searchQuery,
                     catalogReady = catalogReady,
@@ -812,21 +893,68 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     }
                 )
+                // v387 — the PERSONAL shelf: journals + books, each in its
+                // own small view, with the collection's saved members one tap
+                // away at the foot (nothing that lived here was removed).
+                openLevel == SHELF_LEVEL_PERSONAL -> v2PersonalWritingItems(
+                    journals = personalJournals,
+                    books = personalBooks,
+                    searchQuery = searchQuery,
+                    savedMemberCount = builtInShelves
+                        .firstOrNull { it.id == V2ShelfId.PERSONAL }
+                        ?.seededCollectionId
+                        ?.let { seeded ->
+                            shownUserCollections.firstOrNull { it.id == seeded }?.members?.size
+                        } ?: 0,
+                    // v389 — the shelf holds all three kinds of personal page,
+                    // so a row opens its OWN screen: a journal day the editor,
+                    // a to-do list the checklist page, a topic note the topic
+                    // page (see personalRouteFor in PersonalPage.kt).
+                    onOpenJournal = { id ->
+                        val note = personalJournals.firstOrNull { it.id == id }
+                        navController.navigate(
+                            note?.let { personalRouteFor(it) }
+                                ?: CurioRoutes.journalEditor(id)
+                        ) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenBook = { id ->
+                        navController.navigate(CurioRoutes.bookDetail(id)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenAllJournals = {
+                        navController.navigate(CurioRoutes.JOURNALS) { launchSingleTop = true }
+                    },
+                    onOpenShelf = {
+                        navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                    },
+                    onOpenSavedMembers = {
+                        openLevel = builtInShelves
+                            .firstOrNull { it.id == V2ShelfId.PERSONAL }
+                            ?.seededCollectionId ?: "shelf:personal"
+                        searchActive = false
+                        searchQuery = ""
+                    }
+                )
                 else -> v2HomeItems(
                     everythingLikes = allLikes,
                     everythingCount = allLikes.size,
-                    savedEntries = entries.sortedByDescending { it.capturedAtMillis },
                     visibleShelves = visibleShelves,
                     userCollections = shownUserCollections,
                     searching = searching,
-                    selectionMode = selectionMode,
-                    selectedEntryIds = selectedEntryIds,
                     onOpenEverything = { openLevel = "everything"; searchActive = false; searchQuery = "" },
                     onOpenShelf = { id ->
                         openLevel = when (id) {
                             V2ShelfId.FAVORITES -> SHELF_LEVEL_FAVORITES
+                            V2ShelfId.COMPLETED -> SHELF_LEVEL_COMPLETED
                             V2ShelfId.SAVED -> SHELF_LEVEL_SAVED
                             V2ShelfId.NOTES -> SHELF_LEVEL_NOTES
+                            // v387 — Personal opens the writing store (journals
+                            // + books); its saved members keep their door at
+                            // the foot of that level.
+                            V2ShelfId.PERSONAL -> SHELF_LEVEL_PERSONAL
                             else -> {
                                 val seeded = builtInShelves.firstOrNull { it.id == id }?.seededCollectionId
                                 seeded ?: ""
@@ -838,8 +966,6 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     },
                     onOpenCollection = { id -> openLevel = id; searchActive = false; searchQuery = "" },
-                    // v3xx — the collection cards' ⋮ now drives RENAME / DELETE
-                    // straight from an anchored dropdown (no center overlay).
                     onRenameCollection = { id -> renameTarget = id },
                     onDeleteCollection = { id -> deleteTarget = id },
                     onNewCollection = { showCreateSheet = true },
@@ -850,23 +976,7 @@ fun CabinetV2Content(navController: NavController) {
                             CurioRoutes.revealFor(t.categoryId.routeSlug, t.name)
                         ) { launchSingleTop = true }
                     },
-                    // v3xx50 — only claim "empty" once the archive has
-                    // actually been read (see [archiveReady]).
                     showSuggestions = archiveReady && !rawContent,
-                    savedSkeletonCount = if (archiveReady) 0 else skeletonCount,
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
-                    },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    },
                     onClearSearch = { searchQuery = ""; searchActive = false }
                 )
             }
@@ -1113,27 +1223,19 @@ fun CabinetV2Content(navController: NavController) {
 private fun LazyGridScope.v2HomeItems(
     everythingLikes: List<V2Liked>,
     everythingCount: Int,
-    savedEntries: List<CurioEntry>,
     visibleShelves: List<Pair<V2Shelf, Int>>,
     userCollections: List<CurioCollection>,
     searching: Boolean,
-    selectionMode: Boolean,
-    selectedEntryIds: Set<String>,
     onOpenEverything: () -> Unit,
     onOpenShelf: (V2ShelfId) -> Unit,
     onOpenCollection: (String) -> Unit,
     onRenameCollection: (String) -> Unit,
     onDeleteCollection: (String) -> Unit,
     onNewCollection: () -> Unit,
-    suggestions: List<CurioTopic>,
+    suggestions: Map<CategoryId, List<CurioTopic>>,
     onShuffle: () -> Unit,
     onOpenSuggestion: (CurioTopic) -> Unit,
     showSuggestions: Boolean,
-    /** v3xx50 — when > 0 the archive has not been read yet: paint this many
-     *  entry-card placeholders in the Saved-entries slot. */
-    savedSkeletonCount: Int,
-    onEntryLongClick: (String) -> Unit,
-    onEntryClick: (String) -> Unit,
     onClearSearch: () -> Unit
 ) {
     if (searching && visibleShelves.isEmpty() && userCollections.isEmpty()) {
@@ -1169,35 +1271,7 @@ private fun LazyGridScope.v2HomeItems(
                 onOpen = onOpenEverything
             )
         }
-        if (savedEntries.isNotEmpty()) {
-            item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-                V2PageSectionHeader(
-                    title = "Saved entries",
-                    subtitle = "Your latest additions",
-                    trailing = "${savedEntries.size}"
-                )
-            }
-            v2EntryItems(
-                entries = savedEntries,
-                fullSpan = false,
-                selectionMode = selectionMode,
-                selectedEntryIds = selectedEntryIds,
-                onEntryLongClick = onEntryLongClick,
-                onEntryClick = onEntryClick
-            )
-        } else if (savedSkeletonCount > 0) {
-            // v3xx50 — the archive is still arriving: hold the exact slot the
-            // real cards will occupy (same header, same 2-column grid) with
-            // as many placeholders as there are saved entries to come.
-            item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-                V2PageSectionHeader(
-                    title = "Saved entries",
-                    subtitle = "Your latest additions",
-                    trailing = null
-                )
-            }
-            v2SkeletonItems(count = savedSkeletonCount)
-        }
+
     }
 
     if (visibleShelves.isNotEmpty() || userCollections.isNotEmpty()) {
@@ -1495,7 +1569,7 @@ private fun LazyListScope.v2EverythingMasonryItems(
                     // The fallback accent resolves INSIDE the item's composable
                     // lambda (the wall builder itself is not @Composable).
                     val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
-                        ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                        ?.themedAccent() ?: settingsRoseAccent()
                     // Every cover is sized to the shelf height by its OWN
                     // aspect, so the row fills the width exactly and no cover
                     // ever leaves space beside or below it.
@@ -1608,7 +1682,7 @@ private fun V2HeroTrailing(
 
 // ────────────────────────────────────────────────────────────────────────
 // Collection cards
-// ────────────────────────────────────────────────────────────────────────
+// ───────────────────��──────────────────────��─────────────────────────────
 
 /** The "+ New collection" tile at the foot of the collections home. */
 @Composable
@@ -1627,13 +1701,13 @@ private fun V2NewCollectionTile(onClick: () -> Unit) {
             CurioIcon(
                 name = CurioIcons.Add,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = settingsAccentInk(),
                 size = 19.dp
             )
             Text(
                 text = "New collection",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.primary
+                color = settingsAccentInk()
             )
         }
     }
@@ -1880,7 +1954,7 @@ private fun V2EverythingCard(
                         // (dominant color extracted from the cached art). The
                         // category fallback is computed OUTSIDE the remember
                         // (themedAccent is @Composable).
-                        val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                        val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
                         val accent = remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
                             CabinetCoverCache.dominantCoverColor(
                                 context,
@@ -1952,7 +2026,7 @@ private fun V2FilterRail(
                 shape = RoundedCornerShape(50),
                 color = if (selected) accent
                 else MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                contentColor = if (selected) settingsReadableInk(settingsRoseAccent())
                 else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.height(34.dp)
             ) {
@@ -1964,7 +2038,7 @@ private fun V2FilterRail(
                     CurioIcon(
                         name = icon,
                         contentDescription = null,
-                        tint = if (selected) MaterialTheme.colorScheme.onPrimary
+                        tint = if (selected) settingsReadableInk(settingsRoseAccent())
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         size = 15.dp
                     )
@@ -1987,7 +2061,7 @@ private fun V2AddPillCompact(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+        color = settingsRoseAccent().copy(alpha = 0.13f),
         modifier = Modifier.height(46.dp)
     ) {
         Row(
@@ -1998,13 +2072,13 @@ private fun V2AddPillCompact(onClick: () -> Unit) {
             CurioIcon(
                 name = CurioIcons.Add,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = settingsAccentInk(),
                 size = 20.dp
             )
             Text(
                 text = "Add",
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.primary,
+                color = settingsAccentInk(),
                 maxLines = 1
             )
         }
@@ -2037,7 +2111,7 @@ private fun V2MediaTileCard(
 ) {
     val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
     // v3xx — the tile wears ITS OWN color: the dominant color extracted from
     // its cover art (fallback = category accent while the cover is still
     // downloading). Re-keys when the cover cache warms a file.
@@ -2238,7 +2312,7 @@ private fun V2ReviewTileCard(
                     CurioIcon(
                         name = CurioIcons.Check,
                         contentDescription = "Selected",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = settingsAccentInk(),
                         size = 18.dp
                     )
                 }
@@ -2289,7 +2363,7 @@ private fun V2LikedTileCard(
 ) {
     val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
     // v3xx — the tile wears ITS OWN color: the dominant color extracted from
     // its cover art (fallback = category accent while the cover is still
     // downloading). Re-keys when the cover cache warms a file.
@@ -2463,7 +2537,7 @@ private fun V2LikedTopicRow(
     modifier: Modifier = Modifier
 ) {
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val accent = cat?.themedAccent() ?: settingsRoseAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
@@ -2627,7 +2701,7 @@ private fun V2DetailHeader(
         Surface(
             onClick = onAdd,
             shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+            color = settingsRoseAccent().copy(alpha = 0.13f),
             modifier = Modifier.height(46.dp)
         ) {
             Row(
@@ -2638,13 +2712,13 @@ private fun V2DetailHeader(
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = "Add saved captures",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = settingsAccentInk(),
                     size = 22.dp
                 )
                 Text(
                     text = "Add",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = settingsAccentInk(),
                     maxLines = 1
                 )
             }
@@ -2786,7 +2860,7 @@ private fun V2CollectionNameSheet(
                             .background(if (dark) Color(t.dark) else Color(t.light))
                             .then(
                                 if (selected)
-                                    Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(21.dp))
+                                    Modifier.border(3.dp, settingsRoseAccent(), RoundedCornerShape(21.dp))
                                 else Modifier
                             )
                             .clickable { tone = if (selected) -1 else i },
@@ -2821,7 +2895,7 @@ private fun V2CollectionNameSheet(
                             .background(if (dark) Color(t.dark) else Color(t.light))
                             .then(
                                 if (selected)
-                                    Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                                    Modifier.border(3.dp, settingsRoseAccent(), RoundedCornerShape(14.dp))
                                 else Modifier
                             )
                             .clickable { art = if (selected) -1 else i }
@@ -2838,13 +2912,13 @@ private fun V2CollectionNameSheet(
                                     .padding(4.dp)
                                     .size(18.dp)
                                     .clip(RoundedCornerShape(9.dp))
-                                    .background(MaterialTheme.colorScheme.primary),
+                                    .background(settingsRoseAccent()),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CurioIcon(
                                     name = CurioIcons.Check,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    tint = settingsReadableInk(settingsRoseAccent()),
                                     size = 12.dp
                                 )
                             }
@@ -2865,12 +2939,12 @@ private fun V2CollectionNameSheet(
                             .size(44.dp)
                             .clip(RoundedCornerShape(14.dp))
                             .background(
-                                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                                if (selected) settingsRoseAccent().copy(alpha = 0.16f)
                                 else MaterialTheme.colorScheme.surfaceContainerHigh
                             )
                             .then(
                                 if (selected)
-                                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                                    Modifier.border(2.dp, settingsRoseAccent(), RoundedCornerShape(14.dp))
                                 else Modifier
                             )
                             .clickable { icon = if (selected) "" else glyph },
@@ -2879,7 +2953,7 @@ private fun V2CollectionNameSheet(
                         CurioIcon(
                             name = glyph,
                             contentDescription = null,
-                            tint = if (selected) MaterialTheme.colorScheme.primary
+                            tint = if (selected) settingsRoseAccent()
                             else MaterialTheme.colorScheme.onSurfaceVariant,
                             size = 21.dp
                         )
@@ -2892,14 +2966,14 @@ private fun V2CollectionNameSheet(
                     onConfirm(name.trim().ifBlank { "Collection" }, tone, art, icon.ifBlank { null })
                 },
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.primary,
+                color = settingsRoseAccent(),
                 modifier = Modifier.fillMaxWidth().height(46.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         text = confirmLabel,
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = settingsReadableInk(settingsRoseAccent())
                     )
                 }
             }
@@ -2929,13 +3003,13 @@ private fun V2CollectionNameSheet(
                                 modifier = Modifier
                                     .size(34.dp)
                                     .clip(RoundedCornerShape(9.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                                    .background(settingsRoseAccent().copy(alpha = 0.14f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CurioIcon(
                                     name = CurioIcons.Image,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = settingsAccentInk(),
                                     size = 16.dp
                                 )
                             }
@@ -2981,12 +3055,12 @@ private fun StyleAutoChip(
             .height(44.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(
-                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                if (selected) settingsRoseAccent().copy(alpha = 0.16f)
                 else MaterialTheme.colorScheme.surfaceContainerHigh
             )
             .then(
                 if (selected)
-                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                    Modifier.border(2.dp, settingsRoseAccent(), RoundedCornerShape(14.dp))
                 else Modifier
             )
             .clickable(onClick = onClick)
@@ -2996,7 +3070,7 @@ private fun StyleAutoChip(
         Text(
             text = "Auto",
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = if (selected) MaterialTheme.colorScheme.primary
+            color = if (selected) settingsRoseAccent()
             else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -3019,7 +3093,7 @@ private fun V2ShelfToggleChips(
             it.kind == CurioCollectionMember.MemberKind.TOPIC &&
                 it.categoryName == categoryId.name && it.refName == topicName
         } == true
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = settingsRoseAccent()
     val onSurface = MaterialTheme.colorScheme.onSurface
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     @Composable fun chip(id: String, label: String, icon: String) {
@@ -3177,7 +3251,7 @@ private fun V2CoverSourceSheet(
                             modifier = Modifier
                                 .size(30.dp)
                                 .clip(RoundedCornerShape(9.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)),
+                                .background(settingsRoseAccent().copy(alpha = 0.13f)),
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
@@ -3187,7 +3261,7 @@ private fun V2CoverSourceSheet(
                                     else -> CurioIcons.AutoAwesome
                                 },
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = settingsAccentInk(),
                                 size = 16.dp
                             )
                         }
@@ -3369,13 +3443,13 @@ private fun V2AddToShelfSheet(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f))
+                                .background(settingsRoseAccent().copy(alpha = 0.13f))
                                 .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
                             Text(
                                 text = "${picked.size} picked",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.primary
+                                color = settingsAccentInk()
                             )
                         }
                     }
@@ -3467,7 +3541,7 @@ private fun V2AddToShelfSheet(
                     Surface(
                         onClick = { onAddEntries(picked.toList()) },
                         shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = settingsRoseAccent(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(46.dp)
@@ -3477,7 +3551,7 @@ private fun V2AddToShelfSheet(
                             Text(
                                 text = if (picked.size == 1) "Add 1 capture" else "Add ${picked.size} captures",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = settingsReadableInk(settingsRoseAccent())
                             )
                         }
                     }
@@ -3570,7 +3644,7 @@ private fun AddTopicPickRow(
     favoritesMode: Boolean,
     onClick: () -> Unit
 ) {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = settingsRoseAccent()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -3907,7 +3981,7 @@ private fun topicKindForMember(m: CurioCollectionMember): V2Kind = when (m.kind)
  *  discoveries (re-rolled by the Shuffle pill) instead of a blank page. */
 @Composable
 private fun V2EmptySuggestions(
-    suggestions: List<CurioTopic>,
+    suggestions: Map<CategoryId, List<CurioTopic>>,
     onShuffle: () -> Unit,
     onOpen: (CurioTopic) -> Unit,
     modifier: Modifier = Modifier
@@ -3917,6 +3991,12 @@ private fun V2EmptySuggestions(
             text = "Your Cabinet is empty",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
             color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Here are some topics to get you started.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(16.dp))
         if (suggestions.isEmpty()) {
@@ -3932,20 +4012,29 @@ private fun V2EmptySuggestions(
                 Spacer(Modifier.height(10.dp))
             }
         } else {
-            suggestions.forEach { t ->
-                V2LikedRow(
-                    item = V2Liked(t.name, topicKind(t), t),
-                    onClick = { onOpen(t) }
+            suggestions.forEach { (catId, topics) ->
+                val cat = CurioCategories.byId(catId)
+                Text(
+                    text = catId.name.lowercase().replaceFirstChar { it.uppercase() } + "s",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = cat?.themedAccent() ?: settingsRoseAccent(),
+                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
                 )
-                Spacer(Modifier.height(10.dp))
+                topics.forEach { t ->
+                    V2LikedRow(
+                        item = V2Liked(t.name, topicKind(t), t),
+                        onClick = { onOpen(t) }
+                    )
+                    Spacer(Modifier.height(6.dp))
+                }
             }
         }
         Spacer(Modifier.height(6.dp))
         Surface(
             onClick = onShuffle,
             shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
-            contentColor = MaterialTheme.colorScheme.primary,
+            color = settingsRoseAccent().copy(alpha = 0.13f),
+            contentColor = settingsRoseAccent(),
             modifier = Modifier.height(38.dp)
         ) {
             Row(
@@ -3956,13 +4045,13 @@ private fun V2EmptySuggestions(
                 CurioIcon(
                     name = CurioIcons.Shuffle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = settingsAccentInk(),
                     size = 17.dp
                 )
                 Text(
                     text = "Shuffle suggestions",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.primary
+                    color = settingsAccentInk()
                 )
             }
         }
@@ -3987,7 +4076,7 @@ private fun V2LikedRow(
 ) {
     val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: settingsRoseAccent()
     // v3xx — the row wears ITS OWN color: the dominant color extracted from
     // its cover art (fallback = category accent while the cover is still
     // downloading). Re-keys when the cover cache warms a file.

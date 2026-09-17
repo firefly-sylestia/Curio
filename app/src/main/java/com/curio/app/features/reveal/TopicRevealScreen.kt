@@ -58,6 +58,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.Image
@@ -69,6 +70,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -129,6 +131,17 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import com.curio.app.data.PersonalBookEntity
+import com.curio.app.data.PersonalNoteEntity
+import com.curio.app.data.PersonalRepositoryHolder
+// Aliased: this file's own `chapterNoteSpans` / `chapterNotes` locals hold the
+// AppPreferences maps, and a local always shadows an import — the bridge's
+// converters have to be callable next to them.
+import com.curio.app.features.personal.chapterNoteDoc
+import com.curio.app.features.personal.chapterNoteSpans as docToSpans
+import com.curio.app.features.personal.chapterNoteText as docToText
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -157,6 +170,7 @@ import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
 import java.util.UUID
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.savedNameMatches
 import com.curio.app.data.TopicRepository
 import com.curio.app.data.buildEngineSearchUrl
 import com.curio.app.data.buildExploreQuery
@@ -279,15 +293,26 @@ private val RevealEditorialBody: TextStyle = CurioEditorialBody.copy(
  * Synchronous and parse-free — so any topic that has ever been loaded
  * resolves on the very first composition frame. (Deliberately NOT
  * @Composable: it runs inside remember {}'s calculation lambda.)
+ *
+ * v389 — the merged index answers with a topic's IDENTITY now (it no longer
+ * carries the topic objects, which is what let a memory trim actually free the
+ * lane pools), so it is used to find that topic's slot in the cache: a resident
+ * pool still resolves on the very first frame. When a trim has dropped the
+ * pool, the lane's parse is kicked off in the background ([TopicJsonLoader
+ * .warmLane]) and the caller's async pass fills the topic on the next frame,
+ * instead of this function blocking composition on IO.
  */
 private fun resolveRevealTopic(categoryId: CategoryId, topicName: String): CurioTopic? {
     TopicJsonLoader.cached(categoryId)?.firstOrNull {
         it.matchesSavedNameStrict(topicName) || it.matchesSavedName(topicName)
     }?.let { return it }
-    TopicJsonLoader.cachedIndex()?.firstOrNull { entry ->
-        entry.topic.categoryId == categoryId &&
-            (entry.topic.matchesSavedNameStrict(topicName) || entry.topic.matchesSavedName(topicName))
-    }?.let { return it.topic }
+    val entry = TopicJsonLoader.cachedIndex()?.firstOrNull { e ->
+        e.categoryId == categoryId &&
+            (savedNameMatches(e.name, topicName, strict = true) ||
+                savedNameMatches(e.name, topicName, strict = false))
+    } ?: return null
+    TopicJsonLoader.cachedTopicFor(entry)?.let { return it }
+    TopicJsonLoader.warmLane(entry.categoryId)
     return null
 }
 
@@ -331,10 +356,14 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
-    // v3xx — the episode an EPISODES chip opens the series sheet at (null =
+    // The episode an EPISODES chip opens the series sheet at (null =
     // opened from the poster card, list starts at the top). Mirrors the
     // album sheet's [selectedAlbumTrack].
     var selectedSeriesEpisode by remember { mutableStateOf<com.curio.app.data.SeriesEpisode?>(null) }
+    // Film / anime / song poster sheets — mirror the series poster card.
+    var showFilmSheet by rememberSaveable { mutableStateOf(false) }
+    var showAnimeSheet by rememberSaveable { mutableStateOf(false) }
+    var showSongSheet by rememberSaveable { mutableStateOf(false) }
     // v3xx — "File to collection…" (Cabinet 5.1): long-pressing the top bar
     // surfaces a pill whose action opens the collection picker; the topic
     // is pinned into the chosen collection.
@@ -346,6 +375,7 @@ fun TopicRevealScreen(
     // be visible to BOTH blocks (declaring them inside the floating-pill
     // block scoped them out of the notes sheet's reach).
     var showShareSheet by remember { mutableStateOf(false) }
+    // The share action opens the original card editor sheet directly.
     // v375 — chapter → review text + its rich runs (spans) for the one-shot
     // share-card seed.
     var pendingChapterShare by remember { mutableStateOf<Triple<Int, String, List<TextSpan>>?>(null) }
@@ -1023,6 +1053,46 @@ fun TopicRevealScreen(
                     }
                 }
 
+                // ── 2.58 Film poster section (films/animated movies only) ──────
+                val filmTopic = resolved
+                if (filmTopic != null && contentUiReady &&
+                    (filmTopic.categoryId == CategoryId.FILMS || filmTopic.categoryId == CategoryId.ANIMATED_MOVIES)) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        FilmInfoSection(
+                            cat = cat,
+                            topic = filmTopic,
+                            onOpenSheet = { showFilmSheet = true },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
+                // ── 2.59 Anime poster section (anime only) ─────────────────────
+                val animeTopic = resolved
+                if (animeTopic != null && contentUiReady && animeTopic.categoryId == CategoryId.ANIME) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        AnimeInfoSection(
+                            cat = cat,
+                            topic = animeTopic,
+                            onOpenSheet = { showAnimeSheet = true },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
+                // ── 2.60 Song art section (songs only) ───────────────────────
+                val songTopic = resolved
+                if (songTopic != null && contentUiReady && songTopic.categoryId == CategoryId.SONGS) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        SongInfoSection(
+                            cat = cat,
+                            topic = songTopic,
+                            onOpenSheet = { showSongSheet = true },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
                 // ── 2.6 Action row — Express yourself / Explore ──────────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
@@ -1045,7 +1115,7 @@ fun TopicRevealScreen(
                 // the card. The tags row below simply follows the hero
                 // directly.
 
-                // ── 5. Teaser card ──────────────────────────────────────────
+                // ── 5. Teaser card ───────────────────────────────���─���────────
                 // v135 — only rendered once the topic resolves: an
                 // unresolvable legacy topic shows its name + actions instead
                 // of a permanent "Loading topic…" placeholder.
@@ -1084,7 +1154,7 @@ fun TopicRevealScreen(
 
         }
 
-        // ── Floating Category + Favorite bar (v212) ──────────────────────
+        // ── Floating Category + Completed bar (v212) ─────────────────────
         // Replaces the old Like/Dislike pill: category icon + name on the
         // left (expands on favorite), favorite star on the right. Slides
         // away on scroll-down, back on scroll-up. Now also visible in
@@ -1241,14 +1311,36 @@ fun TopicRevealScreen(
         )
     }
 
+    val posterSheetTopic = resolved
+    val posterSheetKind = when (posterSheetTopic?.categoryId) {
+        CategoryId.FILMS, CategoryId.ANIMATED_MOVIES -> if (showFilmSheet) "Movie" else null
+        CategoryId.ANIME -> if (showAnimeSheet) "Anime" else null
+        CategoryId.SONGS -> if (showSongSheet) "Song" else null
+        else -> null
+    }
+    if (posterSheetTopic != null && posterSheetKind != null) {
+        PosterSimilarSheet(
+            topic = posterSheetTopic,
+            kind = posterSheetKind,
+            onDismiss = {
+                showFilmSheet = false
+                showAnimeSheet = false
+                showSongSheet = false
+            }
+        )
+    }
+
     // v350 — the series episode-list sheet (album-style, mirrors the book /
     // album sheets): poster header + favorite heart, watched-progress rail,
     // the synopsis accordion, then the episodes grouped by season. v3xx — an
     // episode chip on the reveal opens it scrolled to (and pre-expanding)
-    // that episode, mirroring the album track chips.
+    // that episode, mirroring the album track chips. v-fix — the sheet now
+    // opens for EVERY series: the poster card section shows for all series
+    // topics, so series without an authored guide get the poster/synopsis
+    // sheet (with a quiet empty-guide line) instead of a dead tap.
     val seriesSheetTopic = resolved
     if (seriesSheetTopic != null && seriesSheetTopic.categoryId == CategoryId.SERIES &&
-        showSeriesSheet && !seriesSheetTopic.episodes.isNullOrEmpty()
+        showSeriesSheet
     ) {
         EpisodeNotesSheet(
             cat = cat,
@@ -3217,9 +3309,89 @@ private fun BookNotesSheet(
     // enlarged note editor) — read reactively so a share always carries the
     // current formatting.
     val chapterNoteSpans = AppPreferences.bookChapterNoteSpansState[bookName].orEmpty()
+
+    // ── THE SHELF BRIDGE ────────────────────────────────────────────────
+    // A book that came from Curio's own lane is the SAME book the member
+    // keeps on their shelf, so a chapter note written here IS that book's
+    // chapter review: one store (`personal_notes`, through the book's topic
+    // id), two screens — this sheet and the shelf's own chapter page. A book
+    // the catalog does not have keeps its notes in AppPreferences exactly as
+    // it always did.
+    var shelfBook by remember(topic.id) { mutableStateOf<PersonalBookEntity?>(null) }
+    var shelfNotes by remember(topic.id) {
+        mutableStateOf<Map<Int, PersonalNoteEntity>>(emptyMap())
+    }
+    // The member's in-flight edits. The store echoes a write back a frame or
+    // two later, and a controlled field that is fed its own stale value is
+    // how characters disappear while typing — so what they typed leads, and
+    // the store follows it.
+    var liveEdits by remember(topic.id) {
+        mutableStateOf<Map<Int, Pair<String, List<TextSpan>>>>(emptyMap())
+    }
+    var pendingWrite by remember(topic.id) {
+        mutableStateOf<Pair<Int, Pair<String, List<TextSpan>>>?>(null)
+    }
+    LaunchedEffect(topic.id) {
+        val linked = withContext(Dispatchers.IO) {
+            runCatching { PersonalRepositoryHolder.repo.bookForCatalog(topic.id) }.getOrNull()
+        }
+        shelfBook = linked
+        if (linked != null) {
+            runCatching {
+                PersonalRepositoryHolder.repo.observeBookNotes(linked.id).collect { list ->
+                    shelfNotes = list.mapNotNull { note ->
+                        note.chapterIndex?.let { index -> index to note }
+                    }.toMap()
+                }
+            }
+        }
+    }
+    // Writes are debounced (the note editor reports every keystroke) and
+    // flushed as one row per pause — never one row per letter.
+    LaunchedEffect(pendingWrite, shelfBook) {
+        val pending = pendingWrite ?: return@LaunchedEffect
+        val linked = shelfBook ?: return@LaunchedEffect
+        delay(400)
+        val (number, payload) = pending
+        withContext(Dispatchers.IO) {
+            runCatching {
+                PersonalRepositoryHolder.repo.saveChapterNote(
+                    bookId = linked.id,
+                    chapter = number,
+                    document = chapterNoteDoc(payload.first, payload.second)
+                )
+            }
+        }
+        pendingWrite = null
+    }
+
+    /** A chapter's note text — the shelf's review when the book is on the
+     *  shelf, else the sheet's own stored note. */
+    fun noteText(number: Int): String =
+        liveEdits[number]?.first
+            ?: shelfNotes[number]?.let { docToText(it.doc) }
+            ?: chapterNotes[number].orEmpty()
+
+    /** A chapter's note runs, from the same source as [noteText]. */
+    fun noteSpans(number: Int): List<TextSpan> =
+        liveEdits[number]?.second
+            ?: shelfNotes[number]?.let { docToSpans(it.doc) }
+            ?: chapterNoteSpans[number].orEmpty()
+
+    /** Writes a chapter note wherever this book keeps its notes. */
+    fun writeNote(number: Int, text: String, spans: List<TextSpan>) {
+        if (shelfBook != null) {
+            liveEdits = liveEdits + (number to (text to spans))
+            pendingWrite = number to (text to spans)
+            return
+        }
+        AppPreferences.setBookChapterNote(context, bookName, number, text)
+        AppPreferences.setBookChapterNoteSpans(context, bookName, number, spans)
+    }
+
     // v371 — the ENLARGE note sheet: which chapter's note is being written
     // in the full writing dialog (null = closed). The dialog edits the SAME
-    // AppPreferences slot as the compact field, so both stay in sync live.
+    // slot as the compact field, so both stay in sync live.
     var noteEditorChapter by remember { mutableStateOf<BookChapter?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val listState = rememberLazyListState()
@@ -3645,7 +3817,7 @@ private fun BookNotesSheet(
                                         // Lives in the expanded panel below the
                                         // summary so readers can jot thoughts.
                                         ChapterNoteField(
-                                            initial = chapterNotes[ch.number].orEmpty(),
+                                            initial = noteText(ch.number),
                                             accent = accent,
                                             onAccent = onAccent,
                                             ink = ink,
@@ -3657,19 +3829,14 @@ private fun BookNotesSheet(
                                             onSurface = onSurface,
                                             onSurfaceVariant = onSurfaceVariant,
                                             isOpen = isOpen,
+                                            // v375 — typing in the compact
+                                            // field rewrites the note, so any
+                                            // rich runs from the enlarged
+                                            // editor no longer line up — clear
+                                            // them (they return via the
+                                            // enlarged editor).
                                             onSave = { text ->
-                                                AppPreferences.setBookChapterNote(
-                                                    context, bookName, ch.number, text
-                                                )
-                                                // v375 — typing in the compact
-                                                // field rewrites the note, so
-                                                // any rich runs from the enlarged
-                                                // editor no longer line up —
-                                                // clear them (they return via
-                                                // the enlarged editor).
-                                                AppPreferences.setBookChapterNoteSpans(
-                                                    context, bookName, ch.number, emptyList()
-                                                )
+                                                writeNote(ch.number, text, emptyList())
                                             },
                                             // v371 — the note row carries two
                                             // actions: EXPAND opens the full
@@ -3679,10 +3846,7 @@ private fun BookNotesSheet(
                                             onExpand = { noteEditorChapter = ch },
                                             onShare = { text ->
                                                 if (text.isNotBlank()) {
-                                                    onShareNote(
-                                                        ch.number, text,
-                                                        chapterNoteSpans[ch.number].orEmpty()
-                                                    )
+                                                    onShareNote(ch.number, text, noteSpans(ch.number))
                                                 }
                                             }
                                         )
@@ -3705,8 +3869,8 @@ private fun BookNotesSheet(
     // is written WITH the text and survives onto the share card's Chapter
     // review + export (spans ride the same AppPreferences slot as the text).
     noteEditorChapter?.let { editCh ->
-        val editText = chapterNotes[editCh.number].orEmpty()
-        val editSpans = chapterNoteSpans[editCh.number].orEmpty()
+        val editText = noteText(editCh.number)
+        val editSpans = noteSpans(editCh.number)
         // v3xx — text-history capture + browser inside the enlarged editor:
         // the pill sits in the header (lifted above the keyboard by the
         // dialog's imePadding) and restores write straight back into this
@@ -3754,11 +3918,9 @@ private fun BookNotesSheet(
                             text = editText,
                             spans = editSpans,
                             onRichTextChange = { newText, spans ->
-                                AppPreferences.setBookChapterNote(
-                                    context, bookName, editCh.number, newText.take(2000)
-                                )
-                                AppPreferences.setBookChapterNoteSpans(
-                                    context, bookName, editCh.number,
+                                writeNote(
+                                    editCh.number,
+                                    newText.take(2000),
                                     if (newText.isBlank()) emptyList() else spans
                                 )
                             },
@@ -3780,11 +3942,7 @@ private fun BookNotesSheet(
                         onClick = {
                             noteEditorChapter = null
                             if (editText.isNotBlank()) {
-                                onShareNote(
-                                    editCh.number,
-                                    editText,
-                                    chapterNoteSpans[editCh.number].orEmpty()
-                                )
+                                onShareNote(editCh.number, editText, noteSpans(editCh.number))
                             }
                         },
                         shape = RoundedCornerShape(50),
@@ -3820,12 +3978,7 @@ private fun BookNotesSheet(
                         TextHistoryRestoreMode.ADD_BOTTOM ->
                             if (editText.isBlank()) restored else "$editText\n$restored"
                     }
-                    AppPreferences.setBookChapterNote(
-                        context, bookName, editCh.number, combined.take(2000)
-                    )
-                    AppPreferences.setBookChapterNoteSpans(
-                        context, bookName, editCh.number, emptyList()
-                    )
+                    writeNote(editCh.number, combined.take(2000), emptyList())
                 },
                 onDismiss = { noteHistoryOpen = false }
             )
@@ -3859,7 +4012,7 @@ private fun ChapterNoteField(
     surfaceHigh: Color = Color.Unspecified,
     onSurface: Color = Color.Unspecified,
     onSurfaceVariant: Color = Color.Unspecified,
-    // v371 — EXPAND opens the full white writing sheet; SHARE seeds the
+    // v371 ��� EXPAND opens the full white writing sheet; SHARE seeds the
     // share card with the current note as a Chapter review.
     onExpand: () -> Unit = {},
     onShare: (String) -> Unit = {}
@@ -4919,7 +5072,7 @@ private fun AlbumNotesSheet(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════���══════════════════════════════════
 // v336 — Album sheet helpers (synopsis accordion, heart glyph, listen links)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -5288,11 +5441,23 @@ private fun EpisodeNotesSheet(
     onSelectEpisode: (com.curio.app.data.SeriesEpisode) -> Unit = {},
     onDismiss: () -> Unit
 ) {
-    val episodes = topic.episodes.orEmpty()
-    if (episodes.isEmpty()) return
-    val context = LocalContext.current
+  var episodes by remember { mutableStateOf(topic.episodes.orEmpty()) }
+  val fetchConsent = AppPreferences.seriesFetchEnabledState
+  val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
-    val fetchConsent = AppPreferences.seriesFetchEnabledState
+  // Enrich every authored episode with available metadata. The fetcher is
+  // memoized and keeps authored values when a provider has no match, so the
+  // reveal always shows the episode details and still art it can resolve.
+  // When the topic has NO authored episodes but the member has fetch consent,
+  // fetch the full episode list from TVMaze so series like Chernobyl don't
+  // show "No episode guide yet" when the data is available.
+  LaunchedEffect(topic.name, fetchConsent) {
+  if (episodes.isNotEmpty()) {
+  episodes = SeriesEpisodeFetcher.enrich(topic.name, episodes)
+  } else if (fetchConsent) {
+  episodes = SeriesEpisodeFetcher.fetchAll(topic.name)
+  }
+  }
     // v371 — same resolved-poster fix as the album sheet: the palette must
     // come from the RESOLVED poster URL (TVMaze → iTunes), not the (usually
     // empty) authored topic.imageUrl — otherwise the series sheet always
@@ -5486,10 +5651,13 @@ private fun EpisodeNotesSheet(
             }
 
             // ── Pinned watched-progress rail — stays above the list ──────
+            // Hidden entirely for series without an authored episode guide
+            // (a 0 / 0 rail reads as broken; the sheet is synopsis-only then).
             Spacer(Modifier.height(12.dp))
             val progressLabel = if (watchedTotal > 0)
                 "$watchedTotal of ${episodes.size} episodes watched"
             else "${episodes.size} episodes"
+            if (episodes.isNotEmpty()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -5530,7 +5698,7 @@ private fun EpisodeNotesSheet(
                     )
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            }
 
             // v3xx33 — Cabinet shelf toggles: Curiying now / Want to read.
             CabinetShelfToggleChips(
@@ -5565,6 +5733,16 @@ private fun EpisodeNotesSheet(
                             // v3xx — the series sheet's accordion wears the
                             // TV/clapperboard glyph, never the book icon.
                             icon = CurioIcons.Movie
+                        )
+                    }
+                }
+                if (episodes.isEmpty()) {
+                    item(key = "series_empty_guide") {
+                        Text(
+                            "No episode guide yet.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                 }
@@ -5775,8 +5953,28 @@ private fun EpisodeNotesSheet(
                                                 .height(1.dp)
                                                 .background(accent.copy(alpha = 0.22f))
                                         )
+                                        // v-expand — episode still image when available.
+                                        if (ep.stillUrl.isNotBlank()) {
+                                            coil.compose.AsyncImage(
+                                                model = ep.stillUrl,
+                                                contentDescription = "Episode still",
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(160.dp)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                            )
+                                        }
+                                        // Metadata chips: season/episode + airdate +
+                                        // runtime + rating in a compact row.
+                                        val metaParts = buildList {
+                                            add("S$season · E${ep.number}")
+                                            if (ep.airdate.isNotBlank()) add(ep.airdate)
+                                            if (ep.runtime > 0) add("${ep.runtime}m")
+                                            if (ep.rating > 0f) add("\u2605 ${"%.1f".format(ep.rating)}")
+                                        }
                                         Text(
-                                            "Season $season · Episode ${ep.number}",
+                                            metaParts.joinToString("  ·  "),
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                             color = if (isOpen) accent.copy(alpha = 0.9f) else ink
                                         )
@@ -5785,10 +5983,6 @@ private fun EpisodeNotesSheet(
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
                                             color = if (isOpen) ink else onSurface
                                         )
-                                        // v352 — the Watched toggle + Like
-                                        // heart moved onto the row (chips
-                                        // above); the panel now only holds
-                                        // the episode notes.
                                     }
                                 }
                             }
@@ -5821,6 +6015,412 @@ private fun albumListenUrl(topic: CurioTopic, service: String): String {
  * two-line teaser with a chevron; tapping the card expands the full
  * description or collapses it back.
  */
+
+// ── Film / Anime / Song info sections ──────────────────────────────────────
+
+/**
+ * FILM section — poster card with film details. Mirrors [SeriesInfoSection]
+ * for TV shows. The poster is fetched from iTunes/TVMaze on demand.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PosterSimilarSheet(
+    topic: CurioTopic,
+    kind: String,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Text(
+                "Similar $kind",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                topic.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = personalAccentInkForReveal()
+            )
+            if (topic.teaser.isNotBlank()) {
+                Text(
+                    topic.teaser,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (topic.tags.isNotEmpty()) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(topic.tags.take(8)) { tag ->
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        ) {
+                            Text(
+                                tag,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            Text(
+                "Explore related ${kind.lowercase()} topics from this reveal.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun personalAccentInkForReveal(): Color = com.curio.app.ui.theme.curioRoseInk()
+
+@Composable
+private fun FilmInfoSection(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onOpenSheet: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val fetchConsent = AppPreferences.bookFetchEnabledState
+    val seriesArtKey = "film|${topic.name}"
+    var paletteUrl by remember(topic.imageUrl) {
+        mutableStateOf(
+            AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
+        )
+    }
+    LaunchedEffect(topic.imageUrl, fetchConsent) {
+        val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+        val resolved = if (stored != null) stored
+        else if (fetchConsent) FilmPosterFetch.resolvePosterUrl(topic.name)
+        else null
+        paletteUrl = resolved ?: topic.imageUrl
+        if (resolved != null && stored == null) {
+            AppPreferences.setSheetArtUrl(context, seriesArtKey, resolved)
+        }
+    }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        FilmPosterCard(
+            cat = cat,
+            topic = topic,
+            posterUrl = paletteUrl,
+            onClick = onOpenSheet
+        )
+    }
+}
+
+@Composable
+private fun FilmPosterCard(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    posterUrl: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        shadowElevation = 3.dp,
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                        CurioIcon(CurioIcons.Movies, null, tint = cat.categoryInk(), size = 16.dp)
+                    }
+                }
+                Text(
+                    "FILM",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp),
+                    color = cat.categoryInk()
+                )
+                Spacer(Modifier.weight(1f))
+                if (topic.byline.isNotBlank()) {
+                    Text(
+                        topic.byline,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = cat.categoryInk().copy(alpha = 0.6f)
+                    )
+                }
+            }
+            if (!posterUrl.isNullOrBlank()) {
+                Spacer(Modifier.height(8.dp))
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(posterUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "${topic.name} poster",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+            if (topic.teaser.isNotBlank()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    topic.teaser,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = cat.categoryInk().copy(alpha = 0.7f),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/**
+ * ANIME section — poster card with anime details. Mirrors [SeriesInfoSection]
+ * for TV shows. The poster is fetched from Jikan/iTunes on demand.
+ */
+@Composable
+private fun AnimeInfoSection(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onOpenSheet: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val fetchConsent = AppPreferences.bookFetchEnabledState
+    val seriesArtKey = "anime|${topic.name}"
+    var paletteUrl by remember(topic.imageUrl) {
+        mutableStateOf(
+            AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
+        )
+    }
+    LaunchedEffect(topic.imageUrl, fetchConsent) {
+        val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+        val resolved = if (stored != null) stored
+        else if (fetchConsent) AnimePosterFetch.resolvePosterUrl(topic.name)
+        else null
+        paletteUrl = resolved ?: topic.imageUrl
+        if (resolved != null && stored == null) {
+            AppPreferences.setSheetArtUrl(context, seriesArtKey, resolved)
+        }
+    }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        AnimePosterCard(
+            cat = cat,
+            topic = topic,
+            posterUrl = paletteUrl,
+            onClick = onOpenSheet
+        )
+    }
+}
+
+@Composable
+private fun AnimePosterCard(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    posterUrl: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        shadowElevation = 3.dp,
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                        CurioIcon(CurioIcons.PlayCircle, null, tint = cat.categoryInk(), size = 16.dp)
+                    }
+                }
+                Text(
+                    "ANIME",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp),
+                    color = cat.categoryInk()
+                )
+                Spacer(Modifier.weight(1f))
+                topic.episodeCount?.let { count ->
+                    Text(
+                        "$count episodes",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = cat.categoryInk().copy(alpha = 0.6f)
+                    )
+                }
+            }
+            if (!posterUrl.isNullOrBlank()) {
+                Spacer(Modifier.height(8.dp))
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(posterUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "${topic.name} poster",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+            if (topic.teaser.isNotBlank()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    topic.teaser,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = cat.categoryInk().copy(alpha = 0.7f),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/**
+ * SONG section — art card with song details. Mirrors [AlbumInfoSection]
+ * for albums. The art is fetched from iTunes on demand.
+ */
+@Composable
+private fun SongInfoSection(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onOpenSheet: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val fetchConsent = AppPreferences.bookFetchEnabledState
+    val seriesArtKey = "song|${topic.name}"
+    var paletteUrl by remember(topic.imageUrl) {
+        mutableStateOf(
+            AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
+        )
+    }
+    LaunchedEffect(topic.imageUrl, fetchConsent) {
+        val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+        val resolved = if (stored != null) stored
+        else if (fetchConsent) SongArtFetch.resolveArtworkUrl(topic.name, topic.byline)
+        else null
+        paletteUrl = resolved ?: topic.imageUrl
+        if (resolved != null && stored == null) {
+            AppPreferences.setSheetArtUrl(context, seriesArtKey, resolved)
+        }
+    }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SongArtCard(
+            cat = cat,
+            topic = topic,
+            artUrl = paletteUrl,
+            onClick = onOpenSheet
+        )
+    }
+}
+
+@Composable
+private fun SongArtCard(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    artUrl: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        shadowElevation = 3.dp,
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                        CurioIcon(CurioIcons.MusicNote, null, tint = cat.categoryInk(), size = 16.dp)
+                    }
+                }
+                Text(
+                    "SONG",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp),
+                    color = cat.categoryInk()
+                )
+                Spacer(Modifier.weight(1f))
+                if (topic.byline.isNotBlank()) {
+                    Text(
+                        topic.byline,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = cat.categoryInk().copy(alpha = 0.6f)
+                    )
+                }
+            }
+            if (!artUrl.isNullOrBlank()) {
+                Spacer(Modifier.height(8.dp))
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(artUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "${topic.name} art",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+            if (topic.teaser.isNotBlank()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    topic.teaser,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = cat.categoryInk().copy(alpha = 0.7f),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun AlbumSynopsisAccordion(
     surface: Color,
@@ -6005,7 +6605,7 @@ private fun RevealTagChip(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ══════════════���════════════════════════════════════════════════════════════
 // Teaser card ("One quirky fact to get you curious")
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -6078,7 +6678,7 @@ private fun TeaserCard(
 
 // ═════════════════���═════════════════════════════════════════════════════════
 // Action prompt card ("{verb} {target}" + instruction)
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════���══════════════════════════════════════════════════════════════
 
 @Composable
 private fun ActionPromptCard(
@@ -6211,7 +6811,7 @@ private fun RevealSentimentPill(
         ) {
             SentimentSegment(
                 icon = if (isFav) CurioIcons.Star else CurioIcons.StarOutline,
-                label = "Favorite",
+                label = "Completed",
                 active = isFav,
                 accent = accent,
                 ink = ink,
@@ -6513,7 +7113,8 @@ private fun RevealCategoryFavoriteBar(
                         )
                     }
                 }
-                // Favorite pill — icon-only when not favorited, expands when favorited.
+                // Completed pill (v3xx60 — renamed from Favorite) — icon-only
+                // when not completed, expands when completed.
                 Surface(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -6532,7 +7133,7 @@ private fun RevealCategoryFavoriteBar(
                     ) {
                         CurioIcon(
                             name = if (isFavorited) CurioIcons.Star else CurioIcons.StarOutline,
-                            contentDescription = if (isFavorited) "Unfavorite" else "Favorite",
+                            contentDescription = if (isFavorited) "Completed" else "Mark as completed",
                             tint = favLabelInk,
                             size = 26.dp
                         )
@@ -6542,7 +7143,7 @@ private fun RevealCategoryFavoriteBar(
                             exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
                         ) {
                             Text(
-                                text = "Favorite",
+                                text = "Completed",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontFamily = ChangaOneFontFamily,
                                     fontWeight = FontWeight.Normal,
@@ -6741,6 +7342,115 @@ private fun FileToCollectionSheet(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * SHARING, SPLIT BY WHAT IS BEING SHARED.
+ *
+ * A topic can leave Curio in three ways and they are not the same act: a CARD
+ * is the topic's art (the share editor's job — its words, style and cover are
+ * all editable there), a NOTE is your own line ABOUT it, and a QUOTE is the
+ * topic's own words credited to whoever said them.
+ *
+ * Burying the last two inside the card editor made them read as settings of a
+ * card, so each one gets its own door here. The community doors appear only
+ * when the account could actually post — signed in with Online Mode on —
+ * because the server refuses anything else.
+ */
+@Composable
+private fun RevealShareChoiceSheet(
+    canPost: Boolean,
+    onCard: () -> Unit,
+    onNote: () -> Unit,
+    onQuote: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 26.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Share this topic",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            RevealShareChoice(
+                glyph = CurioIcons.Share,
+                title = "Share a card",
+                subtitle = "The topic's card — words, style and art, yours to edit",
+                onClick = onCard
+            )
+            if (canPost) {
+                RevealShareChoice(
+                    glyph = CurioIcons.Notes,
+                    title = "Write a note",
+                    subtitle = "Your own line about it, posted to the wall",
+                    onClick = onNote
+                )
+                RevealShareChoice(
+                    glyph = CurioIcons.FormatQuote,
+                    title = "Share a quote",
+                    subtitle = "The topic's own words, credited to whoever said them",
+                    onClick = onQuote
+                )
+            }
+        }
+    }
+}
+
+/** One door in [RevealShareChoiceSheet]. */
+@Composable
+private fun RevealShareChoice(
+    glyph: String,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+        ) {
+            CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = curioDialogActionColor(),
+                size = 20.dp
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

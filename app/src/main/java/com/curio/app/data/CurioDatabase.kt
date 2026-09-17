@@ -8,8 +8,13 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [CaptureEntity::class, TopicEntity::class, CachedTopicEntity::class],
-    version = 14,
+    entities = [
+        CaptureEntity::class, TopicEntity::class, CachedTopicEntity::class,
+        // v387 — the personal writing store (journals + books + chapter
+        // reviews). Its own tables, never the capture archive's.
+        PersonalNoteEntity::class, PersonalBookEntity::class
+    ],
+    version = 18,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -17,6 +22,7 @@ abstract class CurioDatabase : RoomDatabase() {
     abstract fun captureDao(): CaptureDao
     abstract fun topicDao(): TopicDao
     abstract fun cachedTopicDao(): CachedTopicDao
+    abstract fun personalDao(): PersonalDao
 
     companion object {
         @Volatile
@@ -226,6 +232,141 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v14 → v15 (v387): the personal writing store. Two brand-new tables
+         * — nothing existing is touched, so the capture archive, the topic
+         * catalog and the cached topics migrate by simply being left alone.
+         * `personal_notes` holds journals (bookId NULL) and a book's chapter
+         * reviews / notes (bookId set); `personal_books` is the shelf.
+         */
+        val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS personal_notes (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        bookId TEXT,
+                        chapterIndex INTEGER,
+                        title TEXT NOT NULL DEFAULT '',
+                        bodyJson TEXT NOT NULL DEFAULT '',
+                        preview TEXT NOT NULL DEFAULT '',
+                        dateMillis INTEGER NOT NULL DEFAULT 0,
+                        mood TEXT NOT NULL DEFAULT '',
+                        chapterTitle TEXT NOT NULL DEFAULT '',
+                        createdAtMillis INTEGER NOT NULL DEFAULT 0,
+                        updatedAtMillis INTEGER NOT NULL DEFAULT 0,
+                        deletedAt INTEGER
+                    )
+                    """
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_personal_notes_bookId ON personal_notes (bookId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_personal_notes_dateMillis ON personal_notes (dateMillis)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS personal_books (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        title TEXT NOT NULL DEFAULT '',
+                        author TEXT NOT NULL DEFAULT '',
+                        coverUrl TEXT NOT NULL DEFAULT '',
+                        totalChapters INTEGER NOT NULL DEFAULT 0,
+                        currentChapter INTEGER NOT NULL DEFAULT 0,
+                        blurb TEXT NOT NULL DEFAULT '',
+                        createdAtMillis INTEGER NOT NULL DEFAULT 0,
+                        updatedAtMillis INTEGER NOT NULL DEFAULT 0,
+                        finishedAtMillis INTEGER
+                    )
+                    """
+                )
+            }
+        }
+
+        /**
+         * v15 → v16 — the shelf learns where a book CAME from.
+         *
+         * A book added from Curio's own catalog keeps its topic id and the
+         * catalog's page count, which is what lets its page show the real
+         * chapter names, page ranges and summaries the topic JSON already
+         * carries instead of numbering the rows by hand. Both columns are plain
+         * defaults, so every existing shelf row survives the upgrade as a book
+         * the catalog does not know — which is exactly what it is.
+         */
+        val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN catalogId TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN pageCount INTEGER NOT NULL DEFAULT 0"
+                )
+            }
+        }
+
+        /**
+         * v16 → v17 (v389) — what a hand-added book learned about itself, and
+         * the two new kinds of personal page.
+         *
+         *  · `personal_books.chaptersJson` — the chapter list read from Open
+         *    Library's table of contents, so a book Curio's own catalog does
+         *    not have still opens with real chapter names and page ranges
+         *    instead of "Chapter 7".
+         *  · `personal_books.synopsis` — the blurb for a book the catalog does
+         *    not have, read from Open Library's work description, so "About
+         *    this book" is never blank on a hand-added book.
+         *  · `personal_notes.kind` — "" for a journal day, "todo" for a
+         *    checklist page, so ONE store serves both without guessing which
+         *    is which from an empty body.
+         *  · `personal_notes.topicId` / `topicName` / `categoryId` — the page
+         *    written ABOUT a topic (the "+" sheet's note on a topic), which
+         *    is what lets the topic's own page offer it back.
+         *
+         * Every column is added with a non-null default, so an existing
+         * library reads exactly as it did before the update.
+         */
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN chaptersJson TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN kind TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN topicId TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN topicName TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE personal_notes ADD COLUMN categoryId TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+
+        /**
+         * v17 → v18 (v389): the book's OWN FILE.
+         *
+         * A book could hold a picked PDF/EPUB only by putting its URI in
+         * `coverUrl`, which is the COVER's column — so an imported book drew a
+         * broken cover (the shelf tried to paint a PDF as a picture) and the
+         * file itself was a `content://` handle that died with the permission
+         * that came with it. The document now has its own column, and what it
+         * holds is a path inside the app's own storage (`filesDir/books/`) that
+         * no permission can revoke.
+         *
+         * The default is empty, so every book that never had a file reads
+         * exactly as it did before.
+         */
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN documentPath TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -240,7 +381,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

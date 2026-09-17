@@ -275,6 +275,33 @@ fun curioDialogContainerColor(): Color {
 }
 
 /**
+ * The container for a dialog that edits the MEMBER's own profile.
+ *
+ * [curioDialogContainerColor] sits on `surfaceContainerHigh`, which is the
+ * warm tan the floating pills wear. On the profile's editor that tan read as a
+ * coffee-cream slab against the page it opens from, so this one is built from
+ * the page's own surface with the brand rose breathed into it: the same family
+ * as the page, one step brighter, and it still separates from the scrim. DARK
+ * mode keeps the settings-card construction (near-black glass with the rose
+ * whisper), which already matched its page.
+ */
+@Composable
+fun curioProfileDialogColor(): Color {
+    if (isCurioDarkTheme()) {
+        return lerp(
+            MaterialTheme.colorScheme.surfaceContainerLow,
+            lerp(Color.Black, curioRoseInk(), 0.20f),
+            0.30f
+        )
+    }
+    return lerp(
+        MaterialTheme.colorScheme.surfaceContainerLowest,
+        curioRoseInk(),
+        0.06f
+    )
+}
+
+/**
  * The hero glass-pill lift — the color the ink-glass hero pills
  * ([SettingsHeroActionPill], [CabinetHeroActionPill], the sort dropdown)
  * are lerped toward for their frosted fill. LIGHT mode lifts toward the

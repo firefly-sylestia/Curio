@@ -99,6 +99,17 @@ import com.curio.app.features.crash.CurioCrashScreen
 import com.curio.app.features.lightbox.LightboxScreen
 import com.curio.app.features.managecategories.ManageCategoriesScreen
 import com.curio.app.features.onboarding.OnboardingScreen
+import com.curio.app.features.personal.BookDetailScreen
+import com.curio.app.features.personal.BookShelfScreen
+import com.curio.app.features.personal.BookReaderScreen
+import com.curio.app.features.personal.BookReviewScreen
+import com.curio.app.features.personal.ChapterScreen
+import com.curio.app.features.personal.JournalEditorScreen
+import com.curio.app.features.personal.JournalListScreen
+import com.curio.app.features.personal.TodoScreen
+import com.curio.app.features.personal.TopicNoteScreen
+import com.curio.app.features.personal.PersonalPhotoOverlay
+import com.curio.app.features.personal.rememberPersonalPhotoOverlayState
 import com.curio.app.features.profile.ProfileScreen
 import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
@@ -106,12 +117,15 @@ import com.curio.app.features.settings.BackupToolsScreen
 import com.curio.app.features.settings.BookCoverHubScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
+import com.curio.app.features.community.ChatsScreen
 import com.curio.app.features.community.CommunityCardScreen
 import com.curio.app.features.community.CommunityScreen
+import com.curio.app.features.community.ModerationScreen
 import com.curio.app.features.community.DirectMessageScreen
 import com.curio.app.features.community.FriendsScreen
 import com.curio.app.features.community.SocialProfileScreen
 import com.curio.app.features.settings.OnlineModeScreen
+import com.curio.app.features.settings.PrivacyScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
@@ -146,6 +160,7 @@ import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.features.personal.PersonalVoicePill
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
 import com.curio.app.ui.theme.CurioMotion
@@ -307,6 +322,28 @@ private fun SettingsSharedScope(
     ) { content() }
 }
 
+/**
+ * The SOCIAL layer's own scopes — the community, a member's profile, one
+ * card's view and a conversation.
+ *
+ * It provides exactly the same shared-transition locals as the settings
+ * wrapper, because a social page's hero morphs the same way; what matters is
+ * that the community is NOT a settings destination. Its screens draw their
+ * own header and never mount the settings rail, so the social layer reads as
+ * people rather than as a corner of Settings.
+ */
+@Composable
+private fun SocialSharedScope(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRevealSharedScope provides sharedTransitionScope,
+        LocalRevealVisibilityScope provides animatedVisibilityScope
+    ) { content() }
+}
+
 @Composable
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
@@ -376,8 +413,13 @@ fun CurioNavHost(
     // shows on the Community wall only while its opt-in tab is on; with the
     // opt-in off the wall is a plain pushed page reached from Settings and
     // keeps the old chromeless look.
+    // A card's own view shares the WALL's route prefix ("community/…"), so
+    // the prefix check alone kept the nav bar on a post — the one place it
+    // should never float over. The card route is excluded by its FULL route
+    // pattern instead.
+    val isCardRoute = currentRoute == CurioRoutes.COMMUNITY_CARD
     val showBottomBar =
-        routePrefix in CurioRoutes.liveTabPrefixes() && !isRevealRoutePrefix
+        routePrefix in CurioRoutes.liveTabPrefixes() && !isRevealRoutePrefix && !isCardRoute
     // v193 — the floating pill bar stays composed briefly after the route
     // leaves the tab set so the previously-selected pill COLLAPSES with the
     // same spring it expands with. The old `showBottomBar` gate unmounted
@@ -499,12 +541,32 @@ fun CurioNavHost(
     // the boot gates (splash/onboarding/crash) the effect returns WITHOUT
     // consuming; it re-runs when the splash lands on HOME (keyed on
     // currentRoute).
-    LaunchedEffect(currentRoute, PendingEntryOpen.trigger, PendingSpinOpen.trigger) {
+    LaunchedEffect(
+        currentRoute,
+        PendingEntryOpen.trigger,
+        PendingSpinOpen.trigger,
+        PendingDirectMessageOpen.trigger,
+        PendingCommunityOpen.trigger
+    ) {
         val prefix = currentRoute?.substringBefore("/")
         // Wait for a stable root: null (first frame) and the boot gates own
         // navigation until the splash lands on HOME — the effect re-runs
         // there (keyed on currentRoute) and consumes the target once.
         if (prefix == null || prefix in CurioRoutes.bootGatePrefixes) return@LaunchedEffect
+        // A MESSAGE notification tap — open that conversation (the people
+        // page anchored beneath, so Back returns to the app).
+        PendingDirectMessageOpen.take()?.let { (userId, handle) ->
+            navController.navigate(CurioRoutes.directMessage(userId, handle)) {
+                launchSingleTop = true
+            }
+            return@LaunchedEffect
+        }
+        // A COMMUNITY notification tap — land on the 24-hour wall, where the
+        // post the notification is about actually is.
+        if (PendingCommunityOpen.take()) {
+            navController.navigateToTab(CurioRoutes.COMMUNITY)
+            return@LaunchedEffect
+        }
         // Daily-reminder tap — land on the Spin deck (the shuffle page the
         // notification nudges toward), with the tab switch's popUpTo-HOME
         // back stack so Back returns to Home.
@@ -931,6 +993,122 @@ fun CurioNavHost(
                 )
             }
 
+            // ── v387 — the personal writing family ────────────────────────
+            // Journals are a collection of their own (a page per day) and
+            // books a shelf of their own; neither borrows the saved-entry
+            // detail view, because neither has a topic behind it.
+            composable(route = CurioRoutes.JOURNALS) {
+                JournalListScreen(navController = navController)
+            }
+            composable(
+                route = CurioRoutes.JOURNAL_EDITOR,
+                arguments = listOf(navArgument("entryId") { type = NavType.StringType })
+            ) { entry ->
+                // The photo viewer rides the page it was opened from, drawn over
+                // it by this route, so a tapped picture grows out of the page
+                // instead of pushing a whole Lightbox screen on top of it.
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    JournalEditorScreen(
+                        navController = navController,
+                        entryIdArg = entry.arguments?.getString("entryId").orEmpty(),
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
+            // v389 — a note about a topic and a to-do list are their OWN pages:
+            // a journal day wears a date bar and a mood pill, and neither of
+            // those belongs on a page about a topic or on a list of things to do.
+            composable(
+                route = CurioRoutes.TOPIC_NOTE,
+                arguments = listOf(navArgument("entryId") { type = NavType.StringType })
+            ) { entry ->
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    TopicNoteScreen(
+                        navController = navController,
+                        entryIdArg = entry.arguments?.getString("entryId").orEmpty(),
+                        initialTopicId = entry.arguments?.getString("topicId").orEmpty(),
+                        initialTopicName = entry.arguments?.getString("topicName").orEmpty(),
+                        initialCategoryId = entry.arguments?.getString("categoryId").orEmpty(),
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
+            composable(
+                route = CurioRoutes.TODO,
+                arguments = listOf(navArgument("entryId") { type = NavType.StringType })
+            ) { entry ->
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    TodoScreen(
+                        navController = navController,
+                        entryIdArg = entry.arguments?.getString("entryId").orEmpty(),
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
+            composable(route = CurioRoutes.BOOKS) {
+                BookShelfScreen(navController = navController)
+            }
+            composable(
+                route = CurioRoutes.BOOK_DETAIL,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) { entry ->
+                BookDetailScreen(
+                    navController = navController,
+                    bookId = entry.arguments?.getString("bookId").orEmpty()
+                )
+            }
+            // A chapter is its own page (the journal's shape), so the review
+            // is written on a page rather than inside the shelf's list.
+            composable(
+                route = CurioRoutes.BOOK_READER,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) { entry ->
+                BookReaderScreen(
+                    navController = navController,
+                    bookId = entry.arguments?.getString("bookId").orEmpty()
+                )
+            }
+            // v389 — a book's OWN review: one page for the whole book, with a
+            // floating door that drops a chapter marker into it.
+            composable(
+                route = CurioRoutes.BOOK_REVIEW,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) { entry ->
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    BookReviewScreen(
+                        navController = navController,
+                        bookId = entry.arguments?.getString("bookId").orEmpty(),
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
+            composable(
+                route = CurioRoutes.CHAPTER,
+                arguments = listOf(
+                    navArgument("bookId") { type = NavType.StringType },
+                    navArgument("chapter") { type = NavType.IntType }
+                )
+            ) { entry ->
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    ChapterScreen(
+                        navController = navController,
+                        bookId = entry.arguments?.getString("bookId").orEmpty(),
+                        chapter = entry.arguments?.getInt("chapter") ?: 1,
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
+
             // ── Push destinations (no bottom nav) ──────────────────────────
             composable(
                 route = CurioRoutes.ENTRY_DETAIL,
@@ -1012,14 +1190,23 @@ fun CurioNavHost(
                     OnlineModeScreen(navController = navController)
                 }
             }
-            composable(CurioRoutes.COMMUNITY) {
-                CommunityScreen(navController = navController)
+            composable(CurioRoutes.SETTINGS_PRIVACY) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    PrivacyScreen(navController = navController)
+                }
             }
+composable(CurioRoutes.COMMUNITY) {
+        CommunityScreen(navController = navController)
+    }
+    composable(CurioRoutes.MODERATION) {
+        ModerationScreen(navController = navController)
+    }
+
             composable(
                 route = CurioRoutes.COMMUNITY_CARD,
                 arguments = listOf(navArgument("cardId") { type = NavType.StringType })
             ) { backStackEntry ->
-                SettingsSharedScope(sharedTransitionScope, this) {
+                SocialSharedScope(sharedTransitionScope, this) {
                     CommunityCardScreen(
                         navController = navController,
                         cardId = backStackEntry.arguments?.getString("cardId").orEmpty()
@@ -1032,7 +1219,7 @@ fun CurioNavHost(
                 route = CurioRoutes.SOCIAL_PROFILE,
                 arguments = listOf(navArgument("userId") { type = NavType.StringType })
             ) { backStackEntry ->
-                SettingsSharedScope(sharedTransitionScope, this) {
+                SocialSharedScope(sharedTransitionScope, this) {
                     SocialProfileScreen(
                         navController = navController,
                         userId = backStackEntry.arguments?.getString("userId").orEmpty()
@@ -1042,17 +1229,26 @@ fun CurioNavHost(
             composable(CurioRoutes.FRIENDS) {
                 FriendsScreen(navController = navController)
             }
+            composable(CurioRoutes.CHATS) {
+                ChatsScreen(navController = navController)
+            }
             composable(
                 route = CurioRoutes.DIRECT_MESSAGE,
                 arguments = listOf(
-                    navArgument("userId") { type = NavType.StringType }
+                    navArgument("userId") { type = NavType.StringType },
+                    // What the CALLER already knows this person as — the header
+                    // shows it on the first frame instead of a placeholder.
+                    navArgument("handle") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
                 )
             ) { backStackEntry ->
-                SettingsSharedScope(sharedTransitionScope, this) {
+                SocialSharedScope(sharedTransitionScope, this) {
                     DirectMessageScreen(
                         navController = navController,
                         otherUserId = backStackEntry.arguments?.getString("userId").orEmpty(),
-                        handle = ""
+                        handle = backStackEntry.arguments?.getString("handle").orEmpty()
                     )
                 }
             }
@@ -1312,6 +1508,12 @@ fun CurioNavHost(
     ) {
         CurioFloatingPet(routePrefix = routePrefix)
     }
+
+    // v389 — a voice note still being recorded but whose page is not the one on
+    // screen: a small pill at the root says so and takes the member back to it.
+    // Drawn here (like the pet) so it is above every screen, and it hides
+    // itself the moment its own page is composed.
+    PersonalVoicePill(navController = navController)
 
     // ── Done-exploring prompt (app return while a session is active) ────
     val activeSession = ExploreSessionStore.activeSessionState

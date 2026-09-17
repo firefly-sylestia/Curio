@@ -92,6 +92,10 @@ jobs:
           # so the build works whichever name the repository uses.
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # The Curio account site (auth-web/), where confirmation and password
+          # reset emails send people. Optional: unset (empty) leaves Supabase's
+          # own Site URL in charge and hides the app's password-recovery row.
+          CURIO_AUTH_SITE_URL: ${{ secrets.CURIO_AUTH_SITE_URL }}
         run: |
           if [ -z "$SUPABASE_URL" ] || { [ -z "$SUPABASE_PUBLISHABLE_KEY" ] && [ -z "$SUPABASE_ANON_KEY" ]; }; then
             echo "::warning::Supabase URL/key secrets not provided — this build's Online Mode will report unconfigured."

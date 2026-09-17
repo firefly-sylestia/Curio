@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,44 +37,53 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import android.content.Intent
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.DisposableEffect
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioContentFilter
+import com.curio.app.data.SocialPostArchive
+import com.curio.app.data.supabase.CommunityAdminRow
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
+import com.curio.app.data.supabase.CommunityComment
+import com.curio.app.data.supabase.CommunityReportReasons
+import com.curio.app.data.supabase.KIND_CARD
+import com.curio.app.data.supabase.ModerationReasons
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.data.supabase.RealtimeWatch
+import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
-import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
 import com.curio.app.features.settings.heroPageBackground
-import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.ShareCardAspect
 import com.curio.app.ui.components.ShareCardStyle
 import com.curio.app.ui.components.TopicShareCard
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-/**
- * ONE COMMUNITY CARD — the card's own view.
- *
- * The full card at full width, the poster's caption, its author and remaining
- * life, the actions (like, share as an image, report, take down your own) and
- * the replies underneath. Comments live here rather than in the feed so the
- * wall stays scannable, and they die with the card (the DB cascades), which is
- * what keeps the 24-hour promise honest.
- */
+/** Full community post page: card, author, reactions and inline replies. */
 @Composable
 fun CommunityCardScreen(navController: NavController, cardId: String) {
     val context = LocalContext.current
@@ -89,18 +99,30 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var reporting by remember { mutableStateOf(false) }
-    var commentsOpen by remember { mutableStateOf(false) }
+    var takingDown by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    // The moderator's own row: what this account may do to SOMEONE ELSE'S post,
+    // loaded once so the action row can offer the right move.
+    var myAdmin by remember { mutableStateOf<CommunityAdminRow?>(null) }
+    var moderationRemove by remember { mutableStateOf<CommunityCard?>(null) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+
+    LaunchedEffect(token, myUserId) {
+        val active = token
+        val me = myUserId
+        if (active != null && me != null) {
+            CommunityApi.myAdminRow(active, me).onSuccess { myAdmin = it }
+        } else {
+            myAdmin = null
+        }
+    }
 
     suspend fun load() {
         val active = token ?: return
         loading = true
         CommunityApi.card(active, cardId, myUserId).fold(
-            onSuccess = {
-                card = it
-                error = null
-            },
+            onSuccess = { card = it; error = null },
             onFailure = { error = it.message }
         )
         loading = false
@@ -108,8 +130,19 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
 
     LaunchedEffect(cardId, token) { if (token != null) load() }
 
-    /** Shares the card as the same PNG the reveal page produces. */
     fun share(current: CommunityCard) {
+        if (current.kind != KIND_CARD) {
+            val body = buildString {
+                append(current.factText)
+                if (current.byline.isNotBlank()) append("\n— ").append(current.byline)
+            }
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, body)
+            }
+            context.startActivity(Intent.createChooser(send, "Share"))
+            return
+        }
         val aspect = runCatching { ShareCardAspect.valueOf(current.aspect) }
             .getOrDefault(ShareCardAspect.CLASSIC)
         val style = runCatching { ShareCardStyle.valueOf(current.style) }
@@ -136,8 +169,6 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         )
     }
 
-    // Read the state once per composition — the list then renders this
-    // snapshot instead of re-reading a state var inside the lazy scope.
     val current = card
 
     Box(
@@ -158,9 +189,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
 
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .layerBackdrop(glassBackdrop)
-                .fillMaxSize(),
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
@@ -178,21 +207,13 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                     )
                 }
             }
-            item(key = "settings-nav", contentType = "settings-nav") {
-                SettingsNavRail(
-                    active = null,
-                    onSelect = { navigateToSettingsSection(navController, it) },
-                    navController = navController
-                )
-            }
-
             when {
                 token == null -> item {
                     SettingsOptionCard {
                         SettingsOptionInfoRow(
                             CurioIcons.Info,
                             "Sign in to open cards",
-                            "Community cards need an account with Online mode on."
+                            "Social cards need an account with Online mode on."
                         )
                         SettingsOptionRowLink("Settings → Online mode") {
                             navController.navigate(CurioRoutes.SETTINGS_ONLINE)
@@ -201,9 +222,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                 }
                 current == null && loading -> item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 40.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp),
                         contentAlignment = Alignment.Center
                     ) { CircularProgressIndicator(strokeWidth = 2.dp) }
                 }
@@ -227,7 +246,13 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                         }
                     }
                     item(key = "card", contentType = "card") {
-                        CommunityCardCanvas(card = current)
+                        ScreenEntrance {
+                            if (current.kind == KIND_CARD) {
+                                CommunityCardCanvas(card = current)
+                            } else {
+                                SocialTextPost(card = current, onClick = {})
+                            }
+                        }
                     }
                     item(key = "meta") {
                         Row(
@@ -235,36 +260,34 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(50))
-                                .clickable {
-                                    if (current.authorId.isNotBlank()) {
-                                        navController.navigate(
-                                            CurioRoutes.socialProfile(current.authorId)
-                                        ) { launchSingleTop = true }
+                                .curioPressClickable(
+                                    pressedScale = 0.985f,
+                                    hapticOnPress = false,
+                                    onClick = {
+                                        if (current.authorId.isNotBlank()) {
+                                            navController.navigate(CurioRoutes.socialProfile(current.authorId)) {
+                                                launchSingleTop = true
+                                            }
+                                        }
                                     }
-                                }
+                                )
                         ) {
-                            // The portrait and the LIVE username: renaming
-                            // yourself updates every card you ever posted.
                             SocialAvatar(style = current.authorAvatar, avatarSize = 38.dp)
                             Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 10.dp)
+                                modifier = Modifier.weight(1f).padding(start = 10.dp)
                             ) {
                                 Text(
-                                    text = "@${current.authorLabel}",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
+                                    text = current.authorLabel,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1
                                 )
                                 Text(
                                     text = listOfNotNull(
+                                        current.authorHandleLabel,
                                         current.categoryName.takeIf { it.isNotBlank() },
                                         agoLabel(current.createdAtMillis),
-                                        if (current.hoursLeft <= 0L) "expiring"
-                                        else "${current.hoursLeft}h left"
+                                        if (current.hoursLeft <= 0L) "expiring" else "${current.hoursLeft}h left"
                                     ).joinToString(" · "),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -277,10 +300,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 size = 18.dp
                             )
                             if (loading) {
-                                CircularProgressIndicator(
-                                    strokeWidth = 2.dp,
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
                             }
                         }
                     }
@@ -294,50 +314,77 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 glyph = CurioIcons.ThumbUp,
                                 label = if (current.likeCount > 0) current.likeCount.toString() else "Like",
                                 tinted = current.likedByMe,
+                                animate = true,
                                 onClick = {
+                                    val liking = !current.likedByMe
+                                    card = current.toggleLike()
                                     scope.launch {
-                                        val call = if (current.likedByMe && myUserId != null) {
-                                            CommunityApi.unlike(token, current.id, myUserId)
-                                        } else {
-                                            CommunityApi.like(token, current.id)
-                                        }
-                                        call.fold(
-                                            onSuccess = { load() },
-                                            onFailure = { error = it.message }
-                                        )
+                                        val active = token ?: return@launch
+                                        val uid = myUserId ?: return@launch
+                                        val call = if (liking) CommunityApi.like(active, current.id, uid)
+                                        else CommunityApi.unlike(active, current.id, uid)
+                                        call.onFailure { failure -> error = failure.message }
+                                    }
+                                }
+                            )
+                            CommunityAction(
+                                glyph = CurioIcons.ThumbDown,
+                                label = if (current.dislikeCount > 0) current.dislikeCount.toString() else "",
+                                tinted = current.dislikedByMe,
+                                animate = true,
+                                onClick = {
+                                    val disliking = !current.dislikedByMe
+                                    card = current.toggleDislike()
+                                    scope.launch {
+                                        val active = token ?: return@launch
+                                        val uid = myUserId ?: return@launch
+                                        val call = if (disliking) CommunityApi.dislike(active, current.id, uid)
+                                        else CommunityApi.undislike(active, current.id, uid)
+                                        call.onFailure { failure -> error = failure.message }
                                     }
                                 }
                             )
                             CommunityAction(
                                 glyph = CurioIcons.FormatQuote,
-                                label = if (current.commentCount > 0) current.commentCount.toString()
-                                else "Comment",
+                                label = if (current.commentCount > 0) current.commentCount.toString() else "Comment",
                                 tinted = false,
-                                onClick = { commentsOpen = true }
+                                onClick = { }
                             )
-                            CommunityAction(CurioIcons.Share, "Share", false) { share(current) }
-                            CommunityAction(CurioIcons.Flag, "Report", false) { reporting = true }
+                            CommunityAction(CurioIcons.Share, "Share", false, onClick = { share(current) })
+                            CommunityAction(CurioIcons.Flag, "", false, onClick = { reporting = true })
                             if (current.mine) {
-                                CommunityAction(CurioIcons.Delete, "Take down", false) {
-                                    scope.launch {
-                                        CommunityApi.delete(token, current.id).fold(
-                                            onSuccess = { navController.popBackStack() },
-                                            onFailure = { error = it.message }
-                                        )
-                                    }
-                                }
+                                CommunityAction(CurioIcons.Delete, "", false, onClick = { takingDown = true })
+                            } else if (myAdmin?.allows("posts") == true) {
+                                // A moderator's move on someone else's post — the
+                                // same removal the queue does, with the same
+                                // reason sheet, from the post itself.
+                                CommunityAction(
+                                    CurioIcons.Delete,
+                                    "",
+                                    false,
+                                    onClick = { moderationRemove = current }
+                                )
                             }
                         }
                     }
+                    item(key = "replies") {
+                        CommunityInlineReplies(
+                            card = current,
+                            accessToken = token,
+                            myUserId = myUserId,
+                            onOpenProfile = { id ->
+                                navController.navigate(CurioRoutes.socialProfile(id)) { launchSingleTop = true }
+                            }
+                        )
+                    }
                 }
             }
-
             error?.takeIf { current != null }?.let { message ->
                 item(key = "error") {
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -353,15 +400,63 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         }
     }
 
-    if (reporting) {
-        // `?.let` hands the lambda a definitely non-null token, so the report
-        // call never leans on a smart cast across a lambda boundary.
+    if (takingDown) {
         token?.let { active ->
-            ReportCardDialog(
-                onDismiss = { reporting = false },
-                onReport = { reason ->
+            SocialConfirmDialog(
+                title = "Take this card down?",
+                body = "It disappears from the wall for everyone right away, and its replies go " +
+                    "with it. A copy is kept on this phone so you can post it again.",
+                confirmLabel = "Take down",
+                busy = busy,
+                onDismiss = { if (!busy) takingDown = false },
+                onConfirm = {
+                    busy = true
                     scope.launch {
-                        CommunityApi.report(active, cardId, reason).fold(
+                        CommunityApi.delete(active, cardId).fold(
+                            onSuccess = {
+                                // A copy stays on the device before the page
+                                // closes: the words are the author's own, and
+                                // the composer offers them back if they change
+                                // their mind (see [SocialPostArchive]).
+                                card?.let { gone ->
+                                    withContext(Dispatchers.IO) {
+                                        SocialPostArchive.rememberDeleted(
+                                            context,
+                                            SocialPostArchive.DeletedPost(
+                                                id = gone.id,
+                                                title = "",
+                                                draft = SocialPostArchive.draftOf(gone),
+                                                postedAtMillis = gone.createdAtMillis,
+                                                deletedAtMillis = System.currentTimeMillis()
+                                            )
+                                        )
+                                    }
+                                }
+                                takingDown = false
+                                busy = false
+                                navController.popBackStack()
+                            },
+                            onFailure = {
+                                error = it.message
+                                busy = false
+                            }
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    if (reporting) {
+        token?.let { active ->
+            ReportTargetDialog(
+                title = "Report this post",
+                subtitle = "Reports go to the moderation team, with your reason.",
+                reasons = CommunityReportReasons.CONTENT,
+                onDismiss = { reporting = false },
+                onReport = { reason, note ->
+                    scope.launch {
+                        CommunityApi.report(active, "card", cardId, reason, note).fold(
                             onSuccess = { reporting = false },
                             onFailure = { error = it.message }
                         )
@@ -371,35 +466,41 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         }
     }
 
-    // The replies live in one sheet, shared with the wall, so a comment reads
-    // the same wherever it was opened from.
-    val shownCard = current
-    val activeToken = token
-    if (commentsOpen && shownCard != null && activeToken != null) {
-        CommunityCommentsSheet(
-            card = shownCard,
-            accessToken = activeToken,
-            myUserId = myUserId,
-            onDismiss = { commentsOpen = false },
-            onChanged = { scope.launch { load() } },
-            onOpenProfile = { id ->
-                navController.navigate(CurioRoutes.socialProfile(id)) { launchSingleTop = true }
-            }
-        )
+    moderationRemove?.let { target ->
+        token?.let { active ->
+            ModerationReasonDialog(
+                title = "Remove this post",
+                subtitle = "It disappears from the wall for everyone. The author is not told why.",
+                reasons = ModerationReasons.REMOVAL,
+                confirmLabel = "Remove",
+                busy = busy,
+                onDismiss = { if (!busy) moderationRemove = null },
+                onConfirm = { reason, note ->
+                    busy = true
+                    scope.launch {
+                        CommunityApi.removeCardWithReason(active, target.id, reason, note).fold(
+                            onSuccess = {
+                                moderationRemove = null
+                                busy = false
+                                load()
+                            },
+                            onFailure = {
+                                error = it.message
+                                busy = false
+                            }
+                        )
+                    }
+                }
+            )
+        }
     }
 }
 
-/** A one-line row that opens another settings surface (the locked states). */
 @Composable
-private fun SettingsOptionRowLink(
-    title: String,
-    onClick: () -> Unit
-) {
+private fun SettingsOptionRowLink(title: String, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
     ) {
         TextButton(onClick = onClick) {
             CurioIcon(
@@ -414,6 +515,299 @@ private fun SettingsOptionRowLink(
                 style = MaterialTheme.typography.labelLarge,
                 color = curioDialogActionColor()
             )
+        }
+    }
+}
+
+/** The card replies, inline under the post. */
+@Composable
+private fun CommunityInlineReplies(
+    card: CommunityCard,
+    accessToken: String?,
+    myUserId: String?,
+    onOpenProfile: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var replies by remember(card.id) { mutableStateOf<List<CommunityComment>>(emptyList()) }
+    var loading by remember(card.id) { mutableStateOf(false) }
+    var error by remember(card.id) { mutableStateOf<String?>(null) }
+    var text by remember(card.id) { mutableStateOf("") }
+    var replyTo by remember(card.id) { mutableStateOf<CommunityComment?>(null) }
+    var editing by remember(card.id) { mutableStateOf<CommunityComment?>(null) }
+    // Replies whose folded answers are open. Keyed by reply id, at ANY depth.
+    var expandedNodes by remember(card.id) { mutableStateOf(setOf<String>()) }
+    var pushed by remember(card.id) { mutableStateOf(0) }
+
+    suspend fun load() {
+        val active = accessToken ?: return
+        loading = true
+        CommunityApi.comments(active, card.id, myUserId).fold(
+            onSuccess = {
+                replies = it
+                SocialCommentsCache.write(context, card.id, it)
+                error = null
+            },
+            onFailure = { error = it.message }
+        )
+        loading = false
+    }
+
+    /**
+     * Hearts one reply, or takes the heart back — drawn on the tap and put back
+     * if the server refuses, exactly like the sheet's own heart.
+     */
+    fun toggleHeart(reply: CommunityComment) {
+        val active = accessToken ?: return
+        val me = myUserId ?: return
+        val optimistic = reply.copy(
+            likes = (reply.likes + if (reply.likedByMe) -1 else 1).coerceAtLeast(0),
+            likedByMe = !reply.likedByMe
+        )
+        fun draw(updated: CommunityComment) {
+            replies = replies.map { if (it.id == reply.id) updated else it }
+            SocialCommentsCache.write(context, card.id, replies)
+        }
+        draw(optimistic)
+        scope.launch {
+            val result = if (optimistic.likedByMe) {
+                CommunityApi.likeComment(active, reply.id, me)
+            } else {
+                CommunityApi.unlikeComment(active, reply.id, me)
+            }
+            result.onFailure {
+                draw(reply)
+                error = it.message
+            }
+        }
+    }
+
+    LaunchedEffect(card.id, accessToken) {
+        if (accessToken == null) return@LaunchedEffect
+        if (replies.isEmpty()) {
+            val cached = SocialCommentsCache.read(context, card.id, myUserId)
+            if (cached.isNotEmpty()) replies = cached
+        }
+        load()
+    }
+
+    DisposableEffect(card.id, accessToken) {
+        if (accessToken == null) return@DisposableEffect onDispose { }
+        val owner = "card-replies:${card.id}"
+        SupabaseRealtime.watch(
+            owner = owner,
+            accessToken = accessToken,
+            watches = listOf(
+                RealtimeWatch(
+                    table = "community_comments",
+                    filter = "card_id=eq.${card.id}",
+                    events = listOf("INSERT", "UPDATE", "DELETE")
+                )
+            )
+        ) { scope.launch { pushed++ } }
+        onDispose { SupabaseRealtime.unwatch(owner) }
+    }
+    LaunchedEffect(pushed) { if (pushed > 0) load() }
+
+    val branch = remember(replies, expandedNodes) { branchRenderList(replies, expandedNodes) }
+
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Replies",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                if (loading) CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(14.dp))
+            }
+
+            if (replies.isEmpty() && !loading && error == null) {
+                Text(
+                    text = "No replies yet. Say something.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            // ONE ordered pass over the render list (see [branchRenderList]):
+            // a reply and the door that unfolds its OWN answers stay together,
+            // at every depth.
+            branch.forEach { row ->
+                when (row) {
+                    is BranchRender.Reply -> {
+                        val reply = row.comment
+                        CommunityReplyRow(
+                            reply = reply,
+                            depth = row.depth,
+                            onAuthor = {
+                                if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId)
+                            },
+                            onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
+                            onToggleLike = { toggleHeart(reply) },
+                            onEdit = if (reply.mine) {
+                                {
+                                    editing = reply
+                                    text = reply.body
+                                    replyTo = null
+                                }
+                            } else null,
+                            canAddFriend = false,
+                            onAddFriend = { },
+                            onDelete = {
+                                val active = accessToken
+                                if (active != null) scope.launch {
+                                    CommunityApi.deleteComment(active, reply.id).fold(
+                                        onSuccess = {
+                                            if (editing?.id == reply.id) {
+                                                editing = null
+                                                text = ""
+                                            }
+                                            load()
+                                        },
+                                        onFailure = { error = it.message }
+                                    )
+                                }
+                            }
+                        )
+                    }
+                    is BranchRender.More -> ShowMoreReplies(
+                        hidden = row.hidden,
+                        depth = row.depth,
+                        onClick = { expandedNodes = expandedNodes + row.nodeId }
+                    )
+                }
+            }
+
+            error?.let { message ->
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            CurioContentFilter.problem(text)?.let { problem ->
+                Text(
+                    text = problem,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            replyTo?.let { target ->
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp)
+                    ) {
+                        Text(
+                            text = "Replying to @${target.authorLabel}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        CurioIcon(
+                            name = CurioIcons.Close,
+                            contentDescription = "Stop replying",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 14.dp,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .curioPressClickable(
+                                    pressedScale = 0.92f,
+                                    hapticOnPress = false,
+                                    onClick = { replyTo = null }
+                                )
+                        )
+                    }
+                }
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = {
+                        if (it.length <= CommunityApi.MAX_COMMENT_CHARS) text = it
+                    },
+                    label = {
+                        Text(
+                            when {
+                                editing != null -> "Edit your reply"
+                                replyTo == null -> "Add a reply"
+                                else -> "Reply to @${replyTo?.authorLabel}"
+                            }
+                        )
+                    },
+                    maxLines = 3,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        val active = accessToken ?: return@Button
+                        val editTarget = editing
+                        val parent = replyTo
+                        when {
+                            editTarget != null -> scope.launch {
+                                CommunityApi.editComment(active, editTarget.id, text).fold(
+                                    onSuccess = {
+                                        editing = null
+                                        text = ""
+                                        load()
+                                    },
+                                    onFailure = { error = it.message }
+                                )
+                            }
+                            else -> scope.launch {
+                                val handle = AppPreferences.getUsername(context).ifBlank {
+                                    AppPreferences.getDisplayName(context)
+                                }
+                                CommunityApi.comment(
+                                    active,
+                                    card.id,
+                                    text,
+                                    handle,
+                                    parentId = parent?.id,
+                                    myUserId = myUserId
+                                ).fold(
+                                    onSuccess = { created ->
+                                        text = ""
+                                        replyTo = null
+                                        // The server's own row, straight into
+                                        // the thread; only the hosts that can
+                                        // scroll to it need the reload.
+                                        replies = replies + created
+                                        SocialCommentsCache.write(context, card.id, replies)
+                                        created.parentId?.let { parentId ->
+                                            expandedNodes = expandedNodes + parentId
+                                        }
+                                    },
+                                    onFailure = { error = it.message }
+                                )
+                            }
+                        }
+                    },
+                    enabled = accessToken != null && text.isNotBlank() && CurioContentFilter.isClean(text),
+                    shape = RoundedCornerShape(50),
+                    colors = curioDialogActionButtonColors()
+                ) {
+                    Text(
+                        text = if (editing != null) "Save" else "Send",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                }
+            }
         }
     }
 }

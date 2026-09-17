@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curio account</title>
+<meta name="description" content="Confirm your email, set a new password, sign in with a link, review or delete your Curio account.">
+<meta name="theme-color" content="#100c11">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+<body data-page="home">
+<div class="aurora" aria-hidden="true"></div>
+<a class="skip" href="#page">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
+  <nav class="topnav" aria-label="Account">
+    <a href="/signin">Sign in</a>
+    <a href="/signup">Create account</a>
+    <a href="/reset">Password</a>
+    <a href="/account">Account</a>
+    <a href="/support">Support</a>
+  </nav>
+</header>
+
+<main id="page" class="shell">
+  <div class="rise">
+    <span class="eyebrow">Account desk</span>
+    <h1>Everything to do with your Curio account, on the web.</h1>
+    <p class="lede">
+      Email links from Curio land here, so creating an account, confirming your address, choosing
+      a new password and leaving the community all work in a browser. Your saved discoveries stay on your phone, and
+      the app keeps working offline exactly as it did.
+    </p>
+    <div class="row mt-2">
+      <a class="btn btn-primary" href="/signin">Sign in</a>
+      <a class="btn btn-ghost" href="/signup">Create account</a>
+      <a class="btn btn-ghost" href="/reset">Reset password</a>
+    </div>
+  </div>
+
+  <p class="notice" id="page-status" role="status"></p>
+
+  <div class="grid">
+    <a class="tile rise rise-1" href="/signup">
+      <strong>Create your account</strong>
+      <span>Choose an email and a password, then confirm the address we email you.</span>
+      <span class="arrow">Create account</span>
+    </a>
+    <a class="tile rise rise-2" href="/confirm">
+      <strong>Confirm your email</strong>
+      <span>A confirmation link lands here. If yours has expired, send yourself a fresh one.</span>
+      <span class="arrow">Open confirmation</span>
+    </a>
+    <a class="tile rise rise-3" href="/reset">
+      <strong>Set a new password</strong>
+      <span>Ask for a reset link, then choose a password only you know.</span>
+      <span class="arrow">Reset password</span>
+    </a>
+    <a class="tile rise rise-4" href="/account">
+      <strong>Your account</strong>
+      <span>See your profile and what you have posted, or delete the account for good.</span>
+      <span class="arrow">Open account</span>
+    </a>
+    <a class="tile rise rise-4" href="/support">
+      <strong>Support</strong>
+      <span>Link problems, password questions, and where to report something.</span>
+      <span class="arrow">Get help</span>
+    </a>
+  </div>
+
+  <div class="card plain rise rise-4">
+    <h2>Get Curio</h2>
+    <p class="muted">
+      Curio is an Android app first. This site only handles the account side, so you can prove your
+      address, recover a password or close your account without installing anything.
+    </p>
+    <div class="row mt-2">
+      <a class="btn btn-ghost" href="https://github.com/firefly-sylestia/Curio/releases/latest" data-app-download>Download Curio</a>
+      <a class="btn btn-quiet" href="/privacy">Read the privacy notice</a>
+    </div>
+  </div>
+</main>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <span>Curio account desk</span>
+    <span class="dot" aria-hidden="true">•</span>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/support">Support</a>
+    <a href="/account">Account</a>
+  </div>
+</footer>
+
+<script type="module" src="/assets/curio.js"></script>
+</body>
+</html>

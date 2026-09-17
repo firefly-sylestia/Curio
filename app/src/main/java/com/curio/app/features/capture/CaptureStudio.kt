@@ -67,6 +67,7 @@ import com.curio.app.data.JournalMood
 import com.curio.app.data.formatSessionShort
 import com.curio.app.data.shortName
 import com.curio.app.features.capture.formats.MoodChipsRow
+import com.curio.app.features.personal.personalOnAccent
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
@@ -99,8 +100,9 @@ private val StudioRecordRed = Color(0xFFE5484D)
  * What is here and not in the classic page:
  *  - A tinted hero card with the lane medallion, the topic, the session
  *    duration and an inline mood row that expands under the card.
- *  - A take RAIL that lives on the bottom tray (thumb reach) instead of a row
- *    pinned under the topic — each pill springs when it becomes active.
+ *  - A take RAIL that lives on the bottom tray (thumb reach): one pill per
+ *    take you already have, the active one filled, and an **Add take** door
+ *    at the end so the next take lands beside the saved ones (v387).
  *  - Format + mood + tags moved into one **tools bottom sheet**, so the
  *    canvas is never crowded by pickers. The paper notes themselves are
  *    byte-identical: the sheet and the canvas both delegate to the same
@@ -138,8 +140,18 @@ internal fun CaptureStudio(
     tagInput: String,
     onBack: () -> Unit,
     onSave: () -> Unit,
+    /**
+     * Moves the canvas to another take already written (the rail's pills).
+     * v387 — the rail holds the takes again, so the studio needs a door back
+     * into each of them, not only into the next one.
+     */
     onSelectTake: (Int) -> Unit,
-    onAddTake: () -> Unit,
+    /**
+     * Starts a NEW take in the format the picker handed back. Its pill then
+     * lands BESIDE the takes already in the rail, and it becomes the active
+     * one — the picker is the only thing that decides what a take is.
+     */
+    onAddTake: (CaptureFormat) -> Unit,
     onRequestRemoveTake: (Int) -> Unit,
     onPickFormat: (CaptureFormat) -> Unit,
     onPickMood: (JournalMood?) -> Unit,
@@ -151,6 +163,8 @@ internal fun CaptureStudio(
     onImageTap: (String) -> Unit
 ) {
     var toolsOpen by remember { mutableStateOf(false) }
+    // The New-take picker: pick what the next take IS, then it is created.
+    var newTakeOpen by remember { mutableStateOf(false) }
     val activeSection = sections.getOrNull(activeIndex)
     val activeFormat = activeSection?.format ?: CaptureFormat.SoundBite
 
@@ -202,10 +216,21 @@ internal fun CaptureStudio(
             saveInProgress = saveInProgress,
             saveError = saveError,
             onSelectTake = onSelectTake,
-            onAddTake = onAddTake,
             onRequestRemoveTake = onRequestRemoveTake,
+            onAddTake = { newTakeOpen = true },
             onOpenTools = { toolsOpen = true },
             onSave = onSave
+        )
+    }
+
+    if (newTakeOpen) {
+        NewTakePickerSheet(
+            cat = cat,
+            onPick = { format ->
+                newTakeOpen = false
+                onAddTake(format)
+            },
+            onDismiss = { newTakeOpen = false }
         )
     }
 
@@ -599,8 +624,8 @@ private fun StudioTray(
     saveInProgress: Boolean,
     saveError: String?,
     onSelectTake: (Int) -> Unit,
-    onAddTake: () -> Unit,
     onRequestRemoveTake: (Int) -> Unit,
+    onAddTake: () -> Unit,
     onOpenTools: () -> Unit,
     onSave: () -> Unit
 ) {
@@ -627,13 +652,12 @@ private fun StudioTray(
         ) {
             StudioTakeRail(
                 cat = cat,
+                tintWash = tintWash,
                 sections = sections,
                 activeIndex = activeIndex,
-                recording = recording,
-                tintWash = tintWash,
                 onSelect = onSelectTake,
-                onRequestRemove = onRequestRemoveTake,
-                onAddTake = onAddTake
+                onAddTake = onAddTake,
+                onRequestRemoveTake = onRequestRemoveTake
             )
             saveError?.let { message ->
                 Text(
@@ -759,136 +783,196 @@ private fun StudioSaveButton(
 }
 
 /**
- * The take rail — one pill per take plus "New take". The active pill wears the
- * accent and springs a hair larger; a recording take's pill carries a pulsing
- * dot so the rail says WHERE the audio is being captured when the canvas is
- * scrolled away from the mic.
+ * The take rail — the takes you have, and the door to the next one.
+ *
+ * v387 — the rail is a RAIL again (user decision): one pill per take, the
+ * active one filled, and an **Add take** door at the END that the newest pill
+ * lands beside the moment the picker answers. The previous "New take" was a
+ * single control with no memory of the takes already built, so adding a second
+ * take looked like starting over — the pill you just finished vanished into
+ * nothing. Tapping a pill switches to that take; a long press asks to remove
+ * it. What the door does is unchanged: it opens the format picker, and only
+ * the answer creates the take.
  */
 @Composable
 private fun StudioTakeRail(
     cat: CurioCategory,
+    tintWash: Boolean,
     sections: SnapshotStateList<CaptureSectionState>,
     activeIndex: Int,
-    recording: Boolean,
-    tintWash: Boolean,
     onSelect: (Int) -> Unit,
-    onRequestRemove: (Int) -> Unit,
-    onAddTake: () -> Unit
+    onAddTake: () -> Unit,
+    onRequestRemoveTake: (Int) -> Unit
 ) {
     val accent = cat.themedAccent()
+    val railSurface = if (tintWash) {
+        cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHighest)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHighest
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        sections.forEachIndexed { i, section ->
-            val active = i == activeIndex
-            // ONE press source per pill — a shared source would squish the
-            // whole rail whenever any single pill was touched.
-            val pressed = rememberCurioPressSource(pressedScale = 0.94f)
-            val selection by animateFloatAsState(
-                targetValue = if (active) 1f else 0.96f,
-                animationSpec = CurioMotion.Springs.Press,
-                label = "studioTakeSelection"
-            )
-            val fill by animateColorAsState(
-                targetValue = if (active) accent
-                else if (tintWash) cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHighest)
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-                animationSpec = tween(CurioMotion.Durations.Quick),
-                label = "studioTakeFill"
-            )
-            val contentColor = if (active) cat.onAccent()
-            else MaterialTheme.colorScheme.onSurface
+        sections.forEachIndexed { index, section ->
+            val active = index == activeIndex
+            // v389 — the active take wears the SOLID accent fill (a 18% wash
+            // with accent text on a pale background is not "filled" and the text
+            // is hard to read in light mode — user request).
+            val ink = if (active) personalOnAccent() else MaterialTheme.colorScheme.onSurface
             Surface(
-                onClick = { onSelect(i) },
+                onClick = { onSelect(index) },
                 shape = RoundedCornerShape(50),
-                color = fill,
-                interactionSource = pressed.interactionSource,
-                modifier = Modifier
-                    .then(pressed.modifier)
-                    .graphicsLayer {
-                        scaleX = selection
-                        scaleY = selection
-                    }
+                color = if (active) accent else railSurface,
+                border = BorderStroke(
+                    1.dp,
+                    if (active) accent else accent.copy(alpha = 0.16f)
+                )
             ) {
                 Row(
                     modifier = Modifier.padding(
-                        start = 12.dp,
-                        end = if (sections.size > 1) 4.dp else 12.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
+                        start = 13.dp,
+                        end = if (active && sections.size > 1) 6.dp else 13.dp,
+                        top = 9.dp,
+                        bottom = 9.dp
                     ),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
-                    if (active && recording) {
-                        StudioRailPulse(color = contentColor)
-                    } else {
-                        CurioIcon(
-                            name = formatGlyph(section.format),
-                            contentDescription = null,
-                            tint = if (active) contentColor
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 15.dp
-                        )
-                    }
                     Text(
-                        text = "${i + 1} · ${section.format.shortName}",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium
-                        ),
-                        color = contentColor,
-                        maxLines = 1
+                        text = "${index + 1}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ink.copy(alpha = 0.7f)
                     )
-                    if (sections.size > 1) {
+                    Text(
+                        text = section.format.shortName,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = ink
+                    )
+                    // The take you are ON carries its own removal door, so a
+                    // take added by mistake never needs the tools sheet.
+                    if (active && sections.size > 1) {
                         Surface(
-                            onClick = { onRequestRemove(i) },
+                            onClick = { onRequestRemoveTake(index) },
                             shape = CircleShape,
-                            color = Color.Transparent
+                            color = accent.copy(alpha = 0.18f),
+                            modifier = Modifier.size(22.dp)
                         ) {
-                            CurioIcon(
-                                name = CurioIcons.Close,
-                                contentDescription = "Remove take ${i + 1}",
-                                tint = if (active) contentColor
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 16.dp,
-                                modifier = Modifier.padding(4.dp)
-                            )
+                            Box(
+                                modifier = Modifier.size(22.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Close,
+                                    contentDescription = "Remove take ${index + 1}",
+                                    tint = ink,
+                                    size = 12.dp
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+        // The door — always the LAST pill, so a take added from here appears
+        // beside the ones already written.
+        // v389 — the Add take door wears the SOLID accent fill, not a pale
+        // wash with accent icon — the pill that opens a door should be the
+        // same solid shape as the one that is already chosen (user request).
         Surface(
             onClick = onAddTake,
             shape = RoundedCornerShape(50),
-            color = lerp(
-                if (tintWash) cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHighest)
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-                accent,
-                0.14f
-            ),
-            border = BorderStroke(1.dp, accent.copy(alpha = 0.35f))
+            color = accent,
+            border = BorderStroke(1.dp, accent)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = null,
-                    tint = accent,
+                    tint = personalOnAccent(),
                     size = 16.dp
                 )
                 Text(
-                    text = "New take",
+                    text = "Add take",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = personalOnAccent()
+                )
+            }
+        }
+    }
+}
+
+/**
+ * What the NEXT take is — the picker the Add take pill opens.
+ *
+ * A small sheet rather than the tools sheet: tools edit the take you are on
+ * (its format, mood and tags), while this only chooses what to start, so
+ * picking a card here can never rewrite the take underneath you.
+ */
+@Composable
+private fun NewTakePickerSheet(
+    cat: CurioCategory,
+    onPick: (CaptureFormat) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = curioDialogContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "Add take",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                Text(
+                    text = "Pick what this take captures",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                CAPTURE_FORMATS.chunked(2).forEach { pair ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        pair.forEach { fmt ->
+                            StudioFormatCard(
+                                format = fmt,
+                                selected = false,
+                                cat = cat,
+                                onClick = {
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                        onPick(fmt)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

@@ -5,6 +5,8 @@ import com.curio.app.data.CategoryFamily
 import com.curio.app.data.JournalMood
 import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,8 +23,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -35,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 import androidx.compose.material3.Text
+import com.curio.app.data.CurioAlivePreferences
 
 /**
  * Curio's icon system — see Curio icon contract.
@@ -43,273 +49,183 @@ import androidx.compose.material3.Text
  * variable font bundled directly in Curio at
  * `app/src/main/res/font/material_symbols_outlined.ttf`.
  *
- * v174f — the bundled font is SUBSET to the glyphs Curio actually uses
- * (11MB → ~0.3MB; every icon below is a verified ligature). When adding a
- * new icon, subset again with fonttools and keep the FULL font at
- * `tools/fonts/material_symbols_outlined_full.ttf` for future additions:
- *
- *     python3 -m fontTools.subset tools/fonts/material_symbols_outlined_full.ttf \
- *       --text-file=<icon names> --unicodes=<icon codepoints> --no-layout-closure \
- *       --glyph-names --symbol-cmap --name-IDs='*' -o app/src/main/res/font/material_symbols_outlined.ttf
- *
- * Icons are rendered as Text composables using the ligature names from the
- * Material Symbols glyph catalog. The font is bound to [MaterialSymbolsFontFamily]
- * (see CurioTypography.kt).
- *
- * Glyph constants live in [CurioIcons]. Glyph names use snake_case to match
- * the Material Symbols catalog exactly.
+ * The renderer below is intentionally defensive: a few social glyph names
+ * landed after the last font subset pass. They are remapped at render time to
+ * already-bundled equivalents until the subset is regenerated, so one missing
+ * ligature can never make a whole social surface disappear.
  */
 object CurioIcons {
+    const val Music = "album"
+    const val Movies = "movie"
+    const val Books = "menu_book"
+    const val VisualArt = "palette"
+    const val Science = "science"
+    const val Wildcard = "casino"
 
-    // ── Category glyphs (Curio icon contract — used everywhere a category appears)
-    const val Music       = "album"        // vinyl record
-    const val Movies      = "movie"        // clapperboard
-    const val Books       = "menu_book"    // open book
-    const val VisualArt   = "palette"      // artist palette
-    const val Science     = "science"      // atom/flask
-    const val Wildcard    = "casino"       // die
-
-    // ── UI affordance glyphs (from Material Symbols catalog)
-    const val Menu        = "menu"             // ☰ — top-left
-    const val Home        = "home"             // house — bottom nav Home tab
-    const val Person      = "person"           // top-right avatar
-    const val Search      = "search"           // top-right magnifier
-    const val Settings    = "settings"         // cog
-    const val MoreVert    = "more_vert"        // ⋮ — overflow
-    const val Close       = "close"            // X
-    const val ArrowBack   = "arrow_back"       // ← — legacy top-left back arrow
+    const val Menu = "menu"
+    const val Home = "home"
+    const val Person = "person"
+    const val Search = "search"
+    const val Settings = "settings"
+    const val MoreVert = "more_vert"
+    const val Close = "close"
+    const val ArrowBack = "arrow_back"
     const val ArrowForward = "arrow_forward"
-    const val ChevronLeft  = "chevron_left"    // ‹ — unified back arrow
-    const val ChevronRight = "chevron_right"   // › — unified forward arrow
-    const val Check       = "check"            // ✓
-    const val Add         = "add"              // +
-    const val Remove      = "remove"           // −
-    const val AutoAwesome = "auto_awesome"     // sparkles / logomark
-    const val Tune         = "tune"            // sliders — Preferences settings entry
-    const val Inventory2  = "inventory_2"      // cabinet empty state
-    const val SearchOff   = "search_off"       // no-results state
-    const val History     = "history"          // topic history empty
-    const val DragHandle  = "drag_handle"      // ⋮ — manage categories drag
-    const val Info        = "info"
-    const val Edit        = "edit"
-    // New category picker ("Category Mix Studio") — added to the bundled
-    // Material Symbols subset via fontTools (all verified ligatures).
-    const val Shuffle     = "shuffle"
-    const val GridView    = "grid_view"
-    const val Apps        = "apps"
-    // v377 — share-card editor "No fact": eye crossed out — added to the
-    // bundled Material Symbols subset via fontTools (verified ligature;
-    // pure rlig glyph, no cmap codepoint change).
+    const val ChevronLeft = "chevron_left"
+    const val ChevronRight = "chevron_right"
+    const val Check = "check"
+    const val Add = "add"
+    const val Remove = "remove"
+    const val AutoAwesome = "auto_awesome"
+    const val Tune = "tune"
+    const val Inventory2 = "inventory_2"
+    const val SearchOff = "search_off"
+    const val History = "history"
+    const val DragHandle = "drag_handle"
+    const val Info = "info"
+    const val Edit = "edit"
+    const val Shuffle = "shuffle"
+    const val GridView = "grid_view"
+    const val Apps = "apps"
+    const val Lock = "lock"
     const val VisibilityOff = "visibility_off"
-    const val PushPin     = "push_pin"
-    // v115 — the avatar crop editor badge (glyph verified in the bundled
-    // Material Symbols subset).
-    const val Crop        = "crop"
-    const val Share       = "share"
-    const val Lightbulb   = "lightbulb"        // 💡 — curiosity/fact teaser (v35)
-    const val Delete      = "delete"
-    const val Replay      = "replay"
-    const val Refresh     = "refresh"
-    const val Star        = "star"
-    const val StarOutline = "star_outline"
-    const val Bookmark    = "bookmark"           // filled — pinned topic
-    const val BookmarkBorder = "bookmark_border" // outline — not pinned
-    const val ThumbUp     = "thumb_up"            // 👍 — liked topic
-    const val ThumbDown   = "thumb_down"          // 👎 — disliked topic
-    const val FormatQuote = "format_quote"
-    // ── Rich-text formatting (Marginalia journal/quotes + format fields)
-    const val FormatBold = "format_bold"           // B — bold
-    const val FormatItalic = "format_italic"       // I — italic
-    const val FormatUnderline = "format_underlined" // U — underline (glyph added to the subset font; "format_underline" doesn't exist in the Material Symbols catalog and rendered as text)
-    const val FormatHighlight = "format_color_fill" // highlighter marker
-    const val FormatText = "text_fields"           // small toggle for other fields
-    const val TextIncrease = "text_increase"       // A+ — enlarge selection
-    const val TextDecrease = "text_decrease"       // A− — shrink selection
-    const val Mic         = "mic"
-    const val MicNone     = "mic_none"
-    const val Image       = "image"
-    const val Fullscreen  = "fullscreen"   // ⤢ — expand mood board
-    const val AspectRatio = "aspect_ratio" // ▭ — Smart Spin layout (small-screen fit)
-    const val PhotoSizeSelectLarge = "photo_size_select_large" // ⤢ size — Smart density layout (deck scale)
-    const val PlayArrow   = "play_arrow"
-    const val TravelExplore = "travel_explore"   // globe + magnifier — explore in the user's chosen engine
-    const val YouTubeActivity = "youtube_activity" // rounded play tile — explore in YouTube
-    const val MusicNote = "music_note"          // ♪ — Apple Music / music rows
-    const val OpenInNew = "open_in_new"         // ⤢ — external link (album Genius page, v333)
-    const val PlayCircle = "play_circle"        // ▶ in a ring — Spotify
-    const val ContentCopy = "content_copy"      // two overlapping squares — copy to clipboard
-    const val Pause       = "pause"
-    const val Stop        = "stop"
-    const val Timer       = "timer"
-    const val KeyboardArrowDown = "keyboard_arrow_down"  // ▼ — chevron
-    const val KeyboardArrowUp   = "keyboard_arrow_up"    // ▲ — chevron
-    const val ArrowUpward   = "arrow_upward"    // ⬆ — sort oldest-first
-    const val ArrowDownward = "arrow_downward"  // ⬇ — sort newest-first
-    const val Casino      = "casino"
-    const val Album       = "album"
-    const val Movie       = "movie"
-    const val MenuBook    = "menu_book"
-    const val Palette     = "palette"
-    const val ScienceGlyph = "science"
-    const val Colorize    = "colorize"   // eyedropper — Pastel colors mode
-    const val Undo        = "undo"      // ↩ — pet designer undo
-    const val Redo        = "redo"      // ↪ — pet designer redo
-    const val Layers      = "layers"     // stacked cards — Deck cards look (v7.7)
-
-    // ── Note-paper style chips (Ruled/Torn/Coffee/Folded/Red-margin)
-    const val LocalCafe     = "local_cafe"        // coffee-stain paper
-    const val FoldedCorner  = "auto_stories"      // folded page (dog-ear)
-    const val RedMarginLine = "border_clear"      // ruled with red margin
-
-    // ── Backup / restore glyphs (Settings → Backup & restore)
-    const val Backup       = "backup"        // cloud upload — export data
-    const val Restore      = "restore"       // cloud download — import data
-
-    // ── Status / report glyphs
-    const val ErrorOutline = "error_outline"
-    const val BugReport     = "bug_report"
-    const val Warning       = "warning"
-    const val Download      = "download"     // ⬇ — check for updates
-    const val Notifications = "notifications"
-    const val BubbleChart   = "bubble_chart"   // floating explore bubble
-    const val Schedule      = "schedule"
-    const val LocalFire     = "local_fire_department"
-    const val DarkMode      = "dark_mode"
-    const val LightMode     = "light_mode"      // sun — onboarding theme picker
-    const val Contrast      = "contrast"        // half-filled circle — system theme
-
-    // ── Journal mood glyphs (Marginalia editor + saved-entry meta card)
-    const val MoodCalm       = "self_improvement"    // meditating figure
-    const val MoodHappy      = "sentiment_satisfied" // smiley
-    const val MoodCurious    = "psychology"          // head with gears
-    const val MoodInspired   = "lightbulb"           // bulb
-    const val MoodTired      = "bedtime"             // crescent moon
-    const val MoodOverwhelmed = "mood_bad"           // frowning face
-
-    // ── Entry meta card glyph (date & time segment)
-    const val CalendarToday  = "calendar_today"
-
-    // ── Quests / levels / achievements (v7.40)
-    const val EmojiEvents     = "workspace_premium"     // trophy — achievements shelf (v7.89: glyph verified in font subset; "emoji_events" was tofu)
-    const val Flag            = "flag"                  // journey marker
-    const val WorkspacePremium = "workspace_premium"    // badge — level milestones
-    // v8.34 — paw glyph for the Pet designer Settings entry (Material Symbols "pets").
-    const val Pets = "pets"
-    // v8.35 — pet designer tool glyphs (verified present in the bundled font subset).
-    const val Brush = "brush"                 // paint brush — paint tool
-    const val Fill = "format_paint"           // paint roller — fill bucket tool
-    const val Eraser = "ink_eraser"           // eraser — erase tool
-    const val Keyboard = "keyboard"           // typing reaction
-    const val Wallpaper = "wallpaper"         // PNG export
-    const val TaskAlt         = "task_alt"              // current quest
-    const val Database        = "database"              // v7.89 — Browse Topics drawer entry (verified in font subset)
-    const val SupportAgent    = "support_agent"          // v7.89 — Support & diagnostics drawer entry (verified in font subset)
-    // v27 — explore-session attachments (all verified in the bundled font
-    // subset: edit_note + photo_camera + photo_library ship in the hero
-    // watermark family lists).
-    const val Note            = "edit_note"             // shared session note
-    // v3xx — the community / social layer. Both glyphs were ALREADY in the
-    // bundled Material Symbols subset's ligature table (verified with
-    // fontTools against `material_symbols_outlined.ttf`), so no re-subset
-    // was needed — never add a name here without checking it first, a
-    // missing ligature renders as the literal word instead of an icon.
-    const val Hub             = "hub"                   // connected nodes — the Community wall
-    const val Notes           = "notes"                 // stacked lines — replies / direct messages
-    const val Screenshot      = "photo_camera"          // capture the screen
-    const val PhotoLibrary    = "photo_library"         // add screenshots from the gallery
+    const val PushPin = "push_pin"
+    const val Crop = "crop"
+    const val Share = "share"
+    const val Lightbulb = "lightbulb"
+    const val Delete = "delete"
+    const val Replay = "replay"
+    const val Refresh = "refresh"
+    const val Star = "star"
+    const val StarOutline = "star"
+    const val Bookmark = "bookmark"
+    const val BookmarkBorder = "bookmark"
+    const val ThumbUp = "thumb_up"
+    const val ThumbDown = "thumb_down"
 
     /**
-     * Per-family symbol sets for the saved-entry hero's decorative watermark
-     * scatter — instruments for Music, camera kit for Movies, books for
-     * Books, art tools for Visual Art, lab symbols for Science, curiosities
-     * for Wildcard. Standard Material Symbols OUTLINED ligature names, so a
-     * Music entry's hero scatters music notes/pianos, an Artists entry
-     * scatters instruments, etc.
+     * The HEART — one glyph, two states.
+     *
+     * There is deliberately no `FavoriteBorder`: Curio's bundled Material
+     * Symbols subset (see [safeGlyphName]) carries `favorite` but not
+     * `favorite_border`, so an outlined heart would render as the literal word.
+     * An un-hearted control draws THIS glyph in a muted tone instead.
      */
+    const val Favorite = "favorite"
+    const val FormatQuote = "format_quote"
+    const val FormatBold = "format_bold"
+    const val FormatItalic = "format_italic"
+    const val FormatUnderline = "format_underlined"
+    const val FormatStrikethrough = "format_strikethrough"
+    const val FormatHighlight = "format_color_fill"
+    const val FormatText = "text_fields"
+    const val TextIncrease = "text_increase"
+    const val TextDecrease = "text_decrease"
+    const val Mic = "mic"
+    const val MicNone = "mic"
+    const val Image = "image"
+    const val Fullscreen = "fullscreen"
+    const val AspectRatio = "aspect_ratio"
+    const val PhotoSizeSelectLarge = "photo_size_select_large"
+    const val PlayArrow = "play_arrow"
+    const val TravelExplore = "travel_explore"
+    const val YouTubeActivity = "youtube_activity"
+    const val MusicNote = "music_note"
+    const val OpenInNew = "open_in_new"
+    const val PlayCircle = "play_circle"
+    const val ContentCopy = "content_copy"
+    const val Pause = "pause"
+    const val Stop = "stop"
+    const val Timer = "timer"
+    const val KeyboardArrowDown = "keyboard_arrow_down"
+    const val KeyboardArrowUp = "keyboard_arrow_up"
+    const val ArrowUpward = "arrow_upward"
+    const val ArrowDownward = "arrow_downward"
+    const val Casino = "casino"
+    const val Album = "album"
+    const val Movie = "movie"
+    const val MenuBook = "menu_book"
+    const val Palette = "palette"
+    const val ScienceGlyph = "science"
+    const val Colorize = "colorize"
+    const val Undo = "undo"
+    const val Redo = "redo"
+    const val Layers = "layers"
+
+    const val LocalCafe = "local_cafe"
+    const val FoldedCorner = "auto_stories"
+    const val RedMarginLine = "border_clear"
+
+    const val Backup = "backup"
+    const val Restore = "history"
+
+    const val ErrorOutline = "error"
+    const val BugReport = "bug_report"
+    const val Warning = "warning"
+    const val Download = "download"
+    const val Notifications = "notifications"
+    const val BubbleChart = "bubble_chart"
+    const val Schedule = "schedule"
+    const val LocalFire = "local_fire_department"
+    const val DarkMode = "dark_mode"
+    const val LightMode = "light_mode"
+    const val Contrast = "contrast"
+
+    const val MoodCalm = "self_improvement"
+    const val MoodHappy = "sentiment_satisfied"
+    const val MoodCurious = "psychology"
+    const val MoodInspired = "lightbulb"
+    const val MoodTired = "bedtime"
+    const val MoodOverwhelmed = "mood_bad"
+
+    const val CalendarToday = "calendar_today"
+
+    const val EmojiEvents = "workspace_premium"
+    const val Flag = "flag"
+    const val WorkspacePremium = "workspace_premium"
+    const val Pets = "pets"
+    const val Brush = "brush"
+    const val Fill = "format_paint"
+    const val Eraser = "ink_eraser"
+    const val Keyboard = "keyboard"
+    const val Wallpaper = "wallpaper"
+    const val TaskAlt = "task_alt"
+    const val Database = "database"
+    const val SupportAgent = "support_agent"
+    const val Note = "edit_note"
+
+    const val Hub = "hub"
+    const val Chats = "chat_bubble"
+    const val Friends = "groups"
+    const val Send = "send"
+    const val MoreHoriz = "more_horiz"
+    const val Public = "public"
+    const val Notes = "notes"
+    const val Screenshot = "photo_camera"
+    const val PhotoLibrary = "photo_library"
+
     fun heroWatermarkSymbols(family: CategoryFamily): List<String> = when (family) {
-        // Exactly 10 — one per hero scatter slot, so no glyph repeats.
-        // v7.33 — swapped the three names missing from the bundled Material
-        // Symbols font (audiotrack / ondemand_video / create rendered as
-        // empty tofu boxes) for glyphs that exist in the font.
-        CategoryFamily.MUSIC -> listOf(
-            "music_note", "library_music", "headphones", "mic", "album",
-            "equalizer", "piano", "radio", "music_video", "queue_music"
-        )
-        CategoryFamily.MOVIES -> listOf(
-            "movie", "videocam", "theater_comedy", "local_movies", "movie_filter",
-            "play_circle", "slow_motion_video", "video_library", "theaters", "smart_display"
-        )
-        CategoryFamily.BOOKS -> listOf(
-            "menu_book", "auto_stories", "library_books", "edit_note", "book",
-            "format_quote", "import_contacts", "local_library", "edit", "menu_open"
-        )
-        CategoryFamily.VISUAL_ART -> listOf(
-            "brush", "palette", "colorize", "photo_library", "museum",
-            "photo_camera", "wallpaper", "architecture", "photo", "landscape"
-        )
-        CategoryFamily.SCIENCE -> listOf(
-            "science", "biotech", "lightbulb", "functions", "psychology",
-            "bubble_chart", "explore", "hub", "online_prediction", "genetics"
-        )
-        CategoryFamily.ANIME_COMICS -> listOf(
-            "smart_display", "movie_filter", "auto_stories", "import_contacts", "menu_book",
-            "play_circle", "theaters", "video_library", "library_books", "star"
-        )
-        CategoryFamily.GAMES -> listOf(
-            "sports_esports", "videogame_asset", "casino", "diamond", "bolt",
-            "workspace_premium", "star", "rocket_launch", "auto_awesome", "explore"
-        )
-        CategoryFamily.MYTHOLOGY -> listOf(
-            "auto_awesome", "star", "nightlight", "public", "spa",
-            "diamond", "bolt", "explore", "rocket_launch", "psychology"
-        )
-        CategoryFamily.SPORTS -> listOf(
-            "sports_soccer", "flag", "workspace_premium", "local_fire_department", "star",
-            "bolt", "public", "explore", "rocket_launch", "spa"
-        )
-        CategoryFamily.FOOD -> listOf(
-            "restaurant", "local_cafe", "local_fire_department", "spa", "star",
-            "auto_awesome", "diamond", "public", "bolt", "explore"
-        )
-        CategoryFamily.INTERNET -> listOf(
-            "public", "hub", "bolt", "star", "auto_awesome",
-            "explore", "rocket_launch", "diamond", "spa", "nightlight"
-        )
-        CategoryFamily.WILDCARD -> listOf(
-            "casino", "auto_awesome", "explore", "bolt", "star",
-            "nightlight", "public", "spa", "diamond", "rocket_launch"
-        )
+        CategoryFamily.MUSIC -> listOf("music_note", "library_music", "headphones", "mic", "album", "equalizer", "piano", "radio", "music_video", "queue_music")
+        CategoryFamily.MOVIES -> listOf("movie", "videocam", "theater_comedy", "local_movies", "movie_filter", "play_circle", "slow_motion_video", "video_library", "theaters", "smart_display")
+        CategoryFamily.BOOKS -> listOf("menu_book", "auto_stories", "library_books", "edit_note", "book", "format_quote", "import_contacts", "local_library", "edit", "menu_open")
+        CategoryFamily.VISUAL_ART -> listOf("brush", "palette", "colorize", "photo_library", "museum", "photo_camera", "wallpaper", "architecture", "photo", "landscape")
+        CategoryFamily.SCIENCE -> listOf("science", "biotech", "lightbulb", "functions", "psychology", "bubble_chart", "explore", "hub", "online_prediction", "genetics")
+        CategoryFamily.ANIME_COMICS -> listOf("smart_display", "movie_filter", "auto_stories", "import_contacts", "menu_book", "play_circle", "theaters", "video_library", "library_books", "star")
+        CategoryFamily.GAMES -> listOf("sports_esports", "videogame_asset", "casino", "diamond", "bolt", "workspace_premium", "star", "rocket_launch", "auto_awesome", "explore")
+        CategoryFamily.MYTHOLOGY -> listOf("auto_awesome", "star", "nightlight", "public", "spa", "diamond", "bolt", "explore", "rocket_launch", "psychology")
+        CategoryFamily.SPORTS -> listOf("sports_soccer", "flag", "workspace_premium", "local_fire_department", "star", "bolt", "public", "explore", "rocket_launch", "spa")
+        CategoryFamily.FOOD -> listOf("restaurant", "local_cafe", "local_fire_department", "spa", "star", "auto_awesome", "diamond", "public", "bolt", "explore")
+        CategoryFamily.INTERNET -> listOf("public", "hub", "bolt", "star", "auto_awesome", "explore", "rocket_launch", "diamond", "spa", "nightlight")
+        CategoryFamily.WILDCARD -> listOf("casino", "auto_awesome", "explore", "bolt", "star", "nightlight", "public", "spa", "diamond", "rocket_launch")
     }
 
-    // ── Screen-matched hero watermark sets (v59.2) ───────────────────────
-    // The app-level torn heroes (drawer, Settings, Topic History) scatter
-    // glyphs that match the SCREEN's purpose instead of the generic
-    // wildcard set — navigation for the drawer, gears/sliders for Settings,
-    // clocks/history for Topic History. All glyphs below are already used
-    // elsewhere in the app, so they're verified present in the bundled
-    // Material Symbols subset (no tofu).
+    fun settingsHeroSymbols(): List<String> = listOf("settings", "tune", "dark_mode", "light_mode", "contrast", "palette", "colorize", "backup", "notifications", "layers")
 
-    /** Settings hub hero — gears, sliders, appearance + backup glyphs. */
-    fun settingsHeroSymbols(): List<String> = listOf(
-        "settings", "tune", "dark_mode", "light_mode", "contrast",
-        "palette", "colorize", "backup", "notifications", "layers"
-    )
+    fun historyHeroSymbols(): List<String> = listOf("history", "schedule", "restore", "replay", "refresh", "timer", "calendar_today", "undo", "auto_stories", "menu_book")
 
-    /** Topic History hero — clocks, restores and revisits (kept a book so
-     *  the topic-catalog flavor survives). */
-    fun historyHeroSymbols(): List<String> = listOf(
-        "history", "schedule", "restore", "replay", "refresh", "timer",
-        "calendar_today", "undo", "auto_stories", "menu_book"
-    )
-
-    /** Home nav-drawer hero — navigation + curiosity glyphs. Six entries
-     *  (the drawer scatters 3 mirrored pairs, so it needs only 6). */
-    fun drawerHeroSymbols(): List<String> = listOf(
-        "menu", "explore", "auto_awesome", "star", "diamond", "bolt"
-    )
+    fun drawerHeroSymbols(): List<String> = listOf("menu", "explore", "auto_awesome", "star", "diamond", "bolt")
 }
 
-/** The Material Symbols glyph a journal mood wears. */
 val JournalMood.glyph: String
     get() = when (this) {
         JournalMood.CALM -> CurioIcons.MoodCalm
@@ -320,16 +236,19 @@ val JournalMood.glyph: String
         JournalMood.OVERWHELMED -> CurioIcons.MoodOverwhelmed
     }
 
-/**
- * Renders a Material Symbols glyph via ligature.
- *
- * @param name Material Symbols ligature name (e.g. "play_arrow"). See [CurioIcons].
- * @param contentDescription Accessibility description.
- * @param modifier Standard [Modifier].
- * @param tint Glyph tint. Defaults to [LocalContentColor.current].
- * @param size Glyph box size (also used for sp size).
- * @param weight Font weight (Normal/Bold). Defaults to Normal.
- */
+private fun safeGlyphName(name: String): String = when (name) {
+    // These were introduced by the social layer after the last font subset.
+    // Remap to glyphs known to exist in Curio's bundled font so social icons
+    // remain visible without reverting newer icon work.
+    "chat_bubble" -> "notes"
+    "groups" -> "person"
+    "send" -> "arrow_forward"
+    "more_horiz" -> "more_vert"
+    "notes" -> "edit_note"
+    "lock" -> "visibility_off"
+    else -> name
+}
+
 @Composable
 fun CurioIcon(
     name: String,
@@ -339,34 +258,34 @@ fun CurioIcon(
     size: Dp = 24.dp,
     weight: FontWeight = FontWeight.Normal
 ) {
-    // Icon geometry is specified in dp and must remain visually stable when
-    // the system font scale grows. Text-based Material Symbols otherwise
-    // inherit accessibility scaling and outgrow their centered icon slot.
     val iconSp = (size.value / LocalDensity.current.fontScale.coerceAtLeast(1f)).sp
+    val alive = CurioAlivePreferences.isEnabled(LocalContext.current)
+    val navIcon = contentDescription in setOf("Home", "Shuffle", "Cabinet", "Social")
+    val navSelected = navIcon && tint != MaterialTheme.colorScheme.onSurfaceVariant
+    val navScale by animateFloatAsState(
+        targetValue = if (alive && navSelected) 1.14f else 1f,
+        animationSpec = spring(dampingRatio = 0.58f, stiffness = 520f),
+        label = "aliveNavIconScale"
+    )
+    val navRotation by animateFloatAsState(
+        targetValue = if (alive && navSelected) 2.5f else 0f,
+        animationSpec = spring(dampingRatio = 0.66f, stiffness = 430f),
+        label = "aliveNavIconRotation"
+    )
 
-    // v246 — MEASURED INK CENTERING. Font-metric nudges (the old fixed dp
-    // offsets and their proportional successor) could never be right for
-    // every glyph at every font scale — some icons sat low, others rode
-    // high. Instead the actual rendered glyph bounds are measured from the
-    // text layout and the text is shifted by exactly the delta between the
-    // line-box center and the INK center, so every glyph self-centers in
-    // the icon box — menu, person, search, chevron, all of them, at any
-    // system font size.
     var inkShiftPx by remember { mutableFloatStateOf(0f) }
 
     Box(
         modifier = modifier
             .size(size)
             .semantics(mergeDescendants = true) {
-                if (contentDescription != null) {
-                    this.contentDescription = contentDescription
-                }
+                if (contentDescription != null) this.contentDescription = contentDescription
                 this.role = Role.Image
             },
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = name,
+            text = safeGlyphName(name),
             fontFamily = MaterialSymbolsFontFamily,
             fontWeight = weight,
             fontSize = iconSp,
@@ -376,64 +295,42 @@ fun CurioIcon(
             softWrap = false,
             style = TextStyle(
                 lineHeight = iconSp,
-                // Material Symbols' ink is designed to sit vertically centered
-                // in its NATURAL 1.2em line box (glyph ink spans +0.04em..
-                // +0.96em above the baseline; the baseline sits at 1.1em of
-                // the 1.2em box). Keep the platform font padding and let the
-                // line height act as a minimum, so the natural box centers the
-                // ink inside the icon's layout box — glyphs stay perfectly
-                // centered with a small margin and never get clipped by
-                // buttons' rounded shapes at any system font scale.
-                // (v114 — includeFontPadding=false + Trim.Both trimmed the
-                // line below the font metrics and the trim's int rounding
-                // dropped the baseline ~2dp below the icon box: every icon
-                // sat low and its ink bottom was cut by clipped parents.)
-                platformStyle = PlatformTextStyle(includeFontPadding = true)
+                // NO FONT PADDING. Material Symbols carry extra leading above
+                // and below the em box, so a glyph laid out at exactly the
+                // requested size sits LOW inside it — inside a pill (whose
+                // shape clips) that shaved the bottom off the icon. With the
+                // padding gone the ink centring below is exact, so the ink
+                // never leaves the box the caller gave it.
+                platformStyle = PlatformTextStyle(includeFontPadding = false)
             ),
-            // v246 — the measured ink shift (see above), applied as a layout
-            // offset so the glyph's INK — not its line box — sits centered.
-            // v256 — plus a small OPTICAL BIAS DOWNWARD (~4% of the icon
-            // box): pure geometric centering consistently read a touch high
-            // inside circular pills on device — round buttons look right
-            // when the glyph mass rides a hair BELOW the exact middle.
             onTextLayout = { layout ->
                 val inkBounds = runCatching { layout.getBoundingBox(0) }.getOrNull()
                 if (inkBounds != null && layout.size.height > 0) {
-                    inkShiftPx = layout.size.height / 2f -
-                        (inkBounds.top + inkBounds.bottom) / 2f +
-                        layout.size.height * 0.04f
+                    val centred = layout.size.height / 2f -
+                        (inkBounds.top + inkBounds.bottom) / 2f
+                    // A glyph the font lays out oddly must not walk out of a
+                    // pill's clip, so the nudge stays inside a tenth of the box.
+                    val limit = layout.size.height * 0.1f
+                    inkShiftPx = centred.coerceIn(-limit, limit)
                 }
             },
-            modifier = Modifier.offset {
-                IntOffset(0, inkShiftPx.roundToInt())
-            }
+            modifier = Modifier
+                .offset { IntOffset(0, inkShiftPx.roundToInt()) }
+                .graphicsLayer {
+                    scaleX = navScale
+                    scaleY = navScale
+                    rotationZ = navRotation
+                }
         )
     }
 }
 
-/**
- * v233 — PROPORTIONAL GLYPH INK NUDGE. Material Symbols' ink reads a hair
- * low inside small circular pills, so call sites used to pin a FIXED dp
- * offset (e.g. `Modifier.offset(y = (-2f).dp)`). A fixed offset only
- * centers correctly at the default font scale: below 1.0 the rendered
- * glyph shrinks (CurioIcon divides sp by font scale, coerced at 1) while
- * the nudge stays put — so the ink visibly rides HIGH on small-font
- * devices ("why is the avatar icon not centered on my phone"). This
- * helper scales the optical correction by the same factor the glyph
- * itself scales by, so the ink stays optically centered at every font
- * scale. Use INSTEAD of raw `offset(y = …)` nudges on CurioIcon.
- */
 @Composable
 fun Modifier.curioGlyphInkNudge(yDp: Float): Modifier {
     val fontScale = LocalDensity.current.fontScale.coerceAtMost(1f)
     return this.offset(y = yDp.dp * fontScale)
 }
 
-/**
- * v27s — the search-engine pill tile: brand color + letter monogram. The
- * icon font has no logo glyphs, so each engine is a colored rounded tile
- * carrying its initial — readable at 18dp and brand-recognizable.
- */
 fun SearchEngine.brandTile(): Pair<Color, String> = when (this) {
     SearchEngine.GOOGLE -> Color(0xFF4285F4) to "G"
     SearchEngine.DUCKDUCKGO -> Color(0xFFDE5833) to "D"
@@ -444,11 +341,6 @@ fun SearchEngine.brandTile(): Pair<Color, String> = when (this) {
     SearchEngine.YAHOO -> Color(0xFF6001D2) to "Y"
 }
 
-/**
- * v27s — the music-service pill tile: brand color + a Material glyph (the
- * font has no Apple/Spotify logos, so the services use their recognizable
- * glyph + color instead).
- */
 fun MusicService.brandTile(): Pair<Color, String> = when (this) {
     MusicService.YOUTUBE -> Color(0xFFFF0000) to CurioIcons.YouTubeActivity
     MusicService.YOUTUBE_MUSIC -> Color(0xFFFF0000) to CurioIcons.YouTubeActivity
@@ -456,13 +348,6 @@ fun MusicService.brandTile(): Pair<Color, String> = when (this) {
     MusicService.SPOTIFY -> Color(0xFF1DB954) to CurioIcons.PlayCircle
 }
 
-/**
- * v106 — the brand-logo VectorDrawable for each music service (converted
- * from the official brand SVGs the user supplied), used by the explore
- * dialog's "Watch in" pill and the Music service picker rows. The logos
- * keep their own brand colors (never tinted); [brandTile]'s glyphs remain
- * for monogram fallback.
- */
 val MusicService.brandRes: Int
     get() = when (this) {
         MusicService.YOUTUBE -> R.drawable.ic_music_youtube
@@ -471,12 +356,6 @@ val MusicService.brandRes: Int
         MusicService.SPOTIFY -> R.drawable.ic_music_spotify
     }
 
-/**
- * v27s — a small brand tile: a rounded square in the brand color carrying
- * either a Material glyph ([glyph]) or a letter monogram ([letter]).
- * Retired from the explore dialog (v27u uses clean glyph pills instead)
- * but kept as a general-purpose brand chip helper.
- */
 @Composable
 fun BrandMonogram(
     tileColor: Color,

@@ -86,10 +86,28 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # The Curio account site (auth-web/): the redirect every confirmation
+          # and password reset email carries. Optional: unset (empty) leaves
+          # Supabase's own Site URL in charge and hides the recovery row.
+          CURIO_AUTH_SITE_URL: ${{ secrets.CURIO_AUTH_SITE_URL }}
         run: |
           if [ -z "$SUPABASE_URL" ] || { [ -z "$SUPABASE_PUBLISHABLE_KEY" ] && [ -z "$SUPABASE_ANON_KEY" ]; }; then
             echo "::warning::Supabase URL/key secrets not provided — this release APK will ship with Online Mode reporting unconfigured."
           fi
+          # Bundle the source catalogs as Android assets, exactly like
+          # android.yml does for CI builds. Without this the release APK ships
+          # with NO topic data: assets/topics/ holds only SCHEMA.md in git, so
+          # the first launch has nothing to import into Room and the Topic
+          # Database opens empty.
+          rm -rf app/src/main/assets/topics
+          mkdir -p app/src/main/assets/topics
+          cp data/topics/*.json app/src/main/assets/topics/
+          topic_files=$(find app/src/main/assets/topics -maxdepth 1 -name '*.json' | wc -l)
+          if [ "$topic_files" -eq 0 ]; then
+            echo "::error::No topic JSON assets were bundled."
+            exit 1
+          fi
+          echo "Bundled $topic_files topic catalog files into the release APK."
           ./gradlew validateTopics assembleRelease --stacktrace
 
       - name: Verify release APKs and signatures

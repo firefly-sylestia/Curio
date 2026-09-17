@@ -39,6 +39,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 `release.yml` runs only for `v*` tags. It:
 
 - Requires `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`.
+- **Bundles the topic catalog first** (`rm -rf app/src/main/assets/topics && cp data/topics/*.json app/src/main/assets/topics/`, fail if empty — the same step `android.yml` runs): the JSON lives in `data/topics/` in git and `assets/topics/` ships only `SCHEMA.md`, so a release build without this step produces an APK with NO topic data — Room has nothing to import, and the Topic Database opens empty. This exact gap shipped in every release before it was caught.
 - Decodes the repository keystore, runs `validateTopics assembleRelease`, and verifies the signature of **every** produced APK is not the Android debug key using the available Android build-tools.
 - Produces a **universal APK plus per-ABI APKs** (armeabi-v7a, arm64-v8a — v204: the release buildType's `ndk.abiFilters` restrict native libs to the two arm ABIs; x86/x86_64 are emulator-only legacy and no longer shipped) via the ABI splits in `app/build.gradle.kts`, so each device can install the smallest file that matches its CPU. The release ABI diet halves the bundled Vosk `libvosk.so` footprint in the universal release APK (4 ABIs ≈ 38MB → 2 ABIs ≈ 19MB); debug builds keep all four ABIs for emulator testing.
 - Renames every APK to a device-friendly name — `Curio-{versionName}-{versionCode}-{abi}-Android{min}+.apk` (Android 8.0+ = `minSdk 26`) — using version numbers read from the `printReleaseVersion` Gradle task (single source of truth: `defaultConfig`), and publishes a release body that explains which APK fits which device.
@@ -96,13 +97,22 @@ pushes build the desktop module. Re-enable by flipping both gates to
   non-numeric versions.
 - **Tag version is the package version:** exports `RELEASE_VERSION` (tag
   minus `v`) so `desktop/build.gradle.kts` versions the installer from the
-  tag, mirroring the Android convention. jpackage requires a strictly
-  numeric version (`MAJOR[.MINOR][.PATCH]`) for DMG/MSI metadata, so the
-  desktop module strips prerelease/build suffixes (`v1.0.2-beta` → `1.0.2`)
-  from `packageVersion` — the Android `versionName` is a plain string and
-  keeps the suffix. The portable zip name keeps the full tag (distinguishes
-  prerelease from later stable artifacts); the MSI is named from the numeric
-  package version, and the release body mirrors that (`msiVersion`).
+  tag, mirroring the Android convention. jpackage validates
+  `packageVersion` per bundle format, and the Windows MSI is the strict one:
+  it requires exactly `MAJOR.MINOR.BUILD` (255 / 255 / 65535). The desktop
+  module therefore NORMALIZES the tag instead of trusting it — prerelease/
+  build suffixes stripped (`v1.0.2-beta` → `1.0.2`) and missing components
+  padded with 0 (`v2.1-beta6` → `2.1.0`, `v2` → `2.0.0`) — and a tag that
+  yields nothing jpackage accepts falls back to `1.0.0` with a build
+  warning. A two-component tag used to fail **configuration**
+  (`Illegal version for 'Msi': '2.1'`), and since Gradle configures every
+  project before running `:app:assembleRelease`, that broke the Android
+  release on the same tag (v2.1-beta6). The Android `versionName` is a plain
+  string and keeps its suffix. The portable zip name keeps the full tag
+  (distinguishes prerelease from later stable artifacts); the release body's
+  MSI row uses the installer's ACTUAL file name (`CURIO_MSI_NAME`, published
+  by the collect step) rather than re-deriving the rule, so the body can
+  never name a file the build did not produce.
 - Publishes through GitHub Releases with the same `alpha`/`beta`/`rc`
   prerelease detection as the Android workflow, and `update_release_body:
   false` so it never clobbers the Android workflow's release body when both
@@ -145,6 +155,7 @@ The release workflow requires the signing secrets; the Android CI workflow consu
 Optional build-config secrets are exported to the Gradle build and baked into `BuildConfig`; when unset, the feature they configure degrades quietly instead of failing the build:
 
 - `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` (or `SUPABASE_ANON_KEY`) — Supabase project URL and public client key for account sign-in and Online Mode. **Both** `android.yml` and `release.yml` export it, and `app/build.gradle.kts` reads `SUPABASE_PUBLISHABLE_KEY` before falling back to `SUPABASE_ANON_KEY`, so the repo works whichever name is configured; `android.yml` logs a warning when neither is present so an unconfigured APK is visible in the log. The **service-role key must never be added as a secret or exported to a build** — it would ship inside the APK.
+- `CURIO_AUTH_SITE_URL` — the Curio account site (`auth-web/`, deployed on Vercel). It is the `redirect_to` every confirmation and password reset email carries and the URL behind the sign-in form's "Forgot your password?" row. **Optional and empty by default**: unset leaves Supabase's own Site URL in charge of email links (which is what sent members to `http://localhost:3000`) and hides the recovery row, so a build from before the site exists is unchanged. Both `android.yml` and `release.yml` export it.
 - `GOOGLE_BOOKS_API_KEY`, `LIBRARY_THING_API_KEY` — keyed cover providers (unset keeps the keyless paths).
 - `SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET` — Spotify client-credentials flow for music topics (unset keeps the search links).
 

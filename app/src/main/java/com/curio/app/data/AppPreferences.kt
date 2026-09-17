@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.curio.app.data.supabase.SOCIAL_AVATAR_STYLE_COUNT
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -137,6 +138,10 @@ object AppPreferences {
     // the Explore now dialog (default OFF; the Notifications toggle
     // re-shows it there as a single-line choice).
     private const val KEY_SHOW_BUBBLE_OPT_IN_DIALOG = "show_bubble_opt_in_dialog"
+    // v3xx54 — notify for social arrivals: a friend's message, or someone new
+    // on the community wall. Default ON (a message app that stays silent is a
+    // message app you keep opening by hand); the Notifications page owns it.
+    private const val KEY_SOCIAL_NOTIFICATIONS = "social_notifications_enabled"
     // v19 — the search engine the "Explore in browser" button opens (Google
     // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
     private const val KEY_SEARCH_ENGINE = "search_engine"
@@ -235,6 +240,11 @@ object AppPreferences {
     // "Fetch all covers" so a re-tap resumes where the last run left off
     // instead of restarting from book #1.
     private const val KEY_BOOK_COVER_DONE = "book_cover_done"
+    // v389 — book ids whose metadata lookup already COMPLETED. A pass that
+    // threw (offline, a timeout) is never recorded — the marker is durable, so
+    // recording a failure would make one bad attempt permanent. Stops the
+    // detail page repeating a finished lookup after a process restart.
+    private const val KEY_BOOK_LOOKUP_DONE = "book_lookup_done"
     // v362 — per-chapter PERSONAL notes (book name → chapter number → text).
     private const val KEY_BOOK_CHAPTER_NOTES = "book_chapter_notes"
     // v375 — rich runs per chapter note (mirrors KEY_BOOK_CHAPTER_NOTES).
@@ -302,6 +312,9 @@ object AppPreferences {
     // Off by default: Online Mode alone is about sync, this is the louder
     // "I want the community in my nav" choice.
     private const val KEY_COMMUNITY_TAB_ENABLED = "community_tab_enabled"
+    private const val KEY_TERMS_ACCEPTED_VERSION = "terms_accepted_version"
+    private const val KEY_LOCAL_FRIEND_IDS = "local_friend_ids"
+    const val CURRENT_TERMS_VERSION = 1
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -320,11 +333,17 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_USERNAME, username.trim().removePrefix("@").lowercase()).apply()
     }
 
+    // The pick is an index into the app's drawn portrait list, so both ends
+    // clamp against SOCIAL_AVATAR_STYLE_COUNT — a hardcoded 0..15 here silently
+    // reverted every style added after the first sixteen.
     fun getSocialAvatarStyle(context: Context): Int =
-        prefs(context).getInt(KEY_SOCIAL_AVATAR_STYLE, 0).coerceIn(0, 15)
+        prefs(context).getInt(KEY_SOCIAL_AVATAR_STYLE, 0)
+            .coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1)
 
     fun setSocialAvatarStyle(context: Context, style: Int) {
-        prefs(context).edit().putInt(KEY_SOCIAL_AVATAR_STYLE, style.coerceIn(0, 15)).apply()
+        prefs(context).edit()
+            .putInt(KEY_SOCIAL_AVATAR_STYLE, style.coerceIn(0, SOCIAL_AVATAR_STYLE_COUNT - 1))
+            .apply()
     }
 
     // ── Online Mode ──────────────────────────────────────────────────
@@ -338,13 +357,81 @@ object AppPreferences {
         onlineModeEnabledState = enabled
     }
 
-    // ── Community tab (opt-in bottom-nav entry) ───────────────────────
-    fun isCommunityTabEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, false)
+  // ── Terms acceptance ──────────────────────────────────────────────
+  fun hasAcceptedCurrentTerms(context: Context): Boolean =
+  prefs(context).getInt(KEY_TERMS_ACCEPTED_VERSION, 0) >= CURRENT_TERMS_VERSION
+
+  fun acceptCurrentTerms(context: Context) {
+  prefs(context).edit().putInt(KEY_TERMS_ACCEPTED_VERSION, CURRENT_TERMS_VERSION).apply()
+  }
+
+  fun getLocalFriendIds(context: Context): Set<String> =
+  prefs(context).getStringSet(KEY_LOCAL_FRIEND_IDS, emptySet()).orEmpty()
+
+  fun rememberLocalFriend(context: Context, userId: String) {
+  prefs(context).edit().putStringSet(KEY_LOCAL_FRIEND_IDS, getLocalFriendIds(context) + userId).apply()
+  }
+
+  // ── Community tab (opt-in bottom-nav entry) ───────────────────────
+  fun isCommunityTabEnabled(context: Context): Boolean =
+  prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, false)
 
     fun setCommunityTabEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_COMMUNITY_TAB_ENABLED, enabled).apply()
         communityTabEnabledState = enabled
+    }
+
+    // ── Social privacy (v3xx55) ───────────────────────────────────────
+    // These three decisions belong to the member, not the build: they are
+    // stored locally (so they hold offline, where the account layer cannot
+    // answer) and mirrored onto the profile row so the server enforces the
+    // same thing. See `supabase/schema.sql` §5e.
+    private const val KEY_PROFILE_VISIBILITY = "social_profile_visibility"
+    private const val KEY_HIDE_ACTIVITY = "social_hide_activity"
+    private const val KEY_PRESENCE_MODE = "social_presence_mode"
+    const val PRESENCE_ACTIVE = "active"
+    const val PRESENCE_DND = "dnd"
+    const val PRESENCE_HIDDEN = "hidden"
+
+    /**
+     * Who may see this account's profile: "public" (any discoverable member)
+     * or "friends" (accepted friends only). The local value is authoritative
+     * so the choice survives offline; [SocialApi.updatePrivacy] mirrors it.
+     */
+    fun getProfileVisibility(context: Context): String =
+        prefs(context).getString(KEY_PROFILE_VISIBILITY, "public") ?: "public"
+
+    fun setProfileVisibility(context: Context, visibility: String) {
+        val clean = if (visibility == "friends") "friends" else "public"
+        prefs(context).edit().putString(KEY_PROFILE_VISIBILITY, clean).apply()
+        profileVisibilityState = clean
+    }
+
+    /**
+     * When on, this account never publishes a last-active stamp, so no
+     * presence line can be drawn about it — and the switch clears any stamp
+     * that was already stored the moment it is turned on.
+     */
+    fun isActivityHidden(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HIDE_ACTIVITY, false)
+
+    fun getPresenceMode(context: Context): String = prefs(context)
+        .getString(KEY_PRESENCE_MODE, if (isActivityHidden(context)) PRESENCE_HIDDEN else PRESENCE_ACTIVE)
+        ?.takeIf { it == PRESENCE_ACTIVE || it == PRESENCE_DND || it == PRESENCE_HIDDEN }
+        ?: PRESENCE_ACTIVE
+
+    fun setPresenceMode(context: Context, mode: String) {
+        val clean = mode.takeIf { it == PRESENCE_ACTIVE || it == PRESENCE_DND || it == PRESENCE_HIDDEN } ?: PRESENCE_ACTIVE
+        prefs(context).edit()
+            .putString(KEY_PRESENCE_MODE, clean)
+            .putBoolean(KEY_HIDE_ACTIVITY, clean == PRESENCE_HIDDEN)
+            .apply()
+        presenceModeState = clean
+        hideActivityState = clean == PRESENCE_HIDDEN
+    }
+
+    fun setActivityHidden(context: Context, hidden: Boolean) {
+        setPresenceMode(context, if (hidden) PRESENCE_HIDDEN else PRESENCE_ACTIVE)
     }
 
     // ── Favorite song (v... — Vinyl share card) ───────────────────────
@@ -438,7 +525,7 @@ object AppPreferences {
         return added
     }
 
-    // ── Series watched progress (v350) ───────────────────────────────────
+    // ── Series watched progress (v350) ───────────────────
     // Per-show set of watched episode keys ("S1E3"): JSON object show name →
     // JSON array of keys. The episode-list sheet toggles an episode; the UI
     // derives watched counts per season from the authored episode list.
@@ -1051,12 +1138,13 @@ object AppPreferences {
     // v101 — the pill glow (dark mode) is the SUBTLE top-only version
     // (gentler glass edge + a glow that hugs the pill's top). v3xx — the
     // experiment concluded: subtle is the always-on default, no toggle.
-    // v3xx — CABINET v2 experiment (Settings → Experiments → Cabinet v2,
-    // default OFF): while enabled, the saved-entries + liked-books surfaces
-    // render as the new collections view with jacket-art covers and Home's
-    // Save shortcut repoints into it. When the experiment settles the toggle
-    // is removed and the winning view ships always-on.
-    var cabinetV2EnabledState by mutableStateOf(false)
+    // v3xx — CABINET v2 (Settings → Experiments → Cabinet v2): the
+    // collections view — jacket-art covers, glass toolbar, search, batch
+    // select — is now the DEFAULT (decided): new installs and members who
+    // never touched the toggle land on it, while a member who explicitly
+    // turned the experiment OFF keeps the classic grid. The toggle stays for
+    // comparison until the experiment formally settles.
+    var cabinetV2EnabledState by mutableStateOf(true)
     // v3xx45 — SCREEN REVEAL experiment (Settings → Dev page, default OFF):
     // opening a screen plays the SAME circular iris as the light/dark flip —
     // the current screen is frozen and peels away from where you tapped, a
@@ -1067,7 +1155,22 @@ object AppPreferences {
     // hero, a take rail riding the bottom tray, pickers moved into a tools
     // bottom sheet, a live recording pulse and springy take switching. The
     // paper notes themselves are untouched; OFF = today's capture page.
-    var captureStudioState by mutableStateOf(false)
+    var captureStudioState by mutableStateOf(true)
+    // v386 — SOCIAL TEXT EDITING now defaults ON (it was an opt-in experiment).
+    // Edit-own-message / edit-own-comment works out of the box; anyone who
+    // explicitly switched the Experiments toggle OFF keeps that choice — only
+    // the untouched default moved (see [isSocialTextEditingEnabled]).
+    var socialTextEditingState by mutableStateOf(true)
+    // v389 — CONVERSATIONS MUTED ON THE SHADE. A device-side set of user ids:
+    // muting a friend silences their message notifications (the inbox keeps
+    // counting them, so unmuting never dumps a backlog) while the conversation
+    // itself stays fully readable. Set from the notification's own action, from
+    // the thread's bell, and cleared on sign-out (the ids belong to an account).
+    var mutedConversationsState by mutableStateOf<Set<String>>(emptySet())
+        private set
+    // v389 — the wall's density experiment CLOSED: the compact card spacing
+    // (and its "Roomy social wall" switch, v387) was reverted on the member's
+    // call, so the airier row is the shipped one and nothing here toggles it.
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -1211,6 +1314,14 @@ object AppPreferences {
     /** Mirrors [isCommunityTabEnabled] — the opt-in Community nav tab. */
     var communityTabEnabledState by mutableStateOf(false)
         private set
+    /** Mirrors [getProfileVisibility] — "public" or "friends". */
+    var profileVisibilityState by mutableStateOf("public")
+        private set
+    /** Mirrors [isActivityHidden] — no last-active stamp is ever published. */
+    var hideActivityState by mutableStateOf(false)
+    private set
+    var presenceModeState by mutableStateOf(PRESENCE_ACTIVE)
+    private set
 
     /**
      * Whether the Community tab belongs on the bottom nav right now.
@@ -1351,6 +1462,11 @@ object AppPreferences {
     // subtext) so the dialog stays clean while the Settings toggle still
     // enables the bubble itself.
     var showBubbleOptInDialogState by mutableStateOf(false)
+        private set
+
+    // v3xx54 — social notifications (a DM or a new community post), default
+    // ON. Read by the app-level watcher and the Notifications page switch.
+    var socialNotificationsState by mutableStateOf(true)
         private set
 
     // v8.1 — whether the user has declined the "Display over other apps"
@@ -1639,6 +1755,8 @@ object AppPreferences {
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
         captureStudioState = isCaptureStudioEnabled(context)
+        socialTextEditingState = isSocialTextEditingEnabled(context)
+        mutedConversationsState = mutedConversations(context)
         cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -1655,6 +1773,7 @@ object AppPreferences {
         recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
+        socialNotificationsState = isSocialNotificationsEnabled(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
         offlineModelIdState = getOfflineModelId(context)
@@ -1709,6 +1828,9 @@ object AppPreferences {
         autoBackupFrequencyDaysState = getAutoBackupFrequencyDays(context)
         onlineModeEnabledState = isOnlineModeEnabled(context)
         communityTabEnabledState = isCommunityTabEnabled(context)
+        profileVisibilityState = getProfileVisibility(context)
+        hideActivityState = isActivityHidden(context)
+    presenceModeState = getPresenceMode(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────
@@ -1957,7 +2079,7 @@ object AppPreferences {
         heroShadowState = enabled
     }
 
-    // ── Paper & header experiments (v27) ─────────────────────────────
+    // ── Paper & header experiments (v27) ────────────────────────────────
     private const val KEY_HEADER_STYLE = "header_style"   // "TORN" | "GLASS"
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
@@ -1977,6 +2099,8 @@ object AppPreferences {
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
     private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
+  private const val KEY_SOCIAL_TEXT_EDITING = "social_text_editing_enabled"
+  private const val KEY_MUTED_CONVERSATIONS = "social_muted_conversations"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
@@ -2084,10 +2208,9 @@ object AppPreferences {
         paperStatCardsState = enabled
     }
 
-    /** Whether the Cabinet v2 experiment is on (default OFF; see the state
-     *  comment above). */
+    /** Whether Cabinet v2 (the collections view) is on — the default now. */
     fun isCabinetV2Enabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CABINET_V2, false)
+        prefs(context).getBoolean(KEY_CABINET_V2, true)
 
     fun setCabinetV2Enabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_CABINET_V2, enabled).apply()
@@ -2109,10 +2232,51 @@ object AppPreferences {
     fun isCaptureStudioEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_CAPTURE_STUDIO, false)
 
-    fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
-        captureStudioState = enabled
+  fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
+  prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
+  captureStudioState = enabled
+  }
+
+    /** Whether edit controls show for your own direct messages and comments.
+     *  v386 — default ON: the toggle below still turns it off, but a fresh
+     *  install (and every install that never touched the switch) gets it. */
+    fun isSocialTextEditingEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SOCIAL_TEXT_EDITING, true)
+
+    fun setSocialTextEditingEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SOCIAL_TEXT_EDITING, enabled).apply()
+        socialTextEditingState = enabled
     }
+
+    /**
+     * v389 — WHOSE MESSAGE NOTIFICATIONS ARE SILENCED, on this device only.
+     *
+     * A mute is per CONVERSATION, not a blanket switch: it comes from the
+     * notification's own Mute action and from the thread's bell, and it is
+     * read by the arrival watcher, which still counts a muted conversation's
+     * unread (so unmuting never fires a backlog) and simply never announces it.
+     */
+    fun mutedConversations(context: Context): Set<String> =
+        prefs(context).getStringSet(KEY_MUTED_CONVERSATIONS, emptySet()).orEmpty()
+
+    fun isConversationMuted(context: Context, userId: String): Boolean =
+        userId in mutedConversations(context)
+
+    fun setConversationMuted(context: Context, userId: String, muted: Boolean) {
+        val current = mutedConversations(context).toMutableSet()
+        if (muted) current.add(userId) else current.remove(userId)
+        // A COPY is written back: the set SharedPreferences hands out must not
+        // be mutated in place (the value in memory would change silently).
+        prefs(context).edit().putStringSet(KEY_MUTED_CONVERSATIONS, current).apply()
+        mutedConversationsState = current
+    }
+
+    /** Signing out forgets whose notifications were silenced. */
+    fun clearMutedConversations(context: Context) {
+        prefs(context).edit().remove(KEY_MUTED_CONVERSATIONS).apply()
+        mutedConversationsState = emptySet()
+    }
+
 
     // v3xx — the "Subtle pill glow" experiment concluded: subtle is the
     // always-on default, toggle + plumbing removed.
@@ -2429,7 +2593,7 @@ object AppPreferences {
     fun isLiveNotificationsEnabled(context: Context): Boolean = true
 
     /**
-     * v23 ��� whether the Explore now dialog shows its "Show the explore
+     * v23 — whether the Explore now dialog shows its "Show the explore
      * bubble" opt-in row. Default OFF (hidden); the Notifications toggle
      * re-shows it as a single-line choice inside the dialog.
      */
@@ -2439,6 +2603,19 @@ object AppPreferences {
     fun setShowBubbleOptInDialog(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SHOW_BUBBLE_OPT_IN_DIALOG, enabled).apply()
         showBubbleOptInDialogState = enabled
+    }
+
+    /**
+     * v3xx54 — whether Curio notifies for a friend's message and for new
+     * community posts. Default ON; turning it off leaves sync, unread badges
+     * and the wall exactly as they are, it only stops the notifications.
+     */
+    fun isSocialNotificationsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SOCIAL_NOTIFICATIONS, true)
+
+    fun setSocialNotifications(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SOCIAL_NOTIFICATIONS, enabled).apply()
+        socialNotificationsState = enabled
     }
 
     /**
@@ -2897,7 +3074,7 @@ object AppPreferences {
         }
     }
 
-    // ── Last-used Spin category — persisted so the Spin tab opens where ��
+    // ── Last-used Spin category — persisted so the Spin tab opens where the
     //    the user left off, even across app launches (v5.5). Falls back
     //    to WILDCARD when unset or when a stored name no longer exists.
     fun getLastSpinCategory(context: Context): CategoryId {
@@ -3290,7 +3467,7 @@ object AppPreferences {
     fun isCoverFetchEnabled(context: Context): Boolean {
         val p = prefs(context)
         if (p.contains(KEY_COVER_FETCH_ENABLED)) {
-            return p.getBoolean(KEY_COVER_FETCH_ENABLED, false)
+            return p.getBoolean(KEY_COVER_FETCH_ENABLED, true)
         }
         val legacy = p.getBoolean(KEY_BOOK_FETCH_ENABLED, false) ||
             p.getBoolean(KEY_ALBUM_FETCH_ENABLED, false) ||
@@ -3366,15 +3543,49 @@ object AppPreferences {
         bookCoverDoneState = names
     }
 
+    /**
+     * v389 — the book ids whose metadata lookup already COMPLETED. Read by the
+     * book page's auto-fetch so a finished lookup is not repeated on every open
+     * (and after every restart). Disk-backed: call it off the main thread.
+     */
+    fun getBookLookupDone(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_BOOK_LOOKUP_DONE, null) ?: return emptySet()
+        return runCatching {
+            org.json.JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i ->
+                    arr.optString(i).takeIf { it.isNotBlank() }
+                }.toSet()
+            }
+        }.getOrDefault(emptySet())
+    }
+
+    /**
+     * v389 — marks one book's metadata lookup as COMPLETED across restarts.
+     * Only ever called for a pass that actually returned (see BookDetailScreen:
+     * a pass that threw is retried next time instead of being remembered as
+     * done).
+     */
+    fun markBookLookupDone(context: Context, bookId: String) {
+        if (bookId.isBlank()) return
+        val done = getBookLookupDone(context) + bookId
+        prefs(context).edit()
+            .putString(KEY_BOOK_LOOKUP_DONE, org.json.JSONArray(done.toList()).toString())
+            .apply()
+    }
+
     /** v361 — wipe EVERY book-cover record (resolved URLs, verified-done
      *  set, failed list) so the hub's "Clear all covers" starts a provider
      *  test from a blank slate. The Coil disk cache is cleared by the caller
-     *  (BookCoverFetch.clearAllCovers) so old artwork doesn't linger. */
+     *  (BookCoverFetch.clearAllCovers) so old artwork doesn't linger.
+     *  v389 — also drops the completed-metadata-lookup markers: this is the
+     *  book-metadata reset door, and a book marked "looked up" would otherwise
+     *  never be looked up again — the opposite of what a reset is for. */
     fun clearBookCovers(context: Context) {
         prefs(context).edit()
             .remove(KEY_BOOK_COVER_URLS)
             .remove(KEY_BOOK_COVER_DONE)
             .remove(KEY_BOOK_COVER_FAILED)
+            .remove(KEY_BOOK_LOOKUP_DONE)
             .apply()
         bookCoverUrlsState = emptyMap()
         bookCoverDoneState = emptyList()
@@ -3620,7 +3831,7 @@ object AppPreferences {
         bedDesignRowsState = null
     }
 
-    // ── Evolution path (v9.5) ────────────────────────────────────────
+    // ── Evolution path (v9.5) ───────────────────────────────────
     private const val KEY_EVO_PATH = "evo_path"
 
     fun getEvoPath(context: Context): String? =

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset your password · Curio</title>
+<meta name="description" content="Ask for a Curio password reset link, then choose a new password.">
+<meta name="theme-color" content="#100c11">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+<body data-page="reset">
+<div class="aurora" aria-hidden="true"></div>
+<a class="skip" href="#page">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="spark" aria-hidden="true"></span><span>Curio</span></a>
+  <nav class="topnav" aria-label="Account">
+    <a href="/signin">Sign in</a>
+    <a href="/signup">Create account</a>
+    <a href="/reset" aria-current="page">Password</a>
+    <a href="/account">Account</a>
+    <a href="/support">Support</a>
+  </nav>
+</header>
+
+<main id="page" class="shell">
+  <div class="rise">
+    <span class="eyebrow">Curio account</span>
+    <h1>Reset your password</h1>
+    <p class="lede">Two steps: ask for the email, then choose a password on the page it opens.</p>
+  </div>
+
+  <p class="notice" id="page-status" role="status"></p>
+
+  <section class="state show" data-state="request">
+    <div class="card rise-1">
+      <h2>Send me a reset link</h2>
+      <p class="muted tight">
+        The link works once and stays valid for an hour. If it expires, come back and ask again.
+      </p>
+      <form id="request-form" class="stack" novalidate>
+        <div class="field">
+          <label for="request-email">Email</label>
+          <input id="request-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" id="request-button" type="submit">Email me a reset link</button>
+          <a class="btn btn-quiet" href="/signin">Back to sign in</a>
+        </div>
+      </form>
+      <p class="notice" id="request-status" role="status"></p>
+    </div>
+  </section>
+
+  <section class="state" data-state="sent">
+    <div class="card rise-1">
+      <h2>Check your inbox</h2>
+      <p class="muted">
+        If <span id="request-sent" class="faint"></span> has a Curio account, a reset link is
+        waiting there now. Open it in this browser to choose a new password.
+      </p>
+      <p class="faint mt-2">
+        Nothing after a minute? Look in spam, then wait a moment before asking again: the service
+        limits how often it sends.
+      </p>
+      <div class="row mt-2">
+        <a class="btn btn-ghost" href="/support">It did not arrive</a>
+        <a class="btn btn-quiet" href="/reset">Ask again</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="state" data-state="choose">
+    <div class="card rise-1">
+      <h2>Choose a new password</h2>
+      <p class="muted tight">
+        At least 8 characters. Use something you have not used here before, and keep it somewhere
+        safe: Curio never shows it again.
+      </p>
+      <form id="choose-form" class="stack" novalidate>
+        <div class="field">
+          <label for="new-password">New password</label>
+          <input id="new-password" name="new-password" type="password" autocomplete="new-password" required>
+          <span class="hint">8 characters or more.</span>
+        </div>
+        <div class="field">
+          <label for="new-password-2">Repeat it</label>
+          <input id="new-password-2" name="new-password-2" type="password" autocomplete="new-password" required>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" id="choose-button" type="submit">Save new password</button>
+          <a class="btn btn-quiet" href="/signin">Cancel</a>
+        </div>
+      </form>
+      <p class="notice" id="choose-status" role="status"></p>
+    </div>
+  </section>
+
+  <section class="state" data-state="saved">
+    <div class="card rise-1">
+      <h2>Password updated</h2>
+      <p class="muted">
+        Your new password is in place, and the reset link cannot be used again. Sign in with it
+        here or in the app.
+      </p>
+      <div class="row mt-2">
+        <a class="btn btn-primary" href="/signin">Sign in</a>
+        <a class="btn btn-ghost" href="https://github.com/firefly-sylestia/Curio/releases/latest" data-app-download>Download Curio</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <span>Curio account desk</span>
+    <span class="dot" aria-hidden="true">•</span>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/support">Support</a>
+    <a href="/account">Account</a>
+  </div>
+</footer>
+
+<script type="module" src="/assets/curio.js"></script>
+</body>
+</html>

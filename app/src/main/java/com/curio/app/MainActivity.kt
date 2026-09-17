@@ -15,6 +15,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.VoskModels
@@ -24,7 +25,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.infrastructure.ExploreSessionService
+import com.curio.app.features.community.SocialNotificationWatcher
 import com.curio.app.navigation.CurioNavHost
+import com.curio.app.navigation.PendingCommunityOpen
+import com.curio.app.navigation.PendingDirectMessageOpen
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
 import com.curio.app.ui.theme.CurioTheme
@@ -88,6 +92,8 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) {
             PendingEntryOpen.capture(intent)
             PendingSpinOpen.capture(intent)
+            PendingDirectMessageOpen.capture(intent)
+            PendingCommunityOpen.capture(intent)
         }
 
         // Wire the asset manager into the topic loader before any Compose
@@ -141,6 +147,12 @@ class MainActivity : ComponentActivity() {
         // Initialize Room database and repository singleton
         val db = CurioDatabase.getInstance(this)
         CurioRepositoryHolder.init(db.captureDao(), db.cachedTopicDao())
+        // v387 — the personal writing store (journals, books, chapter
+        // reviews). Installed here with the capture repository so every
+        // personal screen (Home chips, journals, the book shelf, the
+        // Cabinet's personal shelf) can read it without touching the DB
+        // singleton itself.
+        PersonalRepositoryHolder.init(db.personalDao())
         // v27 — auto-delete recycle-bin captures that passed their retention
         // window (runs again whenever the recycle bin opens).
         lifecycleScope.launch { RecycleBinExpiry.purgeExpired(this@MainActivity) }
@@ -168,18 +180,37 @@ class MainActivity : ComponentActivity() {
         // used to cancel loadIndex and restart the whole parse; the warm-up
         // now runs to completion regardless (parses are bounded by the
         // loader's gate, so it can't hog the CPU).
+        // v389 — this warm-up STAYS, and it is now the trade it always claimed
+        // to be. The merged index no longer holds the topic objects (see
+        // TopicIndexEntry), so the per-lane pools it used to pin ARE released by
+        // TopicJsonLoader.shedForMemory on a memory trim — which is the honest
+        // fix for "background memory climbs sharply". Deleting the warm-up
+        // instead (the earlier "keep the catalog cold" attempt) moved the same
+        // parse onto the busy path of the screens and left Home's Topics stat,
+        // the reveal's first-frame resolve and TopicCatalog.findByName reading a
+        // cache nothing had filled.
         lifecycleScope.launch {
-            // Wait for the one-time Room import / warm-start cache fill before
-            // pre-warming the loader: on warm starts TopicRepository.init() is
-            // instant (Room already holds the catalog) and pre-warming from
-            // the warmed caches means ZERO JSON re-parsing — the old racing
-            // launch could beat init() and re-read every lane's JSON.
-            withContext(kotlinx.coroutines.Dispatchers.IO) {
-                com.curio.app.data.TopicRepository.init(this@MainActivity)
-            }
             withContext(kotlinx.coroutines.NonCancellable) {
                 runCatching { TopicJsonLoader.loadIndex() }
                 runCatching { TopicJsonLoader.preloadAll() }
+            }
+        }
+
+        // v348 — warm the Cabinet's entry snapshot the same way. The Cabinet
+        // seeds itself from [CaptureRepository.peekLight], which is only
+        // non-empty once SOMETHING has collected the light flow — so a cold
+        // start straight into Cabinet showed a skeleton while the first Room
+        // read landed. Collecting it once here fills the snapshot before the
+        // user can navigate there; later changes keep flowing to screens
+        // through their own collectors (the repository's decode cache makes
+        // the shared emissions cheap). Softly cancelled on teardown — a
+        // process that dies mid-warm simply re-reads on the next open.
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                // The warm-up's effect lives inside the flow's map (the
+                // repository caches each emission); the collector body is
+                // deliberately empty.
+                CurioRepositoryHolder.repo.observeLight().collect { }
             }
         }
         // v53 — update notifier on app start: a toast whenever a check finds
@@ -217,6 +248,11 @@ class MainActivity : ComponentActivity() {
                 CurioThemeTransitionHost {
                     CurioNavHost()
                 }
+                // v3xx54 — social arrivals while the app is alive (a friend's
+                // message, a new community post). It no-ops unless the user is
+                // signed in, Online Mode is on, and the Notifications switch
+                // is on, so an offline user never pays for it.
+                SocialNotificationWatcher()
             }
         }
     }
@@ -278,5 +314,7 @@ class MainActivity : ComponentActivity() {
         // notification targets arrive here instead of onCreate.
         PendingEntryOpen.capture(intent)
         PendingSpinOpen.capture(intent)
+        PendingDirectMessageOpen.capture(intent)
+        PendingCommunityOpen.capture(intent)
     }
 }

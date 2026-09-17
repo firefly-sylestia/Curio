@@ -97,13 +97,19 @@ object TopicRepository {
     }
 
     /**
-     * v294 — Pre-warm TopicJsonLoader's in-memory caches from Room data.
-     * Called after init() confirms Room has topics. This prevents the
-     * loader from re-parsing JSON files on every process restart.
+     * v294 — Pre-warm TopicJsonLoader's COUNT caches from Room.
+     *
+     * v348 — counts only. This used to also materialise every lane's rows back
+     * into the loader's pool cache (`dao.getByCategory(...).map { it.toCurioTopic() }`),
+     * which decoded the whole catalog — chapters, tracks, episodes and all — on
+     * every process start, and then let those Room rows MASK the shipped JSON on
+     * the read path. The loader parses the bundled asset instead (one parse per
+     * lane, shared with the app-start prewarm), so the pools now always match
+     * the content this build actually ships. Counts stay here because they are
+     * cheap and Room mirrors the same JSON.
      */
     private suspend fun warmLoaderFromRoom(dao: TopicDao) = withContext(Dispatchers.IO) {
         try {
-            // Warm the per-category counts cache.
             val counts = mutableMapOf<CategoryId, Int>()
             for (cat in CategoryId.values()) {
                 if (cat == CategoryId.WILDCARD) continue
@@ -113,16 +119,8 @@ object TopicRepository {
                 }
             }
             TopicJsonLoader.warmCountsFromRoom(counts)
-            // Warm the full topic cache per category.
-            for (cat in CategoryId.values()) {
-                if (cat == CategoryId.WILDCARD) continue
-                try {
-                    val topics = dao.getByCategory(cat.name).map { it.toCurioTopic() }
-                    TopicJsonLoader.warmCacheFromRoom(cat, topics)
-                } catch (_: Exception) { }
-            }
         } catch (e: Exception) {
-            Log.w("TopicRepository", "Failed to warm loader from Room: ${e.message}")
+            Log.w("TopicRepository", "Failed to warm loader counts from Room: ${e.message}")
         }
     }
 
@@ -260,12 +258,22 @@ object TopicRepository {
      * v3xx — a SMALL random sample straight from Room (indexed LIMIT
      * queries — never maps a whole lane). Seeds the Spin deck instantly
      * while the full pool is still loading, so the fan is never empty.
-     * WILDCARD samples a few topics from EVERY canonical lane (its pool is
-     * a merge, so no single-lane sample would represent it). Empty only
-     * when Room isn't populated yet — callers keep their loading hint.
+     *
+     * v385 — no longer gated on [isInitialized]. The guard was meant to stop
+     * a sample from an empty table, but the query answers that itself: the
+     * deck asks the moment it composes, which on a restart is BEFORE init()
+     * has finished flipping the flag — so the seed was skipped exactly when it
+     * was needed and the deck sat on its loading hint while the whole catalog
+     * parsed. A stale-but-populated table (the normal restart) now seeds the
+     * fan immediately; a first launch returns nothing and the hint stays, as
+     * before.
+     *
+     * v385 — WILDCARD samples its own lane first (it is one file now). A
+     * database that predates that change holds only the merged upserts, so an
+     * empty WILDCARD lane still falls back to a few picks from every lane.
+     * Empty only when Room holds nothing yet — callers keep their hint.
      */
     suspend fun sampleTopics(context: Context, categoryIds: List<CategoryId>, perLane: Int = 14): List<CurioTopic> {
-        if (!initialized) return emptyList()
         return runCatching {
             val dao = CurioDatabase.getInstance(context).topicDao()
             val out = ArrayList<CurioTopic>()
@@ -276,11 +284,18 @@ object TopicRepository {
             }
             categoryIds.forEach { id ->
                 if (id == CategoryId.WILDCARD) {
-                    CategoryId.values()
-                        .filter { it != CategoryId.WILDCARD }
-                        .forEach { lane ->
-                            dao.getRandomTopics(lane.name, 3).forEach { add(it) }
-                        }
+                    // The lane's OWN rows first; the every-lane sweep is only
+                    // for a database mirrored before WILDCARD became a lane.
+                    val own = dao.getRandomTopics(CategoryId.WILDCARD.name, perLane)
+                    if (own.isNotEmpty()) {
+                        own.forEach { add(it) }
+                    } else {
+                        CategoryId.values()
+                            .filter { it != CategoryId.WILDCARD }
+                            .forEach { lane ->
+                                dao.getRandomTopics(lane.name, 3).forEach { add(it) }
+                            }
+                    }
                 } else {
                     dao.getRandomTopics(id.name, perLane).forEach { add(it) }
                 }

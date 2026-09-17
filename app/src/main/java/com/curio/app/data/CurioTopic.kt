@@ -351,7 +351,12 @@ data class SeriesEpisode(
     val season: Int,
     val number: Int,
     val title: String,
-    val summary: String = ""
+    val summary: String = "",
+    // v-expand — enriched fields fetched from TVMaze on demand.
+    val airdate: String = "",
+    val runtime: Int = 0,
+    val rating: Float = 0f,
+    val stillUrl: String = ""
 )
 
 /**

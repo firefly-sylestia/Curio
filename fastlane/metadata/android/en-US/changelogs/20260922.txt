@@ -1,0 +1,90 @@
+ADD:
+- Books: the shelf shows three covers across, split into what you are reading and what you have finished.
+- Books: a book added from the open library now arrives with its real chapter names and page ranges, read from the edition's own table of contents.
+- Books: a photo on a page now grows out of where you tapped it — no screen change, the page stays behind it.
+- Books: the "+" sheet has two new doors — a note on any topic, and a to-do list.
+- Books: a book page opens on the review side when there is writing — the eye reads it back, the pen turns the page into its notebook; a book with nothing written still opens ready to write.
+- Books: one page for the WHOLE book — review the book itself instead of going chapter by chapter, and drop chapter markers into that same page with a floating "Add chapter" button. Open a book's chapter review under the marker that names it, all on the one page.
+- Books: a floating "Read" pill on a book — wire it a PDF or EPUB you already have and Curio reads it in its own reader, with a cover that is a cover again.
+- Books: a "Download help" pill on the book page searches the web for a PDF or EPUB copy.
+- Books: "Look it up" now tells you what it found (chapters, pages, the description) or why it found nothing.
+- Books: "About this book" now works for non-catalog books too — it shows the description from Open Library, labelled as such.
+- Messages: notifications now look like the people they are from — the sender's own portrait, a Reply box right on the notification that answers their last message, a Like, and Mute for that conversation.
+- Writing: a book's chapter is its own page now — what the app knows about it (its name, its pages, a summary), then your review; tap and you are writing on the same page, with the tools sliding in.
+- Books: opening a book fills in the rest by itself — its chapters, page count and synopsis come from Curio's own catalog first, then the open library. No page is left blank to fill in.
+- Community: follow members — a Follow pill on every profile, and a wall filter that shows just who you follow so their posts are easy to find.
+- Community: bans now come in four reaches — hide content, view-only, social-only, or a full account lock — each with its own clock (a day, a week, a month, or until lifted), and the moderation page keeps a living ban list you can soften or lift.
+- Community: every moderation action is remembered — a member's page and your own profile now carry the record of bans, lifts and removals.
+- Community: deleted posts wait locally behind a small door at the foot of the wall, where they can be re-posted or let go.
+- Community: an unfinished post is kept as a draft and offered back the next time you open the composer.
+- Books: the add-book sheet searches Curio's own book shelf first, then the open library — and says which one it found the book in.
+- Profile: your profile (and every member's) now lives inside the header itself — portrait, counts, bio and actions on the banner, with a proper Message pill.
+- Writing: a note on a topic is its own page — the topic sits at the top as a card (with a way through to it), and you can pick that topic by searching Curio's catalog or by typing a name of your own.
+- Writing: a to-do row can be picked up and moved — press and hold a row to carry it up or down the list (the rows make room as you go), and the new order is saved with the list.
+- Writing: swipe a to-do row sideways to remove it, with a floating "Undo" pill that puts it back exactly as it was — same words, same tick, same place — for a few seconds after.
+- Writing: a to-do list is its own page too — give it a name, type a row and it arrives as a checkbox, with a running count of what is left and the day it was started.
+- Writing: talk into a page — a floating mic sits over the writing, the tools step aside while you record, and what you said lands in the page as a waveform. Tap or drag anywhere along it to jump to that moment, and keep writing under it.
+- Writing: leave a page mid-recording and you are asked what to do — keep recording (a small pill says it is still going and takes you back), keep the note, or discard it.
+- Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
+- Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
+FIX:
+- Books: the description folds to a line while you are writing and opens on a tap, instead of pushing your own words down the page.
+- Books: a chapter review saves itself even when you back straight out of the page (the last change used to be lost).
+- Cabinet: "Curiying now" counts and lists the shelf books you are part-way through, instead of only the items saved onto that shelf.
+- Books: a file you add is COPIED into Curio's own storage, so the book keeps opening offline instead of dying with the picker's permission — and the file no longer takes the book's name (a book keeps the name it has).
+- Books: a book added from a file draws its own cover instead of trying to show the PDF as a picture.
+- Writing: the in-page photo is crisp now — it is loaded at the size it is drawn, with high-quality filtering, instead of being decoded small and stretched back up.
+- Writing: tapping anywhere on the empty part of a page starts writing at the end of your last line — no more having to hit the faint "Write…" itself.
+- Writing: "Write…" appears once on a blank page instead of on every empty line you make with Enter.
+- Journals: the date is shown once (the bar above already had it), a long title stops at two lines, and the emptiness of a row no longer turns into a wall of words.
+- Home: the book chips wear the whole cover with the title on a small footer across its bottom, and the Pages / My shelf doors are lifted off the row with a soft shadow and a hairline edge.
+- Writing: a ticked checklist row stays ticked — the tick is saved with the page, so reopening a list shows what you finished instead of an empty box.
+- Writing: the checklist box is a clean hairline outline in your own ink instead of a pale accent smudge, the tick sits inside it properly, and the box lines up level with the row's words.
+- Writing: searching for a topic ranks the same everywhere — the composer, the Share Hub and the note page all put a name match first instead of an alphabetical guess.
+- Performance: the app hands the topic catalog's memory back when Android asks for it (it could not before, so the app stayed heavy in the background), with no cost to how fast the Topic Database opens.
+- Books: a lookup that failed (no connection, a timeout) is no longer remembered as done — the book is looked up again on your next visit instead of staying blank forever.
+- Books: "Mark finished" really finishes the book now (un-finishing had silently failed), and a chapter you have written wears the accent line down its side.
+- Books: the whole app wears your theme's own accent — the Cabinet, the shelf, Stats, the recycle bin, the category picker, the settings pages, the Topic Database and the composer included — instead of a fixed rose under an azure or lane hero.
+- Books: the journals are grouped by month, and the book page shows a tick per chapter so your progress reads as a place, not a figure.
+- Writing: bold works again, a quote looks like a quote — a touch smaller, with the rule down its side — and an empty page says "Write…" once instead of on every new line.
+- Writing: the journals, the shelf, a book and a chapter page no longer run under the status bar, the writing tools fit a narrow screen without being cut off, and every one of those pages wears your theme's accent instead of a fixed rose.
+- Books: a chapter note taken from a topic's Book Notes and the chapter review on your shelf are the same note — write it in either place and both show it.
+- Social: the portraits are redrawn cute — matching brows, big friendly chibi eyes, and no more odd tint under the chin.
+- Community: wall cards wear the app's accent instead of paper cream, and the Post button steps out of the way while you scroll down.
+- Community: quotes now look like quotes — one proper pull-quote shape shared by the composer preview and the wall.
+- Writing: a journal of your own — a page per day with its date, how the day felt, a title and the writing, with bold / italic / underline / strikethrough / quote / alignment tools that ride above the keyboard and apply to the line you are on. Photos drop into the writing itself.
+- Writing: a book shelf — add a book (or find it and its cover), keep your progress, and write a review for any chapter in the page you are reading it from. Everything saves itself as you write.
+- Home: a "+" that starts a journal page or a book, and a small row of chips showing your newest journals and books, each one tapping straight into it.
+- Take studio: the take rail lists your takes again, with an "Add take" door at the end — pick a format and the new take lands beside the ones you already wrote.
+- Messages: the composer takes a line break when you press Enter, so a message can run to several rows — the round button is what sends it.
+- Chats: a compose button opens your friends, so a new conversation starts right from the inbox.
+- Community: the composer is rebuilt — the topic goes first, the preview is always on, and a topic can ship as a share card or as a plain text post with one tap.
+- Chats: conversations, friends and the wall all run on the same rebuilt chat engine — messages, typing dots, reactions, read ticks and live updates are steadier and faster everywhere.
+- Community: replies now thread properly at any depth — fold and unfold a branch at any level, with a thread line showing where each answer belongs — and every reply can be hearted.
+- Friends: a "Start a chat" strip at the bottom of the contacts list offers your newest friends, one tap from a conversation.
+- Community: the moderation room now covers members too — reports can name a member, hiding an author hides their content without touching their account, and the team manages moderators with five per-person permissions.
+- Social: the 28 portraits are redrawn with real detail — proper faces with brows, noses and lips, layered hair, and accessories that look made (a ribbed beanie with a pompom, a stitched wizard hat, headphones with a mic, goggles with glass, braids).
+FIX:
+- Home: the saved shelf (bookmarked quotes and pinned topics) left the page — your own writing holds that spot now, and the saved shelf keeps its home in Topic History.
+- Wildcard: the Wildcard deck deals its own curated curiosities instead of loading every category first, so it opens instantly.
+- Speed: a restart no longer rewrites the whole topic catalog to the database or rebuilds its text rules for every topic, so the deck, the Topic Database and the composer come up faster and the phone stays cool.
+- Speed: the deck deals cards straight away on a restart instead of showing "Gathering the deck…".
+- Community: the topic chooser in the composer starts collapsed, and its search ranks real matches — name first, then byline, tags and teaser — with each result's category shown.
+- Messages: the quoted message inside a reply is one line tall and fits its own words instead of stretching the bubble across the thread.
+- Speed: the Topic Database opens with the topics already on screen again, and the Cabinet shows your saved entries the moment you open it — no more waiting skeletons.
+- Speed: the Topic Database no longer builds the whole catalog's search index every time it opens or re-derives the page as you scroll, so it opens at once and scrolls without stutter.
+- Releases: the release APK now ships with the full topic catalog — previous releases opened an empty database.
+- Accounts: confirmation and password emails now open a real Curio page instead of a link that went nowhere, and the sign-in form has a "Forgot your password?" row that sets a new one.
+- Community: a reply thread no longer rearranges, duplicates or loses lines when a new answer is posted — every reply is drawn once, in its own branch, at every depth — and a reply you can't reply to no longer blocks a thread.
+- Community: a reply posted on a busy card stays in the thread instead of dropping off the end, and replies are compact so more of a conversation fits on screen.
+- Messages: editing a sent message or a reply really saves now, reaches the other device, and keeps its "edited" mark after reopening the chat; swiping to reply no longer traps a long message.
+- Messages: sending puts the real message on screen at once, and a slow connection can no longer make a sent message look lost until the chat is reopened.
+- Messages: read ticks are per message, so a double tick means it was actually read; opening a chat also clears its unread badge.
+- Messages: an expired sign-in no longer reports "JWT expired". The session renews itself, and a device with no connection says so plainly.
+- Messages: received bubbles sit on the left again, and "Delete for everyone" is a solid red action.
+- Social: topic cards render whole and crisp at every size — no more shrunken art, cropped corners or off-centre previews.
+- Social: Chats, Friends and You ride the header itself now, so they are on screen the moment the Social tab opens instead of appearing late.
+- Messages: editing your own message or reply is on by default (the Experiments switch still turns it off).
+- Topics: picking a category in the Browse Topics panel applies straight away, and closing the box no longer needs Done to keep the pick.
+- Social: an avatar can never spill past its circle — the drawing is clipped to the disc, which also removed the square corners under the portraits.
+- Server setup: re-pasting the SQL no longer fails on the old encryption triggers.

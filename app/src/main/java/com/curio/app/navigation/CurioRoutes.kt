@@ -126,6 +126,71 @@ object PendingEntryOpen {
 }
 
 /**
+ * Out-of-band handoff for a MESSAGE notification's tap.
+ *
+ * A "new message" notification has to open the conversation it is about, not
+ * the app's front door. Like [PendingEntryOpen], the target is stashed here
+ * because MainActivity may be cold-started (onCreate) or already running
+ * (onNewIntent), and the NavHost is the only place that can navigate with the
+ * right back stack. Consumed once the host sits on a stable root route.
+ */
+object PendingDirectMessageOpen {
+    const val EXTRA_USER_ID = "com.curio.app.extra.OPEN_DM_USER_ID"
+    const val EXTRA_HANDLE = "com.curio.app.extra.OPEN_DM_HANDLE"
+
+    private var userId: String? = null
+    private var handle: String = ""
+    private val counter = mutableIntStateOf(0)
+
+    fun capture(intent: Intent?) {
+        val id = intent?.getStringExtra(EXTRA_USER_ID)
+        if (id.isNullOrBlank()) return
+        userId = id
+        handle = intent.getStringExtra(EXTRA_HANDLE).orEmpty()
+        counter.intValue++
+    }
+
+    /** Monotonic bump — the NavHost keys its open-effect on this. */
+    val trigger: Int get() = counter.intValue
+
+    /** Consumes and returns (userId, handle), if a conversation is pending. */
+    fun take(): Pair<String, String>? {
+        val id = userId ?: return null
+        val label = handle
+        userId = null
+        handle = ""
+        return id to label
+    }
+}
+
+/**
+ * Out-of-band handoff for a COMMUNITY notification's tap: the new post lives
+ * on the 24-hour wall, so the tap lands there instead of on Home.
+ */
+object PendingCommunityOpen {
+    const val EXTRA_OPEN_COMMUNITY = "com.curio.app.extra.OPEN_COMMUNITY"
+
+    private var pending = false
+    private val counter = mutableIntStateOf(0)
+
+    fun capture(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_COMMUNITY, false) != true) return
+        pending = true
+        counter.intValue++
+    }
+
+    /** Monotonic bump — the NavHost keys its open-effect on this. */
+    val trigger: Int get() = counter.intValue
+
+    /** Consumes the request, answering whether the wall should open. */
+    fun take(): Boolean {
+        if (!pending) return false
+        pending = false
+        return true
+    }
+}
+
+/**
  * Out-of-band handoff for the daily-reminder notification tap.
  *
  * The daily shuffle reminder ("A little curiosity awaits") carries a boolean
@@ -192,6 +257,33 @@ object CurioRoutes {
     // lifetime stats), reachable from the drawer and Profile.
     const val STATS = "stats"
     const val ENTRY_DETAIL = "detail/{entryId}"
+
+    // ── v387 — the personal writing family (journals + books). Their own
+    // store, their own screens: a capture's detail view is a reaction to a
+    // TOPIC, and none of these have a topic at all.
+    /** Every journal page the member has written. */
+    const val JOURNALS = "journals"
+    /** One journal day. The argument is a note id, or [PERSONAL_NEW]. */
+    const val JOURNAL_EDITOR = "journal/{entryId}"
+    /** A NOTE ON A TOPIC — its OWN page (v389). The argument is a note id, or
+     *  [PERSONAL_NEW]. It used to be the journal editor with topic route-params,
+     *  which meant a page about, say, the Voyager probes opened asking how the
+     *  DAY felt. */
+    const val TOPIC_NOTE = "notes/topic/{entryId}"
+    /** A TO-DO LIST — its OWN page (v389). Same argument. It used to be the
+     *  journal editor with `kind = todo`, checklist hidden behind one tool. */
+    const val TODO = "todo/{entryId}"
+    /** The book shelf (covers + progress). */
+    const val BOOKS = "books"
+    /** One book: its chapters, its chapter reviews and the member's progress. */
+    const val BOOK_DETAIL = "books/{bookId}"
+    /** ONE CHAPTER of that book: what the app knows about it and the review
+     *  the member wrote, with the writing happening on the page itself (see
+     *  ChapterScreen). Its own route, because a chapter is a page — not an
+     *  expanded row inside the chapter list. */
+    const val CHAPTER = "books/{bookId}/chapter/{chapter}"
+    /** The "write something new" sentinel carried by [JOURNAL_EDITOR]. */
+    const val PERSONAL_NEW = "new"
     const val EDIT_MOODBOARD = "edit-moodboard/{entryId}"
     const val EDIT_ENTRY = "edit-entry/{entryId}"
     const val SETTINGS = "settings"
@@ -201,13 +293,25 @@ object CurioRoutes {
     const val SETTINGS_DATA = "settings/data"
     // v3xx — the account + Online Mode page (sign-in and sync).
     const val SETTINGS_ONLINE = "settings/online"
+    // v3xx55 — the member's own privacy rules (profile visibility, activity,
+    // blocked people). Also reached from the Edit profile dialog.
+    const val SETTINGS_PRIVACY = "settings/privacy"
     // v3xx — the 24-hour community wall of text share cards. Also the app's
     // ONLY optional bottom-nav tab: it joins [bottomNavRoutePrefixes] while
     // the user's opt-in tab is showing (see [liveTabPrefixes]).
     const val COMMUNITY = "community"
-    // v3xx — the social layer: friend requests + direct messages.
+    // v3xx57 — the moderation control room: the report queue (posts, replies
+    // and members) plus the team and its permissions. Reached from the Social
+    // tab's own Moderation door, and only by members of the team.
+    const val MODERATION = "moderation"
+    // v3xx — the social layer: friend requests + direct messages. The handle
+    // rides in the query so the thread can name who it is with on the FIRST
+    // frame (the caller already knows it; the id alone is opaque).
     const val FRIENDS = "friends"
-    const val DIRECT_MESSAGE = "dm/{userId}"
+    // v3xx56 — the inbox, split off Friends: "who are my people" and "what was
+    // said" are two different questions, so they are two screens.
+    const val CHATS = "chats"
+    const val DIRECT_MESSAGE = "dm/{userId}?handle={handle}"
     // v3xx — one card's own view: the full card, its caption, replies + share.
     const val COMMUNITY_CARD = "community/{cardId}"
     // v3xx53 — a member's public profile: reaching it from a card, a reply, a
@@ -252,16 +356,57 @@ object CurioRoutes {
     fun captureFor(categorySlug: String, topicName: String) =
         "capture/$categorySlug/${Uri.encode(topicName)}"
     fun entryDetail(entryId: String) = "detail/$entryId"
+    /** One journal day ([PERSONAL_NEW] starts today's). */
+    fun journalEditor(entryId: String) = "journal/$entryId"
+    /**
+     * One note about a topic ([PERSONAL_NEW] starts a blank one).
+     *
+     * The topic params SEED the page for a caller that already knows the topic;
+     * left empty, the page opens with its topic picker in front of the writer —
+     * the catalog (the merged index, ranked like the composer's chooser) or a
+     * name typed in by hand. See TopicNoteScreen.
+     */
+    fun topicNote(
+        entryId: String,
+        topicId: String = "",
+        topicName: String = "",
+        categoryId: String = ""
+    ): String {
+        val params = mutableListOf<String>()
+        if (topicId.isNotBlank()) params += "topicId=${Uri.encode(topicId)}"
+        if (topicName.isNotBlank()) params += "topicName=${Uri.encode(topicName)}"
+        if (categoryId.isNotBlank()) params += "categoryId=${Uri.encode(categoryId)}"
+        val query = if (params.isEmpty()) "" else "?" + params.joinToString("&")
+        return "notes/topic/$entryId$query"
+    }
+    /** One to-do list ([PERSONAL_NEW] starts a blank one). */
+    fun todo(entryId: String) = "todo/$entryId"
+    /**
+     * ONE BOOK'S OWN REVIEW (v389): the whole-book page, where the member
+     * writes about the book as a whole and can drop chapter markers in with a
+     * floating button instead of writing chapter by chapter. A book's own
+     * note is a `personal_notes` row with `chapterIndex = null`.
+     */
+    const val BOOK_REVIEW = "books/{bookId}/review"
+    fun bookReview(bookId: String) = "books/${Uri.encode(bookId)}/review"
+    /** One book on the personal shelf. */
+    const val BOOK_READER = "books/{bookId}/reader"
+    fun bookDetail(bookId: String) = "books/${Uri.encode(bookId)}"
+    /** One chapter of a shelf book (1-based). */
+    fun chapter(bookId: String, chapter: Int) = "books/${Uri.encode(bookId)}/chapter/$chapter"
+    /** Lightweight offline reader for an imported EPUB or PDF. */
+    fun reader(bookId: String) = "books/${Uri.encode(bookId)}/reader"
     /** One community card's own view. */
     fun communityCard(cardId: String) = "community/$cardId"
     /** A member's public profile (their portrait, handle and live cards). */
     fun socialProfile(userId: String) = "person/${Uri.encode(userId)}"
     /**
      * One conversation with [userId]. The handle rides along so the thread can
-     * show who it is with before any message loads (the id alone is opaque).
+     * show who it is with before any message loads (the id alone is opaque),
+     * and so the header never wears a placeholder.
      */
     fun directMessage(userId: String, handle: String = "") =
-        "dm/${Uri.encode(userId)}"
+        "dm/${Uri.encode(userId)}?handle=${Uri.encode(handle)}"
     /** Edit a saved GalleryWall (mood board) entry — preloads + re-saves in place. */
     fun editMoodBoard(entryId: String) = "edit-moodboard/$entryId"
     /**
@@ -286,7 +431,7 @@ object CurioRoutes {
     /**
      * Route PREFIXES where the bottom navigation bar should be visible.
      * Use this (not [bottomNavRoutes]) when checking `destination.route`
-     * — the Nav library returns the route TEMPLATE (e.g.
+     * because the Nav library returns the route TEMPLATE (e.g.
      * `spin/{categorySlug}`), not the resolved URL, so exact-string
      * membership fails for any parameterised route. The previous check
      * `currentRoute in bottomNavRoutes` hid the bar when on
