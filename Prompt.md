@@ -1,5 +1,124 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, COMPLETE — voice notes in the journal + the page's own manners)
+
+Verbatim: "add a voice note in jounal too voice note style journal, with a floating
+voice button which hides the tool box below and it stays on that canvas, and the
+voice note shows as lines with the graph look on pages, easy to pick a certain
+time stamp, beautiful and easy and below we can still add notes, and also during
+writing it says write right so when i do a enter to add a line line now 2 line
+syays write.. which is actually bad view so can u fix that, also when i tap the
+blank space below write, or the space above tools and below ttle it should let me
+write in that write area, coz rn i have to click that write to start riting, so
+fix that, also the image preview isnt good, fix that too its so low quality, also
+in view of journal i see two dates one in the header as it is, and one below so
+remove the duplicate from below. also in journals page, the full title shows and
+it gets really messy can u mak eit so title also shows only 2 lines max, also
+remove that top write today, and instead show todays date on that write today
+header area, same in the add a book header option too. then in home the pages and
+my shelf option row, the book should show the full cover and the tbook title very
+small below themwith a footer style little area at the buttom of the cover keeping
+in one line regardless of the title size, also give the pages and my shelf a depth
+and after finishing you should look up the end of prompt and follo that task, but
+after finishing, now ask any clarifying questions for this request. also fix this."
+(pasted CI log: `ShareHubScreen.kt` smart-cast errors on `pickedTopic`.)
+
+### Shipped first: the CI break
+
+`pickedTopic` is a DELEGATED property, so Kotlin cannot smart-cast it after
+`if (pickedTopic != null)` — the picked-topic chip and the designs heading read it
+directly. Hoisted into a local (`val picked = pickedTopic`), the same rule the
+share sheet in that file already followed. Pushed as `c6954a59`, so CI could go
+green while this request was built.
+
+### Decisions (ask_user)
+
+Voice notes **always on** (no Settings toggle); leaving a page mid-recording
+**asks each time** (keep recording — with a small pill saying it still runs — /
+keep the note / discard); the waveform is **real amplitude bars, tap or drag to
+seek**; **no transcript**; the Books head wears **today's date** like the journals
+one; a tap on blank space **focuses the last line at its end**; the low-quality
+image is the **in-page photo**; the Home chips get a **soft shadow + hairline
+edge**.
+
+### Voice notes (`PersonalVoice.kt`)
+
+1. **The floating mic.** A round accent button rides the writing page's bottom
+   right, over the writing; tapping it starts recording (permission asked on the
+   tap, and the recording starts the moment it is granted), the TOOL DOCK steps
+   aside and a recording capsule takes its place — pulsing dot, `LiveWaveform`
+   fed by the recorder's real `maxAmplitude`, the clock, pause, ✗ discard, ✓ keep.
+2. **The block.** Keeping it lands a voice block in the page through the photo's
+   own path (`insertAtCaret`), leaving a fresh empty line under it, so a page can
+   still be written under what was said. `PersonalBlock.audio` / `audioSeconds` /
+   `audioBars` (codec `aud` / `aus` / `aub`, omitted on every other block kind).
+3. **The waveform is stored, not decoded** (`PersonalAudioBars`, 72 bars as hex
+   bytes = 144 chars): extracting it on every draw would run MediaCodec on the
+   UI path. Drawn with the played part accented, a playhead, and the WHOLE strip
+   as the scrubber (tap seeks and starts playing; drag scrubs). The read-only
+   `PersonalDocView` draws the same bar, so a journal page, a chapter review and
+   a book's note all read the same.
+4. **The recording outlives the screen** (`PersonalVoiceRecording`): a singleton
+   holding the session, the clock and the note it belongs to. The page core's
+   `BackHandler` AND the page's own back button run one guard (the `header`
+   lambda gained a fourth parameter, the guarded `onBack`, and each screen passes
+   `onExit`), which asks the dialog. A kept-alive recording is announced by
+   `PersonalVoicePill`, drawn at the app's ROOT beside the floating pet, which
+   hides itself while its own page is composed and taps through to
+   `session.returnRoute`.
+5. **Storage:** the finished file is copied into `filesDir/audio/` through
+   `AudioStorageManager` (the captures' own store — the temp copy is deleted only
+   after the copy succeeds, and `AudioRecorder.release` is deliberately NOT
+   called, since it deletes the source first). Removing a voice block deletes its
+   file.
+
+### The page's manners (the rest of the request)
+
+6. **"Write…" belongs to a pristine page:** first block only, and gone for good
+   once anything is written (after Enter, two empty paragraphs used to read as
+   two placeholders).
+7. **Tapping blank space writes:** `PersonalEditorState.focusLastLine()` hands the
+   caret to the LAST line at its END, and BOTH the canvas and the whole writing
+   column run it — the gap under the last line and the space above the tools are
+   writing space now.
+8. **The photo is decoded for its box** (`PersonalPagePhoto`): `Scale.FILL` at the
+   composable's measured pixel size + `FilterQuality.High`. Coil's default FIT
+   decode left a bitmap SMALLER than the box, which `ContentScale.Crop` then
+   stretched back up — the blur.
+9. **The journal read view lost its duplicate date** (the bar above already shows
+   it; the body now starts at how the day felt), a journal ROW's title is capped
+   at two lines, and the journals / shelf heads swapped their `Write today` /
+   `Add a book` pills for `PersonalHeaderDate` (today) — the floating `+` and the
+   empty states already open those doors.
+10. **Home chips:** the book chip is now the WHOLE cover with a fixed-height
+    footer strip across its bottom holding the name in one line (a long title
+    ellipsises instead of pushing the cover around), and the two door chips
+    (Pages / My shelf) are lifted with `shadowElevation = 4.dp` + a hairline
+    border (opaque fill, per the shadow rule).
+11. **A leaving flush, found while building #4.** The page's only save paths were
+    the 700ms debounce (inside the composition — a back gesture cancels it) and
+    `ON_STOP`; a page typed into a moment before leaving, or a voice note KEPT on
+    the way out, lost exactly that last change. The core now flushes on dispose
+    too, on its OWN scope (`scope.launch` there would never run — the
+    composition's scope is already cancelled).
+
+### Verified
+
+`scripts/check_braces.js` on all 11 touched files, `git diff --check` clean, a
+U+FFFD sweep, an unused-import sweep over every touched file (the two dead
+imports this pass created are gone), and greps for every new symbol's definition
+vs use (`PersonalVoicePill` at the host root, the three `header` lambdas taking
+the guarded `onBack`, `focusLastLine` / `insertVoice` / `PersonalPagePhoto`
+callers). No Gradle here (root AGENTS rule) — CI is the compile check.
+
+### Docs
+
+`app/AGENTS.md` gained the v389 voice-note contract (the singleton session, the
+stored waveform, the leave guard, the root pill) plus the page-manners bullet;
+the store changelog `20260922.txt` gained four ADD and five FIX lines.
+
+---
+
 ## Request (2026-09-17, COMPLETE — the personal writing family split into its own pages)
 
 Verbatim: "add a proper a note on a topic screen, a screen of its own, and also a
@@ -2039,3 +2158,14 @@ Done:
 - **TopicRevealScreen**: FilmInfoSection, AnimeInfoSection, SongInfoSection with poster cards.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
+Let todo rows be recorded by long press drag and swiped away to delete. also a small window to undo delete.
+
+in daily shuffle reminders option the clock the first option isn't solid it's transparent fix it.
+also in express yourself save your take. in the new take studio, the add take button colors are not good and it's not fully filled. same for the first take suppose Jornal it's text isn't visible properly and it's pill fix it.
+
+now wire the curying now of books into the your shelf also the chapter review and chapter notes of both book button sheet and shelf they share the same info. i mean sync them. properly. and also the curying now in cabinet doesn't show the number properly. also add like in the new a book.
+and also a floating read button which i can wire an file which will open the file in the pdf reader. also the imported file shouldn't change the book name entry. and also during import it happens when file name changes to something else when i add also fix the read button remove it from the side of download help.
+
+also in home the floating + pill have glitchy shadow when it hides and comes back fix it.
+
+in chapter writing keep the about this book but as Collapsed when writing. and also let user edit it. and also a universal review for the book not just chapter wise. so user don't need to write one chapter by chapter. and if they want they can add a chapter as a title style bulletpoint. while writing in that same page. the chapter bullet additing make it a floating button for books.and also is it persistent too like it saves when i back by accident ?. also a Eye viee for book just to read the review, as rn it always opens the book view as the full description look up etc. so add eye for preview, and this view only read will be default when a book is opened from shelf and also it will have the read button for wiring the pdf of the book. before starting this can u use ask user

@@ -127,13 +127,17 @@ fun TopicNoteScreen(
             }
             if (existing.dateMillis > 0L) dateMillis = existing.dateMillis
         },
-        header = { editing, saving, onEditing ->
+        // The page's own way out (the core guards it: a live voice recording is
+        // asked about before a back gesture can drop it — see PersonalVoice).
+        onExit = { navController.popBackStack() },
+        voiceRoute = { CurioRoutes.topicNote(it) },
+        header = { editing, saving, onEditing, onBack ->
             TopicNoteTopBar(
                 topicName = topicName,
                 categoryName = category?.displayName.orEmpty(),
                 saving = saving,
                 editing = editing,
-                onBack = { navController.popBackStack() },
+                onBack = onBack,
                 onToggleMode = onEditing,
                 onOpenTopic = topicName.takeIf { it.isNotBlank() }?.let { name ->
                     {

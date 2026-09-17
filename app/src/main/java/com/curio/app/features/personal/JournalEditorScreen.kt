@@ -114,6 +114,9 @@ fun JournalEditorScreen(
     PersonalWritingPage(
         entryIdArg = entryIdArg,
         photos = photos,
+        // The page's own way out (the core guards it: a live voice recording is
+        // asked about before a back gesture can drop it — see PersonalVoice).
+        onExit = { navController.popBackStack() },
         meta = {
             PersonalPageMeta(
                 title = title,
@@ -129,7 +132,9 @@ fun JournalEditorScreen(
             mood = existing.moodEnum
             if (existing.dateMillis > 0L) dateMillis = existing.dateMillis
         },
-        header = { editing, saving, onEditing ->
+        header = { editing, saving, onEditing, _ ->
+            // A journal day's bar has no back button of its own (the date pill
+            // takes that corner), so the guarded exit is the system's.
             JournalTopBar(
                 dateMillis = dateMillis,
                 saving = saving,
@@ -186,7 +191,6 @@ fun JournalEditorScreen(
         },
         readView = { doc ->
             JournalReadView(
-                dateMillis = dateMillis,
                 title = title,
                 mood = mood,
                 doc = doc,
@@ -442,7 +446,6 @@ private fun MoodSelector(
  */
 @Composable
 private fun JournalReadView(
-    dateMillis: Long,
     title: String,
     mood: PersonalMood?,
     doc: PersonalDoc,
@@ -458,14 +461,9 @@ private fun JournalReadView(
             .widthIn(max = 680.dp)
     ) {
         Spacer(Modifier.height(8.dp))
-        Text(
-            dateMillis.prettyDate(),
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.6.sp
-            ),
-            color = personalAccentInk()
-        )
+        // v389 — the page used to open with the DAY, the mood, and then the day
+        // again under them; the bar above already carries the date, so the head
+        // of the page starts at what the member chose (user report).
         if (mood != null) {
             Spacer(Modifier.height(6.dp))
             Row(

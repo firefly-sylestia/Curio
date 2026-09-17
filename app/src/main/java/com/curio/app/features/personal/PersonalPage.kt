@@ -1,6 +1,7 @@
 package com.curio.app.features.personal
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,8 +30,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,8 +67,10 @@ import com.curio.app.data.newNoteId
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -116,8 +123,19 @@ internal fun PersonalWritingPage(
     entryIdArg: String,
     photos: PersonalPhotoOverlayState,
     meta: () -> PersonalPageMeta,
-    header: @Composable (editing: Boolean, saving: Boolean, onEditing: (Boolean) -> Unit) -> Unit,
+    header: @Composable (
+        editing: Boolean,
+        saving: Boolean,
+        onEditing: (Boolean) -> Unit,
+        /** The GUARDED way out — the page's own back button must use this, so
+         *  a live recording can be asked about (see PersonalVoice). */
+        onBack: () -> Unit
+    ) -> Unit,
     readView: @Composable (doc: PersonalDoc) -> Unit,
+    /** The screen's way off this page, wrapped by the core's leave guard. */
+    onExit: () -> Unit = {},
+    /** How to come BACK here (the keep-recording pill's tap target). */
+    voiceRoute: (String) -> String = { CurioRoutes.journalEditor(it) },
     onLoaded: (PersonalNoteEntity) -> Unit = {},
     /** The document as it changes — the to-do page counts its own rows from it
      *  (see TodoScreen), and nothing else has to reach into the editor. */
@@ -152,6 +170,36 @@ internal fun PersonalWritingPage(
     val editor = remember(entryId) {
         PersonalEditorState(doc).also { it.keepsChecklistRows = checklistFirst }
     }
+
+    // ── Voice notes (v389) ─────────────────────────────────────────────
+    // The mic is a FLOATING button of the page's own, and while a note is being
+    // made the dock steps aside and the recording capsule takes its place: a
+    // recording is not a moment for bold. The session itself lives in
+    // [PersonalVoiceRecording] so leaving the page never decides for the member.
+    val liveVoice = PersonalVoiceRecording.session?.takeIf { it.noteId == entryId }
+    var recordFailed by remember { mutableStateOf(false) }
+    var leavePrompt by remember { mutableStateOf(false) }
+
+    fun startVoice() {
+        val started = PersonalVoiceRecording.start(context, entryId, voiceRoute(entryId))
+        if (started == null) recordFailed = true
+    }
+
+    val askToRecord = rememberRecordPermission { startVoice() }
+
+    // Only the note whose page is OPEN hides the pill at the app's root.
+    DisposableEffect(entryId) {
+        PersonalVoiceRecording.setOnScreen(entryId)
+        onDispose { PersonalVoiceRecording.setOnScreen(null) }
+    }
+
+    /** The one way out of the page: a live recording gets asked about first. */
+    fun leave() {
+        val live = PersonalVoiceRecording.session
+        if (live != null && live.noteId == entryId) leavePrompt = true else onExit()
+    }
+
+    BackHandler(enabled = liveVoice != null) { leave() }
     SideEffect {
         editor.onDocChanged = { updated -> doc = updated }
     }
@@ -190,32 +238,36 @@ internal fun PersonalWritingPage(
     val liveCreatedAt = rememberUpdatedState(createdAt)
     val liveMeta = rememberUpdatedState(meta)
 
+    /** The ONE writer: every save path below hands the same row to the store. */
+    suspend fun writePage(body: PersonalDoc, page: PersonalPageMeta): PersonalNoteEntity =
+        withContext(Dispatchers.IO + NonCancellable) {
+            PersonalRepositoryHolder.repo.saveNote(
+                PersonalNoteEntity(
+                    id = liveId.value,
+                    bookId = null,
+                    chapterIndex = null,
+                    title = page.title.trim(),
+                    bodyJson = com.curio.app.data.PersonalDocCodec.encode(body),
+                    preview = "",
+                    dateMillis = page.dateMillis,
+                    mood = page.mood,
+                    createdAtMillis = liveCreatedAt.value,
+                    updatedAtMillis = 0L,
+                    kind = page.kind,
+                    topicId = page.topicId,
+                    topicName = page.topicName,
+                    categoryId = page.categoryId
+                )
+            )
+        }
+
     fun saveNow() {
         val body = liveDoc.value
         val page = liveMeta.value()
         if (body.isEmpty && page.title.isBlank()) return
         saving = true
         scope.launch {
-            val saved = withContext(Dispatchers.IO + NonCancellable) {
-                PersonalRepositoryHolder.repo.saveNote(
-                    PersonalNoteEntity(
-                        id = liveId.value,
-                        bookId = null,
-                        chapterIndex = null,
-                        title = page.title.trim(),
-                        bodyJson = com.curio.app.data.PersonalDocCodec.encode(body),
-                        preview = "",
-                        dateMillis = page.dateMillis,
-                        mood = page.mood,
-                        createdAtMillis = liveCreatedAt.value,
-                        updatedAtMillis = 0L,
-                        kind = page.kind,
-                        topicId = page.topicId,
-                        topicName = page.topicName,
-                        categoryId = page.categoryId
-                    )
-                )
-            }
+            val saved = writePage(body, page)
             entryId = saved.id
             createdAt = saved.createdAtMillis
             saving = false
@@ -241,6 +293,24 @@ internal fun PersonalWritingPage(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // …and neither must LEAVING it. The debounce above lives inside the
+    // composition, so a back gesture cancels it mid-wait: a page that was typed
+    // into a moment before the member left — or a voice note they chose to KEEP
+    // on the way out — used to lose exactly that last change (user question:
+    // "is it persistent too like it saves when i back by accident?"). This
+    // flush runs on its OWN scope, because by the time onDispose runs the
+    // composition's scope is already cancelled and a `scope.launch` there would
+    // never write anything.
+    DisposableEffect(entryId) {
+        val flushScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        onDispose {
+            val body = liveDoc.value
+            val page = liveMeta.value()
+            if (body.isEmpty && page.title.isBlank()) return@onDispose
+            flushScope.launch { writePage(body, page) }
+        }
     }
 
     // ── Photos ─────────────────────────────────────────────────────────
@@ -269,7 +339,7 @@ internal fun PersonalWritingPage(
             .imePadding()
             .navigationBarsPadding()
     ) {
-        header(editing, saving, { mode -> editing = mode })
+        header(editing, saving, { mode -> editing = mode }, { leave() })
 
         Crossfade(
             targetState = editing,
@@ -284,6 +354,12 @@ internal fun PersonalWritingPage(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        // v389 — the blank part of a page is writing space too: a
+                        // tap anywhere in the gaps (under the last line, between
+                        // the title and the words) hands the caret to the last
+                        // line instead of needing the "Write…" placeholder to be
+                        // hit exactly (user report).
+                        .clickable { editor.focusLastLine() }
                         .padding(horizontal = 20.dp)
                         .widthIn(max = 680.dp)
                 ) {
@@ -300,9 +376,10 @@ internal fun PersonalWritingPage(
         }
 
         // The dock rides the keyboard while the page is being WRITTEN and steps
-        // out of the way while it is being read.
+        // out of the way while it is being read. A live recording REPLACES it:
+        // the voice capsule is what the page's bottom is for while it runs.
         AnimatedVisibility(
-            visible = editing,
+            visible = editing && liveVoice == null,
             enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
             exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
             modifier = Modifier.fillMaxWidth()
@@ -318,8 +395,76 @@ internal fun PersonalWritingPage(
                     showJournalTools = showJournalTools,
                     modifier = Modifier.align(Alignment.Center)
                 )
+                // The page's own mic, floating over the writing just above the
+                // tools, so "say it instead" is always one tap away.
+                PersonalVoiceButton(
+                    onClick = { if (!askToRecord()) startVoice() },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 4.dp)
+                )
             }
         }
+
+        AnimatedVisibility(
+            visible = editing && liveVoice != null,
+            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
+            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (liveVoice != null) {
+                    PersonalVoiceRecorderCapsule(
+                        session = liveVoice,
+                        onKeep = {
+                            scope.launch {
+                                val voice = PersonalVoiceRecording.keep(context, entryId)
+                                if (voice != null) editor.insertVoice(voice)
+                            }
+                        },
+                        onDiscard = { PersonalVoiceRecording.discard() }
+                    )
+                }
+            }
+        }
+    }
+
+    if (leavePrompt) {
+        PersonalVoiceLeaveDialog(
+            elapsed = liveVoice?.elapsed ?: "",
+            onKeepRecording = { leavePrompt = false },
+            onKeepNote = {
+                leavePrompt = false
+                scope.launch {
+                    val voice = PersonalVoiceRecording.keep(context, entryId)
+                    if (voice != null) editor.insertVoice(voice)
+                    onExit()
+                }
+            },
+            onDiscard = {
+                leavePrompt = false
+                PersonalVoiceRecording.discard()
+                onExit()
+            }
+        )
+    }
+
+    if (recordFailed) {
+        AlertDialog(
+            onDismissRequest = { recordFailed = false },
+            title = { Text("Could not start recording") },
+            text = {
+                Text("The microphone is busy or unavailable. Try again in a moment.")
+            },
+            confirmButton = {
+                TextButton(onClick = { recordFailed = false }) { Text("OK") }
+            }
+        )
     }
 }
 

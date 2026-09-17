@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.PAGE_KIND_TODO
 import com.curio.app.data.PersonalDoc
+import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -99,7 +100,11 @@ fun TodoScreen(
             title = existing.title
             if (existing.dateMillis > 0L) dateMillis = existing.dateMillis
         },
-        header = { editing, saving, onToggleMode ->
+        // The page's own way out (the core guards it: a live voice recording is
+        // asked about before a back gesture can drop it — see PersonalVoice).
+        onExit = { navController.popBackStack() },
+        voiceRoute = { CurioRoutes.todo(it) },
+        header = { editing, saving, onToggleMode, onBack ->
             TodoTopBar(
                 title = title,
                 done = done,
@@ -107,7 +112,7 @@ fun TodoScreen(
                 saving = saving,
                 editing = editing,
                 onToggleMode = onToggleMode,
-                onBack = { navController.popBackStack() }
+                onBack = onBack
             )
         },
         readView = { readDoc ->

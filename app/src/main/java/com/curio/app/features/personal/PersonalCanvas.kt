@@ -51,6 +51,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
@@ -66,6 +67,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -79,10 +82,14 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.size.Scale
 import com.curio.app.data.PersonalAlign
 import com.curio.app.data.PersonalBlock
 import com.curio.app.data.PersonalDoc
@@ -470,6 +477,27 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         focusRequestToken++
     }
 
+    /**
+     * v389 — "start writing here". A tap anywhere on the blank part of a page
+     * (under the last line, in the gap above the tools) hands the caret to the
+     * LAST line at its end, which is what a writer means by tapping the empty
+     * space in their own page. Before this the only way in was to find the one
+     * empty line's own "Write…" placeholder and tap exactly on it (user
+     * report). It never ADDS a line — the pen puts you where you left off.
+     *
+     * The caret rides [caret] (not the focus token): the token's rule is "the
+     * first empty line", which is the right answer when a photo just landed but
+     * the wrong one for a tap at the end of the writing.
+     */
+    fun focusLastLine() {
+        val id = order.lastOrNull { block ->
+            val b = blocks[block]
+            b != null && !b.isPhoto && b.audio == null
+        } ?: return
+        focusedId = id
+        caret = PersonalCaret(id, text(id).length)
+    }
+
     fun armCheckboxOnEmptyLine() {
         armed = (armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()) or FLAG_CHECKBOX
     }
@@ -751,6 +779,30 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * the picture sits exactly where the writer was standing.
      */
     fun insertPhoto(uri: String) {
+        insertAtCaret { PersonalBlock(id = newBlockId(), photo = uri) }
+    }
+
+    /**
+     * v389 — a finished VOICE NOTE lands at the caret exactly like a picture:
+     * what came before, the recording (its file, its length, its waveform), and
+     * a fresh empty line to carry on in. The empty line is the point — a page
+     * you talked into still has to be writable under what you said (user
+     * request: "below we can still add notes").
+     */
+    fun insertVoice(voice: RecordedVoice) {
+        insertAtCaret {
+            PersonalBlock(
+                id = newBlockId(),
+                audio = voice.path,
+                audioSeconds = voice.seconds,
+                audioBars = voice.bars
+            )
+        }
+    }
+
+    /** The one place a BLOCK lands between a head and a tail (see
+     *  [insertPhoto] / [insertVoice]). */
+    private fun insertAtCaret(makeBlock: () -> PersonalBlock) {
         val id = focusedId ?: order.lastOrNull() ?: return
         val block = blocks[id] ?: return
         val caretIndex = (selections[id]?.start ?: block.text.length)
@@ -769,7 +821,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             runs = maskToRuns(tailMask),
             align = block.align
         )
-        val photoBlock = PersonalBlock(id = newBlockId(), photo = uri)
+        val photoBlock = makeBlock()
         val index = order.indexOf(id)
         if (index < 0) return
         // The old block is replaced in place, so the page never jumps.
@@ -894,7 +946,7 @@ internal fun PersonalCanvas(
     enabled: Boolean = true
 ) {
     Column(
-        modifier = modifier.clickable(enabled = enabled) { state.requestFocusOnEmptyLine() },
+        modifier = modifier.clickable(enabled = enabled) { state.focusLastLine() },
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         state.blockIds.forEach { id ->
@@ -909,6 +961,18 @@ internal fun PersonalCanvas(
                     onCaption = { state.setCaption(id, it) },
                     onRemove = { state.removeBlock(id) },
                     onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                )
+            } else if (block.isAudio) {
+                // v389 — a voice note in the page: the waveform is the block, and
+                // the writing carries on under it.
+                PersonalVoicePageBlock(
+                    path = block.audio.orEmpty(),
+                    seconds = block.audioSeconds,
+                    bars = block.audioBars,
+                    ink = ink,
+                    accent = accent,
+                    enabled = enabled,
+                    onRemove = { state.removeBlock(id) }
                 )
             } else {
                 PersonalTextBlock(id = id, state = state, ink = ink, accent = accent, enabled = enabled)
@@ -949,7 +1013,12 @@ private fun PersonalTextBlock(
     val markerOutline = ink.copy(alpha = 0.42f)
     // ONE hint for the whole page: the empty-line "Write…" on every new
     // paragraph read as a page full of the word "write".
-    val showHint = text.isEmpty() && !state.hasText()
+    //
+    // v389 — and it belongs to a PRISTINE page, not to every empty line: after
+    // Enter the FIRST line's hint stayed while the new line showed its own, so
+    // two empty paragraphs read as two "Write…" placeholders (user report).
+    // It is the first line's, and it goes for good once anything is written.
+    val showHint = text.isEmpty() && !state.hasText() && state.blockIds.firstOrNull() == id
     val focusRequester = remember(id) { FocusRequester() }
     LaunchedEffect(state.focusRequestToken) {
         if (state.focusRequestToken > 0 && text.isEmpty() && state.blockIds.firstOrNull { state.text(it).isEmpty() } == id) {
@@ -1091,6 +1160,49 @@ private fun PersonalTextBlock(
     }
 }
 
+/**
+ * v389 — A PAGE'S PHOTO, DECODED FOR THE BOX IT IS DRAWN IN.
+ *
+ * Coil's default decode FITS the source inside the target box, so a landscape
+ * photo in a wide, short page thumbnail came back as a bitmap SMALLER than the
+ * box — and `ContentScale.Crop` then scaled it back UP, which is exactly the
+ * blurry picture the member reported ("the image preview isnt good … so low
+ * quality"). This asks for a size that COVERS the box ([Scale.FILL]) at the
+ * composable's own pixel size, so nothing is ever upscaled, and draws it with
+ * `FilterQuality.High`.
+ *
+ * The size is measured rather than guessed: one frame at zero, then the real
+ * request — cheaper than decoding a full-resolution bitmap per photo, which a
+ * page with four of them would feel.
+ */
+@Composable
+internal fun PersonalPagePhoto(
+    uri: String,
+    height: Dp,
+    modifier: Modifier = Modifier,
+    filterQuality: FilterQuality = FilterQuality.High
+) {
+    val context = LocalContext.current
+    var box by remember(uri) { mutableStateOf(IntSize.Zero) }
+    val request = remember(uri, box) {
+        ImageRequest.Builder(context)
+            .data(uri)
+            .scale(Scale.FILL)
+            .apply { if (box.width > 0 && box.height > 0) size(box.width, box.height) }
+            .build()
+    }
+    androidx.compose.foundation.Image(
+        painter = rememberAsyncImagePainter(request),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        filterQuality = filterQuality,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+            .onSizeChanged { box = it }
+    )
+}
+
 @Composable
 private fun PersonalPhotoBlock(
     uri: String,
@@ -1120,12 +1232,7 @@ private fun PersonalPhotoBlock(
                 .clip(RoundedCornerShape(14.dp))
                 .clickable(enabled = enabled) { onOpen(bounds) }
         ) {
-            androidx.compose.foundation.Image(
-                painter = rememberAsyncImagePainter(uri),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().height(172.dp)
-            )
+            PersonalPagePhoto(uri = uri, height = 172.dp)
             if (enabled) {
                 Surface(
                     onClick = onRemove,
@@ -1211,11 +1318,9 @@ internal fun PersonalDocView(
                         .clip(RoundedCornerShape(16.dp))
                         .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
                 ) {
-                    androidx.compose.foundation.Image(
-                        painter = rememberAsyncImagePainter(block.photo.orEmpty()),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth().height(156.dp)
+                    PersonalPagePhoto(
+                        uri = block.photo.orEmpty(),
+                        height = 156.dp
                     )
                     if (block.caption.isNotBlank()) {
                         Text(
@@ -1229,6 +1334,16 @@ internal fun PersonalDocView(
                         )
                     }
                 }
+            } else if (block.isAudio) {
+                // v389 — a saved voice note reads as the waveform it was
+                // recorded into: play it, or tap a moment to jump there.
+                PersonalVoiceBar(
+                    path = block.audio.orEmpty(),
+                    seconds = block.audioSeconds,
+                    bars = block.audioBars,
+                    ink = ink,
+                    accent = accent
+                )
             } else if (block.text.isNotBlank()) {
                 val text = block.text
                 val mask = runsToMask(text.length, block.runs)

@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -41,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -391,13 +392,23 @@ private fun JournalChip(
     }
 }
 
-/** A book as a chip: its cover, its name, where the member is in it. */
+/**
+ * v389 — A BOOK AS A CHIP: THE WHOLE COVER, WITH ITS NAME ON A FOOTER.
+ *
+ * The cover used to be a 58dp band with the title printed UNDER it, which read
+ * as two unrelated things (a sliver of artwork and a line of text) — and the
+ * band cropped most covers to a strip. The chip is now the COVER, full height,
+ * with a small footer bar laid across its bottom edge holding the name in ONE
+ * line: the strip is a fixed height, so a long title is ellipsised instead of
+ * pushing the cover around (user request).
+ */
 @Composable
 private fun BookChip(
     book: PersonalBookEntity,
     onClick: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
+    val footerInk = MaterialTheme.colorScheme.surfaceContainerLow
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
@@ -406,32 +417,50 @@ private fun BookChip(
             .width(CHIP_WIDTH)
             .height(CHIP_HEIGHT)
     ) {
-        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+        Box(Modifier.fillMaxSize()) {
             BookCover(
                 title = book.title,
                 author = book.author,
                 coverUrl = book.coverUrl,
-                corner = 10.dp,
+                corner = 0.dp,
+                modifier = Modifier.fillMaxSize()
+            )
+            // The footer: one line, its own height, OPAQUE so the cover cannot
+            // bleed through the title it is naming.
+            Surface(
+                shape = RoundedCornerShape(bottomStart = 22.dp, bottomEnd = 22.dp),
+                color = footerInk,
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(58.dp)
-                    .clip(RoundedCornerShape(10.dp))
-            )
-            Spacer(Modifier.height(7.dp))
-            Text(
-                book.title,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = ink,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(4.dp))
+                    .height(24.dp)
+            ) {
+                Box(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        book.title,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = ink,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
 }
 
-/** A door chip: the row's quiet "there is more" (and where an empty library
- *  still finds its list). */
+/**
+ * A door chip: the row's quiet "there is more" (and where an empty library
+ * still finds its list).
+ *
+ * v389 — it has DEPTH now: a soft shadow plus a hairline edge, the way the
+ * Cabinet's shelves read, so the two doors (Pages / My shelf) sit ABOVE the
+ * chips around them instead of flat beside them (user request). The fill stays
+ * OPAQUE — a translucent fill lets a shadow bleed through it.
+ */
 @Composable
 private fun DoorChip(
     glyph: String,
@@ -444,6 +473,8 @@ private fun DoorChip(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 4.dp,
+        border = BorderStroke(1.dp, ink.copy(alpha = 0.07f)),
         modifier = Modifier
             .width(CHIP_WIDTH)
             .height(CHIP_HEIGHT)

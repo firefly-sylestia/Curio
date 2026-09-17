@@ -124,13 +124,11 @@ fun BookShelfScreen(navController: NavController) {
                 else -> "${books.size} books"
             },
             onBack = { navController.popBackStack() },
-            action = {
-                PersonalHeaderAction(
-                    glyph = CurioIcons.Add,
-                    label = "Add a book",
-                    onClick = { addOpen = true }
-                )
-            }
+            // v389 — the head wears TODAY instead of an "Add a book" pill: the
+            // floating + already opens the add-book sheet (and the empty state
+            // carries its own action), so the pill was a third door in a head
+            // that has two (user request).
+            action = { PersonalHeaderDate() }
         )
 
         if (books.isEmpty()) {

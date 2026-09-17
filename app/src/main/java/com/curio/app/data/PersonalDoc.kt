@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import kotlin.math.roundToInt
 
 /**
  * v387 — THE JOURNAL/B OOK WRITING DOCUMENT (`features/personal/`).
@@ -70,6 +71,24 @@ data class PersonalBlock(
     val caption: String = "",
     val align: PersonalAlign = PersonalAlign.START,
     /**
+     * A VOICE NOTE's audio file (v389) — an absolute path under
+     * `filesDir/audio/`, or null for a text / photo block. A voice block has no
+     * text of its own: it is the recording, drawn as a waveform the member can
+     * scrub, and the page carries on underneath it (a note can be written above
+     * or below, which is the whole point of a journal you talk into).
+     */
+    val audio: String? = null,
+    /** How long the recording runs, in whole seconds (the time on the block). */
+    val audioSeconds: Int = 0,
+    /**
+     * The waveform, already extracted and downsampled when the recording was
+     * kept — see [PersonalAudioBars]. Stored WITH the block so a page draws its
+     * waveforms instantly: extracting them means decoding the whole file
+     * through MediaCodec, which is far too expensive to do while a page is
+     * scrolling.
+     */
+    val audioBars: String = "",
+    /**
      * A checklist line's TICK (v389). Stored WITH THE BLOCK, which is the whole
      * point of a to-do page: the tick used to live in the editor's own widget
      * state, so it vanished the moment the page reloaded and the read-only view
@@ -86,6 +105,9 @@ data class PersonalBlock(
     val marker: String = ""
 ) {
     val isPhoto: Boolean get() = photo != null
+
+    /** True for a voice-note block (a recording, no text of its own). */
+    val isAudio: Boolean get() = audio != null
 
     /** The line's marker, or the default dot when it never picked one. */
     val markerStyle: PersonalMarker get() = PersonalMarker.fromKey(marker) ?: PersonalMarker.DOT
@@ -143,6 +165,54 @@ enum class PersonalMarker(val key: String, val label: String) {
     }
 }
 
+/**
+ * v389 — HOW A VOICE NOTE'S WAVEFORM IS STORED.
+ *
+ * A page keeps its recordings' waveforms instead of decoding the audio every
+ * time the block is drawn (MediaCodec on a scrolling page is a stutter), and it
+ * keeps them as TEXT: one hex byte per bar, `00`–`ff` for 0.00–1.00. A
+ * three-minute note over 72 bars is 144 characters in the stored document —
+ * cheaper than the float array it came from, and it survives every JSON
+ * round-trip without a float-precision surprise.
+ *
+ * [decode] always answers [BAR_COUNT] bars (padding with silence, resampling a
+ * waveform written at another resolution), so a drawing loop never has to think
+ * about the string's length.
+ */
+object PersonalAudioBars {
+
+    /** How many bars a voice block draws — read at the block's own width. */
+    const val BAR_COUNT = 72
+
+    private const val HEX = "0123456789abcdef"
+
+    fun encode(samples: FloatArray): String {
+        val out = StringBuilder(samples.size * 2)
+        samples.forEach { value ->
+            val level = (value.coerceIn(0f, 1f) * 255f).roundToInt()
+            out.append(HEX[level shr 4]).append(HEX[level and 0x0f])
+        }
+        return out.toString()
+    }
+
+    fun decode(encoded: String, barCount: Int = BAR_COUNT): FloatArray {
+        val bars = FloatArray(barCount)
+        if (encoded.length < 2) return bars
+        val stored = FloatArray(encoded.length / 2)
+        stored.indices.forEach { i ->
+            val high = HEX.indexOf(encoded[i * 2].lowercaseChar())
+            val low = HEX.indexOf(encoded[i * 2 + 1].lowercaseChar())
+            if (high < 0 || low < 0) return bars
+            stored[i] = ((high shl 4) or low) / 255f
+        }
+        if (stored.size == barCount) return stored
+        // A waveform written at another resolution still fits: nearest bar.
+        return FloatArray(barCount) { i ->
+            stored[((i.toLong() * stored.size) / barCount).toInt().coerceIn(0, stored.size - 1)]
+        }
+    }
+}
+
 /** The mood of a journal day. Keys are stable strings in the DB. */
 enum class PersonalMood(val key: String, val label: String) {
     CALM("calm", "Calm"),
@@ -187,6 +257,14 @@ object PersonalDocCodec {
             // version encodes byte-for-byte as it did.
             if (block.checked) b.addProperty("ck", true)
             if (block.marker.isNotBlank()) b.addProperty("mk", block.marker)
+            // v389 — a voice note (its file, its length, its waveform). None of
+            // the three is written for any other kind of block, so a text or
+            // photo page encodes exactly as it did before.
+            block.audio?.let { audio ->
+                b.addProperty("aud", audio)
+                b.addProperty("aus", block.audioSeconds)
+                if (block.audioBars.isNotBlank()) b.addProperty("aub", block.audioBars)
+            }
             val runs = JsonArray()
             block.runs.forEach { run ->
                 val r = JsonObject()
@@ -248,7 +326,12 @@ object PersonalDocCodec {
                 // v389 — the tick and the bullet marker. An older note has
                 // neither key: it decodes as unticked, with the default dot.
                 checked = b.flag("ck"),
-                marker = b.str("mk")
+                marker = b.str("mk"),
+                // v389 — a voice note. An older note has no "aud" key at all,
+                // so it decodes as an ordinary text block, exactly as before.
+                audio = b.str("aud").ifBlank { null },
+                audioSeconds = b.int("aus"),
+                audioBars = b.str("aub")
             )
         }
         // A note whose body decoded to nothing still needs ONE writable block,

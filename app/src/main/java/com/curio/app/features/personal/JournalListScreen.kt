@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -86,17 +87,11 @@ fun JournalListScreen(navController: NavController) {
                 else -> "${journals.size} pages"
             },
             onBack = { navController.popBackStack() },
-            action = {
-                PersonalHeaderAction(
-                    glyph = CurioIcons.Add,
-                    label = "Write today",
-                    onClick = {
-                        navController.navigate(
-                            CurioRoutes.journalEditor(CurioRoutes.PERSONAL_NEW)
-                        ) { launchSingleTop = true }
-                    }
-                )
-            }
+            // v389 — no "Write today" pill: the floating + already writes today's
+            // page, and a second door in the head only crowded the title. The
+            // head wears TODAY instead, which is the one date a journal is
+            // about (user request).
+            action = { PersonalHeaderDate() }
         )
 
         if (journals.isEmpty()) {
@@ -301,7 +296,12 @@ private fun JournalRow(
                         fontFamily = FrauncesFontFamily,
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = if (journal.title.isBlank()) ink.copy(alpha = 0.5f) else ink
+                    color = if (journal.title.isBlank()) ink.copy(alpha = 0.5f) else ink,
+                    // Two lines at most: a long title turned a row into a wall
+                    // of words and pushed the preview and the count off it
+                    // (user request).
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 if (journal.preview.isNotBlank()) {
                     Spacer(Modifier.height(4.dp))
@@ -369,6 +369,44 @@ internal fun PersonalHeader(
             )
         }
         action?.invoke()
+    }
+}
+
+/**
+ * v389 — the personal family's head wears TODAY where a pill action used to be.
+ * A journal collection and a book shelf are both "what I am doing now", and the
+ * date says that without a button: the doors to a new page are the floating `+`
+ * (journals, shelf) and the empty state's own action (user request — the
+ * "Write today" / "Add a book" pills left both heads).
+ */
+@Composable
+internal fun PersonalHeaderDate(
+    dateMillis: Long = System.currentTimeMillis()
+) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CurioIcon(
+                CurioIcons.CalendarToday,
+                null,
+                tint = personalAccentInk(),
+                size = 15.dp
+            )
+            Text(
+                dateMillis.prettyDate(),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = ink.copy(alpha = 0.72f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

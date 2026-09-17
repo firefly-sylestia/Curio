@@ -159,6 +159,7 @@ import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.features.personal.PersonalVoicePill
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
 import com.curio.app.ui.theme.CurioMotion
@@ -1490,6 +1491,12 @@ composable(CurioRoutes.COMMUNITY) {
     ) {
         CurioFloatingPet(routePrefix = routePrefix)
     }
+
+    // v389 — a voice note still being recorded but whose page is not the one on
+    // screen: a small pill at the root says so and takes the member back to it.
+    // Drawn here (like the pet) so it is above every screen, and it hides
+    // itself the moment its own page is composed.
+    PersonalVoicePill(navController = navController)
 
     // ── Done-exploring prompt (app return while a session is active) ────
     val activeSession = ExploreSessionStore.activeSessionState
