@@ -2798,5 +2798,66 @@ prints do not yet share a row.
 also many of them still dont match the eye properly so fix it and refine the others details. also the note on a topic, it shows duplicate topic name in view fix that too. 
 and for voice note on journal and all, it shows on the page as a box, but i want it with the graph only and the play and cross button no backgroud, also the cross button should ask for confimation before deleting it. also similiar to voive note reorder add for photo reorder too. and for the photo preview on page, mak eit polaroid style but make sure it follows the text wrapper style so texts doesnt overlap, when i say polaroid not the whole polaroid phot but a smal lstyle kind of, and support multiple photos and also sizes of polaroid. make them be next to each other or wherver the user wants them. and before pushing use ask user to ask me also redeign the how did the day feel option. 
 
-## next prompt
+## Request (2026-09-17, batch E — INCURSION, the secret screen)
+
+Verbatim: add `https://github.com/firefly-sylestia/mcu-viewing-order` as a secret — all
+its Marvel/Sony/X-Men titles, properly categorised, a new screen with marvel / sony /
+x-men + viewing order and essentials, no trailer info, watch/bookmark/drop statuses, list
+and grid views, its own bottom-nav page style, unlocked by typing "i love you 3000"
+anywhere in the app, with a floating "Incursion" button on Home. Not visible to normal
+users at all.
+
+**Status (2026-09-17): PLANNED — the dataset is located and its schema is known; the
+feature itself is not built. Committed locally, NOT pushed.**
+
+Decided with the user (ask_user): the phrase is accepted by ANY search field in the app;
+Incursion brings its OWN nav (marvel / sony / x-men / essential) and does not touch
+Curio's four tabs.
+
+### Where the data actually lives (found, verified)
+
+NOT `src/data/titles.ts` (404). The repo splits its data per studio under `src/data/`:
+
+- `mcuData.js` — `PHASES`, `NO_PREREQ`, `ESSENTIAL_LIST`, `ADDITIONAL_LIST`
+- `sonyData.js`, `xmenData.js` (and `dcData.js`, which was NOT asked for)
+- `connections.js`, `timelineModes.js`, `afterCreditsData.js`, `trailerData.js`
+  (`trailerData.js` is explicitly NOT wanted)
+
+Entry shape, exactly as the repo writes it:
+
+```
+{ id, order, phase, type: 'film'|'series'|'short', year, essential: bool,
+  episodes: Int?, tmdbId, season?, epStart?, epEnd?, title, seriesGroup?,
+  ageRating, prereq, desc, releaseDate?, releaseStatus?: 'released'|'upcoming'|'TBA' }
+```
+
+`order` is the chronological viewing order the whole feature is about. `essential` is the
+essentials flag. `prereq` is a prerequisite sentence (its "None …" variants are listed in
+`NO_PREREQ`). `desc` is a short synopsis. `id` is NOT dense (it runs 1–67 then jumps to
+101+, and reuses numbers across seasons), so it cannot be used as a list index.
+
+Size: `mcuData.js` alone is 150+ entries before truncation, and `ADDITIONAL_LIST` includes
+every Netflix series episode-by-episode (Daredevil, Jessica Jones, Luke Cage, Iron Fist,
+The Defenders, Punisher, Runaways, Cloak & Dagger, every Agents of SHIELD episode block,
+WHiH Newsfront…). With Sony and X-Men that is a few hundred rows.
+
+### Why it is not built yet, and what it needs
+
+Transcribing a few hundred rows by hand, from a truncated fetch, would ship either
+truncated or invented data in a screen the member would then trust — worse than absent.
+The dataset must arrive VERBATIM. Two clean ways:
+
+1. The user pastes the three files (or their raw URLs are fetched in a session with
+   budget for a few hundred lines of transcription), and they land as
+   `app/src/main/assets/incursion/*.json` — a mechanical transform of the shape above.
+2. A small script in the repo converts the .js modules to the JSON asset, so the data can
+   be re-imported whenever the upstream list moves.
+
+Once the asset exists, the rest is the app's own patterns: a prefs-backed status store
+(Five-state: watched / watching / plan / on-hold / dropped + unwatched, mirroring the
+repo), a screen with its own nav bar, list + grid, essentials filter, the "i love you
+3000" acceptance in each search field, and the Home floating button that only exists once
+unlocked.
+
+## older prompt — the MCU repo
 https://github.com/firefly-sylestia/mcu-viewing-order lets add this as a secret, so i think it have all of the movies and series of marvel and x men etc i want you to add them, but they are not visible to normal user at all. also properly categories the movies and series, and make a new screen with marvel, sony, x men, option with the list with proper viewing order etc. from that repo, and essential etc. no trailer info, just watch and bookmark save and drop and etc status, in list and grid view, with its own buttm nav page style, and this screen can be acessed if the user types, " i love you 3000" and the button will be in home screen floating ith name as incursion. 
