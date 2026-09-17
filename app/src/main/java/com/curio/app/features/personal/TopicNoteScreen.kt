@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -101,8 +100,8 @@ fun TopicNoteScreen(
     // the journals list groups pages by date, and a page with no date would land
     // in January 1970. Set once, never moved.
     // A BOXED Long on purpose: `rememberSaveable` saves a MutableState, not the
-    // primitive holders (mutableLongStateOf / Int / Float are never used with it
-    // anywhere in this app, and they are not what its state overload expects).
+    // primitive holders (the Long / Int / Float state holders are never used with
+    // it anywhere in this app, and they are not what its state overload expects).
     var dateMillis by rememberSaveable { mutableStateOf(startOfToday()) }
     var pickerOpen by rememberSaveable { mutableStateOf(initialTopicName.isBlank()) }
 
