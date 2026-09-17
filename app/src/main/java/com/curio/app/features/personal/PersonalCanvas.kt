@@ -77,6 +77,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
@@ -125,6 +126,7 @@ import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.GeomFontFamily
 import com.curio.app.ui.theme.SpaceMonoFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
+import com.curio.app.data.openSearchUrl
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -262,6 +264,41 @@ internal fun personalFontFamilyOf(flags: Int): FontFamily? = when (fontKeyOf(fla
     else -> if (flags and FLAG_TITLE != 0) FrauncesFontFamily else null
 }
 
+// ── v392 ── CLICKABLE LINKS ──────────────────────────────────────────────
+private const val PERSONAL_LINK_TAG = "personal_url"
+private val URL_REGEX = Regex(
+    "https?://[\u0021-\u007E]+" // ASCII printable URL characters
+)
+
+/**
+ * Adds clickable URL annotations to an existing AnnotatedString.
+ * Each match is tagged [PERSONAL_LINK_TAG] so the read-only view can open it
+ * on tap with the coffee-dark underline style.
+ */
+private fun personalAnnotateLinks(base: AnnotatedString): AnnotatedString {
+    val text = base.text
+    val matches = URL_REGEX.findAll(text).toList()
+    if (matches.isEmpty()) return base
+    return androidx.compose.ui.text.buildAnnotatedString {
+        append(base)
+        matches.forEach { match ->
+            addStyle(
+                SpanStyle(
+                    color = Color(0xFF5C3A20),
+                    textDecoration = TextDecoration.Underline
+                ),
+                match.range.first,
+                match.range.last + 1
+            )
+            addStringAnnotation(
+                PERSONAL_LINK_TAG,
+                match.value,
+                match.range.first,
+                match.range.last + 1
+            )
+        }
+    }
+}
 /** The face's name as the menu shows it. */
 internal fun personalFontLabel(key: String): String = when (key) {
     "sans" -> "Sans"
@@ -2955,12 +2992,22 @@ internal fun PersonalDocView(
                             } else Modifier
                         )
                 ) {
+                    val baseText = personalAnnotated(
+                        text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
+                        titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
+                        smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
+                    )
+                    // v392 — CLICKABLE LINKS: URLs in the read-only view
+                    // open in the browser with a coffee-dark underline so they
+                    // read as ink, not as the app's accent.
+                    val linkText = personalAnnotateLinks(baseText)
+                    var linkLayout by remember(linkText) {
+                        mutableStateOf<TextLayoutResult?>(null)
+                    }
+                    val linkContext = LocalContext.current
                     Text(
-                        text = personalAnnotated(
-                            text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
-                            titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
-                            smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
-                        ),
+                        text = linkText,
+                        onTextLayout = { linkLayout = it },
                         style = when {
                             isTitle -> TextStyle(
                                 fontFamily = FrauncesFontFamily,
@@ -2982,7 +3029,19 @@ internal fun PersonalDocView(
                                 textAlign = alignOf
                             )
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .pointerInput(linkText) {
+                                detectTapGestures { offset ->
+                                    val layout = linkLayout ?: return@detectTapGestures
+                                    val pos = layout.getOffsetForPosition(offset)
+                                    linkText.getStringAnnotations(
+                                        PERSONAL_LINK_TAG, pos, pos
+                                    ).firstOrNull()?.let { ann ->
+                                        openSearchUrl(linkContext, ann.item)
+                                    }
+                                }
+                            }
                     )
                 }
                 if (isTitle) afterTitle?.invoke(text)

@@ -18,6 +18,9 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Reading: tap links in journal pages — URLs are detected and underlined in the read-only view, and tap them to open in the browser.
+- Reading: the selection bar is opaque now — highlight colours and actions sit on a solid surface that matches the reader's skin, instead of a near-transparent wash.
+- Books: Google Books chapter list as a fallback — when Open Library has no table of contents, the enrichment pass now tries Google Books' own chapter data (keyless, same consent toggle).
 - Reading: select words on a PDF page too — hold the page to take the word under your finger and drag to extend the passage, then highlight it, write a note on it or bookmark it from the same bar a reflowable book uses. A page of pictures still marks as a whole page, exactly as before.
 - Reading: a typeset book's own printed page numbers — the Contents sheet can show the page-list the edition carries, so "printed page 42" is a place to jump to, not a guess.
 - Incursion: a hidden page holding the whole viewing order — every Marvel, Sony and X-Men film, series and short, in the order they are meant to be watched, with the essentials marked. It is not in any menu: type "i love you 3000" into any search box in the app and it unlocks, then opens from a floating "Incursion" button on Home.

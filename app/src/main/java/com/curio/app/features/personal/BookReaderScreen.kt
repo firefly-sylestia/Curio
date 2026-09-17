@@ -3271,7 +3271,7 @@ private fun ReaderSelectionBar(
                     Surface(
                         onClick = { onHighlight(ink) },
                         shape = CircleShape,
-                        color = ink.ink.copy(alpha = 0.22f),
+                        color = ink.ink.copy(alpha = 0.35f),
                         border = androidx.compose.foundation.BorderStroke(1.dp, ink.ink),
                         modifier = Modifier.size(30.dp)
                     ) {
@@ -3306,7 +3306,7 @@ private fun SelectionBarAction(
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = palette.ink.copy(alpha = 0.06f),
+        color = palette.ink.copy(alpha = 0.12f),
         modifier = Modifier.size(32.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -3470,21 +3470,21 @@ private fun readerPalette(key: String): ReaderPalette = when (key) {
         paper = Color(0xFFF3E7D3),
         ink = Color(0xFF4A3A28),
         accent = Color(0xFF9A6A43),
-        surface = Color(0x1A4A3A28),
+        surface = Color(0xFFF3E7D3),
         inkKey = "sepia"
     )
     "night" -> ReaderPalette(
         paper = Color(0xFF12100E),
         ink = Color(0xFFD8CFC2),
         accent = Color(0xFFC09263),
-        surface = Color(0x1FD8CFC2),
+        surface = Color(0xFF252018),
         inkKey = "night"
     )
     "white" -> ReaderPalette(
         paper = Color(0xFFFFFFFF),
         ink = Color(0xFF1B1B1B),
         accent = Color(0xFF8A5A33),
-        surface = Color(0x14000000),
+        surface = Color(0xFFF5F5F5),
         inkKey = "white"
     )
     else -> if (isCurioDarkTheme()) {
@@ -3492,7 +3492,7 @@ private fun readerPalette(key: String): ReaderPalette = when (key) {
             paper = Color(0xFF1A1714),
             ink = Color(0xFFE2D9CC),
             accent = Color(0xFFC09263),
-            surface = Color(0x1FE2D9CC),
+            surface = Color(0xFF252018),
             inkKey = "paper"
         )
     } else {
@@ -3500,7 +3500,7 @@ private fun readerPalette(key: String): ReaderPalette = when (key) {
             paper = Color(0xFFFBF6EC),
             ink = Color(0xFF2E2620),
             accent = Color(0xFF8A5A33),
-            surface = Color(0x14000000),
+            surface = Color(0xFFF5F0E8),
             inkKey = "paper"
         )
     }

@@ -69,13 +69,16 @@ internal object BookEnrichment {
             learned += "the catalog's own record"
         }
         if (updated.chaptersJson.isBlank()) {
-            openLibraryChapters(updated.title, updated.author)?.let { chapters ->
+            // v392 — Open Library first, then Google Books as fallback.
+            val chapters = openLibraryChapters(updated.title, updated.author)
+                ?: googleBooksChapters(updated.title, updated.author)
+            chapters?.let { list ->
                 updated = updated.copy(
-                    chaptersJson = PersonalChapterCodec.encode(chapters),
-                    totalChapters = if (updated.totalChapters <= 0) chapters.size
+                    chaptersJson = PersonalChapterCodec.encode(list),
+                    totalChapters = if (updated.totalChapters <= 0) list.size
                     else updated.totalChapters
                 )
-                learned += "${chapters.size} chapters"
+                learned += "${list.size} chapters"
             }
         }
         if (updated.pageCount <= 0) {
@@ -245,6 +248,60 @@ internal object BookEnrichment {
                     ?.takeIf { !it.isJsonNull }
                     ?.asInt
                     ?.takeIf { it > 0 }
+            }.getOrNull()
+        }
+    }
+
+    /**
+     * v392 — GOOGLE BOOKS CHAPTER FALLBACK.
+     *
+     * When Open Library has no table of contents for a book, Google Books
+     * sometimes does (its `volumeInfo.tableOfContents`). The keyless endpoint
+     * works, but the keyed endpoint returns more results; this reads the
+     * [com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY] when set.
+     */
+    private suspend fun googleBooksChapters(
+        title: String, author: String
+    ): List<PersonalChapter>? {
+        if (title.isBlank()) return null
+        if (!AppPreferences.bookFetchEnabledState) return null
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val q = buildString {
+                    append("intitle:")
+                    append(java.net.URLEncoder.encode(title, "UTF-8"))
+                    if (author.isNotBlank()) {
+                        append("+inauthor:")
+                        append(java.net.URLEncoder.encode(author, "UTF-8"))
+                    }
+                }
+                val key = com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY
+                val url = "https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3" +
+                    if (key.isNotBlank()) "&key=$key" else ""
+                val json = getJson(url) ?: return@runCatching null
+                val items = json.asJsonObject.array("items")
+                for (item in items) {
+                    val vol = (item as? JsonObject)?.getAsJsonObject("volumeInfo")
+                        ?: continue
+                    val toc = vol.getAsJsonArray("tableOfContents")
+                        ?: continue
+                    val chapters = toc.mapNotNull { entry ->
+                        val name = runCatching { entry.asString }.getOrDefault("")
+                        if (name.isBlank()) null
+                        else PersonalChapter(
+                            number = 0,
+                            title = name,
+                            pageStart = 0,
+                            pageEnd = 0
+                        )
+                    }
+                    if (chapters.size >= MIN_CHAPTERS) {
+                        return@runCatching chapters.mapIndexed { i, ch ->
+                            ch.copy(number = i + 1)
+                        }
+                    }
+                }
+                null
             }.getOrNull()
         }
     }
