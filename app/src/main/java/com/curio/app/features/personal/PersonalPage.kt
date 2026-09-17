@@ -44,6 +44,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -402,7 +403,17 @@ internal fun PersonalWritingPage(
                 modifier = Modifier.fillMaxSize()
             ) { writing ->
                 if (!writing) {
-                    readView(doc)
+                    // v389 — a checklist row is tickable WHILE READING: the view
+                    // draws the box, this page owns the document, so the write
+                    // is handed down rather than reached for (the tick lands in
+                    // the same store the editor writes to, and the page's own
+                    // debounce saves it).
+                    CompositionLocalProvider(
+                        LocalPersonalCheckToggle provides { index ->
+                            val block = doc.blocks.getOrNull(index)
+                            if (block != null) editor.setChecked(block.id, !block.checked)
+                        }
+                    ) { readView(doc) }
                 } else {
                     Column(
                         modifier = Modifier

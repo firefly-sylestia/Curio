@@ -1,4 +1,8 @@
 ADD:
+- Writing: the dock's two last tools — put a line to the left, centred, right or justified, and set the hand it is written in (default, book serif, writing hand, display serif). Both work on a selection, or on the line you are in when nothing is selected, and they show in the card, the saved entry and the export alike.
+- Writing: the enlarged card editor and the book's note editor are the journal's page now — the same background, the same dock at the foot of the field.
+- To-do: a list previews as its OWN thing in the journals list — its rows with their boxes, ticked or not — instead of its text run into a paragraph.
+- To-do: rows read bigger on a list page, and the Home "+" sheet's to-do door wears the list's own box.
 - Writing: the card editor's full-screen writing and the book sheet's chapter-note editor now write on the journal's own tool dock — a floating strip at the foot of the page where every tool is its own button (bold, italic, underline, highlight, text size), instead of a Format toggle that unfolded a second toolbar.
 - Writing: underline is a tool now — arm it and the words you type carry it, or select a passage and apply it.
 - Reading: a book's own reader — tap once and the head and foot step out of the way, tap again and they come back, so the words get the whole screen.
@@ -35,6 +39,8 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Writing: select all selects the PAGE now — the whole row set wears the selection and Copy puts all of it on the clipboard, instead of grabbing only the line the caret was in.
+- Writing: a to-do box can be ticked while READING a page, not only while writing it — and the tick saves itself like any other change.
 - Reading: a book opens exactly where you stopped, and the foot of the reader names the chapter you are in (the page, for a PDF) as you read instead of the place it opened at.
 - Reading: a PDF draws its pages as you reach them instead of every page up front, so a long PDF opens at once and stops holding so much of the phone's memory.
 - Reading: a mark belongs to the book AND to the file it was made in, so wiring a book to another PDF starts that file's own marks instead of landing the old highlights on text that is not there.

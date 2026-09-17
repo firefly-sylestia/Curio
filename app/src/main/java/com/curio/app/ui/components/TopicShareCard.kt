@@ -10423,7 +10423,13 @@ fun TopicShareSheet(
                             // themes (the old white sheet broke dark mode).
                             Surface(
                                 Modifier.fillMaxSize(),
-                                color = MaterialTheme.colorScheme.surface
+                                // v389 — the enlarged writing is a JOURNAL PAGE:
+                                // the same page background the journal writes on,
+                                // with the journal's own dock at the foot of the
+                                // field (user request: "make its background
+                                // screen and all the journal style with the same
+                                // bottom tool style").
+                                color = MaterialTheme.colorScheme.background
                             ) {
                                 // v3xx — imePadding lifts the sheet above the
                                 // keyboard and the editor area scrolls, so a

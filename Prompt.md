@@ -1,6 +1,51 @@
 # Prompt Log — current request
 
-## Request (2026-09-17, IN PROGRESS — the book reader becomes a reading surface, and its marks reach the book page)
+## Request (2026-09-17, DONE — the dock's two model tools, page-wide Select all, read-view ticks, and the to-do's own preview)
+
+The ask_user answers this pass implements:
+
+1. "Add both to the model" — per-run justification and font family.
+2. "the full screen editor that u chnage make its backgroud screen and all the journal style with the same buttom tool style" — done for the background + dock (the dock was already the journal's; PINNING it to the screen's foot is still open, see below).
+3. "do all of them together, also fixing all the text write so when i do select all it only selects one line … also in the + buttom sheet of home the a todo list icon chnag e it too".
+
+### What landed
+
+- **`TextSpan.alignKey` + `TextSpan.fontKey`** (`data/CaptureData.kt`): keys, not
+  ordinals; `null` = inherit. Rendered by `buildRichAnnotated` (family as a span
+  style, ALIGNMENT as a PARAGRAPH style because the stack aligns whole lines), read
+  back by `extractRichSpans` (span styles + paragraph styles), carried through
+  `merged()` / `rebaseSpans` (which now COPIES rather than rebuilding positionally,
+  so a shifted run keeps every attribute). `setSpanAlign` / `setSpanFont` use the
+  flag toggles' split-at-the-edges shape; `richFontFamily` / `richFontKey` /
+  `richTextAlign` / `richAlignKey` are the two-way tables. The dock's two doors
+  (`RichTextDockMenu` + drawn `RichAlignGlyph` / `RichFontGlyph`, because the icon
+  subset has no alignment marks) apply to the selection or to the caret's own
+  PARAGRAPH when nothing is selected — "centre this line" is one tap.
+- **Select all = the PAGE.** `PersonalCanvas` wraps `LocalTextToolbar`: the platform
+  toolbar keeps its look and every other action, Select all sets
+  `PersonalEditorState.pageSelected`, Copy then copies `pageText()` to the clipboard,
+  every row wears the selection wash, and the dock's tools branch to ALL rows
+  (`toggle`, `setAlign`). Typing clears the mode.
+- **A read-view tick.** `PersonalDocView` answers a tap on the checkbox's own lead
+  square through `LocalPersonalCheckToggle`, which `PersonalWritingPage` provides
+  from the store it owns (so the tick rides the page's normal debounce).
+- **The to-do page:** rows read bigger (`ROW_VIEW_SIZE`), `ChecklistPreview` is the
+  journals list's own preview of a checklist, and the Home "+" sheet's to-do door
+  wears the drawn `TodoGlyph` instead of `task_alt`.
+- **The two editors' page:** the enlarged card editor and the book's note expand now
+  sit on the journal's own page background (`colorScheme.background`).
+
+### ⏭ Still open in this batch
+
+- **Pinning the dock to the screen's foot** in those two editors (it currently sits
+  at the foot of the FIELD, in the scroll): pinning needs the editor's state hoisted
+  to each screen, because the dock lives inside the editor while the scroll belongs
+  to the screen.
+- **The post composer:** the choose-a-topic block sitting under the fold, and the
+  chosen topic surviving a trip to the topic page and back.
+- **The avatar redesign** (all 28 portraits).
+
+## Request (2026-09-17, DONE — the book reader becomes a reading surface, and its marks reach the book page)
 
 This is the READER half of the prompt standing in the "Next prompt" slot at the end of
 this file. Verbatim of that half:

@@ -3939,11 +3939,16 @@ private fun BookNotesSheet(
         Dialog(
             onDismissRequest = { noteEditorChapter = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Surface(
-                Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.surface
-            ) {
+        ) {                    Surface(
+                        Modifier.fillMaxSize(),
+                        // v389 — the note expand is a JOURNAL PAGE now: the same
+                        // page background the journal writes on and the same
+                        // dock at the foot of the field, so a note taken from a
+                        // book and a journal page read as one surface (user
+                        // request: "make its background screen and all the
+                        // journal style with the same bottom tool style").
+                        color = MaterialTheme.colorScheme.background
+                    ) {
                 // v3xx — imePadding lifts the sheet above the keyboard and
                 // the editor area scrolls, so a long note's text is always
                 // reachable and selectable without closing the keyboard.

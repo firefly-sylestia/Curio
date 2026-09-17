@@ -31,12 +31,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -203,12 +205,16 @@ fun CreateEntrySheet(
                 accent = personalAccent(),
                 onClick = onTopicNote
             )
+            // v389 — the door wears the CHECKBOX the to-do page itself draws
+            // (the same mark the journal's to-do tool wears), instead of the
+            // `task_alt` icon, which reads as "task added", not "a list".
             CreateEntryOption(
-                glyph = CurioIcons.TaskAlt,
+                glyph = null,
                 title = "A to-do list",
                 body = "Check off tasks as you go",
                 accent = personalAccent(),
-                onClick = onTodoList
+                onClick = onTodoList,
+                drawn = { TodoGlyph(active = false, size = 20.dp) }
             )
         }
     }
@@ -216,11 +222,14 @@ fun CreateEntrySheet(
 
 @Composable
 private fun CreateEntryOption(
-    glyph: String,
+    glyph: String?,
     title: String,
     body: String,
     accent: androidx.compose.ui.graphics.Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    /** A drawn door mark, for the doors whose icon the bundled font subset
+     *  cannot say — the to-do list wears the page's OWN checklist box. */
+    drawn: (@Composable () -> Unit)? = null
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     // The glyph tone is NOT the raw accent: in light mode the accent is too
@@ -243,7 +252,11 @@ private fun CreateEntryOption(
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
-                    CurioIcon(glyph, null, tint = glyphTint, size = 20.dp)
+                    if (drawn != null) {
+                        CompositionLocalProvider(LocalContentColor provides glyphTint) { drawn() }
+                    } else {
+                        CurioIcon(glyph.orEmpty(), null, tint = glyphTint, size = 20.dp)
+                    }
                 }
             }
             Column(Modifier.weight(1f)) {

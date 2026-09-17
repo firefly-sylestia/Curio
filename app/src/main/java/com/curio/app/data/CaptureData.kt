@@ -127,7 +127,19 @@ data class TextSpan(
     // bar toggles it on the fact text; Save-your-take's dock doesn't expose
     // it, so legacy runs stay underline-free). Rendered as a text decoration
     // by [buildRichAnnotated], persisted like the other flags.
-    val underline: Boolean = false
+    val underline: Boolean = false,
+    // v389 — the two tools the app's full-screen editors' dock added, both
+    // PER RUN and both stored as KEYS rather than ordinals: "start" / "center"
+    // / "end" / "justify" for a paragraph's own justification, and "default" /
+    // "book" / "writing" / "display" for the hand its words are set in. Keys
+    // keep the saved JSON readable AND mean a re-ordered list can never
+    // silently re-point an old run at a different value (an ordinal would).
+    // null = inherit: the field's own default, which is what every legacy run
+    // carries. Rendered by [buildRichAnnotated] (a PARAGRAPH style for the
+    // alignment, because the text stack aligns whole lines, and a span style
+    // for the family).
+    val alignKey: String? = null,
+    val fontKey: String? = null
 )
 
 /** Structured FieldMind provenance preserved on a restored observation or note. */

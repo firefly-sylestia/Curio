@@ -303,7 +303,15 @@ private fun JournalRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (journal.preview.isNotBlank()) {
+                // v389 — a LIST is previewed as a list: its own rows with their
+                // ticks, rather than its text run into a paragraph where a
+                // finished row and an unfinished one read alike (user request:
+                // "its preview as a separate todo preview not inside the
+                // journal"). Everything else previews as prose exactly as before.
+                if (journal.isTodo) {
+                    Spacer(Modifier.height(6.dp))
+                    ChecklistPreview(doc = journal.doc, ink = ink)
+                } else if (journal.preview.isNotBlank()) {
                     Spacer(Modifier.height(4.dp))
                     Text(
                         journal.preview,

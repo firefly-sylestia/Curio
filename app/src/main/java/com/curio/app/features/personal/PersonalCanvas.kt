@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
@@ -68,7 +71,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.TextToolbar
+import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -127,6 +134,9 @@ private val QUOTE_VIEW_SIZE = 15.sp
 /** A TITLE line and a SMALL line, in the editor and in the read-only view. */
 private val TITLE_BODY_SIZE = 24.sp
 private val TITLE_VIEW_SIZE = 22.sp
+
+/** The read size of a page whose ROWS are the content — the to-do list. */
+internal val ROW_VIEW_SIZE = 19.sp
 private val SMALL_BODY_SIZE = 13.5.sp
 private val SMALL_VIEW_SIZE = 12.5.sp
 
@@ -242,6 +252,18 @@ internal val PERSONAL_MARKER_GAP = 10.dp
 /** The whole lead-in — what a list line indents its TEXT by, so a wrapped line
  *  lines up under the first word instead of under the marker. */
 internal val PERSONAL_MARKER_LEAD = PERSONAL_MARKER_SIZE + PERSONAL_MARKER_GAP
+
+/**
+ * v389 — A CHECKLIST ROW CAN BE TICKED WHILE THE PAGE IS BEING READ.
+ *
+ * The tick lived in the editor alone, so a to-do list had to be opened with the
+ * pen down to finish anything — while a list is exactly the page whose READING
+ * side you act on. [PersonalDocView] draws the box; the page that owns the
+ * document (see `PersonalWritingPage`) provides the write here, because a view
+ * renders a document it must never edit itself. The index is the BLOCK's own
+ * position in the document, which is what the view has to hand.
+ */
+internal val LocalPersonalCheckToggle = staticCompositionLocalOf<((Int) -> Unit)?> { null }
 
 /**
  * v389 — ONE BULLET RENDERER for the whole family: the editor, every read-only
@@ -688,6 +710,10 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val old = blocks[id] ?: return
         val newText = value.text
         if (newText != old.text) {
+            // Typing ends a page-wide selection: the member is editing a row
+            // again, and a wash over the whole page beside a live caret reads
+            // as a bug.
+            pageSelected = false
             masks[id] = maskAfterEdit(old.text, newText, mask(id), armed)
             blocks[id] = old.copy(text = newText)
             // An armed tool has now been used: what follows continues in the
@@ -806,7 +832,63 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         return marker(id)
     }
 
+    /**
+     * v389 — THE WHOLE PAGE, SELECTED.
+     *
+     * A journal page is MANY text fields (one per paragraph), so the platform's
+     * own "Select all" could only ever reach the line the caret happened to sit
+     * in — exactly what a member saw ("when i do select all it only selects one
+     * line … its same for all journals book review chapter review and all"). A
+     * page-wide selection is therefore the PAGE's own state rather than a range
+     * inside one field: every row wears the selection wash, and the dock's tools
+     * then apply to all of them, which is what selecting a page and pressing
+     * Bold is supposed to do.
+     */
+    var pageSelected by mutableStateOf(false)
+        private set
+
+    fun selectPage() {
+        if (order.isEmpty()) return
+        pageSelected = true
+        // The caret lands at the END of the page, so the keyboard keeps
+        // inserting where the writing left off if the member carries on.
+        order.lastOrNull { id -> blocks[id]?.let { !it.isPhoto && it.audio == null } == true }
+            ?.let { id ->
+                focusedId = id
+                caret = PersonalCaret(id, text(id).length)
+            }
+    }
+
+    fun clearPageSelection() {
+        pageSelected = false
+    }
+
+    /** Every row's words, top to bottom — what Copy puts on the clipboard. */
+    fun pageText(): String = order
+        .mapNotNull { blocks[it] }
+        .filter { !it.isPhoto && it.audio == null }
+        .joinToString("\n") { it.text }
+        .trimEnd()
+
     fun toggle(flag: Int) {
+        if (pageSelected) {
+            // A page-wide selection means the tool applies to the ROWS, not to
+            // a range inside one of them: the flag goes on for every row it is
+            // missing from, and off for every row that already has it (the same
+            // "toggle the whole thing" rule the dock's buttons follow).
+            val rows = order.filter { id -> blocks[id]?.let { !it.isPhoto && it.audio == null } == true }
+            val allOn = rows.isNotEmpty() && rows.all { id ->
+                val block = blocks[id] ?: return@all false
+                maskCovers(mask(id), 0, block.text.length, flag)
+            }
+            rows.forEach { id ->
+                val block = blocks[id] ?: return@forEach
+                masks[id] = maskApply(mask(id), 0, block.text.length, flag, !allOn)
+            }
+            armed = armed and flag.inv()
+            onDocChanged(doc())
+            return
+        }
         val id = focusedId ?: return
         val blockMask = mask(id)
         val selection = selections[id]
@@ -829,6 +911,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** Left / centre for the focused block (a paragraph is the unit a line
      *  tool can point at). */
     fun setAlign(align: PersonalAlign) {
+        if (pageSelected) {
+            order.forEach { id ->
+                val block = blocks[id] ?: return@forEach
+                blocks[id] = block.copy(align = align)
+            }
+            onDocChanged(doc())
+            return
+        }
         val id = focusedId ?: order.firstOrNull() ?: return
         val block = blocks[id] ?: return
         blocks[id] = block.copy(align = align)
@@ -1228,6 +1318,44 @@ internal fun PersonalCanvas(
     // v389 — one drag for the whole list: the to-do page's rows share it, so
     // the row under the finger and the rows it passes agree about one gesture.
     val rowDrag = remember { PersonalRowDragState() }
+    val selectionWash = LocalTextSelectionColors.current.background
+    // v389 — SELECT ALL MEANS THE PAGE (see [PersonalEditorState.selectPage]).
+    // The platform's toolbar keeps its own look and every one of its actions;
+    // only what "Select all" DOES changes, and Copy is re-pointed with it so the
+    // gesture carries through to the clipboard instead of copying one line.
+    val clipboard = LocalClipboardManager.current
+    val platformToolbar = LocalTextToolbar.current
+    val pageToolbar = remember(platformToolbar, clipboard) {
+        object : TextToolbar {
+            override val status: TextToolbarStatus get() = platformToolbar.status
+
+            override fun hide() = platformToolbar.hide()
+
+            override fun showMenu(
+                rect: Rect,
+                onCopyRequested: (() -> Unit)?,
+                onPasteRequested: (() -> Unit)?,
+                onCutRequested: (() -> Unit)?,
+                onSelectAllRequested: (() -> Unit)?
+            ) {
+                platformToolbar.showMenu(
+                    rect = rect,
+                    onCopyRequested = {
+                        val whole = state.pageText()
+                        if (state.pageSelected && whole.isNotBlank()) {
+                            clipboard.setText(AnnotatedString(whole))
+                        } else {
+                            onCopyRequested?.invoke()
+                        }
+                    },
+                    onPasteRequested = onPasteRequested,
+                    onCutRequested = onCutRequested,
+                    onSelectAllRequested = { state.selectPage() }
+                )
+            }
+        }
+    }
+    CompositionLocalProvider(LocalTextToolbar provides pageToolbar) {
     Column(
         modifier = modifier.clickable(enabled = enabled) { state.focusLastLine() },
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1298,11 +1426,13 @@ internal fun PersonalCanvas(
                         accent = accent,
                         enabled = enabled,
                         quoteJoinAbove = quoteAbove,
-                        quoteJoinBelow = quoteBelow
+                        quoteJoinBelow = quoteBelow,
+                        selectionWash = if (state.pageSelected) selectionWash else Color.Transparent
                     )
                 }
             }
         }
+    }
     }
 }
 
@@ -1310,6 +1440,9 @@ internal fun PersonalCanvas(
 private fun PersonalTextBlock(
     id: String,
     state: PersonalEditorState,
+    /** v389 — the page is SELECTED: this row wears the selection's own wash
+     *  (transparent on every ordinary page, so nothing changes there). */
+    selectionWash: Color = Color.Transparent,
     ink: Color,
     accent: Color,
     enabled: Boolean,
@@ -1396,6 +1529,15 @@ private fun PersonalTextBlock(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (selectionWash == Color.Transparent) Modifier
+                else Modifier.drawBehind {
+                    drawRoundRect(
+                        color = selectionWash,
+                        cornerRadius = CornerRadius(7.dp.toPx())
+                    )
+                }
+            )
             // A quoted line wears the coffee rule down its side, a bulleted
             // line wears a drawn dot (both on the block's own height, so they
             // grow with the writing).
@@ -1662,12 +1804,26 @@ internal fun PersonalDocView(
      * review in right under the marker that names it; every other page passes
      * nothing and reads exactly as it did.
      */
-    afterTitle: (@Composable (String) -> Unit)? = null
+    afterTitle: (@Composable (String) -> Unit)? = null,
+    /**
+     * v389 — ticks a checklist row FROM THE READ VIEW. Null means the page is
+     * read-only here (a chapter review, a saved detail view): the box draws and
+     * does not answer. Otherwise it falls back to [LocalPersonalCheckToggle],
+     * which the writing page provides, so no page has to thread it down.
+     */
+    onToggleChecked: ((Int) -> Unit)? = null,
+    /**
+     * v389 — the row size for a page whose ROWS are the content (a to-do list),
+     * where the writing's own body size reads too small to act on. Unspecified
+     * keeps every other page exactly as it was.
+     */
+    rowSize: TextUnit = TextUnit.Unspecified
 ) {
     val quoteRule = personalQuoteRule()
     val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
     val bulletInk = personalBulletColor()
+    val toggle = onToggleChecked ?: LocalPersonalCheckToggle.current
     // v389 — a quoted line is ONE thing with its quoted neighbour, so which of
     // the two sides leads into another quoted line is decided once, here, and
     // the panels reach into the gap to meet (see QUOTE_JOIN_VIEW).
@@ -1768,6 +1924,25 @@ internal fun PersonalDocView(
                                             lineHeight = lineHeight.toPx()
                                         )
                                     }
+                                    // The BOX is the target: a tap on the mark
+                                    // ticks the row, a tap on the words stays a
+                                    // read (this view has no editing of its
+                                    // own, so nothing else here answers a tap).
+                                    .then(
+                                        if (toggle == null) {
+                                            Modifier
+                                        } else {
+                                            Modifier.pointerInput(index, block.checked) {
+                                                detectTapGestures { at ->
+                                                    if (at.x <= PERSONAL_MARKER_LEAD.toPx() &&
+                                                        at.y <= lineHeight.toPx()
+                                                    ) {
+                                                        toggle(index)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    )
                                     .padding(start = PERSONAL_MARKER_LEAD)
                                 isBullet -> Modifier
                                     .drawBehind {
@@ -1804,8 +1979,8 @@ internal fun PersonalDocView(
                             )
                             else -> TextStyle(
                                 fontFamily = WritingFontFamily,
-                                fontSize = 16.sp,
-                                lineHeight = 27.sp,
+                                fontSize = if (rowSize.isSpecified) rowSize else 16.sp,
+                                lineHeight = if (rowSize.isSpecified) rowSize * 1.7f else 27.sp,
                                 textAlign = alignOf
                             )
                         },
@@ -2023,10 +2198,10 @@ internal fun PersonalToolDock(
  * already a row.
  */
 @Composable
-private fun TodoGlyph(active: Boolean) {
+internal fun TodoGlyph(active: Boolean, size: Dp = 19.dp) {
     val ink = LocalContentColor.current
     val onFill = MaterialTheme.colorScheme.surface
-    androidx.compose.foundation.Canvas(modifier = Modifier.size(19.dp)) {
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(size)) {
         val stroke = 1.7f.dp.toPx()
         val side = size.minDimension * 0.80f
         val left = (size.width - side) / 2f

@@ -50,7 +50,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -83,7 +85,10 @@ import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.paperControlAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.paperHighlight
+import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.PatrickHandFontFamily
+import com.curio.app.ui.theme.WritingFontFamily
 
 /**
  * The rich-text flags the toolbar can apply. [TextSpan] stores each as a
@@ -139,6 +144,20 @@ fun buildRichAnnotated(text: String, spans: List<TextSpan>, highlightColor: Colo
             val s = sp.start.coerceIn(0, text.length)
             val e = sp.end.coerceIn(s, text.length)
             if (e > s) {
+                // v389 — a run's FAMILY, when it has one (the dock's font tool).
+                // The text stack takes it as a span style, so only the letters
+                // in the run change hand.
+                val family = richFontFamily(sp.fontKey)
+                if (family != null) {
+                    addStyle(SpanStyle(fontFamily = family, fontSynthesis = FontSynthesis.All), s, e)
+                }
+                // v389 — a run's ALIGNMENT is a PARAGRAPH property: the stack
+                // aligns whole lines, so any run reaching into a line sets it
+                // for that line. Applied as its own style, so a bold run and an
+                // alignment run can cover the same words without either
+                // dropping the other.
+                val align = richTextAlign(sp.alignKey)
+                if (align != null) addStyle(ParagraphStyle(textAlign = align), s, e)
                 addStyle(
                     SpanStyle(
                         fontWeight = if (sp.bold) FontWeight.Bold else null,
@@ -198,8 +217,8 @@ fun rememberRichAnnotated(
  * read the editor's spans back out after Compose merges them while typing
  * (BasicTextField preserves span styles across edits, so no manual diffing).
  */
-fun extractRichSpans(annotated: AnnotatedString): List<TextSpan> =
-    annotated.spanStyles.mapNotNull { range ->
+fun extractRichSpans(annotated: AnnotatedString): List<TextSpan> {
+    val styled = annotated.spanStyles.mapNotNull { range ->
         val bold = range.item.fontWeight == FontWeight.Bold
         val italic = range.item.fontStyle == FontStyle.Italic
         val highlight = range.item.background != Color.Unspecified
@@ -207,9 +226,22 @@ fun extractRichSpans(annotated: AnnotatedString): List<TextSpan> =
         val underline = range.item.textDecoration == TextDecoration.Underline
         val size = range.item.fontSize
         val sizeSp = if (size.isSpecified) size.value else null
-        if (!bold && !italic && !highlight && !underline && sizeSp == null) null
-        else TextSpan(range.start, range.end, bold, italic, highlight, sizeSp, underline)
-    }.merged()
+        // v389 — and so do the family and the alignment: the family rides the
+        // span styles, the alignment rides the PARAGRAPH styles below.
+        val fontKey = richFontKey(range.item.fontFamily)
+        if (!bold && !italic && !highlight && !underline && sizeSp == null && fontKey == null) null
+        else TextSpan(
+            range.start, range.end, bold, italic, highlight, sizeSp, underline,
+            fontKey = fontKey
+        )
+    }
+    val aligned = annotated.paragraphStyles.mapNotNull { range ->
+        richAlignKey(range.item.textAlign)?.let { key ->
+            TextSpan(range.start, range.end, alignKey = key)
+        }
+    }
+    return (styled + aligned).merged()
+}
 
 /** Sorts and merges adjacent/overlapping spans with identical flags. */
 private fun List<TextSpan>.merged(): List<TextSpan> {
@@ -221,7 +253,8 @@ private fun List<TextSpan>.merged(): List<TextSpan> {
         if (last != null && last.end >= sp.start &&
             last.bold == sp.bold && last.italic == sp.italic &&
             last.highlight == sp.highlight && last.fontSizeSp == sp.fontSizeSp &&
-            last.underline == sp.underline
+            last.underline == sp.underline &&
+            last.alignKey == sp.alignKey && last.fontKey == sp.fontKey
         ) {
             out[out.size - 1] = last.copy(end = maxOf(last.end, sp.end))
         } else {
@@ -229,6 +262,113 @@ private fun List<TextSpan>.merged(): List<TextSpan> {
         }
     }
     return out
+}
+
+// ── v389 — the dock's family and alignment tables ──────────────────────
+//
+// Both directions live here: key → what to draw with, and what the text stack
+// handed back → key. The keys are what the saved JSON carries.
+
+/** The hands a run can be set in. `null` = the field's own default. */
+private val RICH_FONTS: List<Pair<String, FontFamily>> = listOf(
+    "default" to FontFamily.Default,
+    "book" to LoraFontFamily,
+    "writing" to WritingFontFamily,
+    "display" to FrauncesFontFamily
+)
+
+internal fun richFontFamily(key: String?): FontFamily? =
+    RICH_FONTS.firstOrNull { it.first == key }?.second
+
+internal fun richFontKey(family: FontFamily?): String? {
+    if (family == null) return null
+    return RICH_FONTS.firstOrNull { it.second == family }?.first
+}
+
+internal fun richTextAlign(key: String?): TextAlign? = when (key) {
+    "start" -> TextAlign.Start
+    "center" -> TextAlign.Center
+    "end" -> TextAlign.End
+    "justify" -> TextAlign.Justify
+    else -> null
+}
+
+internal fun richAlignKey(align: TextAlign?): String? = when (align) {
+    TextAlign.Center -> "center"
+    TextAlign.End, TextAlign.Right -> "end"
+    TextAlign.Justify -> "justify"
+    TextAlign.Start, TextAlign.Left -> "start"
+    else -> null
+}
+
+/** True when a run still says something after a property was cleared from it. */
+private val TextSpan.hasAnyStyle: Boolean
+    get() = bold || italic || highlight || underline || fontSizeSp != null ||
+        alignKey != null || fontKey != null
+
+/**
+ * Clears whatever [drop] takes off every run overlapping [s, e), splitting the
+ * runs at the edges exactly as the flag toggles do — the shape that lets a run
+ * carry ONE property at a time without disturbing its neighbours.
+ */
+private fun clearRunOver(
+    spans: List<TextSpan>,
+    s: Int,
+    e: Int,
+    drop: (TextSpan) -> TextSpan
+): List<TextSpan> {
+    if (e <= s) return spans
+    val out = mutableListOf<TextSpan>()
+    for (sp in spans) {
+        if (sp.end <= s || sp.start >= e) {
+            out.add(sp)
+            continue
+        }
+        if (sp.start < s) out.add(sp.copy(end = s))
+        val middle = drop(sp.copy(start = maxOf(sp.start, s), end = minOf(sp.end, e)))
+        if (middle.hasAnyStyle) out.add(middle)
+        if (sp.end > e) out.add(sp.copy(start = e))
+    }
+    return out
+}
+
+/** v389 — sets (or clears, with `null`) the ALIGNMENT of [s, e). */
+internal fun setSpanAlign(spans: List<TextSpan>, s: Int, e: Int, key: String?): List<TextSpan> {
+    val cleared = clearRunOver(spans, s, e) { it.copy(alignKey = null) }
+    return if (key == null) cleared.merged()
+    else (cleared + TextSpan(start = s, end = e, alignKey = key)).merged()
+}
+
+/** v389 — sets (or clears, with `null`) the FAMILY of [s, e). */
+internal fun setSpanFont(spans: List<TextSpan>, s: Int, e: Int, key: String?): List<TextSpan> {
+    val cleared = clearRunOver(spans, s, e) { it.copy(fontKey = null) }
+    return if (key == null) cleared.merged()
+    else (cleared + TextSpan(start = s, end = e, fontKey = key)).merged()
+}
+
+/** The alignment in force at [pos] — the innermost run that carries one. */
+internal fun alignKeyAt(spans: List<TextSpan>, pos: Int): String? =
+    spans.filter { it.alignKey != null && it.start <= pos && pos < it.end }
+        .minByOrNull { it.end - it.start }
+        ?.alignKey
+
+/** The family in force at [pos] — the innermost run that carries one. */
+internal fun fontKeyAt(spans: List<TextSpan>, pos: Int): String? =
+    spans.filter { it.fontKey != null && it.start <= pos && pos < it.end }
+        .minByOrNull { it.end - it.start }
+        ?.fontKey
+
+/**
+ * The paragraph the caret is in, as a range — what an alignment or a font
+ * applies to when the member has selected nothing ("justify this line").
+ */
+private fun paragraphRangeAt(text: String, caret: Int): IntRange {
+    val at = caret.coerceIn(0, text.length)
+    val from = text.lastIndexOf('\n', (at - 1).coerceAtLeast(0))
+    val start = if (from < 0 || at == 0) 0 else from + 1
+    val to = text.indexOf('\n', at)
+    val end = if (to < 0) text.length else to
+    return start until end
 }
 
 private fun TextSpan.has(flag: RichFlag): Boolean = when (flag) {
@@ -308,15 +448,13 @@ internal fun rebaseSpans(oldText: String, newText: String, spans: List<TextSpan>
             // Fully before the changed region — same coordinates.
             e <= prefix -> out.add(sp)
             // Fully after the changed region — shift by the length delta.
-            s >= oldEnd -> out.add(
-                TextSpan(s + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline)
-            )
+            // (A COPY, so the run keeps every attribute it had — a positional
+            // rebuild would quietly drop the ones it did not name.)
+            s >= oldEnd -> out.add(sp.copy(start = s + delta, end = e + delta))
             // Overlaps the changed region — keep only the untouched parts.
             else -> {
-                if (s < prefix) out.add(TextSpan(s, prefix, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline))
-                if (e > oldEnd) out.add(
-                    TextSpan(maxOf(s, oldEnd) + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline)
-                )
+                if (s < prefix) out.add(sp.copy(start = s, end = prefix))
+                if (e > oldEnd) out.add(sp.copy(start = maxOf(s, oldEnd) + delta, end = e + delta))
             }
         }
     }
@@ -778,6 +916,45 @@ fun RichTextEditor(
         // branch above).
     }
 
+    /** Applies already-built spans, keeping the caret exactly where it was. */
+    fun applyRun(updated: List<TextSpan>) {
+        val caret = tfv.selection
+        val styled = TextFieldValue(
+            buildRichAnnotated(tfv.text, updated, effectiveHighlight),
+            selection = caret
+        )
+        tfv = styled
+        onRichTextChange(styled.text, extractRichSpans(styled.annotatedString))
+    }
+
+    /**
+     * v389 — JUSTIFY THIS PARAGRAPH. Alignment belongs to LINES, not to letters,
+     * so with nothing selected it lands on the line the caret is in ("centre
+     * this line") and with a selection it lands on every line the selection
+     * touches. `null` takes the alignment off and hands the line back to the
+     * field's own default.
+     */
+    fun applyAlign(key: String?) {
+        val sel = tfv.selection
+        val range = if (sel.collapsed) paragraphRangeAt(tfv.text, sel.start)
+        else minOf(sel.start, sel.end) until maxOf(sel.start, sel.end)
+        if (range.isEmpty()) return
+        applyRun(setSpanAlign(extractRichSpans(tfv.annotatedString), range.first, range.last + 1, key))
+    }
+
+    /**
+     * v389 — SET THE HAND this line is written in (or this selection). Same
+     * paragraph rule as [applyAlign], so the tool always does something visible
+     * even with the caret just sitting in a line.
+     */
+    fun applyFont(key: String?) {
+        val sel = tfv.selection
+        val range = if (sel.collapsed) paragraphRangeAt(tfv.text, sel.start)
+        else minOf(sel.start, sel.end) until maxOf(sel.start, sel.end)
+        if (range.isEmpty()) return
+        applyRun(setSpanFont(extractRichSpans(tfv.annotatedString), range.first, range.last + 1, key))
+    }
+
     /**
      * UNDERLINE, the dock's own addition — same manners as [applyFlag]: a
      * collapsed caret ARMS it for the next characters typed, a selection is
@@ -1175,6 +1352,12 @@ fun RichTextEditor(
                 onUnderline = { applyUnderline() },
                 onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
                 onSizePick = { applyExactSize(it) },
+                // The line's own justification and its hand, both read from the
+                // run under the caret (the dock echoes what the line is wearing).
+                alignKey = alignKeyAt(extractRichSpans(tfv.annotatedString), tfv.selection.start),
+                fontKey = fontKeyAt(extractRichSpans(tfv.annotatedString), tfv.selection.start),
+                onAlign = { applyAlign(it) },
+                onFont = { applyFont(it) },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -1281,6 +1464,11 @@ private fun RichTextDock(
     onUnderline: () -> Unit,
     onHighlight: () -> Unit,
     onSizePick: (Float) -> Unit,
+    /** The line's own alignment / hand, and the doors that set them. */
+    alignKey: String?,
+    fontKey: String?,
+    onAlign: (String?) -> Unit,
+    onFont: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -1322,7 +1510,141 @@ private fun RichTextDock(
                 onPick = onSizePick,
                 dock = true
             )
+            // The two tools the app's full-screen editors asked for: a line's
+            // own JUSTIFICATION (left / centre / right / justified) and the HAND
+            // it is written in. Both are drawn rather than looked up — the
+            // bundled icon subset has no alignment marks.
+            RichTextDockMenu(
+                label = "Alignment",
+                active = alignKey != null,
+                accent = accent,
+                ink = ink,
+                enabled = enabled,
+                currentKey = alignKey,
+                options = RICH_ALIGN_OPTIONS,
+                onPick = onAlign,
+                glyph = { RichAlignGlyph(alignKey) }
+            )
+            RichTextDockMenu(
+                label = "Font",
+                active = fontKey != null,
+                accent = accent,
+                ink = ink,
+                enabled = enabled,
+                currentKey = fontKey,
+                options = RICH_FONT_OPTIONS,
+                onPick = onFont,
+                glyph = { RichFontGlyph() }
+            )
         }
+    }
+}
+
+/** The four ways a line can sit, and the four hands it can be written in. */
+private val RICH_ALIGN_OPTIONS: List<Pair<String?, String>> = listOf(
+    null to "Left",
+    "center" to "Centred",
+    "end" to "Right",
+    "justify" to "Justified"
+)
+
+private val RICH_FONT_OPTIONS: List<Pair<String?, String>> = listOf(
+    null to "Default",
+    "book" to "Book serif",
+    "writing" to "Writing hand",
+    "display" to "Display serif"
+)
+
+/** A dock button that opens its own choices — the shape behind the two menus. */
+@Composable
+private fun RichTextDockMenu(
+    label: String,
+    active: Boolean,
+    accent: Color,
+    ink: Color,
+    enabled: Boolean,
+    currentKey: String?,
+    options: List<Pair<String?, String>>,
+    onPick: (String?) -> Unit,
+    glyph: @Composable () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        RichTextDockButton(label, active, accent, ink, enabled, { expanded = true }) { glyph() }
+        CurioDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            accent = accent
+        ) {
+            options.forEach { (key, text) ->
+                CurioDropdownItem(
+                    text = { Text(text) },
+                    selected = key == currentKey,
+                    accent = accent,
+                    trailingIcon = if (key == currentKey) {
+                        { CurioIcon(CurioIcons.Check, null, tint = accent, size = 16.dp) }
+                    } else null,
+                    onClick = {
+                        expanded = false
+                        onPick(key)
+                    }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The alignment mark, DRAWN: four hairlines laid out the way the line sits.
+ * The bundled icon subset carries no alignment glyphs (the journal's own dock
+ * draws its too), so a justified line is the one whose hairlines all run full
+ * width — right, centre and left step in on the side they lean to.
+ */
+@Composable
+private fun RichAlignGlyph(key: String?) {
+    val ink = LocalContentColor.current
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
+        val stroke = 1.8f.dp.toPx()
+        val width = size.width
+        val fractions = if (key == "justify") listOf(1f, 0.55f, 1f, 0.55f)
+        else listOf(1f, 0.68f, 1f, 0.68f)
+        fractions.forEachIndexed { index, fraction ->
+            val y = size.height * (0.24f + index * 0.18f)
+            val run = width * fraction
+            val x = when (key) {
+                "center" -> (width - run) / 2f
+                "end" -> width - run
+                else -> 0f
+            }
+            drawLine(
+                color = ink,
+                start = androidx.compose.ui.geometry.Offset(x, y),
+                end = androidx.compose.ui.geometry.Offset(x + run, y),
+                strokeWidth = stroke,
+                cap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
+        }
+    }
+}
+
+/** The font tool wears its own capital A — the letter IS the tool. */
+@Composable
+private fun RichFontGlyph() {
+    val ink = LocalContentColor.current
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
+        val stroke = 1.8f.dp.toPx()
+        val w = size.width
+        val h = size.height
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) = drawLine(
+            color = ink,
+            start = androidx.compose.ui.geometry.Offset(x1, y1),
+            end = androidx.compose.ui.geometry.Offset(x2, y2),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+        line(w * 0.18f, h * 0.84f, w * 0.5f, h * 0.18f)
+        line(w * 0.5f, h * 0.18f, w * 0.82f, h * 0.84f)
+        line(w * 0.31f, h * 0.60f, w * 0.69f, h * 0.60f)
     }
 }
 
