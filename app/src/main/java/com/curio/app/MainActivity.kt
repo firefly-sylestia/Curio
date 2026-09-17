@@ -184,7 +184,6 @@ class MainActivity : ComponentActivity() {
         // category into the heap here made background memory climb sharply;
         // TopicJsonLoader now loads only the lane a screen actually opens.
 
-        }
         // v348 — warm the Cabinet's entry snapshot the same way. The Cabinet
         // seeds itself from [CaptureRepository.peekLight], which is only
         // non-empty once SOMETHING has collected the light flow — so a cold
