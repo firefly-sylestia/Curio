@@ -1,5 +1,53 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, batch H — the reader's last gaps closed)
+
+Verbatim (the live instruction): "text selection for both pdf and epub and epub page list
+and also the chapter list reload please then after finishing look at promot end."
+
+**Status: DONE, pushed.** Three of the four were already in place from batch G's own
+follow-ups (the user had answered the open questions); the fourth — the PDF half of text
+selection — was half-built and uncommitted in the tree from the interrupted session, and is
+now finished, wired into both PDF surfaces, and shipped.
+
+### What was found already built (so nothing was rebuilt)
+
+- **EPUB page-list** — `epubPageList` reads `nav[epub:type="page-list"]` /
+  `role="doc-pagelist"`, `splitHref` keeps the href's FRAGMENT, `ReaderBlock.anchor`
+  records the book's own pagebreak markers, `blockForEntry` matches anchor first, and the
+  Contents sheet carries a Contents / Printed pages toggle that only appears for a book
+  that has them. Shipped in `d06a05fe`.
+- **EPUB text selection** — the reflowable paragraph selects by word on a long press and
+  extends on a drag, in BOTH flows (scroll and paged), reported to the ONE selection bar.
+  Shipped in `9e157b83`.
+- **The book page's chapter list reload** — `BookPageMemory` (per-book, fingerprinted) hands
+  the last visit's chapter list, book row and note list to each Room flow as its INITIAL
+  value only, so a reopen's first frame is the answer the last visit ended on. Shipped in
+  `56851ab5`.
+
+### What this batch added
+
+- **PDF text selection, finished and wired.** `PdfPageTextLayer` existed as dead code (never
+  called, and it parsed the page itself). Now: the CALLER reads the page's words (the page
+  being looked at, plus any page already wearing a mark — the 6-page `PdfTextCache` keeps it
+  cheap) and hands them in, so a long press never has to wait for a parse. The layer sits
+  exactly over the drawn page's letterbox, INSIDE the zoom layer (a magnified page carries
+  its marks and its sweep), draws every stored passage back onto its own glyphs by char→glyph
+  offset, and turns long-press → drag into a word-to-word sweep reported as the same
+  `ReaderSelection(isPage = true)` a paragraph reports. Placed in BOTH PDF surfaces — the
+  pager and the continuous scroll — with the long-press gated on the words being in hand, so
+  a page with no text layer (a scan) or a press on the page's own margin HANDS THE PRESS BACK
+  and marking a whole page still works exactly as it did.
+- Dead code removed from the layer: no internal parse, no "press twice, the first one starts
+  the parse" affordance, no stale-capture reads (the gesture reads the words, the callbacks
+  and the drawn width through `rememberUpdatedState`).
+
+### Still open (unchanged, and not this batch's ask)
+
+- The "side by side" half of the photo ask (two small prints in one row).
+- The tail of this log — `## next prompt, also` — is an EMPTY heading: no pending prompt was
+  dropped there, so there is nothing to start from it.
+
 ## Request (2026-09-17, batch G — the reader's second pass, PARTIAL)
 
 Verbatim (the live instruction, the user's own words): "build them add pinch to zoom fix
@@ -40,17 +88,20 @@ the rest need either a decision from the user or a lot more room. Pushed.**
   (`BoxWithConstraints` → item height = `maxHeight`, `ContentScale.Fit`), so the column
   still scrolls continuously but a page is a page.
 - **"It reloads" = the BOOK PAGE's chapter list** — confirmed (not the reader's sheet).
-  Still to do.
+  DONE in `56851ab5` (`BookPageMemory`).
 - **EPUB page-list: the user chose the FULL pass** — carry the href's fragment through
   `resolveTarget`, record the book's own pagebreak anchors on the blocks, and give the
-  Contents sheet its own view of the printed page numbers. Still to do.
+  Contents sheet its own view of the printed page numbers. DONE in `d06a05fe`.
 
 ### Still to do (the honest list)
 
-- **Text selection and highlighting ON a PDF page** (the largest item). The glyph geometry
-  already exists (`BookPdfText.kt`: `wordAround`, `glyphAt`, `textBetween`, 6-page parse
-  cache); the selection overlay, its handles and the highlight drawn back onto the page are
-  not built. Its own batch.
+- ~~**Text selection and highlighting ON a PDF page**~~ — **DONE in batch H** (top of this
+  log): the overlay, the glyph mapping and the press-back for a page of pictures are all in.
+- ~~**EPUB's own page numbers**~~ — **DONE** in `d06a05fe`.
+- ~~**"Sometimes it reloads."**~~ — **DONE** in `56851ab5` (the user confirmed the book page's
+  chapter list; `BookPageMemory` answers the first frame of every flow).
+- ~~**"Double pages view" for a PDF**~~ — **DONE** in `db38383b` (the user confirmed two
+  stacked page images; each page now takes the viewport and fits inside it).
 - **EPUB's own page numbers.** EPUB 3 carries them as `nav[epub:type="page-list"]` whose
   links point at `#pageN` anchors, plus inline `<span epub:type="pagebreak">` markers. Curio
   keeps only the FILE half of an href (`resolveTarget` drops the fragment), so every page

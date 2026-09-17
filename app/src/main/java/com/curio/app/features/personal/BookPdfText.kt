@@ -108,6 +108,63 @@ internal class PdfPageText(
         val to = last.coerceIn(from, (glyphs.size - 1).coerceAtLeast(0))
         return glyphs.subList(from, to + 1).joinToString("") { it.text }.trim()
     }
+
+    /**
+     * v389c — WHERE EACH GLYPH BEGINS IN [text].
+     *
+     * Almost always one character per glyph, which is why a glyph index and a
+     * character offset usually agree — but a ligature or a combining mark comes
+     * back as one TextPosition holding SEVERAL characters, and from that moment
+     * the two numberings drift apart. Everything that turns a stored passage
+     * back into places to draw has to cross between them, so the offsets are
+     * worked out once rather than assumed.
+     */
+    private val charStarts: IntArray by lazy(LazyThreadSafetyMode.NONE) {
+        val starts = IntArray(glyphs.size + 1)
+        var at = 0
+        glyphs.forEachIndexed { index, glyph ->
+            starts[index] = at
+            at += glyph.text.length
+        }
+        starts[glyphs.size] = at
+        starts
+    }
+
+    /** The glyph that covers character [offset] of [text], or -1 if it cannot. */
+    fun glyphAtChar(offset: Int): Int {
+        if (glyphs.isEmpty()) return -1
+        val target = offset.coerceIn(0, (charStarts[glyphs.size] - 1).coerceAtLeast(0))
+        // The LAST glyph that starts at or before the offset — a binary search,
+        // because this runs inside a draw pass over a page of glyphs.
+        var low = 0
+        var high = glyphs.size - 1
+        var found = 0
+        while (low <= high) {
+            val mid = (low + high) / 2
+            if (charStarts[mid] <= target) {
+                found = mid
+                low = mid + 1
+            } else {
+                high = mid - 1
+            }
+        }
+        return found
+    }
+
+    /**
+     * The glyphs covering [length] characters from [offset] — what a stored
+     * passage becomes when the page is drawn again. Returns an empty range when
+     * the words are not on this page at all (the file changed under a mark).
+     */
+    fun glyphRange(offset: Int, length: Int): IntRange {
+        if (glyphs.isEmpty() || length <= 0) return IntRange.EMPTY
+        val from = glyphAtChar(offset)
+        if (from < 0) return IntRange.EMPTY
+        val lastChar = (offset + length - 1).coerceAtLeast(offset)
+        var to = from
+        while (to < glyphs.size - 1 && charStarts[to + 1] <= lastChar) to++
+        return from..to
+    }
 }
 
 /**

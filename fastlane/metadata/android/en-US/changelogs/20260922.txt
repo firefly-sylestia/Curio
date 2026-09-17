@@ -18,6 +18,8 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Reading: select words on a PDF page too — hold the page to take the word under your finger and drag to extend the passage, then highlight it, write a note on it or bookmark it from the same bar a reflowable book uses. A page of pictures still marks as a whole page, exactly as before.
+- Reading: a typeset book's own printed page numbers — the Contents sheet can show the page-list the edition carries, so "printed page 42" is a place to jump to, not a guess.
 - Incursion: a hidden page holding the whole viewing order — every Marvel, Sony and X-Men film, series and short, in the order they are meant to be watched, with the essentials marked. It is not in any menu: type "i love you 3000" into any search box in the app and it unlocks, then opens from a floating "Incursion" button on Home.
 - Incursion: mark any title not watched, watching, planning, watched, on hold or dropped — the list says how far through you are, and the filter chips narrow it to essentials, what is left, what is in progress or what is done.
 - Incursion: mark a WHOLE PHASE in one tap — each phase (or era) header carries its own action for all six states, and can clear itself again after asking.

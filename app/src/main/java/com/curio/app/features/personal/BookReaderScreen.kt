@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -61,6 +62,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -72,6 +74,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
@@ -535,7 +538,16 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     },
                     onTap = { tapPage() },
                     onScrolled = { hideChrome() },
-                    flow = ReaderLook.pageFlow
+                    flow = ReaderLook.pageFlow,
+                    // The sweep on a PDF page is reported the same way the
+                    // reflowable one is, because it is the same act: the words
+                    // go to the ONE bar the reader owns, and the chrome steps
+                    // out of its way either way.
+                    selection = selection,
+                    onSelect = { swept ->
+                        selection = swept
+                        chrome = false
+                    }
                 )
 
                 // `content` is a delegated property, so the null check above
@@ -1078,7 +1090,10 @@ private fun PdfScrollReader(
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onTap: () -> Unit,
     onScrolled: () -> Unit,
-    onLongPress: (Int) -> Unit
+    onLongPress: (Int) -> Unit,
+    /** v389c — the live sweep, when it belongs to this page of the file. */
+    selection: ReaderSelection?,
+    onSelect: (ReaderSelection) -> Unit
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
@@ -1144,14 +1159,30 @@ private fun PdfScrollReader(
                     runCatching { renderPdfPage(context, document, page) }.getOrNull()
                 }
             }
+            // The scrolling reader has no "current page" of its own — the one on
+            // screen is whichever the column is showing — so the words are read
+            // for THAT page, and for every page already wearing a mark.
+            var words by remember(document, page) { mutableStateOf<PdfPageText?>(null) }
+            var container by remember { mutableStateOf(IntSize.Zero) }
+            val wanted = page == listState.firstVisibleItemIndex ||
+                highlightsFor(marks, page).isNotEmpty()
+            LaunchedEffect(document, page, wanted) {
+                if (!wanted || words != null) return@LaunchedEffect
+                words = withContext(Dispatchers.IO) {
+                    runCatching { extractPdfPageText(context, document, page) }.getOrNull()
+                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(pageHeight)
+                    .onSizeChanged { container = it }
                     .pointerInput(page) {
                         detectTapGestures(
                             onTap = { onTap() },
-                            onLongPress = { onLongPress(page) }
+                            // A page whose words are in hand gives the press to
+                            // the sweep; a page of pictures keeps the old one.
+                            onLongPress = { if (words == null) onLongPress(page) }
                         )
                     },
                 contentAlignment = Alignment.Center
@@ -1170,6 +1201,24 @@ private fun PdfScrollReader(
                             .fillMaxSize()
                             .clip(RoundedCornerShape(6.dp))
                     )
+                    words?.let { read ->
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            PdfPageTextLayer(
+                                text = read,
+                                page = page,
+                                bitmapSize = IntSize(drawn.width, drawn.height),
+                                container = container,
+                                palette = palette,
+                                highlights = highlightsFor(marks, page),
+                                selection = selection,
+                                onSelect = onSelect,
+                                onPagePress = { onLongPress(page) }
+                            )
+                        }
+                    }
                 } else {
                     Box(
                         modifier = Modifier.fillMaxWidth().height(320.dp),
@@ -1447,7 +1496,10 @@ private fun PageReader(
     onLongPress: (Int) -> Unit,
     onTap: () -> Unit,
     onScrolled: () -> Unit,
-    flow: ReaderFlow
+    flow: ReaderFlow,
+    /** v389c — the live sweep, when it belongs to this page of the file. */
+    selection: ReaderSelection?,
+    onSelect: (ReaderSelection) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -1467,7 +1519,9 @@ private fun PageReader(
             onOpenedAt = onOpenedAt,
             onTap = onTap,
             onScrolled = onScrolled,
-            onLongPress = onLongPress
+            onLongPress = onLongPress,
+            selection = selection,
+            onSelect = onSelect
         )
         return
     }
@@ -1544,13 +1598,33 @@ private fun PageReader(
                 runCatching { renderPdfPage(context, document, page) }.getOrNull()
             }
         }
+        // ── THE PAGE'S OWN WORDS (v389c) ───────────────────────────────
+        //
+        // Read for the page being looked at, and for any page already wearing a
+        // mark (a highlight has to be drawn on its words even while the page it
+        // belongs to is only a swipe away). Null means this page has NO text
+        // layer — a scan — and the long press below then says exactly what it
+        // always said: mark this page.
+        var words by remember(document, page) { mutableStateOf<PdfPageText?>(null) }
+        var container by remember { mutableStateOf(IntSize.Zero) }
+        val wanted = page == pagerState.currentPage || highlightsFor(marks, page).isNotEmpty()
+        LaunchedEffect(document, page, wanted) {
+            if (!wanted || words != null) return@LaunchedEffect
+            words = withContext(Dispatchers.IO) {
+                runCatching { extractPdfPageText(context, document, page) }.getOrNull()
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .onSizeChanged { container = it }
                 .pointerInput(page) {
                     detectTapGestures(
                         onTap = { onTap() },
-                        onLongPress = { onLongPress(page) }
+                        // Held words are the sweep's: the layer below answers
+                        // the press, and this one only stands in where the page
+                        // has nothing to select (see PdfPageTextLayer).
+                        onLongPress = { if (words == null) onLongPress(page) }
                     )
                 },
             contentAlignment = Alignment.Center
@@ -1579,6 +1653,27 @@ private fun PageReader(
                         colorFilter = readerPdfFilter(palette.inkKey),
                         modifier = Modifier.fillMaxSize()
                     )
+                    // THE WORDS SIT EXACTLY OVER THE PAGE THEY BELONG TO, and
+                    // INSIDE the zoom layer — so a magnified page carries its
+                    // marks and its sweep at the magnification the member chose.
+                    words?.let { read ->
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            PdfPageTextLayer(
+                                text = read,
+                                page = page,
+                                bitmapSize = IntSize(drawn.width, drawn.height),
+                                container = container,
+                                palette = palette,
+                                highlights = highlightsFor(marks, page),
+                                selection = selection,
+                                onSelect = onSelect,
+                                onPagePress = { onLongPress(page) }
+                            )
+                        }
+                    }
                 }
             } else {
                 CircularProgressIndicator(color = palette.accent)
@@ -2894,6 +2989,231 @@ private data class ReaderSelection(
         isHeading = false,
         isPage = isPage
     )
+}
+
+/**
+ * THE WORDS ON A PDF PAGE (v389c).
+ *
+ * A PDF page is a BITMAP, which is why it could be bookmarked and noted but
+ * never selected: there is nothing in a picture to put a caret in. The words do
+ * exist, though — just not in the renderer — and `BookPdfText` already extracts
+ * them, one page at a time, with every glyph's position in the page's own points.
+ *
+ * This layer is the other half: it sits exactly over the drawn page (the bitmap
+ * is fitted into its box, so the drawn rect is that letterbox), draws every
+ * stored passage back onto the words it was swept from, and turns a long press →
+ * drag into a glyph range. The points-to-pixels ratio cancels out of every
+ * mapping, so zooming or re-rendering the page at another resolution never moves
+ * a highlight off its words.
+ *
+ * The extraction costs a parse, so the words are read by the CALLER — the page
+ * being looked at, and any page already carrying a mark — and handed in ready. A
+ * press therefore never waits for a parse to begin: either the words are there to
+ * sweep, or the page has no text layer at all (a scan), in which case the press
+ * is HANDED BACK and means exactly what it always meant — mark this page.
+ */
+@Composable
+private fun PdfPageTextLayer(
+    text: PdfPageText?,
+    page: Int,
+    bitmapSize: IntSize,
+    container: IntSize,
+    palette: ReaderPalette,
+    highlights: List<ReaderPassage>,
+    selection: ReaderSelection?,
+    onSelect: (ReaderSelection) -> Unit,
+    onPagePress: () -> Unit
+) {
+    if (bitmapSize.width <= 0 || bitmapSize.height <= 0 ||
+        container.width <= 0 || container.height <= 0
+    ) {
+        return
+    }
+    val fitted = remember(bitmapSize, container) { fittedSize(bitmapSize, container) }
+    if (fitted.width <= 0 || fitted.height <= 0) return
+    val density = LocalDensity.current
+    val drawnWidthPx = fitted.width.toFloat()
+
+    // The gesture lives in a detector built once for this page, so everything it
+    // reaches for is read through STATE rather than captured: the words, the two
+    // answers and the width the page is drawn at are all live, and a sweep can
+    // never end up selecting against a page that has since been re-read.
+    val liveText = rememberUpdatedState(text)
+    val liveSelect = rememberUpdatedState(onSelect)
+    val livePagePress = rememberUpdatedState(onPagePress)
+    val liveWidth = rememberUpdatedState(drawnWidthPx)
+    var anchorGlyph by remember { mutableStateOf<IntRange?>(null) }
+
+    /**
+     * A SWEEP, from the word the press landed on to the word under the finger.
+     *
+     * Whole words at both ends — half a word is not a passage — and everything
+     * between them, so a drag down the page keeps the words it passed over.
+     */
+    fun report(anchor: IntRange, at: Int) {
+        val words = liveText.value ?: return
+        val word = words.wordAround(at)
+        if (word.isEmpty()) return
+        val range = if (word.first < anchor.first) {
+            word.first..anchor.last
+        } else {
+            anchor.first..maxOf(word.last, anchor.last)
+        }
+        val phrase = words.textBetween(range.first, range.last)
+        if (phrase.isBlank()) return
+        liveSelect.value(
+            ReaderSelection(
+                index = page,
+                from = range.first,
+                to = range.last,
+                text = phrase,
+                isPage = true
+            )
+        )
+    }
+
+    Canvas(
+        modifier = Modifier
+            .size(
+                with(density) { fitted.width.toDp() },
+                with(density) { fitted.height.toDp() }
+            )
+            .pointerInput(page) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { start ->
+                        val words = liveText.value ?: return@detectDragGesturesAfterLongPress
+                        val at = words.glyphAt(start.x, start.y, liveWidth.value)
+                        val word = if (at < 0) IntRange.EMPTY else words.wordAround(at)
+                        anchorGlyph = word
+                        if (word.isEmpty()) {
+                            // The finger is on the page's own margin, or on a
+                            // page of pictures: nothing here to sweep, so the
+                            // press keeps the meaning it has always had.
+                            livePagePress.value()
+                            return@detectDragGesturesAfterLongPress
+                        }
+                        report(word, at)
+                    },
+                    onDrag = { change, _ ->
+                        val anchor = anchorGlyph ?: return@detectDragGesturesAfterLongPress
+                        if (anchor.isEmpty()) return@detectDragGesturesAfterLongPress
+                        val words = liveText.value ?: return@detectDragGesturesAfterLongPress
+                        val at = words.glyphAt(change.position.x, change.position.y, liveWidth.value)
+                        if (at < 0) return@detectDragGesturesAfterLongPress
+                        report(anchor, at)
+                    },
+                    onDragEnd = { }
+                )
+            }
+    ) {
+        val words = text ?: return@Canvas
+        val scale = if (words.pageWidthPt > 0f) size.width / words.pageWidthPt else 1f
+        highlights.forEach { passage ->
+            if (passage.text.isBlank()) return@forEach
+            val at = words.text.indexOf(passage.text)
+            if (at < 0) return@forEach
+            drawPdfPassage(
+                text = words,
+                range = words.glyphRange(at, passage.text.length),
+                color = passage.ink.copy(alpha = 0.34f),
+                scale = scale
+            )
+        }
+        selection?.takeIf { it.isPage && it.index == page }?.let { live ->
+            drawPdfPassage(
+                text = words,
+                range = live.from..live.to,
+                color = palette.accent.copy(alpha = 0.40f),
+                scale = scale
+            )
+        }
+    }
+}
+
+/** The drawn page inside its box: the same letterbox `ContentScale.Fit` makes. */
+private fun fittedSize(bitmap: IntSize, container: IntSize): IntSize {
+    if (bitmap.width <= 0 || bitmap.height <= 0) return IntSize.Zero
+    val scale = minOf(
+        container.width.toFloat() / bitmap.width,
+        container.height.toFloat() / bitmap.height
+    )
+    return IntSize(
+        (bitmap.width * scale).toInt().coerceAtLeast(1),
+        (bitmap.height * scale).toInt().coerceAtLeast(1)
+    )
+}
+
+/**
+ * A PASSAGE, DRAWN ON THE WORDS IT WAS STOLEN FROM.
+ *
+ * One rectangle per GLYPH would leave a comb of seams between the letters; so
+ * runs of glyphs that share a line and touch each other are joined into one
+ * rectangle, which is what makes the wash look like a highlighter rather than a
+ * row of boxes.
+ */
+private fun DrawScope.drawPdfPassage(
+    text: PdfPageText,
+    range: IntRange,
+    color: Color,
+    scale: Float
+) {
+    if (range.isEmpty() || text.glyphs.isEmpty()) return
+    var runLeft = -1f
+    var runRight = 0f
+    var runTop = 0f
+    var runBottom = 0f
+    var runY = 0f
+    var runHeight = 0f
+
+    fun flush() {
+        if (runLeft < 0f) return
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(runLeft, runTop),
+            size = Size((runRight - runLeft).coerceAtLeast(1f), (runBottom - runTop).coerceAtLeast(1f)),
+            cornerRadius = CornerRadius(2f * scale)
+        )
+        runLeft = -1f
+    }
+
+    val last = minOf(range.last, text.glyphs.size - 1)
+    for (index in range.first..last) {
+        if (index < 0) continue
+        val glyph = text.glyphs[index]
+        val left = glyph.x * scale
+        val top = glyph.y * scale
+        val right = (glyph.x + glyph.width) * scale
+        val bottom = (glyph.y + glyph.height) * scale
+        val sameLine = runLeft >= 0f && kotlin.math.abs(glyph.y - runY) <= runHeight * 0.6f
+        val touching = sameLine && left - runRight <= runHeight * scale * 0.9f
+        when {
+            runLeft < 0f -> {
+                runLeft = left
+                runRight = right
+                runTop = top
+                runBottom = bottom
+                runY = glyph.y
+                runHeight = glyph.height
+            }
+
+            touching -> {
+                runRight = right
+                runTop = minOf(runTop, top)
+                runBottom = maxOf(runBottom, bottom)
+            }
+
+            else -> {
+                flush()
+                runLeft = left
+                runRight = right
+                runTop = top
+                runBottom = bottom
+                runY = glyph.y
+                runHeight = glyph.height
+            }
+        }
+    }
+    flush()
 }
 
 /**
