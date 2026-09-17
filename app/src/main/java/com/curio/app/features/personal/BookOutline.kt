@@ -28,6 +28,17 @@ internal data class ReaderOutlineEntry(
     val title: String,
     /** EPUB: the document the chapter lives in, fragment stripped. */
     val target: String = "",
+    /**
+     * v389c — WHERE INSIDE THAT DOCUMENT.
+     *
+     * The half of a contents link that used to be thrown away. It matters for
+     * two things: a chapter that begins partway down a file (a book that keeps
+     * all its chapters in one XHTML) otherwise lands at the top of it, and an
+     * EPUB's own PRINTED PAGE NUMBERS are nothing BUT anchors — `#page42` is the
+     * whole of what a page-list entry says. Matched against the anchor the
+     * parser records for the book's own page-break markers (see `ReaderBlock`).
+     */
+    val anchor: String = "",
     /** PDF: 1-based page the entry opens. */
     val page: Int = -1,
     /** How deep in the contents this sits — 1 is a chapter, 2 a part of one. */
@@ -52,6 +63,51 @@ internal data class ReaderOutlineEntry(
 internal fun epubOutline(zip: ZipFile): List<ReaderOutlineEntry> {
     navDocumentOutline(zip).takeIf { it.isNotEmpty() }?.let { return it }
     return ncxOutline(zip)
+}
+
+/**
+ * v389c — THE BOOK'S OWN PRINTED PAGE NUMBERS.
+ *
+ * An EPUB is reflowable, so it has no pages of its own — but a book that was
+ * TYPESET has them, and EPUB 3 carries the mapping: a second navigation list
+ * (`epub:type="page-list"`, `role="doc-pagelist"`) whose entries are the print
+ * edition's page numbers, each one pointing at the `#page…` anchor in the text
+ * where that page begins. It is the one honest answer to "what page am I on"
+ * for a reflowed book, and the reader had been ignoring it entirely (user
+ * request: "for epub add more detetable chapters and pages").
+ *
+ * The entries come back in the SAME shape as chapters, with [ReaderOutlineEntry.anchor]
+ * carrying the marker, because that is exactly what they are: places in the
+ * book, with the book's own name for them.
+ */
+internal fun epubPageList(zip: ZipFile): List<ReaderOutlineEntry> {
+    val candidates = zip.entries().asSequence().filter { candidate ->
+        !candidate.isDirectory && (candidate.name.endsWith(".xhtml", true) ||
+            candidate.name.endsWith(".html", true) || candidate.name.endsWith(".htm", true))
+    }
+    candidates.forEach { document ->
+        val raw = runCatching {
+            zip.getInputStream(document).bufferedReader().use { it.readText() }
+        }.getOrNull() ?: return@forEach
+        val at = listOf(
+            raw.indexOf("epub:type=\"page-list\"", ignoreCase = true),
+            raw.indexOf("epub:type='page-list'", ignoreCase = true),
+            raw.indexOf("role=\"doc-pagelist\"", ignoreCase = true)
+        ).filter { it >= 0 }.minOrNull() ?: return@forEach
+        val body = raw.substring(at).substringBefore("</nav>", "")
+        val base = document.name.substringBeforeLast('/', "")
+        val found = ArrayList<ReaderOutlineEntry>()
+        Regex("<a[^>]*?href\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>(.*?)</a>", setOf(
+            RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL
+        )).findAll(body).forEach { match ->
+            val label = plain(match.groupValues.getOrNull(2).orEmpty())
+            if (label.isBlank()) return@forEach
+            val (path, anchor) = splitHref(base, match.groupValues.getOrNull(1).orEmpty())
+            found.add(ReaderOutlineEntry(title = label, target = path, anchor = anchor))
+        }
+        if (found.isNotEmpty()) return found
+    }
+    return emptyList()
 }
 
 private fun navDocumentOutline(zip: ZipFile): List<ReaderOutlineEntry> {
@@ -96,10 +152,12 @@ private fun navDocumentOutline(zip: ZipFile): List<ReaderOutlineEntry> {
                 else -> {
                     val title = plain(match.groupValues.getOrNull(2).orEmpty())
                     if (title.isBlank()) return@forEach
+                    val (path, anchor) = splitHref(base, match.groupValues.getOrNull(1).orEmpty())
                     found.add(
                         ReaderOutlineEntry(
                             title = title,
-                            target = resolveTarget(base, match.groupValues.getOrNull(1).orEmpty()),
+                            target = path,
+                            anchor = anchor,
                             depth = depth.coerceIn(1, 3)
                         )
                     )
@@ -148,8 +206,9 @@ private fun ncxOutline(zip: ZipFile): List<ReaderOutlineEntry> {
                 // most recently, which is the last entry added.
                 if (found.isNotEmpty()) {
                     val src = match.groupValues.getOrNull(2).orEmpty()
+                    val (path, anchor) = splitHref(base, src)
                     found[found.size - 1] = found[found.size - 1]
-                        .copy(target = resolveTarget(base, src))
+                        .copy(target = path, anchor = anchor)
                 }
             }
         }
@@ -157,9 +216,23 @@ private fun ncxOutline(zip: ZipFile): List<ReaderOutlineEntry> {
     return found
 }
 
-/** `chapter3.xhtml#s2` beside `OEBPS/` becomes `OEBPS/chapter3.xhtml`. */
+/**
+ * `chapter3.xhtml#s2` beside `OEBPS/` becomes (`OEBPS/chapter3.xhtml`, `s2`).
+ *
+ * Both halves, always: the FILE says which document to open, the FRAGMENT says
+ * where inside it, and a reader needs the second one as much as the first —
+ * which is why the old helper that returned only the path was the reason a
+ * page-list could not work (see [epubPageList]).
+ */
+private fun splitHref(base: String, href: String): Pair<String, String> {
+    val anchor = href.substringAfter('#', "").substringBefore('?').trim()
+    return resolveTarget(base, href) to anchor
+}
+
+/** The FILE half of the href above, as an archive path. */
 private fun resolveTarget(base: String, href: String): String {
     val clean = href.substringBefore('#').substringBefore('?').trim()
+    // A link that is ONLY a fragment belongs to the file it was written in.
     if (clean.isEmpty()) return ""
     val full = if (clean.startsWith("/")) clean.drop(1) else "$base/$clean"
     val parts = ArrayList<String>()

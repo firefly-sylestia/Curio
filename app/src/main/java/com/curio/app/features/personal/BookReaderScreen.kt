@@ -407,16 +407,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     }
     val chapters: List<ReaderOutlineEntry> = when (val loaded = content) {
         is ReaderContent.Text -> if (loaded.outline.isNotEmpty()) {
-            loaded.outline.map { entry ->
-                val section = loaded.sectionSources.indexOf(entry.target)
-                entry.copy(
-                    block = if (section >= 0) {
-                        loaded.blocks.indexOfFirst { it.section == section + 1 }
-                    } else {
-                        -1
-                    }
-                )
-            }
+            loaded.outline.map { entry -> entry.copy(block = blockForEntry(loaded, entry)) }
         } else {
             loaded.blocks.withIndex()
                 .filter { it.value.isHeading }
@@ -431,6 +422,16 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
         is ReaderContent.Pages -> pdfChapters.orEmpty()
         null -> emptyList()
+    }
+
+    // THE BOOK'S OWN PRINTED PAGES (v389c) — resolved the same way a chapter is,
+    // because to the reader they are the same thing: a name for a place.
+    val printedPages: List<ReaderOutlineEntry> = when (val loaded = content) {
+        is ReaderContent.Text -> loaded.pages.map { entry ->
+            entry.copy(block = blockForEntry(loaded, entry))
+        }
+
+        else -> emptyList()
     }
 
     // A JUMP ASKED FOR FROM OUTSIDE the reading surface — the chapters sheet, a
@@ -625,6 +626,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         ReaderSheet.CHAPTERS -> ReaderChaptersSheet(
             content = content,
             chapters = chapters,
+            pages = printedPages,
             palette = palette,
             onPickBlock = { block ->
                 sheet = null
@@ -1502,6 +1504,14 @@ private fun ReaderParagraphBlock(
     hitHere: Boolean,
     hitLength: Int
 ) {
+    // A PAGE-ANCHOR BLOCK (v389c) IS A TARGET, NOT A LINE.
+    //
+    // The book's own page-break markers arrive as blocks of their own so the
+    // page-list has something to land on — and they draw nothing at all, which
+    // is the whole point: a marker is a bookmark in the text, not a thing in the
+    // text. (Without this the row would still take its own padding, and a page
+    // break would look like a gap in the paragraph.)
+    if (block.text.isBlank() && block.imagePath == null) return
     val marked = highlightColor != Color.Transparent
     // The BOOK decides how loud a heading is (v389): its own <h1>, <h2> and <h3>
     // are three sizes rather than one, and every size follows the member's own
@@ -2190,11 +2200,21 @@ private fun ReaderMarkRow(
 private fun ReaderChaptersSheet(
     content: ReaderContent?,
     chapters: List<ReaderOutlineEntry>,
+    pages: List<ReaderOutlineEntry>,
     palette: ReaderPalette,
     onPickBlock: (Int) -> Unit,
     onPickPage: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // ── THE BOOK'S TWO ANSWERS (v389c) ─────────────────────────────────
+    //
+    // "Where does chapter four begin" and "where is printed page 42" are
+    // different questions, and a typeset EPUB answers both — the first with its
+    // contents list, the second with its page-list. So the sheet offers both,
+    // marked by the book's own words for them, with Contents first because that
+    // is what a reader is usually looking for.
+    var showingPages by remember { mutableStateOf(false) }
+    val entries = if (showingPages) pages else chapters
     ReaderSheetFrame("Contents", palette, onDismiss) {
         Column(
             modifier = Modifier
@@ -2203,13 +2223,42 @@ private fun ReaderChaptersSheet(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            // The book offers two ways of naming a place, so the sheet says
+            // which one it is showing instead of quietly picking. Only a book
+            // that HAS printed pages gets the choice.
+            if (pages.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    modifier = Modifier.padding(bottom = 2.dp)
+                ) {
+                    listOf(false to "Contents", true to "Printed pages").forEach { (asPages, label) ->
+                        val on = asPages == showingPages
+                        Surface(
+                            onClick = { showingPages = asPages },
+                            shape = RoundedCornerShape(50),
+                            color = if (on) palette.accent
+                            else palette.ink.copy(alpha = 0.08f)
+                        ) {
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal
+                                ),
+                                color = if (on) palette.paper else palette.ink.copy(alpha = 0.75f),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                            )
+                        }
+                    }
+                }
+            }
             when {
                 // THE FILE'S OWN CONTENTS (v389). An EPUB's nav/NCX and a PDF's
                 // outline both carry real chapter names, so this is a list of
                 // chapters rather than a page grid — the naming is the book's,
                 // the indent says how deep it sits, and a part's own chapters
-                // read as being under it.
-                chapters.isNotEmpty() -> chapters.forEach { entry ->
+                // read as being under it. [entries] is that list, or the book's
+                // own printed page numbers when the member asked for those.
+                entries.isNotEmpty() -> entries.forEach { entry ->
                     val openable = entry.block >= 0 || entry.isPage
                     Surface(
                         onClick = {
@@ -2759,6 +2808,16 @@ private sealed interface ReaderContent {
          */
         val outline: List<ReaderOutlineEntry> = emptyList(),
         /**
+         * v389c — THE BOOK'S OWN PRINTED PAGES (see `epubPageList`).
+         *
+         * A reflowed book has no pages until it is rendered, but a book that was
+         * TYPESET does — and an EPUB 3 carries that mapping as a page-list. Held
+         * apart from [outline] rather than mixed into it, because "where does
+         * chapter four begin" and "where is printed page 42" are two different
+         * questions and the contents sheet offers them as two answers.
+         */
+        val pages: List<ReaderOutlineEntry> = emptyList(),
+        /**
          * Section 1..n as the FILE each one came from, so an outline entry can
          * be turned into the block it opens.
          */
@@ -2792,7 +2851,17 @@ private data class ReaderBlock(
      * cache file when the book was opened and drawn here in the flow, between
      * the paragraphs it actually sat between.
      */
-    val imagePath: String? = null
+    val imagePath: String? = null,
+    /**
+     * v389c — THE BOOK'S OWN PAGE-BREAK MARKER, when one stood here.
+     *
+     * A typeset EPUB marks the place its printed page 42 begins with
+     * `<span epub:type="pagebreak" id="page42">`. The parser records that id on
+     * a block of its OWN — a zero-height block that is nothing but a target — so
+     * the page-list's `#page42` has something to land on. The block draws
+     * nothing: it is a bookmark in the text, not a thing in the text.
+     */
+    val anchor: String = ""
 )
 
 /** What a long press was aimed at. */
@@ -2941,8 +3010,14 @@ private fun readBook(context: android.content.Context, value: String): ReaderCon
             ReaderContent.Text(
                 blocks = read.blocks,
                 outline = read.outline,
+                pages = read.pages,
                 sectionSources = read.sources,
-                ownPages = carriesOwnPageMarkers(read.blocks.map { it.text })
+                // A book that carries its own page-list IS a book that says what
+                // page the member is on, so Curio stops counting sections for it
+                // — the same rule that makes a book printing page numbers in its
+                // text not get a second set from the reader.
+                ownPages = read.pages.isNotEmpty() ||
+                    carriesOwnPageMarkers(read.blocks.map { it.text })
             )
         }
     }
@@ -3018,6 +3093,30 @@ private fun renderPdfPage(
 private const val MAX_PDF_RENDER_SCALE = 3f
 
 /**
+ * WHICH BLOCK AN OUTLINE ENTRY OPENS (v389c).
+ *
+ * An entry names a FILE and, when the book was kind enough to say so, an ANCHOR
+ * inside it. Resolving by file alone was enough while every chapter began a file
+ * of its own, but it is wrong twice over: a book that keeps several chapters in
+ * one XHTML sent every one of them to the top of that file, and an EPUB's own
+ * printed page numbers are nothing BUT anchors, so every page landed in the same
+ * place. The anchor is tried first (it is the book's own, precise answer) and the
+ * section's first block is the fallback for an entry that carries none — or one
+ * whose marker this reader could not record, which must still open somewhere
+ * near where it meant.
+ */
+private fun blockForEntry(content: ReaderContent.Text, entry: ReaderOutlineEntry): Int {
+    val section = content.sectionSources.indexOf(entry.target)
+    if (section < 0) return -1
+    val inSection = content.blocks.withIndex().filter { it.value.section == section + 1 }
+    if (inSection.isEmpty()) return -1
+    if (entry.anchor.isNotBlank()) {
+        inSection.firstOrNull { it.value.anchor == entry.anchor }?.let { return it.index }
+    }
+    return inSection.first().index
+}
+
+/**
  * A PLAIN TEXT FILE as paragraphs: a blank line ends one, which is the only
  * structural rule plain text actually has.
  */
@@ -3054,7 +3153,9 @@ private fun readPlainText(
 private class EpubRead(
     val blocks: List<ReaderBlock>,
     val sources: List<String>,
-    val outline: List<ReaderOutlineEntry>
+    val outline: List<ReaderOutlineEntry>,
+    /** The book's own printed page numbers, when it carries a page-list. */
+    val pages: List<ReaderOutlineEntry> = emptyList()
 )
 
 private fun readEpubText(
@@ -3076,9 +3177,12 @@ private fun readEpubText(
         val blocks = ArrayList<ReaderBlock>()
         val sources = ArrayList<String>()
         var outline: List<ReaderOutlineEntry> = emptyList()
+        var printedPages: List<ReaderOutlineEntry> = emptyList()
         ZipFile(source).use { zip ->
-            // The book's OWN contents, read while the archive is open anyway.
+            // The book's OWN contents and its own printed pages, read while the
+            // archive is open anyway (two navigation lists, one pass).
             outline = epubOutline(zip)
+            printedPages = epubPageList(zip)
             val pages = zip.entries().asSequence()
                 .filter { entry ->
                     !entry.isDirectory &&
@@ -3115,7 +3219,12 @@ private fun readEpubText(
                 blocks.addAll(found)
             }
         }
-        EpubRead(blocks = blocks, sources = sources, outline = outline)
+        EpubRead(
+            blocks = blocks,
+            sources = sources,
+            outline = outline,
+            pages = printedPages
+        )
     } finally {
         temp?.delete()
     }
@@ -3141,6 +3250,21 @@ private fun epubBlocks(
     val marked = raw
         .replace(Regex("<(script|style)[^>]*>.*?</\\1>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)), " ")
         .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
+        // A PAGE BREAK, turned into a marker of its own BEFORE the markup comes
+        // off: `<span epub:type="pagebreak" id="page42">` is where the printed
+        // edition's page 42 begins, and the page-list's own link points at that
+        // id. It becomes a zero-height block carrying the anchor, which is what
+        // makes a printed page number a real place to jump to (v389c).
+        .replace(
+            Regex(
+                "<span[^>]*?(?:epub:type\\s*=\\s*[\"']pagebreak[\"']|role\\s*=\\s*[\"']doc-pagebreak[\"'])[^>]*>",
+                RegexOption.IGNORE_CASE
+            )
+        ) { match ->
+            val id = Regex("id\\s*=\\s*[\"']([^\"']+)[\"']", RegexOption.IGNORE_CASE)
+                .find(match.value)?.groupValues?.getOrNull(1).orEmpty()
+            if (id.isBlank()) "" else "\n\n\u0000P:$id\u0000\n\n"
+        }
         .replace(Regex("<img[^>]*?src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>", RegexOption.IGNORE_CASE)) { match ->
             "\n\n\u0000I:${match.groupValues.getOrNull(1).orEmpty()}\u0000\n\n"
         }
@@ -3170,6 +3294,24 @@ private fun epubBlocks(
                                 sectionTitle = sectionTitle,
                                 isHeading = true,
                                 headingLevel = level.coerceIn(1, 3)
+                            )
+                        )
+                    }
+                }
+
+                chunk.startsWith("\u0000P:") -> {
+                    // A printed page begins here. The block is a TARGET, not a
+                    // line: it says nothing and draws nothing, and the read
+                    // views skip it entirely (see ReaderParagraphBlock).
+                    val id = chunk.removePrefix("\u0000P:").removeSuffix("\u0000").trim()
+                    if (id.isNotBlank()) {
+                        out.add(
+                            ReaderBlock(
+                                text = "",
+                                section = section,
+                                sectionTitle = sectionTitle,
+                                isHeading = false,
+                                anchor = id
                             )
                         )
                     }
