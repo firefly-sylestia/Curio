@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -257,25 +259,16 @@ fun ChapterScreen(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Surface(
-                onClick = {
-                    if (editing) {
-                        saveNow()
-                        editing = false
-                    } else {
-                        editing = true
-                    }
-                },
-                shape = RoundedCornerShape(50),
-                color = if (editing) accent.copy(alpha = 0.16f) else accent
-            ) {
-                Text(
-                    text = if (editing) "Done" else if (review == null) "Write" else "Edit",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (editing) personalIconTint(accent) else personalOnAccent(),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                )
-            }
+            // THE FAMILY'S EYE/PEN (user request). The text pill it replaces
+            // was this page's only "Done", so leaving the pen still SAVES
+            // first — a chapter review must never leave writing unwritten.
+            PersonalModeSwitch(
+                editing = editing,
+                onToggleMode = { writing ->
+                    if (!writing) saveNow()
+                    editing = writing
+                }
+            )
         }
 
         // Where this chapter sits in the book: a hairline rail with one mark,
@@ -318,6 +311,22 @@ fun ChapterScreen(
                     Spacer(Modifier.height(140.dp))
                 }
             } else {
+                // A DOUBLE TAP ON THE READING SIDE hands the pen back (user
+                // request: "when im on eye view and i double tap switch to edit
+                // pen mode, for all"). The detector sits UNDER the view, so a
+                // child that consumes its own tap keeps it.
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onDoubleTap = {
+                                    editing = true
+                                    editor.focusLastLine()
+                                }
+                            )
+                        }
+                ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -354,6 +363,7 @@ fun ChapterScreen(
                         }
                     }
                     Spacer(Modifier.height(120.dp))
+                }
                 }
             }
         }

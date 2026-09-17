@@ -3,6 +3,7 @@ package com.curio.app.features.personal
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -10,7 +11,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +41,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -49,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -132,6 +138,41 @@ fun BookReviewScreen(
     val editor = remember { PersonalEditorState(PersonalDoc(emptyList())) }
     SideEffect {
         editor.onDocChanged = { updated -> draft = updated }
+    }
+
+    // ── WHICH CHAPTER THE WORDS BELONG TO (v389) ────────────────────────
+    //
+    // The review's chapter markers are TITLE lines in the page's own document
+    // (see [PersonalEditorState.insertTitleLine]), so the page can say where it
+    // is by itself — without the chapter list, and without the member naming
+    // anything twice. Each marker reports its own place in the scrolling
+    // content (both sides of the page do this: the canvas while writing, the
+    // doc view while reading), and the scroll offset turns that into "above the
+    // top". A marker is the CURRENT chapter once its own line has gone up out
+    // of sight; while it is still on screen the writing under it belongs to the
+    // chapter before it, which is why the pinned line changes as the next
+    // marker arrives rather than when it is written (user request: "add like a
+    // top pinned chapter switching … when im on the start point of that chapter
+    // it switches to the previous chapter view").
+    val readScroll = rememberScrollState()
+    val writeScroll = rememberScrollState()
+    val chapterLines = remember { mutableStateMapOf<String, PinnedChapterLine>() }
+    val pinnedChapter by remember {
+        derivedStateOf {
+            val scroll = (if (editing) writeScroll.value else readScroll.value).toFloat()
+            chapterLines.values
+                .filter { it.label.isNotBlank() && it.top - scroll <= 0f }
+                .maxByOrNull { it.top }
+                ?.label
+        }
+    }
+    // A line the member deleted (or renamed away) stops being a place to pin.
+    LaunchedEffect(draft, review) {
+        val alive = (draft.blocks + (review?.doc?.blocks ?: emptyList())).map { it.id }.toSet()
+        chapterLines.keys.retainAll(alive)
+    }
+    val reportChapterLine: (String, String, Float) -> Unit = { id, label, top ->
+        chapterLines[id] = PinnedChapterLine(label, top)
     }
 
     // Entering the canvas seeds it from the stored review exactly once (re-
@@ -273,25 +314,19 @@ fun BookReviewScreen(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Surface(
-                onClick = {
-                    if (editing) {
-                        saveNow()
-                        editing = false
-                    } else {
-                        editing = true
-                    }
-                },
-                shape = RoundedCornerShape(50),
-                color = if (editing) accent.copy(alpha = 0.16f) else accent
-            ) {
-                Text(
-                    text = if (editing) "Done" else if (review == null) "Write" else "Edit",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (editing) personalIconTint(accent) else personalOnAccent(),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                )
-            }
+            // THE FAMILY'S EYE/PEN, like every other page in the personal
+            // family (user request: "in book review it doesnt have the eye and
+            // pen style switch fix that"). Leaving the pen SAVES first: the
+            // text pill this replaces was the page's only "Done", so the switch
+            // wears that duty too, and the page never leaves writing without
+            // writing what was written.
+            PersonalModeSwitch(
+                editing = editing,
+                onToggleMode = { writing ->
+                    if (!writing) saveNow()
+                    editing = writing
+                }
+            )
         }
 
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -305,7 +340,7 @@ fun BookReviewScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(writeScroll)
                             // The blank part of a review is writing space too: a
                             // tap in the gaps (under the last line, above the
                             // dock) hands the caret to the last line and the
@@ -324,15 +359,31 @@ fun BookReviewScreen(
                             state = editor,
                             modifier = Modifier.fillMaxWidth(),
                             accent = accent,
+                            onTitlePosition = reportChapterLine,
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
                         )
                         Spacer(Modifier.height(160.dp))
                     }
                 } else {
+                    // A DOUBLE TAP ON THE READING SIDE hands the pen back (user
+                    // request: "when im on eye view and i double tap switch to
+                    // edit pen mode, for all").
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onDoubleTap = {
+                                        editing = true
+                                        editor.focusLastLine()
+                                    }
+                                )
+                            }
+                    ) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(readScroll)
                             .padding(horizontal = 20.dp)
                             .widthIn(max = 680.dp)
                     ) {
@@ -345,6 +396,7 @@ fun BookReviewScreen(
                                 ink = ink,
                                 accent = accent,
                                 onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
+                                onTitlePosition = reportChapterLine,
                                 // A chapter marker carries its chapter's own
                                 // review: the whole book reads back on one page.
                                 afterTitle = { marker ->
@@ -368,6 +420,66 @@ fun BookReviewScreen(
                             )
                         }
                         Spacer(Modifier.height(140.dp))
+                    }
+                    }
+                }
+            }
+
+            // THE PINNED CHAPTER.
+            //
+            // It holds the top edge of the page and names the chapter the words
+            // under it belong to — the one thing a long review cannot say for
+            // itself once its markers have gone by. It exists only after a
+            // marker has been scrolled past (there is nothing to pin before
+            // that), and the label swaps through a small vertical fade so a
+            // change of chapter reads as a change, not a replacement.
+            AnimatedVisibility(
+                visible = pinnedChapter != null,
+                enter = fadeIn(tween(170)) + slideInVertically(tween(220)) { height -> -height / 2 },
+                exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> -height / 2 },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 14.dp, top = 6.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shadowElevation = 4.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(width = 3.dp, height = 12.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(accent)
+                        )
+                        AnimatedContent(
+                            targetState = pinnedChapter.orEmpty(),
+                            transitionSpec = {
+                                (
+                                    fadeIn(tween(180)) +
+                                        slideInVertically(tween(200)) { height -> height / 2 }
+                                    ) togetherWith (
+                                    fadeOut(tween(120)) +
+                                        slideOutVertically(tween(150)) { height -> -height / 2 }
+                                    )
+                            },
+                            label = "pinned-chapter"
+                        ) { label ->
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = ink,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }
@@ -502,6 +614,12 @@ fun BookReviewScreen(
         }
     }
 }
+
+/**
+ * ONE CHAPTER MARKER LINE, and where it sits in the page's scrolling content
+ * (see [BookReviewScreen]'s pinned chapter).
+ */
+private data class PinnedChapterLine(val label: String, val top: Float)
 
 /**
  * A chapter's own review, folded under the marker that names it. It is drawn as

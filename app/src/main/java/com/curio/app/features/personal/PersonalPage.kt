@@ -12,13 +12,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,12 +57,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -170,7 +174,17 @@ internal fun PersonalWritingPage(
      * fix it"). This slot sits UNDER the page's top bar and outside the scroll,
      * so the subject of the page stays on the page.
      */
-    pinnedHead: @Composable () -> Unit = {}
+    pinnedHead: @Composable () -> Unit = {},
+    /**
+     * v389 — HOW FAR THE PAGE HAS BEEN SCROLLED, for a head that ROLLS UP.
+     *
+     * The writing column's own scroll lives here, so a page whose top bar wants
+     * to say something only once the writing has moved under it (the journal's
+     * title — see JournalEditorScreen) has to be told. It is handed the OFFSET
+     * rather than the state on purpose: the bar's business is how far down the
+     * page is, not how to move it.
+     */
+    onScroll: ((Int) -> Unit)? = null
 ) {
     val isNew = entryIdArg == CurioRoutes.PERSONAL_NEW
     val context = LocalContext.current
@@ -389,6 +403,13 @@ internal fun PersonalWritingPage(
         }
     }
 
+    // The writing column's scroll — the page's head reads it (see onScroll).
+    val pageScroll = rememberScrollState()
+    LaunchedEffect(onScroll, pageScroll) {
+        val report = onScroll ?: return@LaunchedEffect
+        snapshotFlow { pageScroll.value }.collect { report(it) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -411,17 +432,29 @@ internal fun PersonalWritingPage(
             // the switch the finger pressed, so the two modes read as two sides
             // of one page. The travel is short (a twelfth of the width) on
             // purpose: this is a mode, not navigation.
+            // v389 — ONE PAGE TURNING, not two pages sliding past each other.
+            //
+            // The first cut slid the writing in from the right and the reading
+            // from the left, tied to the side of the switch that was pressed —
+            // which is a NAVIGATION idea worn by a mode (user report: "switching
+            // between eye and pen isnt smooth ... specially when the keyboard
+            // opens the transition moved up"). The keyboard is the thing that
+            // actually moves: pressing the pen focuses the page and the inset
+            // rises under it. So the two sides now travel the SAME way — a few
+            // dp upward, into the keyboard — and cross-fade: the swap agrees
+            // with the inset instead of fighting it, and it is over quickly
+            // enough (200ms) that the keyboard's own rise is the motion the eye
+            // follows. Nothing is measured differently either: both sides fill
+            // the same box, so no clip and no jump while the inset animates.
             AnimatedContent(
                 targetState = editing,
                 transitionSpec = {
-                    val forward = targetState
-                    val dir = if (forward) 1 else -1
                     (
-                        fadeIn(tween(240)) +
-                            slideInHorizontally(tween(300)) { width -> dir * width / 12 }
+                        fadeIn(tween(200)) +
+                            slideInVertically(tween(240)) { height -> height / 40 }
                         ) togetherWith (
-                        fadeOut(tween(170)) +
-                            slideOutHorizontally(tween(220)) { width -> -dir * width / 12 }
+                        fadeOut(tween(150)) +
+                            slideOutVertically(tween(180)) { height -> -height / 60 }
                         )
                 },
                 label = "personal-page-mode",
@@ -433,17 +466,37 @@ internal fun PersonalWritingPage(
                     // is handed down rather than reached for (the tick lands in
                     // the same store the editor writes to, and the page's own
                     // debounce saves it).
+                    //
+                    // …and the whole reading side ANSWERS A DOUBLE TAP with the
+                    // pen (user request). A reader who wants to add a line should
+                    // not have to travel to the switch's 34dp: the page they are
+                    // reading is the door. The detector sits UNDER the view, so a
+                    // child that consumes its own tap (a checklist box, a photo)
+                    // keeps it — only the page's own blank space answers.
                     CompositionLocalProvider(
                         LocalPersonalCheckToggle provides { index ->
                             val block = doc.blocks.getOrNull(index)
                             if (block != null) editor.setChecked(block.id, !block.checked)
                         }
-                    ) { readView(doc) }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onDoubleTap = {
+                                            editing = true
+                                            editor.focusLastLine()
+                                        }
+                                    )
+                                }
+                        ) { readView(doc) }
+                    }
                 } else {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(pageScroll)
                             // v389 — the blank part of a page is writing space too: a
                             // tap anywhere in the gaps (under the last line, between
                             // the title and the words) hands the caret to the last
@@ -677,53 +730,72 @@ internal fun PersonalModeSwitch(
     onToggleMode: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val accent = personalAccent()
+    val calm = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+    // v389 — THE LIT HALF TRAVELS (user report: the switch "looks clanky",
+    // especially when the keyboard is coming up at the same time). A fill that
+    // appears on one button and vanishes from the other is two states being
+    // swapped; a fill that SLIDES is one control being moved — and the icons
+    // tint through the same motion, so the whole switch is a single gesture
+    // rather than two recolours and a jump.
+    val slide = animateFloatAsState(
+        targetValue = if (editing) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.82f, stiffness = 900f),
+        label = "personal-mode-slide"
+    )
+    val onInk = personalAccentInk()
+    // The window is 34dp + the 2dp gap: one button each way.
+    val travel = (slide.value * 36f).dp
     Surface(
         shape = RoundedCornerShape(50),
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
     ) {
-        Row(
-            modifier = Modifier.padding(3.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            PersonalModeButton(
-                label = "Reading",
-                active = !editing,
-                onClick = { onToggleMode(false) }
+        Box(modifier = Modifier.padding(3.dp)) {
+            Box(
+                modifier = Modifier
+                    .offset(x = travel)
+                    .size(34.dp)
+                    .background(color = accent.copy(alpha = 0.26f), shape = RoundedCornerShape(50))
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                EyeGlyph(active = !editing)
-            }
-            PersonalModeButton(
-                label = "Writing",
-                active = editing,
-                onClick = { onToggleMode(true) }
-            ) {
-                CurioIcon(
-                    CurioIcons.Edit,
-                    null,
-                    tint = if (editing) personalAccentInk()
-                    else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f),
-                    size = 17.dp
-                )
+                PersonalModeButton(
+                    label = "Reading",
+                    onClick = { onToggleMode(false) }
+                ) {
+                    EyeGlyph(tint = lerp(onInk, calm, slide.value))
+                }
+                PersonalModeButton(
+                    label = "Writing",
+                    onClick = { onToggleMode(true) }
+                ) {
+                    CurioIcon(
+                        CurioIcons.Edit,
+                        null,
+                        tint = lerp(calm, onInk, slide.value),
+                        size = 17.dp
+                    )
+                }
             }
         }
     }
 }
 
-/** One half of the switch. */
+/** One half of the switch — the FILL under it is the switch's own (it travels
+ *  between the two), so a button paints nothing of its own. */
 @Composable
 private fun PersonalModeButton(
     label: String,
-    active: Boolean,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val accent = personalAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (active) accent.copy(alpha = 0.26f) else Color.Transparent,
+        color = Color.Transparent,
         modifier = Modifier.size(34.dp)
     ) {
         Box(
@@ -736,11 +808,10 @@ private fun PersonalModeButton(
 }
 
 /** The eye itself — drawn here, because the icon set only bundles the struck
- *  version and the reading mode is not a "hidden" state. */
+ *  version and the reading mode is not a "hidden" state. Its ink is handed in:
+ *  the switch's slide decides how lit it is. */
 @Composable
-private fun EyeGlyph(active: Boolean) {
-    val ink = if (active) personalAccentInk()
-    else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+private fun EyeGlyph(tint: Color) {
     androidx.compose.foundation.Canvas(modifier = Modifier.size(19.dp)) {
         val stroke = 1.6f.dp.toPx()
         val w = size.width
@@ -751,7 +822,7 @@ private fun EyeGlyph(active: Boolean) {
             cubicTo(w * 0.7f, h * 0.84f, w * 0.3f, h * 0.84f, w * 0.06f, h * 0.5f)
             close()
         }
-        drawPath(path, color = ink, style = Stroke(width = stroke))
-        drawCircle(color = ink, radius = h * 0.13f, center = Offset(w * 0.5f, h * 0.5f))
+        drawPath(path, color = tint, style = Stroke(width = stroke))
+        drawCircle(color = tint, radius = h * 0.13f, center = Offset(w * 0.5f, h * 0.5f))
     }
 }

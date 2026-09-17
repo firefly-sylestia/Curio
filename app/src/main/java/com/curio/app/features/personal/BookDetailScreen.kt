@@ -3,8 +3,15 @@ package com.curio.app.features.personal
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +27,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -37,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -191,6 +203,9 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // The download-help sheet (PDF / EPUB).
     var downloadSheet by remember(bookId) { mutableStateOf(false) }
 
+    // The Read pill's own menu — held down, not tapped (see BookReadPill).
+    var fileMenu by remember(bookId) { mutableStateOf(false) }
+
     // ── The book's own FILE (v389) ─────────────────────────────────────
     // A PDF or EPUB the member wires to THIS book. The picked file is COPIED
     // into the app's own storage ([BookFiles]) and opened in Curio's reader,
@@ -266,6 +281,23 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         editing = notes.none { !it.doc.isEmpty }
     }
 
+    // ── The page's own scroll, so its head can ROLL UP ──────────────────
+    // The title is on the page twice: big, with the cover, and here in the
+    // head. The head's copy is a roll-up — it stays out of the way until the
+    // page's own title has gone under it (see [PersonalHeader.titleRevealed]),
+    // which is exactly where "which book am I in" stops being answered by the
+    // page itself.
+    val pageScroll = rememberLazyListState()
+    val titleScrollThreshold = with(LocalDensity.current) {
+        remember { 26.dp.roundToPx() }
+    }
+    val titleRolled by remember(pageScroll) {
+        derivedStateOf {
+            pageScroll.firstVisibleItemIndex > 0 ||
+                pageScroll.firstVisibleItemScrollOffset > titleScrollThreshold
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -277,6 +309,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         PersonalHeader(
             title = current?.title ?: " ",
             subtitle = current?.author.orEmpty().ifBlank { "Your book" },
+            titleRevealed = titleRolled,
             onBack = { navController.popBackStack() },
             action = {
                 PersonalModeSwitch(
@@ -310,6 +343,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         // and the Read pill floats OVER it so it is reachable wherever the        // member has scrolled to.
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             LazyColumn(
+                state = pageScroll,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -361,18 +395,26 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                             // again (the first pass runs by itself), or go looking
                             // for a copy to download.
                             Spacer(Modifier.height(8.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
                             // The app's own doors belong to the WRITING side: a
                             // reader does not need "look it up" or a download
                             // search sitting over the words they came back for.
-                            if (editing) {
-                                LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
-                                DownloadPill(enabled = true) { downloadSheet = true }
+                            // They FOLD with the switch instead of appearing the
+                            // instant the pen is pressed, so the eye/pen flip is
+                            // one move rather than a page that snaps (user
+                            // report: the family's switch "looks clanky").
+                            AnimatedVisibility(
+                                visible = editing,
+                                enter = fadeIn(tween(180)) + expandVertically(tween(220)),
+                                exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
+                                    DownloadPill(enabled = true) { downloadSheet = true }
+                                }
                             }
-                        }
                             if (lookingUp || lookupNote != null) {
                                 Spacer(Modifier.height(6.dp))
                                 Text(
@@ -381,13 +423,19 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
                                 )
                             }
-                        if (editing) {
-                            Spacer(Modifier.height(12.dp))
-                            BlurbField(
-                                value = blurb,
-                                onValueChange = { blurb = it },
-                                enabled = blurbSeeded
-                            )
+                        AnimatedVisibility(
+                            visible = editing,
+                            enter = fadeIn(tween(180)) + expandVertically(tween(220)),
+                            exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
+                        ) {
+                            Column {
+                                Spacer(Modifier.height(12.dp))
+                                BlurbField(
+                                    value = blurb,
+                                    onValueChange = { blurb = it },
+                                    enabled = blurbSeeded
+                                )
+                            }
                         }
                     }
                 }
@@ -419,8 +467,16 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 // what makes this a door rather than a museum. Made read-side
                 // only: the margins are something to read back, not a pile of
                 // cards to scroll past on the way to the writing.
-                if (!editing && margins.isNotEmpty()) {
+                if (margins.isNotEmpty()) {
                     item("margins") {
+                        // Read-side only, and it folds like the writing tools
+                        // do: the margins are what a reader comes back for, so
+                        // they arrive with the eye rather than blink into place.
+                        AnimatedVisibility(
+                            visible = !editing,
+                            enter = fadeIn(tween(200)) + expandVertically(tween(240)),
+                            exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
+                        ) {
                         MarginsCard(
                             marks = margins,
                             onOpen = { mark ->
@@ -444,6 +500,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                 }
                             }
                         )
+                        }
                     }
                 }
 
@@ -545,6 +602,57 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 item("shelf-tail") { Spacer(Modifier.height(96.dp)) }
             }
 
+            // HOLD THE READ PILL: the FILE itself.
+            //
+            // Tapping it reads (or asks for a file the first time); holding it
+            // says which DOCUMENT Curio opens and how to swap it — the member
+            // who downloaded the wrong edition, or who has the PDF now and the
+            // EPUB later, should not have to hunt for that door (user request:
+            // "when i tap and hold the read button it should show a drop down to
+            // change the pdf the file attach").
+            if (fileMenu) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 18.dp, bottom = 74.dp)
+                ) {
+                    DropdownMenu(
+                        expanded = true,
+                        onDismissRequest = { fileMenu = false }
+                    ) {
+                        if (attachedFile.isBlank()) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "Curio has no file for this book yet",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                },
+                                enabled = false,
+                                onClick = {}
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text("Choose a PDF", color = MaterialTheme.colorScheme.onSurface) },
+                            onClick = {
+                                fileMenu = false
+                                documentPicker.launch(arrayOf("application/pdf"))
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Choose an EPUB", color = MaterialTheme.colorScheme.onSurface) },
+                            onClick = {
+                                fileMenu = false
+                                documentPicker.launch(
+                                    arrayOf("application/epub+zip", "text/plain")
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+
             // THE READ PILL. With a file wired to the book it opens the reader;
             // without one it asks for the file first. It used to be a plain
             // "Read" text button tucked beside "Download help", which only
@@ -562,6 +670,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         )
                     }
                 },
+                onLongPress = { fileMenu = true },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp, bottom = 20.dp)
@@ -1338,19 +1447,24 @@ private fun BookReviewDoor(
  * pill with on-accent ink because it is the page's one primary action — the
  * look-up and download pills beside it are tinted, and a third tinted pill
  * would make none of them read as the thing to do.
+ *
+ * HOLD IT for the file itself: the tap reads, the hold asks WHICH document
+ * Curio opens (see the page's own file menu). It is the same door — the
+ * difference is how long the finger stays, which is the one thing a second
+ * pill in this corner could not say without crowding the page.
  */
 @Composable
 private fun BookReadPill(
     hasFile: Boolean,
     onClick: () -> Unit,
+    onLongPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
-        onClick = onClick,
         shape = RoundedCornerShape(50),
         color = personalAccentInk(),
         shadowElevation = 8.dp,
-        modifier = modifier
+        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = onLongPress)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),

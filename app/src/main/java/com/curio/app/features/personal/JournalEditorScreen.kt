@@ -43,6 +43,8 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +59,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -115,9 +119,25 @@ fun JournalEditorScreen(
     val keyboardController =
         androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
 
+    // ── THE DAY'S TITLE, ROLLED UP INTO THE BAR ────────────────────────
+    //
+    // The title is written ON the page, so once it has scrolled away the page
+    // has stopped saying which day this is (user request: "similar to title add
+    // in journal too the toolbar title"). The bar takes it over at exactly that
+    // moment: the title field reports its own place in the writing (an offset
+    // inside the scrolling column, which does not change as it scrolls) and the
+    // page's scroll offset says where the writing has got to. Both are needed
+    // because a position in the WINDOW is only re-reported on layout, not on
+    // scroll — this asks a question the scroll itself answers.
+    var pageScrollY by remember { mutableIntStateOf(0) }
+    var titleTop by remember { mutableFloatStateOf(0f) }
+    var titleHeight by remember { mutableFloatStateOf(0f) }
+    val titleRolled = titleHeight > 0f && (titleTop + titleHeight) - pageScrollY <= 0f
+
     PersonalWritingPage(
         entryIdArg = entryIdArg,
         photos = photos,
+        onScroll = { pageScrollY = it },
         // The page's own way out (the core guards it: a live voice recording is
         // asked about before a back gesture can drop it — see PersonalVoice).
         onExit = { navController.popBackStack() },
@@ -143,6 +163,7 @@ fun JournalEditorScreen(
                 dateMillis = dateMillis,
                 saving = saving,
                 editing = editing,
+                rolledTitle = if (titleRolled) title else "",
                 onToggleMode = onEditing,
                 onShiftDate = { days -> dateMillis = shiftDay(dateMillis, days) },
                 onPickDate = {
@@ -241,7 +262,14 @@ fun JournalEditorScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(titleFocusRequester),
+                    .focusRequester(titleFocusRequester)
+                    // Where the title sits in the WRITING (not in the window):
+                    // the column's own scroll turns this into "scrolled past".
+                    .onGloballyPositioned { coordinates ->
+                        val bounds = coordinates.boundsInParent()
+                        titleTop = bounds.top
+                        titleHeight = bounds.height
+                    },
                 decorationBox = { inner ->
                     Box {
                         if (title.isEmpty()) {
@@ -270,6 +298,9 @@ private fun JournalTopBar(
     dateMillis: Long,
     saving: Boolean,
     editing: Boolean,
+    /** The day's title once its own line has left the page — empty while the
+     *  title is still on screen (see the caller). */
+    rolledTitle: String,
     onToggleMode: (Boolean) -> Unit,
     onShiftDate: (Long) -> Unit,
     onPickDate: () -> Unit
@@ -349,6 +380,31 @@ private fun JournalTopBar(
                     CurioIcon(CurioIcons.ChevronRight, "Next day", tint = personalAccentInk(), size = 18.dp)
                 }
             }
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        // THE TITLE, once the page's own has gone up. It fades into the bar's
+        // empty middle, so the bar never changes height and never pushes a line
+        // of the page (the weight is `fill = false`: the title takes only what
+        // it needs and the spacer either side keeps the date and the switch in
+        // their corners).
+        AnimatedVisibility(
+            visible = rolledTitle.isNotBlank(),
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(140)),
+            modifier = Modifier.weight(1f, fill = false)
+        ) {
+            Text(
+                rolledTitle,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = ink.copy(alpha = 0.8f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
         Spacer(Modifier.weight(1f))

@@ -1,5 +1,7 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -37,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -341,9 +344,26 @@ internal fun PersonalHeader(
     title: String,
     subtitle: String,
     onBack: () -> Unit,
-    action: @Composable (() -> Unit)? = null
+    action: @Composable (() -> Unit)? = null,
+    /**
+     * v389 — THE ROLLING TITLE (a book's page).
+     *
+     * A page that repeats its own title in the head AND in the body shows the
+     * same words twice before anything is scrolled (user report: "in book also
+     * in header it shows the title and then below too"). So the head's title is
+     * a ROLL-UP: it is invisible while the page's own title is on screen and
+     * comes in as that one scrolls under the head — which is what a reader
+     * means by "where am I" once the page's own title is gone. The line is
+     * always LAID OUT (only its ink moves), so nothing below it can jump.
+     */
+    titleRevealed: Boolean = true
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
+    val revealed = animateFloatAsState(
+        targetValue = if (titleRevealed) 1f else 0f,
+        animationSpec = tween(220),
+        label = "header-title-reveal"
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -368,7 +388,14 @@ internal fun PersonalHeader(
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = ink
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.graphicsLayer {
+                    alpha = revealed.value
+                    // It RISES into the bar rather than appearing in place.
+                    translationY = (1f - revealed.value) * -8.dp.toPx()
+                }
             )
             Text(
                 subtitle,

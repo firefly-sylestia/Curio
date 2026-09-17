@@ -553,6 +553,27 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /**
+     * v389 — THE PAGE WAS TAPPED (see [focusLastLine]).
+     *
+     * [focusedId] says which line the keyboard is in and [caret] says where the
+     * caret should go, but neither of them can say WHEN: the caret is consumed
+     * the moment the line it names honours it, so a tap on the blank part of a
+     * page whose caret is already in that line changed NOTHING (user report:
+     * "add proper tap to start writing in blank always even when the cursor was
+     * there"). This is the proof that a finger landed, and it names the line it
+     * asked for.
+     */
+    var tapTarget by mutableStateOf<String?>(null)
+        private set
+    var tapTick by mutableIntStateOf(0)
+        private set
+
+    /** Called by the line the tap named, so no other line answers it twice. */
+    fun consumeTap(id: String) {
+        if (tapTarget == id) tapTarget = null
+    }
+
+    /**
      * v389 — "start writing here". A tap anywhere on the blank part of a page
      * (under the last line, in the gap above the tools) hands the caret to the
      * LAST line at its end, which is what a writer means by tapping the empty
@@ -571,6 +592,10 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         } ?: return
         focusedId = id
         caret = PersonalCaret(id, text(id).length)
+        // …and the TAP itself, so the line takes the caret (and the keyboard)
+        // again even when both of the lines above are already true of it.
+        tapTarget = id
+        tapTick++
     }
 
     fun armCheckboxOnEmptyLine() {
@@ -1315,7 +1340,16 @@ internal fun PersonalCanvas(
     // overlay grows the picture out of the spot it was tapped in (see
     // PersonalPhotoOverlay), which a bare URI cannot say.
     onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    /**
+     * v389 — WHERE THE PAGE'S OWN TITLE LINES SIT (the book review's pinned
+     * chapter). A TITLE line is a chapter marker there, and a page that has
+     * scrolled past one should be able to say which chapter the words below it
+     * belong to — see BookReviewScreen. Reported as the line's own y WITHIN the
+     * scrolling content, so the caller can subtract its scroll offset (a
+     * position in the window would need the scroll to re-report itself).
+     */
+    onTitlePosition: ((id: String, label: String, top: Float) -> Unit)? = null
 ) {
     // v389 — one drag for the whole list: the to-do page's rows share it, so
     // the row under the finger and the rows it passes agree about one gesture.
@@ -1417,7 +1451,8 @@ internal fun PersonalCanvas(
                             accent = accent,
                             enabled = enabled,
                             quoteJoinAbove = quoteAbove,
-                            quoteJoinBelow = quoteBelow
+                            quoteJoinBelow = quoteBelow,
+                            onTitlePosition = onTitlePosition
                         )
                     }
                 } else {
@@ -1429,6 +1464,7 @@ internal fun PersonalCanvas(
                         enabled = enabled,
                         quoteJoinAbove = quoteAbove,
                         quoteJoinBelow = quoteBelow,
+                        onTitlePosition = onTitlePosition,
                         selectionWash = if (state.pageSelected) selectionWash else Color.Transparent
                     )
                 }
@@ -1450,7 +1486,9 @@ private fun PersonalTextBlock(
     enabled: Boolean,
     /** The gap above/below holds another quoted line — see QUOTE_JOIN_EDITOR. */
     quoteJoinAbove: Boolean = false,
-    quoteJoinBelow: Boolean = false
+    quoteJoinBelow: Boolean = false,
+    /** See [PersonalCanvas.onTitlePosition]. */
+    onTitlePosition: ((id: String, label: String, top: Float) -> Unit)? = null
 ) {
     val text = state.text(id)
     val mask = state.mask(id)
@@ -1531,6 +1569,15 @@ private fun PersonalTextBlock(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                // A TITLE line reports where it is, so a page whose head names
+                // the chapter can follow the writing (see onTitlePosition).
+                if (isTitle && onTitlePosition != null) {
+                    Modifier.onGloballyPositioned { coordinates ->
+                        onTitlePosition(id, text, coordinates.boundsInParent().top)
+                    }
+                } else Modifier
+            )
             .then(
                 if (selectionWash == Color.Transparent) Modifier
                 else Modifier.drawBehind {
@@ -1654,6 +1701,25 @@ private fun PersonalTextBlock(
             focusRequester.requestFocus()
             state.onFocusChanged(id, true)
             state.consumeCaret(id)
+        }
+    }
+
+    // …and the PAGE-TAP, which is a separate request on purpose: the caret
+    // above only fires when there is a caret to take. A tap on the blank space
+    // under a page whose caret is ALREADY in this line used to change nothing,
+    // because the state it would set was the state it had — so the keyboard
+    // never came back. The tap token says a finger landed, and the line it named
+    // takes the caret and the keyboard whether or not it already had them.
+    val tapTick = state.tapTick
+    // Read OUTSIDE the effect: a CompositionLocal cannot be reached from a
+    // LaunchedEffect body (see the project's compile-safety rules).
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    LaunchedEffect(tapTick, id) {
+        if (tapTick > 0 && state.tapTarget == id) {
+            focusRequester.requestFocus()
+            keyboard?.show()
+            state.onFocusChanged(id, true)
+            state.consumeTap(id)
         }
     }
 }
@@ -1819,7 +1885,9 @@ internal fun PersonalDocView(
      * where the writing's own body size reads too small to act on. Unspecified
      * keeps every other page exactly as it was.
      */
-    rowSize: TextUnit = TextUnit.Unspecified
+    rowSize: TextUnit = TextUnit.Unspecified,
+    /** See [PersonalCanvas.onTitlePosition] — the read side of the same page. */
+    onTitlePosition: ((id: String, label: String, top: Float) -> Unit)? = null
 ) {
     val quoteRule = personalQuoteRule()
     val quoteWash = personalQuoteWash()
@@ -1957,6 +2025,16 @@ internal fun PersonalDocView(
                                     .padding(start = PERSONAL_MARKER_LEAD)
                                 else -> Modifier
                             }
+                        )
+                        // A TITLE line is a chapter marker on the book review's
+                        // page: it reports its own place so the head can say
+                        // which chapter is being read (see onTitlePosition).
+                        .then(
+                            if (isTitle && onTitlePosition != null) {
+                                Modifier.onGloballyPositioned { coordinates ->
+                                    onTitlePosition(block.id, text, coordinates.boundsInParent().top)
+                                }
+                            } else Modifier
                         )
                 ) {
                     Text(
