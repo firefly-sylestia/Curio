@@ -126,7 +126,7 @@ private val INK = Color(0xFF2A2320)
 private val BLUSH = Color(0xFFDE6E52)
 private val LIP = Color(0xFFC4625C)
 
-// ── the design grid ─────────────────────────────────────────────────────────
+// ── the design grid ─────────────────────────────��───────────────────────────
 // Every portrait is drawn on a 100×100 grid and scaled to the disc, so the same
 // drawing is a 24dp chip and a 120dp hero portrait. [u] is the grid's scale in
 // canvas pixels per unit: 1 design unit = u px.
@@ -487,39 +487,50 @@ private fun DrawScope.drawBrows(art: AvatarArt, u: Float) {
 
 private fun DrawScope.drawFace(art: AvatarArt, u: Float, withMouth: Boolean = true) {
     val iris = darken(art.hair, 0.45f)
-    // ── eyes ──────────────────────────────────────────────────────────────
-    // CHIBI EYES. The detailed pair — a white sclera, a lash line, a lid crease
-    // and a lower lid — was four grey lines smeared together at 40dp, and the
-    // whites made every face read startled at hero size. A chibi eye is ONE big
-    // dark shape with two highlights; its character comes from the size and the
-    // tilt, not from the number of lines inside it.
+    // Eye language is part of the character design, not a shared sticker:
+    // sleepy eyes suit the beret and beard, round eyes suit the doctor/glasses,
+    // sharp eyes suit the witch and leaf-crown silhouettes, and the dark avatar
+    // gets a warm almond shape instead of a startled white-eyed stare.
+    val eyeStyle = when (art.kind) {
+        6, 11, 19 -> 0 // relaxed / editorial
+        8, 9, 24, 27 -> 1 // pointed / magical and botanical
+        14, 26 -> 2 // deep-set / hooded and dark-skin portrait
+        2, 10, 15, 25 -> 3 // round / glasses, goggles and doctor-like clarity
+        else -> 4 // soft open eyes
+    }
     listOf(42.6f to -1f, 57.4f to 1f).forEach { (ex, side) ->
-        val cy = 47.4f
-        // Taller than wide, tilted a touch outward: open, friendly, and still
-        // exactly the shape the glasses' round lenses expect.
-        drawOval(
-            color = iris,
-            topLeft = o(ex - 4.6f, cy - 6.6f, u),
-            size = Size(s(9.2f, u), s(13.2f, u))
-        )
-        // A deeper centre, so the eye has an inside rather than reading flat.
-        drawCircle(INK, s(3.1f, u), o(ex, cy + 0.6f, u))
-        // The big top highlight and one lower spark: two is the chibi
-        // signature, and at chip size they are what keeps the eye from closing.
-        drawCircle(Color.White.copy(alpha = 0.95f), s(2.7f, u), o(ex - 1.5f, cy - 3.4f, u))
-        drawCircle(Color.White.copy(alpha = 0.72f), s(1.25f, u), o(ex + 1.5f, cy + 3.2f, u))
-        // The upper lid: ONE stroke, the outer corner a little heavier (the
-        // `side` swing), so the eye stays defined when the whole portrait is
-        // 24dp in a chat row.
-        drawArc(
-            color = INK.copy(alpha = 0.80f),
-            startAngle = if (side < 0f) 206f else 194f,
-            sweepAngle = 140f,
-            useCenter = false,
-            topLeft = o(ex - 4.9f, cy - 7.2f, u),
-            size = Size(s(9.8f, u), s(8.6f, u)),
-            style = Stroke(width = s(1.5f, u), cap = StrokeCap.Round)
-        )
+        val cy = when (eyeStyle) { 0 -> 47.8f; 1 -> 47.1f; else -> 47.4f }
+        when (eyeStyle) {
+            0 -> {
+                drawArc(iris, if (side < 0f) 198f else 202f, 144f, false,
+                    o(ex - 5.2f, cy - 2.2f, u), Size(s(10.4f, u), s(5.2f, u)),
+                    style = Stroke(width = s(2.1f, u), cap = StrokeCap.Round))
+                drawCircle(INK, s(1.35f, u), o(ex + side * 1.1f, cy + 0.1f, u))
+            }
+            1 -> {
+                val eye = Path().apply {
+                    mv(ex - 5f, cy, u)
+                    qd(ex, cy - 5.2f, ex + 5f, cy, u)
+                    qd(ex, cy + 2.1f, ex - 5f, cy, u)
+                    close()
+                }
+                drawPath(eye, iris)
+                drawCircle(Color.White.copy(alpha = 0.88f), s(1.25f, u), o(ex - side * 1.3f, cy - 1.6f, u))
+                drawPath(Path().apply { mv(ex - 5f, cy, u); qd(ex, cy - 5.5f, ex + 5f, cy, u) }, INK,
+                    style = Stroke(width = s(1.4f, u), cap = StrokeCap.Round))
+            }
+            2 -> {
+                drawOval(iris, o(ex - 4.3f, cy - 4.7f, u), Size(s(8.6f, u), s(9.2f, u)))
+                drawCircle(INK, s(2.2f, u), o(ex, cy + 0.5f, u))
+                drawCircle(Color.White.copy(alpha = 0.9f), s(1.25f, u), o(ex - 1.1f, cy - 1.5f, u))
+            }
+            else -> {
+                val height = if (eyeStyle == 3) 10.5f else 12.2f
+                drawOval(iris, o(ex - 4.4f, cy - height / 2f, u), Size(s(8.8f, u), s(height, u)))
+                drawCircle(INK, s(if (eyeStyle == 3) 2.45f else 2.8f, u), o(ex, cy + 0.5f, u))
+                drawCircle(Color.White.copy(alpha = 0.92f), s(1.8f, u), o(ex - 1.3f, cy - 2.6f, u))
+            }
+        }
     }
     // ── nose ──────────────────────────────────────────────────────────────
     // A chibi nose is a hint: one short warm shadow under the tip. The bridge
@@ -1144,12 +1155,12 @@ private fun DrawScope.drawHairFront(art: AvatarArt, u: Float) {
             )
             drawPath(
                 Path().apply {
-                    mv(31f, 40f, u)
-                    cu(29f, 52f, 34f, 62f, 42f, 66f, u)
-                    cu(46f, 68.4f, 54f, 68.4f, 58f, 66f, u)
-                    cu(66f, 62f, 71f, 52f, 69f, 40f, u)
-                    cu(66f, 50f, 60f, 55f, 50f, 55f, u)
-                    cu(40f, 55f, 34f, 50f, 31f, 40f, u)
+                    mv(31f, 43f, u)
+                    cu(29f, 53f, 34f, 64f, 42f, 69f, u)
+                    cu(46f, 72f, 54f, 72f, 58f, 69f, u)
+                    cu(66f, 64f, 71f, 53f, 69f, 43f, u)
+                    cu(66f, 51f, 60f, 57f, 50f, 58f, u)
+                    cu(40f, 57f, 34f, 51f, 31f, 43f, u)
                     close()
                 },
                 hair
