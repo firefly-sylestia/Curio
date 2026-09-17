@@ -53,11 +53,34 @@ data class PersonalRun(
     /** A bulleted line (the dot is drawn, never typed). */
     val bullet: Boolean = false,
     /** A checklist line (the box is drawn, never typed). */
-    val checkbox: Boolean = false
+    val checkbox: Boolean = false,
+    /**
+     * v389 — THE MARKER PEN this stretch of words was written with: one of
+     * [PERSONAL_HIGHLIGHT_KEYS], or "" for none.
+     *
+     * A run's own KEY rather than a colour, exactly like [PersonalMarker]: the
+     * page paints it (see personalHighlightInk) so the palette can move without
+     * rewriting anybody's notes, and an unseen key degrades to no marker rather
+     * than to a wrong colour.
+     */
+    val highlight: String = ""
 )
 
 /** Alignment of one block's paragraph. */
-enum class PersonalAlign { START, CENTER }
+/**
+ * v389 — HOW A LINE SITS IN THE PAGE.
+ *
+ * [START] and [CENTER] were the only two for as long as the dock had only two
+ * buttons for them. The universal dock carries the other two (user request: "the
+ * full scren text editor formats of left right centered and justofied … add in
+ * the universal tool bar"), and they are the same shape of property — the
+ * block's, not a character's, because an alignment is a property of a line.
+ *
+ * Adding values is safe on disk: an old note never wrote one, and a note that
+ * writes one still opens in a build that does not know it (see the tolerant
+ * enum reading in the PersonalDoc codec).
+ */
+enum class PersonalAlign { START, CENTER, END, JUSTIFY }
 
 /** One block of the writing canvas: text, or an attached photo. */
 data class PersonalBlock(
@@ -279,6 +302,9 @@ object PersonalDocCodec {
                 if (run.small) r.addProperty("m", true)
                 if (run.bullet) r.addProperty("l", true)
                 if (run.checkbox) r.addProperty("c", true)
+                // v389 — the marker pen, written only when a pen is down, so an
+                // unmarked note is byte-for-byte what it was before.
+                if (run.highlight.isNotEmpty()) r.addProperty("g", run.highlight)
                 runs.add(r)
             }
             b.add("runs", runs)
@@ -311,7 +337,13 @@ object PersonalDocCodec {
                     title = r.flag("h"),
                     small = r.flag("m"),
                     bullet = r.flag("l"),
-                    checkbox = r.flag("c")
+                    checkbox = r.flag("c"),
+                    // v389 — an older note has no "g" key: it decodes as
+                    // unmarked. An UNKNOWN key (a pen a future build adds)
+                    // decodes as unmarked too rather than throwing, because
+                    // [personalHighlightInk] answers "" with the default pen and
+                    // a wrong colour is worse than no colour.
+                    highlight = r.str("g")
                 ).takeIf { it.end > it.start }
             }.orEmpty()
             PersonalBlock(

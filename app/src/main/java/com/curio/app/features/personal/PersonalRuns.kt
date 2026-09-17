@@ -51,6 +51,52 @@ internal val ALL_FLAGS = intArrayOf(
  */
 internal val ALL_FLAGS_MASK = ALL_FLAGS.fold(0) { mask, flag -> mask or flag }
 
+// ── v389 — THE MARKER PEN ─────────────────────────────────────────────
+//
+// A highlighter is a COLOUR, not a yes/no, and the mask is one int per
+// character — so the colour lives in the three bits directly above the flags
+// (the flags stop at 256) and a character's whole appearance stays ONE int.
+//
+// That is not a trick for its own sake. [maskToRuns] merges neighbouring
+// characters by comparing their ints, so two words written with different pens
+// are already two runs and two words written with the same pen are already one —
+// the marker needs no merging logic of its own, and an edit that shifts text
+// around carries it for free, because every copy of the mask is a copy of the
+// colour with it.
+
+/** The pens, in the order the menu lists them. */
+internal val PERSONAL_HIGHLIGHT_KEYS = listOf("amber", "rose", "sage", "sky")
+
+internal const val HIGHLIGHT_SHIFT = 9
+internal const val HIGHLIGHT_BITS = 0x0E00
+
+/** The pen a mask was written with: "" for none. */
+internal fun highlightKeyOf(mask: Int): String =
+    PERSONAL_HIGHLIGHT_KEYS.getOrNull(((mask and HIGHLIGHT_BITS) shr HIGHLIGHT_SHIFT) - 1).orEmpty()
+
+/** The bits a pen key means, or 0 for none. */
+internal fun highlightMaskFor(key: String?): Int {
+    val index = PERSONAL_HIGHLIGHT_KEYS.indexOf(key.orEmpty())
+    return if (index < 0) 0 else (index + 1) shl HIGHLIGHT_SHIFT
+}
+
+/** A copy of [mask] with [key]'s pen over [start] until [end], or with the
+ *  marker taken off entirely when [key] is null. */
+internal fun maskApplyHighlight(
+    mask: IntArray,
+    start: Int,
+    end: Int,
+    key: String?
+): IntArray {
+    if (end <= start) return mask
+    val bits = highlightMaskFor(key)
+    val out = mask.copyOf()
+    for (i in start until end.coerceAtMost(out.size)) {
+        out[i] = (out[i] and HIGHLIGHT_BITS.inv()) or bits
+    }
+    return out
+}
+
 /** An empty mask of [length] characters. */
 internal fun emptyMask(length: Int): IntArray = IntArray(length)
 
@@ -70,6 +116,8 @@ internal fun runsToMask(textLength: Int, runs: List<PersonalRun>): IntArray {
         if (run.small) flags = flags or FLAG_SMALL
         if (run.bullet) flags = flags or FLAG_BULLET
         if (run.checkbox) flags = flags or FLAG_CHECKBOX
+        // The marker travels in the same int as the flags (see HIGHLIGHT_BITS).
+        if (flags != 0) flags = flags or highlightMaskFor(run.highlight)
         if (flags == 0) return@forEach
         for (i in start until end) mask[i] = mask[i] or flags
     }
@@ -101,7 +149,8 @@ internal fun maskToRuns(mask: IntArray): List<PersonalRun> {
                 title = flags and FLAG_TITLE != 0,
                 small = flags and FLAG_SMALL != 0,
                 bullet = flags and FLAG_BULLET != 0,
-                checkbox = flags and FLAG_CHECKBOX != 0
+                checkbox = flags and FLAG_CHECKBOX != 0,
+                highlight = highlightKeyOf(flags)
             )
         )
         i = j
@@ -130,7 +179,13 @@ internal fun maskAfterEdit(
     newText: String,
     mask: IntArray,
     armed: Int,
-    cleared: Int = 0
+    cleared: Int = 0,
+    /**
+     * v389 — the MARKER the typed words wear: null keeps whatever pen the caret
+     * already sat in (the same rule the flags follow), and `0` is the pen being
+     * taken off, which a nullable Int says and a plain Int cannot.
+     */
+    highlightOverride: Int? = null
 ): IntArray {
     val oldLength = oldText.length
     val newLength = newText.length
@@ -154,8 +209,10 @@ internal fun maskAfterEdit(
         else -> 0
     }
     // The INPUT STYLE: the tools switched on (which replace the inherited style
-    // outright), then the tools switched off taken back out of it.
-    val typed = ((if (armed != 0) 0 else inherited) and cleared.inv()) or armed
+    // outright), then the tools switched off taken back out of it. The marker is
+    // its own axis — a pen is not a bold.
+    val typedFlags = ((if (armed != 0) 0 else inherited and ALL_FLAGS_MASK) and cleared.inv()) or armed
+    val typed = typedFlags or (highlightOverride ?: (inherited and HIGHLIGHT_BITS))
 
     val out = IntArray(newLength)
     for (i in 0 until prefix.coerceAtMost(newLength)) out[i] = mask.getOrZero(i)

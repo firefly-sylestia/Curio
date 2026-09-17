@@ -80,6 +80,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import com.curio.app.ui.components.TextHistoryBrowser
+import com.curio.app.ui.components.TextHistoryRestoreMode
+import com.curio.app.ui.components.rememberTextHistoryCapture
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.platform.TextToolbar
 import androidx.compose.ui.platform.TextToolbarStatus
@@ -195,6 +198,47 @@ internal fun personalQuoteDeepColor(): Color =
 @Composable
 internal fun personalBulletColor(): Color =
     if (isCurioDarkTheme()) Color(0xFFB08255) else Color(0xFF6E4A2E)
+
+/**
+ * v389 — THE FOUR MARKER PENS.
+ *
+ * Keyed, not coloured, in storage (see [PersonalRun.highlight]) so the palette
+ * can be tuned without touching a single saved note. They are the READER's own
+ * four highlighters, which means a page marked in the journal and a passage
+ * marked in a book are the same four inks.
+ *
+ * Painted at a wash alpha by [personalAnnotated], so the ink under them is
+ * always the page's own — a marker is a pen held over the text, not a fill.
+ */
+internal fun personalHighlightInk(key: String): Color = when (key) {
+    "rose" -> Color(0xFFD98A8A)
+    "sage" -> Color(0xFF8FB08A)
+    "sky" -> Color(0xFF7FA8C9)
+    else -> Color(0xFFE0A33C)
+}
+
+/** The pen's name as the menu shows it. */
+/**
+ * v389 — AN ALIGNMENT, AS THE TEXT ENGINE WANTS IT.
+ *
+ * One mapping, in one place, because the four kinds are drawn by four callers
+ * (both canvas surfaces, both document views) and a fifth kind added in three
+ * of them would silently lay out as left.
+ */
+internal fun PersonalAlign.toTextAlign(): TextAlign = when (this) {
+    PersonalAlign.START -> TextAlign.Start
+    PersonalAlign.CENTER -> TextAlign.Center
+    PersonalAlign.END -> TextAlign.End
+    PersonalAlign.JUSTIFY -> TextAlign.Justify
+}
+
+internal fun personalHighlightLabel(key: String): String = when (key) {
+    "rose" -> "Rose"
+    "sage" -> "Sage"
+    "sky" -> "Sky"
+    "amber" -> "Amber"
+    else -> key.replaceFirstChar { it.uppercase() }
+}
 
 /**
  * HOW FAR A QUOTE PANEL REACHES INTO THE GAP BESIDE IT: half of it, so two
@@ -480,6 +524,11 @@ internal fun personalAnnotated(
         var j = i + 1
         while (j < text.length && mask.getOrElse(j) { 0 } == flags) j++
         if (flags != 0) {
+            // The pen rides in the same int as the flags, so a marker-only
+            // stretch (flags == its colour bits) has to paint a background even
+            // though no flag is set — which is why this is inside `flags != 0`
+            // rather than in a branch of its own.
+            val pen = highlightKeyOf(flags)
             val decorations = ArrayList<TextDecoration>(2)
             if (flags and FLAG_UNDERLINE != 0) decorations.add(TextDecoration.Underline)
             if (flags and FLAG_STRIKE != 0) decorations.add(TextDecoration.LineThrough)
@@ -503,6 +552,14 @@ internal fun personalAnnotated(
                         else -> null
                     },
                     fontStyle = if (flags and FLAG_ITALIC != 0) FontStyle.Italic else null,
+                    // A WASH, so the words stay the page's ink — and unspecified
+                    // rather than transparent, which would punch a hole through
+                    // a quote panel it sat inside.
+                    background = if (pen.isEmpty()) {
+                        Color.Unspecified
+                    } else {
+                        personalHighlightInk(pen).copy(alpha = 0.40f)
+                    },
                     textDecoration = when (decorations.size) {
                         0 -> null
                         1 -> decorations.first()
@@ -644,6 +701,62 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         private set
 
     /**
+     * v389 — THE PEN SWITCHED ON FOR WHAT IS TYPED NEXT.
+     *
+     * `null` is "whatever pen the caret already sits in" — the state a marker
+     * spends almost all its life in, and the reason this is nullable: the pen
+     * being TAKEN OFF is a real, distinct setting (0), and a plain Int could not
+     * tell it apart from "unchanged". Cleared as soon as a keystroke consumes
+     * it, the same as [armed].
+     */
+    var armedHighlight by mutableStateOf<Int?>(null)
+        private set
+
+    /** The pen the caret sits in right now — what the dock's marker button
+     *  lights from and names. "" for none. */
+    fun highlightOfFocused(): String {
+        val id = focusedId ?: return highlightKeyOf(armedHighlight ?: 0)
+        val blockMask = mask(id)
+        val selection = selections[id]
+        val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
+        return highlightKeyOf(caretFlags(id)) .ifEmpty {
+            // A caret at the very start of the block has nothing to its left or
+            // right to inherit from, so it wears the standing pen.
+            if (selection?.collapsed != false && at == 0) highlightKeyOf(armedHighlight ?: 0) else ""
+        }
+    }
+
+    /**
+     * v389 — THE MARKER BUTTON.
+     *
+     * A selection is marked outright (and the selection is kept, so the writer
+     * can see what they just did). With nothing selected the pen becomes an
+     * INPUT STYLE — the next words typed wear it — except when the caret is
+     * already in that exact pen, which takes it OFF, which is how a rich text
+     * editor's highlighter toggle behaves.
+     */
+    fun applyHighlight(key: String) {
+        val id = focusedId ?: run {
+            armedHighlight = highlightMaskFor(key)
+            return
+        }
+        val block = blocks[id] ?: return
+        val selection = selections[id]
+        if (selection != null && !selection.collapsed) {
+            val start = selection.min.coerceIn(0, block.text.length)
+            val end = selection.max.coerceIn(0, block.text.length)
+            // Tapping the pen the stretch already wears takes it off.
+            val every = (start until end).all { highlightKeyOf(mask(id).getOrElse(it) { 0 }) == key }
+            masks[id] = maskApplyHighlight(mask(id), start, end, if (every) null else key)
+            armedHighlight = null
+            onDocChanged(doc())
+            return
+        }
+        val current = highlightOfFocused()
+        armedHighlight = if (current == key) 0 else highlightMaskFor(key)
+    }
+
+    /**
      * v389 — a CHECKLIST page keeps making rows: Enter at the END of a row
      * starts the next line as a row already, and Enter on an EMPTY row ends the
      * list (the way every checklist behaves). Off by default, because on a
@@ -731,6 +844,24 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     fun text(id: String): String = blocks[id]?.text.orEmpty()
 
+    /**
+     * v389 — REPLACE A LINE'S WORDS OUTRIGHT.
+     *
+     * The dock's text-history browser restores a whole version over whichever
+     * line the caret was on. That is an edit like any other, so it goes through
+     * [maskAfterEdit] rather than swapping the text in: a mask shorter than its
+     * text paints the wrong characters on the tail of the line, and a restore
+     * is exactly the case where the two lengths nearly always differ.
+     */
+    fun setBlockText(id: String, text: String) {
+        val block = blocks[id] ?: return
+        if (text == block.text) return
+        masks[id] = maskAfterEdit(block.text, text, mask(id), 0, 0)
+        blocks[id] = block.copy(text = text)
+        selections[id] = TextRange(text.length)
+        onDocChanged(doc())
+    }
+
     fun mask(id: String): IntArray = masks[id] ?: emptyMask(text(id).length)
 
     fun photo(id: String): String? = blocks[id]?.photo
@@ -799,12 +930,15 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 splitOnNewlines(id, value)
                 return
             }
-            masks[id] = maskAfterEdit(old.text, newText, mask(id), armed, armedOff)
+            masks[id] = maskAfterEdit(old.text, newText, mask(id), armed, armedOff, armedHighlight)
             blocks[id] = old.copy(text = newText)
             // A pending tool has now been used: what follows continues in the
             // style just typed, so the buttons stop being "pending".
             if (armed != 0) armed = 0
             if (armedOff != 0) armedOff = 0
+            // The pen is consumed the same way — the words just typed wear it
+            // and the pen after them is whatever they wear.
+            if (armedHighlight != null) armedHighlight = null
         }
         selections[id] = value.selection
         compositions[id] = value.composition
@@ -1311,7 +1445,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // A whole-line tool is a WHOLE-LINE tool on both sides of the break; a
         // partly-styled line just keeps its own characters' styles.
         val after = if (headFlags != 0 && afterText.isNotEmpty()) {
-            IntArray(afterText.length) { headFlags }
+            // v389 — the wholesale re-stamp is about the FLAGS; the pen each
+            // character was written with is its own and rides across untouched,
+            // or a marked line would come out of an Enter with its marker gone.
+            IntArray(afterText.length) { i ->
+                headFlags or (maskBefore.getOrElse(caretIndex + i) { 0 } and HIGHLIGHT_BITS)
+            }
         } else {
             maskBefore.copyOfRange(caretIndex, block.text.length)
         }
@@ -1757,7 +1896,9 @@ private fun PersonalTextBlock(
             .let { if (it.min < 0) TextRange(0) else it },
         composition = state.composition(id)
     )
-    val alignOf = if (align == PersonalAlign.CENTER) TextAlign.Center else TextAlign.Start
+    // One place maps an alignment to the way text lays out, so a fourth kind
+    // cannot be added in three of the four spots that draw a line.
+    val alignOf = align.toTextAlign()
     val bodyStyle = when {
         isTitle -> TextStyle(
             fontFamily = FrauncesFontFamily,
@@ -2178,7 +2319,7 @@ internal fun PersonalDocView(
                 val markerFill = personalAccentInk()
                 val markerOnFill = MaterialTheme.colorScheme.surface
                 val markerOutline = ink.copy(alpha = 0.42f)
-                val alignOf = if (block.align == PersonalAlign.CENTER) TextAlign.Center
+                val alignOf = block.align.toTextAlign()
                 else TextAlign.Start
                 Box(
                     modifier = Modifier
@@ -2319,6 +2460,26 @@ internal fun PersonalToolDock(
     val accent = personalAccent()
     val accentInk = personalAccentInk()
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    // v389 — TEXT HISTORY, the dock's FIRST tool.
+    //
+    // The writing pages had it everywhere else in Curio but here, so the one
+    // surface that holds the longest-lived writing in the app was the one with
+    // no way back to an earlier draft (user request: "in journal bottom tool bar
+    // add the text history option as the first"). It snapshots the LINE the
+    // caret is on — a line is what a block is, so that is the unit the member
+    // was actually editing — and a restore lands back on that same line.
+    val historyContext = LocalContext.current
+    var historyOpen by remember { mutableStateOf(false) }
+    val historyLine = state.focusedId ?: state.blockIds.firstOrNull()
+    val historyText = historyLine?.let { state.text(it) }.orEmpty()
+    if (historyLine != null) {
+        rememberTextHistoryCapture(
+            ctx = historyContext,
+            field = "Journal line",
+            text = historyText,
+            resetKey = historyLine
+        )
+    }
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = surface,
@@ -2335,6 +2496,17 @@ internal fun PersonalToolDock(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(1.dp)
         ) {
+            // First in the dock, deliberately: it is the tool a member reaches
+            // for when something has gone wrong with the writing, and that is
+            // not a tool to go hunting for.
+            PersonalToolButton(
+                label = "Text history",
+                active = false,
+                accent = accentInk, ink = ink,
+                onClick = { historyOpen = true }
+            ) {
+                CurioIcon(CurioIcons.History, null, size = 19.dp)
+            }
             PersonalToolButton(
                 label = "Bold",
                 active = active and FLAG_BOLD != 0,
@@ -2367,6 +2539,72 @@ internal fun PersonalToolDock(
                 onClick = { state.toggle(FLAG_STRIKE) }
             ) {
                 StrikeGlyph()
+            }
+            // v389 — THE MARKER PEN, the first tool in the dock that is a
+            // COLOUR. It follows the bullet tool's manner exactly, because that
+            // is the manner this dock already taught the member: the first tap
+            // puts a pen down (the first one — the common case, one tap), and
+            // the tap after that opens the palette to change it or take it off
+            // (user request: "watermark with color options", "the text maker
+            // highlighter colr of the word"). The button WEARS the pen it is
+            // about to use, so the dock says which colour before the tap does.
+            Box {
+                var penMenuOpen by remember { mutableStateOf(false) }
+                val pen = state.highlightOfFocused()
+                val penOn = pen.isNotEmpty()
+                PersonalToolButton(
+                    label = if (penOn) "Marker: ${personalHighlightLabel(pen)}" else "Marker",
+                    active = penOn,
+                    // A lit marker wears its OWN ink rather than the theme's
+                    // accent — the same reason the menu's swatches are the pens
+                    // and not the theme: a colour tool that shows the accent
+                    // shows the wrong colour.
+                    accent = if (penOn) personalHighlightInk(pen) else accentInk,
+                    ink = ink,
+                    onClick = {
+                        if (penOn) penMenuOpen = true
+                        else state.applyHighlight(PERSONAL_HIGHLIGHT_KEYS.first())
+                    }
+                ) {
+                    MarkerPenGlyph(pen = if (penOn) personalHighlightInk(pen) else null)
+                }
+                DropdownMenu(
+                    expanded = penMenuOpen,
+                    onDismissRequest = { penMenuOpen = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { MarkerMenuLabel("Remove marker") },
+                        leadingIcon = {
+                            CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp)
+                        },
+                        trailingIcon = {
+                            if (!penOn) CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                        },
+                        onClick = {
+                            // With nothing selected this ARMS the eraser: the
+                            // words typed next come out unmarked, which is the
+                            // only way to write plain text inside a marked
+                            // sentence. With a selection it clears it outright.
+                            state.applyHighlight("")
+                            penMenuOpen = false
+                        }
+                    )
+                    PERSONAL_HIGHLIGHT_KEYS.forEach { key ->
+                        DropdownMenuItem(
+                            text = { MarkerMenuLabel(personalHighlightLabel(key)) },
+                            leadingIcon = { PenSwatch(personalHighlightInk(key)) },
+                            trailingIcon = {
+                                if (pen == key) {
+                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                                }
+                            },
+                            onClick = {
+                                state.applyHighlight(key)
+                                penMenuOpen = false
+                            }
+                        )
+                    }
+                }
             }
   if (showJournalTools) PersonalToolButton(
   label = "Large bold text",
@@ -2468,7 +2706,7 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.setAlign(PersonalAlign.START) }
             ) {
-                AlignGlyph(center = false)
+                AlignGlyph(AlignKind.START)
             }
             PersonalToolButton(
                 label = "Align centre",
@@ -2476,7 +2714,23 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.setAlign(PersonalAlign.CENTER) }
             ) {
-                AlignGlyph(center = true)
+                AlignGlyph(AlignKind.CENTER)
+            }
+            PersonalToolButton(
+                label = "Align right",
+                active = state.alignOfFocused() == PersonalAlign.END,
+                accent = accentInk, ink = ink,
+                onClick = { state.setAlign(PersonalAlign.END) }
+            ) {
+                AlignGlyph(AlignKind.END)
+            }
+            PersonalToolButton(
+                label = "Justify",
+                active = state.alignOfFocused() == PersonalAlign.JUSTIFY,
+                accent = accentInk, ink = ink,
+                onClick = { state.setAlign(PersonalAlign.JUSTIFY) }
+            ) {
+                AlignGlyph(AlignKind.JUSTIFY)
             }
             if (showJournalTools) PersonalToolButton(
                 label = "Add a photo",
@@ -2487,6 +2741,27 @@ internal fun PersonalToolDock(
                 CurioIcon(CurioIcons.Image, null, size = 18.dp)
             }
         }
+    }
+    // The browser rides OUTSIDE the surface: it is a sheet of its own, and
+    // nesting it in the dock's rounded pill would clip it to the pill.
+    if (historyOpen && historyLine != null) {
+        TextHistoryBrowser(
+            ctx = historyContext,
+            activeField = "Journal line",
+            currentText = historyText,
+            onRestore = { restored, mode ->
+                val merged = when (mode) {
+                    TextHistoryRestoreMode.REPLACE -> restored
+                    TextHistoryRestoreMode.ADD_TOP -> restored + "\n" + historyText
+                    // The line is ONE line, so "add below" means the line after
+                    // it — the second half is dropped in as its own block by the
+                    // newline rule rather than pressed into this one.
+                    TextHistoryRestoreMode.ADD_BOTTOM -> historyText + "\n" + restored
+                }
+                state.setBlockText(historyLine, merged)
+            },
+            onDismiss = { historyOpen = false }
+        )
     }
 }
 
@@ -2555,6 +2830,57 @@ private fun StrikeGlyph() {
  * menu's preview is literally the glyph the line will wear (v389 — it used to
  * be a separate dot-and-rules drawing that matched nothing).
  */
+/**
+ * THE MARKER PEN as the dock draws it: a nib over a wash.
+ *
+ * Drawn rather than taken from the icon subset, for the same reason the marker
+ * and alignment glyphs are: the pen has to show the COLOUR it will lay down, and
+ * a tinted bundled icon is not a pen.
+ *
+ * [pen] is the ink the next words will wear, or null when no pen is down — in
+ * which case the wash is drawn in the content colour so the button still reads
+ * as a highlighter among the other glyphs.
+ */
+@Composable
+private fun MarkerPenGlyph(pen: Color?) {
+    val ink = LocalContentColor.current
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(19.dp)) {
+        val wash = pen ?: ink.copy(alpha = 0.55f)
+        val tip = 1.9f.dp.toPx()
+        // The wash: the band the pen leaves on the page.
+        drawRoundRect(
+            color = wash,
+            topLeft = Offset(size.width * 0.12f, size.height * 0.60f),
+            size = Size(size.width * 0.70f, size.height * 0.26f),
+            cornerRadius = CornerRadius(size.height * 0.13f)
+        )
+        // The nib: a diagonal bar rising out of the wash, cut square so it
+        // reads as a chisel tip rather than a pencil.
+        val nib = Path().apply {
+            moveTo(size.width * 0.30f, size.height * 0.55f)
+            lineTo(size.width * 0.52f, size.height * 0.16f)
+            lineTo(size.width * 0.74f, size.height * 0.28f)
+            lineTo(size.width * 0.50f, size.height * 0.66f)
+            close()
+        }
+        drawPath(path = nib, color = ink, style = Stroke(width = tip, join = StrokeJoin.Round))
+    }
+}
+
+/** One pen in the palette: a rounded wash in the pen's own ink, so the menu is
+ *  the four colours rather than four words that mean colours. */
+@Composable
+private fun PenSwatch(color: Color) {
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
+        drawRoundRect(
+            color = color.copy(alpha = 0.85f),
+            topLeft = Offset(0f, size.height * 0.16f),
+            size = Size(size.width, size.height * 0.68f),
+            cornerRadius = CornerRadius(size.height * 0.30f)
+        )
+    }
+}
+
 @Composable
 private fun MarkerGlyph(marker: PersonalMarker) {
     val ink = LocalContentColor.current
@@ -2574,19 +2900,44 @@ private fun MarkerMenuLabel(text: String) {
     )
 }
 
-/** The alignment tools draw their own glyph (three rules), so the dock never
- *  depends on a font subset that has no align icons. */
+/** Which of the four alignments a glyph draws. One enum rather than a
+ *  `center: Boolean`, which could never say "right" let alone "justify". */
+internal enum class AlignKind { START, CENTER, END, JUSTIFY }
+
+/**
+ * The alignment tools draw their own glyph (four rules), so the dock never
+ * depends on a font subset that has no align icons. The rule lengths are what
+ * tell the four apart at 18dp: left is ragged right, right is ragged left,
+ * centre is ragged both ends, and justified is four FULL rules — which is the
+ * only one of the four that can be drawn flush on both edges without lying
+ * about what it does.
+ */
 @Composable
-private fun AlignGlyph(center: Boolean) {
+private fun AlignGlyph(kind: AlignKind) {
     val ink = LocalContentColor.current
     androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
         val stroke = 1.8f.dp.toPx()
         val width = size.width
-        val gaps = listOf(1f, 0.72f, 1f, 0.72f)
-        gaps.forEachIndexed { index, fraction ->
+        // The last rule is short on every ragged style; the ones above it are
+        // full, which is the shape the eye reads as an alignment at a glance.
+        val fractions = when (kind) {
+            AlignKind.START -> listOf(1f, 0.68f, 1f, 0.5f)
+            AlignKind.END -> listOf(1f, 0.68f, 1f, 0.5f)
+            AlignKind.CENTER -> listOf(1f, 0.68f, 1f, 0.5f)
+            AlignKind.JUSTIFY -> listOf(1f, 1f, 1f, 1f)
+        }
+        fractions.forEachIndexed { index, fraction ->
             val y = size.height * (0.22f + index * 0.19f)
             val lineWidth = width * fraction
-            val x = if (center) (width - lineWidth) / 2f else 0f
+            val x = when (kind) {
+                AlignKind.START -> 0f
+                AlignKind.CENTER -> (width - lineWidth) / 2f
+                AlignKind.END -> width - lineWidth
+                // A justified rule starts at the margin on two of its four
+                // lines and is centred on the others — the way justified prose
+                // reads: flush, flush, and a short last line in the middle.
+                AlignKind.JUSTIFY -> if (index == 3) (width - lineWidth) / 2f else 0f
+            }
             drawLine(
                 color = ink,
                 start = Offset(x, y),
