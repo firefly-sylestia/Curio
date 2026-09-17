@@ -61,7 +61,9 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.data.ReaderMarkEntity
 import com.curio.app.data.openSearchUrl
+import com.curio.app.features.community.SocialPullQuote
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -92,6 +94,14 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     val notes by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
         runCatching {
             PersonalRepositoryHolder.repo.observeBookNotes(bookId).collect { value = it }
+        }
+    }
+    // THE MARGINS: what the member marked while READING this book in Curio's
+    // reader. A highlight carries the passage's own WORDS, so the page can hold
+    // it as a quote without opening the file again.
+    val margins by produceState(initialValue = emptyList<ReaderMarkEntity>(), bookId) {
+        runCatching {
+            PersonalRepositoryHolder.repo.observeBookMarks(bookId).collect { value = it }
         }
     }
     // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
@@ -402,6 +412,41 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 )
             }
 
+                // v389 — FROM THE MARGINS. The passage is quoted from the mark
+                // itself (a highlight stores the words it was made on), so the
+                // page can show what the member kept without re-reading the
+                // file — and tapping one opens the reader AT that mark, which is
+                // what makes this a door rather than a museum. Made read-side
+                // only: the margins are something to read back, not a pile of
+                // cards to scroll past on the way to the writing.
+                if (!editing && margins.isNotEmpty()) {
+                    item("margins") {
+                        MarginsCard(
+                            marks = margins,
+                            onOpen = { mark ->
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            // The reader restores where it was
+                                            // left, so "go to this mark" is
+                                            // written as a position first.
+                                            PersonalRepositoryHolder.repo.saveReaderPosition(
+                                                bookId = bookId,
+                                                sourceKey = mark.sourceKey,
+                                                index = mark.positionIndex,
+                                                fraction = mark.positionFraction
+                                            )
+                                        }
+                                    }
+                                    navController.navigate(CurioRoutes.reader(bookId)) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+
                 item("progress") {
                     ProgressCard(
                         total = total,
@@ -567,6 +612,76 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         )
     }
 }
+
+/**
+ * THE BOOK'S MARGINS — what the member marked while reading it.
+ *
+ * A quote is the family's own pull quote ([SocialPullQuote]): the same rule down
+ * the side and the same coffee ink the journal's quote panel and the community's
+ * text posts wear, so a quote is one thing across the app. The member's own note
+ * rides as the credit — their words tied to the passage they were about — and a
+ * highlight with no note reads as what it is.
+ */
+@Composable
+private fun MarginsCard(
+    marks: List<ReaderMarkEntity>,
+    onOpen: (ReaderMarkEntity) -> Unit
+) {
+    val accent = personalAccent()
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(15.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CurioIcon(CurioIcons.Bookmark, null, tint = accent, size = 17.dp)
+                Text(
+                    "From the margins",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = FrauncesFontFamily,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    "${marks.size}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = accent
+                )
+            }
+            marks.take(MARGINS_SHOWN).forEach { mark ->
+                Spacer(Modifier.height(12.dp))
+                Surface(
+                    onClick = { onOpen(mark) },
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color.Transparent,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    SocialPullQuote(
+                        words = mark.text.ifBlank { "Chapter ${mark.chapter}" },
+                        credit = mark.note.ifBlank { mark.markKind.label }
+                    )
+                }
+            }
+            if (marks.size > MARGINS_SHOWN) {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "${marks.size - MARGINS_SHOWN} more in the reader",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                )
+            }
+        }
+    }
+}
+
+/** How many margins the book page quotes: enough to read back, never a wall. */
+private const val MARGINS_SHOWN = 4
 
 @Composable
 private fun ProgressCard(

@@ -434,3 +434,7 @@ object PersonalChapterCodec {
 fun newBlockId(): String = "pb-" + java.util.UUID.randomUUID().toString()
 fun newNoteId(): String = "pn-" + java.util.UUID.randomUUID().toString()
 fun newPersonalBookId(): String = "bk-" + java.util.UUID.randomUUID().toString()
+
+/** A reader mark's id (see [ReaderMarkEntity]) — its own prefix, so a mark can
+ *  never be mistaken for a note or a book when one is logged out of context. */
+fun newReaderMarkId(): String = "rm-" + java.util.UUID.randomUUID().toString()

@@ -12,9 +12,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CaptureEntity::class, TopicEntity::class, CachedTopicEntity::class,
         // v387 — the personal writing store (journals + books + chapter
         // reviews). Its own tables, never the capture archive's.
-        PersonalNoteEntity::class, PersonalBookEntity::class
+        PersonalNoteEntity::class, PersonalBookEntity::class, ReaderMarkEntity::class
     ],
-    version = 18,
+    version = 19,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -367,6 +367,49 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v389 — the reader's marks.
+         *
+         * A brand-new table rather than columns on `personal_books`, because
+         * marks are a LIST (one book has many) and because it keeps this
+         * migration to a single CREATE: nothing already on the shelf is
+         * touched, and a book that is never opened in the reader has no rows
+         * here at all.
+         *
+         * The DDL is byte-for-byte what Room expects of [ReaderMarkEntity] —
+         * every column NOT NULL (none of them carries a SQL default, because a
+         * Kotlin default is not one) and both indices named the way Room names
+         * them, or `validateMigration` fails on the next open.
+         */
+        val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `reader_marks` (" +
+                        "`id` TEXT NOT NULL, " +
+                        "`bookId` TEXT NOT NULL, " +
+                        "`sourceKey` TEXT NOT NULL, " +
+                        "`positionIndex` INTEGER NOT NULL, " +
+                        "`positionFraction` REAL NOT NULL, " +
+                        "`kind` TEXT NOT NULL, " +
+                        "`text` TEXT NOT NULL, " +
+                        "`note` TEXT NOT NULL, " +
+                        "`colorKey` TEXT NOT NULL, " +
+                        "`chapter` INTEGER NOT NULL, " +
+                        "`createdAtMillis` INTEGER NOT NULL, " +
+                        "`updatedAtMillis` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`id`))"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_reader_marks_bookId` " +
+                        "ON `reader_marks` (`bookId`)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_reader_marks_bookId_sourceKey` " +
+                        "ON `reader_marks` (`bookId`, `sourceKey`)"
+                )
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -381,7 +424,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

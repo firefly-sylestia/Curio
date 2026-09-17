@@ -1,5 +1,80 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, IN PROGRESS — the book reader becomes a reading surface, and its marks reach the book page)
+
+This is the READER half of the prompt standing in the "Next prompt" slot at the end of
+this file. Verbatim of that half:
+
+"and now let's fix the pdf book reader and the epub reader. we need to add hold select
+tools such as highlights, notes book marks for chapters. etc etc proper book reader
+features and also for eye adjustment background color changer. for epub proper
+continuous scroll and page and position remember of the last read. and also auto
+marking the perfect read. and fix the pdf reader the page are not full screen. hide
+the header when reading. proper pinch to zoom swipe to change pages not a next and
+back button and all for pdf too and if texts are scanned proper highlights etc again
+y bookmarks etc too. suggest more book features and add and also keep the auto hide
+style consistent so when reading the reader never sees any distraction."
+
+### Decisions (ask_user, answered)
+
+- **Order**: readers first (EPUB, then PDF, with the annotation table); the two named
+  editors after. The rest of the pending prompt stays pending.
+- **"highlights can become quote notes in the book page"**: the book page SHOWS the
+  marks made while reading as quotes from the margins, each one a door back into the
+  reader at that mark — and it lands read-side only.
+- **The reader opens like a book should**: an existing file resumes where it was left;
+  a page with nothing marked still opens at the start, never at a forced place.
+
+### Shipped
+
+- **`reader_marks`** (`data/PersonalEntity.kt`, migration 18 → 19 in
+  `CurioDatabase.MIGRATION_18_19`): one table for a bookmark, a highlight, a note
+  **and** where the member stopped (`ReaderMarkKind.POSITION`), keyed by book id PLUS
+  the document path (`sourceKey`) — so re-wiring a book to another PDF starts that
+  file's own marks instead of landing the old highlights on text that is not there.
+  The DDL is byte-for-byte what Room expects (every column NOT NULL, both indices
+  named Room's way) or `validateMigration` fails on the next open.
+- **`PersonalDao` / `PersonalRepository`**: `observeReaderMarks`, `readerMarks`,
+  `readerPosition`, `saveReaderMark` (an upsert — re-highlighting a passage is the
+  SAME mark in a new ink), `deleteReaderMark`, `saveReaderPosition` (one row per book +
+  file, rewritten: "where was I" is a fact about the book, not a history of it) and
+  `observeBookMarks` (every mark in the book, across files — the book page's margins).
+- **`BookReaderScreen.kt`** — the reader as a place to READ:
+  - EPUB / plain text read CONTINUOUSLY (the file's `h1`/`h2`/`h3` become in-flow
+    headings, one section per archive entry), so there is no page boundary to fight.
+  - A PDF is a pager, but each page renders ON DEMAND (`produceState` per page) — the
+    first pass drew every page at open, which is why a long PDF took seconds to appear
+    and held a phone's memory while it did.
+  - The head and foot hide themselves (4.2s, and while a sheet is up) and come back on
+    a tap — the same auto-hide for both formats, and the tap sits UNDER the words so
+    it never eats a long press meant for a passage.
+  - A HOLD raises the ink bar: four highlighters, a note, a bookmark. Marks are listed
+    in the reader with their words, and a tap lands back on the passage.
+  - **`jumpToMark` vs `jumpToChapter`** — two jumps, because a mark points at a BLOCK
+    and the chapter sheet names a SECTION; the old single `jumpTo` sent a highlight to
+    whichever heading happened to share its block number.
+  - The foot names the chapter (the page, for a PDF) from the LIVE position, and the
+    stored fraction is progress through the book ("38% through"), not a pixel offset.
+  - Four page inks (paper / sepia / night / white), held for the process — an ink is
+    chosen for READING, not for one novel.
+- **`BookDetailScreen.kt`** — `MarginsCard`: the book's highlights and notes as quotes
+  from the margins (the family's own `SocialPullQuote`), read-side only, each one a
+  door into the reader at that mark.
+- Docs: `app/AGENTS.md` (the reader + the marks table) and the 20260922 store changelog.
+
+### Verified statically
+
+`check_braces.js` over every touched file, a scan for duplicate adjacent annotations,
+and a read-through for suspend-called-from-non-suspend. **No Gradle here — CI is the
+compile check.**
+
+### ⏭ Still pending from the same prompt
+
+The two named editors on the journal's dock (the Share-Hub full-screen editor and the
+book sheet's note expand) — see the status in the "Next prompt" slot at the end of
+this file. Pinch-to-zoom and a real text layer over a scanned PDF page are NOT in this
+pass (they need a different rendering strategy than `PdfRenderer` gives).
+
 ## Request (2026-09-17, DONE — line tools across Enter, backspace joins a line, the coffee quote, the pinned doors, and the mic)
 
 Verbatim:
@@ -2328,6 +2403,14 @@ Done:
 - **TopicRevealScreen**: FilmInfoSection, AnimeInfoSection, SongInfoSection with poster cards.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
+
+**Status (2026-09-17):** the READER half is DONE — continuous EPUB/text, PDF pages on
+demand, hold-to-mark (highlight / note / bookmark) with its own `reader_marks` table
+(migration 18 → 19), position memory per book + file, the four page inks, auto-hiding
+chrome, and the book page's "From the margins". See the request section at the TOP of
+this file. **Still pending:** the two editors on the journal dock (below), plus the
+scanned-PDF text layer and pinch-to-zoom.
+
 now yk the full screen text editor in share card and also in the add note expand of book buttom sheet. well they should use the new journal style buttom tool bar editing with the all tools support. except the image. and also add more tools to the journal buttom tool bar like text size from the save your take notes format editor, more formats of justify etc etc from share card. keeping it as one format button with drop down. font change etc.
 
 remember the journal style buttom floating tool bar na fits page style to be the shared for the new full screen text editors ask again if any confusion.

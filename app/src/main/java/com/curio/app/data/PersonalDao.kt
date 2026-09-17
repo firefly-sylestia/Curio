@@ -42,6 +42,50 @@ interface PersonalDao {
     @Query("SELECT * FROM personal_notes WHERE deletedAt IS NULL AND bookId = :bookId ORDER BY chapterIndex ASC")
     suspend fun bookNotes(bookId: String): List<PersonalNoteEntity>
 
+    // ── The reader's marks (v389) ─────────────────────────────────────
+    //
+    // One table for both the marks a member MADE and where they stopped
+    // reading: "last read" is a row of its own kind ([ReaderMarkKind.POSITION]),
+    // so the reader's memory arrived with the same migration as the marks it
+    // sits beside and the two can never disagree about the book or the file.
+
+    /** Every mark the member made in THIS file of this book, in reading order. */
+    @Query(
+        "SELECT * FROM reader_marks WHERE bookId = :bookId AND sourceKey = :sourceKey " +
+            "AND kind != 'position' ORDER BY positionIndex ASC, createdAtMillis ASC"
+    )
+    fun observeReaderMarks(bookId: String, sourceKey: String): Flow<List<ReaderMarkEntity>>
+
+    @Query(
+        "SELECT * FROM reader_marks WHERE bookId = :bookId AND sourceKey = :sourceKey " +
+            "AND kind != 'position' ORDER BY positionIndex ASC, createdAtMillis ASC"
+    )
+    suspend fun readerMarks(bookId: String, sourceKey: String): List<ReaderMarkEntity>
+
+    /**
+     * Every mark in the BOOK, whichever file it was read in — what the book page
+     * shows as its margins. A highlight is kept with the passage's own WORDS, so
+     * the page can quote it without opening the file again.
+     */
+    @Query(
+        "SELECT * FROM reader_marks WHERE bookId = :bookId AND kind != 'position' " +
+            "ORDER BY chapter ASC, positionIndex ASC, createdAtMillis ASC"
+    )
+    fun observeBookMarks(bookId: String): Flow<List<ReaderMarkEntity>>
+
+    /** Where the member stopped in THIS file (null when they never opened it). */
+    @Query(
+        "SELECT * FROM reader_marks WHERE bookId = :bookId AND sourceKey = :sourceKey " +
+            "AND kind = 'position' LIMIT 1"
+    )
+    suspend fun readerPosition(bookId: String, sourceKey: String): ReaderMarkEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertReaderMark(mark: ReaderMarkEntity)
+
+    @Query("DELETE FROM reader_marks WHERE id = :id")
+    suspend fun deleteReaderMark(id: String)
+
     // ── Books ──────────────────────────────────────────────────────────
 
     @Query("SELECT * FROM personal_books ORDER BY finishedAtMillis IS NOT NULL, updatedAtMillis DESC")
@@ -180,6 +224,68 @@ class PersonalRepository(private val dao: PersonalDao) {
     /** The shelf row for a catalog book (the topic page's bridge). */
     suspend fun bookForCatalog(catalogId: String): PersonalBookEntity? =
         if (catalogId.isBlank()) null else dao.bookForCatalog(catalogId)
+
+    // ── The reader's marks (v389) ─────────────────────────────────────
+
+    fun observeReaderMarks(bookId: String, sourceKey: String): Flow<List<ReaderMarkEntity>> =
+        dao.observeReaderMarks(bookId, sourceKey)
+
+    suspend fun readerMarks(bookId: String, sourceKey: String): List<ReaderMarkEntity> =
+        dao.readerMarks(bookId, sourceKey)
+
+    suspend fun readerPosition(bookId: String, sourceKey: String): ReaderMarkEntity? =
+        dao.readerPosition(bookId, sourceKey)
+
+    /** The book's margins: every mark in it, across every file it was read in. */
+    fun observeBookMarks(bookId: String): Flow<List<ReaderMarkEntity>> =
+        dao.observeBookMarks(bookId)
+
+    /**
+     * Adds or replaces one mark. An upsert on purpose: re-highlighting the same
+     * passage is the SAME mark in a new colour, not a second one stacked on it.
+     */
+    suspend fun saveReaderMark(mark: ReaderMarkEntity) {
+        val now = System.currentTimeMillis()
+        dao.upsertReaderMark(
+            mark.copy(
+                updatedAtMillis = now,
+                createdAtMillis = if (mark.createdAtMillis == 0L) now else mark.createdAtMillis
+            )
+        )
+    }
+
+    suspend fun deleteReaderMark(id: String) = dao.deleteReaderMark(id)
+
+    /**
+     * The member stopped reading here.
+     *
+     * ONE row per book + file, rewritten rather than appended: "where was I" is
+     * a fact about the book, not a history of it — and it is what makes the
+     * reader open where it was left, and what an auto bookmark IS (the marks
+     * sheet shows this row as "Last read · auto").
+     */
+    suspend fun saveReaderPosition(
+        bookId: String,
+        sourceKey: String,
+        index: Int,
+        fraction: Float
+    ) {
+        val now = System.currentTimeMillis()
+        val existing = dao.readerPosition(bookId, sourceKey)
+        dao.upsertReaderMark(
+            (existing ?: ReaderMarkEntity(
+                id = newReaderMarkId(),
+                bookId = bookId,
+                sourceKey = sourceKey,
+                kind = ReaderMarkKind.POSITION.key,
+                createdAtMillis = now
+            )).copy(
+                positionIndex = index,
+                positionFraction = fraction.coerceIn(0f, 1f),
+                updatedAtMillis = now
+            )
+        )
+    }
 
     suspend fun bookByTitle(title: String): PersonalBookEntity? = dao.bookByTitle(title.trim())
 

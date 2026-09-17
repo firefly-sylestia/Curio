@@ -1,4 +1,9 @@
 ADD:
+- Reading: a book's own reader — tap once and the head and foot step out of the way, tap again and they come back, so the words get the whole screen.
+- Reading: mark a passage as you read — press and hold to highlight it in one of four inks, write a note on it, or drop a bookmark. Every mark is listed with the words it was made on, and jumping to one lands back on it.
+- Reading: what you marked while reading now shows on the book's page as quotes from the margins, and tapping one opens the reader at that mark.
+- Reading: an EPUB or a text file reads as one continuous scroll instead of a page at a time, with each chapter a heading you can jump to.
+- Reading: the page's own ink is yours to choose — paper, sepia, night or white — for daylight, lamplight or the dark.
 - Books: the shelf shows three covers across, split into what you are reading and what you have finished.
 - Books: a book added from the open library now arrives with its real chapter names and page ranges, read from the edition's own table of contents.
 - Books: a photo on a page now grows out of where you tapped it — no screen change, the page stays behind it.
@@ -28,6 +33,9 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Reading: a book opens exactly where you stopped, and the foot of the reader names the chapter you are in (the page, for a PDF) as you read instead of the place it opened at.
+- Reading: a PDF draws its pages as you reach them instead of every page up front, so a long PDF opens at once and stops holding so much of the phone's memory.
+- Reading: a mark belongs to the book AND to the file it was made in, so wiring a book to another PDF starts that file's own marks instead of landing the old highlights on text that is not there.
 - Books: a saved book opens the way a journal does — the reading side when it has writing and the pen when it has none (the shelf was being asked before it had answered, so a book with writing still opened as the book view).
 - To-do: picking a row up to move it no longer fights the swipe — a carried row cannot also be swiped off the list, and a task that wraps onto two lines counts for its own height, so the list lands where your finger put it.
 - Cabinet: tapping "Curiying now" on a book also puts it on your own shelf, so it shows up in My shelf on Home and the book's chapter notes attach to it — taking it back out of the shelf never deletes the book.
