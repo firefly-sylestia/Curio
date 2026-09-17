@@ -108,6 +108,15 @@ interface PersonalDao {
     @Query("UPDATE personal_books SET blurb = :blurb, updatedAtMillis = :now WHERE id = :id")
     suspend fun setBlurb(id: String, blurb: String, now: Long)
 
+    /**
+     * The book's OWN FILE, and nothing else (v389). It is a column-scoped
+     * write on purpose: attaching a document must never rewrite a title, a
+     * blurb, a chapter list or a progress mark — which is exactly what the
+     * import path used to do when it named the book after the picked file.
+     */
+    @Query("UPDATE personal_books SET documentPath = :path, updatedAtMillis = :now WHERE id = :id")
+    suspend fun setDocument(id: String, path: String, now: Long)
+
     @Query("DELETE FROM personal_notes WHERE id = :id")
     suspend fun deleteNote(id: String)
 
@@ -250,6 +259,14 @@ class PersonalRepository(private val dao: PersonalDao) {
 
     suspend fun setBlurb(bookId: String, blurb: String) =
         dao.setBlurb(bookId, blurb, System.currentTimeMillis())
+
+    /**
+     * v389 — points the book at its own file. Only [documentPath] moves: the
+     * title, the blurb, the chapters and the progress are the member's, and
+     * attaching a PDF is not a reason to touch any of them.
+     */
+    suspend fun setDocument(bookId: String, path: String) =
+        dao.setDocument(bookId, path, System.currentTimeMillis())
 
     /**
      * Stores the chapter list a book learned (Open Library's table of

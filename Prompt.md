@@ -58,10 +58,17 @@ Undo pill, ~5 s**.
    the default once the book has writing, the About-this-book block collapsed
    (and still editable) while writing, a leaving flush for the chapter review
    (the same gap the journal page had), and the attached-file Read pill there.
-4. **The attached file:** a floating Read pill that copies a picked PDF/EPUB into
-   the app's own storage, opens it in the reader, and never renames the book on
-   import (the import path's file-name rename is the bug); the Read pill leaves
-   its old spot beside "Download help".
+4. **The attached file: DONE (this slice).** `documentPath` on `personal_books`
+   (migration 17 → 18) + `BookFiles` (copies a picked PDF/EPUB/txt into
+   `filesDir/books/<bookId>.<ext>`) + `PersonalDao.setDocument` (a
+   COLUMN-scoped write, so attaching can never touch a title) + the book page's
+   floating `BookReadPill` ("Read" / "Read a file"), and the old `Read` text
+   button beside "Download help" is gone. The reader opens the path, with the
+   legacy `content://` `coverUrl` handle as a fallback.
+   STILL OPEN: the shelf's add-sheet "Import a file" door names the NEW book
+   after the picked file (it is the only name available for a brand-new book).
+   The attach path never renames — flag this to the user before changing the
+   door's behaviour (removing it would need confirmation).
 5. **Currently Reading, wired:** shelf books appear in the Cabinet's collection
    with a correct count, and the chapter notes from the topic's Book Notes sheet
    and the shelf's chapter page are provably one row (the `bookForCatalog` bridge).

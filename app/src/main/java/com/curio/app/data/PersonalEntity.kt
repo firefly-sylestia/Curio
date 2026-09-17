@@ -120,6 +120,18 @@ data class PersonalBookEntity(
      */
     val chaptersJson: String = "",
     /**
+     * THE BOOK'S OWN FILE when the member attached one (v389): a PDF, EPUB or
+     * plain text, COPIED into the app's own storage under
+     * `filesDir/books/<bookId>.<ext>` by `BookFiles`. It is a path, not a
+     * `content://` handle, so it outlives the picker's permission and opens
+     * offline for as long as the book is on the shelf.
+     *
+     * It lives in its OWN column because `coverUrl` is the COVER's: imported
+     * books used to park their document there, which is why the shelf tried to
+     * paint a PDF as a picture and showed a broken cover.
+     */
+    val documentPath: String = "",
+    /**
      * THE BOOK'S ABOUT-TEXT when it did not come from Curio's own catalog:
      * Open Library's description of the work (see `BookEnrichment`), kept on
      * the row so the page's "About this book" card is there offline too. A

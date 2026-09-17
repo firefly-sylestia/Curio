@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         // reviews). Its own tables, never the capture archive's.
         PersonalNoteEntity::class, PersonalBookEntity::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -345,6 +345,28 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v17 → v18 (v389): the book's OWN FILE.
+         *
+         * A book could hold a picked PDF/EPUB only by putting its URI in
+         * `coverUrl`, which is the COVER's column — so an imported book drew a
+         * broken cover (the shelf tried to paint a PDF as a picture) and the
+         * file itself was a `content://` handle that died with the permission
+         * that came with it. The document now has its own column, and what it
+         * holds is a path inside the app's own storage (`filesDir/books/`) that
+         * no permission can revoke.
+         *
+         * The default is empty, so every book that never had a file reads
+         * exactly as it did before.
+         */
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE personal_books ADD COLUMN documentPath TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -359,7 +381,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

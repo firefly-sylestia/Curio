@@ -1,5 +1,8 @@
 package com.curio.app.features.personal
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -178,6 +181,32 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // The download-help sheet (PDF / EPUB).
     var downloadSheet by remember(bookId) { mutableStateOf(false) }
 
+    // ── The book's own FILE (v389) ─────────────────────────────────────
+    // A PDF or EPUB the member wires to THIS book. The picked file is COPIED
+    // into the app's own storage ([BookFiles]) and opened in Curio's reader,
+    // so it works offline and long after the picker's permission would have
+    // expired — and attaching one never touches the book's name, blurb,
+    // chapters or progress. The pill below is the only door to it.
+    var attachFailed by remember(bookId) { mutableStateOf(false) }
+    val documentPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            val path = withContext(Dispatchers.IO) {
+                BookFiles.import(context, bookId, uri, book?.documentPath.orEmpty())
+            }
+            if (path.isNullOrBlank()) {
+                attachFailed = true
+            } else {
+                withContext(Dispatchers.IO) {
+                    runCatching { PersonalRepositoryHolder.repo.setDocument(bookId, path) }
+                }
+                navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
+            }
+        }
+    }
+
     // The book's own note ("why I picked it up") — same auto-save discipline.
     var blurb by remember(bookId) { mutableStateOf("") }
     var blurbSeeded by remember(bookId) { mutableStateOf(false) }
@@ -231,178 +260,211 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         val highestWritten = writtenChapters.maxOrNull() ?: 0
         val chapterCount = maxOf(total, chapters.size, highestWritten, 1)
 
-        LazyColumn(
-            // weight, not fillMaxSize: the tool dock is the column's LAST child
-            // and has to stay visible below the list (and above the keyboard).
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item("identity") {
-                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    BookCover(
-                        title = current.title,
-                        author = current.author,
-                        coverUrl = current.coverUrl,
-                        corner = 12.dp,
-                        modifier = Modifier
-                            .width(104.dp)
-                            .height(156.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                    )
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            current.title,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontFamily = FrauncesFontFamily,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = MaterialTheme.colorScheme.onBackground
+        // The list keeps the column's weight (the reader is a separate screen),
+        // and the Read pill floats OVER it so it is reachable wherever the
+        // member has scrolled to.
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item("identity") {
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        BookCover(
+                            title = current.title,
+                            author = current.author,
+                            coverUrl = current.coverUrl,
+                            corner = 12.dp,
+                            modifier = Modifier
+                                .width(104.dp)
+                                .height(156.dp)
+                                .clip(RoundedCornerShape(12.dp))
                         )
-                        if (current.author.isNotBlank()) {
+                        Column(Modifier.weight(1f)) {
                             Text(
-                                current.author,
-                                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = LoraFontFamily),
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                                current.title,
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontFamily = FrauncesFontFamily,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = MaterialTheme.colorScheme.onBackground
                             )
-                        }
-                        // What the app knows about the book, at a glance.
-                        val facts = listOfNotNull(
-                            current.pageCount.takeIf { it > 0 }?.let { "$it pages" },
-                            current.totalChapters.takeIf { it > 0 }?.let { "$it chapters" },
-                            current.catalogId.takeIf { it.isNotBlank() }
-                                ?.let { "From Curio's catalog" }
-                        ).joinToString(" \u00b7 ")
-                        if (facts.isNotBlank()) {
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                facts,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
-                            )
-                        }
-                        // Two doors, both always open: ask the app's sources
-                        // again (the first pass runs by itself), or go looking
-                        // for a copy to download.
-                        Spacer(Modifier.height(8.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
-                            DownloadPill(enabled = true) { downloadSheet = true }
-                            if (current.coverUrl.startsWith("content://")) {
-                                TextButton(onClick = {
-                                    navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
-                                }) { Text("Read") }
+                            if (current.author.isNotBlank()) {
+                                Text(
+                                    current.author,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontFamily = LoraFontFamily),
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                                )
                             }
-                        }
-                        if (lookingUp || lookupNote != null) {
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                lookupNote ?: "Looking it up\u2026",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+                            // What the app knows about the book, at a glance.
+                            val facts = listOfNotNull(
+                                current.pageCount.takeIf { it > 0 }?.let { "$it pages" },
+                                current.totalChapters.takeIf { it > 0 }?.let { "$it chapters" },
+                                current.catalogId.takeIf { it.isNotBlank() }
+                                    ?.let { "From Curio's catalog" }
+                            ).joinToString(" \u00b7 ")
+                            if (facts.isNotBlank()) {
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    facts,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+                                )
+                            }
+                            // Two doors, both always open: ask the app's sources
+                            // again (the first pass runs by itself), or go looking
+                            // for a copy to download.
+                            Spacer(Modifier.height(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
+                                DownloadPill(enabled = true) { downloadSheet = true }
+                            }
+                            if (lookingUp || lookupNote != null) {
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    lookupNote ?: "Looking it up\u2026",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+                                )
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            BlurbField(
+                                value = blurb,
+                                onValueChange = { blurb = it },
+                                enabled = blurbSeeded
                             )
                         }
-                        Spacer(Modifier.height(12.dp))
-                        BlurbField(
-                            value = blurb,
-                            onValueChange = { blurb = it },
-                            enabled = blurbSeeded
-                        )
                     }
                 }
-            }
 
-            item("progress") {
-                ProgressCard(
-                    total = total,
-                    current = current.currentChapter,
-                    finished = current.isFinished,
-                    onChapter = { chapter ->
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                runCatching { PersonalRepositoryHolder.repo.setProgress(bookId, chapter) }
+                item("progress") {
+                    ProgressCard(
+                        total = total,
+                        current = current.currentChapter,
+                        finished = current.isFinished,
+                        onChapter = { chapter ->
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching { PersonalRepositoryHolder.repo.setProgress(bookId, chapter) }
+                                }
                             }
-                        }
-                    },
-                    onTotal = { chapters ->
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                runCatching {
-                                    PersonalRepositoryHolder.repo.saveBook(
-                                        current.copy(totalChapters = chapters)
-                                    )
+                        },
+                        onTotal = { chapters ->
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        PersonalRepositoryHolder.repo.saveBook(
+                                            current.copy(totalChapters = chapters)
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        onFinished = { done ->
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching { PersonalRepositoryHolder.repo.setFinished(bookId, done) }
                                 }
                             }
                         }
-                    },
-                    onFinished = { done ->
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                runCatching { PersonalRepositoryHolder.repo.setFinished(bookId, done) }
-                            }
-                        }
-                    }
-                )
-            }
-
-            // ABOUT THIS BOOK. A book from Curio's own lane reads the catalog's
-            // synopsis; one the catalog does not have reads the description
-            // Open Library keeps for the work (fetched by BookEnrichment, so it
-            // is here offline too). The card says which of the two it is.
-            val about = catalogSynopsis.ifBlank { current.synopsis }
-            if (about.isNotBlank()) {
-                item("synopsis") {
-                    SynopsisCard(
-                        synopsis = about,
-                        source = if (catalogSynopsis.isNotBlank()) "Curio catalog" else "Open Library"
                     )
                 }
+
+                // ABOUT THIS BOOK. A book from Curio's own lane reads the catalog's
+                // synopsis; one the catalog does not have reads the description
+                // Open Library keeps for the work (fetched by BookEnrichment, so it
+                // is here offline too). The card says which of the two it is.
+                val about = catalogSynopsis.ifBlank { current.synopsis }
+                if (about.isNotBlank()) {
+                    item("synopsis") {
+                        SynopsisCard(
+                            synopsis = about,
+                            source = if (catalogSynopsis.isNotBlank()) "Curio catalog" else "Open Library"
+                        )
+                    }
+                }
+
+                item("chapters-title") {
+                    Text(
+                        if (total > 0) "Chapters" else "Where you write",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontFamily = FrauncesFontFamily,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
+                    )
+                }
+
+                items(
+                    count = chapterCount,
+                    key = { index -> "chapter-${index + 1}" }
+                ) { index ->
+                    val chapter = index + 1
+                    val review = notes.firstOrNull { it.chapterIndex == chapter }
+                    ChapterCard(
+                        chapter = chapter,
+                        // The catalog's own words for this chapter, when the book came
+                        // from Curio's lane: a name, and the pages it spans.
+                        catalogTitle = chapters.getOrNull(chapter - 1)?.title.orEmpty(),
+                        catalogPages = chapters.getOrNull(chapter - 1)
+                            ?.takeIf { it.pageStart > 0 && it.pageEnd > 0 }
+                            ?.let { "pp. ${it.pageStart}\u2013${it.pageEnd}" }
+                            .orEmpty(),
+                        review = review,
+                        // The chapter's own page (its summary and its review, and
+                        // the writing) — never a canvas grown inside this list.
+                        onOpen = {
+                            navController.navigate(CurioRoutes.chapter(bookId, chapter)) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onDelete = { pendingReviewDelete = review }
+                    )
+                }
+
+                item("shelf-tail") { Spacer(Modifier.height(96.dp)) }
             }
 
-            item("chapters-title") {
-                Text(
-                    if (total > 0) "Chapters" else "Where you write",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontFamily = FrauncesFontFamily,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
-                )
-            }
-
-            items(
-                count = chapterCount,
-                key = { index -> "chapter-${index + 1}" }
-            ) { index ->
-                val chapter = index + 1
-                val review = notes.firstOrNull { it.chapterIndex == chapter }
-                ChapterCard(
-                    chapter = chapter,
-                    // The catalog's own words for this chapter, when the book came
-                    // from Curio's lane: a name, and the pages it spans.
-                    catalogTitle = chapters.getOrNull(chapter - 1)?.title.orEmpty(),
-                    catalogPages = chapters.getOrNull(chapter - 1)
-                        ?.takeIf { it.pageStart > 0 && it.pageEnd > 0 }
-                        ?.let { "pp. ${it.pageStart}\u2013${it.pageEnd}" }
-                        .orEmpty(),
-                    review = review,
-                    // The chapter's own page (its summary and its review, and
-                    // the writing) — never a canvas grown inside this list.
-                    onOpen = {
-                        navController.navigate(CurioRoutes.chapter(bookId, chapter)) {
-                            launchSingleTop = true
-                        }
-                    },
-                    onDelete = { pendingReviewDelete = review }
-                )
-            }
-
-            item("shelf-tail") { Spacer(Modifier.height(96.dp)) }
+            // THE READ PILL. With a file wired to the book it opens the reader;
+            // without one it asks for the file first. It used to be a plain
+            // "Read" text button tucked beside "Download help", which only
+            // appeared when a `content://` handle happened to be sitting in the
+            // cover column.
+            val attachedFile = BookFiles.documentOf(current.documentPath, current.coverUrl)
+            BookReadPill(
+                hasFile = attachedFile.isNotBlank(),
+                onClick = {
+                    if (attachedFile.isNotBlank()) {
+                        navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
+                    } else {
+                        documentPicker.launch(
+                            arrayOf("application/pdf", "application/epub+zip", "text/plain")
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 18.dp, bottom = 20.dp)
+            )
         }
+    }
+
+    if (attachFailed) {
+        AlertDialog(
+            onDismissRequest = { attachFailed = false },
+            title = { Text("Could not open that file") },
+            text = {
+                Text("Curio could not copy the file into its own storage. Try picking it again.")
+            },
+            confirmButton = {
+                TextButton(onClick = { attachFailed = false }) { Text("OK") }
+            }
+        )
     }
 
     // Download help: PDF or EPUB, chosen here and searched out in the
@@ -983,6 +1045,48 @@ private fun SynopsisCard(synopsis: String, source: String) {
                     lineHeight = 24.sp
                 ),
                 color = ink.copy(alpha = 0.82f)
+            )
+        }
+    }
+}
+
+/**
+ * v389 — THE BOOK PAGE'S FLOATING READ PILL.
+ *
+ * One door, two states: a book with its own file says "Read" and opens it, and
+ * a book without one says "Read a file" and asks for it. It is a SOLID accent
+ * pill with on-accent ink because it is the page's one primary action — the
+ * look-up and download pills beside it are tinted, and a third tinted pill
+ * would make none of them read as the thing to do.
+ */
+@Composable
+private fun BookReadPill(
+    hasFile: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = personalAccentInk(),
+        shadowElevation = 8.dp,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CurioIcon(
+                CurioIcons.MenuBook,
+                null,
+                tint = MaterialTheme.colorScheme.surface,
+                size = 18.dp
+            )
+            Text(
+                if (hasFile) "Read" else "Read a file",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.surface
             )
         }
     }

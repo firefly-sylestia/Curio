@@ -513,7 +513,10 @@ private fun AddBookSheet(
         cover: String,
         chapters: Int,
         catalogId: String = "",
-        pages: Int = 0
+        pages: Int = 0,
+        /** A file the member picked while adding (Import a file) — COPIED into
+         *  the app's own storage, never kept as the picker's URI. */
+        document: Uri? = null
     ) {
         val trimmed = title.trim()
         if (trimmed.isEmpty()) return
@@ -533,6 +536,18 @@ private fun AddBookSheet(
                             pageCount = pages.coerceAtLeast(0)
                         )
                     )
+                    // v389 — the picked file belongs on the book's OWN column.
+                    // It used to be parked in `coverUrl`, so the shelf tried to
+                    // paint a PDF as a picture AND the document died with the
+                    // picker's permission. The copy is the app's now.
+                    if (document != null) {
+                        val path = BookFiles.import(context, id, document)
+                        if (!path.isNullOrBlank()) {
+                            runCatching {
+                                PersonalRepositoryHolder.repo.setDocument(id, path)
+                            }
+                        }
+                    }
                 }
             }
             onAdded(id)
@@ -548,13 +563,10 @@ private fun AddBookSheet(
             ?.replace('_', ' ')
             .orEmpty()
             .ifBlank { "Imported book" }
-        runCatching {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-        }
-        addBook(name, "", uri.toString(), 0)
+        // The picker's permission is no longer kept: the file is COPIED into
+        // the app's own storage by `addBook`, which is the only reason the
+        // book can still be read after the permission would have expired.
+        addBook(name, "", "", 0, document = uri)
     }
 
 

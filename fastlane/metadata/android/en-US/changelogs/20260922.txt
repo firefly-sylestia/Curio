@@ -3,6 +3,7 @@ ADD:
 - Books: a book added from the open library now arrives with its real chapter names and page ranges, read from the edition's own table of contents.
 - Books: a photo on a page now grows out of where you tapped it — no screen change, the page stays behind it.
 - Books: the "+" sheet has two new doors — a note on any topic, and a to-do list.
+- Books: a floating "Read" pill on a book — wire it a PDF or EPUB you already have and Curio reads it in its own reader, with a cover that is a cover again.
 - Books: a "Download help" pill on the book page searches the web for a PDF or EPUB copy.
 - Books: "Look it up" now tells you what it found (chapters, pages, the description) or why it found nothing.
 - Books: "About this book" now works for non-catalog books too — it shows the description from Open Library, labelled as such.
@@ -25,6 +26,8 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Books: a file you add is COPIED into Curio's own storage, so the book keeps opening offline instead of dying with the picker's permission — and the file no longer takes the book's name (a book keeps the name it has).
+- Books: a book added from a file draws its own cover instead of trying to show the PDF as a picture.
 - Writing: the in-page photo is crisp now — it is loaded at the size it is drawn, with high-quality filtering, instead of being decoded small and stretched back up.
 - Writing: tapping anywhere on the empty part of a page starts writing at the end of your last line — no more having to hit the faint "Write…" itself.
 - Writing: "Write…" appears once on a blank page instead of on every empty line you make with Enter.
