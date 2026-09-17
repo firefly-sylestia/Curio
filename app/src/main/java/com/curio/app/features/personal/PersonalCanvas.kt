@@ -1,5 +1,8 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -60,6 +64,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -1412,6 +1417,55 @@ internal fun PersonalCanvas(
                 val quoteAbove = index > 0 && state.isQuoteLine(state.blockIds[index - 1])
                 val quoteBelow = index < state.blockIds.lastIndex &&
                     state.isQuoteLine(state.blockIds[index + 1])
+
+                // v389 — EVERY BLOCK SHIFT makes room when a voice note is
+                // carried (see PersonalMovableBlock), so the gap says exactly
+                // where it will land — the same "make room" the to-do rows
+                // have, extended to the rest of the page.
+                val isDragged = rowDrag.draggedId == id
+                val blockShift by animateFloatAsState(
+                    targetValue = if (
+                        isDragged || block.isAudio || state.keepsChecklistRows
+                    ) 0f else rowDrag.shiftFor(index, state.blockIds.lastIndex),
+                    animationSpec = if (
+                        !rowDrag.isDragging || isDragged ||
+                            block.isAudio || state.keepsChecklistRows
+                    ) snap()
+                    else spring(dampingRatio = 0.82f, stiffness = 700f),
+                    label = "canvasBlockShift-$index"
+                )
+                // The DROP-LINE: a thin accent bar at the top of the block
+                // that will be right after the drop, so the carried voice note
+                // says where it is going to land.
+                val targetIdx = rowDrag.targetIndex(state.blockIds.lastIndex)
+                val showDropLine = rowDrag.isDragging && !isDragged &&
+                    !block.isAudio && !state.keepsChecklistRows &&
+                    index == targetIdx && rowDrag.fromIndex != targetIdx
+
+                // All blocks share the same shift-and-drop-line wrapper.
+                // Photo and text blocks slide to make room when a voice note
+                // is carried; audio and checklist blocks handle their own
+                // shift inside PersonalMovableBlock / PersonalTodoRow.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer { translationY = blockShift }
+                        .then(
+                            if (showDropLine) Modifier.drawWithContent {
+                                // A thin accent bar at the top of the target
+                                // block — this is where the voice note will land.
+                                // drawWithContent so it sits ON TOP of the text,
+                                // not behind it.
+                                drawContent()
+                                drawLine(
+                                    color = accent,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(size.width, 0f),
+                                    strokeWidth = 2.dp.toPx()
+                                )
+                            } else Modifier
+                        )
+                ) {
                 if (block.isPhoto) {
                     PersonalPhotoBlock(
                         uri = block.photo.orEmpty(),
@@ -1480,6 +1534,7 @@ internal fun PersonalCanvas(
                         onTitlePosition = onTitlePosition,
                         selectionWash = if (state.pageSelected) selectionWash else Color.Transparent
                     )
+                }
                 }
             }
         }
