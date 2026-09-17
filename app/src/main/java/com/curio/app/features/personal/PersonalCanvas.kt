@@ -239,6 +239,16 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** The block the keyboard is in — the target of every tool. */
     var focusedId by mutableStateOf<String?>(null)
         private set
+    var focusRequestToken by mutableIntStateOf(0)
+        private set
+
+    fun requestFocusOnEmptyLine() {
+        focusRequestToken++
+    }
+
+    fun armCheckboxOnEmptyLine() {
+        armed = (armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()) or FLAG_CHECKBOX
+    }
 
     /** Tools switched on with nothing to apply them to (an empty line). */
     var armed by mutableIntStateOf(0)
@@ -585,7 +595,10 @@ internal fun PersonalCanvas(
     onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
     enabled: Boolean = true
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(
+        modifier = modifier.clickable(enabled = enabled) { state.requestFocusOnEmptyLine() },
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
         state.blockIds.forEach { id ->
             val block = state.block(id) ?: return@forEach
             if (block.isPhoto) {
@@ -632,6 +645,11 @@ private fun PersonalTextBlock(
     // paragraph read as a page full of the word "write".
     val showHint = text.isEmpty() && !state.hasText()
     val focusRequester = remember(id) { FocusRequester() }
+    LaunchedEffect(state.focusRequestToken) {
+        if (state.focusRequestToken > 0 && text.isEmpty() && state.blockIds.firstOrNull { state.text(it).isEmpty() } == id) {
+            focusRequester.requestFocus()
+        }
+    }
     val value = TextFieldValue(
         annotatedString = personalAnnotated(
             text, mask, ink, quoteInk, QUOTE_BODY_SIZE,
@@ -694,13 +712,13 @@ private fun PersonalTextBlock(
                             drawRoundRect(
                                 color = bulletInk,
                                 topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
-                                size = Size(11.dp.toPx(), 11.dp.toPx()),
-                                cornerRadius = CornerRadius(2.dp.toPx()),
-                                style = Stroke(width = 1.6.dp.toPx())
+                                size = Size(19.dp.toPx(), 19.dp.toPx()),
+                                cornerRadius = CornerRadius(4.dp.toPx()),
+                                style = Stroke(width = 2.2.dp.toPx())
                             )
                             if (checkboxChecked) {
-                                drawLine(bulletInk, Offset(3.dp.toPx(), 13.dp.toPx()), Offset(6.dp.toPx(), 16.dp.toPx()), strokeWidth = 1.8.dp.toPx())
-                                drawLine(bulletInk, Offset(6.dp.toPx(), 16.dp.toPx()), Offset(12.dp.toPx(), 8.dp.toPx()), strokeWidth = 1.8.dp.toPx())
+                                drawLine(bulletInk, Offset(4.dp.toPx(), 17.dp.toPx()), Offset(8.dp.toPx(), 21.dp.toPx()), strokeWidth = 2.4.dp.toPx())
+                                drawLine(bulletInk, Offset(8.dp.toPx(), 21.dp.toPx()), Offset(16.dp.toPx(), 10.dp.toPx()), strokeWidth = 2.4.dp.toPx())
                             }
                         }
                         .clickable(enabled = enabled) { checkboxChecked = !checkboxChecked }
@@ -937,7 +955,7 @@ internal fun PersonalDocView(
                                         drawRoundRect(
                                             color = bulletInk,
                                             topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
-                                            size = Size(11.dp.toPx(), 11.dp.toPx()),
+size = Size(16.dp.toPx(), 16.dp.toPx()),
                                             cornerRadius = CornerRadius(2.dp.toPx()),
                                             style = Stroke(width = 1.6.dp.toPx())
                                         )
@@ -1007,6 +1025,7 @@ internal fun PersonalDocView(
 internal fun PersonalToolDock(
     state: PersonalEditorState,
     onPickPhoto: () -> Unit,
+    showJournalTools: Boolean = true,
     modifier: Modifier = Modifier,
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
@@ -1037,19 +1056,17 @@ internal fun PersonalToolDock(
                 active = active and FLAG_BOLD != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_BOLD) }
-            ) {
-                Text("B", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 17.sp))
-            }
+  ) {
+  CurioIcon(CurioIcons.FormatBold, null, size = 20.dp)
+  }
+
             PersonalToolButton(
                 label = "Italic",
                 active = active and FLAG_ITALIC != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_ITALIC) }
             ) {
-                Text(
-                    "I",
-                    style = TextStyle(fontStyle = FontStyle.Italic, fontSize = 17.sp)
-                )
+  CurioIcon(CurioIcons.FormatItalic, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Underline",
@@ -1057,13 +1074,7 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_UNDERLINE) }
             ) {
-                Text(
-                    "U",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        textDecoration = TextDecoration.Underline
-                    )
-                )
+  CurioIcon(CurioIcons.FormatUnderline, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Strikethrough",
@@ -1071,21 +1082,15 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_STRIKE) }
             ) {
-                Text(
-                    "S",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        textDecoration = TextDecoration.LineThrough
-                    )
-                )
+                StrikeGlyph()
             }
-            PersonalToolButton(
-                label = "Large bold text",
+  if (showJournalTools) PersonalToolButton(
+  label = "Large bold text",
                 active = active and FLAG_TITLE != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_TITLE) }
             ) {
-                Text("T", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 19.sp))
+                CurioIcon(CurioIcons.FormatText, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Todo checkbox",
@@ -1102,10 +1107,7 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_SMALL) }
             ) {
-                Text(
-                    "Aa",
-                    style = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
-                )
+  CurioIcon(CurioIcons.TextDecrease, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Bullet",
@@ -1115,7 +1117,7 @@ internal fun PersonalToolDock(
             ) {
                 BulletGlyph()
             }
-            PersonalToolButton(
+            if (showJournalTools) PersonalToolButton(
                 label = "Quote",
                 active = active and FLAG_QUOTE != 0,
                 accent = accentInk, ink = ink,
@@ -1139,7 +1141,7 @@ internal fun PersonalToolDock(
             ) {
                 AlignGlyph(center = true)
             }
-            PersonalToolButton(
+            if (showJournalTools) PersonalToolButton(
                 label = "Add a photo",
                 active = false,
                 accent = accentInk, ink = ink,
@@ -1149,6 +1151,24 @@ internal fun PersonalToolDock(
             }
         }
     }
+}
+
+/** A reliable strike glyph independent of the bundled font subset. */
+@Composable
+private fun StrikeGlyph() {
+    val contentColor = LocalContentColor.current
+    Text(
+        text = "S",
+        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+        modifier = Modifier.drawBehind {
+            drawLine(
+                color = contentColor,
+                start = Offset(1.dp.toPx(), size.height * 0.56f),
+                end = Offset(size.width - 1.dp.toPx(), size.height * 0.56f),
+                strokeWidth = 1.5.dp.toPx()
+            )
+        }
+    )
 }
 
 /** The bullet tool's own glyph — a dot and two hanging rules. */

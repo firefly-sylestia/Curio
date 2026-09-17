@@ -338,7 +338,7 @@ private fun BookShelfCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(38.dp),
+                .height(20.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Text(

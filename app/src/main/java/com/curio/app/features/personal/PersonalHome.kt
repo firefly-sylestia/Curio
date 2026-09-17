@@ -337,52 +337,42 @@ fun PersonalChipsRow(
     }
     val ink = MaterialTheme.colorScheme.onBackground
 
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        items(items = journals.take(3), key = { it.id }) { journal ->
-            JournalChip(
-                journal = journal,
-                onClick = {
-                    navController.navigate(CurioRoutes.journalEditor(journal.id)) {
-                        launchSingleTop = true
-                    }
-                }
-            )
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item("all-journals") {
+                DoorChip(
+                    glyph = CurioIcons.Note,
+                    label = "Pages",
+                    caption = "All journals",
+                    onClick = { navController.navigate(CurioRoutes.JOURNALS) { launchSingleTop = true } }
+                )
+            }
+            items(items = journals.take(3), key = { it.id }) { journal ->
+                JournalChip(journal = journal, onClick = {
+                    navController.navigate(CurioRoutes.journalEditor(journal.id)) { launchSingleTop = true }
+                })
+            }
         }
-        // The list door is ALWAYS here: it is where a page is removed, so it
-        // must not depend on how many pages happen to be in the row today.
-        item("all-journals") {
-            DoorChip(
-                glyph = CurioIcons.Note,
-                label = if (journals.size > 3) "+${journals.size - 3}" else "Pages",
-                caption = "All journals",
-                onClick = {
-                    navController.navigate(CurioRoutes.JOURNALS) { launchSingleTop = true }
-                }
-            )
-        }
-        items(items = books.take(3), key = { it.id }) { book ->
-            BookChip(
-                book = book,
-                onClick = {
-                    navController.navigate(CurioRoutes.bookDetail(book.id)) {
-                        launchSingleTop = true
-                    }
-                }
-            )
-        }
-        item("all-books") {
-            DoorChip(
-                glyph = CurioIcons.MenuBook,
-                label = if (books.isEmpty()) "My shelf" else if (books.size > 3) "+${books.size - 3}" else "Shelf",
-                caption = "Books",
-                onClick = {
-                    navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
-                }
-            )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item("all-books") {
+                DoorChip(
+                    glyph = CurioIcons.MenuBook,
+                    label = "My shelf",
+                    caption = "Books",
+                    onClick = { navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true } }
+                )
+            }
+            items(items = books.take(3), key = { it.id }) { book ->
+                BookChip(book = book, onClick = {
+                    navController.navigate(CurioRoutes.bookDetail(book.id)) { launchSingleTop = true }
+                })
+            }
         }
     }
 }
@@ -511,7 +501,7 @@ private fun BookChip(
                 book.title,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = ink,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(Modifier.height(4.dp))

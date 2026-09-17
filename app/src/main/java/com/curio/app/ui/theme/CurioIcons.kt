@@ -116,6 +116,7 @@ object CurioIcons {
     const val FormatBold = "format_bold"
     const val FormatItalic = "format_italic"
     const val FormatUnderline = "format_underlined"
+    const val FormatStrikethrough = "format_strikethrough"
     const val FormatHighlight = "format_color_fill"
     const val FormatText = "text_fields"
     const val TextIncrease = "text_increase"
