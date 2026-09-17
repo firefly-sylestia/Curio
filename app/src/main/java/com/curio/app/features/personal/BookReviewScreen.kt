@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -85,9 +88,12 @@ import kotlinx.coroutines.withContext
  *  · READ FIRST. The review is the page, and each chapter's OWN review folds in
  *    under the marker that names it — so one page reads the whole book back.
  *  · WRITE ON TAP, with the dock rising on the keyboard, plus ONE floating door
- *    the ordinary dock cannot offer: **Add chapter**. It drops a title-style
- *    marker line at the caret, named as the member types it ([insertTitleLine]),
- *    which is all a chapter marker is — a heading in their own review.
+ *    the ordinary dock cannot offer: **Add chapter**. It opens the BOOK'S OWN
+ *    chapter list — number and name, the same list the read view folds reviews
+ *    under — and drops the picked one in as a title-style marker line at the
+ *    caret ([insertTitleLine]); a book with no chapter list still gets a blank
+ *    marker to name itself. A chapter marker is only a heading in their own
+ *    review.
  *  · NOTHING IS A SAVE BUTTON. It persists while typing, when the app leaves the
  *    foreground, and once more on the way out (the flush the chapter page was
  *    missing), so a back gesture cannot lose the last words.
@@ -198,6 +204,8 @@ fun BookReviewScreen(
         }
     }
 
+    // Which chapter the floating "Add chapter" door is offering (see below).
+    var chapterMenu by remember { mutableStateOf(false) }
     val ink = MaterialTheme.colorScheme.onBackground
     val accent = personalAccent()
 
@@ -298,6 +306,16 @@ fun BookReviewScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
+                            // The blank part of a review is writing space too: a
+                            // tap in the gaps (under the last line, above the
+                            // dock) hands the caret to the last line and the
+                            // keyboard follows it — the page used to sit there
+                            // dead, with the caret nowhere (user report: "in book
+                            // review or chapter review i tap the blank space to
+                            // write but the cursor doesnt start and my keyboard
+                            // too"). The journal's own writing column has done
+                            // this since v389; the book's two pages had not.
+                            .clickable { editor.focusLastLine() }
                             .padding(horizontal = 20.dp)
                             .widthIn(max = 680.dp)
                     ) {
@@ -365,30 +383,100 @@ fun BookReviewScreen(
                     .align(Alignment.BottomEnd)
                     .padding(end = 16.dp, bottom = 10.dp)
             ) {
-                Surface(
-                    onClick = { editor.insertTitleLine() },
-                    shape = RoundedCornerShape(50),
-                    color = accent,
-                    shadowElevation = 6.dp
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                Box {
+                    Surface(
+                        onClick = { chapterMenu = true },
+                        shape = RoundedCornerShape(50),
+                        color = accent,
+                        shadowElevation = 6.dp
                     ) {
-                        CurioIcon(
-                            CurioIcons.FoldedCorner,
-                            null,
-                            tint = personalOnAccent(),
-                            size = 16.dp
-                        )
-                        Text(
-                            "Add chapter",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = personalOnAccent()
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                CurioIcons.FoldedCorner,
+                                null,
+                                tint = personalOnAccent(),
+                                size = 16.dp
+                            )
+                            Text(
+                                "Add chapter",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = personalOnAccent()
+                            )
+                        }
+                    }
+                    // WHICH chapter — the book's own list, the same one the read
+                    // view folds reviews under, so a marker is picked rather
+                    // than typed. The label carries the NUMBER as well as the
+                    // name ("Chapter 7 · The Fall") because that is what the
+                    // fold matches on, and a book with no chapter list at all
+                    // still gets a blank marker to name itself.
+                    DropdownMenu(
+                        expanded = chapterMenu,
+                        onDismissRequest = { chapterMenu = false }
+                    ) {
+                        chapterNames.forEachIndexed { index, chapter ->
+                            val name = chapter.title.trim()
+                            val label =
+                                if (name.isEmpty()) "Chapter ${index + 1}"
+                                else "Chapter ${index + 1} \u00b7 $name"
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        label,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontFamily = WritingFontFamily
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                onClick = {
+                                    chapterMenu = false
+                                    editor.insertTitleLine(label)
+                                }
+                            )
+                        }
+                        if (chapterNames.size > 1) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "A chapter of its own",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontFamily = WritingFontFamily
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    chapterMenu = false
+                                    editor.insertTitleLine()
+                                }
+                            )
+                        }
+                        if (chapterNames.isEmpty()) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "Chapter marker",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontFamily = WritingFontFamily
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    chapterMenu = false
+                                    editor.insertTitleLine()
+                                }
+                            )
+                        }
                     }
                 }
             }

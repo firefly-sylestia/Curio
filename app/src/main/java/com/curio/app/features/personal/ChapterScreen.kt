@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -292,17 +293,23 @@ fun ChapterScreen(
             animationSpec = tween(220),
             label = "chapter-read-write",
             modifier = Modifier.fillMaxWidth().weight(1f)
-        ) { writing ->
-            if (writing) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 20.dp)
-                        .widthIn(max = 680.dp)
-                ) {
-                    Spacer(Modifier.height(4.dp))
-                    PersonalCanvas(
+        ) { writing ->             if (writing) {
+                 Column(
+                     modifier = Modifier
+                         .fillMaxSize()
+                         .verticalScroll(rememberScrollState())
+                         // v389 — the blank part of the review is writing space:
+                         // a tap in the gaps hands the caret to the LAST line and
+                         // the keyboard follows (user report: "i tap the blank
+                         // space to write but the cursor doesnt start and my
+                         // keyboard too"). The journal's writing column has done
+                         // this since v389; this page had not.
+                         .clickable { editor.focusLastLine() }
+                         .padding(horizontal = 20.dp)
+                         .widthIn(max = 680.dp)
+                 ) {
+                     Spacer(Modifier.height(4.dp))
+                     PersonalCanvas(
                         state = editor,
                         modifier = Modifier.fillMaxWidth(),
                         accent = accent,

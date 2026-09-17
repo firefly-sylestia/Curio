@@ -1159,26 +1159,42 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /**
-     * v389 — "ADD CHAPTER": a marker lands on the page as its own TITLE line,
-     * with the caret on it and the line ARMED as a title, so the chapter's name
-     * arrives as the heading it is (the same mechanism the dock's title button
-     * uses).
+     * v389 — "ADD CHAPTER": a marker lands on the page as its own TITLE line.
+     *
+     * With no [label] the line arrives EMPTY and ARMED as a title, so the
+     * chapter's name arrives as the heading it is (the same mechanism the dock's
+     * title button uses). With a [label] — the chapter the member PICKED out of
+     * the book's own chapter list — the line arrives already written and already
+     * a title, because re-typing a name the book already knows is an errand (user
+     * request: "in book review add chapter it should give option to add which
+     * chapter from the fetched or catalog chapter names or number").
      *
      * It is an ordinary block in the ordinary order — which is exactly what
      * lets a book's whole review stay ONE page: the markers are prose, and the
      * read view folds a chapter's own review in under the marker that names it.
      */
-    fun insertTitleLine() {
+    fun insertTitleLine(label: String = "") {
         val after = focusedId?.let { order.indexOf(it) }?.takeIf { it >= 0 }
             ?: order.indexOfLast { id -> !(blocks[id]?.isPhoto ?: false) }
         val at = if (after < 0) order.size else (after + 1).coerceAtMost(order.size)
-        val block = PersonalBlock(id = newBlockId())
+        val text = label.trim()
+        val block = if (text.isEmpty()) {
+            PersonalBlock(id = newBlockId())
+        } else {
+            PersonalBlock(
+                id = newBlockId(),
+                text = text,
+                runs = maskToRuns(IntArray(text.length) { FLAG_TITLE })
+            )
+        }
         order.add(at, block.id)
         blocks[block.id] = block
-        masks[block.id] = emptyMask(0)
-        caret = PersonalCaret(block.id, 0)
+        masks[block.id] = runsToMask(text.length, block.runs)
+        caret = PersonalCaret(block.id, text.length)
         focusedId = block.id
-        armed = FLAG_TITLE
+        // A picked chapter is already written, so nothing is armed: the next
+        // thing typed is prose under the heading.
+        armed = if (text.isEmpty()) FLAG_TITLE else 0
         onDocChanged(doc())
     }
 

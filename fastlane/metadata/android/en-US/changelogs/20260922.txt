@@ -28,6 +28,9 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Writing: the blank part of a book or chapter review starts the writing — tap the empty space and the caret and the keyboard follow, instead of the page sitting there dead.
+- Books: "Add chapter" offers the book's own chapter list (its number and its name) and drops the one you pick straight in, instead of handing you a blank heading to type.
+- Journals: opening a saved journal lands on the reading side, while a page with nothing written on it still opens ready to write.
 - Writing: a line you made with Enter can be taken back — backspace at the start of a line joins it to the one above, and an empty line goes away.
 - Writing: the tool you have switched on stays on after Enter — a quote, a list or a title carries to the new line instead of dropping to plain prose.
 - Writing: a quote is a coffee panel now — a soft wash behind the words with the rule down its side — and a quotation typed over several Enters reads as one continuous block.

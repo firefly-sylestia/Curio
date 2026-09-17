@@ -228,6 +228,15 @@ internal fun PersonalWritingPage(
             editor.replace(decoded)
             createdAt = existing.createdAtMillis
             onLoaded(existing)
+            // v389 — WHICH SIDE AN EXISTING PAGE OPENS ON (user decision):
+            // opening a journal from Home, from the list or from the Cabinet
+            // lands on the EYE — a saved page is a page to READ, and the pen is
+            // one tap away — while a page with nothing on it opens with the pen
+            // down, because there is nothing to read yet and a caret waiting is
+            // the whole point of the door that led here. `editing` already
+            // starts false for an existing entry (see its declaration), so this
+            // only lifts the EMPTY pages back into writing.
+            if (decoded.isEmpty && !checklistFirst) editing = true
         }
         loaded = true
     }

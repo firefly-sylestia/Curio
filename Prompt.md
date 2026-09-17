@@ -2339,3 +2339,7 @@ bookmarks etc too. suggest more book features and add and also keep the auto hid
 also the check box should be tickable in read view too. and also make the todo screen text size more larger and it's preview as a separate todo preview not inside the journal.
 also when i open a journal to read from the home screen or from personal or journals page don't open it on edit page but the eye page
 also in the post topic screen the choose a topic area gets hidden as it's not on top the page. it's little scrolled down so fix it, also a note on a topic, so when i select one and i tap the look the topic from the header and i press back the previous topic gets saved and it asks me again to choose a new can u fix that too.
+
+
+## next prompt 
+and importantly for the profile social avatars, all of them are bad like the black is the worse and also all of the design is bad and the eyes is same and also very weird too the eye should be different per individual matching the style. fix redesign all of them properly
