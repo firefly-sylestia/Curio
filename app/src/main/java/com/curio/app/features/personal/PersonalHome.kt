@@ -48,6 +48,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
@@ -286,6 +289,19 @@ private fun CreateEntryOption(
 fun PersonalChipsRow(
     navController: NavController,
     onWrite: () -> Unit,
+    /**
+     * v389d — THE PAGE'S OWN BACKDROP, for the doors' plate.
+     *
+     * The two doors ride on an opaque fill so the chips can slide under them —
+     * and that fill was the theme's plain `background`, which on Home is NOT
+     * what the page is painted with (Home wears a lane wash, or its own rose
+     * tint). The doors therefore sat on a pale plate of their own, a visible
+     * seam in every theme that is not plain white (user report: "in home screen
+     * the stikky pages and your my shelf. they have a white background which
+     * creates weird theme issues with background"). The caller hands over what
+     * it actually painted with.
+     */
+    backdrop: Color = MaterialTheme.colorScheme.background,
     modifier: Modifier = Modifier
 ) {
     val journals by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
@@ -302,6 +318,7 @@ fun PersonalChipsRow(
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         PinnedDoorRow(
+            backdrop = backdrop,
             door = {
                 DoorChip(
                     glyph = CurioIcons.Note,
@@ -311,7 +328,11 @@ fun PersonalChipsRow(
                 )
             }
         ) {
-            items(items = journals.take(3), key = { it.id }) { journal ->
+            // v389d — MORE THAN THREE (user question: "why only 3 books and 3
+            // journal shows. add more keeping scroll too"). The row has always
+            // been a LazyRow — it scrolls — so the cap was the only reason the
+            // rest of the library could not be reached from here.
+            items(items = journals.take(CHIP_ROW_LIMIT), key = { it.id }) { journal ->
                 JournalChip(journal = journal, onClick = {
                     // v389 — the chip opens the page's OWN screen (a to-do list is
                     // not a journal day; see personalRouteFor).
@@ -320,6 +341,7 @@ fun PersonalChipsRow(
             }
         }
         PinnedDoorRow(
+            backdrop = backdrop,
             door = {
                 DoorChip(
                     glyph = CurioIcons.MenuBook,
@@ -329,7 +351,7 @@ fun PersonalChipsRow(
                 )
             }
         ) {
-            items(items = books.take(3), key = { it.id }) { book ->
+            items(items = books.take(CHIP_ROW_LIMIT), key = { it.id }) { book ->
                 BookChip(book = book, onClick = {
                     navController.navigate(CurioRoutes.bookDetail(book.id)) { launchSingleTop = true }
                 })
@@ -353,6 +375,7 @@ fun PersonalChipsRow(
  */
 @Composable
 private fun PinnedDoorRow(
+    backdrop: Color,
     door: @Composable () -> Unit,
     content: LazyListScope.() -> Unit
 ) {
@@ -367,7 +390,23 @@ private fun PinnedDoorRow(
         Row(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .background(MaterialTheme.colorScheme.background)
+                // The plate: the page's own backdrop, solid under the door and
+                // FADED at its trailing edge — an opaque rectangle laid over a
+                // tinted page reads as a seam, and a bare fade would ghost the
+                // chips through the door's own text.
+                .drawBehind {
+                    val tail = 18.dp.toPx().coerceAtMost(size.width)
+                    val solid = (size.width - tail).coerceAtLeast(0.001f)
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            colorStops = arrayOf(
+                                0f to backdrop,
+                                (solid / size.width).coerceIn(0f, 1f) to backdrop,
+                                1f to backdrop.copy(alpha = 0f)
+                            )
+                        )
+                    )
+                }
                 .padding(start = 16.dp, end = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -375,6 +414,12 @@ private fun PinnedDoorRow(
         }
     }
 }
+
+/**
+ * v389d — HOW MANY CHIPS A HOME ROW OFFERS. The row scrolls, so this is only
+ * about not building a chip for a library of hundreds on first frame.
+ */
+private const val CHIP_ROW_LIMIT = 12
 
 @Composable
 private fun NewChip(onClick: () -> Unit) {

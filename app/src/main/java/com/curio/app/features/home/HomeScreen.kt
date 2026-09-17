@@ -1053,6 +1053,10 @@ fun HomeScreen(navController: NavController) {
             PersonalChipsRow(
                 navController = navController,
                 onWrite = { writeSheetOpen = true },
+                // The doors' plate has to be the paint this page is actually
+                // wearing (a lane wash, or Home's own rose tint), or it shows as
+                // a pale rectangle across the row (see PinnedDoorRow).
+                backdrop = homeBg,
                 modifier = Modifier
                     // Wide windows: the same comfortable centered column the
                     // sections above and below ride in (phone untouched).
