@@ -189,6 +189,7 @@ import com.curio.app.data.coverSwatchesFromArgbs
 import com.curio.app.data.coverSwatchesToArgbs
 import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.ui.components.RichTextEditor
+import com.curio.app.ui.components.RichTextToolbarMode
 import com.curio.app.ui.components.TextHistoryBrowser
 import com.curio.app.ui.components.TextHistoryPill
 import com.curio.app.ui.components.TextHistoryRestoreMode
@@ -3986,6 +3987,12 @@ private fun BookNotesSheet(
                             placeholder = "Write your thoughts on this chapter…",
                             minHeight = 140.dp,
                             maxCharacters = 2000,
+                            // v389 — the note expand wears the JOURNAL's dock: a
+                            // floating strip at the foot of the field with every
+                            // tool its own button (bold, italic, underline,
+                            // highlight, text size), instead of a Format toggle
+                            // that unfolds a second toolbar over the words.
+                            toolbarMode = RichTextToolbarMode.DOCK,
                             accent = MaterialTheme.colorScheme.primary,
                             ink = MaterialTheme.colorScheme.onSurface,
                             surface = MaterialTheme.colorScheme.surfaceVariant,

@@ -70,10 +70,54 @@ compile check.**
 
 ### ⏭ Still pending from the same prompt
 
-The two named editors on the journal's dock (the Share-Hub full-screen editor and the
-book sheet's note expand) — see the status in the "Next prompt" slot at the end of
-this file. Pinch-to-zoom and a real text layer over a scanned PDF page are NOT in this
-pass (they need a different rendering strategy than `PdfRenderer` gives).
+- Pinch-to-zoom and a real text layer over a scanned PDF page are NOT in this pass
+  (they need a different rendering strategy than `PdfRenderer` gives).
+- The editors' dock landed in the pass below; the two additions that need a MODEL
+  change (per-run justification and font family — `TextSpan` has neither) are waiting
+  on the ask_user.
+
+## Request (2026-09-17, DONE — the two named full-screen editors wear the journal's dock)
+
+Verbatim of this half of the pending prompt:
+
+"now yk the full screen text editor in share card and also in the add note expand of
+book buttom sheet. well they should use the new journal style buttom tool bar editing
+with the all tools support. except the image."
+
+### Decisions (ask_user, answered)
+
+- **Keep them separate, restyle the share-card toolbar** — the two editors are not
+  merged; only the way they present their tools changed.
+- **All tools as individual dock buttons** — no grouped menus in the dock.
+- **Both in one pass.**
+
+### What landed
+
+- **`RichTextEditor.kt`** — `RichTextToolbarMode.DOCK`, a third mode (the capture
+  formats' MAIN / TOGGLE strips are untouched, so nothing else in the app moved):
+  - `RichTextDock` + `RichTextDockButton` are the journal's dock — 22dp surface,
+    `surfaceContainerHigh`, 6dp lift, one horizontally scrolling row, every tool its
+    own 36dp circular button, the active one filled with the accent at 24%.
+  - It sits at the **foot of the field**, and the head strip only renders when it still
+    has something of its own to say (`showTopStrip`: paper tools, a trailing action, the
+    text history). The `Format` toggle is hidden in DOCK mode — no second toolbar
+    unfolding over the words.
+  - `SizePickerButton` gained `dock = true`, so the size door wears the dock's button
+    while still opening the same size menu.
+- **Underline, for the first time in a toolbar.** `TextSpan.underline` has existed since
+  v379 (the share card's selection bar sets it) but no toolbar ever offered it;
+  `applyUnderline()` / `hasUnderlineAt()` and the armed `pendingUnderline` now follow the
+  other flags exactly (a collapsed caret arms, a selection is one-shot), including
+  inheritance while typing inside an underlined run and in the sticky-format path.
+- **Two call sites, and only two**: the Share Hub's full-screen card editor
+  (`TopicShareCard`) and the book sheet's chapter-note expand (`TopicRevealScreen`,
+  plus the new `RichTextToolbarMode` import).
+
+### Verified statically
+
+`check_braces.js` over every touched file, no duplicate imports, and no `when` over
+`RichTextToolbarMode` (so the new constant cannot make an existing branch
+non-exhaustive). **No Gradle here — CI is the compile check.**
 
 ## Request (2026-09-17, DONE — line tools across Enter, backspace joins a line, the coffee quote, the pinned doors, and the mic)
 
@@ -2404,12 +2448,16 @@ Done:
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
 
-**Status (2026-09-17):** the READER half is DONE — continuous EPUB/text, PDF pages on
-demand, hold-to-mark (highlight / note / bookmark) with its own `reader_marks` table
-(migration 18 → 19), position memory per book + file, the four page inks, auto-hiding
-chrome, and the book page's "From the margins". See the request section at the TOP of
-this file. **Still pending:** the two editors on the journal dock (below), plus the
-scanned-PDF text layer and pinch-to-zoom.
+**Status (2026-09-17):** BOTH halves named in the ask_user are DONE — the reader
+(continuous EPUB/text, PDF pages on demand, hold-to-mark with its own `reader_marks`
+table, position memory, four page inks, auto-hiding chrome, the book page's "From the
+margins") and the two full-screen editors now writing on the journal's own dock (with
+underline, which no toolbar ever offered). See the request sections at the TOP of this
+file. **Still pending here:** the additions that need a data-model change (per-run
+justify + font family — `TextSpan` has neither), pinch-to-zoom, a text layer over a
+scanned PDF page, and everything else in this slot below (tickable read view, bigger
+to-do rows with a to-do preview, journals opening on the eye, the post-composer topic
+picker, the avatar redesign).
 
 now yk the full screen text editor in share card and also in the add note expand of book buttom sheet. well they should use the new journal style buttom tool bar editing with the all tools support. except the image. and also add more tools to the journal buttom tool bar like text size from the save your take notes format editor, more formats of justify etc etc from share card. keeping it as one format button with drop down. font change etc.
 

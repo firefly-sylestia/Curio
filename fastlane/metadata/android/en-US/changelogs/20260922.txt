@@ -1,4 +1,6 @@
 ADD:
+- Writing: the card editor's full-screen writing and the book sheet's chapter-note editor now write on the journal's own tool dock — a floating strip at the foot of the page where every tool is its own button (bold, italic, underline, highlight, text size), instead of a Format toggle that unfolded a second toolbar.
+- Writing: underline is a tool now — arm it and the words you type carry it, or select a passage and apply it.
 - Reading: a book's own reader — tap once and the head and foot step out of the way, tap again and they come back, so the words get the whole screen.
 - Reading: mark a passage as you read — press and hold to highlight it in one of four inks, write a note on it, or drop a bookmark. Every mark is listed with the words it was made on, and jumping to one lands back on it.
 - Reading: what you marked while reading now shows on the book's page as quotes from the margins, and tapping one opens the reader at that mark.

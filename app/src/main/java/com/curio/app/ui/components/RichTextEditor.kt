@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -24,10 +27,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +47,8 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -105,7 +112,19 @@ enum class RichTextToolbarMode {
     MAIN,
 
     /** Other text fields (Field Notes sections, Reel Notes review, …). */
-    TOGGLE
+    TOGGLE,
+
+    /**
+     * THE JOURNAL'S OWN DOCK, worn by the app's full-screen rich-text editors
+     * (the Share Hub's card editor and the book sheet's note expand): a floating
+     * rounded strip at the FOOT of the field, every tool its own button, the
+     * active one in the accent — the same dock the journal page writes on. The
+     * compact capture-format strips (MAIN / TOGGLE) are untouched.
+     *
+     * The IMAGE tool is deliberately not here: a rich-text field holds text, and
+     * the dock's photo door belongs to the page that has a page to put it on.
+     */
+    DOCK
 }
 
 /**
@@ -537,6 +556,10 @@ fun RichTextEditor(
     // arms a FIXED size so the next characters typed carry it (and the
     // dropdown icons stay lit — their true "active" state).
     var pendingSizeSp by remember { mutableStateOf<Float?>(null) }
+    // v389 — armed UNDERLINE. The model has carried the attribute since v379
+    // (the share card picks it up on a selection), but no toolbar ever offered
+    // it: the journal's dock does, and the dock is what these editors now wear.
+    var pendingUnderline by remember { mutableStateOf(false) }
     // Paper mode: the field floats directly on the card's paper — no inner
     // padding of its own (the card owns the margins). The toolbar + cursor
     // also switch to the warm paper accent: these controls sit on cream in
@@ -569,6 +592,7 @@ fun RichTextEditor(
             pendingBold = false
             pendingItalic = false
             pendingHighlight = false
+            pendingUnderline = false
             pendingSizeSp = null
         }
     }
@@ -655,6 +679,9 @@ fun RichTextEditor(
                 if (sp.highlight) {
                     spans = toggleSpanFlag(spans, caret, insertedRange.last + 1, RichFlag.HIGHLIGHT, true)
                 }
+                if (sp.underline) {
+                    spans = toggleSpanUnderline(spans, caret, insertedRange.last + 1, true)
+                }
                 sp.fontSizeSp?.let { size ->
                     spans = setSpanSize(spans, caret, insertedRange.last + 1, size)
                 }
@@ -665,7 +692,9 @@ fun RichTextEditor(
         // characters so typing continues in that style (BasicTextField only
         // inherits the style under the caret, so an armed format needs
         // explicit application). Pure deletions diff to null and are skipped.
-        if (pendingBold || pendingItalic || pendingHighlight || pendingSizeSp != null) {
+        if (pendingBold || pendingItalic || pendingHighlight || pendingUnderline ||
+            pendingSizeSp != null
+        ) {
             insertedRange?.let { range ->
                 if (pendingBold) {
                     spans = toggleSpanFlag(spans, range.first, range.last + 1, RichFlag.BOLD, true)
@@ -675,6 +704,9 @@ fun RichTextEditor(
                 }
                 if (pendingHighlight) {
                     spans = toggleSpanFlag(spans, range.first, range.last + 1, RichFlag.HIGHLIGHT, true)
+                }
+                if (pendingUnderline) {
+                    spans = toggleSpanUnderline(spans, range.first, range.last + 1, true)
                 }
                 pendingSizeSp?.let { size ->
                     spans = setSpanSize(spans, range.first, range.last + 1, size)
@@ -746,6 +778,30 @@ fun RichTextEditor(
         // branch above).
     }
 
+    /**
+     * UNDERLINE, the dock's own addition — same manners as [applyFlag]: a
+     * collapsed caret ARMS it for the next characters typed, a selection is
+     * applied once (so the tool never stays lit after a single change).
+     */
+    fun applyUnderline() {
+        val sel = tfv.selection
+        if (sel.collapsed) {
+            pendingUnderline = !pendingUnderline
+            return
+        }
+        val s = minOf(sel.start, sel.end)
+        val e = maxOf(sel.start, sel.end)
+        val current = extractRichSpans(tfv.annotatedString)
+        val add = !spansUnderlineCovered(current, s, e)
+        val updated = toggleSpanUnderline(current, s, e, add)
+        val styled = TextFieldValue(
+            buildRichAnnotated(tfv.text, updated, effectiveHighlight),
+            selection = sel
+        )
+        tfv = styled
+        onRichTextChange(styled.text, extractRichSpans(styled.annotatedString))
+    }
+
     /** Applies the picked [targetSp] to the selection (if any) and arms it. */
     fun applyExactSize(targetSp: Float) {
         val sel = tfv.selection
@@ -810,6 +866,20 @@ fun RichTextEditor(
         return spansFullyCovered(current, s, e, flag)
     }
 
+    /** Underline's own sibling of [hasFlagAt] — the dock's lit state. */
+    fun hasUnderlineAt(): Boolean {
+        val sel = tfv.selection
+        val s = minOf(sel.start, sel.end)
+        val e = maxOf(sel.start, sel.end)
+        val current = extractRichSpans(tfv.annotatedString)
+        if (sel.collapsed) {
+            val pos = s
+            val underCaret = current.any { sp -> sp.start <= pos && pos < sp.end && sp.underline }
+            return pendingUnderline || underCaret
+        }
+        return spansUnderlineCovered(current, s, e)
+    }
+
     Column(modifier = modifier) {
         // ── Tool dock — one theme-aware strip above the field ───────────
         // v7.98 — redesigned: a single rounded dock (theme surface)
@@ -820,7 +890,13 @@ fun RichTextEditor(
         // divider. Every color comes from theme tokens (surface container,
         // outline variant, accent), so the dock is properly theme-aware in
         // light, dark, AMOLED and pastel — no hardcoded alpha bumps.
-        Surface(
+        // The journal-style dock (DOCK mode) carries the format tools at the
+        // FOOT of the field, so this head strip appears only when it still has
+        // something of its own to say — the paper tools, a trailing action or
+        // the text history. In the other modes it is the dock, as before.
+        val showTopStrip = toolbarMode != RichTextToolbarMode.DOCK ||
+            paper || trailingAction != null || historyField != null
+        if (showTopStrip) Surface(
             shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shadowElevation = 2.dp,
@@ -849,7 +925,7 @@ fun RichTextEditor(
                             }
                         )
                     }
-                    ToolToggleButton(
+                    if (toolbarMode != RichTextToolbarMode.DOCK) ToolToggleButton(
                         icon = CurioIcons.FormatText,
                         label = "Format",
                         expanded = toolbarExpanded,
@@ -1077,6 +1153,32 @@ fun RichTextEditor(
         } else {
             fieldBlock()
         }
+        // ── The journal's dock (DOCK mode) ─────────────────────────────
+        // At the FOOT of the field, where a thumb already is: the same shape,
+        // tokens and manners as the journal page's own tool dock, with every
+        // tool its own button (no grouped menus) — so the app's full-screen
+        // editors and the journal read as ONE writing surface.
+        if (toolbarMode == RichTextToolbarMode.DOCK) {
+            Spacer(Modifier.height(8.dp))
+            RichTextDock(
+                boldActive = hasFlagAt(RichFlag.BOLD),
+                italicActive = hasFlagAt(RichFlag.ITALIC),
+                underlineActive = hasUnderlineAt(),
+                highlightActive = hasFlagAt(RichFlag.HIGHLIGHT),
+                sizeActive = pendingSizeSp != null,
+                accent = effectiveAccent,
+                ink = MaterialTheme.colorScheme.onSurfaceVariant,
+                enabled = enabled,
+                currentSp = currentSizeSp(),
+                onBold = { applyFlag(RichFlag.BOLD) },
+                onItalic = { applyFlag(RichFlag.ITALIC) },
+                onUnderline = { applyUnderline() },
+                onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
+                onSizePick = { applyExactSize(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         // The text-history browser for this field — self-contained: pill in
         // the dock → this sheet → restore straight back into the editor.
         if (historyOpen && historyField != null) {
@@ -1150,6 +1252,108 @@ internal fun SelectionFormatBar(
                 onPick = onSizePick,
                 paper = paper
             )
+        }
+    }
+}
+
+/**
+ * THE JOURNAL'S DOCK, worn by the app's full-screen rich-text editors.
+ *
+ * Shape, tokens and manners are the journal page's own tool dock
+ * (`PersonalToolDock`): a floating rounded strip in `surfaceContainerHigh`, a
+ * 6dp lift, the tools scrolling in one row and the active one filled with the
+ * accent at 24% and inked in the accent. A member who has written on a page
+ * arrives here knowing exactly where everything is.
+ */
+@Composable
+private fun RichTextDock(
+    boldActive: Boolean,
+    italicActive: Boolean,
+    underlineActive: Boolean,
+    highlightActive: Boolean,
+    sizeActive: Boolean,
+    accent: Color,
+    ink: Color,
+    enabled: Boolean,
+    currentSp: Float,
+    onBold: () -> Unit,
+    onItalic: () -> Unit,
+    onUnderline: () -> Unit,
+    onHighlight: () -> Unit,
+    onSizePick: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 6.dp,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                // The same reason the journal's dock scrolls: a row of tools
+                // that overflows a narrow phone must never clip the last one.
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            RichTextDockButton("Bold", boldActive, accent, ink, enabled, onBold) {
+                CurioIcon(CurioIcons.FormatBold, null, size = 20.dp)
+            }
+            RichTextDockButton("Italic", italicActive, accent, ink, enabled, onItalic) {
+                CurioIcon(CurioIcons.FormatItalic, null, size = 20.dp)
+            }
+            RichTextDockButton("Underline", underlineActive, accent, ink, enabled, onUnderline) {
+                CurioIcon(CurioIcons.FormatUnderline, null, size = 20.dp)
+            }
+            RichTextDockButton("Highlight", highlightActive, accent, ink, enabled, onHighlight) {
+                CurioIcon(CurioIcons.FormatHighlight, null, size = 20.dp)
+            }
+            // One text-size door — the A+/A− pair's single button, wearing the
+            // dock's own look instead of the compact strip's chip.
+            SizePickerButton(
+                icon = CurioIcons.TextIncrease,
+                label = "Text size",
+                active = sizeActive,
+                accent = accent,
+                enabled = enabled,
+                currentSp = currentSp,
+                onPick = onSizePick,
+                dock = true
+            )
+        }
+    }
+}
+
+/** One tool of the journal-style dock — the journal's `PersonalToolButton`. */
+@Composable
+private fun RichTextDockButton(
+    label: String,
+    active: Boolean,
+    accent: Color,
+    ink: Color,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(50),
+        color = if (active) accent.copy(alpha = 0.24f) else Color.Transparent,
+        modifier = Modifier.size(36.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CompositionLocalProvider(LocalContentColor provides if (active) accent else ink) {
+                Box(
+                    modifier = Modifier.semantics { contentDescription = label },
+                    contentAlignment = Alignment.Center
+                ) { content() }
+            }
         }
     }
 }
@@ -1323,11 +1527,25 @@ private fun SizePickerButton(
     enabled: Boolean,
     currentSp: Float,
     onPick: (Float) -> Unit,
-    paper: Boolean = false
+    paper: Boolean = false,
+    /** Wears the journal dock's own button instead of the compact strip's
+     *  chip (the full-screen editors' dock). */
+    dock: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        FormatToolButton(
+        if (dock) {
+            RichTextDockButton(
+                label = label,
+                active = active,
+                accent = accent,
+                ink = MaterialTheme.colorScheme.onSurfaceVariant,
+                enabled = enabled,
+                onClick = { expanded = true }
+            ) {
+                CurioIcon(icon, null, size = 20.dp)
+            }
+        } else FormatToolButton(
             icon = icon,
             label = label,
             active = active,

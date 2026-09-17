@@ -10472,6 +10472,14 @@ fun TopicShareSheet(
                                             modifier = Modifier.fillMaxWidth(),
                                             placeholder = "Start writing…",
                                             minHeight = 140.dp,
+                                            // v389 — the card's full-screen editor
+                                            // writes on the JOURNAL's dock: a
+                                            // floating strip at the foot of the
+                                            // field, every tool its own button
+                                            // (bold, italic, underline, highlight,
+                                            // text size) instead of a Format
+                                            // toggle unfolding a second toolbar.
+                                            toolbarMode = RichTextToolbarMode.DOCK,
                                             accent = MaterialTheme.colorScheme.primary,
                                             ink = MaterialTheme.colorScheme.onSurface,
                                             surface = MaterialTheme.colorScheme.surfaceVariant,
