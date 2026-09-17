@@ -2,8 +2,10 @@ package com.curio.app.features.personal
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.RepeatMode
@@ -271,30 +273,56 @@ internal object PersonalVoiceRecording {
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * Whether the app may record, and the "ask for it" door. Callers get a Boolean
- * so a tap on the mic can start recording the moment permission is granted
- * instead of needing a second tap.
+ * THE MIC'S PERMISSION DOOR.
+ *
+ * The returned call is what a tap on the mic runs: it hands the question to
+ * Android's own launcher and NOTHING else. `RequestPermission` answers
+ * immediately when the permission is already held, so one path covers "already
+ * allowed", "never asked" and "asked before" — and recording starts from the
+ * GRANTED callback, never from the tap itself.
+ *
+ * v389 — this is the bug the member hit ("tapping it doesnt do anything"). The
+ * old version read the permission and returned a Boolean, and the caller was
+ * `if (!ask()) start()`: on the very FIRST tap the read said "not granted"
+ * (which launched the system dialog) AND `start()` still ran, so a
+ * MediaRecorder was built with no permission, threw, and put "Could not start
+ * recording" on the page while the dialog was still up. A tap that is refused
+ * for good now says so instead of failing silently — [onDenied] is the door to
+ * Android's app settings, which is the only way back from "Don't allow".
  */
 @Composable
-internal fun rememberRecordPermission(onGranted: () -> Unit): () -> Boolean {
-    val context = LocalContext.current
+internal fun rememberRecordPermission(
+    onGranted: () -> Unit,
+    onDenied: () -> Unit
+): () -> Unit {
     val granted = rememberUpdatedState(onGranted)
+    val denied = rememberUpdatedState(onDenied)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { allowed -> if (allowed) granted.value() }
-    return {
-        val allowed = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
-        if (!allowed) launcher.launch(Manifest.permission.RECORD_AUDIO)
-        allowed
+    ) { allowed ->
+        if (allowed) granted.value() else denied.value()
     }
+    return { launcher.launch(Manifest.permission.RECORD_AUDIO) }
 }
 
 /**
- * THE FLOATING MIC. It rides above the tool dock, on the page's own writing, so
- * "say it instead" is one tap from anywhere in a page.
+ * Android's own page for THIS app, where a permission that was refused for good
+ * can be given back. Returns null when the device has no such screen, so the
+ * caller can stay quiet rather than send the member nowhere.
+ */
+internal fun appPermissionSettingsIntent(context: Context): Intent? =
+    Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.fromParts("package", context.packageName, null)
+    ).takeIf { it.resolveActivity(context.packageManager) != null }
+
+/**
+ * THE FLOATING MIC. It floats over the writing ABOVE the tool dock, so "say it
+ * instead" is one tap away without ever sitting on the tools themselves.
+ *
+ * v389 — it wears the accent's DEEP shade as its fill rather than the airy one:
+ * a pale accent disc on a pale page reads as a disabled control, and this is
+ * the one button on the page whose whole job is to be pressed.
  */
 @Composable
 internal fun PersonalVoiceButton(
@@ -302,21 +330,20 @@ internal fun PersonalVoiceButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val accent = personalAccent()
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = CircleShape,
-        color = accent,
+        color = personalAccentInk(),
         shadowElevation = 8.dp,
-        modifier = modifier.size(46.dp)
+        modifier = modifier.size(48.dp)
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CurioIcon(
                 CurioIcons.Mic,
                 "Record a voice note",
-                tint = personalOnAccent(),
-                size = 21.dp
+                tint = MaterialTheme.colorScheme.surface,
+                size = 22.dp
             )
         }
     }

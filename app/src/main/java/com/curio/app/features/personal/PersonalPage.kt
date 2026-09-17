@@ -4,14 +4,19 @@ import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -181,13 +187,20 @@ internal fun PersonalWritingPage(
     val liveVoice = PersonalVoiceRecording.session?.takeIf { it.noteId == entryId }
     var recordFailed by remember { mutableStateOf(false) }
     var leavePrompt by remember { mutableStateOf(false) }
+    // The microphone was refused (or refused for good) — the page SAYS so and
+    // offers Android's own app page, which is the only way back from "Don't
+    // allow". A dead-looking button was the reported bug.
+    var micDenied by remember { mutableStateOf(false) }
 
     fun startVoice() {
         val started = PersonalVoiceRecording.start(context, entryId, voiceRoute(entryId))
         if (started == null) recordFailed = true
     }
 
-    val askToRecord = rememberRecordPermission { startVoice() }
+    val askToRecord = rememberRecordPermission(
+        onGranted = { startVoice() },
+        onDenied = { micDenied = true }
+    )
 
     // Only the note whose page is OPEN hides the pill at the app's root.
     DisposableEffect(entryId) {
@@ -356,9 +369,26 @@ internal fun PersonalWritingPage(
         header(editing, saving, { mode -> editing = mode }, { leave() })
 
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            Crossfade(
+            // v389 — THE EYE/PEN SWITCH IS A MOVE, not a swap (user report:
+            // "switching between eye and pen isnt smooth"). A crossfade showed
+            // one page dissolving into another; the writing now comes in from
+            // the RIGHT and the reading from the LEFT, tied to the same side of
+            // the switch the finger pressed, so the two modes read as two sides
+            // of one page. The travel is short (a twelfth of the width) on
+            // purpose: this is a mode, not navigation.
+            AnimatedContent(
                 targetState = editing,
-                animationSpec = tween(220),
+                transitionSpec = {
+                    val forward = targetState
+                    val dir = if (forward) 1 else -1
+                    (
+                        fadeIn(tween(240)) +
+                            slideInHorizontally(tween(300)) { width -> dir * width / 12 }
+                        ) togetherWith (
+                        fadeOut(tween(170)) +
+                            slideOutHorizontally(tween(220)) { width -> -dir * width / 12 }
+                        )
+                },
                 label = "personal-page-mode",
                 modifier = Modifier.fillMaxSize()
             ) { writing ->
@@ -406,6 +436,25 @@ internal fun PersonalWritingPage(
                     onDismiss = { editor.clearRemovedRow() }
                 )
             }
+
+            // THE PAGE'S OWN MIC (v389). It floats over the WRITING, clear of
+            // the dock — the dock is a row of buttons a thumb sweeps across, and
+            // a mic sitting in that row is one stray drag from a recording. It
+            // belongs to THIS box and not to the dock's, for a reason that was a
+            // bug: a button hanging outside its parent's bounds is never hit-
+            // tested, so the version that rode the dock's top edge looked dead
+            // (user report: "tapping it doesnt do anything"). Here it is inside
+            // the writing area, above the toolbar, and the whole disc is tappable.
+            PersonalFloatingLayer(
+                visible = editing && liveVoice == null,
+                enter = fadeIn(tween(180)) + scaleIn(tween(220), initialScale = 0.80f),
+                exit = fadeOut(tween(120)) + scaleOut(tween(160), targetScale = 0.80f),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 18.dp, bottom = 16.dp)
+            ) {
+                PersonalVoiceButton(onClick = askToRecord)
+            }
         }
 
         // The dock rides the keyboard while the page is being WRITTEN and steps
@@ -427,14 +476,6 @@ internal fun PersonalWritingPage(
                     onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
                     showJournalTools = showJournalTools,
                     modifier = Modifier.align(Alignment.Center)
-                )
-                // The page's own mic, floating over the writing just above the
-                // tools, so "say it instead" is always one tap away.
-                PersonalVoiceButton(
-                    onClick = { if (!askToRecord()) startVoice() },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 4.dp)
                 )
             }
         }
@@ -496,6 +537,37 @@ internal fun PersonalWritingPage(
             },
             confirmButton = {
                 TextButton(onClick = { recordFailed = false }) { Text("OK") }
+            }
+        )
+    }
+
+    // Android's own page for THIS app, when the device has one.
+    val micSettings = remember(context) { appPermissionSettingsIntent(context) }
+    if (micDenied) {
+        AlertDialog(
+            onDismissRequest = { micDenied = false },
+            title = { Text("Curio needs the microphone") },
+            text = {
+                Text(
+                    "Recording a voice note on this page needs microphone access. " +
+                        "If Android will not ask again, its own page for Curio is " +
+                        "where it is turned back on."
+                )
+            },
+            confirmButton = {
+                if (micSettings != null) {
+                    TextButton(onClick = {
+                        micDenied = false
+                        runCatching { context.startActivity(micSettings) }
+                    }) { Text("Open settings") }
+                } else {
+                    TextButton(onClick = { micDenied = false }) { Text("OK") }
+                }
+            },
+            dismissButton = if (micSettings != null) {
+                { TextButton(onClick = { micDenied = false }) { Text("Not now") } }
+            } else {
+                null
             }
         )
     }

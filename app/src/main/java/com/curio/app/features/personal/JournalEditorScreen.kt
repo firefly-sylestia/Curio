@@ -1,10 +1,14 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -179,10 +183,19 @@ fun JournalEditorScreen(
                 ) {
                     DatePicker(
                         state = pickerState,
+                        // v389 — the selected day is the ACCENT's airy tone, not
+                        // its deep ink: the deep shade made the picked day the
+                        // darkest thing on the calendar and swallowed the
+                        // numeral (user report: "the calendar selected date
+                        // highlight is too dark"). The pairing is the same one
+                        // every accent FILL in the app uses — the airy fill,
+                        // the readable ink on it.
                         colors = DatePickerDefaults.colors(
-                            selectedDayContainerColor = personalAccentInk(),
+                            selectedDayContainerColor = personalAccent(),
                             selectedDayContentColor = personalOnAccent(),
-                            todayDateBorderColor = personalAccentInk(),
+                            selectedYearContainerColor = personalAccent(),
+                            selectedYearContentColor = personalOnAccent(),
+                            todayDateBorderColor = personalAccent(),
                             todayContentColor = personalAccentInk()
                         )
                     )
@@ -263,7 +276,6 @@ private fun JournalTopBar(
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val accent = personalAccent()
-    val today = dateMillis.toLocalDate() == LocalDate.now()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -298,13 +310,35 @@ private fun JournalTopBar(
                     horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
                     CurioIcon(CurioIcons.CalendarToday, null, tint = personalAccentInk(), size = 15.dp)
-                    Text(
-                        if (today) "Today" else dateMillis.prettyDate(),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-color = personalAccentInk()
-                )
+                    // v389 — the day MOVES when it changes (user report: "date
+                    // switching isnt smooth"): a later day rises in and an
+                    // earlier day drops in, so the arrow the thumb pressed and
+                    // the direction the date travels agree. Vertical on purpose
+                    // — the two dates are the same height, so the pill never has
+                    // to resize while they swap.
+                    AnimatedContent(
+                        targetState = dateMillis,
+                        transitionSpec = {
+                            val forward = targetState > initialState
+                            val enter = if (forward) 1 else -1
+                            (
+                                fadeIn(tween(200)) +
+                                    slideInVertically(tween(240)) { height -> enter * height / 2 }
+                                ) togetherWith (
+                                fadeOut(tween(140)) +
+                                    slideOutVertically(tween(180)) { height -> -enter * height / 2 }
+                                )
+                        },
+                        label = "journal-date"
+                    ) { millis ->
+                        Text(
+                            if (millis.toLocalDate() == LocalDate.now()) "Today" else millis.prettyDate(),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = personalAccentInk()
+                        )
+                    }
+                }
             }
-        }
         if (editing) Surface(
                 onClick = { onShiftDate(1L) },
                 shape = CircleShape,

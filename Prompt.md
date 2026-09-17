@@ -1,6 +1,83 @@
 # Prompt Log — current request
 
-## Request (2026-09-17, IN PROGRESS — the piled-up prompt: to-do row gestures, the take studio pills, the reminder clock, and the book family)
+## Request (2026-09-17, DONE — line tools across Enter, backspace joins a line, the coffee quote, the pinned doors, and the mic)
+
+Verbatim:
+"in journal the voive note isnt working and also its above the toolbar so move it
+up, when i say its not working tapping it doesnt do anything, so fix it also give
+it a dark shade, and the tool bar check boc icon chnag e it, also when i tap the
+bulletpoint dont show the drop down, by default add the 1st bulletpoint tapping it
+again should show the drop down, also instead of writing no list write cancel or
+something, and also make the buulletpoint colors darker coffe deep color not the
+theme accent, then in home screen make the pages ad my shelf stikcy and in that
+position also give them the theme color accent fto the card of it, then make itthe
+content of them stay scrollable and it goes under that and for book cover footer
+make the title font more smller in size. then in typing in ournal its bad, like
+when i use enter to create a new line it create the new line but when i type back
+it doesnt delete it, and also when i have a tool selected from the tool nbar and i
+tap enter it deselects the tool and create a new line, also same with quotes it
+shouldnt do that and also chnage the quote style so its better view and a new line
+with enter for quote looks beautiful. also in posts the quote auses the same accent
+of theme instead use deep dark cfee color in social post too and in preview as
+well, and also switvhing betwen eye and pen isnt smoothwith proper animation and
+same for date swithcing its not smooth, also the calender selected date highlight
+is too dark so fix that. too and ask if any doubt and fix this cl first and push and
+dont push after each task" (plus a pasted CI log).
+
+### Decisions (ask_user, answered)
+
+- **The pinned doors**: EACH door holds its own row's left edge — the chips scroll
+  beside it and slide under it. The door card wears the accent.
+- **The marker menu's first row**: it keeps REMOVING the list; only the wording
+  changes ("No list" → "Remove list").
+- **The quote's coffee**: the journal writing (editor + read view) and the community
+  post — i.e. the pull-quote shared by the composer's preview and the wall. Not the
+  share card, not the topic detail page.
+
+### The pasted CI log was already fixed
+
+The log (`CaptureStudio.kt` unresolved `curio`, the two `ColumnScope.AnimatedVisibility`
+scoping errors, `CurioNavHost`'s missing `BookReviewScreen` import) is the build that
+`c8c14f8e` fixed — verified against the working tree before starting, so nothing had
+to be re-landed.
+
+### Done
+
+- **`PersonalVoice.kt` / `PersonalPage.kt` — the mic works, and it moved.** It now
+  lives in the page's WRITING box (bottom-right, 18/16dp clear of the dock, fade +
+  scale in), not on the dock's top edge: a control placed outside its parent's bounds
+  is never hit-tested, which is exactly why only a sliver of the disc responded. Its
+  fill is `personalAccentInk()` (the deep shade), and the permission door starts the
+  recording from the GRANTED callback instead of after a Boolean read (the old
+  `if (!ask()) start()` launched the dialog AND built a recorder with no permission).
+- **`PersonalCanvas.kt`** — `splitAtCaret` carries the line's own flags (and an armed
+  tool) across Enter, with the to-do page's "Enter on an empty row ends the list"
+  kept; new `mergeWithPrevious` joins a line back into the one above and is wired to
+  Backspace in `onPreviewKeyEvent`; the bullet tool applies the first marker on one tap
+  and opens the menu on the next; "Remove list"; `personalBulletColor()` (deep coffee);
+  `TodoGlyph` replaces the struck-through task icon in the dock; a quote is a coffee
+  PANEL and a run of quoted lines draws as one continuous block (editor and read view).
+- **`PersonalHome.kt`** — `PinnedDoorRow`: each door pinned at its row's left edge over
+  an opaquely filled strip, chips scrolling under it; the door wears an opaque accent
+  wash + accent hairline + deep accent ink; the book footer's title drops to 10sp.
+- **`JournalEditorScreen.kt`** — the date moves (slide + fade, direction from the
+  shift) instead of swapping; the calendar's picked day is `personalAccent()` with
+  on-accent ink instead of the deep `personalAccentInk()`.
+- **`SocialComponents.kt` / `CommunityPostScreen.kt`** — `SocialPullQuote` (composer
+  preview AND wall) takes no accent: rule, mark, dash and credit are
+  `personalQuoteDeepColor()`, theme-aware deep coffee.
+- Docs: `app/AGENTS.md` (the line's tools, the panel quote, the pinned doors, the mic
+  and its permission door) + the 20260922 store changelog.
+- Verified statically: `check_braces.js` over the touched trees, `git diff --check`.
+  No Gradle in this environment — CI is the compile check.
+
+### ⏭ The pending prompt at the end of this file is NEXT
+
+Not started in this pass (it is its own large piece of work: unifying the full-screen
+editors on the journal dock, the PDF/EPUB reader features, a tickable read view, a
+to-do preview, journals opening on the eye, and the post-composer topic picker).
+
+## Request (2026-09-17, DONE — the piled-up prompt: to-do row gestures, the take studio pills, the reminder clock, and the book family)
 
 Verbatim (moved up out of the "Next prompt" slot — nothing dropped):
 "Let todo rows be recorded by long press drag and swiped away to delete. also a
@@ -2251,3 +2328,14 @@ Done:
 - **TopicRevealScreen**: FilmInfoSection, AnimeInfoSection, SongInfoSection with poster cards.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
+now yk the full screen text editor in share card and also in the add note expand of book buttom sheet. well they should use the new journal style buttom tool bar editing with the all tools support. except the image. and also add more tools to the journal buttom tool bar like text size from the save your take notes format editor, more formats of justify etc etc from share card. keeping it as one format button with drop down. font change etc.
+
+remember the journal style buttom floating tool bar na fits page style to be the shared for the new full screen text editors ask again if any confusion.
+
+and now let's fix the pdf book reader and the epub reader. we need to add hold select tools such as highlights, notes book marks for chapters. etc etc proper book reader features and also for eye adjustment background color changer.
+for epub proper continuous scroll and page and position remember of the last read. and also auto marking the perfect read. 
+and fix the pdf reader the page are not full screen. hide the header when reading. proper pinch to zoom swipe to change pages not a next and back button and all  for pdf too and if texts are scanned proper highlights etc again and y
+bookmarks etc too. suggest more book features and add and also keep the auto hide style consistent so when reading the reader never sees any  distraction. 
+also the check box should be tickable in read view too. and also make the todo screen text size more larger and it's preview as a separate todo preview not inside the journal.
+also when i open a journal to read from the home screen or from personal or journals page don't open it on edit page but the eye page
+also in the post topic screen the choose a topic area gets hidden as it's not on top the page. it's little scrolled down so fix it, also a note on a topic, so when i select one and i tap the look the topic from the header and i press back the previous topic gets saved and it asks me again to choose a new can u fix that too.

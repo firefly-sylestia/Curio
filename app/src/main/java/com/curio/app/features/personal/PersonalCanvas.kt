@@ -143,6 +143,50 @@ internal fun personalQuoteColor(): Color = Color(0xFF9A6A43)
 @Composable
 internal fun personalQuoteRule(): Color = personalQuoteColor().copy(alpha = 0.85f)
 
+/**
+ * THE PANEL BEHIND A QUOTED LINE — the same coffee, at a whisper (user
+ * decision: "Coffee panel"). A quotation is a passage SOMEONE ELSE wrote, so it
+ * reads as a panel laid onto the page rather than as the member's own voice; the
+ * rule alone left that to one 3dp bar.
+ */
+@Composable
+internal fun personalQuoteWash(): Color =
+    personalQuoteColor().copy(alpha = if (isCurioDarkTheme()) 0.18f else 0.085f)
+
+/**
+ * THE QUOTE'S INK WHERE IT IS DRAWN OUTSIDE A PAGE — the same coffee family,
+ * one shade deeper and theme-aware, for the social pull-quote (which is BOTH the
+ * composer's preview and the post on the wall — one composable, see
+ * SocialPullQuote). A quotation is never drawn in the member's accent: on a rose
+ * or an azure theme the rule and the credit read as a highlight somebody had
+ * selected rather than as somebody else's words (user request).
+ */
+@Composable
+internal fun personalQuoteDeepColor(): Color =
+    if (isCurioDarkTheme()) Color(0xFFC09263) else Color(0xFF5C3A20)
+
+/**
+ * v389 — THE BULLET'S OWN COLOUR: DEEP COFFEE, never the theme's accent.
+ *
+ * A list marker is typography, not a highlight: a rose dot on a rose-accent
+ * theme made every bullet look like something the member had just selected (user
+ * request: "make the bulletpoint colors darker coffe deep color not the theme
+ * accent"). It wears the same coffee family as a quotation — the deep twin on a
+ * light page, the milky one on a dark page so it cannot vanish.
+ */
+@Composable
+internal fun personalBulletColor(): Color =
+    if (isCurioDarkTheme()) Color(0xFFB08255) else Color(0xFF6E4A2E)
+
+/**
+ * HOW FAR A QUOTE PANEL REACHES INTO THE GAP BESIDE IT: half of it, so two
+ * quoted lines typed over one Enter meet in the middle and read as ONE panel
+ * instead of a stack of bars. The editor sets its blocks 6dp apart, the read-only
+ * views 8dp — each half is the world it belongs to.
+ */
+private val QUOTE_JOIN_EDITOR = 3.dp
+private val QUOTE_JOIN_VIEW = 4.dp
+
 // ────────────────────────────────────────────────────────────────────────────
 // Style → pixels
 // ────────────────────────────────────────────────────────────────────────────
@@ -977,30 +1021,82 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /**
-     * Enter: the paragraph splits at the caret and the caret lands at the
-     * start of the new one. The style of the characters travels with them (the
-     * mask is cut in two), but an ARMED tool does not cross the break: a new
-     * line is plain prose unless a tool is armed — or unless this is a
-     * checklist page, which arms its own rows (see [keepsChecklistRows]).
+     * The flags that cover EVERY visible character of a line — the tools that
+     * are really ON for that whole line (which is also what the dock lights /
+     * what [activeFlags] reports for a caret with no selection). A line with no
+     * visible characters has none.
+     */
+    private fun lineFlags(text: String, mask: IntArray): Int {
+        var flags = ALL_FLAGS
+        var seen = false
+        for (i in text.indices) {
+            if (text[i].isWhitespace()) continue
+            seen = true
+            flags = flags and mask.getOrElse(i) { 0 }
+        }
+        return if (seen) flags else 0
+    }
+
+    /** True when the block at [id] is a quoted line (the quote panel's run). */
+    fun isQuoteLine(id: String): Boolean {
+        val block = blocks[id] ?: return false
+        if (block.isPhoto || block.isAudio) return false
+        return personalBlockCarries(block.text, mask(id), FLAG_QUOTE)
+    }
+
+    /**
+     * Enter: the paragraph splits at the caret and the caret lands at the start
+     * of the new one.
+     *
+     * v389 — THE LINE'S TOOLS CROSS THE BREAK. Before this the styles were cut
+     * in two (so the words after the caret kept theirs) but the NEW line was
+     * plain prose and the dock's button went dark, which read as the editor
+     * dropping the tool mid-sentence (user report: "when i have a tool selected
+     * from the tool nbar and i tap enter it deselects the tool"). Now the whole
+     * line's own tools — bold, a quote, a title, a bullet, a checklist row —
+     * carry to the new line, and an ARMED tool (nothing typed yet) carries too,
+     * because that is the same promise the editor makes everywhere else: what is
+     * switched on applies to what comes next.
+     *
+     * A checklist page keeps its own manner: Enter at the end of a row makes the
+     * next row (the row's own checkbox is one of the line's tools, so it carries),
+     * and Enter on an EMPTY row ends the list.
      */
     fun splitAtCaret(id: String) {
         val block = blocks[id] ?: return
-        // Read the row's own flags BEFORE the split rewrites the mask: a
-        // checklist page needs to know whether the line being left was a row.
-        val wasChecklistRow = personalBlockCarries(block.text, mask(id), FLAG_CHECKBOX)
+        val blockMask = mask(id)
+        // What the line is wearing decides what the new one inherits; an armed
+        // tool (an empty line) inherits itself.
+        val headFlags = lineFlags(block.text, blockMask)
+        val carried = when {
+            // The TO-DO page's own manner, kept: Enter on an EMPTY row ends the
+            // list instead of arming the next row for ever (a page of checklists
+            // has to stop somewhere).
+            keepsChecklistRows && block.text.isEmpty() -> 0
+            headFlags != 0 -> headFlags
+            else -> armed
+        }
         val caretIndex = (selections[id]?.start ?: block.text.length)
             .coerceIn(0, block.text.length)
         val index = order.indexOf(id)
         if (index < 0) return
         val head = block.copy(
             text = block.text.take(caretIndex),
-            runs = maskToRuns(mask(id).copyOfRange(0, caretIndex))
+            runs = maskToRuns(blockMask.copyOfRange(0, caretIndex))
         )
+        val tailText = block.text.drop(caretIndex)
+        // A whole-line tool is a WHOLE-LINE tool on both sides of the break; a
+        // partly-styled line just keeps its own characters' styles.
+        val tailMask = if (headFlags != 0 && tailText.isNotEmpty()) {
+            IntArray(tailText.length) { headFlags }
+        } else {
+            blockMask.copyOfRange(caretIndex, block.text.length)
+        }
         val tail = PersonalBlock(
             id = newBlockId(),
-            text = block.text.drop(caretIndex),
-            runs = maskToRuns(mask(id).copyOfRange(caretIndex, block.text.length)),
-            align = if (block.text.drop(caretIndex).isEmpty()) block.align else PersonalAlign.START
+            text = tailText,
+            runs = maskToRuns(tailMask),
+            align = if (tailText.isEmpty()) block.align else PersonalAlign.START
         )
         masks[id] = runsToMask(head.text.length, head.runs)
         blocks[id] = head
@@ -1010,12 +1106,53 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         selections[tail.id] = TextRange(0)
         focusedId = tail.id
         caret = PersonalCaret(tail.id, 0)
-        // A checklist page (see [keepsChecklistRows]): Enter after a row with
-        // words in it makes the NEXT row; Enter on an empty row ends the list.
-        if (keepsChecklistRows && wasChecklistRow && tail.text.isEmpty() && head.text.isNotBlank()) {
-            armed = FLAG_CHECKBOX
-        }
+        armed = carried
         onDocChanged(doc())
+    }
+
+    /**
+     * v389 — BACKSPACE AT THE START OF A LINE takes that line into the one above
+     * it, the way every editor does.
+     *
+     * The split used to be one-way: Enter made a new line and NOTHING could take
+     * it back, so one accidental Enter left an empty paragraph the writer could
+     * never remove (user report: "when i use enter to create a new line it
+     * create the new line but when i type back it doesnt delete it"). An EMPTY
+     * line is dropped outright; a line with words in it hands them to the end of
+     * the line above. Returns false when there is nowhere to merge into (the
+     * first line, or a block above that is a photo or a voice note), so the key
+     * falls through to the field.
+     */
+    fun mergeWithPrevious(id: String): Boolean {
+        val index = order.indexOf(id)
+        if (index <= 0) return false
+        val block = blocks[id] ?: return false
+        val previousId = order[index - 1]
+        val previous = blocks[previousId] ?: return false
+        if (previous.isPhoto || previous.isAudio) return false
+        val ownMask = masks[id] ?: emptyMask(0)
+        val previousMask = mask(previousId)
+        val previousText = previous.text
+        val at = previousText.length
+        val mergedText = previousText + block.text
+        val mergedMask = IntArray(mergedText.length) { i ->
+            if (i < at) previousMask.getOrElse(i) { 0 }
+            else ownMask.getOrElse(i - at) { 0 }
+        }
+        order.removeAt(index)
+        blocks.remove(id)
+        masks.remove(id)
+        selections.remove(id)
+        compositions.remove(id)
+        blocks[previousId] = previous.copy(text = mergedText, runs = maskToRuns(mergedMask))
+        masks[previousId] = mergedMask
+        // Where the two halves met is where the caret belongs — the exact
+        // position the Enter was pressed at, one keystroke ago.
+        selections[previousId] = TextRange(at)
+        focusedId = previousId
+        caret = PersonalCaret(previousId, at)
+        onDocChanged(doc())
+        return true
     }
 
     /**
@@ -1084,6 +1221,13 @@ internal fun PersonalCanvas(
             // caret, the focus requester and the field's own scroll would all
             // follow the POSITION instead of the row.
             key(id) {
+                // v389 — whether a QUOTE panel has a quoted neighbour decides
+                // how far it reaches into the gap, so a quotation typed over
+                // several Enters draws as one continuous panel (see
+                // personalQuoteWash).
+                val quoteAbove = index > 0 && state.isQuoteLine(state.blockIds[index - 1])
+                val quoteBelow = index < state.blockIds.lastIndex &&
+                    state.isQuoteLine(state.blockIds[index + 1])
                 if (block.isPhoto) {
                     PersonalPhotoBlock(
                         uri = block.photo.orEmpty(),
@@ -1122,11 +1266,21 @@ internal fun PersonalCanvas(
                             state = state,
                             ink = ink,
                             accent = accent,
-                            enabled = enabled
+                            enabled = enabled,
+                            quoteJoinAbove = quoteAbove,
+                            quoteJoinBelow = quoteBelow
                         )
                     }
                 } else {
-                    PersonalTextBlock(id = id, state = state, ink = ink, accent = accent, enabled = enabled)
+                    PersonalTextBlock(
+                        id = id,
+                        state = state,
+                        ink = ink,
+                        accent = accent,
+                        enabled = enabled,
+                        quoteJoinAbove = quoteAbove,
+                        quoteJoinBelow = quoteBelow
+                    )
                 }
             }
         }
@@ -1139,14 +1293,18 @@ private fun PersonalTextBlock(
     state: PersonalEditorState,
     ink: Color,
     accent: Color,
-    enabled: Boolean
+    enabled: Boolean,
+    /** The gap above/below holds another quoted line — see QUOTE_JOIN_EDITOR. */
+    quoteJoinAbove: Boolean = false,
+    quoteJoinBelow: Boolean = false
 ) {
     val text = state.text(id)
     val mask = state.mask(id)
     val align = state.align(id)
     val quoteRule = personalQuoteRule()
+    val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
-    val bulletInk = personalAccentInk()
+    val bulletInk = personalBulletColor()
     val isQuote = personalBlockIsQuote(text, mask)
     // A line that IS a title (or a small note) is set by the BLOCK, so a
     // heading really is bigger writing and not just a bolder word.
@@ -1227,9 +1385,20 @@ private fun PersonalTextBlock(
                     isQuote -> Modifier
                         .drawBehind {
                             val barWidth = 3.dp.toPx()
+                            val join = QUOTE_JOIN_EDITOR.toPx()
+                            val top = if (quoteJoinAbove) -join else 0f
+                            val bottom = if (quoteJoinBelow) join else 0f
+                            val panelHeight = size.height + (bottom - top)
+                            drawRoundRect(
+                                color = quoteWash,
+                                topLeft = Offset(0f, top),
+                                size = Size(size.width, panelHeight),
+                                cornerRadius = CornerRadius(9.dp.toPx())
+                            )
                             drawRoundRect(
                                 color = quoteRule,
-                                size = Size(barWidth, size.height),
+                                topLeft = Offset(0f, top),
+                                size = Size(barWidth, panelHeight),
                                 cornerRadius = CornerRadius(barWidth / 2f)
                             )
                         }
@@ -1266,20 +1435,34 @@ private fun PersonalTextBlock(
             .focusRequester(focusRequester)
             .onFocusChanged { state.onFocusChanged(id, it.isFocused) }
             .onPreviewKeyEvent { event ->
+                if (!enabled || event.type != KeyEventType.KeyDown) {
+                    return@onPreviewKeyEvent false
+                }
                 // Enter makes a NEW line (a block), so a line tool can point
                 // at the line the caret is on. Shift+Enter keeps the plain
                 // newline inside the paragraph.
                 if (
-                    enabled &&
-                    event.type == KeyEventType.KeyDown &&
                     (event.key == Key.Enter || event.key == Key.NumPadEnter) &&
                     !event.isShiftPressed
                 ) {
                     state.splitAtCaret(id)
-                    true
-                } else {
-                    false
+                    return@onPreviewKeyEvent true
                 }
+                // BACKSPACE AT THE START OF A LINE takes the line back into the
+                // one above it — the key beside Enter has to be able to undo
+                // what Enter did (user report: "when i type back it doesnt
+                // delete it"). The live values are read here rather than
+                // captured, because this runs between two compositions.
+                if (event.key == Key.Backspace) {
+                    val live = state.text(id)
+                    val selection = state.selection(id)
+                    val atLineStart = live.isEmpty() ||
+                        (selection != null && selection.collapsed && selection.start == 0)
+                    if (atLineStart) {
+                        return@onPreviewKeyEvent state.mergeWithPrevious(id)
+                    }
+                }
+                false
             },
         textStyle = bodyStyle,
         cursorBrush = SolidColor(personalAccentInk()),
@@ -1463,10 +1646,19 @@ internal fun PersonalDocView(
     afterTitle: (@Composable (String) -> Unit)? = null
 ) {
     val quoteRule = personalQuoteRule()
+    val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
-    val bulletInk = personalAccentInk()
+    val bulletInk = personalBulletColor()
+    // v389 — a quoted line is ONE thing with its quoted neighbour, so which of
+    // the two sides leads into another quoted line is decided once, here, and
+    // the panels reach into the gap to meet (see QUOTE_JOIN_VIEW).
+    fun isQuoteRun(block: PersonalBlock): Boolean =
+        !block.isPhoto && !block.isAudio && block.text.isNotBlank() &&
+            personalBlockIsQuote(block.text, runsToMask(block.text.length, block.runs))
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        doc.blocks.forEach { block ->
+        doc.blocks.forEachIndexed { index, block ->
+            val quoteAbove = index > 0 && isQuoteRun(doc.blocks[index - 1])
+            val quoteBelow = index < doc.blocks.lastIndex && isQuoteRun(doc.blocks[index + 1])
             if (block.isPhoto) {
                 // A saved page shows the picture SMALL — it is a page of
                 // writing, not a gallery — and hands its bounds to the
@@ -1529,9 +1721,20 @@ internal fun PersonalDocView(
                                 isQuote -> Modifier
                                     .drawBehind {
                                         val barWidth = 3.dp.toPx()
+                                        val join = QUOTE_JOIN_VIEW.toPx()
+                                        val top = if (quoteAbove) -join else 0f
+                                        val bottom = if (quoteBelow) join else 0f
+                                        val panelHeight = size.height + (bottom - top)
+                                        drawRoundRect(
+                                            color = quoteWash,
+                                            topLeft = Offset(0f, top),
+                                            size = Size(size.width, panelHeight),
+                                            cornerRadius = CornerRadius(9.dp.toPx())
+                                        )
                                         drawRoundRect(
                                             color = quoteRule,
-                                            size = Size(barWidth, size.height),
+                                            topLeft = Offset(0f, top),
+                                            size = Size(barWidth, panelHeight),
                                             cornerRadius = CornerRadius(barWidth / 2f)
                                         )
                                     }
@@ -1683,7 +1886,7 @@ internal fun PersonalToolDock(
                 ink = ink,
                 onClick = { state.toggleListStyle(FLAG_CHECKBOX) }
             ) {
-                CurioIcon(CurioIcons.TaskAlt, null, size = 19.dp)
+                TodoGlyph(active = active and FLAG_CHECKBOX != 0)
             }
             PersonalToolButton(
                 label = "Small text",
@@ -1693,20 +1896,25 @@ internal fun PersonalToolDock(
             ) {
   CurioIcon(CurioIcons.TextDecrease, null, size = 20.dp)
             }
-            // v389 — THE MARKER MENU. The bullet tool opens a small anchored
-            // menu of list styles instead of toggling one hard-coded dot: the
-            // first row takes the list OFF the line, the rest give it that
-            // marker (stored per line — see PersonalBlock.marker). The button
-            // itself wears the focused line's own marker, so the dock always
-            // echoes what the line is wearing.
+            // v389 — THE MARKER MENU. The bullet tool gives the line the FIRST
+            // marker on its first tap (a dot — the common case, one tap) and
+            // opens the menu of styles on the tap after that, once the line is
+            // already a list (user request: "by default add the 1st bulletpoint
+            // tapping it again should show the drop down"). The button itself
+            // wears the focused line's own marker, so the dock always echoes
+            // what the line is wearing.
             Box {
                 var markerMenuOpen by remember { mutableStateOf(false) }
                 val focusedMarker = state.markerOfFocused()
+                val bulletOn = active and FLAG_BULLET != 0
                 PersonalToolButton(
                     label = "Bullet style",
-                    active = active and FLAG_BULLET != 0,
+                    active = bulletOn,
                     accent = accentInk, ink = ink,
-                    onClick = { markerMenuOpen = true }
+                    onClick = {
+                        if (bulletOn) markerMenuOpen = true
+                        else state.applyMarker(PersonalMarker.entries.first())
+                    }
                 ) {
                     MarkerGlyph(focusedMarker)
                 }
@@ -1715,7 +1923,7 @@ internal fun PersonalToolDock(
                     onDismissRequest = { markerMenuOpen = false }
                 ) {
                     DropdownMenuItem(
-                        text = { MarkerMenuLabel("No list") },
+                        text = { MarkerMenuLabel("Remove list") },
                         leadingIcon = {
                             CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp)
                         },
@@ -1782,6 +1990,46 @@ internal fun PersonalToolDock(
                 CurioIcon(CurioIcons.Image, null, size = 18.dp)
             }
         }
+    }
+}
+
+/**
+ * v389 — THE TO-DO TOOL'S OWN GLYPH: the page's CHECKBOX, drawn.
+ *
+ * The bundled icon was a struck-through task glyph that read as a finished item
+ * rather than as the thing the button MAKES — and it shared no shape with the
+ * boxes the page draws down the margin (user request: "the tool bar check box
+ * icon change it"). This is that box and that tick, at dock size: the same
+ * rounded square, the same tick, filled with the accent when the line is
+ * already a row.
+ */
+@Composable
+private fun TodoGlyph(active: Boolean) {
+    val ink = LocalContentColor.current
+    val onFill = MaterialTheme.colorScheme.surface
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(19.dp)) {
+        val stroke = 1.7f.dp.toPx()
+        val side = size.minDimension * 0.80f
+        val left = (size.width - side) / 2f
+        val top = (size.height - side) / 2f
+        val corner = CornerRadius(side * 0.30f)
+        drawRoundRect(
+            color = ink,
+            topLeft = Offset(left, top),
+            size = Size(side, side),
+            cornerRadius = corner,
+            style = if (active) androidx.compose.ui.graphics.drawscope.Fill else Stroke(width = stroke)
+        )
+        val tick = Path().apply {
+            moveTo(left + side * 0.24f, top + side * 0.53f)
+            lineTo(left + side * 0.43f, top + side * 0.73f)
+            lineTo(left + side * 0.78f, top + side * 0.30f)
+        }
+        drawPath(
+            path = tick,
+            color = if (active) onFill else ink,
+            style = Stroke(width = stroke, cap = StrokeCap.Round, join = StrokeJoin.Round)
+        )
     }
 }
 

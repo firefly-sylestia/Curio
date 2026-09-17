@@ -28,6 +28,16 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Writing: a line you made with Enter can be taken back — backspace at the start of a line joins it to the one above, and an empty line goes away.
+- Writing: the tool you have switched on stays on after Enter — a quote, a list or a title carries to the new line instead of dropping to plain prose.
+- Writing: a quote is a coffee panel now — a soft wash behind the words with the rule down its side — and a quotation typed over several Enters reads as one continuous block.
+- Writing: the bullet tool gives the line a dot on the first tap and opens the mark menu on the next, and the row that takes a list off a line reads "Remove list".
+- Writing: a bullet's mark is a deep coffee instead of your theme's accent, and the to-do tool wears the page's own checklist box instead of a struck-through task icon.
+- Writing: the page's mic floats over the writing, clear of the tool row, where the whole button can be tapped — and recording a voice note asks for the microphone properly (the first tap used to fail silently while Android's dialog was still up).
+- Writing: the eye / pen switch is a move instead of a swap — the writing slides in from one side and the reading from the other.
+- Journals: the date changes with a shift instead of swapping in place, and the calendar's picked day is the accent's lighter tone so the numeral stays readable.
+- Social: a quote is set in deep coffee instead of your theme's accent, in the composer's preview and on the wall alike.
+- Home: the Pages / My shelf doors hold their row's left edge while the chips scroll under them, and the doors wear your accent; the book cover footer's title is smaller.
 - Books: the description folds to a line while you are writing and opens on a tap, instead of pushing your own words down the page.
 - Books: a chapter review saves itself even when you back straight out of the page (the last change used to be lost).
 - Cabinet: "Curiying now" counts and lists the shelf books you are part-way through, instead of only the items saved onto that shelf.
