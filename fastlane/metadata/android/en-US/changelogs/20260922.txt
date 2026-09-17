@@ -4,6 +4,8 @@ ADD:
 - Journals: the day's title comes into the top bar once the title you wrote has scrolled away.
 - Writing: the book review and the chapter review wear the same eye / pen switch as every other page, and the switch itself now slides between the two instead of swapping.
 - Writing: tap the blank part of a page to start writing even when the caret was already sitting there, and double-tap a page you are reading to put the pen back.
+- Writing: press and hold a voice note to carry it to a new place on the page, the way a to-do row already moves.
+- Books: the book review and the chapter review now have the journal's own mic — record a voice note in either page, and the waveform lands in the writing just like it does in a journal.
 - Writing: the card editor's and the book note's tool dock now HOLDS the foot of the screen while the writing moves under it, the way the journal page's dock does.
 - Social: every portrait has its own gaze now — twelve eye designs chosen per character (a wizard's sparkle, a hood's shaded gleam, a beard's steady eye, a flower crown's smile) with brows to match, instead of the same pair of eyes on all 28.
 - Writing: the dock's two last tools — put a line to the left, centred, right or justified, and set the hand it is written in (default, book serif, writing hand, display serif). Both work on a selection, or on the line you are in when nothing is selected, and they show in the card, the saved entry and the export alike.

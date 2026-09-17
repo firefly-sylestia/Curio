@@ -2625,12 +2625,11 @@ see if the previous prompts are implemented if so makr them pass and do the thin
 
 fix this (the `PersonalCanvas` CI log), also did u do the full proper book reader implementation? also in the book read floating option when i tap and hold the read button it should sho a drop down to chnage the pdf the file attach, in book also in header it shows the title and then below too, instead show the titile when the buttom title scrolls above with proper smooth transition, also for eye and pen switch for journals etc the transition is very bad even though the information was already there the smooth tranition isnt smooth but looks clanky specially when th ekeyboard opens the transiton moved up, also add proper tap to start writin gin blank always even when th e cursor was there, also when im on eye view and i double tap switch to edit pen mode, for all also the book review it doesnt have the eye and pen style switch fix that, also suppose im writng in book review for a chapter by adding a chapter, add like a top pinned chapter switching like when the chapter scrolls aways it shows there pinned and when im on the start point of that chapter it swicthes to the revious chapter view, similiar to title add in journal too the tooo bar titlee, great additon isnt it? suggest similiar mode, also add drag to move the voice note too, in journal page, also add int in book review chapter review too, in book review keep it mind theres add chapter floating button too so properly adjust it. and first fix the cl and push it, then d the rest of the work, dont push them though just commit
 
-**Status (2026-09-17):** DONE except the last item. The CI fix is PUSHED (`2d260552`);
-the rest is COMMITTED but NOT pushed (per the request). Landed: the read pill's hold
-menu, the book head's roll-up title, the pinned chapter, the journal's rolled title,
-the travelling mode switch + the page's cross-fade, tap-the-blank-always, double-tap to
-the pen, and the eye/pen switch on the book and chapter reviews.
-**OPEN — the voice note's drag, and voice notes on the book/chapter pages:** "drag to
-move the voice note" has three readings (the floating mic dragged around the canvas /
-the voice BLOCK moved within the page / the waveform scrub, which already seeks), and
-the book + chapter review pages carry no mic at all today, so the ask is with the user.
+**Status (2026-09-17):** ALL DONE. The CI fix is PUSHED (`2d260552`);
+the batch is PUSHED (`53c61624`, `b2b824a6`); the voice-note carry + mic-on-both-pages
+is PUSHED (`c73f4f2a`). The voice-note drag was "the voice block in the page" — the
+voice block can now be long-press-dragged to a new place (the waveform's seek stands
+down while it is carried, via `LocalPersonalBlockCarried`). Voice notes are now on the
+book review AND the chapter review: the same floating mic, permission door, capsule-
+replaces-the-dock, and leave-guard the journal already has. The book review's mic
+sits at the bottom-LEFT to keep clear of the Add-chapter pill.
