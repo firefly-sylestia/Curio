@@ -1,8 +1,10 @@
 package com.curio.app.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
@@ -42,6 +44,39 @@ fun Modifier.curioPressClickable(
         )
 }
 
+/**
+ * Curio's tap + hold primitive. The press animation shares the same visual
+ * language as [curioPressClickable], while combinedClickable keeps the
+ * long-press gesture available to scrollable surfaces.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun Modifier.curioPressCombinedClickable(
+    enabled: Boolean = true,
+    pressedScale: Float = 0.975f,
+    hapticOnPress: Boolean = true,
+    onClickLabel: String? = null,
+    onLongClickLabel: String? = null,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null
+): Modifier {
+    val press = rememberCurioPressSource(
+        pressedScale = pressedScale,
+        hapticOnPress = hapticOnPress && enabled
+    )
+    return this
+        .then(press.modifier)
+        .combinedClickable(
+            interactionSource = press.interactionSource,
+            indication = LocalIndication.current,
+            enabled = enabled,
+            onClickLabel = onClickLabel,
+            onLongClickLabel = onLongClickLabel,
+            onClick = onClick,
+            onLongClick = onLongClick
+        )
+}
+
 class CurioPressSource(
     val interactionSource: MutableInteractionSource,
     val modifier: Modifier
@@ -56,12 +91,12 @@ fun rememberCurioPressSource(
     val pressed by interaction.collectIsPressedAsState()
     val alive = CurioAlivePreferences.isEnabled(LocalContext.current)
     val targetScale = if (pressed) {
-        if (alive) minOf(pressedScale, 0.92f) else pressedScale
+        if (alive) maxOf(pressedScale, 0.955f) else pressedScale
     } else 1f
     val scale by animateFloatAsState(
         targetValue = targetScale,
         animationSpec = if (alive) {
-            androidx.compose.animation.core.spring(dampingRatio = 0.64f, stiffness = 680f)
+            androidx.compose.animation.core.spring(dampingRatio = 0.70f, stiffness = 760f)
         } else CurioMotion.Springs.Press,
         label = "curioPressScale"
     )
@@ -75,8 +110,8 @@ fun rememberCurioPressSource(
         Modifier.graphicsLayer {
             scaleX = scale
             scaleY = scale
-            rotationZ = if (pressed) -1.15f else 0f
-            alpha = if (pressed) 0.965f else 1f
+            rotationZ = if (pressed) -0.45f else 0f
+            alpha = if (pressed) 0.975f else 1f
             transformOrigin = TransformOrigin.Center
         }
     } else {
