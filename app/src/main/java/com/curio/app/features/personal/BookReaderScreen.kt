@@ -144,7 +144,6 @@ import java.util.zip.ZipFile
  *    rendered ONE page per frame instead of every page at open, which is what
  *    made a long PDF open slowly and hold a phone's memory hostage.
  */
-@Composable
 /** The Activity a View is drawn in, however wrapped its context is. */
 private fun Context.findActivity(): Activity? {
     var candidate: Context? = this
@@ -250,14 +249,55 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
     val palette = readerPalette(ReaderLook.inkKey)
 
-    // ── HOW THIS BOOK FLOWS, AND THE BAR THAT SAYS SO ───────────────────
-    // Hoisted HERE because the bar belongs to the CHROME, which hides itself:
-    // a page bar that lived inside the pager could not go away with the tools,
-    // and a reader whose chrome is gone should have nothing over the words at
-    // all (user request: "a floating page chnaging bar in the tool bar which
-    // again hides with the tool barm").
+    // ── HOW THIS BOOK FLOWS ──────────────────────────────────────────────
+    // The PAGED text flow lays the book out itself, so the page count is the
+    // pager's to report; the bar that shows it is built further down, beside
+    // the PDF pager it also reads (see `pageBar` — it cannot be built here,
+    // because at this point in the body the pager it names does not exist yet).
     var textPageCount by remember { mutableIntStateOf(0) }
     val textPager = rememberPagerState { textPageCount }
+    val flowLabel = when (content) {
+        is ReaderContent.Pages -> ReaderLook.pageFlow
+        else -> ReaderLook.textFlow
+    }
+
+    // The two things a jump has to reach: the text list and the page pager.
+    // Hoisted HERE, to the screen, because the marks and chapter sheets move
+    // them — a state that a sheet has to reach is the screen's state, not the
+    // composable's that happens to draw it. `pageCount` is a lambda over
+    // `content`, so the pager is told its length the moment the file is read.
+    val listState = rememberLazyListState()
+    val pagerState = rememberPagerState {
+        (content as? ReaderContent.Pages)?.pageCount ?: 0
+    }
+    /**
+     * Jump to a MARK's own place — a block index in a reflowable book, a page in
+     * a PDF. It lands on the passage ITSELF: a highlight belongs to the words it
+     * was made on, never to a heading that happens to share its number.
+     */
+    suspend fun jumpToMark(index: Int) {
+        when (val loaded = content) {
+            is ReaderContent.Text -> listState.scrollToItem(
+                index.coerceIn(0, (loaded.blocks.size - 1).coerceAtLeast(0))
+            )
+            is ReaderContent.Pages -> pagerState.scrollToPage(
+                index.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
+            )
+            null -> Unit
+        }
+    }
+
+    // ── THE PAGE BAR ─────────────────────────────────────────────────────
+    // The floating bar that turns a page, and the only place the reader says
+    // WHICH page it is in terms the member can act on. It belongs to the CHROME,
+    // which hides itself: a page bar that lived inside the pager could not go
+    // away with the tools, and a reader whose chrome is gone should have nothing
+    // over the words at all (user request: "a floating page chnaging bar in the
+    // tool bar which again hides with the tool barm").
+    //
+    // Two pagers, one bar: the PDF's own, and the text pager the PAGED flow
+    // lays a reflowable book out into. A book that prints its own page numbers
+    // is the exception — Curio does not number it a second time.
     val pageBar: ReaderPageBar? = when (val loaded = content) {
         is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
             ReaderPageBar(
@@ -304,36 +344,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
 
         null -> null
-    }
-    val flowLabel = when (content) {
-        is ReaderContent.Pages -> ReaderLook.pageFlow
-        else -> ReaderLook.textFlow
-    }
-
-    // The two things a jump has to reach: the text list and the page pager.
-    // Hoisted HERE, to the screen, because the marks and chapter sheets move
-    // them — a state that a sheet has to reach is the screen's state, not the
-    // composable's that happens to draw it. `pageCount` is a lambda over
-    // `content`, so the pager is told its length the moment the file is read.
-    val listState = rememberLazyListState()
-    val pagerState = rememberPagerState {
-        (content as? ReaderContent.Pages)?.pageCount ?: 0
-    }
-    /**
-     * Jump to a MARK's own place — a block index in a reflowable book, a page in
-     * a PDF. It lands on the passage ITSELF: a highlight belongs to the words it
-     * was made on, never to a heading that happens to share its number.
-     */
-    suspend fun jumpToMark(index: Int) {
-        when (val loaded = content) {
-            is ReaderContent.Text -> listState.scrollToItem(
-                index.coerceIn(0, (loaded.blocks.size - 1).coerceAtLeast(0))
-            )
-            is ReaderContent.Pages -> pagerState.scrollToPage(
-                index.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
-            )
-            null -> Unit
-        }
     }
 
     // WHERE THEY ARE, said as a fact about the book — the chapter they are in,

@@ -938,7 +938,6 @@ private fun ProgressCard(
     }
 }
 
-@Composable
 /**
  * v389 — WHY I PICKED IT UP, as the eye reads it.
  *

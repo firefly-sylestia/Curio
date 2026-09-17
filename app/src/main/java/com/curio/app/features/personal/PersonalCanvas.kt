@@ -92,6 +92,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -2410,7 +2411,6 @@ internal fun PersonalDocView(
                 val markerOnFill = MaterialTheme.colorScheme.surface
                 val markerOutline = ink.copy(alpha = 0.42f)
                 val alignOf = block.align.toTextAlign()
-                else TextAlign.Start
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
