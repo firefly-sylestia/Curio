@@ -98,14 +98,33 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun BookDetailScreen(navController: NavController, bookId: String) {
-    val book by produceState<com.curio.app.data.PersonalBookEntity?>(initialValue = null) {
+    // v389c — THE FIRST FRAME IS THE LAST VISIT'S ANSWER.
+    //
+    // Both of these are Room flows, and a flow's first value lands a frame or
+    // two after the page composes — so reopening a book began from nothing: the
+    // head without its title, then the title; the chapter rows as numbered
+    // placeholders, then their real names and page ranges. BookPageMemory keeps
+    // what the last visit ended on and hands it over as the initial value only;
+    // the flows below still decide, and they win on their first emission (user
+    // report: "the chapter view well sometimes it reload like it fetches the
+    // chapter notes etc then when i close and open again for a berif moment i
+    // see pages").
+    val book by produceState<com.curio.app.data.PersonalBookEntity?>(
+        initialValue = BookPageMemory.row(bookId)
+    ) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeBook(bookId).collect { value = it }
+            PersonalRepositoryHolder.repo.observeBook(bookId).collect {
+                BookPageMemory.rememberRow(it)
+                value = it
+            }
         }
     }
-    val notes by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
+    val notes by produceState(initialValue = BookPageMemory.notes(bookId)) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeBookNotes(bookId).collect { value = it }
+            PersonalRepositoryHolder.repo.observeBookNotes(bookId).collect {
+                BookPageMemory.rememberNotes(bookId, it)
+                value = it
+            }
         }
     }
     // THE MARGINS: what the member marked while READING this book in Curio's

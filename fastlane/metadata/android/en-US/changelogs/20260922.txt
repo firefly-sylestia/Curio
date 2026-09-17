@@ -1,4 +1,5 @@
 FIX:
+- Books: reopening a book no longer flashes its placeholder rows — the head, the chapter names and their page ranges are the ones the last visit ended on from the first frame, instead of arriving a couple of frames late.
 - Reading: a PDF page is drawn for the screen it is on — it was rendered at a fixed size and then stretched back up, which is what made it soft on a high-density phone — and the foot of the reader no longer states the page a second time while the page bar is already saying it.
 - Reading: the scrolling reader shows ONE page at a time again — every page takes the screen it is given and fits inside it, so a page and the next one's top are no longer stacked under each other.
 - Reading: a book's own contents keep their shape — a part's chapters are indented and marked by their level, from the EPUB's nav document, its NCX and a PDF's outline alike, instead of reading as one flat list.

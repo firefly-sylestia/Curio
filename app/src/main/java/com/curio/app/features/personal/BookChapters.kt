@@ -39,10 +39,29 @@ internal fun BookChapter.asPersonal(): PersonalChapter = PersonalChapter(
 internal fun rememberBookChapters(book: PersonalBookEntity?): List<PersonalChapter> {
     val catalogId = book?.catalogId.orEmpty()
     val stored = book?.chapters.orEmpty()
+    // ── THE ANSWER THE LAST VISIT ENDED ON (v389c) ────────────────────────
+    //
+    // This can only answer once the book's ROW has arrived, and that is a Room
+    // read — so a book page opened for the second time still began with no
+    // chapters at all and then filled them in: numbered placeholder rows that
+    // turned into real names and page ranges a couple of frames later (user
+    // report: "when i close and open again for a berif moment i see pages").
+    // The last resolved list is kept per book (see BookPageMemory) and used as
+    // the FIRST value, so the reopen's first frame is the answer its last visit
+    // ended on; the list below is still what actually decides, and it wins the
+    // moment the book is readable.
+    val remembered = BookPageMemory.chapters(book)
     // Re-reads only when the book (or the list it learned) actually changes.
-    val state = produceState(initialValue = stored, catalogId, book?.chaptersJson) {
-        value = if (catalogId.isBlank()) stored
+    val state = produceState(
+        initialValue = stored.ifEmpty { remembered },
+        catalogId,
+        book?.chaptersJson
+    ) {
+        val resolved = if (catalogId.isBlank()) stored
         else BookCatalog.chapters(catalogId).map { it.asPersonal() }
+        val answer = resolved.ifEmpty { remembered }
+        BookPageMemory.rememberChapters(book, answer)
+        value = answer
     }
     return state.value
 }
