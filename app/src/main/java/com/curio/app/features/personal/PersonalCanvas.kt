@@ -694,7 +694,7 @@ private fun PersonalTextBlock(
                             drawRoundRect(
                                 color = bulletInk,
                                 topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
-                                size = Size(11.dp.toPx(), 11.dp.toPx()),
+                                size = Size(16.dp.toPx(), 16.dp.toPx()),
                                 cornerRadius = CornerRadius(2.dp.toPx()),
                                 style = Stroke(width = 1.6.dp.toPx())
                             )
@@ -937,7 +937,7 @@ internal fun PersonalDocView(
                                         drawRoundRect(
                                             color = bulletInk,
                                             topLeft = Offset(1.5.dp.toPx(), (if (isTitle) 11.dp else 8.dp).toPx()),
-                                            size = Size(11.dp.toPx(), 11.dp.toPx()),
+size = Size(16.dp.toPx(), 16.dp.toPx()),
                                             cornerRadius = CornerRadius(2.dp.toPx()),
                                             style = Stroke(width = 1.6.dp.toPx())
                                         )
@@ -1007,6 +1007,7 @@ internal fun PersonalDocView(
 internal fun PersonalToolDock(
     state: PersonalEditorState,
     onPickPhoto: () -> Unit,
+    showJournalTools: Boolean = true,
     modifier: Modifier = Modifier,
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
@@ -1037,19 +1038,17 @@ internal fun PersonalToolDock(
                 active = active and FLAG_BOLD != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_BOLD) }
-            ) {
-                Text("B", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 17.sp))
-            }
+  ) {
+  CurioIcon(CurioIcons.FormatBold, null, size = 20.dp)
+  }
+
             PersonalToolButton(
                 label = "Italic",
                 active = active and FLAG_ITALIC != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_ITALIC) }
             ) {
-                Text(
-                    "I",
-                    style = TextStyle(fontStyle = FontStyle.Italic, fontSize = 17.sp)
-                )
+  CurioIcon(CurioIcons.FormatItalic, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Underline",
@@ -1057,13 +1056,7 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_UNDERLINE) }
             ) {
-                Text(
-                    "U",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        textDecoration = TextDecoration.Underline
-                    )
-                )
+  CurioIcon(CurioIcons.FormatUnderline, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Strikethrough",
@@ -1071,21 +1064,15 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_STRIKE) }
             ) {
-                Text(
-                    "S",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        textDecoration = TextDecoration.LineThrough
-                    )
-                )
+  CurioIcon(CurioIcons.FormatStrikethrough, null, size = 20.dp)
             }
-            PersonalToolButton(
-                label = "Large bold text",
+  if (showJournalTools) PersonalToolButton(
+  label = "Large bold text",
                 active = active and FLAG_TITLE != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_TITLE) }
             ) {
-                Text("T", style = TextStyle(fontWeight = FontWeight.Black, fontSize = 19.sp))
+                CurioIcon(CurioIcons.FormatText, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Todo checkbox",
@@ -1102,10 +1089,7 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_SMALL) }
             ) {
-                Text(
-                    "Aa",
-                    style = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
-                )
+  CurioIcon(CurioIcons.TextDecrease, null, size = 20.dp)
             }
             PersonalToolButton(
                 label = "Bullet",
@@ -1115,7 +1099,7 @@ internal fun PersonalToolDock(
             ) {
                 BulletGlyph()
             }
-            PersonalToolButton(
+            if (showJournalTools) PersonalToolButton(
                 label = "Quote",
                 active = active and FLAG_QUOTE != 0,
                 accent = accentInk, ink = ink,
@@ -1139,7 +1123,7 @@ internal fun PersonalToolDock(
             ) {
                 AlignGlyph(center = true)
             }
-            PersonalToolButton(
+            if (showJournalTools) PersonalToolButton(
                 label = "Add a photo",
                 active = false,
                 accent = accentInk, ink = ink,

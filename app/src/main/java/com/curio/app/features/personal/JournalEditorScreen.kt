@@ -78,6 +78,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.curio.app.data.PAGE_KIND_JOURNAL
+import com.curio.app.data.PAGE_KIND_TODO
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMood
 import com.curio.app.data.PersonalNoteEntity
@@ -136,6 +137,7 @@ fun JournalEditorScreen(
     val topicName = remember(initialTopicName) { mutableStateOf(initialTopicName) }
     val categoryId = remember(initialCategoryId) { mutableStateOf(initialCategoryId) }
     val pageKind = remember(initialKind) { mutableStateOf(initialKind) }
+    val isTodo = pageKind.value == PAGE_KIND_TODO
 
     var entryId by remember { mutableStateOf(if (isNew) newNoteId() else entryIdArg) }
     var doc by remember { mutableStateOf(PersonalDoc(emptyList())) }
@@ -312,9 +314,10 @@ fun JournalEditorScreen(
                 .widthIn(max = 680.dp)
         ) {
             Spacer(Modifier.height(6.dp))
-            MoodSelector(selected = mood, onSelect = { mood = it }, ink = ink)
-            Spacer(Modifier.height(18.dp))
-            BasicTextField(
+            if (!isTodo) {
+                MoodSelector(selected = mood, onSelect = { mood = it }, ink = ink)
+                Spacer(Modifier.height(18.dp))
+                BasicTextField(
                 value = title,
                 onValueChange = { title = it },
                 singleLine = false,
@@ -349,8 +352,9 @@ fun JournalEditorScreen(
                         inner()
                     }
                 }
-            )
-            Spacer(Modifier.height(14.dp))
+                )
+                Spacer(Modifier.height(14.dp))
+            }
             PersonalCanvas(
                 state = editor,
                 modifier = Modifier.fillMaxWidth(),
@@ -374,11 +378,13 @@ fun JournalEditorScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp, vertical = 8.dp)
             ) {
-                PersonalToolDock(
-                    state = editor,
-                    onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                    PersonalToolDock(
+                        state = editor,
+                        onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
+                        showJournalTools = !isTodo,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+
             }
         }
     }
@@ -538,22 +544,15 @@ color = personalAccentInk()
             animationSpec = infiniteRepeatable(tween(620), RepeatMode.Reverse),
             label = "journal-saving-pulse"
         )
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier
-                    .size(9.dp)
-                    .background(
-                        color = if (saving) accent.copy(alpha = pulse) else ink.copy(alpha = 0.22f),
-                        shape = CircleShape
-                    )
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                if (saving) "Saving" else "Saved",
-                style = MaterialTheme.typography.labelSmall,
-                color = ink.copy(alpha = 0.4f)
-            )
-        }
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .background(
+                    color = if (saving) accent.copy(alpha = pulse) else ink.copy(alpha = 0.22f),
+                    shape = CircleShape
+                )
+                .semantics { contentDescription = if (saving) "Saving" else "Saved" }
+        )
     }
 }
 
