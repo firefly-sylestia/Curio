@@ -1,4 +1,5 @@
 ADD:
+- Social: every portrait has its own gaze now — twelve eye designs chosen per character (a wizard's sparkle, a hood's shaded gleam, a beard's steady eye, a flower crown's smile) with brows to match, instead of the same pair of eyes on all 28.
 - Writing: the dock's two last tools — put a line to the left, centred, right or justified, and set the hand it is written in (default, book serif, writing hand, display serif). Both work on a selection, or on the line you are in when nothing is selected, and they show in the card, the saved entry and the export alike.
 - Writing: the enlarged card editor and the book's note editor are the journal's page now — the same background, the same dock at the foot of the field.
 - To-do: a list previews as its OWN thing in the journals list — its rows with their boxes, ticked or not — instead of its text run into a paragraph.
@@ -39,6 +40,9 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Social: no portrait reads as a black blob — the darkest hair and hood tones came off near-black, and the hooded face is a face rather than paper.
+- Writing: a note's topic stays pinned above the writing instead of scrolling out of view, so "choose the topic" can never hide under the fold.
+- Writing: going to a topic from a note's header and coming back keeps the note and the topic it was about — it no longer saves one page and then asks you to pick the topic again on a second one.
 - Writing: select all selects the PAGE now — the whole row set wears the selection and Copy puts all of it on the clipboard, instead of grabbing only the line the caret was in.
 - Writing: a to-do box can be ticked while READING a page, not only while writing it — and the tick saves itself like any other change.
 - Reading: a book opens exactly where you stopped, and the foot of the reader names the chapter you are in (the page, for a PDF) as you read instead of the place it opened at.

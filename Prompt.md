@@ -1,5 +1,38 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, DONE — the portraits' own gazes, the pinned topic head, and a new page's identity)
+
+Verbatim: "do the avatar redesign each one properly then the pinning the dock and post
+composer for a note of topic".
+
+### What landed
+
+- **The portraits.** `AvatarArt` gained `eye`; twelve named gazes (`EDGE_*`), assigned
+  per character to suit it, drawn by the new `drawEyes` (which replaced the eye block
+  inside `drawFace`), with `drawBrows` now shaped per gaze. The near-black hair/hood
+  tones came up off black and the hooded face's near-white skin warmed, since "the
+  black is the worse" was a real read of a black mass on a pastel ground. Everything
+  else — the clip, the light, the 28 rows' colours, `socialAvatarBitmap` — is
+  untouched, and the notification wallpaper draws through the same function.
+- **The topic head is pinned.** `PersonalWritingPage` gained `pinnedHead`, a slot
+  under the top bar and OUTSIDE the writing scroll; the topic note puts its
+  `TopicHead` there (it used to ride `aboveCanvas`, inside the scroll, which is what
+  hid the "choose the topic" door under the fold).
+- **A new page keeps its identity.** The page's `entryId` — minted on the first
+  composition — and the topic note's topic/category/date/picker state are
+  `rememberSaveable` now. Navigating to the topic page and back DISPOSES the
+  composition, so a `remember`ed id was re-minted, which saved a second row and asked
+  for the topic again.
+
+### ⏭ Still open
+
+- **Pinning the EDITOR's dock to the screen's foot** (the card editor and the book's
+  note editor). The dock lives inside `RichTextEditor` while the scroll belongs to the
+  call site, so pinning means restructuring the editor's own layout (field scrolls
+  inside, dock below) — deliberately NOT attempted in this pass rather than risking
+  the 1,600-line shared editor that eight capture formats ride on. It is the one
+  piece of the batch still outstanding.
+
 ## Request (2026-09-17, DONE — the dock's two model tools, page-wide Select all, read-view ticks, and the to-do's own preview)
 
 The ask_user answers this pass implements:

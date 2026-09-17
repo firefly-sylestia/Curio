@@ -54,6 +54,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -157,13 +158,34 @@ internal fun PersonalWritingPage(
      */
     checklistFirst: Boolean = false,
     showJournalTools: Boolean = true,
-    aboveCanvas: @Composable () -> Unit = {}
+    aboveCanvas: @Composable () -> Unit = {},
+    /**
+     * v389 — A HEAD THAT DOES NOT SCROLL.
+     *
+     * [aboveCanvas] rides INSIDE the writing column, so it travels up out of
+     * view as soon as the page is scrolled or the keyboard lifts the caret —
+     * which is wrong for anything that is the page's own subject rather than a
+     * field above it (user report, about the topic note: "the choose a topic
+     * area gets hidden as it's not on top the page. it's little scrolled down so
+     * fix it"). This slot sits UNDER the page's top bar and outside the scroll,
+     * so the subject of the page stays on the page.
+     */
+    pinnedHead: @Composable () -> Unit = {}
 ) {
     val isNew = entryIdArg == CurioRoutes.PERSONAL_NEW
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var entryId by remember { mutableStateOf(if (isNew) newNoteId() else entryIdArg) }
+    // SAVED, not merely remembered: a brand-new page's id is minted on the
+    // first composition, and navigating away (the topic page, a settings trip)
+    // DISPOSES that composition — so coming back used to mint a SECOND id, save
+    // a second row and lose everything the first one had. The id is a fact about
+    // the page, so it is saved with the page's own state (user report, about a
+    // topic note: "when i tap the look the topic from the header and i press
+    // back the previous topic gets saved and it asks me again to choose a new").
+    var entryId by rememberSaveable(entryIdArg) {
+        mutableStateOf(if (isNew) newNoteId() else entryIdArg)
+    }
     var doc by remember { mutableStateOf(PersonalDoc(emptyList())) }
     // READ FIRST, write on request: a saved page OPENS as the page it is and
     // the pen switches the tools on. A brand new page has nothing to read, so
@@ -377,6 +399,9 @@ internal fun PersonalWritingPage(
             .navigationBarsPadding()
     ) {
         header(editing, saving, { mode -> editing = mode }, { leave() })
+
+        // The page's subject, held still above the writing.
+        pinnedHead()
 
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             // v389 — THE EYE/PEN SWITCH IS A MOVE, not a swap (user report:
