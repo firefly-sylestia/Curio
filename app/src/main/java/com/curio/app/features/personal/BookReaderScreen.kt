@@ -9,13 +9,16 @@ import android.os.ParcelFileDescriptor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +34,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -84,6 +88,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.withStyle
@@ -219,6 +224,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     var marking by remember { mutableStateOf<ReaderParagraph?>(null) }
     var noteFor by remember { mutableStateOf<ReaderParagraph?>(null) }
     var searching by remember { mutableStateOf<ReaderSearch?>(null) }
+    // v389c — WHAT IS SELECTED RIGHT NOW. One selection for the whole reader (a
+    // PDF page and a reflowable paragraph are two ways of choosing the same
+    // thing: words), so the bar that acts on it is drawn once, and either
+    // surface simply reports what the finger swept.
+    var selection by remember { mutableStateOf<ReaderSelection?>(null) }
 
     // The chrome leaves on its own — that is what "auto hide" means — and it
     // stays while a sheet is up, because a sheet is a deliberate act.
@@ -241,6 +251,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
      * tap themselves, and a scroll puts the chrome away.
      */
     fun tapPage() {
+        // A tap means "get out of the way" — and if words were selected, the
+        // selection goes before the chrome does, because the selection's own bar
+        // is standing where the foot of the reader is.
+        if (selection != null) {
+            selection = null
+            return
+        }
         chrome = !chrome
     }
 
@@ -482,6 +499,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     chromeVisible = chrome,
                     onTap = { tapPage() },
                     onScrolled = { hideChrome() },
+                    selection = selection,
+                    onSelect = { swept ->
+                        // Selecting words is a deliberate act on the page: the
+                        // chrome steps out of the way of the selection's bar.
+                        selection = swept
+                        chrome = false
+                    },
                     query = searching?.query.orEmpty(),
                     hitIndex = searching?.current ?: -1,
                     hitLength = searching?.query?.length ?: 0,
@@ -546,6 +570,67 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onMarks = { sheet = ReaderSheet.MARKS },
             onChapters = { sheet = ReaderSheet.CHAPTERS }
         )
+
+        // ── THE SELECTION'S BAR (v389c) ─────────────────────────────────
+        //
+        // Words are selected on the page and marked from here, without leaving
+        // the reading: a tap on an ink is the highlight, and a note or a
+        // bookmark is one more tap. It stands where the foot of the reader is
+        // and the chrome is already out of the way (see [tapPage]).
+        val swept = selection
+        if (swept != null && swept.text.isNotBlank() && sheet == null) {
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(160)) + slideInVertically { it / 3 },
+                exit = fadeOut(tween(140)),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 10.dp, vertical = 12.dp)
+            ) {
+                ReaderSelectionBar(
+                    selection = swept,
+                    palette = palette,
+                    onHighlight = { ink ->
+                        selection = null
+                        scope.launch {
+                            saveReaderMark(
+                                bookId = bookId,
+                                document = document,
+                                paragraph = swept.asParagraph(),
+                                kind = ReaderMarkKind.HIGHLIGHT,
+                                text = swept.text,
+                                colorKey = ink.key
+                            )
+                        }
+                    },
+                    onNote = {
+                        noteFor = swept.asParagraph()
+                        selection = null
+                    },
+                    onBookmark = {
+                        selection = null
+                        scope.launch {
+                            saveReaderMark(
+                                bookId = bookId,
+                                document = document,
+                                paragraph = swept.asParagraph(),
+                                kind = ReaderMarkKind.BOOKMARK,
+                                text = swept.text.take(90)
+                            )
+                        }
+                    },
+                    onMore = {
+                        // The whole-place sheet is still here, one tap away:
+                        // selecting words ADDS a way to mark a book up, it does
+                        // not take the old one away.
+                        marking = swept.asParagraph()
+                        selection = null
+                    },
+                    onClear = { selection = null }
+                )
+            }
+        }
     }
 
     // -- THE SWEEP -------------------------------------------------------
@@ -795,6 +880,9 @@ private fun TextReader(
     chromeVisible: Boolean,
     onTap: () -> Unit,
     onScrolled: () -> Unit,
+    /** v389c — the live selection, when it belongs to this book's text. */
+    selection: ReaderSelection?,
+    onSelect: (ReaderSelection) -> Unit,
     query: String,
     hitIndex: Int,
     hitLength: Int,
@@ -895,6 +983,8 @@ private fun TextReader(
             document = document,
             onLongPress = onLongPress,
             onTap = onTap,
+            selection = selection,
+            onSelect = onSelect,
             query = query,
             hitIndex = hitIndex,
             pendingBlock = pendingBlock,
@@ -927,15 +1017,27 @@ private fun TextReader(
             val block = content.blocks[index]
             val highlight = marks.firstOrNull { it.isHighlight && it.positionIndex == index }
             val note = marks.firstOrNull { it.isNote && it.positionIndex == index }
-            val bookmark = marks.firstOrNull { it.markKind == ReaderMarkKind.BOOKMARK && it.positionIndex == index }
-            ReaderParagraphBlock(
+            val bookmark = marks.firstOrNull { it.markKind == ReaderMarkKind.BOOKMARK && it.positionIndex == index }            ReaderParagraphBlock(
                 block = block,
                 palette = palette,
-                highlightColor = highlight?.let { readerHighlighter(it.colorKey).ink } ?: Color.Transparent,
+                highlights = highlightsFor(marks, index),
                 note = note?.note.orEmpty(),
                 bookmarked = bookmark != null,
                 onLongPress = { onLongPress(ReaderParagraph(index, block.section, block.text, block.isHeading)) },
-                onTap = onTap,
+                selection = selection?.takeIf { !it.isPage && it.index == index }
+                    ?.let { range -> range.from..range.to },
+                onSelect = { range, text ->
+                    onSelect(
+                        ReaderSelection(
+                            index = index,
+                            from = range.first,
+                            to = range.last,
+                            text = text,
+                            isPage = false,
+                            section = block.section
+                        )
+                    )
+                },
                 query = query,
                 // The find the member is standing on wears the wash; the rest of
                 // the matches in the same block still read as matches, which is
@@ -1119,6 +1221,9 @@ private fun TextPagedReader(
     document: String,
     onLongPress: (ReaderParagraph) -> Unit,
     onTap: () -> Unit,
+    /** v389c — the live selection, when it belongs to this book's text. */
+    selection: ReaderSelection?,
+    onSelect: (ReaderSelection) -> Unit,
     query: String,
     hitIndex: Int,
     pendingBlock: Int?,
@@ -1197,14 +1302,26 @@ private fun TextPagedReader(
                 ReaderParagraphBlock(
                     block = block,
                     palette = palette,
-                    highlightColor = highlight?.let { readerHighlighter(it.colorKey).ink }
-                        ?: Color.Transparent,
+                    highlights = highlightsFor(marks, index),
                     note = note?.note.orEmpty(),
                     bookmarked = bookmark != null,
                     onLongPress = {
                         onLongPress(ReaderParagraph(index, block.section, block.text, block.isHeading))
                     },
-                    onTap = onTap,
+                    selection = selection?.takeIf { !it.isPage && it.index == index }
+                        ?.let { range -> range.from..range.to },
+                    onSelect = { range, text ->
+                        onSelect(
+                            ReaderSelection(
+                                index = index,
+                                from = range.first,
+                                to = range.last,
+                                text = text,
+                                isPage = false,
+                                section = block.section
+                            )
+                        )
+                    },
                     query = query,
                     hitHere = hitIndex == index && query.isNotBlank(),
                     hitLength = query.length
@@ -1495,11 +1612,14 @@ private fun PageReader(
 private fun ReaderParagraphBlock(
     block: ReaderBlock,
     palette: ReaderPalette,
-    highlightColor: Color,
+    highlights: List<ReaderPassage>,
     note: String,
     bookmarked: Boolean,
     onLongPress: () -> Unit,
-    onTap: () -> Unit,
+    /** The live selection, as character offsets into THIS block's text. */
+    selection: IntRange?,
+    /** A sweep of the words: the range and the words themselves. */
+    onSelect: (IntRange, String) -> Unit,
     query: String,
     hitHere: Boolean,
     hitLength: Int
@@ -1512,7 +1632,15 @@ private fun ReaderParagraphBlock(
     // text. (Without this the row would still take its own padding, and a page
     // break would look like a gap in the paragraph.)
     if (block.text.isBlank() && block.imagePath == null) return
-    val marked = highlightColor != Color.Transparent
+    val marked = highlights.isNotEmpty()
+    val firstInk = highlights.firstOrNull()?.ink ?: Color.Transparent
+    // The words are laid out by Compose, so Compose is what can say which
+    // CHARACTER a finger landed on — the one thing needed to select text inside
+    // a paragraph rather than marking the whole of it.
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    // Where the sweep began, so a drag extends from the word it started on
+    // instead of chasing the finger's own character.
+    var anchorWord by remember(block.text) { mutableStateOf<IntRange?>(null) }
     // The BOOK decides how loud a heading is (v389): its own <h1>, <h2> and <h3>
     // are three sizes rather than one, and every size follows the member's own
     // type size (ReaderLook.textScale).
@@ -1554,29 +1682,18 @@ private fun ReaderParagraphBlock(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .pointerInput(block.text) {
-                detectTapGestures(
-                    onTap = { onTap() },
-                    onLongPress = { onLongPress() }
-                )
-            }
             .then(
                 if (marked) {
                     Modifier
-                        // A highlight is drawn BEHIND the words AND down their
-                        // side: the wash says "this passage", the rule says
-                        // where it starts — the same shape the journal's own
-                        // quote panel wears, one system rather than two.
+                        // A highlight is drawn DOWN THE SIDE of the paragraph it
+                        // lives in: the rule says "a passage here", and the wash
+                        // on the words themselves is drawn by the text spans
+                        // below (which is what lets it cover ONE RUN of a
+                        // paragraph rather than the whole of it).
                         .drawBehind {
                             val bar = 3.dp.toPx()
                             drawRoundRect(
-                                color = highlightColor.copy(alpha = 0.30f),
-                                topLeft = Offset(0f, 0f),
-                                size = Size(size.width, size.height),
-                                cornerRadius = CornerRadius(6.dp.toPx())
-                            )
-                            drawRoundRect(
-                                color = highlightColor,
+                                color = firstInk,
                                 topLeft = Offset(0f, 0f),
                                 size = Size(bar, size.height),
                                 cornerRadius = CornerRadius(bar / 2f)
@@ -1608,41 +1725,116 @@ private fun ReaderParagraphBlock(
                 )
             }
         }
-        // WHAT A FIND LOOKS LIKE: every occurrence in the block wears the wash,
-        // not only the one the search jumped to — a search that lit a single
-        // find would leave the member hunting for the rest.
-        val shown = remember(block.text, query, hitHere) {
+        // ── WHAT THE PARAGRAPH LOOKS LIKE (v389c) ──────────────────────────
+        //
+        // Three things can wash the words and they are not exclusive: every
+        // stored HIGHLIGHT (in its own ink, over exactly the run it was made on),
+        // the LIVE SELECTION (in the page's accent, while the member is choosing),
+        // and every SEARCH FIND (the wash and a heavier weight). So the runs are
+        // worked out from the spans themselves — each stretch of characters wears
+        // every span that covers it — instead of one `if` picking a winner.
+        val shown = remember(block.text, query, hitHere, highlights, selection) {
             val needle = query.trim()
-            if (!hitHere || needle.isEmpty() || !block.text.contains(needle, ignoreCase = true)) {
-                AnnotatedString(block.text)
-            } else {
-                buildAnnotatedString {
-                    var from = 0
-                    while (from <= block.text.length) {
-                        val at = block.text.indexOf(needle, from, ignoreCase = true)
-                        if (at < 0) {
-                            append(block.text.substring(from))
-                            break
-                        }
-                        append(block.text.substring(from, at))
-                        withStyle(
+            val spans = ArrayList<ReaderTextSpan>()
+            highlights.forEach { passage ->
+                val at = if (passage.text.isBlank()) -1 else block.text.indexOf(passage.text)
+                if (at >= 0) {
+                    spans.add(
+                        ReaderTextSpan(
+                            at,
+                            at + passage.text.length,
+                            SpanStyle(background = passage.ink.copy(alpha = 0.30f))
+                        )
+                    )
+                } else if (passage.text.isBlank()) {
+                    // A mark whose words could not be found (the file changed
+                    // under it) still has to say WHERE it was: the whole block.
+                    spans.add(
+                        ReaderTextSpan(0, block.text.length, SpanStyle(background = passage.ink.copy(alpha = 0.18f)))
+                    )
+                }
+            }
+            if (hitHere && needle.isNotEmpty()) {
+                var from = 0
+                while (from <= block.text.length) {
+                    val at = block.text.indexOf(needle, from, ignoreCase = true)
+                    if (at < 0) break
+                    spans.add(
+                        ReaderTextSpan(
+                            at,
+                            at + needle.length,
                             SpanStyle(
                                 background = palette.accent.copy(alpha = 0.32f),
                                 fontWeight = FontWeight.SemiBold
                             )
-                        ) {
-                            append(block.text.substring(at, at + needle.length))
-                        }
-                        from = at + needle.length
-                    }
+                        )
+                    )
+                    from = at + needle.length
                 }
             }
+            selection?.let { range ->
+                val from = range.first.coerceIn(0, block.text.length)
+                val to = (range.last + 1).coerceIn(from, block.text.length)
+                if (to > from) {
+                    spans.add(
+                        ReaderTextSpan(
+                            from,
+                            to,
+                            SpanStyle(background = palette.accent.copy(alpha = 0.38f))
+                        )
+                    )
+                }
+            }
+            annotatedWithSpans(block.text, spans)
         }
         Row(verticalAlignment = Alignment.Top) {
             Text(
                 text = shown,
                 style = body,
-                modifier = Modifier.weight(1f)
+                onTextLayout = { result -> layout = result },
+                modifier = Modifier
+                    .weight(1f)
+                    // A LONG PRESS SELECTS THE WORD UNDER THE FINGER, and the
+                    // drag extends it — the standard reading gesture, and the
+                    // only way to mark a passage rather than a whole paragraph.
+                    // A plain TAP is deliberately not handled here: it falls
+                    // through to the reader's own detector, which is what has
+                    // always brought the chrome back.
+                    .pointerInput(block.text) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { start ->
+                                val result = layout ?: return@detectDragGesturesAfterLongPress
+                                val at = result.getOffsetForPosition(start)
+                                val word = result.getWordBoundary(at)
+                                val range = word.start..(word.end - 1).coerceAtLeast(word.start)
+                                anchorWord = range
+                                onSelect(range, block.text.substring(
+                                    range.first.coerceIn(0, block.text.length),
+                                    range.last.coerceIn(0, block.text.length - 1).plus(1)
+                                        .coerceAtMost(block.text.length)
+                                ))
+                            },
+                            onDrag = { change, _ ->
+                                val result = layout ?: return@detectDragGesturesAfterLongPress
+                                val anchor = anchorWord ?: return@detectDragGesturesAfterLongPress
+                                val at = result.getOffsetForPosition(change.position)
+                                val word = result.getWordBoundary(at)
+                                val end = (word.end - 1).coerceAtLeast(word.start)
+                                val range = if (word.start < anchor.first) {
+                                    word.start..anchor.last
+                                } else {
+                                    anchor.first..maxOf(end, anchor.last)
+                                }
+                                val from = range.first.coerceIn(0, block.text.length)
+                                val to = (range.last + 1).coerceIn(from, block.text.length)
+                                onSelect(
+                                    from..(to - 1).coerceAtLeast(from),
+                                    block.text.substring(from, to)
+                                )
+                            },
+                            onDragEnd = { }
+                        )
+                    }
             )
             if (bookmarked) {
                 Box(
@@ -2591,6 +2783,220 @@ private fun ReaderNoteDialog(
 // ────────────────────────────────────────────────────────────────────────────
 
 /** The four inks a page can be read on. */
+/**
+ * v389c — A HIGHLIGHT, AS THE PAGE DRAWS IT: the exact words, and the ink.
+ *
+ * The reader used to know only "this paragraph is marked", which is why a mark
+ * held the whole block's words and a passage could not be chosen. Now the words
+ * ARE the mark: a paragraph (or a PDF page) finds what it stored and washes that
+ * run, so two passages in one paragraph are two different marks.
+ */
+private data class ReaderPassage(val text: String, val ink: Color)
+
+/**
+ * EVERY HIGHLIGHT A BLOCK WEARS (v389c).
+ *
+ * All of them, not the first: the words ARE the mark now, so a paragraph can
+ * hold two passages the member thought were worth keeping, and a renderer that
+ * took only the first would quietly drop the second.
+ */
+private fun highlightsFor(marks: List<ReaderMarkEntity>, index: Int): List<ReaderPassage> =
+    marks.filter { it.isHighlight && it.positionIndex == index }
+        .map { ReaderPassage(it.text, readerHighlighter(it.colorKey).ink) }
+
+/** One stretch of a paragraph and the style it wears — see [annotatedWithSpans]. */
+private data class ReaderTextSpan(val start: Int, val end: Int, val style: SpanStyle)
+
+/**
+ * THE SAME WORDS, WITH EVERY SPAN THAT COVERS THEM (v389c).
+ *
+ * A paragraph can be wearing three different washes at once — a stored highlight
+ * on one run, the live selection over part of it, every search find lit — and
+ * they overlap. So the string is cut at every span boundary and each piece wears
+ * every style that covers it (nested, innermost last), which is the only way to
+ * draw a selection INSIDE a highlight without one silently winning.
+ */
+private fun annotatedWithSpans(text: String, spans: List<ReaderTextSpan>): AnnotatedString {
+    if (spans.isEmpty()) return AnnotatedString(text)
+    val live = spans
+        .map {
+            ReaderTextSpan(
+                it.start.coerceIn(0, text.length),
+                it.end.coerceIn(0, text.length),
+                it.style
+            )
+        }
+        .filter { it.end > it.start }
+    if (live.isEmpty()) return AnnotatedString(text)
+    val points = sortedSetOf(0, text.length)
+    live.forEach {
+        points.add(it.start)
+        points.add(it.end)
+    }
+    val cuts = points.toList()
+    return buildAnnotatedString {
+        for (i in 0 until cuts.size - 1) {
+            val from = cuts[i]
+            val to = cuts[i + 1]
+            if (to <= from) continue
+            val covering = live.filter { it.start <= from && it.end >= to }.map { it.style }
+            if (covering.isEmpty()) {
+                append(text.substring(from, to))
+            } else {
+                fun emit(depth: Int) {
+                    if (depth >= covering.size) {
+                        append(text.substring(from, to))
+                        return
+                    }
+                    withStyle(covering[depth]) { emit(depth + 1) }
+                }
+                emit(0)
+            }
+        }
+    }
+}
+
+/**
+ * v389c — WHAT THE MEMBER HAS SWEPT UP, right now.
+ *
+ * One selection lives in the reader screen (not in a paragraph and not in a
+ * page), because the bar that acts on it is drawn once, over everything: a
+ * highlight is made for the same reason whether it was chosen on a PDF page or
+ * in a reflowable paragraph, and the two surfaces should not each own half of
+ * that decision.
+ *
+ * [index] is the format's own unit — a BLOCK index for a reflowable book (the
+ * reader's paragraphs are flat list items) or a PAGE for a PDF — matching
+ * [ReaderMarkEntity.positionIndex], which is how a highlight made here is found
+ * again on the next visit.
+ */
+private data class ReaderSelection(
+    val index: Int,
+    /** Character offsets into the block's own text (or the page's own words). */
+    val from: Int,
+    val to: Int,
+    val text: String,
+    /** True when [index] is a PDF page rather than a paragraph. */
+    val isPage: Boolean,
+    /** The 1-based section a paragraph belongs to (0 for a page). */
+    val section: Int = 0
+) {
+    /**
+     * The same selection in the shape the mark layer already speaks (see
+     * [saveReaderMark]) — so a highlight made by sweeping words is stored by
+     * exactly the same path as one made from the hold-a-passage sheet, and
+     * there is one writer for a book's marks rather than two.
+     */
+    fun asParagraph(): ReaderParagraph = ReaderParagraph(
+        positionIndex = index,
+        section = if (isPage) index + 1 else section,
+        text = text,
+        isHeading = false,
+        isPage = isPage
+    )
+}
+
+/**
+ * THE SELECTION'S OWN BAR.
+ *
+ * One strip, drawn over the foot of the reader while words are selected: the
+ * four inks (a tap marks the passage in that ink), a note, a bookmark, and a
+ * door to everything else the old hold-a-passage sheet offered — so selecting
+ * text ADDS a way to mark a book up without taking the old one away.
+ *
+ * It is deliberately not a Material toolbar: the reader has its own paper and
+ * its own inks, and a quote marked on a page should look like the same system
+ * the journal's own quote panels belong to.
+ */
+@Composable
+private fun ReaderSelectionBar(
+    selection: ReaderSelection,
+    palette: ReaderPalette,
+    onHighlight: (ReaderHighlighter) -> Unit,
+    onNote: () -> Unit,
+    onBookmark: () -> Unit,
+    onMore: () -> Unit,
+    onClear: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = palette.surface,
+        shadowElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp)) {
+            // The words themselves, so the member knows what they are about to
+            // mark before they mark it (a selection handle off the edge of a
+            // screen can leave the passage itself out of sight).
+            Text(
+                "\u201C${selection.text.take(140)}\u201D",
+                style = TextStyle(
+                    fontFamily = LoraFontFamily,
+                    fontSize = 13.sp,
+                    lineHeight = 17.sp,
+                    color = palette.ink.copy(alpha = 0.8f)
+                ),
+                maxLines = 2,
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                ReaderHighlighter.entries.forEach { ink ->
+                    Surface(
+                        onClick = { onHighlight(ink) },
+                        shape = CircleShape,
+                        color = ink.ink.copy(alpha = 0.22f),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, ink.ink),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(CircleShape)
+                                    .background(ink.ink)
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.width(2.dp))
+                SelectionBarAction(CurioIcons.Note, "Write a note on this passage", palette, onNote)
+                SelectionBarAction(CurioIcons.Bookmark, "Bookmark this passage", palette, onBookmark)
+                SelectionBarAction(CurioIcons.MoreHoriz, "More about this passage", palette, onMore)
+                Spacer(Modifier.weight(1f))
+                SelectionBarAction(CurioIcons.Close, "Clear the selection", palette, onClear)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectionBarAction(
+    glyph: String,
+    description: String,
+    palette: ReaderPalette,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = palette.ink.copy(alpha = 0.06f),
+        modifier = Modifier.size(32.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = glyph,
+                contentDescription = description,
+                tint = palette.ink.copy(alpha = 0.8f),
+                size = 17.dp
+            )
+        }
+    }
+}
+
 private enum class ReaderSkin(val key: String, val label: String) {
     PAPER("paper", "Paper"),
     SEPIA("sepia", "Sepia"),
@@ -2951,7 +3357,16 @@ private suspend fun saveReaderMark(
         val existing = runCatching {
             PersonalRepositoryHolder.repo
                 .readerMarks(bookId, document)
-                .firstOrNull { it.positionIndex == paragraph.positionIndex && it.markKind == kind }
+                .firstOrNull {
+                    it.positionIndex == paragraph.positionIndex && it.markKind == kind &&
+                        // v389c — A HIGHLIGHT BELONGS TO ITS PASSAGE. One per
+                        // place was right while a mark was "this paragraph is
+                        // marked"; now the words ARE the mark, so two runs of one
+                        // paragraph are two marks and neither overwrites the
+                        // other. Notes and bookmarks stay one per place (asking
+                        // twice about the same page means editing, not adding).
+                        (kind != ReaderMarkKind.HIGHLIGHT || it.text == text)
+                }
         }.getOrNull()
         runCatching {
             PersonalRepositoryHolder.repo.saveReaderMark(
