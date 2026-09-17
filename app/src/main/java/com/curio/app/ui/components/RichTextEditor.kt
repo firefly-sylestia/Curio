@@ -8,6 +8,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -612,6 +613,20 @@ fun RichTextEditor(
     /** Optional visual line cap; the field never grows beyond this many lines. */
     maxLines: Int? = null,
     toolbarMode: RichTextToolbarMode = RichTextToolbarMode.MAIN,
+    /**
+     * v389 — HOLD THE DOCK AT THE FOOT OF THE SCREEN.
+     *
+     * In [RichTextToolbarMode.DOCK] the tools normally sit at the foot of the
+     * FIELD, so they travel with the words. The app's full-screen editors want
+     * them still — the journal's own dock does not move while a page is written
+     * — so a pinned editor scrolls the writing INSIDE itself and keeps the dock
+     * below it, which is what lets the call site hand the editor a weighted
+     * height instead of wrapping it in a scroll of its own.
+     *
+     * Only meaningful with [RichTextToolbarMode.DOCK] (every other mode keeps its
+     * strip above the field, exactly as before).
+     */
+    dockPinned: Boolean = false,
     enabled: Boolean = true,
     accent: Color = MaterialTheme.colorScheme.primary,
     ink: Color = MaterialTheme.colorScheme.onSurface,
@@ -1288,6 +1303,10 @@ fun RichTextEditor(
                 )
             }
         }
+        // The field and its paper wrapper as ONE unit: where it goes depends on
+        // the dock below it (a pinned editor scrolls the writing, so the area
+        // has to be something a Box can own).
+        val fieldArea: @Composable () -> Unit = {
         if (paper) {
             // v7.16 — universal style model: the base decides torn vs sharp
             // ruled paper and the style's flags drive every decoration, so
@@ -1329,6 +1348,21 @@ fun RichTextEditor(
             }
         } else {
             fieldBlock()
+        }
+        }
+        // PINNED: the writing scrolls on its own and the dock keeps the foot
+        // (the call site hands this editor a weighted height for exactly this).
+        if (dockPinned && toolbarMode == RichTextToolbarMode.DOCK) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Column { fieldArea() }
+            }
+        } else {
+            fieldArea()
         }
         // ── The journal's dock (DOCK mode) ─────────────────────────────
         // At the FOOT of the field, where a thumb already is: the same shape,

@@ -26,12 +26,24 @@ composer for a note of topic".
 
 ### ⏭ Still open
 
-- **Pinning the EDITOR's dock to the screen's foot** (the card editor and the book's
-  note editor). The dock lives inside `RichTextEditor` while the scroll belongs to the
-  call site, so pinning means restructuring the editor's own layout (field scrolls
-  inside, dock below) — deliberately NOT attempted in this pass rather than risking
-  the 1,600-line shared editor that eight capture formats ride on. It is the one
-  piece of the batch still outstanding.
+Nothing from this batch — the dock pinning is the pass below.
+
+## Request (2026-09-17, DONE — the editor's dock pinned to the screen's foot)
+
+Verbatim of the last open piece: "then the pinning the dock".
+
+### What landed
+
+- `RichTextEditor` gained `dockPinned` (inert unless the mode is DOCK). With it the
+  editor scrolls the WRITING inside itself — the paper wrapper and the field are one
+  `fieldArea` lambda owned by a `Box(weight(1f).verticalScroll(...))` — and the dock
+  renders BELOW that box, so it holds the foot of the editor's column.
+- Both call sites (the Share Hub's card editor, the book sheet's note expand) dropped
+  their own `Column(weight(1f).verticalScroll(...))` wrapper and hand the editor
+  `Modifier.weight(1f).fillMaxWidth()` plus `dockPinned = true`, so the dock holds the
+  foot of the screen instead of travelling with the words.
+- The eight capture formats never pass `dockPinned`, so nothing else about the shared
+  editor moved.
 
 ## Request (2026-09-17, DONE — the dock's two model tools, page-wide Select all, read-view ticks, and the to-do's own preview)
 

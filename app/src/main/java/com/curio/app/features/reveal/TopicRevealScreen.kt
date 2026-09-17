@@ -3972,38 +3972,34 @@ private fun BookNotesSheet(
                     // v375 — rich editing: every change saves the text AND its
                     // runs together (blank clears both). The compact field
                     // below reflects the text; its own edits clear the runs.
-                    Column(
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        RichTextEditor(
-                            text = editText,
-                            spans = editSpans,
-                            onRichTextChange = { newText, spans ->
-                                writeNote(
-                                    editCh.number,
-                                    newText.take(2000),
-                                    if (newText.isBlank()) emptyList() else spans
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = "Write your thoughts on this chapter…",
-                            minHeight = 140.dp,
-                            maxCharacters = 2000,
+                    // v389 — the editor owns the scroll and the dock holds the
+                    // sheet's foot: pinned, the words move and the tools do not.
+                    RichTextEditor(
+                        text = editText,
+                        spans = editSpans,
+                        onRichTextChange = { newText, spans ->
+                            writeNote(
+                                editCh.number,
+                                newText.take(2000),
+                                if (newText.isBlank()) emptyList() else spans
+                            )
+                        },
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        placeholder = "Write your thoughts on this chapter…",
+                        minHeight = 140.dp,
+                        maxCharacters = 2000,
+                        dockPinned = true,
                             // v389 — the note expand wears the JOURNAL's dock: a
                             // floating strip at the foot of the field with every
                             // tool its own button (bold, italic, underline,
                             // highlight, text size), instead of a Format toggle
                             // that unfolds a second toolbar over the words.
-                            toolbarMode = RichTextToolbarMode.DOCK,
-                            accent = MaterialTheme.colorScheme.primary,
-                            ink = MaterialTheme.colorScheme.onSurface,
-                            surface = MaterialTheme.colorScheme.surfaceVariant,
-                            showFieldBorder = true
-                        )
-                    }
+                        toolbarMode = RichTextToolbarMode.DOCK,
+                        accent = MaterialTheme.colorScheme.primary,
+                        ink = MaterialTheme.colorScheme.onSurface,
+                        surface = MaterialTheme.colorScheme.surfaceVariant,
+                        showFieldBorder = true
+                    )
                     Spacer(Modifier.height(8.dp))
                     // Share the note straight to the share card as a Chapter
                     // review — no copy/paste, no re-typing. v375 — the note's

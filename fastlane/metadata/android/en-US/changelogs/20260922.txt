@@ -1,4 +1,5 @@
 ADD:
+- Writing: the card editor's and the book note's tool dock now HOLDS the foot of the screen while the writing moves under it, the way the journal page's dock does.
 - Social: every portrait has its own gaze now — twelve eye designs chosen per character (a wizard's sparkle, a hood's shaded gleam, a beard's steady eye, a flower crown's smile) with brows to match, instead of the same pair of eyes on all 28.
 - Writing: the dock's two last tools — put a line to the left, centred, right or justified, and set the hand it is written in (default, book serif, writing hand, display serif). Both work on a selection, or on the line you are in when nothing is selected, and they show in the card, the saved entry and the export alike.
 - Writing: the enlarged card editor and the book's note editor are the journal's page now — the same background, the same dock at the foot of the field.
