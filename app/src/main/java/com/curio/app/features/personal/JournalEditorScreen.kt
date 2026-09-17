@@ -143,7 +143,7 @@ fun JournalEditorScreen(
 
     var entryId by remember { mutableStateOf(if (isNew) newNoteId() else entryIdArg) }
     var doc by remember { mutableStateOf(PersonalDoc(emptyList())) }
-    var title by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf(initialTopicName) }
     var mood by remember { mutableStateOf<PersonalMood?>(null) }
     // READ FIRST, write on request: a saved page OPENS as the page it is (the
     // date, the title, the writing) and the pen switches the tools on. A brand
@@ -188,6 +188,7 @@ fun JournalEditorScreen(
             titleFocusRequester.requestFocus()
             keyboardController?.show()
         } else {
+            editor.armCheckboxOnEmptyLine()
             editor.requestFocusOnEmptyLine()
         }
     }

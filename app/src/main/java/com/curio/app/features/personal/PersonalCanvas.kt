@@ -246,6 +246,9 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         focusRequestToken++
     }
 
+    fun armCheckboxOnEmptyLine() {
+        armed = (armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()) or FLAG_CHECKBOX
+    }
 
     /** Tools switched on with nothing to apply them to (an empty line). */
     var armed by mutableIntStateOf(0)
