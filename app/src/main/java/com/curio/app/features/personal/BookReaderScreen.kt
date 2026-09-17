@@ -1,5 +1,8 @@
 package com.curio.app.features.personal
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
@@ -71,15 +74,26 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.ReaderMarkEntity
@@ -131,9 +145,39 @@ import java.util.zip.ZipFile
  *    made a long PDF open slowly and hold a phone's memory hostage.
  */
 @Composable
+/** The Activity a View is drawn in, however wrapped its context is. */
+private fun Context.findActivity(): Activity? {
+    var candidate: Context? = this
+    while (candidate is ContextWrapper) {
+        if (candidate is Activity) return candidate
+        candidate = candidate.baseContext
+    }
+    return null
+}
+
+@Composable
 fun BookReaderScreen(navController: NavController, bookId: String) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    // THE READER TAKES THE WHOLE SCREEN (v389). The system's own status bar sat
+    // over every page of every book, competing with the words for the top of the
+    // screen (user request: "hide the system status bar" in the reader). It is
+    // hidden for as long as the reader is on screen and comes back on the way
+    // out; and because it is hidden, the chrome's own `statusBarsPadding`
+    // collapses with it, which is exactly right — nothing is drawn under
+    // anything, so there is nothing to pad for.
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val window = view.context.findActivity()?.window
+        val controller = window?.let { WindowCompat.getInsetsController(it, view) }
+        controller?.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller?.hide(WindowInsetsCompat.Type.statusBars())
+        onDispose {
+            controller?.show(WindowInsetsCompat.Type.statusBars())
+        }
+    }
     val book by produceState<com.curio.app.data.PersonalBookEntity?>(null, bookId) {
         runCatching {
             PersonalRepositoryHolder.repo.observeBook(bookId).collect { value = it }
@@ -206,6 +250,66 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
     val palette = readerPalette(ReaderLook.inkKey)
 
+    // ── HOW THIS BOOK FLOWS, AND THE BAR THAT SAYS SO ───────────────────
+    // Hoisted HERE because the bar belongs to the CHROME, which hides itself:
+    // a page bar that lived inside the pager could not go away with the tools,
+    // and a reader whose chrome is gone should have nothing over the words at
+    // all (user request: "a floating page chnaging bar in the tool bar which
+    // again hides with the tool barm").
+    var textPageCount by remember { mutableIntStateOf(0) }
+    val textPager = rememberPagerState { textPageCount }
+    val pageBar: ReaderPageBar? = when (val loaded = content) {
+        is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
+            ReaderPageBar(
+                label = "Page ${pagerState.currentPage + 1} of ${loaded.pageCount}",
+                onPrev = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(
+                            (pagerState.currentPage - 1).coerceAtLeast(0)
+                        )
+                    }
+                },
+                onNext = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(
+                            (pagerState.currentPage + 1).coerceAtMost(loaded.pageCount - 1)
+                        )
+                    }
+                }
+            )
+        } else {
+            null
+        }
+
+        is ReaderContent.Text -> if (
+            ReaderLook.textFlow == ReaderFlow.PAGED && !loaded.ownPages && textPageCount > 0
+        ) {
+            ReaderPageBar(
+                label = "Page ${textPager.currentPage + 1} of $textPageCount",
+                onPrev = {
+                    scope.launch {
+                        textPager.animateScrollToPage((textPager.currentPage - 1).coerceAtLeast(0))
+                    }
+                },
+                onNext = {
+                    scope.launch {
+                        textPager.animateScrollToPage(
+                            (textPager.currentPage + 1).coerceAtMost(textPageCount - 1)
+                        )
+                    }
+                }
+            )
+        } else {
+            null
+        }
+
+        null -> null
+    }
+    val flowLabel = when (content) {
+        is ReaderContent.Pages -> ReaderLook.pageFlow
+        else -> ReaderLook.textFlow
+    }
+
     // The two things a jump has to reach: the text list and the page pager.
     // Hoisted HERE, to the screen, because the marks and chapter sheets move
     // them — a state that a sheet has to reach is the screen's state, not the
@@ -232,27 +336,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
 
-    /**
-     * Jump to a CHAPTER, which the chapter sheet names by its SECTION number
-     * rather than by a block index — so this is where that heading is found, and
-     * the jump lands on the heading that OPENS the chapter.
-     */
-    suspend fun jumpToChapter(section: Int) {
-        when (val loaded = content) {
-            is ReaderContent.Text -> {
-                val heading = loaded.blocks.indexOfFirst { it.isHeading && it.section == section }
-                listState.scrollToItem(
-                    (if (heading >= 0) heading else section - 1)
-                        .coerceIn(0, (loaded.blocks.size - 1).coerceAtLeast(0))
-                )
-            }
-            is ReaderContent.Pages -> pagerState.scrollToPage(
-                section.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
-            )
-            null -> Unit
-        }
-    }
-
     // WHERE THEY ARE, said as a fact about the book — the chapter they are in,
     // how many marks they have left, the page of the file. It reads the LIVE
     // position (the list's first block, the pager's current page), so it follows
@@ -263,7 +346,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         is ReaderContent.Text -> {
             val at = loaded.blocks.getOrNull(listState.firstVisibleItemIndex)
             val place = at?.sectionTitle.orEmpty().ifBlank {
-                at?.let { "Section ${it.section}" }.orEmpty()
+                // A book that prints its own page numbers says where the member
+                // is by itself, so Curio does not number it a second time — no
+                // "Section 12" against the book's own "12" (see
+                // carriesOwnPageMarkers).
+                if (loaded.ownPages) "" else at?.let { "Section ${it.section}" }.orEmpty()
             }
             val marked = marks.count { !it.isPosition }
             buildString {
@@ -276,6 +363,63 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
 
         null -> ""
+    }
+
+    // ── THE BOOK'S OWN CONTENTS (v389) ─────────────────────────────────
+    //
+    // The chapters sheet lists what the FILE says, not what the reader could
+    // guess for itself: an EPUB's nav document or NCX, a PDF's own outline, and
+    // the reader's own headings only when the file has neither. A PDF's outline
+    // costs a parse, so it is read when the sheet is OPENED and not a moment
+    // before — a book must never open slower for a list nobody has asked for
+    // (user request: "instead of the chapters tab where in chapters i see the
+    // pages it should show the chapters and all detected from the epub or pdf,
+    // im sure boo pdf hav that table of contnt etc").
+    var pdfChapters by remember(document) { mutableStateOf<List<ReaderOutlineEntry>?>(null) }
+    LaunchedEffect(sheet, document) {
+        if (sheet != ReaderSheet.CHAPTERS) return@LaunchedEffect
+        if (content !is ReaderContent.Pages) return@LaunchedEffect
+        if (pdfChapters != null || document.isBlank()) return@LaunchedEffect
+        pdfChapters = withContext(Dispatchers.IO) {
+            runCatching { pdfOutline(context, document) }.getOrNull()
+        }
+    }
+    val chapters: List<ReaderOutlineEntry> = when (val loaded = content) {
+        is ReaderContent.Text -> if (loaded.outline.isNotEmpty()) {
+            loaded.outline.map { entry ->
+                val section = loaded.sectionSources.indexOf(entry.target)
+                entry.copy(
+                    block = if (section >= 0) {
+                        loaded.blocks.indexOfFirst { it.section == section + 1 }
+                    } else {
+                        -1
+                    }
+                )
+            }
+        } else {
+            loaded.blocks.withIndex()
+                .filter { it.value.isHeading }
+                .map { (index, block) ->
+                    ReaderOutlineEntry(
+                        title = block.text,
+                        block = index,
+                        depth = block.headingLevel.coerceIn(1, 3)
+                    )
+                }
+        }
+
+        is ReaderContent.Pages -> pdfChapters.orEmpty()
+        null -> emptyList()
+    }
+
+    // A JUMP ASKED FOR FROM OUTSIDE the reading surface — the chapters sheet, a
+    // search find. It is handed to whichever surface is showing (the scroll list
+    // or the pager) because only that one knows where the block landed, and
+    // cleared by it so the same jump never fires twice.
+    var pendingBlock by remember { mutableStateOf<Int?>(null) }
+    fun jumpToBlock(index: Int) {
+        pendingBlock = index
+        chrome = false
     }
 
     Box(
@@ -318,8 +462,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     onScrolled = { hideChrome() },
                     query = searching?.query.orEmpty(),
                     hitIndex = searching?.current ?: -1,
-                    hitLength = searching?.query?.length ?: 0
-                )
+                    hitLength = searching?.query?.length ?: 0,
+            pagerState = textPager,
+            onPageCount = { count -> textPageCount = count },
+            ownPages = loaded.ownPages,
+            pendingBlock = pendingBlock,
+            onPendingConsumed = { pendingBlock = null }
+        )
 
                 is ReaderContent.Pages -> PageReader(
                     pageCount = loaded.pageCount,
@@ -339,7 +488,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         )
                     },
                     onTap = { tapPage() },
-                    onScrolled = { hideChrome() }
+                    onScrolled = { hideChrome() },
+                    flow = ReaderLook.pageFlow
                 )
 
                 // `content` is a delegated property, so the null check above
@@ -354,6 +504,15 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             title = book?.title.orEmpty().ifBlank { "Reader" },
             palette = palette,
             positionLabel = positionLabel,
+            pageBar = pageBar,
+            flowLabel = flowLabel.label,
+            onToggleFlow = {
+                when (content) {
+                    is ReaderContent.Pages -> ReaderLook.pageFlow = ReaderLook.pageFlow.flipped()
+                    is ReaderContent.Text -> ReaderLook.textFlow = ReaderLook.textFlow.flipped()
+                    null -> Unit
+                }
+            },
             onClose = { navController.popBackStack() },
             onSearch = {
                 searching = ReaderSearch().also { started ->
@@ -444,10 +603,20 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
         ReaderSheet.CHAPTERS -> ReaderChaptersSheet(
             content = content,
+            chapters = chapters,
             palette = palette,
-            onPick = { index ->
+            onPickBlock = { block ->
                 sheet = null
-                scope.launch { jumpToChapter(index) }
+                if (block >= 0) jumpToBlock(block)
+            },
+            onPickPage = { page ->
+                sheet = null
+                chrome = false
+                scope.launch {
+                    pagerState.scrollToPage(
+                        (page - 1).coerceIn(0, (pagerState.pageCount - 1).coerceAtLeast(0))
+                    )
+                }
             },
             onDismiss = { sheet = null }
         )
@@ -460,16 +629,17 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onPick = { index ->
                 searching?.current = index
                 sheet = null
-                scope.launch {
-                    when (content) {
-                        is ReaderContent.Text -> listState.scrollToItem(
-                            index.coerceIn(0, ((content as ReaderContent.Text).blocks.size - 1).coerceAtLeast(0))
-                        )
-                        is ReaderContent.Pages -> pagerState.scrollToPage(
+                when (content) {
+                    // A block index for a reflowed book: the surface showing it
+                    // decides which page that block is on.
+                    is ReaderContent.Text -> jumpToBlock(index)
+                    is ReaderContent.Pages -> scope.launch {
+                        pagerState.scrollToPage(
                             index.coerceIn(0, (pagerState.pageCount - 1).coerceAtLeast(0))
                         )
-                        null -> Unit
                     }
+
+                    null -> Unit
                 }
             },
             onDismiss = {
@@ -604,9 +774,25 @@ private fun TextReader(
     onScrolled: () -> Unit,
     query: String,
     hitIndex: Int,
-    hitLength: Int
+    hitLength: Int,
+    /** Hoisted to the SCREEN, because the page bar lives in the chrome. */
+    pagerState: PagerState,
+    onPageCount: (Int) -> Unit,
+    ownPages: Boolean,
+    /** A block to land on, asked for from outside (a chapter, a search find). */
+    pendingBlock: Int?,
+    onPendingConsumed: () -> Unit
 ) {
     val state = listState
+
+    // THE JUMP, on the scrolling side: the pager answers it itself (it is the
+    // only one that knows which page a block landed on).
+    LaunchedEffect(pendingBlock) {
+        val target = pendingBlock ?: return@LaunchedEffect
+        if (ReaderLook.textFlow != ReaderFlow.SCROLL) return@LaunchedEffect
+        state.scrollToItem(target.coerceIn(0, (content.blocks.size - 1).coerceAtLeast(0)))
+        onPendingConsumed()
+    }
 
     // A scroll means the member is moving through the book, and the chrome has
     // no business over the words while they do it (see [tapPage]).
@@ -624,6 +810,7 @@ private fun TextReader(
 
     // Read the stored position once per open, and go there.
     var restored by remember(bookId, document) { mutableStateOf(false) }
+    var restoredBlock by remember(bookId, document) { mutableIntStateOf(0) }
     LaunchedEffect(bookId, document, content.blocks.size) {
         if (restored) return@LaunchedEffect
         val stored = withContext(Dispatchers.IO) {
@@ -631,13 +818,23 @@ private fun TextReader(
         }
         onOpenedAt(stored)
         if (stored != null && stored.positionIndex > 0) {
-            state.scrollToItem(stored.positionIndex.coerceIn(0, (content.blocks.size - 1).coerceAtLeast(0)))
+            restoredBlock = stored.positionIndex
+                .coerceIn(0, (content.blocks.size - 1).coerceAtLeast(0))
+            // Only the SCROLL list is moved here. In PAGED flow the pager cannot
+            // be told about a BLOCK until it knows which page that block landed
+            // on, which is its own business (see TextPagedReader).
+            if (ReaderLook.textFlow == ReaderFlow.SCROLL) {
+                state.scrollToItem(restoredBlock)
+            }
         }
         restored = true
     }
 
-    LaunchedEffect(bookId, document, content.blocks.size, restored) {
+    LaunchedEffect(bookId, document, content.blocks.size, restored, ReaderLook.textFlow) {
         if (!restored) return@LaunchedEffect
+        // In PAGED flow the pager owns where the member is (see TextPagedReader),
+        // and this would write block 0 over their place.
+        if (ReaderLook.textFlow == ReaderFlow.PAGED) return@LaunchedEffect
         snapshotFlow { state.firstVisibleItemIndex to state.firstVisibleItemScrollOffset }
             .collectLatest { (index, _) ->
                 delay(900)
@@ -655,6 +852,32 @@ private fun TextReader(
                     }
                 }
             }
+    }
+
+    // ── PAGES, for a book whose own pages do not exist ───────────────────
+    // A reflowed book has no pages of its own, so "Pages" means the reader makes
+    // them: the words are measured at the member's own type size and broken into
+    // screenfuls, which is what every ebook reader does and what makes a page
+    // turn mean the same thing in a novel as in a PDF (user request: "same ofor
+    // epub page like epub option too").
+    if (ReaderLook.textFlow == ReaderFlow.PAGED) {
+        TextPagedReader(
+            content = content,
+            pagerState = pagerState,
+            onPageCount = onPageCount,
+            restoredBlock = restoredBlock,
+            marks = marks,
+            palette = palette,
+            bookId = bookId,
+            document = document,
+            onLongPress = onLongPress,
+            onTap = onTap,
+            query = query,
+            hitIndex = hitIndex,
+            pendingBlock = pendingBlock,
+            onPendingConsumed = onPendingConsumed
+        )
+        return
     }
 
     LazyColumn(
@@ -710,6 +933,347 @@ private fun TextReader(
 }
 
 /**
+ * A PDF AS ONE LONG COLUMN OF PAGES (v389).
+ *
+ * The other half of the flow choice, and the one a reference book or a scanned
+ * document wants: the pages run on under each other instead of being turned
+ * (user request: "add like continuos veritical pdf style too"). Each page is
+ * still rendered ON DEMAND — a `LazyColumn` asks for the pages near the screen
+ * and nothing else — so a 400-page file costs the same handful of bitmaps it
+ * costs in the pager. Its scroll carries its own auto-bookmark, so switching
+ * between the two flows never loses the member's place.
+ */
+@Composable
+private fun PdfScrollReader(
+    pageCount: Int,
+    document: String,
+    marks: List<ReaderMarkEntity>,
+    palette: ReaderPalette,
+    bookId: String,
+    onOpenedAt: (ReaderMarkEntity?) -> Unit,
+    onTap: () -> Unit,
+    onScrolled: () -> Unit,
+    onLongPress: (Int) -> Unit
+) {
+    val context = LocalContext.current
+    val listState = rememberLazyListState()
+
+    var restored by remember(bookId, document) { mutableStateOf(false) }
+    LaunchedEffect(bookId, document, pageCount) {
+        if (restored) return@LaunchedEffect
+        val found = withContext(Dispatchers.IO) {
+            runCatching { PersonalRepositoryHolder.repo.readerPosition(bookId, document) }.getOrNull()
+        }
+        onOpenedAt(found)
+        if (found != null && found.positionIndex > 0) {
+            listState.scrollToItem(found.positionIndex.coerceIn(0, (pageCount - 1).coerceAtLeast(0)))
+        }
+        restored = true
+    }
+
+    LaunchedEffect(listState, onScrolled) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling -> if (scrolling) onScrolled() }
+    }
+
+    LaunchedEffect(bookId, document, pageCount, restored) {
+        if (!restored) return@LaunchedEffect
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collectLatest { index ->
+                delay(800)
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                        PersonalRepositoryHolder.repo.saveReaderPosition(
+                            bookId = bookId,
+                            sourceKey = document,
+                            index = index,
+                            fraction = index.toFloat() / (pageCount - 1).coerceAtLeast(1)
+                        )
+                    }
+                }
+            }
+    }
+
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
+        contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 58.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        items(count = pageCount, key = { page -> "pdf-page-$page" }) { page ->
+            val bitmap by produceState<Bitmap?>(null, document, page) {
+                value = withContext(Dispatchers.IO) {
+                    runCatching { renderPdfPage(context, document, page) }.getOrNull()
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .pointerInput(page) {
+                        detectTapGestures(
+                            onTap = { onTap() },
+                            onLongPress = { onLongPress(page) }
+                        )
+                    }
+            ) {
+                val drawn = bitmap
+                if (drawn != null) {
+                    Image(
+                        bitmap = drawn.asImageBitmap(),
+                        contentDescription = "Page ${page + 1}",
+                        // A page in a column fills the column's WIDTH: this is
+                        // the reading-the-whole-file mode, not the inspecting-
+                        // one-page mode, so height is whatever the page needs.
+                        contentScale = ContentScale.FillWidth,
+                        colorFilter = readerPdfFilter(palette.inkKey),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(6.dp))
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(420.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = palette.accent)
+                    }
+                }
+                val marksHere = marks.count { it.positionIndex == page && !it.isPosition }
+                if (marksHere > 0) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = palette.surface,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)
+                    ) {
+                        Text(
+                            "$marksHere marked",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.ink.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * v389 — PAGES FOR A BOOK THAT HAS NONE OF ITS OWN.
+ *
+ * The words are MEASURED at the member's own type size and broken into
+ * screenfuls, so a page turn in a novel means what a page turn in a PDF means
+ * and a pinch re-lays the book out instead of magnifying a photograph of it.
+ * Nothing is cached: a page is a RANGE of blocks, and the ranges are worked out
+ * from the room the screen actually has — which is also what makes the mode
+ * survive a rotation or a keyboard.
+ */
+@Composable
+private fun TextPagedReader(
+    content: ReaderContent.Text,
+    pagerState: PagerState,
+    onPageCount: (Int) -> Unit,
+    restoredBlock: Int,
+    marks: List<ReaderMarkEntity>,
+    palette: ReaderPalette,
+    bookId: String,
+    document: String,
+    onLongPress: (ReaderParagraph) -> Unit,
+    onTap: () -> Unit,
+    query: String,
+    hitIndex: Int,
+    pendingBlock: Int?,
+    onPendingConsumed: () -> Unit
+) {
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    var room by remember { mutableStateOf(IntSize.Zero) }
+    val pages = remember(content.blocks, room, ReaderLook.textScale) {
+        paginateBlocks(content.blocks, room, ReaderLook.textScale, measurer, density)
+    }
+
+    LaunchedEffect(pages.size) { onPageCount(pages.size) }
+
+    // Where the member was, once the pages exist to be counted: the page whose
+    // range covers the block they stopped on.
+    var placed by remember(content.blocks.size) { mutableStateOf(false) }
+    LaunchedEffect(pages.size, restoredBlock) {
+        if (placed || pages.isEmpty()) return@LaunchedEffect
+        val target = pages.indexOfFirst { restoredBlock in it }
+        if (target > 0) pagerState.scrollToPage(target)
+        placed = true
+    }
+
+    // A block asked for from outside: the page whose range covers it.
+    LaunchedEffect(pendingBlock, pages.size) {
+        val target = pendingBlock ?: return@LaunchedEffect
+        val page = pages.indexOfFirst { target in it }
+        if (page >= 0) pagerState.scrollToPage(page)
+        onPendingConsumed()
+    }
+
+    // …and the same auto-bookmark the scroll carries: the page settles, the
+    // block it opens on is written, and the next visit lands there.
+    LaunchedEffect(bookId, document, pages.size, placed) {
+        if (!placed || pages.isEmpty()) return@LaunchedEffect
+        snapshotFlow { pagerState.currentPage }
+            .collectLatest { page ->
+                delay(700)
+                val index = pages.getOrNull(page)?.first ?: return@collectLatest
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                        PersonalRepositoryHolder.repo.saveReaderPosition(
+                            bookId = bookId,
+                            sourceKey = document,
+                            index = index,
+                            fraction = index.toFloat() / (content.blocks.size - 1).coerceAtLeast(1)
+                        )
+                    }
+                }
+            }
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier
+            .fillMaxSize()
+            .onSizeChanged { room = it }
+            .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
+        pageSpacing = 14.dp
+    ) { page ->
+        val range = pages.getOrNull(page) ?: return@HorizontalPager
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 22.dp, vertical = 24.dp)
+        ) {
+            range.forEach { index ->
+                val block = content.blocks.getOrNull(index) ?: return@forEach
+                val highlight = marks.firstOrNull { it.isHighlight && it.positionIndex == index }
+                val note = marks.firstOrNull { it.isNote && it.positionIndex == index }
+                val bookmark = marks.firstOrNull {
+                    it.markKind == ReaderMarkKind.BOOKMARK && it.positionIndex == index
+                }
+                ReaderParagraphBlock(
+                    block = block,
+                    palette = palette,
+                    highlightColor = highlight?.let { readerHighlighter(it.colorKey).ink }
+                        ?: Color.Transparent,
+                    note = note?.note.orEmpty(),
+                    bookmarked = bookmark != null,
+                    onLongPress = {
+                        onLongPress(ReaderParagraph(index, block.section, block.text, block.isHeading))
+                    },
+                    onTap = onTap,
+                    query = query,
+                    hitHere = hitIndex == index && query.isNotBlank(),
+                    hitLength = query.length
+                )
+            }
+        }
+    }
+}
+
+/**
+ * THE BREAK, worked out from the room the screen has.
+ *
+ * A heading, a paragraph and a picture all take a HEIGHT; the pages are the
+ * ranges that fit the height available at the member's own type size. An
+ * unmeasured screen (the first frame, before anything has been laid out) is one
+ * page, which is the honest answer when there is no room to divide yet.
+ */
+private fun paginateBlocks(
+    blocks: List<ReaderBlock>,
+    room: IntSize,
+    scale: Float,
+    measurer: TextMeasurer,
+    density: Density
+): List<IntRange> {
+    if (blocks.isEmpty()) return emptyList()
+    val side = with(density) { PAGE_SIDE_PADDING.roundToPx() }
+    val vertical = with(density) { PAGE_VERTICAL_PADDING.roundToPx() }
+    val width = room.width - side
+    val height = room.height - vertical
+    if (width <= 0 || height <= 0) return listOf(blocks.indices)
+
+    val pages = ArrayList<IntRange>()
+    var start = 0
+    var used = 0
+    blocks.forEachIndexed { index, block ->
+        val gap = with(density) { 2.dp.roundToPx() }
+        val needed = if (block.imagePath != null) {
+            // A picture's height is not known until it is decoded, so a page's
+            // worth is estimated from the width — the same guess the page's own
+            // layout makes, and the reason an illustrated page may end early.
+            (width * 0.62f).toInt() + gap
+        } else {
+            val style = pagedTextStyle(block, scale)
+            runCatching {
+                measurer.measure(
+                    text = AnnotatedString(block.text),
+                    style = style,
+                    constraints = androidx.compose.ui.unit.Constraints(maxWidth = width)
+                ).size.height + gap
+            }.getOrDefault(with(density) { 26.dp.roundToPx() })
+        }
+        if (used > 0 && used + needed > height) {
+            pages.add(start until index)
+            start = index
+            used = 0
+        }
+        used += needed
+        if (used >= height && index < blocks.size - 1) {
+            pages.add(start..index)
+            start = index + 1
+            used = 0
+        }
+    }
+    if (start < blocks.size) pages.add(start until blocks.size)
+    return pages.filter { !it.isEmpty() }.ifEmpty { listOf(blocks.indices) }
+}
+
+/** The type a block is drawn in, at the member's own size — the same numbers
+ *  ReaderParagraphBlock uses, so a measured page is the page they will read. */
+private fun pagedTextStyle(block: ReaderBlock, scale: Float): TextStyle {
+    val level = when {
+        block.headingLevel in 1..3 -> block.headingLevel
+        block.isHeading -> 1
+        else -> 0
+    }
+    return when (level) {
+        1 -> TextStyle(
+            fontFamily = FrauncesFontFamily,
+            fontSize = (23f * scale).sp,
+            lineHeight = (31f * scale).sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        2 -> TextStyle(
+            fontFamily = FrauncesFontFamily,
+            fontSize = (20f * scale).sp,
+            lineHeight = (27f * scale).sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        3 -> TextStyle(
+            fontFamily = LoraFontFamily,
+            fontSize = (18f * scale).sp,
+            lineHeight = (26f * scale).sp,
+            fontWeight = FontWeight.Bold
+        )
+        else -> TextStyle(
+            fontFamily = LoraFontFamily,
+            fontSize = (17f * scale).sp,
+            lineHeight = (29f * scale).sp
+        )
+    }
+}
+
+private val PAGE_SIDE_PADDING = 44.dp
+private val PAGE_VERTICAL_PADDING = 60.dp
+
+/**
  * A PAGE READER for a PDF: one page at a time, which is what a PDF page IS.
  *
  * Each page is rendered when it becomes visible (`produceState` keyed on the
@@ -728,9 +1292,31 @@ private fun PageReader(
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onLongPress: (Int) -> Unit,
     onTap: () -> Unit,
-    onScrolled: () -> Unit
+    onScrolled: () -> Unit,
+    flow: ReaderFlow
 ) {
     val context = LocalContext.current
+
+    // ── ONE LONG COLUMN OF PAGES (v389) ─────────────────────────────────
+    // The other half of the flow choice, and the one a reference book or a
+    // scanned document wants: the pages run on under each other instead of
+    // being turned (user request: "add like continuos veritical pdf style
+    // too"). Its own scroll carries its own bookmark, exactly like the paged
+    // one, so switching between them never loses the member's place.
+    if (flow == ReaderFlow.SCROLL) {
+        PdfScrollReader(
+            pageCount = pageCount,
+            document = document,
+            marks = marks,
+            palette = palette,
+            bookId = bookId,
+            onOpenedAt = onOpenedAt,
+            onTap = onTap,
+            onScrolled = onScrolled,
+            onLongPress = onLongPress
+        )
+        return
+    }
 
     // WHERE THEY STOPPED, read once per open — and the write below waits for it,
     // or the restore would race its own save and page 1 would overwrite the page
@@ -747,6 +1333,7 @@ private fun PageReader(
         }
         restored = true
     }
+
 
     LaunchedEffect(bookId, document, pageCount, restored) {
         if (!restored) return@LaunchedEffect
@@ -1067,7 +1654,10 @@ private fun ReaderChrome(
     onSearch: () -> Unit,
     onInk: () -> Unit,
     onMarks: () -> Unit,
-    onChapters: () -> Unit
+    onChapters: () -> Unit,
+    pageBar: ReaderPageBar?,
+    flowLabel: String,
+    onToggleFlow: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         // The HEAD carries the way out and what is being read — nothing else. A
@@ -1100,6 +1690,60 @@ private fun ReaderChrome(
             }
         }
 
+        // THE PAGE BAR, riding just above the foot and going away with it.
+        AnimatedVisibility(
+            visible = visible && pageBar != null,
+            enter = fadeIn(tween(180)),
+            exit = fadeOut(tween(160)),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            if (pageBar != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(start = 12.dp, end = 12.dp, bottom = 54.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = palette.paper.copy(alpha = 0.96f),
+                        shadowElevation = 3.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(
+                                start = 3.dp,
+                                end = 9.dp,
+                                top = 2.dp,
+                                bottom = 2.dp
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(1.dp)
+                        ) {
+                            ReaderChromeButton(
+                                CurioIcons.ChevronLeft,
+                                "The page before",
+                                palette
+                            ) { pageBar.onPrev() }
+                            Text(
+                                pageBar.label,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = palette.ink.copy(alpha = 0.8f)
+                            )
+                            ReaderChromeButton(
+                                CurioIcons.ChevronRight,
+                                "The next page",
+                                palette
+                            ) { pageBar.onNext() }
+                        }
+                    }
+                }
+            }
+        }
+
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(tween(180)),
@@ -1115,6 +1759,21 @@ private fun ReaderChrome(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // HOW THE BOOK FLOWS — the one control that changes the whole
+                // page, so it sits where the thumb already is and names the
+                // OTHER way of reading rather than the one it is in.
+                Surface(
+                    onClick = onToggleFlow,
+                    shape = RoundedCornerShape(50),
+                    color = palette.surface
+                ) {
+                    Text(
+                        if (flowLabel == ReaderFlow.PAGED.label) "Scrolling" else "Pages",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.ink.copy(alpha = 0.8f),
+                        modifier = Modifier.padding(horizontal = 11.dp, vertical = 7.dp)
+                    )
+                }
                 // WHERE THEY ARE, as a fact about the book rather than a
                 // sentence of advice: a reader does not need to be told to hold
                 // a passage, they need to know which chapter they are in.
@@ -1495,11 +2154,13 @@ private fun ReaderMarkRow(
 @Composable
 private fun ReaderChaptersSheet(
     content: ReaderContent?,
+    chapters: List<ReaderOutlineEntry>,
     palette: ReaderPalette,
-    onPick: (Int) -> Unit,
+    onPickBlock: (Int) -> Unit,
+    onPickPage: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ReaderSheetFrame("Chapters", palette, onDismiss) {
+    ReaderSheetFrame("Contents", palette, onDismiss) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1507,47 +2168,71 @@ private fun ReaderChaptersSheet(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            when (content) {
-                is ReaderContent.Text -> {
-                    val headings = content.blocks.filter { it.isHeading }
-                    if (headings.isEmpty()) {
-                        Text(
-                            "This file has no chapter headings of its own.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = palette.ink.copy(alpha = 0.6f)
-                        )
-                    }
-                    headings.forEach { heading ->
-                        Surface(
-                            onClick = { onPick(heading.section) },
-                            shape = RoundedCornerShape(10.dp),
-                            color = palette.surface,
-                            modifier = Modifier.fillMaxWidth()
+            when {
+                // THE FILE'S OWN CONTENTS (v389). An EPUB's nav/NCX and a PDF's
+                // outline both carry real chapter names, so this is a list of
+                // chapters rather than a page grid — the naming is the book's,
+                // the indent says how deep it sits, and a part's own chapters
+                // read as being under it.
+                chapters.isNotEmpty() -> chapters.forEach { entry ->
+                    val openable = entry.block >= 0 || entry.isPage
+                    Surface(
+                        onClick = {
+                            if (entry.isPage) onPickPage(entry.page) else onPickBlock(entry.block)
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        color = palette.surface,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(
+                                start = (12 + (entry.depth - 1) * 14).dp,
+                                end = 12.dp,
+                                top = 10.dp,
+                                bottom = 10.dp
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                heading.text,
+                                entry.title,
                                 style = TextStyle(
                                     fontFamily = WritingFontFamily,
-                                    fontSize = 15.sp,
+                                    fontSize = if (entry.depth <= 1) 15.sp else 14.sp,
+                                    fontWeight = if (entry.depth <= 1) FontWeight.SemiBold
+                                    else FontWeight.Normal,
                                     color = palette.ink
                                 ),
-                                maxLines = 1,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                                maxLines = 2,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                when {
+                                    entry.isPage -> "p ${entry.page}"
+                                    openable -> ""
+                                    else -> "not in this file"
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.ink.copy(alpha = 0.45f)
                             )
                         }
                     }
                 }
 
-                is ReaderContent.Pages -> {
-                    // A PDF's own pages: the jumps a reader actually wants are
-                    // the coarsest ones, so this is a page grid rather than a
-                    // list of 400 rows.
+                content is ReaderContent.Pages -> {
+                    Text(
+                        "This PDF carries no contents of its own.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = palette.ink.copy(alpha = 0.6f)
+                    )
+                    // The fallback: a page grid, because on a file with no
+                    // contents the only jumps there are ARE the pages.
                     val chunks = (0 until content.pageCount).chunked(4)
                     chunks.take(60).forEachIndexed { row, pages ->
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             pages.forEach { page ->
                                 Surface(
-                                    onClick = { onPick(page) },
+                                    onClick = { onPickPage(page + 1) },
                                     shape = RoundedCornerShape(10.dp),
                                     color = palette.surface,
                                     modifier = Modifier.weight(1f)
@@ -1574,7 +2259,13 @@ private fun ReaderChaptersSheet(
                     }
                 }
 
-                null -> Text(
+                content is ReaderContent.Text -> Text(
+                    "This file has no chapter headings of its own.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = palette.ink.copy(alpha = 0.6f)
+                )
+
+                else -> Text(
                     "Still opening the file\u2026",
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.ink.copy(alpha = 0.6f)
@@ -1827,6 +2518,30 @@ private object ReaderLook {
     var pdfZoom by mutableStateOf(1f)
     var pdfPanX by mutableStateOf(0f)
     var pdfPanY by mutableStateOf(0f)
+
+    /**
+     * v389 — HOW THE BOOK FLOWS.
+     *
+     * One column you scroll, or pages you turn — a choice every reader on earth
+     * offers, and the two are good at different things: a scroll is how a novel
+     * is read in bed, and pages are how a PDF and a reference book are looked at
+     * (user request: "add horizontal readies too, also add like continuos
+     * veritical pdf style too and same ofor epub page like epub option too").
+     *
+     * Kept PER KIND, because the two kinds start from opposite ends: a reflowed
+     * book opens as a scroll (it has no pages of its own) and a PDF opens as
+     * pages (it has nothing but). Changing one never changes the other.
+     */
+    var textFlow by mutableStateOf(ReaderFlow.SCROLL)
+    var pageFlow by mutableStateOf(ReaderFlow.PAGED)
+}
+
+/** The two ways a book can be laid out on screen. */
+private enum class ReaderFlow(val label: String) {
+    SCROLL("Scrolling"),
+    PAGED("Pages");
+
+    fun flipped(): ReaderFlow = if (this == SCROLL) PAGED else SCROLL
 }
 
 /** What the reader draws with, for one ink. */
@@ -1977,7 +2692,25 @@ private fun readerHighlighter(key: String?): ReaderHighlighter = ReaderHighlight
 
 /** What a reader is holding: reflowable text, or pages. */
 private sealed interface ReaderContent {
-    data class Text(val blocks: List<ReaderBlock>) : ReaderContent
+    data class Text(
+        val blocks: List<ReaderBlock>,
+        /**
+         * THE BOOK'S OWN CONTENTS (v389) — EPUB nav/NCX, or a PDF outline. What
+         * the chapters sheet lists, with the reader's own headings as the
+         * fallback for a file that has none (see [ReaderOutlineEntry]).
+         */
+        val outline: List<ReaderOutlineEntry> = emptyList(),
+        /**
+         * Section 1..n as the FILE each one came from, so an outline entry can
+         * be turned into the block it opens.
+         */
+        val sectionSources: List<String> = emptyList(),
+        /**
+         * True when the book numbers its own pages in the text — the reader
+         * then stops counting them itself (see [carriesOwnPageMarkers]).
+         */
+        val ownPages: Boolean = false
+    ) : ReaderContent
 
     data class Pages(val pageCount: Int) : ReaderContent
 }
@@ -2055,6 +2788,21 @@ private fun String.aroundSnippet(at: Int, length: Int): String {
     return head + substring(from, to.coerceAtLeast(from)).trim() + tail
 }
 
+/**
+ * v389 — THE PAGE BAR.
+ *
+ * A paged book needs one thing neither the head nor the foot can give it: which
+ * page of how many, and the two arrows that move one. It lives in the CHROME, so
+ * the same tap that puts the tools away takes it away too and a reader with the
+ * chrome gone has nothing over the words at all (user request: "a floating page
+ * chnaging bar in the tool bar which again hides with the tool barm").
+ */
+private class ReaderPageBar(
+    val label: String,
+    val onPrev: () -> Unit,
+    val onNext: () -> Unit
+)
+
 private data class ReaderSearchHit(
     /** The block index of a reflowable book, or the page of a PDF. */
     val index: Int,
@@ -2118,9 +2866,27 @@ private fun readBook(context: android.content.Context, value: String): ReaderCon
             // descriptor, not four hundred bitmaps.
             ReaderContent.Pages(pageCount = pdfPageCount(context, value, file))
         }
-        type.startsWith("text/") || name.endsWith(".txt") ->
-            ReaderContent.Text(readPlainText(context, value, file))
-        else -> ReaderContent.Text(readEpubText(context, value, file))
+        type.startsWith("text/") || name.endsWith(".txt") -> {
+            val blocks = readPlainText(context, value, file)
+            ReaderContent.Text(
+                blocks = blocks,
+                // A plain text file has no contents of its own to read, and its
+                // own line numbering is plain text's business — but it very
+                // often still prints the print edition's page numbers, which is
+                // the same duplication the EPUB check looks for.
+                ownPages = carriesOwnPageMarkers(blocks.map { it.text })
+            )
+        }
+
+        else -> {
+            val read = readEpubText(context, value, file)
+            ReaderContent.Text(
+                blocks = read.blocks,
+                outline = read.outline,
+                sectionSources = read.sources,
+                ownPages = carriesOwnPageMarkers(read.blocks.map { it.text })
+            )
+        }
     }
 }
 
@@ -2206,11 +2972,19 @@ private fun readPlainText(
  * continuous scroll possible — a chapter is a run of paragraphs, not a page —
  * and it is also what the chapter sheet lists.
  */
+/** An EPUB, read: its blocks, the file each section came from, and its own
+ *  contents — the three things that let an outline entry name a block. */
+private class EpubRead(
+    val blocks: List<ReaderBlock>,
+    val sources: List<String>,
+    val outline: List<ReaderOutlineEntry>
+)
+
 private fun readEpubText(
     context: android.content.Context,
     value: String,
     file: File?
-): List<ReaderBlock> {
+): EpubRead {
     val temp = if (file == null) {
         File.createTempFile("curio-reader", ".epub", context.cacheDir).also { target ->
             context.contentResolver.openInputStream(android.net.Uri.parse(value)).use { input ->
@@ -2223,7 +2997,11 @@ private fun readEpubText(
     val source = file ?: temp ?: error("No file")
     return try {
         val blocks = ArrayList<ReaderBlock>()
+        val sources = ArrayList<String>()
+        var outline: List<ReaderOutlineEntry> = emptyList()
         ZipFile(source).use { zip ->
+            // The book's OWN contents, read while the archive is open anyway.
+            outline = epubOutline(zip)
             val pages = zip.entries().asSequence()
                 .filter { entry ->
                     !entry.isDirectory &&
@@ -2250,6 +3028,7 @@ private fun readEpubText(
                         .trim()
                         .takeIf { it.isNotBlank() && it.length < 60 }
                         .orEmpty()
+                sources.add(entry.name)
                 val found = epubBlocks(context, zip, entry.name, raw, section, heading)
                 if (found.none { it.isHeading } && heading.isNotBlank()) {
                     // A file with no heading of its own gets the one it is named
@@ -2259,7 +3038,7 @@ private fun readEpubText(
                 blocks.addAll(found)
             }
         }
-        blocks
+        EpubRead(blocks = blocks, sources = sources, outline = outline)
     } finally {
         temp?.delete()
     }

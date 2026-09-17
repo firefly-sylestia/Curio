@@ -66,3 +66,18 @@
 # and obfuscates the rest of the app, these files just skip the outlining.
 -keep class com.curio.app.ui.components.TopicShareCardKt { *; }
 -keep class com.curio.app.features.settings.ShareHubScreenKt { *; }
+
+# v389 — PdfBox-Android's JPEG2000 filter. The library ships the filter and
+# expects an optional JP2 decoder (`com.gemalto.jp2.JP2Decoder`) that it does
+# not depend on, because a PDF only needs it when a page embeds a JPEG2000
+# image. R8 found the reference and failed the RELEASE build's missing-class
+# check (`minifyReleaseWithR8`), which is a build break for every PDF reader
+# user even though no code path we call touches it.
+#
+# Silenced rather than pulled in on purpose: the decoder is a whole extra
+# native library for a filter almost no book uses, and the library's own
+# documented advice is exactly this rule. A PDF that DOES use JPX will let
+# PdfRenderer draw the page as it always has (the text layer is PDFBox's, the
+# picture has never been), so the only consequence is that such a page's words
+# do not come back from the extractor.
+-dontwarn com.gemalto.jp2.**

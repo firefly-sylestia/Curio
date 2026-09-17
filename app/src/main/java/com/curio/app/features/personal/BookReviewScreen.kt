@@ -559,10 +559,9 @@ fun BookReviewScreen(
                         onDismissRequest = { chapterMenu = false }
                     ) {
                         chapterNames.forEachIndexed { index, chapter ->
-                            val name = chapter.title.trim()
-                            val label =
-                                if (name.isEmpty()) "Chapter ${index + 1}"
-                                else "Chapter ${index + 1} \u00b7 $name"
+                            // The book's own title, with the number said once —
+                            // see chapterMarkerLabel.
+                            val label = chapterMarkerLabel(index, chapter.title)
                             DropdownMenuItem(
                                 text = {
                                     Text(
@@ -701,6 +700,81 @@ fun BookReviewScreen(
 private data class PinnedChapterLine(val label: String, val top: Float, val bottom: Float)
 
 /**
+ * v389 — A CHAPTER'S NAME, WITH THE NUMBER SAID ONCE.
+ *
+ * A book's own contents very often already say which chapter it is —
+ * "Chapter 7", "7. The Fall", "Ch. VII" — so prefixing our own number produced
+ * "Chapter 7 · Chapter 7" and, on a chapter the edition never named,
+ * "Chapter 1 Chapter 1" (user report: "it automaticaly says hapter 1 and
+ * sometimes the chapter name dont have names so it says chapter 1 athen it comes
+ * chapter 1 chater 1 so fix that, add auto detetct something when chapter name
+ * contains chapter 1 or ch etc then it doesnt say it again").
+ *
+ * So the name is CLEANED first: a leading chapter word with or without a
+ * number, or a leading bare number, is taken off — but ONLY when it says the
+ * number we were about to write. A heading that says a different chapter is the
+ * book's own words and is left exactly as the book wrote it.
+ */
+internal fun chapterMarkerLabel(index: Int, name: String): String {
+    val cleaned = chapterNameOnly(index, name)
+    return if (cleaned.startsWith("Chapter ")) cleaned else "Chapter ${index + 1} \u00b7 $cleaned"
+}
+
+/** Just the name a chapter goes by: the book's own title with our number taken
+ *  back out of it, or "Chapter N" when the edition never named it. */
+internal fun chapterNameOnly(index: Int, name: String): String {
+    val cleaned = stripChapterPrefix(name.trim(), index + 1)
+    return cleaned.ifBlank { "Chapter ${index + 1}" }
+}
+
+private val CHAPTER_WORD = Regex(
+    "^\\s*(?:chapter|chap|ch|book|part|section|\u00a7)\\.?\\s*([0-9]+|[IVXLCDMivxlcdm]+)?\\s*[\\-\u2013\u2014.:\u00b7)]?\\s*",
+    RegexOption.IGNORE_CASE
+)
+
+private val CHAPTER_BARE_NUMBER = Regex("^\\s*([0-9]+)\\s*[\\-\u2013\u2014.:\u00b7)]\\s*")
+
+private fun stripChapterPrefix(name: String, number: Int): String {
+    if (name.isEmpty()) return ""
+    CHAPTER_WORD.find(name)?.let { match ->
+        val said = match.groupValues.getOrNull(1).orEmpty()
+        val same = said.isBlank() || said.toIntOrNull() == number || romanValue(said) == number
+        // Only OUR number is a duplicate. "Chapter 9" standing over chapter 7 is
+        // the book's own heading and stays whole.
+        if (same) return name.substring(match.range.last + 1).trim()
+        return name
+    }
+    CHAPTER_BARE_NUMBER.find(name)?.let { match ->
+        if (match.groupValues[1].toIntOrNull() == number) {
+            return name.substring(match.range.last + 1).trim()
+        }
+    }
+    return name
+}
+
+/** "VII" -> 7, "" for anything that is not a numeral. */
+private fun romanValue(text: String): Int {
+    if (text.isEmpty()) return -1
+    var total = 0
+    var previous = 0
+    text.uppercase().reversed().forEach { ch ->
+        val value = when (ch) {
+            'I' -> 1
+            'V' -> 5
+            'X' -> 10
+            'L' -> 50
+            'C' -> 100
+            'D' -> 500
+            'M' -> 1000
+            else -> return -1
+        }
+        if (value < previous) total -= value else total += value
+        previous = value
+    }
+    return total
+}
+
+/**
  * A chapter's own review, folded under the marker that names it. It is drawn as
  * a quieter card, because it is somebody else's page: the member's own words
  * are the review around it, and this is what they wrote when they finished
@@ -733,7 +807,7 @@ private fun FoldedChapterReview(
                         .background(accent)
                 )
                 Text(
-                    (name.ifBlank { "Chapter $chapter" }).uppercase(),
+                    chapterNameOnly(chapter - 1, name).uppercase(),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.1.sp

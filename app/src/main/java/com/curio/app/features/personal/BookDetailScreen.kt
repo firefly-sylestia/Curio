@@ -442,6 +442,23 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                 )
                             }
                         }
+                        // WHY I PICKED IT UP, READ BACK (v389). The note was only
+                        // ever drawn while the pen was down, so the one thing a
+                        // member writes BEFORE reading was the one thing the eye
+                        // could not see (user report: "in book page the why i
+                        // picked it up isnt visible in read view so fix it
+                        // please"). A member who never wrote it sees nothing —
+                        // an empty card would be a box of nothing.
+                        AnimatedVisibility(
+                            visible = !editing && blurb.isNotBlank(),
+                            enter = fadeIn(tween(200)),
+                            exit = fadeOut(tween(120))
+                        ) {
+                            Column {
+                                Spacer(Modifier.height(12.dp))
+                                BlurbReadBack(value = blurb)
+                            }
+                        }
                     }
                 }
             }
@@ -922,6 +939,53 @@ private fun ProgressCard(
 }
 
 @Composable
+/**
+ * v389 — WHY I PICKED IT UP, as the eye reads it.
+ *
+ * The same words the field holds, drawn as a note on the page rather than as a
+ * box: no placeholder, no caret, no container that says "type here". It is
+ * something to read back, which is what the reading side is for.
+ */
+@Composable
+private fun BlurbReadBack(value: String) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp),
+            horizontalArrangement = Arrangement.spacedBy(9.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 3.dp, height = 15.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(personalAccent())
+            )
+            Column {
+                Text(
+                    "Why I picked it up",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = personalAccentInk()
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    value,
+                    style = TextStyle(
+                        fontFamily = LoraFontFamily,
+                        fontSize = 13.sp,
+                        lineHeight = 19.sp,
+                        color = ink
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun BlurbField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -1032,7 +1096,9 @@ private fun ChapterCard(
                     Text(
                         // The book's OWN chapter name leads when the catalog has
                         // one; the number stays for the ones it does not.
-                        text = catalogTitle.takeIf { it.isNotBlank() } ?: "Chapter $chapter",
+                        // The edition's own title with our number said once —
+                        // see chapterNameOnly (v389).
+                        text = chapterNameOnly(chapter - 1, catalogTitle),
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontFamily = FrauncesFontFamily,
                             fontWeight = FontWeight.SemiBold

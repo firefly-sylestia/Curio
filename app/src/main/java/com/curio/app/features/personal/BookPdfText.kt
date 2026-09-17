@@ -141,6 +141,31 @@ private fun pdfLocalFile(value: String): File? {
  * has no text layer at all (a scanned PDF), so a caller can carry on drawing the
  * page and offer no selection rather than fail.
  */
+/**
+ * THE ONE WAY TO OPEN A PDF. Every reader feature that needs the file's words
+ * rather than its picture comes through here — the page text, the contents, and
+ * whatever else is added later — so the loader is initialised once and a
+ * `content://` and a plain path are handled in exactly one place.
+ */
+internal fun <T> withPdfDocument(
+    context: Context,
+    document: String,
+    block: (PDDocument) -> T
+): T? = runCatching {
+    // Cheap and idempotent: the loader hands PDFBox the app's assets/fonts so a
+    // page that uses a standard font can be measured.
+    PDFBoxResourceLoader.init(context.applicationContext)
+    val file = pdfLocalFile(document)
+    val pdf = if (file != null) {
+        PDDocument.load(file)
+    } else {
+        val stream = context.contentResolver.openInputStream(Uri.parse(document))
+            ?: return@runCatching null
+        stream.use { PDDocument.load(it) }
+    }
+    pdf.use { loaded -> block(loaded) }
+}.getOrNull()
+
 internal fun extractPdfPageText(
     context: Context,
     document: String,
@@ -148,20 +173,8 @@ internal fun extractPdfPageText(
 ): PdfPageText? {
     val key = "$document#$index"
     PdfTextCache.get(key)?.let { return it }
-    return runCatching {
-        // Cheap and idempotent: the loader hands PDFBox the app's assets/fonts
-        // so a page that uses a standard font can be measured.
-        PDFBoxResourceLoader.init(context.applicationContext)
-        val file = pdfLocalFile(document)
-        val pdf = if (file != null) {
-            PDDocument.load(file)
-        } else {
-            val stream = context.contentResolver.openInputStream(Uri.parse(document))
-                ?: return@runCatching null
-            stream.use { PDDocument.load(it) }
-        }
-        pdf.use { loaded ->
-            if (index !in 0 until loaded.numberOfPages) return@runCatching null
+    return withPdfDocument(context, document) { loaded ->
+            if (index !in 0 until loaded.numberOfPages) return@withPdfDocument null
             val page = loaded.getPage(index)
             val glyphs = ArrayList<PdfGlyph>()
             val stripper = object : PDFTextStripper() {
@@ -198,6 +211,5 @@ internal fun extractPdfPageText(
                 pageWidthPt = box.width,
                 pageHeightPt = box.height
             ).also { PdfTextCache.put(key, it) }
-        }
-    }.getOrNull()
+    }
 }
