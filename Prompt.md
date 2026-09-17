@@ -47,10 +47,13 @@ Undo pill, ~5 s**.
    selected option is drawn transparent), the take studio's Add-take door and take
    pills (faint text, fill not solid), and Home's floating `+` shadow glitch on
    its show/hide (a shadow drawn while the pill scales in).
-2. **To-do rows:** long-press drag to reorder and swipe-to-delete with the Undo
-   pill, persisted in the row order of the stored document (the to-do page only,
-   gated on the page like `keepsChecklistRows`), with the deleted row's style,
-   tick and marker restored by the undo.
+2. **To-do rows: DONE (this slice).** `PersonalTodoRow.kt` (`PersonalRowDragState`
+   + the gestures) — long-press drag reorders, swipe past a third of the width
+   removes, `PersonalUndoPill` restores the held `PersonalRemovedRow` (words,
+   style, tick, marker and place) for 5 s. The canvas' blocks are `key(id)`-wrapped
+   so reordering cannot scramble remembered state. The row order IS the stored
+   document. Still to do in this item: nothing (`moveBlock` commits the order the
+   way it reads).
 3. **The book page's READ-FIRST eye:** an eye/pen switch on the book page, the eye
    the default once the book has writing, the About-this-book block collapsed
    (and still editable) while writing, a leaving flush for the chapter review

@@ -17,6 +17,8 @@ ADD:
 - Books: the add-book sheet searches Curio's own book shelf first, then the open library — and says which one it found the book in.
 - Profile: your profile (and every member's) now lives inside the header itself — portrait, counts, bio and actions on the banner, with a proper Message pill.
 - Writing: a note on a topic is its own page — the topic sits at the top as a card (with a way through to it), and you can pick that topic by searching Curio's catalog or by typing a name of your own.
+- Writing: a to-do row can be picked up and moved — press and hold a row to carry it up or down the list (the rows make room as you go), and the new order is saved with the list.
+- Writing: swipe a to-do row sideways to remove it, with a floating "Undo" pill that puts it back exactly as it was — same words, same tick, same place — for a few seconds after.
 - Writing: a to-do list is its own page too — give it a name, type a row and it arrives as a checkbox, with a running count of what is left and the day it was started.
 - Writing: talk into a page — a floating mic sits over the writing, the tools step aside while you record, and what you said lands in the page as a waveform. Tap or drag anywhere along it to jump to that moment, and keep writing under it.
 - Writing: leave a page mid-recording and you are asked what to do — keep recording (a small pill says it is still going and takes you back), keep the note, or discard it.

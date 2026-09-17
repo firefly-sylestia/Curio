@@ -228,6 +228,18 @@ internal fun PersonalWritingPage(
     // The page's own view of the document (the to-do page's progress line).
     LaunchedEffect(doc) { onDoc(doc) }
 
+    // ── The Undo pill (v389) ───────────────────────────────────────────
+    // A swiped-away to-do row is held by the editor, and the pill that puts it
+    // back goes away by itself — long enough to notice and reach, short enough
+    // that it can never become part of the page.
+    val removedRow = editor.lastRemovedRow
+    LaunchedEffect(removedRow) {
+        if (removedRow != null) {
+            delay(5000)
+            editor.clearRemovedRow()
+        }
+    }
+
     // ── Auto-save ──────────────────────────────────────────────────────
     // Everything that can change is held in `rememberUpdatedState` so the
     // writers below (a debounce inside composition, and an app-switch flush
@@ -341,37 +353,56 @@ internal fun PersonalWritingPage(
     ) {
         header(editing, saving, { mode -> editing = mode }, { leave() })
 
-        Crossfade(
-            targetState = editing,
-            animationSpec = tween(220),
-            label = "personal-page-mode",
-            modifier = Modifier.fillMaxWidth().weight(1f)
-        ) { writing ->
-            if (!writing) {
-                readView(doc)
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        // v389 — the blank part of a page is writing space too: a
-                        // tap anywhere in the gaps (under the last line, between
-                        // the title and the words) hands the caret to the last
-                        // line instead of needing the "Write…" placeholder to be
-                        // hit exactly (user report).
-                        .clickable { editor.focusLastLine() }
-                        .padding(horizontal = 20.dp)
-                        .widthIn(max = 680.dp)
-                ) {
-                    Spacer(Modifier.height(6.dp))
-                    aboveCanvas()
-                    PersonalCanvas(
-                        state = editor,
-                        modifier = Modifier.fillMaxWidth(),
-                        onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
-                    )
-                    Spacer(Modifier.height(140.dp))
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            Crossfade(
+                targetState = editing,
+                animationSpec = tween(220),
+                label = "personal-page-mode",
+                modifier = Modifier.fillMaxSize()
+            ) { writing ->
+                if (!writing) {
+                    readView(doc)
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            // v389 — the blank part of a page is writing space too: a
+                            // tap anywhere in the gaps (under the last line, between
+                            // the title and the words) hands the caret to the last
+                            // line instead of needing the "Write…" placeholder to be
+                            // hit exactly (user report).
+                            .clickable { editor.focusLastLine() }
+                            .padding(horizontal = 20.dp)
+                            .widthIn(max = 680.dp)
+                    ) {
+                        Spacer(Modifier.height(6.dp))
+                        aboveCanvas()
+                        PersonalCanvas(
+                            state = editor,
+                            modifier = Modifier.fillMaxWidth(),
+                            onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
+                        )
+                        Spacer(Modifier.height(140.dp))
+                    }
                 }
+            }
+
+            // The pill floats INSIDE the writing area, so a swipe away and the
+            // undo of it never move a line of the page.
+            AnimatedVisibility(
+                visible = editing && removedRow != null,
+                enter = fadeIn(tween(160)) + slideInVertically(tween(200)) { height -> height / 2 },
+                exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> height / 2 },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 6.dp)
+            ) {
+                PersonalUndoPill(
+                    label = "Row removed",
+                    onUndo = { editor.restoreRemovedRow() },
+                    onDismiss = { editor.clearRemovedRow() }
+                )
             }
         }
 

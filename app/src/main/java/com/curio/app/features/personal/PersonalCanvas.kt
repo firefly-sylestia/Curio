@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
@@ -450,6 +451,13 @@ internal fun personalAnnotated(
 internal data class PersonalCaret(val blockId: String, val index: Int)
 
 /**
+ * v389 — a row the writer swiped away, held by the editor so the floating Undo
+ * pill can put it back: the block itself (words, style, tick and marker) plus
+ * the place it stood in the list.
+ */
+internal data class PersonalRemovedRow(val block: PersonalBlock, val index: Int)
+
+/**
  * The canvas' brain: the block list, each block's text + style mask, and the
  * toolbar's live state. Deliberately NOT a Compose UI class — a screen can
  * drive it (auto-save, "add a photo", programmatic focus) without touching
@@ -514,6 +522,19 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * turns it on.
      */
     var keepsChecklistRows: Boolean = false
+
+    /**
+     * v389 — THE ROW THE WRITER JUST SWIPED AWAY.
+     *
+     * A to-do row is `keepsChecklistRows`' business, and swiping one off the
+     * list is the fastest way to say "not this anymore" — so it has to be the
+     * fastest way to say "actually, yes" too. The whole row (its words, its
+     * style, its tick, its marker and its PLACE in the list) is held here for
+     * the floating Undo pill to put back exactly as it was. Held against the
+     * editor rather than the screen because the pill watches the editor.
+     */
+    var lastRemovedRow by mutableStateOf<PersonalRemovedRow?>(null)
+        private set
 
     private var caret by mutableStateOf<PersonalCaret?>(null)
 
@@ -874,6 +895,87 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         onDocChanged(doc())
     }
 
+    // ── The to-do page's own gestures (v389) ───────────────────────────
+
+    /**
+     * v389 — REORDER: the row at [from] and the row at [to] trade places.
+     *
+     * A to-do list is read top-to-bottom, so its ORDER is part of its meaning —
+     * and because [order] IS the stored document's order, a dragged list is
+     * saved the way it reads, with no separate rank column to fall out of sync.
+     * The move is a real list edit (not a draft), so the drag can move a row
+     * more than one step and every step already happened where the finger put
+     * it.
+     */
+    fun moveBlock(from: Int, to: Int) {
+        if (from == to) return
+        if (from !in order.indices || to !in order.indices) return
+        val id = order.removeAt(from)
+        order.add(to, id)
+        onDocChanged(doc())
+    }
+
+    /**
+     * v389 — SWIPE AWAY: the row leaves the page and is HELD ([lastRemovedRow])
+     * so the floating Undo pill can put it back exactly where it was.
+     *
+     * The row keeps its id, so restoring it rebuilds the same block with the
+     * same tick and marker — the pill undoes the swipe, not the writing on the
+     * row. The one thing it does not bring back is a fresh blank line the
+     * removal had to leave behind when the list would otherwise be empty: undo
+     * restores what was there, not the placeholder the page needed.
+     */
+    fun removeRow(id: String) {
+        val index = order.indexOf(id)
+        val block = blocks[id]
+        if (index < 0 || block == null) return
+        order.remove(id)
+        blocks.remove(id)
+        masks.remove(id)
+        selections.remove(id)
+        compositions.remove(id)
+        lastRemovedRow = PersonalRemovedRow(block, index)
+        if (order.isEmpty()) {
+            val fresh = PersonalBlock(id = newBlockId())
+            order.add(fresh.id)
+            blocks[fresh.id] = fresh
+            masks[fresh.id] = emptyMask(0)
+        }
+        if (focusedId == id) focusedId = order.getOrNull(index.coerceAtMost(order.size - 1))
+        onDocChanged(doc())
+    }
+
+    /** The Undo pill: puts the swiped row back, at the place it was swiped from. */
+    fun restoreRemovedRow() {
+        val removed = lastRemovedRow ?: return
+        lastRemovedRow = null
+        val block = removed.block
+        // The page can never be EMPTY, so swiping a list's last row leaves a
+        // fresh blank line behind. Undo drops it again.
+        val placeholder = order.singleOrNull()
+        val placeholderBlock = placeholder?.let { blocks[it] }
+        if (
+            placeholder != null && placeholderBlock != null &&
+            placeholderBlock.text.isEmpty() && !placeholderBlock.isPhoto && placeholderBlock.audio == null
+        ) {
+            order.remove(placeholder)
+            blocks.remove(placeholder)
+            masks.remove(placeholder)
+            selections.remove(placeholder)
+            compositions.remove(placeholder)
+        }
+        val index = removed.index.coerceIn(0, order.size)
+        order.add(index, block.id)
+        blocks[block.id] = block
+        masks[block.id] = runsToMask(block.text.length, block.runs)
+        onDocChanged(doc())
+    }
+
+    /** Dismisses the Undo pill without putting anything back. */
+    fun clearRemovedRow() {
+        lastRemovedRow = null
+    }
+
     /**
      * Enter: the paragraph splits at the caret and the caret lands at the
      * start of the new one. The style of the characters travels with them (the
@@ -943,37 +1045,65 @@ internal fun PersonalCanvas(
     onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
     enabled: Boolean = true
 ) {
+    // v389 — one drag for the whole list: the to-do page's rows share it, so
+    // the row under the finger and the rows it passes agree about one gesture.
+    val rowDrag = remember { PersonalRowDragState() }
     Column(
         modifier = modifier.clickable(enabled = enabled) { state.focusLastLine() },
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        state.blockIds.forEach { id ->
-            val block = state.block(id) ?: return@forEach
-            if (block.isPhoto) {
-                PersonalPhotoBlock(
-                    uri = block.photo.orEmpty(),
-                    caption = state.caption(id),
-                    ink = ink,
-                    accent = accent,
-                    enabled = enabled,
-                    onCaption = { state.setCaption(id, it) },
-                    onRemove = { state.removeBlock(id) },
-                    onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
-                )
-            } else if (block.isAudio) {
-                // v389 — a voice note in the page: the waveform is the block, and
-                // the writing carries on under it.
-                PersonalVoicePageBlock(
-                    path = block.audio.orEmpty(),
-                    seconds = block.audioSeconds,
-                    bars = block.audioBars,
-                    ink = ink,
-                    accent = accent,
-                    enabled = enabled,
-                    onRemove = { state.removeBlock(id) }
-                )
-            } else {
-                PersonalTextBlock(id = id, state = state, ink = ink, accent = accent, enabled = enabled)
+        state.blockIds.forEachIndexed { index, id ->
+            val block = state.block(id) ?: return@forEachIndexed
+            // v389 — the blocks are KEYED by their own id. The to-do page can
+            // now reorder them, and without the key Compose would hand each
+            // slot's remembered state to whichever block slid into it — the
+            // caret, the focus requester and the field's own scroll would all
+            // follow the POSITION instead of the row.
+            key(id) {
+                if (block.isPhoto) {
+                    PersonalPhotoBlock(
+                        uri = block.photo.orEmpty(),
+                        caption = state.caption(id),
+                        ink = ink,
+                        accent = accent,
+                        enabled = enabled,
+                        onCaption = { state.setCaption(id, it) },
+                        onRemove = { state.removeBlock(id) },
+                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                    )
+                } else if (block.isAudio) {
+                    // v389 — a voice note in the page: the waveform is the block, and
+                    // the writing carries on under it.
+                    PersonalVoicePageBlock(
+                        path = block.audio.orEmpty(),
+                        seconds = block.audioSeconds,
+                        bars = block.audioBars,
+                        ink = ink,
+                        accent = accent,
+                        enabled = enabled,
+                        onRemove = { state.removeBlock(id) }
+                    )
+                } else if (state.keepsChecklistRows) {
+                    // A to-do page: every text row can be picked up (long press),
+                    // carried to another place, and swiped sideways off the list.
+                    PersonalTodoRow(
+                        id = id,
+                        index = index,
+                        state = state,
+                        drag = rowDrag,
+                        enabled = enabled
+                    ) {
+                        PersonalTextBlock(
+                            id = id,
+                            state = state,
+                            ink = ink,
+                            accent = accent,
+                            enabled = enabled
+                        )
+                    }
+                } else {
+                    PersonalTextBlock(id = id, state = state, ink = ink, accent = accent, enabled = enabled)
+                }
             }
         }
     }
