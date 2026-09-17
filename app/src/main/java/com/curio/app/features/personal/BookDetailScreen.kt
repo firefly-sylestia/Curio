@@ -307,9 +307,14 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     ) {
         val current = book
         PersonalHeader(
-            title = current?.title ?: " ",
-            subtitle = current?.author.orEmpty().ifBlank { "Your book" },
+            title = current?.title.orEmpty(),
+            subtitle = current?.author.orEmpty(),
             titleRevealed = titleRolled,
+            // The head's idle line names the SHELF the book sits on: while the
+            // page is still showing the book's own title and author there is
+            // nothing for the head to add (user request: "instead of initial
+            // blank say your shelf").
+            idleTitle = "Your shelf",
             onBack = { navController.popBackStack() },
             action = {
                 PersonalModeSwitch(

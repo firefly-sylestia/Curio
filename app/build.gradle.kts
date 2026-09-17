@@ -306,6 +306,12 @@ dependencies {
     implementation(libs.com.google.code.gson.gson)
     implementation(libs.com.squareup.okhttp3.okhttp)
 
+    // v389 — the book reader's PDF text layer (see libs.versions.toml): the
+    // words on a PDF page, so a PDF can be selected, searched and highlighted
+    // like a reflowable book. Used LAZILY, one page at a time, on the IO
+    // dispatcher — never while a book is opening.
+    implementation(libs.com.tom.roush.pdfbox.android)
+
     // Vosk — on-device speech-to-text for pre-recorded sound bites (offline
     // transcription in the entry detail page; model downloaded in Settings).
     implementation(libs.com.alphacephei.vosk.android)

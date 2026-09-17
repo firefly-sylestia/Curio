@@ -118,12 +118,19 @@ internal fun maskToRuns(mask: IntArray): List<PersonalRun> {
  * with the style that sat at the caret otherwise (typing inside a bold phrase
  * stays bold — that is the behaviour every writing app has, and losing it
  * after one edit is what makes a marker-based editor feel broken).
+ *
+ * v389 — [cleared] is the other half of that promise: the tools switched OFF
+ * for what comes next. With no selection the dock is an INPUT STYLE (see
+ * `PersonalEditorState.toggle`), so turning bold off inside a bold phrase has
+ * to reach the very next keystroke — and the keystrokes after it, which keep
+ * inheriting from the now-unbold character the caret leaves behind.
  */
 internal fun maskAfterEdit(
     oldText: String,
     newText: String,
     mask: IntArray,
-    armed: Int
+    armed: Int,
+    cleared: Int = 0
 ): IntArray {
     val oldLength = oldText.length
     val newLength = newText.length
@@ -138,16 +145,17 @@ internal fun maskAfterEdit(
     val oldRegionEnd = oldLength - suffix
     val newRegionEnd = newLength - suffix
 
-    val typed = when {
-        armed != 0 -> armed
-        // Nothing armed: inherit from the character just left of the caret,
-        // else the one just right of it (typing at the start of a styled run
-        // continues that run).
+    // What the caret already sat in — typing at the start of a styled run
+    // continues that run.
+    val inherited = when {
         prefix - 1 in 0 until oldLength && mask.getOrZero(prefix - 1) != 0 -> mask[prefix - 1]
         mask.getOrZero(prefix) != 0 -> mask[prefix]
         mask.getOrZero(oldRegionEnd) != 0 -> mask[oldRegionEnd]
         else -> 0
     }
+    // The INPUT STYLE: the tools switched on (which replace the inherited style
+    // outright), then the tools switched off taken back out of it.
+    val typed = ((if (armed != 0) 0 else inherited) and cleared.inv()) or armed
 
     val out = IntArray(newLength)
     for (i in 0 until prefix.coerceAtMost(newLength)) out[i] = mask.getOrZero(i)

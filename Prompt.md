@@ -1,5 +1,77 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, batch B — the reader deepened, the writing rules tightened)
+
+Verbatim summary: deepen the book reader (pinch-to-zoom, EPUB images/styled headings,
+in-book search, chapter-level highlights, PDF ink change + proper text selection on both
+formats); the reader's tools must come back on a tap of the page and go on a second tap
+or a scroll; and the writing surfaces want Enter to make real lines, the title tool to
+stop at the end of a title, marks to act as an input style rather than rewriting the
+line, the book review's pinned chapter fixed (it appeared too early; tapping it should
+jump), a journal equivalent, a bigger pinned bar nearer the header, the book page's head
+to roll up the author too and say "Your shelf" at rest, the eye/pen switch not to fight
+the keyboard, and a pasted paragraph to be split so things can go between its lines.
+
+### Decisions taken with the user (asked, not guessed)
+
+- **PDF text selection:** the member chose a TEXT EXTRACTOR. Android's PdfRenderer has
+  no text layer at all. `com.tom-roush:pdfbox-android` (2.0.27.0) is added and used
+  LAZILY — one page at a time, on IO, cached — so opening a PDF is exactly as fast as it
+  was (the member's own objection: "why the pdf needs to get slower in open").
+- **Highlights:** both an exact run and a whole-chapter highlight.
+- **"Your shelf":** the book page's head, before the title rolls up.
+
+### What landed
+
+- **The reader's chrome is reachable again.** Every paragraph carried a long-press
+  detector with no tap of its own, and Compose consumes the press — so a tap on the page
+  did nothing and the auto-hidden head/foot could never be brought back. Both surfaces
+  now answer a tap themselves, a scroll puts the chrome away, and an auto-hide timer
+  still runs.
+- **Zoom** — `Modifier.pinchToZoom`, two fingers only so a single-finger scroll or page
+  turn is never stolen. A reflowed book's zoom is its TYPE size (`ReaderLook.textScale`,
+  applied to every size in `ReaderParagraphBlock`); a PDF's is a real scale-and-pan in a
+  `graphicsLayer`, and the pager stands down while it is in close.
+- **PDF ink + full fit** — `readerPdfFilter(palette.inkKey)` is a colour matrix per skin
+  (sepia tint, a night inversion, a paper softening, nothing for white), and the page is
+  `ContentScale.Fit` over `fillMaxSize` instead of stretched across the width.
+- **Search** — a `ReaderSearch` object (query, token, progress, hits) swept in the
+  background: one pass over the blocks of a reflowed book, or page by page through
+  `extractPdfPageText` for a PDF, giving the frame back between pages and reporting
+  "read N of M". Finds are washed in the text themselves (`buildAnnotatedString`).
+- **Chapter highlight** — offered on a HEADING in the marks sheet, so "mark this
+  chapter" is one act rather than a paragraph at a time.
+- **EPUB images and styled headings** — `epubBlocks` turns `<img>` and `<h1..h6>` into
+  markers BEFORE the markup is stripped, so the document's own order survives in one
+  pass: pictures are copied out of the archive to a cache file and drawn between the
+  paragraphs they stood between, and headings keep three sizes.
+- **The writing rules** — `PersonalEditorState.armedOff` is the other half of `armed`
+  (marks switched OFF for what comes next), so with no selection the dock is an INPUT
+  STYLE: tapping bold inside a bold phrase un-bolds the next words instead of rewriting
+  the line. `splitBlock` is the one split (Enter, a held Enter, a paste) and a TITLE
+  never crosses it. `onFieldChange` splits on any newline, so a pasted paragraph becomes
+  the page's own lines — which is also what made Select all and "put a voice note between
+  these lines" work.
+- **The pinned line** — `PersonalPinnedLine` is shared by the book review, the chapter
+  review and every writing page (via `LocalPersonalTitleReport`, because the reading
+  half is the caller's view), it is bigger and nearer the header, it appears only once a
+  heading's BOTTOM has gone by (the glitch: its top edge was enough, so chapter one was
+  pinned before anything was scrolled), and tapping it goes back to that heading.
+- **The heads** — `PersonalHeader` rolls the author up with the title and has an
+  `idleTitle`, which the book page fills with "Your shelf".
+- **The switch** — the journal focuses its title immediately but opens the keyboard 260ms
+  later, after the page has turned, so the cross-fade is not lifted mid-flight.
+
+### Still open (NOT done in this pass — deliberately reported, not hidden)
+
+- **On-page PDF text selection.** The extractor, its cache and the glyph geometry are in
+  (`BookPdfText.kt`), including `wordAround`, `glyphAt`, `textBetween` — but the selection
+  OVERLAY on the page (drag handles, the wash drawn over the glyphs, and the
+  highlight/quote/note bar over it) is not wired up yet. A PDF can be searched today; it
+  cannot yet be dragged over.
+- **Inline bold/italic inside an EPUB paragraph.** Headings' levels and images are read;
+  emphasis inside a paragraph (`<b>`, `<em>`) is still flattened to plain text.
+
 ## Request (2026-09-17, DONE — the rolling heads, the pinned chapter, one switch for every page)
 
 Verbatim: "fix this … first fix the cl and push it, then d the rest of the work, dont push
@@ -2621,7 +2693,15 @@ and importantly for the profile social avatars, all of them are bad like the bla
 ## next promot
 see if the previous prompts are implemented if so makr them pass and do the thing, then in home screen the pages and my shelf they are caring a backgroud or something which i ca ntoice, also the journal card and books cards they dont wear the aceen like the pages and  my shelf do so fix that, also make the journl date darker shade please, also the journal text editing for bold italic underline etc, those can be per word too not always on line maybe like when i wrote something then seleted the Bold text and then i wrote a word that word and next stays bold kind of like that also back spacing dleteing that line glitches and deselets the tool too so fix that push everything also fix the select all for texts in ournal and book etc etc the one its shared and watch cl
 
-## next prompt (2026-09-17)
+## next prompt (2026-09-17) — batch B, STATUS: COMMITTED
+
+Deepen the book reader + the writing-surface fixes. See the request block at the top of
+this log. Status: implemented and committed in one batch (the CI fix is not needed — there
+was no red log with this request). The two deliberate gaps are listed under "Still open".
+
+---
+
+## older prompt (2026-09-17)
 
 fix this (the `PersonalCanvas` CI log), also did u do the full proper book reader implementation? also in the book read floating option when i tap and hold the read button it should sho a drop down to chnage the pdf the file attach, in book also in header it shows the title and then below too, instead show the titile when the buttom title scrolls above with proper smooth transition, also for eye and pen switch for journals etc the transition is very bad even though the information was already there the smooth tranition isnt smooth but looks clanky specially when th ekeyboard opens the transiton moved up, also add proper tap to start writin gin blank always even when th e cursor was there, also when im on eye view and i double tap switch to edit pen mode, for all also the book review it doesnt have the eye and pen style switch fix that, also suppose im writng in book review for a chapter by adding a chapter, add like a top pinned chapter switching like when the chapter scrolls aways it shows there pinned and when im on the start point of that chapter it swicthes to the revious chapter view, similiar to title add in journal too the tooo bar titlee, great additon isnt it? suggest similiar mode, also add drag to move the voice note too, in journal page, also add int in book review chapter review too, in book review keep it mind theres add chapter floating button too so properly adjust it. and first fix the cl and push it, then d the rest of the work, dont push them though just commit
 

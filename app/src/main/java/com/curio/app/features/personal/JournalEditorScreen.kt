@@ -67,6 +67,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import com.curio.app.data.PAGE_KIND_JOURNAL
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMood
@@ -239,7 +240,17 @@ fun JournalEditorScreen(
             // writing, so the first thing to do is type (this block is only
             // composed in the writing mode, which is what makes that true).
             LaunchedEffect(Unit) {
+                // FOCUS first — that is instant and silent — and let the page's
+                // own turn finish before the keyboard's inset starts to rise.
+                // The two used to happen at once, so the cross-fade was lifted
+                // mid-flight and read as a jump (user report: "when i switch to
+                // edit the keyboard automatically opens up and that makes the
+                // crossfading animation looks bad and it also shifts so fix it
+                // properly without disabling the keyboard"). The keyboard is
+                // still opened by the page itself: it just arrives AFTER the
+                // turn, which is the order the eye expects.
                 titleFocusRequester.requestFocus()
+                delay(260)
                 keyboardController?.show()
             }
             MoodSelector(selected = mood, onSelect = { mood = it }, ink = ink)

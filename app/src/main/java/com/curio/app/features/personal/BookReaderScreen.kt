@@ -9,6 +9,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,12 +63,21 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -161,6 +174,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     var sheet by remember { mutableStateOf<ReaderSheet?>(null) }
     var marking by remember { mutableStateOf<ReaderParagraph?>(null) }
     var noteFor by remember { mutableStateOf<ReaderParagraph?>(null) }
+    var searching by remember { mutableStateOf<ReaderSearch?>(null) }
 
     // The chrome leaves on its own — that is what "auto hide" means — and it
     // stays while a sheet is up, because a sheet is a deliberate act.
@@ -168,6 +182,26 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         if (!chrome || sheet != null) return@LaunchedEffect
         delay(4200)
         chrome = false
+    }
+
+    /**
+     * v389 — THE PAGE IS THE SWITCH.
+     *
+     * The chrome used to be reachable only by tapping the space AROUND the
+     * words: every paragraph carried a long-press detector with no tap of its
+     * own, and Compose consumes the press before it can bubble — so tapping the
+     * page itself did nothing at all, and the tools, once auto-hidden, could not
+     * be got back (user report: "the tools they have they disapear and they never
+     * appear, so make it when i tap the page … it should appear and when i tap
+     * again or scroll the tools gets hidden"). Both reading surfaces now answer a
+     * tap themselves, and a scroll puts the chrome away.
+     */
+    fun tapPage() {
+        chrome = !chrome
+    }
+
+    fun hideChrome() {
+        if (chrome) chrome = false
     }
 
     val palette = readerPalette(ReaderLook.inkKey)
@@ -279,7 +313,12 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     document = document,
                     onOpenedAt = { openedAt = it },
                     onLongPress = { marking = it },
-                    chromeVisible = chrome
+                    chromeVisible = chrome,
+                    onTap = { tapPage() },
+                    onScrolled = { hideChrome() },
+                    query = searching?.query.orEmpty(),
+                    hitIndex = searching?.current ?: -1,
+                    hitLength = searching?.query?.length ?: 0
                 )
 
                 is ReaderContent.Pages -> PageReader(
@@ -298,7 +337,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                             isHeading = false,
                             isPage = true
                         )
-                    }
+                    },
+                    onTap = { tapPage() },
+                    onScrolled = { hideChrome() }
                 )
 
                 // `content` is a delegated property, so the null check above
@@ -314,10 +355,66 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             palette = palette,
             positionLabel = positionLabel,
             onClose = { navController.popBackStack() },
+            onSearch = {
+                searching = ReaderSearch().also { started ->
+                    started.isPaged = content is ReaderContent.Pages
+                }
+                sheet = ReaderSheet.SEARCH
+            },
             onInk = { sheet = ReaderSheet.INK },
             onMarks = { sheet = ReaderSheet.MARKS },
             onChapters = { sheet = ReaderSheet.CHAPTERS }
         )
+    }
+
+    // -- THE SWEEP -------------------------------------------------------
+    // Runs while a search is open, in the background, and hands the frame back
+    // between pages (a PDF's words cost a parse to read, so a reader that
+    // stuttered while it searched would have stopped being a reader). The hits
+    // appear as they are found and the sheet says how far the sweep has got.
+    val sweep = searching
+    LaunchedEffect(sweep?.token) {
+        val run = sweep ?: return@LaunchedEffect
+        val asked = run.query.trim()
+        run.hits = emptyList()
+        run.current = -1
+        run.scanned = 0
+        run.total = 0
+        if (asked.isBlank()) return@LaunchedEffect
+        when (val loaded = content) {
+            is ReaderContent.Text -> {
+                val found = ArrayList<ReaderSearchHit>()
+                loaded.blocks.forEachIndexed { index, block ->
+                    if (block.text.contains(asked, ignoreCase = true)) {
+                        found.add(ReaderSearchHit(index, block.text.take(120)))
+                    }
+                }
+                run.hits = found
+                run.total = loaded.blocks.size
+                run.scanned = loaded.blocks.size
+            }
+
+            is ReaderContent.Pages -> {
+                run.total = loaded.pageCount
+                val found = ArrayList<ReaderSearchHit>()
+                for (page in 0 until loaded.pageCount) {
+                    val words = withContext(Dispatchers.IO) {
+                        runCatching { extractPdfPageText(context, document, page) }.getOrNull()
+                    }
+                    val at = words?.text?.indexOf(asked, ignoreCase = true) ?: -1
+                    if (at >= 0) {
+                        found.add(
+                            ReaderSearchHit(page, words?.text.orEmpty().aroundSnippet(at, asked.length))
+                        )
+                    }
+                    run.hits = found.toList()
+                    run.scanned = page + 1
+                    kotlinx.coroutines.yield()
+                }
+            }
+
+            null -> Unit
+        }
     }
 
     when (sheet) {
@@ -355,6 +452,32 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onDismiss = { sheet = null }
         )
 
+        ReaderSheet.SEARCH -> ReaderSearchSheet(
+            search = searching ?: ReaderSearch(),
+            palette = palette,
+            onQuery = { asked -> searching?.query = asked },
+            onSubmit = { searching?.token = (searching?.token ?: 0) + 1 },
+            onPick = { index ->
+                searching?.current = index
+                sheet = null
+                scope.launch {
+                    when (content) {
+                        is ReaderContent.Text -> listState.scrollToItem(
+                            index.coerceIn(0, ((content as ReaderContent.Text).blocks.size - 1).coerceAtLeast(0))
+                        )
+                        is ReaderContent.Pages -> pagerState.scrollToPage(
+                            index.coerceIn(0, (pagerState.pageCount - 1).coerceAtLeast(0))
+                        )
+                        null -> Unit
+                    }
+                }
+            },
+            onDismiss = {
+                sheet = null
+                searching = null
+            }
+        )
+
         null -> Unit
     }
 
@@ -375,6 +498,32 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     )
                 }
                 marking = null
+            },
+            onHighlightChapter = if (!paragraph.isHeading) null else {
+                {
+                    scope.launch {
+                        val loaded = content
+                        if (loaded is ReaderContent.Text) {
+                            loaded.blocks.forEachIndexed { index, block ->
+                                if (block.section != paragraph.section) return@forEachIndexed
+                                saveReaderMark(
+                                    bookId = bookId,
+                                    document = document,
+                                    paragraph = ReaderParagraph(
+                                        index,
+                                        block.section,
+                                        block.text,
+                                        block.isHeading
+                                    ),
+                                    kind = ReaderMarkKind.HIGHLIGHT,
+                                    text = block.text,
+                                    colorKey = ReaderHighlighter.AMBER.key
+                                )
+                            }
+                        }
+                    }
+                    marking = null
+                }
             },
             onNote = {
                 noteFor = paragraph
@@ -450,9 +599,28 @@ private fun TextReader(
     document: String,
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onLongPress: (ReaderParagraph) -> Unit,
-    chromeVisible: Boolean
+    chromeVisible: Boolean,
+    onTap: () -> Unit,
+    onScrolled: () -> Unit,
+    query: String,
+    hitIndex: Int,
+    hitLength: Int
 ) {
     val state = listState
+
+    // A scroll means the member is moving through the book, and the chrome has
+    // no business over the words while they do it (see [tapPage]).
+    LaunchedEffect(state, onScrolled) {
+        snapshotFlow { state.isScrollInProgress }
+            .collect { scrolling -> if (scrolling) onScrolled() }
+    }
+
+    // PINCH makes the TYPE bigger, not the pixels: a reflowed book that is
+    // magnified like a photograph is a worse book, and every reader on earth
+    // re-lays the page out instead (v389).
+    val zoomModifier = Modifier.pinchToZoom { zoom, _ ->
+        ReaderLook.textScale = (ReaderLook.textScale * zoom).coerceIn(0.8f, 2.6f)
+    }
 
     // Read the stored position once per open, and go there.
     var restored by remember(bookId, document) { mutableStateOf(false) }
@@ -491,7 +659,13 @@ private fun TextReader(
 
     LazyColumn(
         state = state,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .then(zoomModifier)
+            // THE PAGE ANSWERS A TAP. The blocks below answer their own (a long
+            // press marks a passage, a tap puts the chrome back), and this one
+            // catches the presses that land in the gaps between them.
+            .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
         contentPadding = PaddingValues(
             start = 22.dp,
             end = 22.dp,
@@ -514,7 +688,14 @@ private fun TextReader(
                 highlightColor = highlight?.let { readerHighlighter(it.colorKey).ink } ?: Color.Transparent,
                 note = note?.note.orEmpty(),
                 bookmarked = bookmark != null,
-                onLongPress = { onLongPress(ReaderParagraph(index, block.section, block.text, block.isHeading)) }
+                onLongPress = { onLongPress(ReaderParagraph(index, block.section, block.text, block.isHeading)) },
+                onTap = onTap,
+                query = query,
+                // The find the member is standing on wears the wash; the rest of
+                // the matches in the same block still read as matches, which is
+                // what a search's highlighting is for.
+                hitHere = hitIndex == index && query.isNotBlank(),
+                hitLength = hitLength
             )
         }
         item("the-end") {
@@ -545,7 +726,9 @@ private fun PageReader(
     palette: ReaderPalette,
     bookId: String,
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
-    onLongPress: (Int) -> Unit
+    onLongPress: (Int) -> Unit,
+    onTap: () -> Unit,
+    onScrolled: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -585,9 +768,34 @@ private fun PageReader(
             }
     }
 
+    // A page turned is the member moving through the book: the chrome goes.
+    LaunchedEffect(pagerState, onScrolled) {
+        snapshotFlow { pagerState.isScrollInProgress }
+            .collect { scrolling -> if (scrolling) onScrolled() }
+    }
+
+    // PINCH ZOOMS THE PAGE ITSELF. A PDF page is not reflowable — zooming it has
+    // to mean magnifying it, which is also what makes the small print of a
+    // scanned document legible on a phone at all (v389).
+    val zoomModifier = Modifier.pinchToZoom { zoom, pan ->
+        val next = (ReaderLook.pdfZoom * zoom).coerceIn(1f, 4f)
+        ReaderLook.pdfZoom = next
+        if (next <= 1.02f) {
+            ReaderLook.pdfPanX = 0f
+            ReaderLook.pdfPanY = 0f
+        } else {
+            ReaderLook.pdfPanX += pan.x
+            ReaderLook.pdfPanY += pan.y
+        }
+    }
+
     HorizontalPager(
         state = pagerState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().then(zoomModifier),
+        // A zoomed page is being INSPECTED, not turned: while the member is in
+        // close, the horizontal drag belongs to the pan and the pager takes it
+        // back the moment they are out again.
+        userScrollEnabled = ReaderLook.pdfZoom <= 1.02f,
         pageSpacing = 8.dp
     ) { page ->
         val bitmap by produceState<Bitmap?>(null, document, page) {
@@ -599,17 +807,38 @@ private fun PageReader(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(page) {
-                    detectTapGestures(onLongPress = { onLongPress(page) })
+                    detectTapGestures(
+                        onTap = { onTap() },
+                        onLongPress = { onLongPress(page) }
+                    )
                 },
             contentAlignment = Alignment.Center
         ) {
             val drawn = bitmap
             if (drawn != null) {
-                Image(
-                    bitmap = drawn.asImageBitmap(),
-                    contentDescription = "Page ${page + 1}",
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // THE PAGE FILLS ITS SCREEN (user request: "make the page full
+                // fit") and wears the reader's own ink — it used to be stretched
+                // across the width and stayed white whatever the member chose
+                // (user request: "for the pdf reader make the pdf background
+                // change too").
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            scaleX = ReaderLook.pdfZoom
+                            scaleY = ReaderLook.pdfZoom
+                            translationX = ReaderLook.pdfPanX
+                            translationY = ReaderLook.pdfPanY
+                        }
+                ) {
+                    Image(
+                        bitmap = drawn.asImageBitmap(),
+                        contentDescription = "Page ${page + 1}",
+                        contentScale = ContentScale.Fit,
+                        colorFilter = readerPdfFilter(palette.inkKey),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             } else {
                 CircularProgressIndicator(color = palette.accent)
             }
@@ -645,22 +874,48 @@ private fun ReaderParagraphBlock(
     highlightColor: Color,
     note: String,
     bookmarked: Boolean,
-    onLongPress: () -> Unit
+    onLongPress: () -> Unit,
+    onTap: () -> Unit,
+    query: String,
+    hitHere: Boolean,
+    hitLength: Int
 ) {
     val marked = highlightColor != Color.Transparent
-    val body = if (block.isHeading) {
-        TextStyle(
+    // The BOOK decides how loud a heading is (v389): its own <h1>, <h2> and <h3>
+    // are three sizes rather than one, and every size follows the member's own
+    // type size (ReaderLook.textScale).
+    val scale = ReaderLook.textScale
+    val level = when {
+        block.headingLevel in 1..3 -> block.headingLevel
+        block.isHeading -> 1
+        else -> 0
+    }
+    val body = when (level) {
+        1 -> TextStyle(
             fontFamily = FrauncesFontFamily,
-            fontSize = 23.sp,
-            lineHeight = 31.sp,
+            fontSize = (23f * scale).sp,
+            lineHeight = (31f * scale).sp,
             fontWeight = FontWeight.SemiBold,
             color = palette.ink
         )
-    } else {
-        TextStyle(
+        2 -> TextStyle(
+            fontFamily = FrauncesFontFamily,
+            fontSize = (20f * scale).sp,
+            lineHeight = (27f * scale).sp,
+            fontWeight = FontWeight.SemiBold,
+            color = palette.ink
+        )
+        3 -> TextStyle(
             fontFamily = LoraFontFamily,
-            fontSize = 17.sp,
-            lineHeight = 29.sp,
+            fontSize = (18f * scale).sp,
+            lineHeight = (26f * scale).sp,
+            fontWeight = FontWeight.Bold,
+            color = palette.ink
+        )
+        else -> TextStyle(
+            fontFamily = LoraFontFamily,
+            fontSize = (17f * scale).sp,
+            lineHeight = (29f * scale).sp,
             color = palette.ink
         )
     }
@@ -668,7 +923,10 @@ private fun ReaderParagraphBlock(
         modifier = Modifier
             .fillMaxWidth()
             .pointerInput(block.text) {
-                detectTapGestures(onLongPress = { onLongPress() })
+                detectTapGestures(
+                    onTap = { onTap() },
+                    onLongPress = { onLongPress() }
+                )
             }
             .then(
                 if (marked) {
@@ -698,9 +956,59 @@ private fun ReaderParagraphBlock(
                 }
             )
     ) {
+        // A PICTURE FROM INSIDE THE BOOK, drawn in the place it actually stood.
+        if (block.imagePath != null) {
+            val picture by produceState<ImageBitmap?>(null, block.imagePath) {
+                value = withContext(Dispatchers.IO) {
+                    bookImageBitmap(block.imagePath.orEmpty())
+                }
+            }
+            val drawn = picture
+            if (drawn != null) {
+                Image(
+                    bitmap = drawn,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            }
+        }
+        // WHAT A FIND LOOKS LIKE: every occurrence in the block wears the wash,
+        // not only the one the search jumped to — a search that lit a single
+        // find would leave the member hunting for the rest.
+        val shown = remember(block.text, query, hitHere) {
+            val needle = query.trim()
+            if (!hitHere || needle.isEmpty() || !block.text.contains(needle, ignoreCase = true)) {
+                AnnotatedString(block.text)
+            } else {
+                buildAnnotatedString {
+                    var from = 0
+                    while (from <= block.text.length) {
+                        val at = block.text.indexOf(needle, from, ignoreCase = true)
+                        if (at < 0) {
+                            append(block.text.substring(from))
+                            break
+                        }
+                        append(block.text.substring(from, at))
+                        withStyle(
+                            SpanStyle(
+                                background = palette.accent.copy(alpha = 0.32f),
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        ) {
+                            append(block.text.substring(at, at + needle.length))
+                        }
+                        from = at + needle.length
+                    }
+                }
+            }
+        }
         Row(verticalAlignment = Alignment.Top) {
             Text(
-                text = block.text,
+                text = shown,
                 style = body,
                 modifier = Modifier.weight(1f)
             )
@@ -756,6 +1064,7 @@ private fun ReaderChrome(
     palette: ReaderPalette,
     positionLabel: String,
     onClose: () -> Unit,
+    onSearch: () -> Unit,
     onInk: () -> Unit,
     onMarks: () -> Unit,
     onChapters: () -> Unit
@@ -819,6 +1128,7 @@ private fun ReaderChrome(
                     )
                 }
                 Spacer(Modifier.weight(1f))
+                ReaderChromeButton(CurioIcons.Search, "Search this book", palette) { onSearch() }
                 ReaderChromeButton(CurioIcons.FormatText, "The page's ink", palette) { onInk() }
                 ReaderChromeButton(CurioIcons.Bookmark, "Bookmarks and highlights", palette) { onMarks() }
                 ReaderChromeButton(CurioIcons.MenuBook, "Chapters", palette) { onChapters() }
@@ -888,6 +1198,145 @@ private fun ReaderSheetFrame(
                 )
                 Spacer(Modifier.height(12.dp))
                 content()
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReaderSearchSheet(
+    search: ReaderSearch,
+    palette: ReaderPalette,
+    onQuery: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onPick: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ReaderSheetFrame("Search this book", palette, onDismiss) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = palette.surface,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CurioIcon(
+                        CurioIcons.Search,
+                        null,
+                        tint = palette.ink.copy(alpha = 0.5f),
+                        size = 17.dp
+                    )
+                    BasicTextField(
+                        value = search.query,
+                        onValueChange = onQuery,
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            fontFamily = LoraFontFamily,
+                            fontSize = 16.sp,
+                            color = palette.ink
+                        ),
+                        cursorBrush = SolidColor(palette.accent),
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Search
+                        ),
+                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                            onSearch = { onSubmit() }
+                        ),
+                        decorationBox = { inner ->
+                            Box {
+                                if (search.query.isEmpty()) {
+                                    Text(
+                                        "Words to find",
+                                        style = TextStyle(
+                                            fontFamily = LoraFontFamily,
+                                            fontSize = 16.sp,
+                                            color = palette.ink.copy(alpha = 0.35f)
+                                        )
+                                    )
+                                }
+                                inner()
+                            }
+                        },
+                        modifier = Modifier.weight(1f).padding(vertical = 12.dp)
+                    )
+                    if (search.query.isNotEmpty()) {
+                        Surface(
+                            onClick = onSubmit,
+                            shape = RoundedCornerShape(50),
+                            color = palette.accent
+                        ) {
+                            Text(
+                                "Find",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // HOW FAR THE SWEEP HAS GOT. A PDF is read page by page (its words
+            // live in a text layer that costs a parse apiece), so the count is
+            // the honest thing to show rather than a spinner with no meaning.
+            if (search.query.isNotBlank()) {
+                Text(
+                    when {
+                        search.total == 0 -> "Reading the book\u2026"
+                        search.done && search.hits.isEmpty() -> "Nothing found."
+                        search.done -> "${search.hits.size} found"
+                        else -> "${search.hits.size} found \u00b7 read ${search.scanned} of ${search.total}"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.ink.copy(alpha = 0.55f)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 320.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                search.hits.forEachIndexed { index, hit ->
+                    val active = index == search.current
+                    Surface(
+                        onClick = { onPick(hit.index) },
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (active) palette.accent.copy(alpha = 0.22f) else palette.surface,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(
+                                hit.snippet,
+                                style = TextStyle(
+                                    fontFamily = LoraFontFamily,
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp,
+                                    color = palette.ink
+                                ),
+                                maxLines = 2,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                if (search.isPaged) "p ${hit.index + 1}" else "\u00a7 ${hit.index + 1}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.accent
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -1141,6 +1590,13 @@ private fun ReaderMarkSheet(
     marks: List<ReaderMarkEntity>,
     palette: ReaderPalette,
     onHighlight: (ReaderHighlighter) -> Unit,
+    /**
+     * v389 — THE WHOLE CHAPTER IN ONE GO. Highlighting ran a paragraph at a
+     * time, which is the wrong unit for the thing a member most often wants to
+     * keep: the chapter. Offered on a HEADING (the block that names a chapter),
+     * so the gesture is "mark this chapter" and nothing else has to say so.
+     */
+    onHighlightChapter: (() -> Unit)?,
     onNote: () -> Unit,
     onBookmark: () -> Unit,
     onRemove: (ReaderMarkEntity) -> Unit,
@@ -1188,6 +1644,14 @@ private fun ReaderMarkSheet(
                         }
                     }
                 }
+            }
+            if (onHighlightChapter != null) {
+                ReaderSheetAction(
+                    glyph = CurioIcons.FormatText,
+                    label = "Highlight this whole chapter",
+                    palette = palette,
+                    onClick = onHighlightChapter
+                )
             }
             ReaderSheetAction(
                 glyph = CurioIcons.Note,
@@ -1349,6 +1813,20 @@ private enum class ReaderSkin(val key: String, val label: String) {
  */
 private object ReaderLook {
     var inkKey by mutableStateOf(ReaderSkin.PAPER.key)
+
+    /**
+     * v389 — HOW BIG THE WORDS ARE, for the PROCESS like the ink: a member who
+     * needs larger type needs it in every book, and asking them again per novel
+     * would be an errand. A PDF page is a picture, so its zoom is a real
+     * scale-and-pan ([readerZoom]); a reflowable book's is this — its own type
+     * size, which re-lays the page out instead of magnifying a photograph of it.
+     */
+    var textScale by mutableStateOf(1f)
+
+    /** The PDF's own scale and pan, reset per page. */
+    var pdfZoom by mutableStateOf(1f)
+    var pdfPanX by mutableStateOf(0f)
+    var pdfPanY by mutableStateOf(0f)
 }
 
 /** What the reader draws with, for one ink. */
@@ -1356,8 +1834,82 @@ private data class ReaderPalette(
     val paper: Color,
     val ink: Color,
     val accent: Color,
-    val surface: Color
+    val surface: Color,
+    /**
+     * v389 — WHICH INK THIS IS, kept as its own key so a PDF PAGE can wear it.
+     *
+     * The words of a reflowable book are drawn in [ink] on [paper] and follow
+     * the skin by themselves; a PDF page is a BITMAP, so the only way it can
+     * follow the same choice is a colour filter — which needs to know WHICH
+     * choice it is, not just what colour the surrounding page happens to be
+     * (user request: "for the pdf reader make the pdf background change too").
+     */
+    val inkKey: String
 )
+
+/**
+ * THE PAGE'S INK, APPLIED TO A PDF PAGE.
+ *
+ * A rendered PDF page arrives as white paper with black type whatever the
+ * member has chosen, which is why changing the reader's ink used to change
+ * everything EXCEPT the one thing they were looking at. A colour matrix is the
+ * honest way to fix that on a bitmap: white and black are scaled on the way
+ * through, so the page keeps its own contrast and only its temperature changes
+ * (and `night` inverts it, which is what reading a PDF in the dark actually
+ * requires). `null` means "leave the page exactly as it was drawn", which is
+ * what the White skin asks for.
+ */
+private fun readerPdfFilter(key: String): ColorFilter? = when (key) {
+    ReaderSkin.WHITE.key -> null
+    ReaderSkin.SEPIA.key -> pdfTint(0.95f, 0.87f, 0.74f, 0f, 0f, 0f)
+    ReaderSkin.NIGHT.key -> pdfTint(-0.86f, -0.86f, -0.86f, 236f, 231f, 214f)
+    else -> pdfTint(0.97f, 0.94f, 0.88f, 0f, 0f, 0f)
+}
+
+/** A scale-and-offset matrix: what turns white paper into the reader's ink. */
+private fun pdfTint(
+    r: Float,
+    g: Float,
+    b: Float,
+    rOffset: Float,
+    gOffset: Float,
+    bOffset: Float
+): ColorFilter = ColorFilter.colorMatrix(
+    ColorMatrix(
+        floatArrayOf(
+            r, 0f, 0f, 0f, rOffset,
+            0f, g, 0f, 0f, gOffset,
+            0f, 0f, b, 0f, bOffset,
+            0f, 0f, 0f, 1f, 0f
+        )
+    )
+)
+
+/**
+ * v389 — TWO FINGERS ZOOM, ONE FINGER IS THE MEMBER'S.
+ *
+ * A plain `transformable` swallows the drag that was meant to scroll the page or
+ * turn it, which on a reader is the gesture that matters most. This waits until
+ * a SECOND finger is down before it claims anything, so pinch is free and the
+ * single-finger scroll and swipe are untouched.
+ */
+private fun Modifier.pinchToZoom(onZoom: (zoom: Float, pan: Offset) -> Unit): Modifier =
+    pointerInput(Unit) {
+        awaitEachGesture {
+            awaitFirstDown(requireUnconsumed = false)
+            do {
+                val event = awaitPointerEvent()
+                if (event.changes.count { it.pressed } >= 2) {
+                    val zoom = event.calculateZoom()
+                    val pan = event.calculatePan()
+                    if (zoom != 1f || pan != Offset.Zero) {
+                        onZoom(zoom, pan)
+                        event.changes.forEach { it.consume() }
+                    }
+                }
+            } while (event.changes.any { it.pressed })
+        }
+    }
 
 // @Composable because the default ink asks [isCurioDarkTheme] what the app is
 // wearing — one reader, two themes.
@@ -1367,33 +1919,38 @@ private fun readerPalette(key: String): ReaderPalette = when (key) {
         paper = Color(0xFFF3E7D3),
         ink = Color(0xFF4A3A28),
         accent = Color(0xFF9A6A43),
-        surface = Color(0x1A4A3A28)
+        surface = Color(0x1A4A3A28),
+        inkKey = "sepia"
     )
     "night" -> ReaderPalette(
         paper = Color(0xFF12100E),
         ink = Color(0xFFD8CFC2),
         accent = Color(0xFFC09263),
-        surface = Color(0x1FD8CFC2)
+        surface = Color(0x1FD8CFC2),
+        inkKey = "night"
     )
     "white" -> ReaderPalette(
         paper = Color(0xFFFFFFFF),
         ink = Color(0xFF1B1B1B),
         accent = Color(0xFF8A5A33),
-        surface = Color(0x14000000)
+        surface = Color(0x14000000),
+        inkKey = "white"
     )
     else -> if (isCurioDarkTheme()) {
         ReaderPalette(
             paper = Color(0xFF1A1714),
             ink = Color(0xFFE2D9CC),
             accent = Color(0xFFC09263),
-            surface = Color(0x1FE2D9CC)
+            surface = Color(0x1FE2D9CC),
+            inkKey = "paper"
         )
     } else {
         ReaderPalette(
             paper = Color(0xFFFBF6EC),
             ink = Color(0xFF2E2620),
             accent = Color(0xFF8A5A33),
-            surface = Color(0x14000000)
+            surface = Color(0x14000000),
+            inkKey = "paper"
         )
     }
 }
@@ -1425,13 +1982,26 @@ private sealed interface ReaderContent {
     data class Pages(val pageCount: Int) : ReaderContent
 }
 
-/** ONE paragraph (or heading) of a reflowable book. */
+/** ONE paragraph (or heading, or picture) of a reflowable book. */
 private data class ReaderBlock(
     val text: String,
     /** 1-based chapter/section this paragraph belongs to. */
     val section: Int,
     val sectionTitle: String,
-    val isHeading: Boolean
+    val isHeading: Boolean,
+    /**
+     * v389 — WHICH HEADING THIS IS: 1, 2 or 3 for an `<h1>`-`<h3>` of the
+     * book's own markup, 0 for a paragraph. The file said how loud the line is
+     * meant to be, so the reader no longer flattens every heading into one size
+     * (user request: "EPUB images/styled headings").
+     */
+    val headingLevel: Int = 0,
+    /**
+     * v389 — A PICTURE FROM INSIDE THE BOOK, copied out of the archive to a
+     * cache file when the book was opened and drawn here in the flow, between
+     * the paragraphs it actually sat between.
+     */
+    val imagePath: String? = null
 )
 
 /** What a long press was aimed at. */
@@ -1449,7 +2019,49 @@ private data class ReaderParagraph(
     val isPage: Boolean = false
 )
 
-private enum class ReaderSheet { INK, MARKS, CHAPTERS }
+private enum class ReaderSheet { INK, MARKS, CHAPTERS, SEARCH }
+
+/**
+ * v389 — A SEARCH RUNNING OVER THE BOOK.
+ *
+ * Held as an object rather than a handful of states because a search is ONE
+ * thing with a beginning and a middle: what was asked, how far the sweep has
+ * got, what it has found, and which find the member is standing on. A PDF has to
+ * be SWEPT page by page (its words live in a text layer that costs a parse per
+ * page), so the sweep is honest about itself — [scanned] of [total] — and the
+ * hits appear as they are found instead of after a silent wait.
+ */
+private class ReaderSearch {
+    /** What is in the sheet's field right now. */
+    var query by mutableStateOf("")
+    /** Bumped when the member commits the field — what actually starts a sweep. */
+    var token by mutableIntStateOf(0)
+    var scanned by mutableIntStateOf(0)
+    var total by mutableIntStateOf(0)
+    var hits by mutableStateOf<List<ReaderSearchHit>>(emptyList())
+    var current by mutableIntStateOf(-1)
+    /** True when the book is a PDF, so a find is named by its PAGE. */
+    var isPaged by mutableStateOf(false)
+
+    val done: Boolean get() = total > 0 && scanned >= total
+}
+
+/** A little of what surrounds a find — enough to recognise it by. */
+private fun String.aroundSnippet(at: Int, length: Int): String {
+    val from = (at - 40).coerceAtLeast(0)
+    val to = (at + length + 40).coerceAtMost(length.coerceAtLeast(this.length))
+    val head = if (from > 0) "…" else ""
+    val tail = if (to < this.length) "…" else ""
+    return head + substring(from, to.coerceAtLeast(from)).trim() + tail
+}
+
+private data class ReaderSearchHit(
+    /** The block index of a reflowable book, or the page of a PDF. */
+    val index: Int,
+    val snippet: String
+)
+
+
 
 private suspend fun saveReaderMark(
     bookId: String,
@@ -1622,6 +2234,10 @@ private fun readEpubText(
             pages.forEachIndexed { sectionIndex, entry ->
                 val raw = zip.getInputStream(entry).bufferedReader().use { it.readText() }
                 val section = sectionIndex + 1
+                // The FIRST heading still names the section (the chapter sheet's
+                // entry). It is no longer added as a block of its own: every
+                // heading is a block now, at its own level, so adding one here
+                // too would print it twice.
                 val heading = Regex(
                     "<h[1-2][^>]*>(.*?)</h[1-2]>",
                     setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
@@ -1634,12 +2250,13 @@ private fun readEpubText(
                         .trim()
                         .takeIf { it.isNotBlank() && it.length < 60 }
                         .orEmpty()
-                if (heading.isNotBlank()) {
-                    blocks.add(ReaderBlock(heading, section, heading, isHeading = true))
+                val found = epubBlocks(context, zip, entry.name, raw, section, heading)
+                if (found.none { it.isHeading } && heading.isNotBlank()) {
+                    // A file with no heading of its own gets the one it is named
+                    // by, so the chapter sheet can still list it.
+                    blocks.add(ReaderBlock(heading, section, heading, isHeading = true, headingLevel = 1))
                 }
-                paragraphsOf(raw).forEach { paragraph ->
-                    blocks.add(ReaderBlock(paragraph, section, heading, isHeading = false))
-                }
+                blocks.addAll(found)
             }
         }
         blocks
@@ -1648,17 +2265,161 @@ private fun readEpubText(
     }
 }
 
-/** The paragraphs of one XHTML document, with its markup taken off. */
-private fun paragraphsOf(raw: String): List<String> {
-    val body = raw
+/**
+ * v389 — ONE XHTML DOCUMENT, IN THE ORDER IT READS.
+ *
+ * Headings and pictures are turned into MARKERS *before* the markup is taken
+ * off, so the document's own order survives in one pass: a heading keeps its
+ * level (`<h1>` is not `<h3>`), a picture lands exactly between the paragraphs
+ * it sat between, and neither has to be found by a second walk that could not
+ * have known where it belonged.
+ */
+private fun epubBlocks(
+    context: android.content.Context,
+    zip: ZipFile,
+    entryName: String,
+    raw: String,
+    section: Int,
+    sectionTitle: String
+): List<ReaderBlock> {
+    val marked = raw
         .replace(Regex("<(script|style)[^>]*>.*?</\\1>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)), " ")
         .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
-        .replace(Regex("</(p|div|h[1-6]|li|blockquote)>", RegexOption.IGNORE_CASE), "\n\n")
-    return stripMarkup(body)
+        .replace(Regex("<img[^>]*?src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>", RegexOption.IGNORE_CASE)) { match ->
+            "\n\n\u0000I:${match.groupValues.getOrNull(1).orEmpty()}\u0000\n\n"
+        }
+        .replace(
+            Regex("<h([1-6])[^>]*>(.*?)</h\\1>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+        ) { match ->
+            val level = match.groupValues.getOrNull(1)?.toIntOrNull() ?: 2
+            "\n\n\u0000H$level:${match.groupValues.getOrNull(2).orEmpty()}\u0000\n\n"
+        }
+        .replace(Regex("</(p|div|li|blockquote|h[1-6])>", RegexOption.IGNORE_CASE), "\n\n")
+    val out = ArrayList<ReaderBlock>()
+    stripMarkup(marked)
         .split(Regex("\\n{2,}"))
         .map { it.replace(Regex("\\s+"), " ").trim() }
         .filter { it.isNotBlank() }
+        .forEach { chunk ->
+            when {
+                chunk.startsWith("\u0000H") -> {
+                    val body = chunk.removePrefix("\u0000").removeSuffix("\u0000")
+                    val level = body.substringAfter('H').substringBefore(':').toIntOrNull() ?: 2
+                    val text = body.substringAfter(':').trim()
+                    if (text.isNotBlank()) {
+                        out.add(
+                            ReaderBlock(
+                                text = text,
+                                section = section,
+                                sectionTitle = sectionTitle,
+                                isHeading = true,
+                                headingLevel = level.coerceIn(1, 3)
+                            )
+                        )
+                    }
+                }
+
+                chunk.startsWith("\u0000I:") -> {
+                    val src = chunk.removePrefix("\u0000I:").removeSuffix("\u0000").trim()
+                    val path = readEpubImage(context, zip, entryName, src)
+                    if (path != null) {
+                        out.add(
+                            ReaderBlock(
+                                text = "",
+                                section = section,
+                                sectionTitle = sectionTitle,
+                                isHeading = false,
+                                imagePath = path
+                            )
+                        )
+                    }
+                }
+
+                else -> out.add(
+                    ReaderBlock(
+                        text = chunk,
+                        section = section,
+                        sectionTitle = sectionTitle,
+                        isHeading = false
+                    )
+                )
+            }
+        }
+    return out
 }
+
+/**
+ * A PICTURE FROM INSIDE THE BOOK, copied out of the archive once.
+ *
+ * A zip entry is a stream, and a page being scrolled cannot hold one open — so
+ * the bytes are written to the app's own cache the first time the book is
+ * opened and the block remembers the PATH. What cannot be decoded is dropped
+ * outright: half a page of broken pictures is worse than a page with none.
+ */
+private fun readEpubImage(
+    context: android.content.Context,
+    zip: ZipFile,
+    entryName: String,
+    src: String
+): String? {
+    if (src.isBlank() || src.startsWith("data:")) return null
+    val decoded = android.net.Uri.decode(src).substringBefore('#').substringBefore('?').trim()
+    if (decoded.startsWith("http://") || decoded.startsWith("https://")) return null
+    val base = entryName.substringBeforeLast('/', "")
+    val resolved = normaliseZipPath(
+        if (decoded.startsWith("/")) decoded.drop(1) else "$base/$decoded"
+    )
+    val entry = zip.getEntry(resolved)
+        ?: zip.getEntry(decoded.dropWhile { it == '/' })
+        ?: return null
+    if (entry.isDirectory) return null
+    val target = File(imageDir(context), resolved.replace('/', '_').takeLast(72))
+    if (target.exists() && target.length() > 0L) return target.absolutePath
+    return runCatching {
+        zip.getInputStream(entry).use { input ->
+            target.outputStream().use { output -> input.copyTo(output) }
+        }
+        val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeFile(target.absolutePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
+            target.delete()
+            null
+        } else {
+            target.absolutePath
+        }
+    }.getOrNull()
+}
+
+/** `a/../b/c.png` -> `b/c.png`, so a relative `src` lands on a real entry. */
+private fun normaliseZipPath(path: String): String {
+    val parts = ArrayList<String>()
+    path.split('/').forEach { part ->
+        when (part) {
+            "", "." -> Unit
+            ".." -> if (parts.isNotEmpty()) parts.removeAt(parts.size - 1)
+            else -> parts.add(part)
+        }
+    }
+    return parts.joinToString("/")
+}
+
+private fun imageDir(context: android.content.Context): File =
+    File(context.cacheDir, "book-images").apply { mkdirs() }
+
+/**
+ * A book's picture at reading size. Decoded with a sample size rather than at
+ * full resolution: an illustrated page can carry a 3000px scan, and a phone
+ * has no business holding four of them to draw 600 of those pixels.
+ */
+private fun bookImageBitmap(path: String): ImageBitmap? = runCatching {
+    val probe = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    android.graphics.BitmapFactory.decodeFile(path, probe)
+    if (probe.outWidth <= 0) return@runCatching null
+    var sample = 1
+    while (probe.outWidth / sample > 1400) sample *= 2
+    val options = android.graphics.BitmapFactory.Options().apply { inSampleSize = sample }
+    android.graphics.BitmapFactory.decodeFile(path, options)?.asImageBitmap()
+}.getOrNull()
 
 private fun stripMarkup(html: String): String = html
     .replace(Regex("<[^>]+>"), " ")

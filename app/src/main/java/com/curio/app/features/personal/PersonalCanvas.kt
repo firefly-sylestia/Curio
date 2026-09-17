@@ -532,6 +532,21 @@ internal data class PersonalCaret(val blockId: String, val index: Int)
 internal data class PersonalRemovedRow(val block: PersonalBlock, val index: Int)
 
 /**
+ * v389 — WHERE A PAGE'S TITLE LINES SIT, for a page that cannot be handed the
+ * callback.
+ *
+ * A writing page owns both halves of itself, but the READING half is the
+ * CALLER's view (`readView`), so the page has nothing to pass it. It provides
+ * this local instead, and both [PersonalCanvas] and [PersonalDocView] fall back
+ * to it when their own parameter is null — which is what lets the journal's
+ * pinned section work on the reading side as well as the writing one.
+ */
+internal val LocalPersonalTitleReport =
+    staticCompositionLocalOf<
+        ((id: String, label: String, top: Float, bottom: Float) -> Unit)?
+        > { null }
+
+/**
  * The canvas' brain: the block list, each block's text + style mask, and the
  * toolbar's live state. Deliberately NOT a Compose UI class — a screen can
  * drive it (auto-save, "add a photo", programmatic focus) without touching
@@ -598,6 +613,8 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         } ?: return
         focusedId = id
         caret = PersonalCaret(id, text(id).length)
+        // A pending OFF belongs to the place the caret was, not to this one.
+        armedOff = 0
         // …and the TAP itself, so the line takes the caret (and the keyboard)
         // again even when both of the lines above are already true of it.
         tapTarget = id
@@ -610,6 +627,21 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /** Tools switched on with nothing to apply them to (an empty line). */
     var armed by mutableIntStateOf(0)
+
+    /**
+     * v389 — TOOLS SWITCHED **OFF** FOR WHAT IS TYPED NEXT.
+     *
+     * With no selection the dock is an INPUT STYLE, not a command that rewrites
+     * the line (user report: "the bold italic underline strikethough … size
+     * quotes etc they should not work for the whole line when i tap to active
+     * them it should only work after the text written just like in rich text
+     * editor"). [armed] is the tools switched ON; this is the tools switched
+     * OFF — the only way to write plain words in the middle of a bold sentence,
+     * which is what tapping Bold with the caret inside a bold run now means.
+     * The two are always disjoint ([toggle] keeps them so).
+     */
+    var armedOff by mutableIntStateOf(0)
+        private set
 
     /**
      * v389 — a CHECKLIST page keeps making rows: Enter at the END of a row
@@ -651,6 +683,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         compositions.clear()
         focusedId = null
         armed = 0
+        armedOff = 0
         caret = null
         val source = if (document.blocks.isEmpty()) listOf(PersonalBlock(id = newBlockId()))
         else document.blocks
@@ -747,11 +780,31 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // again, and a wash over the whole page beside a live caret reads
             // as a bug.
             pageSelected = false
-            masks[id] = maskAfterEdit(old.text, newText, mask(id), armed)
+            // ── A LINE IS A LINE (v389) ────────────────────────────────
+            // A newline inside a field is not a newline in the text: it is a
+            // NEW LINE of the page, which is what a block is. Before this the
+            // character simply landed in the field, so a pasted paragraph came
+            // in as ONE element with invisible breaks inside it — nothing could
+            // be put between its lines (a voice note dragged there snapped to
+            // the paragraph's start or its end) and the platform's Select all
+            // set to work on a shape the page did not have (user reports: "when
+            // i use enter it creates a new line or something which isnt
+            // connected to the previous text … for that reason the select all
+            // doesnt work" and "when i paste a paragraph then that whole
+            // paragraph becomes one element and i cant put things between
+            // them"). Shift+Enter is still the plain newline — one paragraph,
+            // exactly as before — because the key handler consumes it before it
+            // ever reaches the field.
+            if (newText.indexOf('\n') >= 0) {
+                splitOnNewlines(id, value)
+                return
+            }
+            masks[id] = maskAfterEdit(old.text, newText, mask(id), armed, armedOff)
             blocks[id] = old.copy(text = newText)
-            // An armed tool has now been used: what follows continues in the
-            // style just typed, so the button stops being "pending".
+            // A pending tool has now been used: what follows continues in the
+            // style just typed, so the buttons stop being "pending".
             if (armed != 0) armed = 0
+            if (armedOff != 0) armedOff = 0
         }
         selections[id] = value.selection
         compositions[id] = value.composition
@@ -765,23 +818,43 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /** The flags of whatever the focused tool bar would act on right now —
      *  drives which buttons read as switched on. */
+    /**
+     * The style the CARET sits in: the character just left of it, else the one
+     * just right (typing at the start of a styled run continues that run). This
+     * is what a rich text editor lights its buttons from when nothing is
+     * selected — what the next keystroke will wear.
+     */
+    private fun caretFlags(id: String): Int {
+        val blockMask = mask(id)
+        val at = (selections[id]?.start ?: blockMask.size).coerceIn(0, blockMask.size)
+        return when {
+            at - 1 in blockMask.indices && blockMask[at - 1] != 0 -> blockMask[at - 1]
+            at in blockMask.indices && blockMask[at] != 0 -> blockMask[at]
+            else -> 0
+        }
+    }
+
+    /** The tools as the dock should light them right now. */
     fun activeFlags(): Int {
         val id = focusedId ?: return armed
         val selection = selections[id]
-        // No selection: the LINE decides, exactly like the tap would — a tool
-        // lights only when the whole line already carries it, so what the dock
-        // shows is what another tap on that button would do.
-        val range = if (selection != null && !selection.collapsed) {
-            selection.min to selection.max
-        } else {
-            0 to text(id).length
+        if (selection == null || selection.collapsed) {
+            // NO SELECTION: the buttons are an INPUT STYLE, exactly like a rich
+            // text editor's — they report what the NEXT keypress wears, which is
+            // the style the caret already sits in unless the member has switched
+            // something on or off (v389). Before this, a tool lit only when the
+            // WHOLE LINE carried it, so the dock described the line instead of
+            // the typing, and tapping a button rewrote everything already
+            // written.
+            return (caretFlags(id) and armedOff.inv()) or armed
         }
+        val range = selection.min to selection.max
         val blockMask = mask(id)
         var flags = 0
         ALL_FLAGS.forEach { flag ->
             if (maskCovers(blockMask, range.first, range.second, flag)) flags = flags or flag
         }
-        return flags or armed
+        return flags
     }
 
     /**
@@ -925,19 +998,28 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val id = focusedId ?: return
         val blockMask = mask(id)
         val selection = selections[id]
-        val range = if (selection != null && !selection.collapsed) {
-            selection.min to selection.max
-        } else {
-            0 to text(id).length
-        }
-        if (range.second <= range.first) {
-            armed = armed xor flag
+        if (selection == null || selection.collapsed) {
+            // NO SELECTION: the tool is an INPUT STYLE. Tapping it changes what
+            // the NEXT keystroke wears — never the line already written, which
+            // is the whole point of the user report above. Inside a bold phrase
+            // that means turning bold OFF for what follows it; on a plain line
+            // it means switching bold ON for the words still to come.
+            val on = ((caretFlags(id) and armedOff.inv()) or armed) and flag != 0
+            if (!on) {
+                armed = armed or flag
+                armedOff = armedOff and flag.inv()
+            } else {
+                armed = armed and flag.inv()
+                armedOff = armedOff or flag
+            }
             onDocChanged(doc())
             return
         }
+        val range = selection.min to selection.max
         val on = !maskCovers(blockMask, range.first, range.second, flag)
         masks[id] = maskApply(blockMask, range.first, range.second, flag, on)
         armed = armed and flag.inv()
+        armedOff = armedOff and flag.inv()
         onDocChanged(doc())
     }
 
@@ -1190,42 +1272,60 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      */
     fun splitAtCaret(id: String) {
         val block = blocks[id] ?: return
-        val blockMask = mask(id)
+        splitBlock(id, selections[id]?.start ?: block.text.length, mask(id))
+    }
+
+    /**
+     * v389 — THE ONE SPLIT. Enter, a held-down Enter, and a pasted paragraph all
+     * end up here: the text splits at [at], the line's own whole-line tools
+     * cross the break, and the new block's id comes back so a caller splitting
+     * in a loop can carry on with the remainder.
+     *
+     * [maskBefore] is the mask of the text being split — passed in rather than
+     * read here, because a paste splits a paragraph that does not exist in the
+     * page yet.
+     */
+    private fun splitBlock(id: String, at: Int, maskBefore: IntArray): String {
+        val block = blocks[id] ?: return ""
+        val caretIndex = at.coerceIn(0, block.text.length)
+        val index = order.indexOf(id)
+        if (index < 0) return ""
         // What the line is wearing decides what the new one inherits; an armed
-        // tool (an empty line) inherits itself.
-        val headFlags = lineFlags(block.text, blockMask)
+        // tool (an empty line) inherits itself. A TITLE never crosses the break
+        // (v389): a title is ONE line, so Enter at the end of a title starts
+        // prose — which is exactly what the title button has to mean for the
+        // member to be able to write a body under it (user request: "for the
+        // title format in tool bar it should not work if we use enter to go to
+        // a new line i mean it should auto select just the title format").
+        val headFlags = lineFlags(block.text, maskBefore) and FLAG_TITLE.inv()
         val carried = when {
             // The TO-DO page's own manner, kept: Enter on an EMPTY row ends the
             // list instead of arming the next row for ever (a page of checklists
             // has to stop somewhere).
             keepsChecklistRows && block.text.isEmpty() -> 0
             headFlags != 0 -> headFlags
-            else -> armed
+            else -> armed and FLAG_TITLE.inv()
         }
-        val caretIndex = (selections[id]?.start ?: block.text.length)
-            .coerceIn(0, block.text.length)
-        val index = order.indexOf(id)
-        if (index < 0) return
-        val head = block.copy(
-            text = block.text.take(caretIndex),
-            runs = maskToRuns(blockMask.copyOfRange(0, caretIndex))
-        )
-        val tailText = block.text.drop(caretIndex)
+        val before = maskBefore.copyOfRange(0, caretIndex)
+        val afterText = block.text.drop(caretIndex)
         // A whole-line tool is a WHOLE-LINE tool on both sides of the break; a
         // partly-styled line just keeps its own characters' styles.
-        val tailMask = if (headFlags != 0 && tailText.isNotEmpty()) {
-            IntArray(tailText.length) { headFlags }
+        val after = if (headFlags != 0 && afterText.isNotEmpty()) {
+            IntArray(afterText.length) { headFlags }
         } else {
-            blockMask.copyOfRange(caretIndex, block.text.length)
+            maskBefore.copyOfRange(caretIndex, block.text.length)
         }
+        val tailMask = if (afterText.isEmpty()) after
+        else IntArray(after.size) { after[it] and FLAG_TITLE.inv() }
+        val head = block.copy(text = block.text.take(caretIndex), runs = maskToRuns(before))
         val tail = PersonalBlock(
             id = newBlockId(),
-            text = tailText,
+            text = afterText,
             runs = maskToRuns(tailMask),
-            align = if (tailText.isEmpty()) block.align else PersonalAlign.START
+            align = if (afterText.isEmpty()) block.align else PersonalAlign.START
         )
-        masks[id] = runsToMask(head.text.length, head.runs)
         blocks[id] = head
+        masks[id] = runsToMask(head.text.length, head.runs)
         order.add(index + 1, tail.id)
         blocks[tail.id] = tail
         masks[tail.id] = runsToMask(tail.text.length, tail.runs)
@@ -1233,7 +1333,49 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         focusedId = tail.id
         caret = PersonalCaret(tail.id, 0)
         armed = carried
+        armedOff = 0
         onDocChanged(doc())
+        return tail.id
+    }
+
+    /**
+     * v389 — A FIELD'S NEWLINES BECOME THE PAGE'S OWN LINES.
+     *
+     * Runs [splitBlock] once per newline, so a pasted paragraph and a held-down
+     * Enter arrive at the same result: a block per line, each wearing the style
+     * its own characters had. The caret then lands where the writer's cursor
+     * actually was — in whichever line of the paste it belongs to — so carrying
+     * on typing does what the member expects.
+     */
+    private fun splitOnNewlines(id: String, value: TextFieldValue) {
+        val old = blocks[id] ?: return
+        val whole = maskAfterEdit(old.text, value.text, mask(id), armed, armedOff)
+        val caretAt = value.selection.start.coerceIn(0, value.text.length)
+        // Where each line of the typed text begins: what the caret's own line and
+        // the offset inside it are read from at the end.
+        val lineStarts = value.text.indices.filter { value.text[it] == '\n' }.map { it + 1 }
+        val lineIds = ArrayList<String>()
+        lineIds.add(id)
+        var remaining = old
+        var remainingMask = whole
+        var guard = 0
+        while (guard++ < 64) {
+            val breakAt = remaining.text.indexOf('\n')
+            if (breakAt < 0) break
+            val tailId = splitBlock(remaining.id, breakAt, remainingMask)
+            val tail = blocks[tailId] ?: break
+            lineIds.add(tailId)
+            remaining = tail
+            remainingMask = runsToMask(tail.text.length, tail.runs)
+        }
+        // Where the writer's cursor was: the line it falls in, at the offset it
+        // was at within that line.
+        val line = lineStarts.count { it <= caretAt }.coerceIn(0, lineIds.size - 1)
+        val lineId = lineIds.getOrNull(line) ?: return
+        val from = if (line == 0) 0 else lineStarts[line - 1]
+        val at = (caretAt - from).coerceIn(0, text(lineId).length)
+        focusedId = lineId
+        caret = PersonalCaret(lineId, at)
     }
 
     /**
@@ -1354,9 +1496,18 @@ internal fun PersonalCanvas(
      * belong to — see BookReviewScreen. Reported as the line's own y WITHIN the
      * scrolling content, so the caller can subtract its scroll offset (a
      * position in the window would need the scroll to re-report itself).
+     *
+     * v389 — the line's BOTTOM is reported with its top, because "scrolled
+     * past" means the whole line, not its first pixel: a pinned bar that lit up
+     * the moment a heading touched the top edge named a chapter the member was
+     * still reading the heading of (user report: "it shows that title at the
+     * same position even though the title isnt scrolled awasy yet").
      */
-    onTitlePosition: ((id: String, label: String, top: Float) -> Unit)? = null
+    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
 ) {
+    // The page's own reporter, or the one its host provided (see
+    // [LocalPersonalTitleReport]).
+    val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
     // v389 — one drag for the whole list: the to-do page's rows share it, so
     // the row under the finger and the rows it passes agree about one gesture.
     val rowDrag = remember { PersonalRowDragState() }
@@ -1519,7 +1670,7 @@ internal fun PersonalCanvas(
                             enabled = enabled,
                             quoteJoinAbove = quoteAbove,
                             quoteJoinBelow = quoteBelow,
-                            onTitlePosition = onTitlePosition
+                            onTitlePosition = titleReport
                         )
                     }
                 } else {
@@ -1531,7 +1682,7 @@ internal fun PersonalCanvas(
                         enabled = enabled,
                         quoteJoinAbove = quoteAbove,
                         quoteJoinBelow = quoteBelow,
-                        onTitlePosition = onTitlePosition,
+                        onTitlePosition = titleReport,
                         selectionWash = if (state.pageSelected) selectionWash else Color.Transparent
                     )
                 }
@@ -1556,7 +1707,7 @@ private fun PersonalTextBlock(
     quoteJoinAbove: Boolean = false,
     quoteJoinBelow: Boolean = false,
     /** See [PersonalCanvas.onTitlePosition]. */
-    onTitlePosition: ((id: String, label: String, top: Float) -> Unit)? = null
+    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
 ) {
     val text = state.text(id)
     val mask = state.mask(id)
@@ -1642,7 +1793,8 @@ private fun PersonalTextBlock(
                 // the chapter can follow the writing (see onTitlePosition).
                 if (isTitle && onTitlePosition != null) {
                     Modifier.onGloballyPositioned { coordinates ->
-                        onTitlePosition(id, text, coordinates.boundsInParent().top)
+                        val bounds = coordinates.boundsInParent()
+                        onTitlePosition(id, text, bounds.top, bounds.bottom)
                     }
                 } else Modifier
             )
@@ -1955,8 +2107,10 @@ internal fun PersonalDocView(
      */
     rowSize: TextUnit = TextUnit.Unspecified,
     /** See [PersonalCanvas.onTitlePosition] — the read side of the same page. */
-    onTitlePosition: ((id: String, label: String, top: Float) -> Unit)? = null
+    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
 ) {
+    // The page's own reporter, or the host's — see [LocalPersonalTitleReport].
+    val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
     val quoteRule = personalQuoteRule()
     val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
@@ -2098,9 +2252,10 @@ internal fun PersonalDocView(
                         // page: it reports its own place so the head can say
                         // which chapter is being read (see onTitlePosition).
                         .then(
-                            if (isTitle && onTitlePosition != null) {
+                            if (isTitle && titleReport != null) {
                                 Modifier.onGloballyPositioned { coordinates ->
-                                    onTitlePosition(block.id, text, coordinates.boundsInParent().top)
+                                    val bounds = coordinates.boundsInParent()
+                                    titleReport(block.id, text, bounds.top, bounds.bottom)
                                 }
                             } else Modifier
                         )

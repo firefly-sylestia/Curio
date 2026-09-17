@@ -170,22 +170,34 @@ fun BookReviewScreen(
     val readScroll = rememberScrollState()
     val writeScroll = rememberScrollState()
     val chapterLines = remember { mutableStateMapOf<String, PinnedChapterLine>() }
-    val pinnedChapter by remember {
+    // WHICH MARKER IS BEHIND US — and where to go back to it.
+    //
+    // A marker is behind us only once its WHOLE line has gone up: the bar names
+    // the chapter being READ, and the heading of the chapter being read is not
+    // that. v389 fixes the glitch the member reported — the bar used to appear
+    // the instant a heading's top edge touched the top edge of the page, which
+    // on the page's own FIRST heading (whose top is 0 before a single line has
+    // scrolled) meant it was up and naming chapter one the moment the review
+    // opened (user report: "in reading view it shows that title at the same
+    // position even though the title isnt scrolled away yet"). The bottom edge
+    // is what answers the question, and the id rides along so the bar can be
+    // TAPPED to go back to the heading it names.
+    val pinnedMarker by remember {
         derivedStateOf {
             val scroll = (if (editing) writeScroll.value else readScroll.value).toFloat()
-            chapterLines.values
-                .filter { it.label.isNotBlank() && it.top - scroll <= 0f }
-                .maxByOrNull { it.top }
-                ?.label
+            chapterLines.entries
+                .filter { it.value.label.isNotBlank() && it.value.bottom - scroll <= 0f }
+                .maxByOrNull { it.value.bottom }
         }
     }
+    val pinnedChapter = pinnedMarker?.value?.label.orEmpty()
     // A line the member deleted (or renamed away) stops being a place to pin.
     LaunchedEffect(draft, review) {
         val alive = (draft.blocks + (review?.doc?.blocks ?: emptyList())).map { it.id }.toSet()
         chapterLines.keys.retainAll(alive)
     }
-    val reportChapterLine: (String, String, Float) -> Unit = { id, label, top ->
-        chapterLines[id] = PinnedChapterLine(label, top)
+    val reportChapterLine: (String, String, Float, Float) -> Unit = { id, label, top, bottom ->
+        chapterLines[id] = PinnedChapterLine(label, top, bottom)
     }
 
     // Entering the canvas seeds it from the stored review exactly once (re-
@@ -459,56 +471,25 @@ fun BookReviewScreen(
             // Through `PersonalFloatingLayer`: this is a Box inside a Column, so
             // a bare `AnimatedVisibility` resolves to the ColumnScope overload
             // and is then rejected (see that function's own note).
-            PersonalFloatingLayer(
-                visible = pinnedChapter != null,
-                enter = fadeIn(tween(170)) + slideInVertically(tween(220)) { height -> -height / 2 },
-                exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> -height / 2 },
+            PersonalPinnedLine(
+                label = pinnedChapter,
+                accent = accent,
+                onClick = {
+                    // A DOOR, not a label: the bar IS the chapter it names, so
+                    // tapping it goes back to that heading (user request:
+                    // "tapping that floating pinned should take me to that title
+                    // position").
+                    val marker = pinnedMarker ?: return@PersonalPinnedLine
+                    scope.launch {
+                        val target = marker.value.top.toInt().coerceAtLeast(0)
+                        if (editing) writeScroll.animateScrollTo(target)
+                        else readScroll.animateScrollTo(target)
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 14.dp, top = 6.dp)
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shadowElevation = 4.dp
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(7.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(width = 3.dp, height = 12.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(accent)
-                        )
-                        AnimatedContent(
-                            targetState = pinnedChapter.orEmpty(),
-                            transitionSpec = {
-                                (
-                                    fadeIn(tween(180)) +
-                                        slideInVertically(tween(200)) { height -> height / 2 }
-                                    ) togetherWith (
-                                    fadeOut(tween(120)) +
-                                        slideOutVertically(tween(150)) { height -> -height / 2 }
-                                    )
-                            },
-                            label = "pinned-chapter"
-                        ) { label ->
-                            Text(
-                                label,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = ink,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
-            }
+                    .padding(start = 16.dp, top = 10.dp)
+            )
 
             // THE PAGE'S OWN MIC. The Add-chapter door has the RIGHT corner
             // (below), so the mic takes the LEFT: the two float side by side
@@ -717,7 +698,7 @@ fun BookReviewScreen(
  * ONE CHAPTER MARKER LINE, and where it sits in the page's scrolling content
  * (see [BookReviewScreen]'s pinned chapter).
  */
-private data class PinnedChapterLine(val label: String, val top: Float)
+private data class PinnedChapterLine(val label: String, val top: Float, val bottom: Float)
 
 /**
  * A chapter's own review, folded under the marker that names it. It is drawn as

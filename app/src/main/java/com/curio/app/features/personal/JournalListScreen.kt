@@ -1,7 +1,13 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -41,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -356,14 +363,19 @@ internal fun PersonalHeader(
      * means by "where am I" once the page's own title is gone. The line is
      * always LAID OUT (only its ink moves), so nothing below it can jump.
      */
-    titleRevealed: Boolean = true
+    titleRevealed: Boolean = true,
+    /**
+     * v389 — WHAT THE HEAD SAYS WHILE THE PAGE'S OWN TITLE IS STILL ON SCREEN.
+     *
+     * Empty (the default) is right for a page with no context to name. A book's
+     * page names its SHELF: until the book's own title and author have scrolled
+     * under the head there is nothing about the book for the head to add, and
+     * "Your shelf" is where the member actually is (user request: "instead of
+     * initial blank say your shelf").
+     */
+    idleTitle: String = ""
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
-    val revealed = animateFloatAsState(
-        targetValue = if (titleRevealed) 1f else 0f,
-        animationSpec = tween(220),
-        label = "header-title-reveal"
-    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -381,27 +393,47 @@ internal fun PersonalHeader(
                 CurioIcon(CurioIcons.ArrowBack, "Back", tint = ink, size = 20.dp)
             }
         }
-        Column(Modifier.weight(1f)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontFamily = FrauncesFontFamily,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = ink,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.graphicsLayer {
-                    alpha = revealed.value
-                    // It RISES into the bar rather than appearing in place.
-                    translationY = (1f - revealed.value) * -8.dp.toPx()
-                }
-            )
-            Text(
-                subtitle,
-                style = MaterialTheme.typography.labelMedium,
-                color = ink.copy(alpha = 0.5f)
-            )
+        // ONE, not two: the head says one thing at a time, and it ROLLS — the
+        // idle line and the rolled one are the same two rows, so the swap is
+        // the words changing and the head never changes size. The AUTHOR comes
+        // in with the title (user request: "when i scroll away the title appears
+        // in header make the same for title author too not just title"): before
+        // the roll the page is still saying both of them itself, in the middle
+        // of the screen, at a size the head cannot match.
+        AnimatedContent(
+            targetState = titleRevealed,
+            transitionSpec = {
+                (
+                    fadeIn(tween(230)) +
+                        slideInVertically(tween(270)) { height -> -height / 3 }
+                    ) togetherWith (
+                    fadeOut(tween(150)) +
+                        slideOutVertically(tween(190)) { height -> -height / 3 }
+                    )
+            },
+            label = "personal-header-roll",
+            modifier = Modifier.weight(1f)
+        ) { rolled ->
+            Column(Modifier.fillMaxWidth()) {
+                Text(
+                    if (rolled) title else idleTitle,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFamily = FrauncesFontFamily,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = if (rolled) ink else ink.copy(alpha = 0.72f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    // The line HOLDS ITS HEIGHT while it is out of the way, so
+                    // the head is one size whatever it is saying.
+                    color = if (rolled) ink.copy(alpha = 0.5f) else Color.Transparent,
+                    maxLines = 1
+                )
+            }
         }
         action?.invoke()
     }

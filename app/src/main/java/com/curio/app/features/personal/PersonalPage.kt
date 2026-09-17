@@ -49,8 +49,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,6 +71,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -410,6 +414,34 @@ internal fun PersonalWritingPage(
         snapshotFlow { pageScroll.value }.collect { report(it) }
     }
 
+    // ── THE PAGE'S OWN SECTIONS, HELD AT THE TOP (v389) ─────────────────
+    //
+    // The book review's pinned chapter, on EVERY writing page: a TITLE line is a
+    // section of the page, and once one has scrolled away the page has stopped
+    // saying which part of itself is being read (user request: "similiar to the
+    // book review chapter pinned floating view i want something similiar in
+    // journal too"). Both sides report where their title lines sit — the reading
+    // side is the CALLER's view, so the reporter travels to it through
+    // [LocalPersonalTitleReport] — the writing column's own scroll turns that
+    // into "gone by", and the bar holds the top edge and goes back when tapped.
+    val sectionLines = remember { mutableStateMapOf<String, PersonalSectionLine>() }
+    val pinnedSection by remember {
+        derivedStateOf {
+            val scroll = pageScroll.value.toFloat()
+            sectionLines.entries
+                .filter { it.value.label.isNotBlank() && it.value.bottom - scroll <= 0f }
+                .maxByOrNull { it.value.bottom }
+        }
+    }
+    val reportSectionLine: (String, String, Float, Float) -> Unit = { id, label, top, bottom ->
+        sectionLines[id] = PersonalSectionLine(label, top, bottom)
+    }
+    // A line the member deleted (or stopped being a title) stops being a place
+    // to pin.
+    LaunchedEffect(doc) {
+        sectionLines.keys.retainAll(doc.blocks.map { it.id }.toSet())
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -424,6 +456,7 @@ internal fun PersonalWritingPage(
         // The page's subject, held still above the writing.
         pinnedHead()
 
+        CompositionLocalProvider(LocalPersonalTitleReport provides reportSectionLine) {
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             // v389 — ONE PAGE TURNING, not two pages sliding past each other.
             //
@@ -504,7 +537,8 @@ internal fun PersonalWritingPage(
                         PersonalCanvas(
                             state = editor,
                             modifier = Modifier.fillMaxWidth(),
-                            onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
+                            onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
+                            onTitlePosition = reportSectionLine
                         )
                         Spacer(Modifier.height(140.dp))
                     }
@@ -546,6 +580,24 @@ internal fun PersonalWritingPage(
             ) {
                 PersonalVoiceButton(onClick = askToRecord)
             }
+
+            // THE PAGE'S OWN PINNED SECTION — the same bar the book review
+            // wears for its chapters, and a door rather than a label: tapping it
+            // goes back to the heading it names.
+            PersonalPinnedLine(
+                label = pinnedSection?.value?.label.orEmpty(),
+                accent = personalAccent(),
+                onClick = {
+                    val section = pinnedSection ?: return@PersonalPinnedLine
+                    scope.launch {
+                        pageScroll.animateScrollTo(section.value.top.toInt().coerceAtLeast(0))
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 16.dp, top = 10.dp)
+            )
+        }
         }
 
         // The dock rides the keyboard while the page is being WRITTEN and steps
@@ -717,6 +769,95 @@ internal fun PersonalFloatingLayer(
  * because a journal day and a note on a topic both need it, and the two must not
  * disagree about which icon means which mode.
  */
+/** Where one of a page's TITLE lines sits in its content, and what it says. */
+internal data class PersonalSectionLine(val label: String, val top: Float, val bottom: Float)
+
+/**
+ * v389 — THE PINNED LINE.
+ *
+ * A page whose own headings have scrolled away has stopped saying where the
+ * member is; this is the bar that says it, holding the top edge of the writing
+ * area and naming the heading the words under it belong to. SHARED on purpose —
+ * the book review's chapter markers, the chapter review's, and the journal's own
+ * section titles all ride it (user request: "similiar to the book review chapter
+ * pinned floating view i want something similiar in journal too") — and it is a
+ * DOOR rather than a label: tapping it goes back to the heading it names.
+ *
+ * It is deliberately a size up from a chip and sits close under the page's
+ * header — near enough to read as belonging to it, clear enough not to touch it
+ * (user request: "make the pinned view bigger and attached to the header a
+ * little, not like attached but closer"). Nothing here knows about scrolling:
+ * the caller decides the label, and a blank one is simply the bar being away.
+ */
+@Composable
+internal fun PersonalPinnedLine(
+    label: String,
+    accent: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    AnimatedVisibility(
+        visible = label.isNotBlank(),
+        enter = fadeIn(tween(170)) + slideInVertically(tween(220)) { height -> -height / 2 },
+        exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> -height / 2 },
+        modifier = modifier
+    ) {
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = 5.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    start = 15.dp,
+                    end = 11.dp,
+                    top = 10.dp,
+                    bottom = 10.dp
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 4.dp, height = 16.dp)
+                        .background(accent, RoundedCornerShape(50))
+                )
+                AnimatedContent(
+                    targetState = label,
+                    transitionSpec = {
+                        (
+                            fadeIn(tween(180)) +
+                                slideInVertically(tween(200)) { height -> height / 2 }
+                            ) togetherWith (
+                            fadeOut(tween(120)) +
+                                slideOutVertically(tween(150)) { height -> -height / 2 }
+                            )
+                    },
+                    label = "personal-pinned-line"
+                ) { shown ->
+                    Text(
+                        shown,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = ink,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                CurioIcon(
+                    CurioIcons.KeyboardArrowUp,
+                    "Back to this heading",
+                    tint = ink.copy(alpha = 0.4f),
+                    size = 15.dp
+                )
+            }
+        }
+    }
+}
+
 @Composable
 internal fun PersonalModeSwitch(
     editing: Boolean,
