@@ -433,7 +433,11 @@ fun BookReviewScreen(
             // marker has been scrolled past (there is nothing to pin before
             // that), and the label swaps through a small vertical fade so a
             // change of chapter reads as a change, not a replacement.
-            AnimatedVisibility(
+            //
+            // Through `PersonalFloatingLayer`: this is a Box inside a Column, so
+            // a bare `AnimatedVisibility` resolves to the ColumnScope overload
+            // and is then rejected (see that function's own note).
+            PersonalFloatingLayer(
                 visible = pinnedChapter != null,
                 enter = fadeIn(tween(170)) + slideInVertically(tween(220)) { height -> -height / 2 },
                 exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> -height / 2 },

@@ -472,7 +472,11 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         // Read-side only, and it folds like the writing tools
                         // do: the margins are what a reader comes back for, so
                         // they arrive with the eye rather than blink into place.
-                        AnimatedVisibility(
+                        // Hoisted into `PersonalFloatingLayer` on purpose: a bare
+                        // `AnimatedVisibility` inside a `LazyColumn` item resolves
+                        // to the ColumnScope overload and is then rejected (see
+                        // that function's own note).
+                        PersonalFloatingLayer(
                             visible = !editing,
                             enter = fadeIn(tween(200)) + expandVertically(tween(240)),
                             exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
@@ -610,6 +614,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             // EPUB later, should not have to hunt for that door (user request:
             // "when i tap and hold the read button it should show a drop down to
             // change the pdf the file attach").
+            val attachedFile = BookFiles.documentOf(current.documentPath, current.coverUrl)
             if (fileMenu) {
                 Box(
                     modifier = Modifier
@@ -658,7 +663,6 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             // "Read" text button tucked beside "Download help", which only
             // appeared when a `content://` handle happened to be sitting in the
             // cover column.
-            val attachedFile = BookFiles.documentOf(current.documentPath, current.coverUrl)
             BookReadPill(
                 hasFile = attachedFile.isNotBlank(),
                 onClick = {
