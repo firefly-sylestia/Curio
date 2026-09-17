@@ -2,7 +2,6 @@ package com.curio.app.features.recent
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -57,6 +57,7 @@ import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.curioPressCombinedClickable
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
@@ -142,25 +143,23 @@ fun RecentScreen(navController: NavController) {
     val feed = remember(entries, explored, unexplored) {
         buildRecentFeed(entries, explored, unexplored)
     }
-    // v3xx — LONG-PRESS a row for more (default tap opens the TOPIC now):
-    // the option pill offers the alternative actions (write about it, open
-    // the saved entry, remove from Recents).
+    // Tap = open the topic. Hold = contextual actions.
     var optionItem by remember { mutableStateOf<RecentFeedItem?>(null) }
     val listState = rememberLazyListState()
-val glassBackdrop = rememberLayerBackdrop()
-    // v-tablet — the torn hero is NOT sticky on wide windows (landscape
-    // tablet): it leads the list as its first item and scrolls away with it;
-    // the pinned glass overlay stays phone-only.
+    val glassBackdrop = rememberLayerBackdrop()
     val wide = windowWidthSizeClass().isWide
+
+    // A scroll takes ownership of the gesture. Any transient hold surface
+    // is dismissed immediately so it can never appear after a fling/drag.
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) optionItem = null
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            // v30 — "Hero follows Spin lane": the page wears the lane wash.
             .background(heroPageBackground())
     ) {
-        // Wide windows: the NavHost's full-bleed collage replaces the page's
-        // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
             CurioWatermarkBackdrop(
                 activeCat = CurioCategories.byId(CategoryId.WILDCARD),
@@ -168,14 +167,7 @@ val glassBackdrop = rememberLayerBackdrop()
             )
         }
 
-        // v26 — the full page now wears the settings-family torn-rose hero
-        // (same as Manage Categories / Topic Database / Topic History): the
-        // feed scrolls up and disappears under the ragged tear instead of a
-        // plain back-button + title row.
         ScreenEntrance {
-            // v255 — SCROLLING HERO (the Home/Profile construction): the
-            // banner leads the page — as the empty state's top block or the
-            // list's first item — and scrolls away with it.
             if (feed.isEmpty()) {
                 Column {
                     SettingsHeroHeader(
@@ -183,7 +175,6 @@ val glassBackdrop = rememberLayerBackdrop()
                         subtitle = "Your latest discoveries, all in one place",
                         onBack = { navController.popBackStack() }
                     )
-                    // v3xx — the app-wide doodle empty state.
                     CurioDoodleEmptyState(
                         headline = "No discoveries yet",
                         subtext = "Explore a topic or save a capture. Your recent finds will show up here.",
@@ -211,7 +202,7 @@ val glassBackdrop = rememberLayerBackdrop()
                             )
                         }
                     }
-                                        items(feed, key = { it.key }) { item ->
+                    items(feed, key = { it.key }) { item ->
                         RecentFeedRow(
                             item = item,
                             navController = navController,
@@ -224,7 +215,6 @@ val glassBackdrop = rememberLayerBackdrop()
         }
 
         if (feed.isNotEmpty()) {
-            // Side scroll indicator — thin overlay knob, grows on touch.
             CurioVerticalScrollIndicator(
                 state = listState.scrollIndicatorState,
                 onScrollBy = { listState.dispatchRawDelta(it) },
@@ -235,10 +225,7 @@ val glassBackdrop = rememberLayerBackdrop()
             )
         }
 
-        // v3xx — the long-press option pill: default tap opens the TOPIC;
-        // the hold pill carries the write / open-entry / remove actions.
         optionItem?.let { target ->
-            // (label, action, destructive)
             val actions = buildList<Triple<String, () -> Unit, Boolean>> {
                 when (target) {
                     is RecentFeedItem.Explored -> {
@@ -282,15 +269,15 @@ val glassBackdrop = rememberLayerBackdrop()
                 onDismiss = { optionItem = null }
             )
         }
-                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
-        // content: rows slide under the ragged tear as they scroll up, and
-        // the back pill refracts them through REAL liquid glass.
-        // v-tablet — pinned overlay is phone-only; wide windows scroll the
-        // hero as the list's first item instead.
-        if (!wide) {
-            SettingsHeroHeader(title = "Recents", subtitle = "Your latest discoveries, all in one place", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
-        }
 
+        if (!wide) {
+            SettingsHeroHeader(
+                title = "Recents",
+                subtitle = "Your latest discoveries, all in one place",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
+        }
     }
 }
 
@@ -306,8 +293,6 @@ private fun RecentFeedRow(
             RecentTopicRow(
                 categoryId = topic.categoryId,
                 topicName = topic.topicName,
-                // v3xx — the default tap now opens the TOPIC (keeps the
-                // discovery open); the write/save flow moved to long-press.
                 label = if (topic.wasUnexplored) "Resumed · tap to open" else "Explored · tap to open",
                 tag = if (topic.wasUnexplored) "Resumed" else null,
                 onClick = {
@@ -336,20 +321,15 @@ private fun RecentFeedRow(
         is RecentFeedItem.SavedEntry -> {
             val entry = item.entry
             val category = CurioCategories.byId(entry.topic.categoryId)
-            // v22 — the explore-session duration joins the meta line when one
-            // was recorded ("Films · 2d ago · explored 12m"), matching the
-            // detail hero's language.
             val meta = if (entry.sessionTimeMillis > 0L) {
                 "${category.displayName} · ${entry.capturedAtDaysAgoLabel()} · explored ${formatSessionShort(entry.sessionTimeMillis)}"
             } else {
                 "${category.displayName} · ${entry.capturedAtDaysAgoLabel()}"
             }
             Surface(
-                // v3xx — default tap opens the TOPIC (the saved entry and
-                // the write flow live behind the long-press pill).
                 modifier = Modifier
                     .fillMaxWidth()
-                    .combinedClickable(
+                    .curioPressCombinedClickable(
                         onClick = {
                             navController.navigate(
                                 CurioRoutes.revealFor(entry.topic.categoryId.routeSlug, entry.topic.name)
@@ -413,7 +393,10 @@ private fun RecentTopicRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            .curioPressCombinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         shape = RoundedCornerShape(22.dp),
         color = category.categorySurface(),
         shadowElevation = 0.dp
@@ -429,9 +412,6 @@ private fun RecentTopicRow(
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    // v27 — the icon wears the category's deep ink (Home's
-                    // explore-topic rows) instead of the pale accent, which
-                    // washed out against the tinted surface.
                     CurioIcon(
                         name = category.iconGlyph,
                         contentDescription = null,
@@ -454,13 +434,6 @@ private fun RecentTopicRow(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     if (tag != null) {
-                        // v198 — the same shaded category pill as Home's
-                        // explore-topic rows: the accent pulled toward the
-                        // card surface (~30% light / ~38% dark) so the pill
-                        // reads as a solid shaded chip on the tinted card in
-                        // light and a visibly tinted pill on the dark card
-                        // (the old 14% blend read transparent). Pastel light
-                        // uses the deep same-hue ink as the shade.
                         val tagShade = if (AppPreferences.pastelColorsState && !isCurioDarkTheme())
                             category.categoryInk() else accent
                         Surface(
@@ -470,9 +443,6 @@ private fun RecentTopicRow(
                                 tagShade,
                                 if (isCurioDarkTheme()) 0.38f else 0.30f
                             ),
-                            // Same hairline rim as Home's explore-topic rows —
-                            // the deep ink text + pastel fill alone read
-                            // muddy on the tinted card.
                             shadowElevation = 2.dp
                         ) {
                             Text(
