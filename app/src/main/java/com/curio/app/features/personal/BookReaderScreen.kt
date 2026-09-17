@@ -19,6 +19,7 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -1014,14 +1015,25 @@ private fun PdfScrollReader(
             }
     }
 
-    LazyColumn(
-        state = listState,
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
-        contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 58.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
+    // ── ONE PAGE PER SCREEN, IN A COLUMN (v389c) ──────────────────────
+    //
+    // The column used to size every page by its WIDTH (`ContentScale.FillWidth`),
+    // so on a modern phone a page was taller than the screen and the next one's
+    // top was showing under it — which is exactly what a member reported seeing
+    // ("for pdf it was showing double pages view": two page images stacked). A
+    // scrolling reader should still read ONE page at a time, so each page now
+    // takes the whole viewport and fits INSIDE it: the column scrolls, the page
+    // is a page, and the only place two pages meet is the 10dp gap between them.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val pageHeight = maxHeight
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
+            contentPadding = PaddingValues(start = 14.dp, end = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
         items(count = pageCount, key = { page -> "pdf-page-$page" }) { page ->
             val bitmap by produceState<Bitmap?>(null, document, page) {
                 value = withContext(Dispatchers.IO) {
@@ -1031,30 +1043,32 @@ private fun PdfScrollReader(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(pageHeight)
                     .pointerInput(page) {
                         detectTapGestures(
                             onTap = { onTap() },
                             onLongPress = { onLongPress(page) }
                         )
-                    }
+                    },
+                contentAlignment = Alignment.Center
             ) {
                 val drawn = bitmap
                 if (drawn != null) {
                     Image(
                         bitmap = drawn.asImageBitmap(),
                         contentDescription = "Page ${page + 1}",
-                        // A page in a column fills the column's WIDTH: this is
-                        // the reading-the-whole-file mode, not the inspecting-
-                        // one-page mode, so height is whatever the page needs.
-                        contentScale = ContentScale.FillWidth,
+                        // FIT, not FillWidth: the page is fitted into the one
+                        // screen it is given, so no second page can be showing
+                        // under it.
+                        contentScale = ContentScale.Fit,
                         colorFilter = readerPdfFilter(palette.inkKey),
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .clip(RoundedCornerShape(6.dp))
                     )
                 } else {
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(420.dp),
+                        modifier = Modifier.fillMaxWidth().height(320.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = palette.accent)
@@ -1076,6 +1090,7 @@ private fun PdfScrollReader(
                     }
                 }
             }
+        }
         }
     }
 }

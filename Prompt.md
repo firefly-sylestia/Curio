@@ -32,6 +32,19 @@ the rest need either a decision from the user or a lot more room. Pushed.**
   with type and weight falling as it goes, plus an accent mark on every deeper row (an indent
   alone cannot say it — a wrapped title restarts at the same edge).
 
+### Answered by the user (so the next session starts warm)
+
+- **"Double pages view" for a PDF = two page images stacked** — confirmed. The SCROLL flow
+  sized every page by its WIDTH, so a page was taller than the screen and the next one's top
+  showed under it. FIXED: each page now takes the viewport and fits inside it
+  (`BoxWithConstraints` → item height = `maxHeight`, `ContentScale.Fit`), so the column
+  still scrolls continuously but a page is a page.
+- **"It reloads" = the BOOK PAGE's chapter list** — confirmed (not the reader's sheet).
+  Still to do.
+- **EPUB page-list: the user chose the FULL pass** — carry the href's fragment through
+  `resolveTarget`, record the book's own pagebreak anchors on the blocks, and give the
+  Contents sheet its own view of the printed page numbers. Still to do.
+
 ### Still to do (the honest list)
 
 - **Text selection and highlighting ON a PDF page** (the largest item). The glyph geometry
