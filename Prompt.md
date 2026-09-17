@@ -1,5 +1,74 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, IN PROGRESS — the piled-up prompt: to-do row gestures, the take studio pills, the reminder clock, and the book family)
+
+Verbatim (moved up out of the "Next prompt" slot — nothing dropped):
+"Let todo rows be recorded by long press drag and swiped away to delete. also a
+small window to undo delete. in daily shuffle reminders option the clock the first
+option isn't solid it's transparent fix it. also in express yourself save your
+take. in the new take studio, the add take button colors are not good and it's not
+fully filled. same for the first take suppose Jornal it's text isn't visible
+properly and it's pill fix it. now wire the curying now of books into the your
+shelf also the chapter review and chapter notes of both book button sheet and
+shelf they share the same info. i mean sync them. properly. and also the curying
+now in cabinet doesn't show the number properly. also add like in the new a book.
+and also a floating read button which i can wire an file which will open the file
+in the pdf reader. also the imported file shouldn't change the book name entry.
+and also during import it happens when file name changes to something else when i
+add also fix the read button remove it from the side of download help. also in
+home the floating + pill have glitchy shadow when it hides and comes back fix it.
+in chapter writing keep the about this book but as Collapsed when writing. and also
+let user edit it. and also a universal review for the book not just chapter wise.
+so user don't need to write one chapter by chapter. and if they want they can add a
+chapter as a title style bulletpoint. while writing in that same page. the chapter
+bullet additing make it a floating button for books.and also is it persistent too
+like it saves when i back by accident ?. also a Eye viee for book just to read the
+review, as rn it always opens the book view as the full description look up etc.
+so add eye for preview, and this view only read will be default when a book is
+opened from shelf and also it will have the read button for wiring the pdf of the
+book."
+
+### Decisions (ask_user, answered)
+
+The book page opens in the READ view **when it has writing** (a book with nothing
+written opens ready to write); the universal review is **one page holding both** —
+a book review plus chapter markers inserted as title-style lines with a floating
+button, per-chapter rows still working for those who want them, and **existing
+chapter reviews shown folded in at their marker** when the book page reads; the
+Cabinet's Currently-Reading problem is the **count** (shelf books missing); an
+attached PDF/EPUB is **copied into the app's own storage**; importing a file must
+**never rename the book**; the take pills go **solid accent fill with on-accent
+text**; to-do rows **drag on long press and swipe away with a small floating
+Undo pill, ~5 s**.
+
+### Plan (in the order it will land)
+
+1. **Quick visual fixes, one pass:** the daily-shuffle reminder's clock chip (the
+   selected option is drawn transparent), the take studio's Add-take door and take
+   pills (faint text, fill not solid), and Home's floating `+` shadow glitch on
+   its show/hide (a shadow drawn while the pill scales in).
+2. **To-do rows:** long-press drag to reorder and swipe-to-delete with the Undo
+   pill, persisted in the row order of the stored document (the to-do page only,
+   gated on the page like `keepsChecklistRows`), with the deleted row's style,
+   tick and marker restored by the undo.
+3. **The book page's READ-FIRST eye:** an eye/pen switch on the book page, the eye
+   the default once the book has writing, the About-this-book block collapsed
+   (and still editable) while writing, a leaving flush for the chapter review
+   (the same gap the journal page had), and the attached-file Read pill there.
+4. **The attached file:** a floating Read pill that copies a picked PDF/EPUB into
+   the app's own storage, opens it in the reader, and never renames the book on
+   import (the import path's file-name rename is the bug); the Read pill leaves
+   its old spot beside "Download help".
+5. **Currently Reading, wired:** shelf books appear in the Cabinet's collection
+   with a correct count, and the chapter notes from the topic's Book Notes sheet
+   and the shelf's chapter page are provably one row (the `bookForCatalog` bridge).
+6. **The universal review:** one writing page per book holding the whole-book
+   review, a floating "add chapter" button inserting a title-style chapter line
+   into that same page, existing chapter reviews folded in at their markers when
+   read, and everything saved on the way out.
+
+---
+
 ## Request (2026-09-17, COMPLETE — voice notes in the journal + the page's own manners)
 
 Verbatim: "add a voice note in jounal too voice note style journal, with a floating
@@ -2158,14 +2227,3 @@ Done:
 - **TopicRevealScreen**: FilmInfoSection, AnimeInfoSection, SongInfoSection with poster cards.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
-Let todo rows be recorded by long press drag and swiped away to delete. also a small window to undo delete.
-
-in daily shuffle reminders option the clock the first option isn't solid it's transparent fix it.
-also in express yourself save your take. in the new take studio, the add take button colors are not good and it's not fully filled. same for the first take suppose Jornal it's text isn't visible properly and it's pill fix it.
-
-now wire the curying now of books into the your shelf also the chapter review and chapter notes of both book button sheet and shelf they share the same info. i mean sync them. properly. and also the curying now in cabinet doesn't show the number properly. also add like in the new a book.
-and also a floating read button which i can wire an file which will open the file in the pdf reader. also the imported file shouldn't change the book name entry. and also during import it happens when file name changes to something else when i add also fix the read button remove it from the side of download help.
-
-also in home the floating + pill have glitchy shadow when it hides and comes back fix it.
-
-in chapter writing keep the about this book but as Collapsed when writing. and also let user edit it. and also a universal review for the book not just chapter wise. so user don't need to write one chapter by chapter. and if they want they can add a chapter as a title style bulletpoint. while writing in that same page. the chapter bullet additing make it a floating button for books.and also is it persistent too like it saves when i back by accident ?. also a Eye viee for book just to read the review, as rn it always opens the book view as the full description look up etc. so add eye for preview, and this view only read will be default when a book is opened from shelf and also it will have the read button for wiring the pdf of the book. before starting this can u use ask user

@@ -598,9 +598,12 @@ private fun PreferencesSection(highlightKey: String? = null) {
                     Surface(
                         onClick = { showReminderTimePicker = true },
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                        color = if (customTime) rose else rose.copy(alpha = 0.16f),
+                        // v389 — when the time is a preset the chip sits between the
+                        // one-tap hour pills and the clock picker; it was 16% alpha
+                        // rose ("transparent") until a custom time was set, so it read
+                        // as a placeholder rather than a solid door (user request).
+                        color = if (customTime) rose else MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = if (customTime) Color.White else rose,
-                        shadowElevation = 2.dp,
                         modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Row(

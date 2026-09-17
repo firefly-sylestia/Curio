@@ -36,11 +36,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -89,18 +91,35 @@ fun PersonalCreateLauncher(
     modifier: Modifier = Modifier
 ) {
     val accent = personalAccent()
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(tween(200)) + scaleIn(tween(220), initialScale = 0.82f),
-        exit = fadeOut(tween(150)) + scaleOut(tween(160), targetScale = 0.82f),
-        modifier = modifier
-    ) {
+    val progress = remember { Animatable(if (visible) 1f else 0f) }
+    LaunchedEffect(visible) {
+        progress.animateTo(
+            if (visible) 1f else 0f,
+            animationSpec = tween(if (visible) 200 else 160)
+        )
+    }
+    // v389 — the old AnimatedVisibility painted the shadow on a separate render
+    // node from the scale transform, so the shadow's box popped out as a stale
+    // rectangle during the scale-out instead of shrinking with the circle. This
+    // drives both scale AND shadowElevation from the same progress float inside
+    // one graphicsLayer, so the shadow is always the circle's own shadow at
+    // every moment of the animation.
+    if (progress.value > 0.01f) {
+        val p = progress.value
         Surface(
             onClick = onClick,
+            enabled = p > 0.9f,
             shape = CircleShape,
             color = accent,
-            shadowElevation = 10.dp,
-            modifier = Modifier.size(56.dp)
+            shadowElevation = (10 * p).dp,
+            modifier = modifier
+                .size(56.dp)
+                .graphicsLayer {
+                    val s = 0.82f + 0.18f * p
+                    scaleX = s
+                    scaleY = s
+                    alpha = p
+                }
         ) {
             Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
                 CurioIcon(

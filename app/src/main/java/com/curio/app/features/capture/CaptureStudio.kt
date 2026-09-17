@@ -818,14 +818,17 @@ private fun StudioTakeRail(
     ) {
         sections.forEachIndexed { index, section ->
             val active = index == activeIndex
-            val ink = if (active) accent else MaterialTheme.colorScheme.onSurface
+            // v389 — the active take wears the SOLID accent fill (a 18% wash
+            // with accent text on a pale background is not "filled" and the text
+            // is hard to read in light mode — user request).
+            val ink = if (active) curio.app.ui.theme.personalOnAccent() else MaterialTheme.colorScheme.onSurface
             Surface(
                 onClick = { onSelect(index) },
                 shape = RoundedCornerShape(50),
-                color = if (active) lerp(railSurface, accent, 0.18f) else railSurface,
+                color = if (active) accent else railSurface,
                 border = BorderStroke(
                     1.dp,
-                    if (active) accent.copy(alpha = 0.45f) else accent.copy(alpha = 0.16f)
+                    if (active) accent else accent.copy(alpha = 0.16f)
                 )
             ) {
                 Row(
@@ -875,11 +878,14 @@ private fun StudioTakeRail(
         }
         // The door — always the LAST pill, so a take added from here appears
         // beside the ones already written.
+        // v389 — the Add take door wears the SOLID accent fill, not a pale
+        // wash with accent icon — the pill that opens a door should be the
+        // same solid shape as the one that is already chosen (user request).
         Surface(
             onClick = onAddTake,
             shape = RoundedCornerShape(50),
-            color = lerp(railSurface, accent, 0.14f),
-            border = BorderStroke(1.dp, accent.copy(alpha = 0.35f))
+            color = accent,
+            border = BorderStroke(1.dp, accent)
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
@@ -889,13 +895,13 @@ private fun StudioTakeRail(
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = null,
-                    tint = accent,
+                    tint = curio.app.ui.theme.personalOnAccent(),
                     size = 16.dp
                 )
                 Text(
                     text = "Add take",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = curio.app.ui.theme.personalOnAccent()
                 )
             }
         }
