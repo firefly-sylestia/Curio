@@ -57,8 +57,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -414,14 +414,16 @@ fun BookReviewScreen(
                             .padding(horizontal = 20.dp)
                             .widthIn(max = 680.dp)
                     ) {
-                        Spacer(Modifier.height(4.dp))
+                        // v389d — THE CANVAS' PLACE IN THE SCROLL.
+                        var aboveContentHeight by remember { mutableFloatStateOf(0f) }
+                        Box(
+                            Modifier.onSizeChanged {
+                                aboveContentHeight = it.height.toFloat() + 4.dp.toPx()
+                            }
+                        ) { Spacer(Modifier.height(0.dp)) }
                         PersonalCanvas(
                             state = editor,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .onGloballyPositioned { coordinates ->
-                                    canvasTop = coordinates.boundsInParent().top
-                                },
+                            modifier = Modifier.fillMaxWidth(),
                             accent = accent,
                             onTitlePosition = reportChapterLine,
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }

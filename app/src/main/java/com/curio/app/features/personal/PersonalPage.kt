@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -69,7 +70,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -576,14 +576,21 @@ internal fun PersonalWritingPage(
                             .widthIn(max = 680.dp)
                     ) {
                         Spacer(Modifier.height(6.dp))
-                        aboveCanvas()
+                        // v389d — THE CANVAS' PLACE IN THE SCROLL.
+                        // The title's `top` and `bottom` are reported inside the
+                        // canvas's own Column; to make "scrolled past" and "go
+                        // there" agree with the scroll, that Column's start in the
+                        // scrolling content must be added. A simple measurement box
+                        // (which also houses [aboveCanvas]) gives that offset.
+                        var aboveContentHeight by remember { mutableFloatStateOf(0f) }
+                        Box(
+                            Modifier.onSizeChanged {
+                                aboveContentHeight = it.height.toFloat() + 6.dp.toPx()
+                            }
+                        ) { aboveCanvas() }
                         PersonalCanvas(
                             state = editor,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .onGloballyPositioned { coordinates ->
-                                    canvasTop = coordinates.boundsInParent().top
-                                },
+                            modifier = Modifier.fillMaxWidth(),
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
                             onTitlePosition = reportSectionLine
                         )
