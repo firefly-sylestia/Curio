@@ -357,7 +357,7 @@ fun BookReviewScreen(
             // THE FLOATING CHAPTER DOOR. It rides over the writing area, above
             // the dock, and it is the one thing the ordinary tool dock cannot
             // give: a marker in the member's own review.
-            AnimatedVisibility(
+            PersonalFloatingLayer(
                 visible = editing,
                 enter = fadeIn(tween(160)) + slideInVertically(tween(200)) { it / 2 },
                 exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { it / 2 },

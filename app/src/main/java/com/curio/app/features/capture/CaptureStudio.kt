@@ -67,6 +67,7 @@ import com.curio.app.data.JournalMood
 import com.curio.app.data.formatSessionShort
 import com.curio.app.data.shortName
 import com.curio.app.features.capture.formats.MoodChipsRow
+import com.curio.app.features.personal.personalOnAccent
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
@@ -821,7 +822,7 @@ private fun StudioTakeRail(
             // v389 — the active take wears the SOLID accent fill (a 18% wash
             // with accent text on a pale background is not "filled" and the text
             // is hard to read in light mode — user request).
-            val ink = if (active) curio.app.ui.theme.personalOnAccent() else MaterialTheme.colorScheme.onSurface
+            val ink = if (active) personalOnAccent() else MaterialTheme.colorScheme.onSurface
             Surface(
                 onClick = { onSelect(index) },
                 shape = RoundedCornerShape(50),
@@ -895,13 +896,13 @@ private fun StudioTakeRail(
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = null,
-                    tint = curio.app.ui.theme.personalOnAccent(),
+                    tint = personalOnAccent(),
                     size = 16.dp
                 )
                 Text(
                     text = "Add take",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = curio.app.ui.theme.personalOnAccent()
+                    color = personalOnAccent()
                 )
             }
         }

@@ -102,6 +102,7 @@ import com.curio.app.features.onboarding.OnboardingScreen
 import com.curio.app.features.personal.BookDetailScreen
 import com.curio.app.features.personal.BookShelfScreen
 import com.curio.app.features.personal.BookReaderScreen
+import com.curio.app.features.personal.BookReviewScreen
 import com.curio.app.features.personal.ChapterScreen
 import com.curio.app.features.personal.JournalEditorScreen
 import com.curio.app.features.personal.JournalListScreen

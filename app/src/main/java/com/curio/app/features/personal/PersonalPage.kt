@@ -6,6 +6,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -390,7 +392,7 @@ internal fun PersonalWritingPage(
 
             // The pill floats INSIDE the writing area, so a swipe away and the
             // undo of it never move a line of the page.
-            AnimatedVisibility(
+            PersonalFloatingLayer(
                 visible = editing && removedRow != null,
                 enter = fadeIn(tween(160)) + slideInVertically(tween(200)) { height -> height / 2 },
                 exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> height / 2 },
@@ -512,6 +514,36 @@ internal fun personalRouteFor(note: PersonalNoteEntity): String = when {
     note.isTodo -> CurioRoutes.todo(note.id)
     note.hasTopic -> CurioRoutes.topicNote(note.id)
     else -> CurioRoutes.journalEditor(note.id)
+}
+
+/**
+ * v389 — A FLOATING LAYER: `AnimatedVisibility` inside a Box that lives inside
+ * a Column.
+ *
+ * Compose ships a `ColumnScope.AnimatedVisibility` overload, and calling the
+ * plain one from a Box nested in a Column makes the compiler pick the SCOPED
+ * overload and then reject it ("cannot be called in this context with an
+ * implicit receiver"). Hoisting the call into this function takes it out of the
+ * Column's implicit scope once, which is all the disambiguation it needs. The
+ * caller still computes its own `Modifier.align(...)`, because that belongs to
+ * the Box it floats in.
+ */
+@Composable
+internal fun PersonalFloatingLayer(
+    visible: Boolean,
+    enter: EnterTransition,
+    exit: ExitTransition,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = enter,
+        exit = exit
+    ) {
+        content()
+    }
 }
 
 /**
