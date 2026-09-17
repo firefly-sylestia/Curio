@@ -172,31 +172,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
     val palette = readerPalette(ReaderLook.inkKey)
 
-    // WHERE THEY ARE, said as a fact about the book — the chapter they are in,
-    // how many marks they have left, the page of the file. It reads the LIVE
-    // position (the list's first block, the pager's current page), so it follows
-    // the reading instead of naming the place the book happened to open at.
-    val positionLabel = when (val loaded = content) {
-        is ReaderContent.Pages -> "Page ${pagerState.currentPage + 1} of ${loaded.pageCount}"
-
-        is ReaderContent.Text -> {
-            val at = loaded.blocks.getOrNull(listState.firstVisibleItemIndex)
-            val place = at?.sectionTitle.orEmpty().ifBlank {
-                at?.let { "Section ${it.section}" }.orEmpty()
-            }
-            val marked = marks.count { !it.isPosition }
-            buildString {
-                append(place)
-                if (marked > 0) {
-                    if (isNotEmpty()) append(" \u00b7 ")
-                    append("$marked marked")
-                }
-            }
-        }
-
-        null -> ""
-    }
-
     // The two things a jump has to reach: the text list and the page pager.
     // Hoisted HERE, to the screen, because the marks and chapter sheets move
     // them — a state that a sheet has to reach is the screen's state, not the
@@ -242,6 +217,31 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             )
             null -> Unit
         }
+    }
+
+    // WHERE THEY ARE, said as a fact about the book — the chapter they are in,
+    // how many marks they have left, the page of the file. It reads the LIVE
+    // position (the list's first block, the pager's current page), so it follows
+    // the reading instead of naming the place the book happened to open at.
+    val positionLabel = when (val loaded = content) {
+        is ReaderContent.Pages -> "Page ${pagerState.currentPage + 1} of ${loaded.pageCount}"
+
+        is ReaderContent.Text -> {
+            val at = loaded.blocks.getOrNull(listState.firstVisibleItemIndex)
+            val place = at?.sectionTitle.orEmpty().ifBlank {
+                at?.let { "Section ${it.section}" }.orEmpty()
+            }
+            val marked = marks.count { !it.isPosition }
+            buildString {
+                append(place)
+                if (marked > 0) {
+                    if (isNotEmpty()) append(" \u00b7 ")
+                    append("$marked marked")
+                }
+            }
+        }
+
+        null -> ""
     }
 
     Box(
@@ -300,6 +300,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         )
                     }
                 )
+
+                // `content` is a delegated property, so the null check above
+                // cannot smart-cast it — this branch is what makes the `when`
+                // exhaustive (the file was still being read a moment ago).
+                null -> Unit
             }
         }
 
@@ -1354,6 +1359,9 @@ private data class ReaderPalette(
     val surface: Color
 )
 
+// @Composable because the default ink asks [isCurioDarkTheme] what the app is
+// wearing — one reader, two themes.
+@Composable
 private fun readerPalette(key: String): ReaderPalette = when (key) {
     "sepia" -> ReaderPalette(
         paper = Color(0xFFF3E7D3),
