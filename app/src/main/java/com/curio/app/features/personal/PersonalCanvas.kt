@@ -1027,7 +1027,10 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * visible characters has none.
      */
     private fun lineFlags(text: String, mask: IntArray): Int {
-        var flags = ALL_FLAGS
+        // Every bit to start with, then AND each visible character's own bits
+        // into it: what survives covers the whole line ([ALL_FLAGS] is the
+        // toolbar's ARRAY, so the mask has its own name — ALL_FLAGS_MASK).
+        var flags = ALL_FLAGS_MASK
         var seen = false
         for (i in text.indices) {
             if (text[i].isWhitespace()) continue

@@ -42,6 +42,15 @@ internal val ALL_FLAGS = intArrayOf(
     FLAG_TITLE, FLAG_SMALL, FLAG_BULLET, FLAG_CHECKBOX
 )
 
+/**
+ * Every style bit in ONE mask — the value a line starts from when the canvas
+ * asks what a whole line is wearing (see `PersonalEditorState.lineFlags`,
+ * which ANDs each character's own bits into it). [ALL_FLAGS] is the toolbar's
+ * ORDER, an array to iterate; this is the same bits as a mask, which is a
+ * different thing and the reason the two are not interchangeable.
+ */
+internal val ALL_FLAGS_MASK = ALL_FLAGS.fold(0) { mask, flag -> mask or flag }
+
 /** An empty mask of [length] characters. */
 internal fun emptyMask(length: Int): IntArray = IntArray(length)
 

@@ -905,7 +905,6 @@ private fun TextPostPreview(
                 SocialPullQuote(
                     words = body.ifBlank { "The words you keep will be set like this" },
                     credit = credit.ifBlank { "Who said it" },
-                    accent = accent,
                     placeholder = body.isBlank() && credit.isBlank()
                 )
                 return@Column
