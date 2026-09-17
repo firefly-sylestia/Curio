@@ -1029,7 +1029,10 @@ private fun TextReader(
             val block = content.blocks[index]
             val highlight = marks.firstOrNull { it.isHighlight && it.positionIndex == index }
             val note = marks.firstOrNull { it.isNote && it.positionIndex == index }
-            val bookmark = marks.firstOrNull { it.markKind == ReaderMarkKind.BOOKMARK && it.positionIndex == index }            ReaderParagraphBlock(
+            val bookmark = marks.firstOrNull {
+                it.markKind == ReaderMarkKind.BOOKMARK && it.positionIndex == index
+            }
+            ReaderParagraphBlock(
                 block = block,
                 palette = palette,
                 highlights = highlightsFor(marks, index),
