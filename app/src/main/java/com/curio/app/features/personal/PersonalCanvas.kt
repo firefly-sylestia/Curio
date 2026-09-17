@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -99,6 +100,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -960,6 +962,19 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** A checklist line's tick — stored with the block (v389). */
     fun checked(id: String): Boolean = blocks[id]?.checked == true
 
+    /** v389 — an attached photo's size on the column (page-wide by default). */
+    fun photoSize(id: String): PersonalPhotoSize =
+        PersonalPhotoSize.fromKey(blocks[id]?.photoSize)
+
+    /** v389 — how big that photo sits. The block is the unit, so this is a
+     *  property of the block, saved with the rest of the page. */
+    fun setPhotoSize(id: String, size: PersonalPhotoSize) {
+        val block = blocks[id] ?: return
+        if (block.isPhoto.not()) return
+        blocks[id] = block.copy(photoSize = size.key)
+        onDocChanged(doc())
+    }
+
     /** The line's bullet marker (the default dot when it never picked one). */
     fun marker(id: String): PersonalMarker = blocks[id]?.markerStyle ?: PersonalMarker.DOT
 
@@ -1804,13 +1819,18 @@ internal fun PersonalCanvas(
                 // where it will land — the same "make room" the to-do rows
                 // have, extended to the rest of the page.
                 val isDragged = rowDrag.draggedId == id
+                // v389 — a PHOTO is carried now too, and a carried block never
+                // shifts on the outer layer: PersonalMovableBlock moves the one
+                // under the finger itself, and shifting it here as well would
+                // double its travel. The same exemption the voice note has.
+                val ownCarry = block.isAudio || block.isPhoto
                 val blockShift by animateFloatAsState(
                     targetValue = if (
-                        isDragged || block.isAudio || state.keepsChecklistRows
+                        isDragged || ownCarry || state.keepsChecklistRows
                     ) 0f else rowDrag.shiftFor(index, state.blockIds.lastIndex),
                     animationSpec = if (
                         !rowDrag.isDragging || isDragged ||
-                            block.isAudio || state.keepsChecklistRows
+                            ownCarry || state.keepsChecklistRows
                     ) snap()
                     else spring(dampingRatio = 0.82f, stiffness = 700f),
                     label = "canvasBlockShift-$index"
@@ -1848,16 +1868,32 @@ internal fun PersonalCanvas(
                         )
                 ) {
                 if (block.isPhoto) {
-                    PersonalPhotoBlock(
-                        uri = block.photo.orEmpty(),
-                        caption = state.caption(id),
-                        ink = ink,
-                        accent = accent,
-                        enabled = enabled,
-                        onCaption = { state.setCaption(id, it) },
-                        onRemove = { state.removeBlock(id) },
-                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
-                    )
+                    // v389 — A PHOTO CAN BE CARRIED TOO (user request: "similiar
+                    // to voive note reorder add for photo reorder too"). Exactly
+                    // the voice note's manner: press and hold, then drag — the
+                    // rows make room, a drop-line says where it lands, and the
+                    // photo's own tap-to-open stands down while it is in the
+                    // air (it reads LocalPersonalBlockCarried).
+                    PersonalMovableBlock(
+                        id = id,
+                        index = index,
+                        state = state,
+                        drag = rowDrag,
+                        enabled = enabled
+                    ) {
+                        PersonalPhotoBlock(
+                            uri = block.photo.orEmpty(),
+                            caption = state.caption(id),
+                            size = state.photoSize(id),
+                            ink = ink,
+                            accent = accent,
+                            enabled = enabled,
+                            onCaption = { state.setCaption(id, it) },
+                            onSize = { state.setPhotoSize(id, it) },
+                            onRemove = { state.removeBlock(id) },
+                            onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                        )
+                    }
                 } else if (block.isAudio) {
                     // v389 — a voice note in the page: the waveform is the block, and
                     // the writing carries on under it. It can also be CARRIED to
@@ -2222,36 +2258,98 @@ internal fun PersonalPagePhoto(
 }
 
 @Composable
+/**
+ * v389 — HOW BIG A PRINT SITS ON THE COLUMN.
+ *
+ * [fraction] is of the writing WRAPPER's own width, never a fixed dp — that is
+ * what keeps a photo inside the text's measure, so a caption or a paragraph can
+ * never end up underneath it (user request: "make sure it follows the text
+ * wrapper style so texts doesnt overlap"). PAGE is the default and is what every
+ * photo placed before this existed already is.
+ */
+internal enum class PersonalPhotoSize(
+    val key: String,
+    val label: String,
+    val fraction: Float
+) {
+    PAGE("page", "Page", 1f),
+    HALF("half", "Half", 0.62f),
+    SMALL("small", "Small", 0.44f);
+
+    companion object {
+        fun fromKey(key: String?): PersonalPhotoSize =
+            entries.firstOrNull { it.key == key } ?: PAGE
+    }
+}
+
+/**
+ * A PHOTO AS A PRINT.
+ *
+ * It used to be a full-width card with a caption field under it, which read as
+ * a box of picture with a form attached (user request: "for the photo preview on
+ * page, mak eit polaroid style but make sure it follows the text wrapper style …
+ * when i say polaroid not the whole polaroid phot but a smal lstyle kind of, and
+ * support multiple photos and also sizes of polaroid"). A print is the shape
+ * itself: the picture, a narrow border, and a wider bottom border with the
+ * caption written in it — and it comes in the three sizes the dock's menu
+ * offers, all of them a fraction of the text's own measure.
+ */
+@Composable
 private fun PersonalPhotoBlock(
     uri: String,
     caption: String,
+    size: PersonalPhotoSize,
     ink: Color,
     accent: Color,
     enabled: Boolean,
     onCaption: (String) -> Unit,
+    onSize: (PersonalPhotoSize) -> Unit,
     onRemove: () -> Unit,
     onOpen: (Rect?) -> Unit
 ) {
     // The preview is deliberately SMALL (it is a note in a page, not a
     // gallery) and its bounds are what the page's overlay grows out of.
     var bounds by remember(uri) { mutableStateOf<Rect?>(null) }
+    // v389 — while this photo is being CARRIED (see PersonalMovableBlock), its
+    // own taps stand down: a finger that is dragging a photo is not asking to
+    // open it, and the remove button must not be a thing that can be pressed
+    // mid-flight. The block underneath is passive until it lands.
+    val carried = LocalPersonalBlockCarried.current
+    val actionable = enabled && !carried
+    var sizeMenu by remember(uri) { mutableStateOf(false) }
+    val imageHeight = when (size) {
+        PersonalPhotoSize.PAGE -> 168.dp
+        PersonalPhotoSize.HALF -> 128.dp
+        PersonalPhotoSize.SMALL -> 100.dp
+    }
+    val captionSize = when (size) {
+        PersonalPhotoSize.PAGE -> 13.sp
+        PersonalPhotoSize.HALF -> 12.sp
+        PersonalPhotoSize.SMALL -> 10.sp
+    }
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(6.dp)
+            // A FRACTION of the wrapper's width, so the print can never be
+            // wider than the words it sits among.
+            .fillMaxWidth(size.fraction)
+            // Shadow BEFORE the fill, and the fill OPAQUE — a translucent one
+            // lets the shadow bleed through the print (see AGENTS rule 11).
+            .shadow(5.dp, RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
+            .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(172.dp)
+                .height(imageHeight)
                 .onGloballyPositioned { bounds = it.boundsInWindow() }
-                .clip(RoundedCornerShape(14.dp))
-                .clickable(enabled = enabled) { onOpen(bounds) }
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color.Black.copy(alpha = 0.06f))
+                .clickable(enabled = actionable) { onOpen(bounds) }
         ) {
-            PersonalPagePhoto(uri = uri, height = 172.dp)
-            if (enabled) {
+            PersonalPagePhoto(uri = uri, height = imageHeight)
+            if (actionable) {
                 Surface(
                     onClick = onRemove,
                     shape = CircleShape,
@@ -2272,37 +2370,138 @@ private fun PersonalPhotoBlock(
                 }
             }
         }
-        if (enabled) {
-            BasicTextField(
-                value = caption,
-                onValueChange = onCaption,
-                singleLine = true,
-                textStyle = TextStyle(
-                    fontFamily = WritingFontFamily,
-                    fontSize = 13.sp,
-                    color = ink.copy(alpha = 0.72f)
-                ),
-                cursorBrush = SolidColor(personalAccentInk()),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                decorationBox = { inner ->
-                    Box {
-                        if (caption.isEmpty()) {
-                            Text(
-                                "Add a caption",
-                                style = TextStyle(
-                                    fontFamily = WritingFontFamily,
-                                    fontSize = 13.sp,
-                                    color = ink.copy(alpha = 0.34f)
+        // ── THE WIDE BOTTOM BORDER, with the caption written in it ────────
+        // This is the whole shape of a print: the picture, then a band of paper
+        // under it carrying what the picture is. Keeping the caption INSIDE the
+        // frame is also what stops it becoming a line of text loose on the page.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 2.dp, end = 0.dp, top = 5.dp, bottom = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            if (enabled) {
+                BasicTextField(
+                    value = caption,
+                    onValueChange = onCaption,
+                    singleLine = true,
+                    textAlign = TextAlign.Center,
+                    textStyle = TextStyle(
+                        fontFamily = WritingFontFamily,
+                        fontSize = captionSize,
+                        color = ink.copy(alpha = 0.72f)
+                    ),
+                    cursorBrush = SolidColor(personalAccentInk()),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 3.dp),
+                    decorationBox = { inner ->
+                        Box(contentAlignment = Alignment.Center) {
+                            if (caption.isEmpty()) {
+                                Text(
+                                    "Add a caption",
+                                    style = TextStyle(
+                                        fontFamily = WritingFontFamily,
+                                        fontSize = captionSize,
+                                        color = ink.copy(alpha = 0.34f)
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+                            }
+                            inner()
+                        }
+                    }
+                )
+            } else if (caption.isNotBlank()) {
+                Text(
+                    caption,
+                    modifier = Modifier.weight(1f),
+                    style = TextStyle(
+                        fontFamily = WritingFontFamily,
+                        fontSize = captionSize,
+                        color = ink.copy(alpha = 0.72f)
+                    ),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (actionable) {
+                // The size the print sits at — in the frame's own border, where
+                // a print's own mark would be.
+                Box {
+                    Surface(
+                        onClick = { sizeMenu = true },
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        modifier = Modifier.size(26.dp)
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            PrintSizeGlyph(ink.copy(alpha = 0.42f))
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = sizeMenu,
+                        onDismissRequest = { sizeMenu = false }
+                    ) {
+                        PersonalPhotoSize.entries.forEach { option ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        option.label,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontFamily = WritingFontFamily
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (option == size) {
+                                        CurioIcon(
+                                            CurioIcons.Check,
+                                            null,
+                                            tint = personalAccentInk(),
+                                            size = 17.dp
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onSize(option)
+                                    sizeMenu = false
+                                }
                             )
                         }
-                        inner()
                     }
                 }
-            )
+            }
         }
+    }
+}
+
+/** Two prints, one big and one small — the size tool's own mark. Drawn rather
+ *  than taken from the icon subset, so it says "how big" at 16dp. */
+@Composable
+private fun PrintSizeGlyph(tint: Color) {
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(16.dp)) {
+        val stroke = 1.4f.dp.toPx()
+        val big = Size(size.width * 0.62f, size.height * 0.62f)
+        val small = Size(size.width * 0.44f, size.height * 0.44f)
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(0f, 0f),
+            size = big,
+            cornerRadius = CornerRadius(1.5f.dp.toPx()),
+            style = Stroke(width = stroke)
+        )
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(size.width - small.width, size.height - small.height),
+            size = small,
+            cornerRadius = CornerRadius(1.5f.dp.toPx()),
+            style = Stroke(width = stroke)
+        )
     }
 }
 
@@ -2362,17 +2561,32 @@ internal fun PersonalDocView(
                 // A saved page shows the picture SMALL — it is a page of
                 // writing, not a gallery — and hands its bounds to the
                 // overlay so tapping it grows out of exactly here.
+                //
+                // v389 — AND IT SHOWS THE PRINT THE EDITOR DRAWS: the size the
+                // member chose (a fraction of the text's own measure, so nothing
+                // can ever land on top of it), the same paper frame, and the
+                // caption in the frame's wide bottom border. Reading a page back
+                // has to look like the page that was written (see
+                // PersonalPhotoBlock, which owns the shape).
                 var bounds by remember(block.photo) { mutableStateOf<Rect?>(null) }
+                val printSize = PersonalPhotoSize.fromKey(block.photoSize)
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(printSize.fraction)
                         .onGloballyPositioned { bounds = it.boundsInWindow() }
-                        .clip(RoundedCornerShape(16.dp))
+                        .shadow(5.dp, RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
+                        .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
                         .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
                 ) {
                     PersonalPagePhoto(
                         uri = block.photo.orEmpty(),
-                        height = 156.dp
+                        height = when (printSize) {
+                            PersonalPhotoSize.PAGE -> 168.dp
+                            PersonalPhotoSize.HALF -> 128.dp
+                            PersonalPhotoSize.SMALL -> 100.dp
+                        }
                     )
                     if (block.caption.isNotBlank()) {
                         Text(
@@ -2382,7 +2596,12 @@ internal fun PersonalDocView(
                                 fontSize = 13.sp,
                                 color = ink.copy(alpha = 0.62f)
                             ),
-                            modifier = Modifier.padding(top = 6.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 5.dp, bottom = 5.dp),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

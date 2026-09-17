@@ -482,6 +482,8 @@ internal fun PersonalVoiceBar(
     var isPlaying by rememberSaveable(path) { mutableStateOf(false) }
     var position by rememberSaveable(path) { mutableLongStateOf(0L) }
     var duration by rememberSaveable(path) { mutableLongStateOf(seconds * 1000L) }
+    /** The ✕ holds here until the member says yes (see the dialog below). */
+    var confirmRemove by remember(path) { mutableStateOf(false) }
 
     // A stored audio path is an absolute file path — wrap it, or ExoPlayer's
     // data source parses it as a schemeless URI and plays nothing.
@@ -555,12 +557,19 @@ internal fun PersonalVoiceBar(
         }
     }
 
+    // NO CONTAINER (v389): the note used to sit in a rounded surfaceContainerLow
+    // box, which made a recording look like a card parked in the writing rather
+    // than part of it (user request: "it shows on the page as a box, but i want
+    // it with the graph only and the play and cross button no backgroud"). What
+    // is left is the three things the note actually is — a play button, the
+    // waveform, and the clock — sitting on the page itself, starting where the
+    // paragraph starts. The LIFT while it is being carried still comes from
+    // PersonalMovableBlock, which is the only state that had any business
+    // drawing a surface here.
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(start = 6.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+            .padding(end = 8.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -645,7 +654,13 @@ internal fun PersonalVoiceBar(
         )
         if (onRemove != null) {
             Surface(
-                onClick = onRemove,
+                // v389 — ASKS FIRST. The ✕ sits beside the play button, on the
+                // page, where a mis-tap during a scrub is easy — and what it
+                // destroys is a recording that cannot be made again (user
+                // request: "the cross button should ask for confimation before
+                // deleting it"). The dialog names the cost; the audio file is
+                // only unlinked on the confirm.
+                onClick = { confirmRemove = true },
                 shape = CircleShape,
                 color = Color.Transparent,
                 modifier = Modifier.size(30.dp)
@@ -660,6 +675,26 @@ internal fun PersonalVoiceBar(
                 }
             }
         }
+    }
+    if (confirmRemove) {
+        AlertDialog(
+            onDismissRequest = { confirmRemove = false },
+            title = { Text("Remove this voice note?") },
+            text = {
+                Text("The recording goes with it, and a recording cannot be made again.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmRemove = false
+                        onRemove?.invoke()
+                    }
+                ) { Text("Remove") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmRemove = false }) { Text("Keep it") }
+            }
+        )
     }
 }
 

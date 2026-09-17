@@ -468,8 +468,10 @@ private fun MoodSelector(
         Surface(
             onClick = { open = !open },
             shape = RoundedCornerShape(50),
-            color = if (selected != null) personalAccent().copy(alpha = 0.24f)
-            else MaterialTheme.colorScheme.surfaceContainer
+            // The pill wears the CHOSEN feeling's ink, so the collapsed state
+            // and the options below it are visibly the same thing.
+            color = selected?.let { personalMoodInk(it).copy(alpha = 0.20f) }
+                ?: MaterialTheme.colorScheme.surfaceContainer
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -480,7 +482,7 @@ private fun MoodSelector(
                     CurioIcon(
                         personalMoodGlyph(selected),
                         null,
-                        tint = personalAccentInk(),
+                        tint = personalMoodInk(selected),
                         size = 17.dp
                     )
                 }
@@ -489,12 +491,12 @@ private fun MoodSelector(
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = if (selected != null) personalAccentInk() else ink.copy(alpha = 0.6f)
+                    color = if (selected != null) ink else ink.copy(alpha = 0.6f)
                 )
                 CurioIcon(
                     if (open) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
                     null,
-                    tint = if (selected != null) personalAccentInk() else ink.copy(alpha = 0.5f),
+                    tint = ink.copy(alpha = 0.5f),
                     size = 18.dp
                 )
             }
@@ -504,37 +506,122 @@ private fun MoodSelector(
             enter = expandVertically(tween(180)) + fadeIn(tween(140)),
             exit = shrinkVertically(tween(140)) + fadeOut(tween(110))
         ) {
-            Row(
+            // v389 — SIX NAMED OPTIONS, IN TWO ROWS.
+            //
+            // They used to be six icon-only chips squeezed into one row at equal
+            // width: on a phone that is a row of grey faces roughly 44dp wide,
+            // with no words at all, so telling Calm from Curious meant guessing
+            // at a glyph (user request: "also redeign the how did the day feel
+            // option"). Now each mood is a chip that SAYS ITS NAME, gives the
+            // feeling its own ink, and ticks when it is the one the day felt.
+            Column(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                PersonalMood.entries.forEach { mood ->
-                    val on = mood == selected
-                    Surface(
-                        onClick = {
-                            onSelect(if (on) null else mood)
-                            open = false
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = if (on) personalAccent() else MaterialTheme.colorScheme.surfaceContainer,
-                        modifier = Modifier.weight(1f)
+                PersonalMood.entries.chunked(2).forEach { pair ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Box(
-                            modifier = Modifier.height(38.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CurioIcon(
-                                personalMoodGlyph(mood),
-                                mood.label,
-                                tint = if (on) personalOnAccent() else personalAccentInk(),
-                                size = 18.dp
+                        pair.forEach { mood ->
+                            MoodOption(
+                                mood = mood,
+                                on = mood == selected,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    onSelect(if (mood == selected) null else mood)
+                                    open = false
+                                }
                             )
                         }
+                        // An odd number of moods leaves the last row half full.
+                        // The blank keeps every chip the same width rather than
+                        // letting the last one stretch across the page.
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
             }
         }
     }
+}
+
+/**
+ * v389 — ONE FEELING, AS AN OPTION.
+ *
+ * The disc carries the mood's own ink whether or not it is picked, so the six
+ * read as six DIFFERENT feelings instead of six grey glyphs that only light up
+ * after the choice has been made — and the chip is a chip rather than a button,
+ * which is what makes a row of them read as a set of states to choose from.
+ */
+@Composable
+private fun MoodOption(
+    mood: PersonalMood,
+    on: Boolean,
+    ink: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val tint = personalMoodInk(mood)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = if (on) tint.copy(alpha = 0.20f)
+        else MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = if (on) tint else tint.copy(alpha = 0.20f),
+                modifier = Modifier.size(27.dp)
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        personalMoodGlyph(mood),
+                        mood.label,
+                        tint = if (on) personalOnAccent() else tint,
+                        size = 16.dp
+                    )
+                }
+            }
+            Text(
+                mood.label,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Medium
+                ),
+                color = if (on) ink else ink.copy(alpha = 0.72f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (on) {
+                CurioIcon(CurioIcons.Check, null, tint = tint, size = 15.dp)
+            }
+        }
+    }
+}
+
+/**
+ * v389 — A FEELING'S OWN INK.
+ *
+ * The marker pens' four colours proved the point on this page (see
+ * personalHighlightInk), so the moods borrow the same language: each feeling
+ * gets a colour that means it, drawn from the journal's own palette rather than
+ * the theme's accent — because six chips in one accent say "these are six
+ * buttons", and six chips in six inks say "these are six different days".
+ */
+internal fun personalMoodInk(mood: PersonalMood): Color = when (mood) {
+    PersonalMood.CALM -> Color(0xFF7FA8C9)
+    PersonalMood.HAPPY -> Color(0xFFE0A33C)
+    PersonalMood.CURIOUS -> Color(0xFF8FB08A)
+    PersonalMood.INSPIRED -> Color(0xFFD98A8A)
+    PersonalMood.TIRED -> Color(0xFF9B8AA6)
+    PersonalMood.HEAVY -> Color(0xFF6E6A72)
 }
 
 // v389 — the eye/pen switch (ModeButton + EyeGlyph) moved to PersonalPage.kt
@@ -572,7 +659,14 @@ private fun JournalReadView(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                CurioIcon(personalMoodGlyph(mood), null, tint = ink.copy(alpha = 0.55f), size = 15.dp)
+                // The mood's own ink here too, so the day's feeling reads the
+                // same colour whether it is being picked or read back.
+                CurioIcon(
+                    personalMoodGlyph(mood),
+                    null,
+                    tint = personalMoodInk(mood).copy(alpha = 0.85f),
+                    size = 15.dp
+                )
                 Text(
                     mood.label,
                     style = MaterialTheme.typography.labelSmall,

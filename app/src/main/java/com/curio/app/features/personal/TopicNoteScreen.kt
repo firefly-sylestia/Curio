@@ -325,10 +325,20 @@ private fun TopicNoteTopBar(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
+                // THE TOPIC'S NAME IS NOT REPEATED HERE.
+                //
+                // It has a proper home on the page in both modes — the pinned
+                // card while writing, the heading while reading — so naming it
+                // in the bar as well made the page say the same thing twice
+                // (user report: "the note on a topic, it shows duplicate topic
+                // name in view fix that too"). This line carries the LANE
+                // instead, which is the one thing about the note the page does
+                // not already say; it falls back to the topic's own name only
+                // when there is no lane to name.
                 listOfNotNull(
-                    topicName.ifBlank { null },
-                    categoryName.ifBlank { null }
-                ).joinToString(" · ").ifBlank { "Pick a topic to write about" },
+                    categoryName.ifBlank { null },
+                    topicName.ifBlank { null }.takeIf { categoryName.isBlank() }
+                ).joinToString(" \u00b7 ").ifBlank { "Pick a topic to write about" },
                 style = MaterialTheme.typography.labelSmall,
                 color = ink.copy(alpha = 0.55f),
                 maxLines = 1,

@@ -73,7 +73,17 @@ data class PersonalRun(
      * a file — and a build that does not know the key sets the page's own face,
      * which is a note that looks plain, never a note that looks broken.
      */
-    val font: String = ""
+    val font: String = "",
+    /**
+     * v389 — HOW BIG AN ATTACHED PHOTO SITS on the writing column: one of
+     * [PersonalPhotoSize]'s keys, or "" for a page-wide print.
+     *
+     * A key rather than a dp value: a photo placed before this existed is
+     * [PersonalPhotoSize.PAGE], which is what it already looked like, so the
+     * field costs old notes nothing and a future size is a new key rather than
+     * a re-layout of everybody's pages.
+     */
+    val photoSize: String = ""
 )
 
 /** Alignment of one block's paragraph. */
@@ -284,6 +294,7 @@ object PersonalDocCodec {
             b.addProperty("text", block.text)
             b.addProperty("photo", block.photo)
             b.addProperty("caption", block.caption)
+            if (block.photoSize.isNotEmpty()) b.addProperty("ps", block.photoSize)
             b.addProperty("align", block.align.name)
             // v389 — a ticked checklist line and a line's bullet marker. Both
             // are omitted at their defaults, so every page written before this
@@ -368,6 +379,9 @@ object PersonalDocCodec {
                 runs = runs,
                 photo = b.get("photo")?.takeIf { !it.isJsonNull }?.asString,
                 caption = b.str("caption"),
+                // v389 — absent on an older note, which reads as a page-wide
+                // print: exactly how that note already looked.
+                photoSize = b.str("ps"),
                 align = runCatching {
                     PersonalAlign.valueOf(b.str("align").ifBlank { PersonalAlign.START.name })
                 }.getOrDefault(PersonalAlign.START),

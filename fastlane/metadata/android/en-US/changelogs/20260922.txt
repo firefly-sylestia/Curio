@@ -1,4 +1,7 @@
 FIX:
+- Writing: a voice note is no longer a box — it is the waveform, the play button and the clock on the page itself, with the ✕ asking before it throws a recording away.
+- Writing: a note on a topic says the topic once — the bar carries the lane now, instead of repeating the name the page already shows.
+- Journals: the day's mood is six named chips in each feeling's own colour, instead of six grey glyphs to guess at.
 - Save your take: a note's tool bar appears while you are writing in it and folds away when you stop — tap the blank space beside a note to end the typing — instead of a formatting row parked under every note on the page.
 - Writing: a marker's colour and the face a line is set in travel with the words, so both survive Enter, a paste and reopening the page.
 - Reading: tapping the page brings the head and foot back — they used to hide themselves and then be unreachable, because every paragraph swallowed the tap.
@@ -10,6 +13,8 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Writing: a photo is a print now — a page, half or small one chosen from the frame's own corner, sized as a share of the text's measure so nothing can ever land on top of it, with the caption written in the frame's wide bottom border.
+- Writing: a photo can be picked up and carried to another place on the page, exactly like a voice note.
 - Writing: a marker pen on the dock — four inks (amber, rose, sage, sky), the same four a book is marked with. Mark a selection outright, or arm a pen for the words you type next; the button wears the pen it is about to lay down.
 - Writing: a font menu — the four faces the app already bundles (serif, sans, mono, display), with the menu itself set in each face and the button a lettered specimen of the face in use.
 - Writing: right and justified now join left and centred, so every alignment a line can wear is one tap on the dock.

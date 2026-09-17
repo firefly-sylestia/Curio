@@ -2757,7 +2757,46 @@ book review AND the chapter review: the same floating mic, permission door, caps
 replaces-the-dock, and leave-guard the journal already has. The book review's mic
 sits at the bottom-LEFT to keep clear of the Add-chapter pill.
 
-## next prompt
+## Request (2026-09-17, batch D — the page's own surfaces)
+
+Verbatim summary: fully redesign avatars 1, 5, 7, 9, 10, 11, 12, 15, 16, 17 and fix the
+eyes that do not match, refining the rest's detail; the note on a topic shows the topic
+name twice in the view; the voice note is a box on the page but should be the graph with
+play and cross and no background, the cross asking before it deletes; photos want the
+same carry the voice note has; the in-page photo should be a small polaroid that follows
+the text wrapper (so text never overlaps), with multiple photos and polaroid sizes, side
+by side or wherever the member puts them; and redesign "how did the day feel".
+
+**Status (2026-09-17): DONE except the avatars — committed, NOT pushed (the user asked
+to be asked first).**
+
+- The topic note's bar no longer repeats the topic's name: it carries the LANE, which is
+  the one thing about the note the page does not already say (the name has a home in both
+  modes — the pinned card while writing, the heading while reading).
+- The voice note is backgroundless: the container came off `PersonalVoiceBar`, so what is
+  left is the play button, the waveform and the clock sitting on the page. The ✕ now
+  opens a dialog naming the cost, and the audio file is only unlinked on the confirm.
+- Photos can be carried: `PersonalMovableBlock` (the voice note's own machinery) wraps the
+  photo block, and the photo's tap-to-open and remove stand down while it is in the air
+  (it reads `LocalPersonalBlockCarried`).
+- Photos are PRINTS: `PersonalPhotoSize` (page / half / small) stored per block as a key
+  (`ps`, absent = page, so old notes are untouched), drawn as a share of the text
+  wrapper's width with shadow-before-opaque-fill, the caption inside the frame's wide
+  bottom border — and the READ side draws the identical print, because a page read back
+  has to look like the page that was written.
+- "How did the day feel" is six NAMED chips in two rows, each in the feeling's own ink
+  (`personalMoodInk`), with a tick on the picked one; the collapsed pill wears the chosen
+  feeling's colour. The old chip row was six icon-only buttons ~44dp wide with no words.
+
+**Still open from this prompt:** the avatar redesign (nos. 1, 5, 7, 9, 10, 11, 12, 15, 16,
+17, the eye matches and the general detail pass) — `SocialAvatar.kt`'s 28 portraits. And the
+"side by side" half of the photo ask: a photo can be sized and carried, but two small
+prints do not yet share a row.
+
+## older prompt — avatar redesign
 , now i want you to fully redesign these avatar, like fully chnage avatar no. 1,5,7,9,10,11,12,15,16,17,
 also many of them still dont match the eye properly so fix it and refine the others details. also the note on a topic, it shows duplicate topic name in view fix that too. 
 and for voice note on journal and all, it shows on the page as a box, but i want it with the graph only and the play and cross button no backgroud, also the cross button should ask for confimation before deleting it. also similiar to voive note reorder add for photo reorder too. and for the photo preview on page, mak eit polaroid style but make sure it follows the text wrapper style so texts doesnt overlap, when i say polaroid not the whole polaroid phot but a smal lstyle kind of, and support multiple photos and also sizes of polaroid. make them be next to each other or wherver the user wants them. and before pushing use ask user to ask me also redeign the how did the day feel option. 
+
+## next prompt
+https://github.com/firefly-sylestia/mcu-viewing-order lets add this as a secret, so i think it have all of the movies and series of marvel and x men etc i want you to add them, but they are not visible to normal user at all. also properly categories the movies and series, and make a new screen with marvel, sony, x men, option with the list with proper viewing order etc. from that repo, and essential etc. no trailer info, just watch and bookmark save and drop and etc status, in list and grid view, with its own buttm nav page style, and this screen can be acessed if the user types, " i love you 3000" and the button will be in home screen floating ith name as incursion. 
