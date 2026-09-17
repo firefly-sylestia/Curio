@@ -54,10 +54,17 @@ Undo pill, ~5 s**.
    so reordering cannot scramble remembered state. The row order IS the stored
    document. Still to do in this item: nothing (`moveBlock` commits the order the
    way it reads).
-3. **The book page's READ-FIRST eye:** an eye/pen switch on the book page, the eye
-   the default once the book has writing, the About-this-book block collapsed
-   (and still editable) while writing, a leaving flush for the chapter review
-   (the same gap the journal page had), and the attached-file Read pill there.
+3. **The book page's READ-FIRST eye: DONE (this slice).** `PersonalModeSwitch` in
+   the book page's `PersonalHeader` action slot, seeded ONCE to read when the book
+   has writing (pen when empty), the look-up/download pills and the blurb field
+   behind `if (editing)`, `SynopsisCard(collapsed = editing)` folded with a tap to
+   open, and the chapter-row delete button behind the eye. `BookReviewScreen`
+   got the leaving flush the chapter page was missing (its own
+   `SupervisorJob` scope on dispose).
+   STILL OPEN: "also let user edit it" — the About-this-book text is folded and
+   readable but NOT yet editable (it is the fetched description; making it
+   member-editable needs its own field so a lookup cannot overwrite it). Asked
+   for confirmation before adding.
 4. **The attached file: DONE (this slice).** `documentPath` on `personal_books`
    (migration 17 → 18) + `BookFiles` (copies a picked PDF/EPUB/txt into
    `filesDir/books/<bookId>.<ext>`) + `PersonalDao.setDocument` (a
@@ -77,10 +84,12 @@ Undo pill, ~5 s**.
    STILL OPEN: the `bookForCatalog` bridge proof (chapter notes from the topic's
    Book Notes sheet and from the shelf's chapter page being one row) — the
    existing `ChapterNoteBridge` should already do this; needs a read-through.
-6. **The universal review:** one writing page per book holding the whole-book
-   review, a floating "add chapter" button inserting a title-style chapter line
-   into that same page, existing chapter reviews folded in at their markers when
-   read, and everything saved on the way out.
+6. **The universal review: DONE (this slice).** `BookReviewScreen.kt` +
+   `CurioRoutes.BOOK_REVIEW` (`books/{bookId}/review`) + `saveBookReview`
+   (`chapterIndex = null`) + `PersonalEditorState.insertTitleLine()` behind a
+   floating "Add chapter" pill + `PersonalDocView(afterTitle = …)` folding each
+   chapter's own review under the marker that names it + the leaving flush. The
+   book page carries a `BookReviewDoor` into it.
 
 ---
 

@@ -1018,6 +1018,30 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         onDocChanged(doc())
     }
 
+    /**
+     * v389 — "ADD CHAPTER": a marker lands on the page as its own TITLE line,
+     * with the caret on it and the line ARMED as a title, so the chapter's name
+     * arrives as the heading it is (the same mechanism the dock's title button
+     * uses).
+     *
+     * It is an ordinary block in the ordinary order — which is exactly what
+     * lets a book's whole review stay ONE page: the markers are prose, and the
+     * read view folds a chapter's own review in under the marker that names it.
+     */
+    fun insertTitleLine() {
+        val after = focusedId?.let { order.indexOf(it) }?.takeIf { it >= 0 }
+            ?: order.indexOfLast { id -> !(blocks[id]?.isPhoto ?: false) }
+        val at = if (after < 0) order.size else (after + 1).coerceAtMost(order.size)
+        val block = PersonalBlock(id = newBlockId())
+        order.add(at, block.id)
+        blocks[block.id] = block
+        masks[block.id] = emptyMask(0)
+        caret = PersonalCaret(block.id, 0)
+        focusedId = block.id
+        armed = FLAG_TITLE
+        onDocChanged(doc())
+    }
+
     /** Focus + caret request the canvas consumes on its next frame. */
     fun requestCaret(id: String, index: Int = 0) {
         caret = PersonalCaret(id, index)
@@ -1429,7 +1453,14 @@ internal fun PersonalDocView(
     modifier: Modifier = Modifier,
     ink: Color = MaterialTheme.colorScheme.onSurface,
     accent: Color = personalAccent(),
-    onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> }
+    onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
+    /**
+     * v389 — a TITLE line can carry a FOLD. The book's whole-book review uses
+     * its title lines as chapter markers, so it folds each chapter's own
+     * review in right under the marker that names it; every other page passes
+     * nothing and reads exactly as it did.
+     */
+    afterTitle: (@Composable (String) -> Unit)? = null
 ) {
     val quoteRule = personalQuoteRule()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
@@ -1559,6 +1590,7 @@ internal fun PersonalDocView(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+                if (isTitle) afterTitle?.invoke(text)
             }
         }
     }

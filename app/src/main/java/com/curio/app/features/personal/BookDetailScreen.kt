@@ -228,6 +228,22 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
 
     var pendingReviewDelete by remember { mutableStateOf<PersonalNoteEntity?>(null) }
 
+    // ── READ FIRST (v389) ──────────────────────────────────────────────
+    // The page used to open as the book VIEW every time — description, look-up
+    // pills, progress steppers — even for a member who only wanted to read back
+    // what they had written. Now the head carries the same eye/pen switch the
+    // journal pages use: a book with writing opens READING, a book with nothing
+    // written opens with the pen down, and the switch is the member's from then
+    // on (the seed runs ONCE, when the notes first arrive, so it can never
+    // override a toggle they just made).
+    var editing by remember(bookId) { mutableStateOf(true) }
+    var modeSeeded by remember(bookId) { mutableStateOf(false) }
+    LaunchedEffect(notes) {
+        if (modeSeeded) return@LaunchedEffect
+        modeSeeded = true
+        if (notes.isNotEmpty()) editing = false
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -239,7 +255,10 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         PersonalHeader(
             title = current?.title ?: " ",
             subtitle = current?.author.orEmpty().ifBlank { "Your book" },
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            action = {
+                PersonalModeSwitch(editing = editing, onToggleMode = { editing = it })
+            }
         )
 
         if (current == null) {
@@ -261,8 +280,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         val chapterCount = maxOf(total, chapters.size, highestWritten, 1)
 
         // The list keeps the column's weight (the reader is a separate screen),
-        // and the Read pill floats OVER it so it is reachable wherever the
-        // member has scrolled to.
+        // and the Read pill floats OVER it so it is reachable wherever the        // member has scrolled to.
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -320,9 +338,14 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
+                            // The app's own doors belong to the WRITING side: a
+                            // reader does not need "look it up" or a download
+                            // search sitting over the words they came back for.
+                            if (editing) {
                                 LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
                                 DownloadPill(enabled = true) { downloadSheet = true }
                             }
+                        }
                             if (lookingUp || lookupNote != null) {
                                 Spacer(Modifier.height(6.dp))
                                 Text(
@@ -331,6 +354,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
                                 )
                             }
+                        if (editing) {
                             Spacer(Modifier.height(12.dp))
                             BlurbField(
                                 value = blurb,
@@ -340,6 +364,26 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         }
                     }
                 }
+            }
+
+            // v389 — THE WHOLE-BOOK REVIEW. One page for the book itself
+            // (CurioRoutes.BOOK_REVIEW), with chapter markers the member can
+            // drop in as they go — so writing about a book is not a
+            // chapter-by-chapter errand any more.
+            item("book-review") {
+                val whole = notes.firstOrNull { it.chapterIndex == null }
+                BookReviewDoor(
+                    preview = whole?.preview.orEmpty(),
+                    words = whole?.let { it.doc.wordsLabel() }.orEmpty(),
+                    hasWriting = whole != null,
+                    ink = MaterialTheme.colorScheme.onBackground,
+                    onClick = {
+                        navController.navigate(CurioRoutes.bookReview(bookId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
 
                 item("progress") {
                     ProgressCard(
@@ -380,12 +424,18 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 // is here offline too). The card says which of the two it is.
                 val about = catalogSynopsis.ifBlank { current.synopsis }
                 if (about.isNotBlank()) {
-                    item("synopsis") {
-                        SynopsisCard(
-                            synopsis = about,
-                            source = if (catalogSynopsis.isNotBlank()) "Curio catalog" else "Open Library"
-                        )
-                    }
+                item("synopsis") {
+                    SynopsisCard(
+                        synopsis = about,
+                        source = if (catalogSynopsis.isNotBlank()) "Curio catalog" else "Open Library",
+                        // v389 — while the member is WRITING, the description is
+                        // folded to a line: it is a thing to read, not a thing
+                        // to scroll past on the way to their own words. Tap it
+                        // and it opens. ("keep the about this book but as
+                        // Collapsed when writing")
+                        collapsed = editing
+                    )
+                }
                 }
 
                 item("chapters-title") {
@@ -402,8 +452,11 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
 
                 items(
                     count = chapterCount,
-                    key = { index -> "chapter-${index + 1}" }
-                ) { index ->
+                    key = { index -> "chapter-${index + 1}" },
+                    // v389 — the eye is a READING eye: in read mode a chapter
+                    // row carries no delete button, so the page cannot be
+                    // changed by accident while it is being read.
+                    ) { index ->
                     val chapter = index + 1
                     val review = notes.firstOrNull { it.chapterIndex == chapter }
                     ChapterCard(
@@ -1000,15 +1053,24 @@ private fun LookUpPill(lookingUp: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** The catalog's own blurb for the book, when Curio has one. */
+/**
+ * The catalog's own blurb for the book, when Curio has one.
+ *
+ * v389 — it can arrive COLLAPSED: while the member is writing, the description
+ * is one line with the source beside it, and a tap opens the whole thing. The
+ * words themselves are untouched either way, so a collapsed card is folded, not
+ * hidden.
+ */
 @Composable
-private fun SynopsisCard(synopsis: String, source: String) {
+private fun SynopsisCard(synopsis: String, source: String, collapsed: Boolean = false) {
     val ink = MaterialTheme.colorScheme.onSurface
     val accent = personalAccent()
+    // The tap opens it; the mode only decides where it STARTS.
+    var open by remember(collapsed) { mutableStateOf(!collapsed) }
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().clickable { if (collapsed) open = !open }
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(
@@ -1035,16 +1097,102 @@ private fun SynopsisCard(synopsis: String, source: String) {
                     style = MaterialTheme.typography.labelSmall,
                     color = ink.copy(alpha = 0.4f)
                 )
+                if (collapsed) {
+                    CurioIcon(
+                        if (open) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                        if (open) "Fold the description" else "Open the description",
+                        tint = ink.copy(alpha = 0.45f),
+                        size = 18.dp
+                    )
+                }
             }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                synopsis,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = LoraFontFamily,
-                    fontSize = 14.sp,
-                    lineHeight = 24.sp
-                ),
-                color = ink.copy(alpha = 0.82f)
+            if (open) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    synopsis,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = LoraFontFamily,
+                        fontSize = 14.sp,
+                        lineHeight = 24.sp
+                    ),
+                    color = ink.copy(alpha = 0.82f)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * v389 — THE BOOK'S OWN REVIEW, AS A DOOR.
+ *
+ * One page for the whole book (CurioRoutes.BOOK_REVIEW). It shows what the
+ * member already wrote — the first words and how much of it there is — or, when
+ * the page is blank, what the page is FOR, and it opens either way: writing
+ * about a book should not be an expedition through its chapters.
+ */
+@Composable
+private fun BookReviewDoor(
+    preview: String,
+    words: String,
+    hasWriting: Boolean,
+    ink: Color,
+    onClick: () -> Unit
+) {
+    val accent = personalAccent()
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(13.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = accent.copy(alpha = 0.22f),
+                modifier = Modifier.size(38.dp)
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        CurioIcons.MenuBook,
+                        null,
+                        tint = personalAccentInk(),
+                        size = 19.dp
+                    )
+                }
+            }
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "Book review",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontFamily = FrauncesFontFamily,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = ink
+                )
+                Text(
+                    text = if (hasWriting) {
+                        listOfNotNull(
+                            words.takeIf { it.isNotBlank() },
+                            preview.takeIf { it.isNotBlank() }
+                        ).joinToString(" \u00b7 ").ifBlank { "Open to keep writing" }
+                    } else {
+                        "The whole book at once"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.55f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            CurioIcon(
+                CurioIcons.ChevronRight,
+                null,
+                tint = ink.copy(alpha = 0.4f),
+                size = 18.dp
             )
         }
     }

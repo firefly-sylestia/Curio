@@ -1073,6 +1073,22 @@ fun CurioNavHost(
                     bookId = entry.arguments?.getString("bookId").orEmpty()
                 )
             }
+            // v389 — a book's OWN review: one page for the whole book, with a
+            // floating door that drops a chapter marker into it.
+            composable(
+                route = CurioRoutes.BOOK_REVIEW,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) { entry ->
+                val photos = rememberPersonalPhotoOverlayState()
+                Box(Modifier.fillMaxSize()) {
+                    BookReviewScreen(
+                        navController = navController,
+                        bookId = entry.arguments?.getString("bookId").orEmpty(),
+                        photos = photos
+                    )
+                    PersonalPhotoOverlay(photos)
+                }
+            }
             composable(
                 route = CurioRoutes.CHAPTER,
                 arguments = listOf(

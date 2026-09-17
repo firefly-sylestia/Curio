@@ -3,6 +3,8 @@ ADD:
 - Books: a book added from the open library now arrives with its real chapter names and page ranges, read from the edition's own table of contents.
 - Books: a photo on a page now grows out of where you tapped it — no screen change, the page stays behind it.
 - Books: the "+" sheet has two new doors — a note on any topic, and a to-do list.
+- Books: a book page opens on the review side when there is writing — the eye reads it back, the pen turns the page into its notebook; a book with nothing written still opens ready to write.
+- Books: one page for the WHOLE book — review the book itself instead of going chapter by chapter, and drop chapter markers into that same page with a floating "Add chapter" button. Open a book's chapter review under the marker that names it, all on the one page.
 - Books: a floating "Read" pill on a book — wire it a PDF or EPUB you already have and Curio reads it in its own reader, with a cover that is a cover again.
 - Books: a "Download help" pill on the book page searches the web for a PDF or EPUB copy.
 - Books: "Look it up" now tells you what it found (chapters, pages, the description) or why it found nothing.
@@ -26,6 +28,8 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Books: the description folds to a line while you are writing and opens on a tap, instead of pushing your own words down the page.
+- Books: a chapter review saves itself even when you back straight out of the page (the last change used to be lost).
 - Cabinet: "Curiying now" counts and lists the shelf books you are part-way through, instead of only the items saved onto that shelf.
 - Books: a file you add is COPIED into Curio's own storage, so the book keeps opening offline instead of dying with the picker's permission — and the file no longer takes the book's name (a book keeps the name it has).
 - Books: a book added from a file draws its own cover instead of trying to show the PDF as a picture.

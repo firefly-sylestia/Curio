@@ -381,6 +381,14 @@ object CurioRoutes {
     }
     /** One to-do list ([PERSONAL_NEW] starts a blank one). */
     fun todo(entryId: String) = "todo/$entryId"
+    /**
+     * ONE BOOK'S OWN REVIEW (v389): the whole-book page, where the member
+     * writes about the book as a whole and can drop chapter markers in with a
+     * floating button instead of writing chapter by chapter. A book's own
+     * note is a `personal_notes` row with `chapterIndex = null`.
+     */
+    const val BOOK_REVIEW = "books/{bookId}/review"
+    fun bookReview(bookId: String) = "books/${Uri.encode(bookId)}/review"
     /** One book on the personal shelf. */
     const val BOOK_READER = "books/{bookId}/reader"
     fun bookDetail(bookId: String) = "books/${Uri.encode(bookId)}"

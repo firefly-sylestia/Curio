@@ -203,6 +203,30 @@ class PersonalRepository(private val dao: PersonalDao) {
     }
 
     /**
+     * v389 — THE BOOK'S OWN REVIEW: one note per book with NO chapter index,
+     * the whole-book page the member writes in instead of going chapter by
+     * chapter. It keeps its identity the same way a chapter's review does (a
+     * re-open edits the same row), and it deliberately does NOT move the
+     * reading progress: a whole-book review is not a chapter you finished.
+     */
+    suspend fun saveBookReview(bookId: String, document: PersonalDoc): PersonalNoteEntity {
+        val existing = dao.bookNotes(bookId).firstOrNull { it.chapterIndex == null }
+        return saveNote(
+            PersonalNoteEntity(
+                id = existing?.id ?: newNoteId(),
+                bookId = bookId,
+                chapterIndex = null,
+                title = existing?.title.orEmpty(),
+                bodyJson = PersonalDocCodec.encode(document),
+                preview = "",
+                dateMillis = existing?.dateMillis ?: System.currentTimeMillis(),
+                mood = existing?.mood.orEmpty(),
+                createdAtMillis = existing?.createdAtMillis ?: 0L
+            )
+        )
+    }
+
+    /**
      * Writes one chapter's review — the ONE writer behind both screens: the
      * shelf's chapter page and the topic page's book sheet. It keeps the note's
      * identity (so a review written in one view is edited, never duplicated by
