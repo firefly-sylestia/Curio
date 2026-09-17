@@ -582,7 +582,7 @@ internal fun PersonalWritingPage(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .onGloballyPositioned { coordinates ->
-                                    canvasTop = coordinates.positionInParent().y
+                                    canvasTop = coordinates.boundsInParent().top
                                 },
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
                             onTitlePosition = reportSectionLine

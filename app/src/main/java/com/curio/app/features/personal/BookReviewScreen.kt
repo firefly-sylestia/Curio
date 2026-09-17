@@ -420,7 +420,7 @@ fun BookReviewScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .onGloballyPositioned { coordinates ->
-                                    canvasTop = coordinates.positionInParent().y
+                                    canvasTop = coordinates.boundsInParent().top
                                 },
                             accent = accent,
                             onTitlePosition = reportChapterLine,
