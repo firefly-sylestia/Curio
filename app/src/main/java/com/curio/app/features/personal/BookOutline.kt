@@ -72,17 +72,39 @@ private fun navDocumentOutline(zip: ZipFile): List<ReaderOutlineEntry> {
         val body = raw.substring(at).substringBefore("</nav>", "")
         val base = document.name.substringBeforeLast('/', "")
         val found = ArrayList<ReaderOutlineEntry>()
-        Regex("<a[^>]*?href\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>(.*?)</a>", setOf(
-            RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL
-        )).findAll(body).forEach { match ->
-            val title = plain(match.groupValues.getOrNull(2).orEmpty())
-            if (title.isBlank()) return@forEach
-            found.add(
-                ReaderOutlineEntry(
-                    title = title,
-                    target = resolveTarget(base, match.groupValues.getOrNull(1).orEmpty())
-                )
-            )
+        // ── THE LIST'S OWN NESTING IS THE HIERARCHY (v389c) ──────────────
+        //
+        // A contents list is a list of LISTS: a part's chapters are nested
+        // inside it, which is what makes "Part Two" read as a heading with its
+        // chapters under it rather than as one more sibling. The first pass
+        // flattened every entry to depth 1, so the sheet could show a contents
+        // but not the book's own shape — the user's note was "make the chapter
+        // points more broader with proper hirarcy". Depth is therefore counted
+        // from the markup as it is walked: `<ol>` opens a level, `</ol>` closes
+        // one, and each anchor takes the level it sits at (capped at three,
+        // because a fourth indent on a phone is off the side of the sheet).
+        var depth = 0
+        Regex(
+            "<ol\\b|</ol\\s*>|<a[^>]*?href\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>(.*?)</a>",
+            setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+        ).findAll(body).forEach { match ->
+            val whole = match.value
+            when {
+                whole.startsWith("</ol", ignoreCase = true) ->
+                    depth = (depth - 1).coerceAtLeast(0)
+                whole.startsWith("<ol", ignoreCase = true) -> depth++
+                else -> {
+                    val title = plain(match.groupValues.getOrNull(2).orEmpty())
+                    if (title.isBlank()) return@forEach
+                    found.add(
+                        ReaderOutlineEntry(
+                            title = title,
+                            target = resolveTarget(base, match.groupValues.getOrNull(1).orEmpty()),
+                            depth = depth.coerceIn(1, 3)
+                        )
+                    )
+                }
+            }
         }
         if (found.isNotEmpty()) return found
     }
@@ -98,19 +120,39 @@ private fun ncxOutline(zip: ZipFile): List<ReaderOutlineEntry> {
     }.getOrNull() ?: return emptyList()
     val base = ncx.name.substringBeforeLast('/', "")
     val found = ArrayList<ReaderOutlineEntry>()
-    Regex("<navPoint[^>]*>(.*?)</navPoint>", setOf(
-        RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL
-    )).findAll(raw).forEach { point ->
-        val block = point.groupValues.getOrNull(1).orEmpty()
-        val title = plain(
-            Regex("<text[^>]*>(.*?)</text>", setOf(
-                RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL
-            )).find(block)?.groupValues?.getOrNull(1).orEmpty()
-        )
-        val src = Regex("content[^>]*?src\\s*=\\s*[\"']([^\"']+)[\"']", RegexOption.IGNORE_CASE)
-            .find(block)?.groupValues?.getOrNull(1).orEmpty()
-        if (title.isBlank()) return@forEach
-        found.add(ReaderOutlineEntry(title = title, target = resolveTarget(base, src)))
+    // An NCX says its own shape the same way the nav document does — navPoints
+    // nested inside navPoints — so the depth is counted from the markup rather
+    // than assumed (see navDocumentOutline for why it matters).
+    var depth = 0
+    Regex(
+        "<navPoint\\b|</navPoint\\s*>|<text[^>]*>(.*?)</text>|<content[^>]*?src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+    ).findAll(raw).forEach { match ->
+        val whole = match.value
+        when {
+            whole.startsWith("</navPoint", ignoreCase = true) ->
+                depth = (depth - 1).coerceAtLeast(0)
+            whole.startsWith("<navPoint", ignoreCase = true) -> depth++
+            whole.startsWith("<text", ignoreCase = true) -> {
+                val title = plain(match.groupValues.getOrNull(1).orEmpty())
+                if (title.isBlank()) return@forEach
+                found.add(
+                    ReaderOutlineEntry(
+                        title = title,
+                        depth = depth.coerceIn(1, 3)
+                    )
+                )
+            }
+            else -> {
+                // The `<content src>` belongs to the navPoint that was opened
+                // most recently, which is the last entry added.
+                if (found.isNotEmpty()) {
+                    val src = match.groupValues.getOrNull(2).orEmpty()
+                    found[found.size - 1] = found[found.size - 1]
+                        .copy(target = resolveTarget(base, src))
+                }
+            }
+        }
     }
     return found
 }

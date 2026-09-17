@@ -351,7 +351,17 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // position (the list's first block, the pager's current page), so it follows
     // the reading instead of naming the place the book happened to open at.
     val positionLabel = when (val loaded = content) {
-        is ReaderContent.Pages -> "Page ${pagerState.currentPage + 1} of ${loaded.pageCount}"
+        // The PAGE BAR is where a PDF says its page, and in the paged flow the
+        // bar is right there in the same chrome — so the foot says the thing the
+        // bar cannot: how much of the book is marked. (The two used to say "Page
+        // 7 of 300" at once, which reads as the same number told twice.) In the
+        // SCROLL flow there is no bar, and the foot still does not state a page:
+        // the pager is not the thing being scrolled, so any number here would be
+        // a stale one — a wrong page is worse than none.
+        is ReaderContent.Pages -> {
+            val marked = marks.count { !it.isPosition }
+            if (marked > 0) "$marked marked" else ""
+        }
 
         is ReaderContent.Text -> {
             val at = loaded.blocks.getOrNull(listState.firstVisibleItemIndex)
@@ -2196,19 +2206,42 @@ private fun ReaderChaptersSheet(
                     ) {
                         Row(
                             modifier = Modifier.padding(
-                                start = (12 + (entry.depth - 1) * 14).dp,
+                                // The indent is the HIERARCHY, so it has to be an
+                                // indent: 18dp a level, with the row's own type
+                                // and weight falling as it goes deeper. The old
+                                // 14dp and 1sp step made a part and its chapters
+                                // look like one flat list.
+                                start = (14 + (entry.depth - 1) * 18).dp,
                                 end = 12.dp,
-                                top = 10.dp,
-                                bottom = 10.dp
+                                top = if (entry.depth <= 1) 12.dp else 9.dp,
+                                bottom = if (entry.depth <= 1) 12.dp else 9.dp
                             ),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(9.dp)
                         ) {
+                            // A deeper row wears a small mark in the accent, so
+                            // the level is legible even where the indent is
+                            // slight (a wrapped title starts at the same edge
+                            // whatever it is, which is what an indent alone
+                            // cannot say).
+                            if (entry.depth > 1) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(3.dp)
+                                        .height(if (entry.depth == 2) 16.dp else 11.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(palette.accent.copy(alpha = if (entry.depth == 2) 0.75f else 0.4f))
+                                )
+                            }
                             Text(
                                 entry.title,
                                 style = TextStyle(
                                     fontFamily = WritingFontFamily,
-                                    fontSize = if (entry.depth <= 1) 15.sp else 14.sp,
+                                    fontSize = when (entry.depth) {
+                                        1 -> 16.sp
+                                        2 -> 14.5.sp
+                                        else -> 13.5.sp
+                                    },
                                     fontWeight = if (entry.depth <= 1) FontWeight.SemiBold
                                     else FontWeight.Normal,
                                     color = palette.ink
@@ -2932,12 +2965,24 @@ private fun renderPdfPage(
     return try {
         val renderer = PdfRenderer(descriptor)
         val page = renderer.openPage(index)
-        // A page drawn at 1.5x reads cleanly on a phone without holding a
-        // poster-sized bitmap per page.
-        val scale = 1.5f
+        // ── THE PAGE IS DRAWN FOR THE SCREEN IT IS DRAWN ON (v389c) ───────
+        // A fixed 1.5x was the wrong number twice over: on a 400dpi phone the
+        // page was rendered SMALLER than the box it was then stretched into
+        // (which is what "the pdf quality" is — a bitmap scaled up is a blurry
+        // bitmap), and on a cheap screen it rendered bigger than anything that
+        // could ever be shown. The honest scale is the one that makes the page
+        // exactly as many pixels wide as the screen the reader is holding, so
+        // there is no resampling in either direction at the fit size. The
+        // height is capped because a very tall page at screen width would hold
+        // a poster per page in memory, and beyond the cap the extra pixels are
+        // not being displayed anyway.
+        val screenWidth = context.resources.displayMetrics.widthPixels.coerceAtLeast(320)
+        val scale = (screenWidth.toFloat() / page.width.coerceAtLeast(1))
+            .coerceIn(1f, MAX_PDF_RENDER_SCALE)
+        val height = (page.height * scale).toInt().coerceAtLeast(1)
         val bitmap = Bitmap.createBitmap(
             (page.width * scale).toInt().coerceAtLeast(1),
-            (page.height * scale).toInt().coerceAtLeast(1),
+            height,
             Bitmap.Config.ARGB_8888
         )
         bitmap.eraseColor(android.graphics.Color.WHITE)
@@ -2949,6 +2994,13 @@ private fun renderPdfPage(
         descriptor.close()
     }
 }
+
+/**
+ * How far a page may be scaled up. 3x is already more pixels than any phone
+ * shows of a page that has to fit on it; past that the bitmap is memory the
+ * reader never gets to look at.
+ */
+private const val MAX_PDF_RENDER_SCALE = 3f
 
 /**
  * A PLAIN TEXT FILE as paragraphs: a blank line ends one, which is the only
