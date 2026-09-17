@@ -17,6 +17,8 @@ ADD:
 - Books: the add-book sheet searches Curio's own book shelf first, then the open library — and says which one it found the book in.
 - Profile: your profile (and every member's) now lives inside the header itself — portrait, counts, bio and actions on the banner, with a proper Message pill.
 FIX:
+- Performance: the app hands the topic catalog's memory back when Android asks for it (it could not before, so the app stayed heavy in the background), with no cost to how fast the Topic Database opens.
+- Books: a lookup that failed (no connection, a timeout) is no longer remembered as done — the book is looked up again on your next visit instead of staying blank forever.
 - Books: "Mark finished" really finishes the book now (un-finishing had silently failed), and a chapter you have written wears the accent line down its side.
 - Books: the whole app wears your theme's own accent — the Cabinet, the shelf, Stats, the recycle bin, the category picker, the settings pages, the Topic Database and the composer included — instead of a fixed rose under an azure or lane hero.
 - Books: the journals are grouped by month, and the book page shows a tick per chapter so your progress reads as a place, not a figure.

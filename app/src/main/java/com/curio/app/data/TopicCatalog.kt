@@ -129,15 +129,23 @@ object TopicCatalog {
 
     /**
      * The app's TOTAL topic count across the ten canonical lanes
-     * (wildcard excluded — it only mirrors them). Sync: reads the warm
-     * cache, which the splash preload fills before the UI renders; an
-     * uncached lane just contributes zero until it loads. Used by the
-     * Home hero's "Topics" stat.
+     * (wildcard excluded — it only mirrors them). Sync. Used by the Home
+     * hero's "Topics" stat.
+     *
+     * v389 — the warm COUNT is read first: it is a few Ints and survives a
+     * memory trim, while the lane POOLS are exactly what a trim drops. The stat
+     * used to sum resident pools only, so a trimmed app (or a build without the
+     * startup prewarm) showed "0 topics" until an async recount landed. The
+     * pool sum stays as the fallback for the first frames of a cold process,
+     * before anything has counted the catalog.
      */
-    fun totalTopicCount(): Int =
-        CategoryId.values()
+    fun totalTopicCount(): Int {
+        val counted = TopicJsonLoader.cachedCanonicalCount()
+        if (counted > 0) return counted
+        return CategoryId.values()
             .filter { it != CategoryId.WILDCARD }
             .sumOf { TopicJsonLoader.cached(it)?.size ?: 0 }
+    }
 
     // ── Sample entries (sync, after preload) ───────────────────────────────
     //
@@ -228,14 +236,8 @@ private fun savedNameBase(s: String): String {
  * ("Flow" must resolve to the film, never to "Flower Boy" whose name
  * merely contains "flow").
  */
-internal fun CurioTopic.matchesSavedNameStrict(requested: String): Boolean {
-    val wanted = requested.trim()
-    if (wanted.isEmpty()) return false
-    if (name.equals(wanted, ignoreCase = true)) return true
-    val nameBase = savedNameBase(name)
-    val wantedBase = savedNameBase(wanted)
-    return nameBase.isNotBlank() && nameBase.equals(wantedBase, ignoreCase = true)
-}
+internal fun CurioTopic.matchesSavedNameStrict(requested: String): Boolean =
+    savedNameMatches(name, requested, strict = true)
 
 /**
  * v135 — tolerant saved-name matching for topics whose canonical name
@@ -249,13 +251,23 @@ internal fun CurioTopic.matchesSavedNameStrict(requested: String): Boolean {
  * category before this tolerant pass, and callers resolve within the
  * route's own category first.
  */
-internal fun CurioTopic.matchesSavedName(requested: String): Boolean {
+internal fun CurioTopic.matchesSavedName(requested: String): Boolean =
+    savedNameMatches(name, requested, strict = false)
+
+/**
+ * v389 — the same rules against a bare display NAME, so a caller holding an
+ * index entry (which carries a topic's name but not the topic object any more,
+ * see [TopicIndexEntry]) matches exactly like a caller holding the topic. One
+ * implementation, so the two can never drift.
+ */
+internal fun savedNameMatches(name: String, requested: String, strict: Boolean): Boolean {
     val wanted = requested.trim()
     if (wanted.isEmpty()) return false
     if (name.equals(wanted, ignoreCase = true)) return true
     val nameBase = savedNameBase(name)
     val wantedBase = savedNameBase(wanted)
     if (nameBase.isNotBlank() && nameBase.equals(wantedBase, ignoreCase = true)) return true
+    if (strict) return false
 
     // Containment needs a real word to anchor on — never match on a
     // 1–3 char fragment ("The", "198", "La").

@@ -170,6 +170,7 @@ import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
 import java.util.UUID
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.savedNameMatches
 import com.curio.app.data.TopicRepository
 import com.curio.app.data.buildEngineSearchUrl
 import com.curio.app.data.buildExploreQuery
@@ -292,15 +293,26 @@ private val RevealEditorialBody: TextStyle = CurioEditorialBody.copy(
  * Synchronous and parse-free — so any topic that has ever been loaded
  * resolves on the very first composition frame. (Deliberately NOT
  * @Composable: it runs inside remember {}'s calculation lambda.)
+ *
+ * v389 — the merged index answers with a topic's IDENTITY now (it no longer
+ * carries the topic objects, which is what let a memory trim actually free the
+ * lane pools), so it is used to find that topic's slot in the cache: a resident
+ * pool still resolves on the very first frame. When a trim has dropped the
+ * pool, the lane's parse is kicked off in the background ([TopicJsonLoader
+ * .warmLane]) and the caller's async pass fills the topic on the next frame,
+ * instead of this function blocking composition on IO.
  */
 private fun resolveRevealTopic(categoryId: CategoryId, topicName: String): CurioTopic? {
     TopicJsonLoader.cached(categoryId)?.firstOrNull {
         it.matchesSavedNameStrict(topicName) || it.matchesSavedName(topicName)
     }?.let { return it }
-    TopicJsonLoader.cachedIndex()?.firstOrNull { entry ->
-        entry.topic.categoryId == categoryId &&
-            (entry.topic.matchesSavedNameStrict(topicName) || entry.topic.matchesSavedName(topicName))
-    }?.let { return it.topic }
+    val entry = TopicJsonLoader.cachedIndex()?.firstOrNull { e ->
+        e.categoryId == categoryId &&
+            (savedNameMatches(e.name, topicName, strict = true) ||
+                savedNameMatches(e.name, topicName, strict = false))
+    } ?: return null
+    TopicJsonLoader.cachedTopicFor(entry)?.let { return it }
+    TopicJsonLoader.warmLane(entry.categoryId)
     return null
 }
 

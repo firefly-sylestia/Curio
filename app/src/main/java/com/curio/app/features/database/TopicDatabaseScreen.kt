@@ -395,7 +395,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     // directly now, so a 16k-entry HashMap is built the moment the hero search
     // opens and dropped again when it closes, instead of on every open.
     val indexByTopicId: Map<String, TopicIndexEntry> = remember(indexEntries, searchActive) {
-        if (!searchActive) emptyMap() else indexEntries?.associateBy { it.topic.id }.orEmpty()
+        // v389 — the entry IS the identity now: it carries the topic id (the
+        // merged index no longer holds the topic objects, so a memory trim can
+        // actually free the pools).
+        if (!searchActive) emptyMap() else indexEntries?.associateBy { it.id }.orEmpty()
     }
     // Build the search/sort fields (lowercase keys + word lists + year) OFF
     // the composition thread, ONCE per catalog identity. v347 kept this build

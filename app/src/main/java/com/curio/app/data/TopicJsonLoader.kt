@@ -312,10 +312,17 @@ object TopicJsonLoader {
      * Per-lane topic counts (v55): Spin's "Mixed · N" deck label and the
      * picker's totals call [countFor] on EVERY deck change — each call used
      * to re-read + re-parse the whole category file just for a length.
-     * Cached once per lane (invalidated with the pools on memory pressure);
+     * Cached once per lane (kept across a memory trim — a few Ints, v389);
      * parses run under the bounded [parseGate].
      */
     private val countsCache = ConcurrentHashMap<CategoryId, Int>()
+
+    /**
+     * v389 — the canonical total as last counted, without counting again.
+     * 0 when nothing has counted it yet. Home's Topics stat reads this so it
+     * never depends on which lane pools happen to be resident.
+     */
+    fun cachedCanonicalCount(): Int = canonicalTopicCount.takeIf { it >= 0 } ?: 0
 
     suspend fun countCanonicalTopics(): Int = withContext(Dispatchers.IO) {
         canonicalTopicCount.takeIf { it >= 0 }?.let { return@withContext it }
@@ -410,8 +417,10 @@ object TopicJsonLoader {
                         val tagKeys = if (tagsArr != null)
                             List(tagsArr.length()) { j -> tagsArr.getString(j) }
                         else topic.tags.map(String::lowercase)
-                        TopicIndexEntry(
-                            topic = topic,
+                        // v389 — the entry is built from the topic, then the
+                        // asset's own precomputed keys/year overlay it. The
+                        // topic object is NOT retained (see TopicIndexEntry).
+                        indexEntryOf(topic).copy(
                             year = year,
                             nameKey = key("name", topic.name),
                             subtypeKey = key("subtype", topic.subtype),
@@ -429,6 +438,33 @@ object TopicJsonLoader {
         }
     }
 
+    /**
+     * v389 — the ONE place an index entry is derived from a topic.
+     *
+     * The entry keeps the topic's IDENTITY (id + lane), the display fields the
+     * search rows show, and the precomputed lowercase keys — never the topic
+     * object. Holding that object was what made the catalog un-sheddable: a
+     * warm index kept every pool alive, so [shedForMemory] freed nothing. Only
+     * the heavy per-topic payloads (exploreAction, synopsis, chapters, tracks,
+     * episodes) are left behind now, and they come back from the lane pool
+     * through [topicForEntry] when a screen actually needs one.
+     */
+    private fun indexEntryOf(topic: CurioTopic): TopicIndexEntry = TopicIndexEntry(
+        id = topic.id,
+        categoryId = topic.categoryId,
+        name = topic.name,
+        subtype = topic.subtype,
+        byline = topic.byline,
+        teaser = topic.teaser,
+        tags = topic.tags,
+        year = topic.publicationYear(),
+        nameKey = topic.name.lowercase(),
+        subtypeKey = topic.subtype.lowercase(),
+        bylineKey = topic.byline.lowercase(),
+        teaserKey = topic.teaser.lowercase(),
+        tagKeys = topic.tags.map(String::lowercase)
+    )
+
     /** v174f — runtime mirror of scripts/build_topic_index.py. The prebuilt
      *  merged index stopped shipping (the per-category files duplicate it),
      *  so this builds the same search index once, at runtime, from the
@@ -443,15 +479,7 @@ object TopicJsonLoader {
         val out = ArrayList<TopicIndexEntry>()
         fun add(topic: CurioTopic) {
             if (!seen.add(topic.id)) return
-            out += TopicIndexEntry(
-                topic = topic,
-                year = topic.publicationYear(),
-                nameKey = topic.name.lowercase(),
-                subtypeKey = topic.subtype.lowercase(),
-                bylineKey = topic.byline.lowercase(),
-                teaserKey = topic.teaser.lowercase(),
-                tagKeys = topic.tags.map(String::lowercase)
-            )
+            out += indexEntryOf(topic)
         }
         for (id in CategoryId.values()) {
             if (id == CategoryId.WILDCARD) continue
@@ -473,14 +501,65 @@ object TopicJsonLoader {
     fun cachedIndex(): List<TopicIndexEntry>? = indexCache
 
     /**
+     * v389 — resolves an index entry back to its full topic from the entry's
+     * OWN lane pool. Synchronous and parse-free: null when that lane isn't
+     * resident (call [topicForEntry] to load it).
+     */
+    fun cachedTopicFor(entry: TopicIndexEntry): CurioTopic? =
+        cached(entry.categoryId)?.firstOrNull { it.id == entry.id }
+
+    /**
+     * v389 — resolves an index entry to its full topic, loading the entry's own
+     * lane when it isn't resident. The lane read goes through [load], so it
+     * shares an in-flight parse with every other caller (at most ONE parse).
+     *
+     * This is what replaces the index's old `topic` field: the index carries
+     * identity + search keys only (see [TopicIndexEntry]), so a caller that
+     * needs the topic object itself asks the lane for it.
+     */
+    suspend fun topicForEntry(entry: TopicIndexEntry): CurioTopic? =
+        cachedTopicFor(entry) ?: runCatching {
+            load(entry.categoryId).firstOrNull { it.id == entry.id }
+        }.getOrNull()
+
+    /**
+     * v389 — resolves ONE topic by id through the merged index, loading its
+     * lane on demand. Used by screens that persisted only a topic id (the
+     * composer's kept draft).
+     */
+    suspend fun topicById(id: String): CurioTopic? {
+        if (id.isBlank()) return null
+        val entry = indexCache?.firstOrNull { it.id == id } ?: return null
+        return topicForEntry(entry)
+    }
+
+    /**
+     * v389 — kicks a lane's parse off in the background without awaiting it.
+     *
+     * The reveal page resolves its topic SYNCHRONOUSLY on the first frame
+     * (see `resolveRevealTopic`): the index can say the topic exists, but only
+     * the lane pool can hand back the topic object. When a memory trim has
+     * dropped that pool, this warms it for the next frame instead of stalling
+     * the composition — [load] dedupes, so a later call shares this parse.
+     */
+    fun warmLane(id: CategoryId) {
+        if (cache[id] != null) return
+        loadScope.launch { runCatching { load(id) } }
+    }
+
+    /**
      * v55 — memory-pressure shed, TIERED so a trim never triggers a full
      * re-parse storm (the lag + heating):
      *  - RUNNING_LOW (the common mid-range case): drop the per-category
-     *    pools, the per-lane counts and the canonical count — each is one
-     *    file, cheap to rebuild lazily. The prebuilt 16k-entry INDEX stays:
-     *    rebuilding it is the single heaviest parse, and the Topic Database
-     *    re-requests it the moment it opens.
+     *    pools. The prebuilt 16k-entry INDEX stays (rebuilding it is the
+     *    single heaviest parse and the Topic Database re-requests it the
+     *    moment it opens) — and, unlike before v389, keeping it now really
+     *    does release the catalog: the index stores identity + search keys,
+     *    not the topics, so the pools it used to pin are freed here.
      *  - RUNNING_CRITICAL / COMPLETE: also drop the index.
+     * v389 — the per-lane counts and the canonical total are KEPT: they are a
+     * handful of Ints, and dropping them bought nothing while forcing a
+     * ten-file re-count the next time Home asked for its Topics stat.
      * The generation guard still stops a stale in-flight parse from
      * refilling a cache Android just asked us to release.
      */
@@ -489,10 +568,10 @@ object TopicJsonLoader {
             cacheGeneration += 1L
             cache.clear()
         }
-        countsCache.clear()
-        canonicalTopicCount = -1
         if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
             indexCache = null
+            countsCache.clear()
+            canonicalTopicCount = -1
         }
     }
 
@@ -674,14 +753,31 @@ object TopicJsonLoader {
 }
 
 /**
- * One entry of the prebuilt Topic Database index (v29): the full topic
- * plus the fields the browser used to derive at runtime — the lowercased
- * search keys and the sort year — now precomputed at build time by
+ * One entry of the Topic Database index (v29): a topic's identity plus the
+ * fields the browser used to derive at runtime — the lowercased search keys
+ * and the sort year — precomputed at build time by
  * scripts/build_topic_index.py, so the database renders instantly at any
  * catalog size.
+ *
+ * v389 — THE ENTRY NO LONGER HOLDS THE TOPIC. `topic: CurioTopic` used to ride
+ * along so the browser could read the topic straight out of the index, which
+ * also meant the index pinned every topic in the heap: [TopicJsonLoader
+ * .shedForMemory] cleared the per-lane pools and freed almost nothing, because
+ * the 16k entries still referenced every topic ("background memory climbs
+ * sharply"). The entry now carries identity + display text + search keys only,
+ * so dropping the pools is a real release, and callers that need the topic
+ * itself resolve it through [TopicJsonLoader.topicForEntry] /
+ * [TopicJsonLoader.cachedTopicFor] /
+ * [TopicJsonLoader.topicById].
  */
 data class TopicIndexEntry(
-    val topic: CurioTopic,
+    val id: String,
+    val categoryId: CategoryId,
+    val name: String,
+    val subtype: String,
+    val byline: String,
+    val teaser: String,
+    val tags: List<String>,
     val year: Int?,
     val nameKey: String,
     val subtypeKey: String,

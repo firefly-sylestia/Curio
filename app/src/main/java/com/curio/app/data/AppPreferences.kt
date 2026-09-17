@@ -240,6 +240,11 @@ object AppPreferences {
     // "Fetch all covers" so a re-tap resumes where the last run left off
     // instead of restarting from book #1.
     private const val KEY_BOOK_COVER_DONE = "book_cover_done"
+    // v389 — book ids whose metadata lookup already COMPLETED. A pass that
+    // threw (offline, a timeout) is never recorded — the marker is durable, so
+    // recording a failure would make one bad attempt permanent. Stops the
+    // detail page repeating a finished lookup after a process restart.
+    private const val KEY_BOOK_LOOKUP_DONE = "book_lookup_done"
     // v362 — per-chapter PERSONAL notes (book name → chapter number → text).
     private const val KEY_BOOK_CHAPTER_NOTES = "book_chapter_notes"
     // v375 — rich runs per chapter note (mirrors KEY_BOOK_CHAPTER_NOTES).
@@ -520,7 +525,7 @@ object AppPreferences {
         return added
     }
 
-    // ── Series watched progress (v350) ───────────────────────���───���───────
+    // ── Series watched progress (v350) ───────────────────
     // Per-show set of watched episode keys ("S1E3"): JSON object show name →
     // JSON array of keys. The episode-list sheet toggles an episode; the UI
     // derives watched counts per season from the authored episode list.
@@ -1298,7 +1303,7 @@ object AppPreferences {
     var profileAvatarPathState by mutableStateOf("")
         internal set
 
-    // ��─ Online Mode + the Community tab (observable mirrors) ──────────
+    // ── Online Mode + the Community tab (observable mirrors) ──────────
     // Both are read from COMPOSITION (the bottom nav bar decides whether the
     // Community tab exists, and every online surface tests the gate), so the
     // stored prefs are mirrored into Compose state here. Without this the nav
@@ -2074,7 +2079,7 @@ object AppPreferences {
         heroShadowState = enabled
     }
 
-    // ── Paper & header experiments (v27) ──────────────────────────��──
+    // ── Paper & header experiments (v27) ────────────────────────────────
     private const val KEY_HEADER_STYLE = "header_style"   // "TORN" | "GLASS"
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
@@ -2588,7 +2593,7 @@ object AppPreferences {
     fun isLiveNotificationsEnabled(context: Context): Boolean = true
 
     /**
-     * v23 ��� whether the Explore now dialog shows its "Show the explore
+     * v23 — whether the Explore now dialog shows its "Show the explore
      * bubble" opt-in row. Default OFF (hidden); the Notifications toggle
      * re-shows it as a single-line choice inside the dialog.
      */
@@ -3069,7 +3074,7 @@ object AppPreferences {
         }
     }
 
-    // ── Last-used Spin category — persisted so the Spin tab opens where ��
+    // ── Last-used Spin category — persisted so the Spin tab opens where the
     //    the user left off, even across app launches (v5.5). Falls back
     //    to WILDCARD when unset or when a stored name no longer exists.
     fun getLastSpinCategory(context: Context): CategoryId {
@@ -3538,15 +3543,49 @@ object AppPreferences {
         bookCoverDoneState = names
     }
 
+    /**
+     * v389 — the book ids whose metadata lookup already COMPLETED. Read by the
+     * book page's auto-fetch so a finished lookup is not repeated on every open
+     * (and after every restart). Disk-backed: call it off the main thread.
+     */
+    fun getBookLookupDone(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_BOOK_LOOKUP_DONE, null) ?: return emptySet()
+        return runCatching {
+            org.json.JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i ->
+                    arr.optString(i).takeIf { it.isNotBlank() }
+                }.toSet()
+            }
+        }.getOrDefault(emptySet())
+    }
+
+    /**
+     * v389 — marks one book's metadata lookup as COMPLETED across restarts.
+     * Only ever called for a pass that actually returned (see BookDetailScreen:
+     * a pass that threw is retried next time instead of being remembered as
+     * done).
+     */
+    fun markBookLookupDone(context: Context, bookId: String) {
+        if (bookId.isBlank()) return
+        val done = getBookLookupDone(context) + bookId
+        prefs(context).edit()
+            .putString(KEY_BOOK_LOOKUP_DONE, org.json.JSONArray(done.toList()).toString())
+            .apply()
+    }
+
     /** v361 — wipe EVERY book-cover record (resolved URLs, verified-done
      *  set, failed list) so the hub's "Clear all covers" starts a provider
      *  test from a blank slate. The Coil disk cache is cleared by the caller
-     *  (BookCoverFetch.clearAllCovers) so old artwork doesn't linger. */
+     *  (BookCoverFetch.clearAllCovers) so old artwork doesn't linger.
+     *  v389 — also drops the completed-metadata-lookup markers: this is the
+     *  book-metadata reset door, and a book marked "looked up" would otherwise
+     *  never be looked up again — the opposite of what a reset is for. */
     fun clearBookCovers(context: Context) {
         prefs(context).edit()
             .remove(KEY_BOOK_COVER_URLS)
             .remove(KEY_BOOK_COVER_DONE)
             .remove(KEY_BOOK_COVER_FAILED)
+            .remove(KEY_BOOK_LOOKUP_DONE)
             .apply()
         bookCoverUrlsState = emptyMap()
         bookCoverDoneState = emptyList()
@@ -3792,7 +3831,7 @@ object AppPreferences {
         bedDesignRowsState = null
     }
 
-    // ── Evolution path (v9.5) ────────────────────────────────────────
+    // ── Evolution path (v9.5) ───────────────────────────────────
     private const val KEY_EVO_PATH = "evo_path"
 
     fun getEvoPath(context: Context): String? =

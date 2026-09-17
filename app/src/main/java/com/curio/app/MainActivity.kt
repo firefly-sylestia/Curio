@@ -180,20 +180,22 @@ class MainActivity : ComponentActivity() {
         // used to cancel loadIndex and restart the whole parse; the warm-up
         // now runs to completion regardless (parses are bounded by the
         // loader's gate, so it can't hog the CPU).
-        // v348 — this no longer QUEUES behind TopicRepository.init(): the
-        // import's one-time JSON→Room pass (and the version-gated re-sync on
-        // an update) used to run FIRST, so on any launch that touched the
-        // database the prewarm — and therefore the browser's warm index —
-        // started late. Both jobs share the loader's caches, so running them
-        // concurrently is safe: `load()` dedupes a lane's parse and the import
-        // re-checks Room counts under its mutex. The import launch above owns
-        // Room; this one only fills the in-memory caches.
+        // v389 — this warm-up STAYS, and it is now the trade it always claimed
+        // to be. The merged index no longer holds the topic objects (see
+        // TopicIndexEntry), so the per-lane pools it used to pin ARE released by
+        // TopicJsonLoader.shedForMemory on a memory trim — which is the honest
+        // fix for "background memory climbs sharply". Deleting the warm-up
+        // instead (the earlier "keep the catalog cold" attempt) moved the same
+        // parse onto the busy path of the screens and left Home's Topics stat,
+        // the reveal's first-frame resolve and TopicCatalog.findByName reading a
+        // cache nothing had filled.
         lifecycleScope.launch {
             withContext(kotlinx.coroutines.NonCancellable) {
                 runCatching { TopicJsonLoader.loadIndex() }
                 runCatching { TopicJsonLoader.preloadAll() }
             }
         }
+
         // v348 — warm the Cabinet's entry snapshot the same way. The Cabinet
         // seeds itself from [CaptureRepository.peekLight], which is only
         // non-empty once SOMETHING has collected the light flow — so a cold

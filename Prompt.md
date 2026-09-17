@@ -1,5 +1,74 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, COMPLETE — the memory rework of `v0/reduce-book-lookup-memory`)
+
+Verbatim: the branch link with "compare but first do git pull and tell is the
+chnage good", then "okay do it, and fix those invalid texts, keep the download
+pill and searh chnage, fix the failed look up issue, do the best".
+
+### The review (the "is it good" answer: no, not as-is)
+
+Two commits (`b3cdf62f`, `ba14f5a3`) on the CURRENT main — 3 files, no
+conflicts, braces balanced, `LocalContext` already imported — but: the startup
+catalog prewarm was deleted (Topic Database lost its instant first frame,
+Home's Topics stat read 0 — contradicting the comment right above it — the
+reveal's last-resort `findByNameAcrossAll` went cold, and
+`TopicCatalog.findByName`, which scans the CACHE, went blind for the Cabinet and
+the capture save), a FAILED book lookup was recorded as done forever, the
+Download pill's in-flight guard was dropped and the download search rewritten
+(both out of scope for the branch's name), two `const val`s were dedented and
+two comment lines got NEW mojibake, and `MainActivity` was left with a dead
+contradictory comment block. User's calls: **keep the pill change and the
+search rewrite**, fix the invalid texts, fix the failed lookup.
+
+### Shipped — the memory goal, done at the real holder
+
+1. **`TopicIndexEntry` no longer holds the topic.** It carried
+   `topic: CurioTopic`, which pinned all ~16k topics for as long as the merged
+   index was warm — so `shedForMemory(RUNNING_LOW)` cleared the pools and freed
+   almost nothing, which IS the "background memory climbs sharply" symptom the
+   branch was chasing. The entry now carries identity + the display text + the
+   precomputed keys, so dropping the pools is a real release.
+2. **The prewarm stays** (`MainActivity`: `loadIndex()` + `preloadAll()`
+   restored, NonCancellable as before) — instant Topic Database open, Home's
+   Topics stat and `findByName` coverage all survive; a memory trim is now the
+   thing that reclaims the catalog.
+3. **Resolution replaces the index's topic field:** `topicForEntry` (suspend,
+   shares the lane's parse), `cachedTopicFor` (sync, resident only), `topicById`
+   (by persisted id) and `warmLane` (background, for the reveal). The composer's
+   picker + kept draft, the Share Hub's picked topic and the reveal all resolve
+   through their own lane pool, off the UI thread. `savedNameMatches` is the
+   String form of the topic name matchers, so `resolveRevealTopic` matches index
+   entries with exactly the rules the topic-level matchers use (one
+   implementation, they cannot drift).
+4. **Home's Topics stat** reads the warm count (`cachedCanonicalCount`) before
+   summing resident pools, and a trim KEEPS the counts (a few Ints — re-counting
+   ten files to reclaim them was pure loss). A trimmed app no longer reads 0.
+5. **Book lookups:** the durable marker records only a pass that RETURNED; a
+   pass that threw (offline, a timeout) is retried on the next open instead of
+   being remembered as done. Read/written off the main thread, and cleared by
+   the book-cover reset door (`clearBookCovers`).
+6. **Invalid texts:** the two comment lines the branch garbled are clean
+   box-drawing runs, the dedented `const val`s are back at their indent, and the
+   four remaining damaged lines elsewhere in AppPreferences are repaired — the
+   file now has ZERO U+FFFD characters and is valid UTF-8.
+
+### Verified
+
+`scripts/check_braces.js` on all 9 touched files (OK), `git diff --check`
+clean, a repo sweep for every index-entry field use (exactly the 4 known
+consumers: Topic Database, Share Hub, composer, reveal) and for every symbol
+this pass introduced/removed. No Gradle here (root AGENTS rule) — CI is the
+compile check, as always.
+
+### Docs
+
+`app/AGENTS.md` catalog bullet gained the v389 clause (the index pinning the
+catalog, the resolvers, why the prewarm stays); the store changelog
+`20260922.txt` gained the memory-reclaim and failed-lookup FIX lines.
+
+---
+
 ## Request (2026-09-16, IN PROGRESS — accent contrast, floating create action, journal controls, and media sheets)
 
 Verbatim: "the accent fix is still remaining ... also add the similiar series buttom sheet style with episodes view to anime as well, and movies, songs too ... also add touch and hold to switch differnt bullet point styles ... fix them too"

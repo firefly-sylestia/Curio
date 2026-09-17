@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -45,6 +46,7 @@ import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.ui.adaptive.isWide
@@ -115,8 +117,19 @@ fun ShareHubScreen(navController: NavController) {
             .take(40)
     }
 
-    val pickedTopic = remember(index, pickedTopicId) {
-        index.orEmpty().firstOrNull { it.topic.id == pickedTopicId }?.topic
+    // v389 — the merged index carries a topic's identity and search keys, not
+    // the topic object (a warm index used to pin every topic in the heap, which
+    // is why a memory trim freed nothing). The picked topic is therefore
+    // RESOLVED: its lane pool answers immediately when it is resident, and a
+    // cold lane parses once, off the UI thread.
+    var pickedTopic by remember { mutableStateOf<CurioTopic?>(null) }
+    LaunchedEffect(index, pickedTopicId) {
+        val id = pickedTopicId
+        pickedTopic = if (id == null) null else {
+            index.orEmpty().firstOrNull { it.id == id }?.let { entry ->
+                TopicJsonLoader.topicForEntry(entry)
+            }
+        }
     }
 
     // Preview parameters — the picked topic, or a sample Curiosity card so the
@@ -229,14 +242,14 @@ fun ShareHubScreen(navController: NavController) {
                                 .padding(vertical = 4.dp)
                         ) {
                             results.forEachIndexed { i, entry ->
-                                val cat = CurioCategories.byId(entry.topic.categoryId)
+                                val cat = CurioCategories.byId(entry.categoryId)
                                 if (i > 0) androidx.compose.material3.HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 14.dp),
                                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                                 )
                                 Surface(
                                     onClick = {
-                                        pickedTopicId = entry.topic.id
+                                        pickedTopicId = entry.id
                                         query = ""
                                     },
                                     color = Color.Transparent,
@@ -255,7 +268,7 @@ fun ShareHubScreen(navController: NavController) {
                                         )
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                entry.topic.name,
+                                                entry.name,
                                                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 maxLines = 1,
@@ -263,7 +276,7 @@ fun ShareHubScreen(navController: NavController) {
                                             )
                                             Text(
                                                 listOfNotNull(
-                                                    entry.topic.byline.ifBlank { null },
+                                                    entry.byline.ifBlank { null },
                                                     cat.displayName
                                                 ).joinToString(" · "),
                                                 style = MaterialTheme.typography.bodySmall,
@@ -273,9 +286,9 @@ fun ShareHubScreen(navController: NavController) {
                                             )
                                         }
                                         CurioIcon(
-                                            name = if (entry.topic.id == pickedTopicId) CurioIcons.Check else CurioIcons.ChevronRight,
+                                            name = if (entry.id == pickedTopicId) CurioIcons.Check else CurioIcons.ChevronRight,
                                             contentDescription = null,
-                                            tint = if (entry.topic.id == pickedTopicId) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            tint = if (entry.id == pickedTopicId) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
                                             size = 18.dp
                                         )
                                     }
@@ -430,9 +443,13 @@ fun ShareHubScreen(navController: NavController) {
         }
 
         // ── The sheet — the exact same TopicShareSheet as Topic Reveal ──
-        if (hubShareOpen && selectedDesign != null && pickedTopic != null) {
+        // v389 — hoisted into a local before the check: `pickedTopic` is mutable
+        // state now (it is resolved, not read off the index), and a delegated
+        // property cannot smart-cast.
+        val sheetTopic = pickedTopic
+        if (hubShareOpen && selectedDesign != null && sheetTopic != null) {
             val design = selectedDesign
-            val topic = pickedTopic
+            val topic = sheetTopic
             val resolvedCat = CurioCategories.byId(topic.categoryId)
             val ovCat = design.categoryOverrideId?.let { CurioCategories.byId(it) }
             val isQuotes = resolvedCat.id == CategoryId.QUOTES

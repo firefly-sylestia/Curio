@@ -154,7 +154,7 @@ private fun searchTopics(
     return hits
         .sortedWith(
             compareBy<Pair<TopicIndexEntry, Int>> { it.second }
-                .thenBy { it.first.topic.name.length }
+                .thenBy { it.first.name.length }
                 .thenBy { it.first.nameKey }
         )
         .take(limit)
@@ -247,7 +247,9 @@ internal fun CommunityPostScreen(
             // The card's topic comes back too, when the index still knows it —
             // a draft that lost its topic would be a post that cannot be made.
             if (saved.topicId.isNotBlank() && topic == null) {
-                topic = index.firstOrNull { it.topic.id == saved.topicId }?.topic
+                // v389 — the merged index knows the topic's IDENTITY, so the
+                // draft's topic comes back through the lane pool it lives in.
+                topic = TopicJsonLoader.topicById(saved.topicId)
             }
         }
         draftOffered = draftOffered + kind
@@ -381,11 +383,20 @@ internal fun CommunityPostScreen(
                                 onToggle = { topicPickerOpen = !topicPickerOpen },
                                 onQuery = { query = it },
                                 onPick = { picked ->
-                                    topic = picked
+                                    // v389 — the picker hands back an index entry
+                                    // (identity + display text), not the topic:
+                                    // the topic itself comes out of its own lane
+                                    // pool. A resident lane answers immediately;
+                                    // a cold one parses once, off the UI thread.
                                     if (text.isBlank()) text = picked.teaser
                                     query = ""
                                     topicPickerOpen = false
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    scope.launch {
+                                        TopicJsonLoader.topicForEntry(picked)?.let { chosen ->
+                                            topic = chosen
+                                        }
+                                    }
                                 }
                             )
                         }
@@ -1112,7 +1123,7 @@ private fun TopicPicker(
     accent: Color,
     onToggle: () -> Unit,
     onQuery: (String) -> Unit,
-    onPick: (CurioTopic) -> Unit
+    onPick: (TopicIndexEntry) -> Unit
 ) {
     Surface(
         onClick = onToggle,
@@ -1179,14 +1190,14 @@ private fun TopicPicker(
                     }
                     results.forEach { result ->
                         Surface(
-                            onClick = { onPick(result.topic) },
+                            onClick = { onPick(result) },
                             shape = RoundedCornerShape(14.dp),
                             color = MaterialTheme.colorScheme.surface
                         ) {
                             Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = result.topic.name,
+                                        text = result.name,
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
@@ -1194,13 +1205,13 @@ private fun TopicPicker(
                                     )
                                     Spacer(Modifier.width(8.dp))
                                     Text(
-                                        text = CurioCategories.byId(result.topic.categoryId).displayName,
+                                        text = CurioCategories.byId(result.categoryId).displayName,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1
                                     )
                                 }
-                                Text(result.topic.teaser, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(result.teaser, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
                     }

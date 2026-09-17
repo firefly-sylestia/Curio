@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.openSearchUrl
@@ -105,6 +106,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     }
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // ── Auto-fetch ─────────────────────────────────────────────────────
     // What Curio knows about this book is filled in FOR the member rather
@@ -127,9 +129,18 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     LaunchedEffect(book, lookupTick) {
         val current = book ?: return@LaunchedEffect
         if (enrichedTick == lookupTick) return@LaunchedEffect
-        // Skip auto-fetch when the book is already complete and this is
-        // the initial pass (lookupTick == 0). Manual taps still run.
-        if (lookupTick == 0 && alreadyComplete) return@LaunchedEffect
+        // v389 — an already-complete book skips the initial pass, and so does a
+        // book whose lookup already COMPLETED (the marker is durable, so a
+        // restart or a re-open no longer repeats the same network request).
+        // Only the INITIAL pass consults it: a manual tap is an explicit retry.
+        // The marker set is disk-backed, so it is read off the main thread.
+        val skipInitial = lookupTick == 0 && (
+            alreadyComplete ||
+                withContext(Dispatchers.IO) {
+                    AppPreferences.getBookLookupDone(context).contains(bookId)
+                }
+            )
+        if (skipInitial) return@LaunchedEffect
         val manual = lookupTick > 0
         enrichedTick = lookupTick
         lookingUp = true
@@ -141,6 +152,15 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             withContext(Dispatchers.IO) {
                 runCatching { PersonalRepositoryHolder.repo.saveBook(report.book) }
             }
+        }
+        // v389 — persist a pass that COMPLETED, and only that. The marker is
+        // durable and the initial pass consults it, so recording a pass that
+        // threw (offline, a timeout, a bad response) made ONE bad attempt
+        // permanent: that book was never looked up again on any later open.
+        // A completed pass that found nothing stays done — asking again would
+        // learn nothing — and the Look-it-up pill is always a deliberate retry.
+        if (report != null) {
+            withContext(Dispatchers.IO) { AppPreferences.markBookLookupDone(context, bookId) }
         }
         if (manual) {
             lookupNote = when {
@@ -270,7 +290,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
-                            DownloadPill(enabled = !lookingUp) { downloadSheet = true }
+                            DownloadPill(enabled = true) { downloadSheet = true }
                             if (current.coverUrl.startsWith("content://")) {
                                 TextButton(onClick = {
                                     navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
@@ -791,8 +811,8 @@ private fun DownloadHelpSheet(
                 color = ink,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            // The extension is the app's own "hidden" search token — the member
-            // picks a format and the app writes the filetype syntax for them.
+            // Search uses ordinary title/author text; free-public-domain search
+            // engines often ignore or reject filetype qualifiers.
             DownloadFormatRow(
                 tile = "PDF",
                 label = "Search for a PDF",
@@ -876,16 +896,13 @@ private fun openDownloadSearch(
     extension: String
 ) {
     val query = buildString {
-        append('"')
         append(title.trim())
-        append('"')
         if (author.isNotBlank()) {
-            append(" \"")
+            append(' ')
             append(author.trim())
-            append('"')
         }
-        append(" filetype:")
-        append(extension)
+        if (extension == "gutenberg") append(" free public domain epub download")
+        else append(" free ").append(extension).append(" download")
     }
     val url = "https://www.google.com/search?q=" +
         java.net.URLEncoder.encode(query, "UTF-8")
