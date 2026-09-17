@@ -289,10 +289,13 @@ fun ShareHubScreen(navController: NavController) {
                     }
                 }
             }
-            // Picked topic chip
-            if (pickedTopic != null) {
+            // Picked topic chip. `pickedTopic` is a delegated property, so it
+            // can NEVER be smart-cast: hoist it into a local first (the same
+            // rule the share sheet below follows).
+            val picked = pickedTopic
+            if (picked != null) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    val cat = CurioCategories.byId(pickedTopic.categoryId)
+                    val cat = CurioCategories.byId(picked.categoryId)
                     Surface(
                         shape = RoundedCornerShape(50),
                         color = cat.themedAccent().copy(alpha = 0.16f),
@@ -306,7 +309,7 @@ fun ShareHubScreen(navController: NavController) {
                         ) {
                             CurioIcon(name = cat.iconGlyph, contentDescription = null, tint = cat.categoryInk(), size = 16.dp)
                             Text(
-                                "${pickedTopic.name} · ${cat.displayName}",
+                                "${picked.name} · ${cat.displayName}",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 color = cat.categoryInk(),
                                 maxLines = 1,
@@ -334,7 +337,7 @@ fun ShareHubScreen(navController: NavController) {
             // ── Design grid ─────────────────────────────────────────────
             item(span = { GridItemSpan(maxLineSpan) }) {
                 SettingsSectionHeading(
-                    if (pickedTopic != null) "Designs · ${pickedTopic.name}" else "Designs · preview with any topic"
+                    if (picked != null) "Designs · ${picked.name}" else "Designs · preview with any topic"
                 )
             }
             HubDesigns.forEachIndexed { i, design ->
