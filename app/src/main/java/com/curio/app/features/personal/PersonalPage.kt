@@ -425,13 +425,6 @@ internal fun PersonalWritingPage(
         pinnedHead()
 
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            // v389 — THE EYE/PEN SWITCH IS A MOVE, not a swap (user report:
-            // "switching between eye and pen isnt smooth"). A crossfade showed
-            // one page dissolving into another; the writing now comes in from
-            // the RIGHT and the reading from the LEFT, tied to the same side of
-            // the switch the finger pressed, so the two modes read as two sides
-            // of one page. The travel is short (a twelfth of the width) on
-            // purpose: this is a mode, not navigation.
             // v389 — ONE PAGE TURNING, not two pages sliding past each other.
             //
             // The first cut slid the writing in from the right and the reading
