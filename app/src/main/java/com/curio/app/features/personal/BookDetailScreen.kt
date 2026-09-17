@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.openSearchUrl
@@ -105,6 +106,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     }
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // ── Auto-fetch ─────────────────────────────────────────────────────
     // What Curio knows about this book is filled in FOR the member rather
@@ -127,9 +129,10 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     LaunchedEffect(book, lookupTick) {
         val current = book ?: return@LaunchedEffect
         if (enrichedTick == lookupTick) return@LaunchedEffect
-        // Skip auto-fetch when the book is already complete and this is
-        // the initial pass (lookupTick == 0). Manual taps still run.
-        if (lookupTick == 0 && alreadyComplete) return@LaunchedEffect
+        // A completed lookup is durable, so a restart does not repeat the same
+        // network request. Manual taps remain an explicit retry.
+        val lookupAlreadyDone = AppPreferences.getBookLookupDone(context).contains(bookId)
+        if (lookupTick == 0 && (alreadyComplete || lookupAlreadyDone)) return@LaunchedEffect
         val manual = lookupTick > 0
         enrichedTick = lookupTick
         lookingUp = true
@@ -142,6 +145,9 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 runCatching { PersonalRepositoryHolder.repo.saveBook(report.book) }
             }
         }
+        // Persist even a no-change/empty result: the user can manually retry,
+        // but opening the same book after a restart should not search again.
+        AppPreferences.markBookLookupDone(context, bookId)
         if (manual) {
             lookupNote = when {
                 report == null -> "Could not reach the catalogue just now."
@@ -270,7 +276,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
-                            DownloadPill(enabled = !lookingUp) { downloadSheet = true }
+                            DownloadPill(enabled = true) { downloadSheet = true }
                             if (current.coverUrl.startsWith("content://")) {
                                 TextButton(onClick = {
                                     navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
@@ -791,8 +797,8 @@ private fun DownloadHelpSheet(
                 color = ink,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            // The extension is the app's own "hidden" search token — the member
-            // picks a format and the app writes the filetype syntax for them.
+            // Search uses ordinary title/author text; free-public-domain search
+            // engines often ignore or reject filetype qualifiers.
             DownloadFormatRow(
                 tile = "PDF",
                 label = "Search for a PDF",
@@ -876,16 +882,13 @@ private fun openDownloadSearch(
     extension: String
 ) {
     val query = buildString {
-        append('"')
         append(title.trim())
-        append('"')
         if (author.isNotBlank()) {
-            append(" \"")
+            append(' ')
             append(author.trim())
-            append('"')
         }
-        append(" filetype:")
-        append(extension)
+        if (extension == "gutenberg") append(" free public domain epub download")
+        else append(" free ").append(extension).append(" download")
     }
     val url = "https://www.google.com/search?q=" +
         java.net.URLEncoder.encode(query, "UTF-8")

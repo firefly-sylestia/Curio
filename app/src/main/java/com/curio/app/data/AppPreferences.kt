@@ -239,8 +239,11 @@ object AppPreferences {
     // Library's 1x1 placeholder) in a bulk fetch. The hub skips these on
     // "Fetch all covers" so a re-tap resumes where the last run left off
     // instead of restarting from book #1.
-    private const val KEY_BOOK_COVER_DONE = "book_cover_done"
-    // v362 — per-chapter PERSONAL notes (book name → chapter number → text).
+private const val KEY_BOOK_COVER_DONE = "book_cover_done"
+  // v389 — book ids whose metadata lookup already completed. This keeps the
+  // detail page from repeating the same network lookup after a process restart.
+  private const val KEY_BOOK_LOOKUP_DONE = "book_lookup_done"
+  // v362 — per-chapter PERSONAL notes (book name → chapter number → text).
     private const val KEY_BOOK_CHAPTER_NOTES = "book_chapter_notes"
     // v375 — rich runs per chapter note (mirrors KEY_BOOK_CHAPTER_NOTES).
     private const val KEY_BOOK_CHAPTER_NOTE_SPANS = "book_chapter_note_spans"
@@ -520,7 +523,7 @@ object AppPreferences {
         return added
     }
 
-    // ── Series watched progress (v350) ───────────────────────���───���───────
+    // ── Series watched progress (v350) ───────────────────────�����───���───────
     // Per-show set of watched episode keys ("S1E3"): JSON object show name →
     // JSON array of keys. The episode-list sheet toggles an episode; the UI
     // derives watched counts per season from the authored episode list.
@@ -3538,6 +3541,27 @@ object AppPreferences {
         bookCoverDoneState = names
     }
 
+    /** Returns book ids whose metadata lookup has already completed. */
+    fun getBookLookupDone(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_BOOK_LOOKUP_DONE, null) ?: return emptySet()
+        return runCatching {
+            org.json.JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i ->
+                    arr.optString(i).takeIf { it.isNotBlank() }
+                }.toSet()
+            }
+        }.getOrDefault(emptySet())
+    }
+
+    /** Marks one book metadata lookup as completed across restarts. */
+    fun markBookLookupDone(context: Context, bookId: String) {
+        if (bookId.isBlank()) return
+        val done = getBookLookupDone(context) + bookId
+        prefs(context).edit()
+            .putString(KEY_BOOK_LOOKUP_DONE, org.json.JSONArray(done.toList()).toString())
+            .apply()
+    }
+
     /** v361 — wipe EVERY book-cover record (resolved URLs, verified-done
      *  set, failed list) so the hub's "Clear all covers" starts a provider
      *  test from a blank slate. The Coil disk cache is cleared by the caller
@@ -3792,7 +3816,7 @@ object AppPreferences {
         bedDesignRowsState = null
     }
 
-    // ── Evolution path (v9.5) ────────────────────────────────────────
+    // ── Evolution path (v9.5) ──��─────────────────────────────────────
     private const val KEY_EVO_PATH = "evo_path"
 
     fun getEvoPath(context: Context): String? =
