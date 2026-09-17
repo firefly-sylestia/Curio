@@ -478,6 +478,7 @@ internal fun PersonalVoiceBar(
 ) {
     val context = LocalContext.current
     val samples = remember(bars) { PersonalAudioBars.decode(bars) }
+    val carried = LocalPersonalBlockCarried.current
     var isPlaying by rememberSaveable(path) { mutableStateOf(false) }
     var position by rememberSaveable(path) { mutableLongStateOf(0L) }
     var duration by rememberSaveable(path) { mutableLongStateOf(seconds * 1000L) }
@@ -588,7 +589,11 @@ internal fun PersonalVoiceBar(
                         if (!isPlaying) toggle()
                     }
                 }
-                .pointerInput(path) {
+                // v389 — AND THE STRIP STANDS DOWN WHILE THE BLOCK IS CARRIED:
+                // picking the note up (see PersonalMovableBlock) and scrubbing
+                // it are both drags, and one finger cannot mean two things.
+                .pointerInput(path, carried) {
+                    if (carried) return@pointerInput
                     detectDragGestures(
                         onDragStart = { offset -> seekTo(offset.x / size.width) },
                         onDrag = { change, _ ->
@@ -694,6 +699,92 @@ internal fun PersonalVoicePageBlock(
 // ────────────────────────────────────────────────────────────────────────────
 // The keep-recording pill (app root) and the leave-page dialog
 // ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * v389 — A PAGE'S MIC, FOR A PAGE THAT IS NOT [PersonalWritingPage].
+ *
+ * The journal, a topic note and a to-do list get their mic from the writing
+ * core; the BOOK REVIEW and the CHAPTER REVIEW are their own layouts (a book's
+ * page is not a day), so they had none — which is what "also add in book review
+ * chapter review too" asked for. What is shared here is the whole door: the
+ * floating button, the ONE permission request ([rememberRecordPermission]), the
+ * two ways it can fail (refused, or the recorder busy) and the registration that
+ * stops the app's keep-recording pill covering the page it belongs to. What a
+ * page does with the RESULT stays with the page: it reads
+ * `PersonalVoiceRecording.session` for its own `noteId` to swap its dock for the
+ * capsule, and inserts what was kept at its caret ([PersonalEditorState.insertVoice]).
+ *
+ * [entryId] is any stable tag for the page — it names the session and is what
+ * the pill comes back to, so it does not have to be a stored row id.
+ */
+@Composable
+internal fun PersonalVoiceMic(
+    entryId: String,
+    route: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    var recordFailed by remember { mutableStateOf(false) }
+    var micDenied by remember { mutableStateOf(false) }
+
+    fun startVoice() {
+        val started = PersonalVoiceRecording.start(context, entryId, route)
+        if (started == null) recordFailed = true
+    }
+
+    val askToRecord = rememberRecordPermission(
+        onGranted = { startVoice() },
+        onDenied = { micDenied = true }
+    )
+
+    // Only the page whose page is OPEN hides the pill at the app's root.
+    DisposableEffect(entryId) {
+        PersonalVoiceRecording.setOnScreen(entryId)
+        onDispose { PersonalVoiceRecording.setOnScreen(null) }
+    }
+
+    PersonalVoiceButton(onClick = askToRecord, modifier = modifier)
+
+    if (recordFailed) {
+        AlertDialog(
+            onDismissRequest = { recordFailed = false },
+            title = { Text("Could not start recording") },
+            text = { Text("The microphone is busy or unavailable. Try again in a moment.") },
+            confirmButton = { TextButton(onClick = { recordFailed = false }) { Text("OK") } }
+        )
+    }
+
+    // Android's own page for THIS app, when the device has one.
+    val micSettings = remember(context) { appPermissionSettingsIntent(context) }
+    if (micDenied) {
+        AlertDialog(
+            onDismissRequest = { micDenied = false },
+            title = { Text("Curio needs the microphone") },
+            text = {
+                Text(
+                    "Recording a voice note on this page needs microphone access. " +
+                        "If Android will not ask again, its own page for Curio is " +
+                        "where it is turned back on."
+                )
+            },
+            confirmButton = {
+                if (micSettings != null) {
+                    TextButton(onClick = {
+                        micDenied = false
+                        runCatching { context.startActivity(micSettings) }
+                    }) { Text("Open settings") }
+                } else {
+                    TextButton(onClick = { micDenied = false }) { Text("OK") }
+                }
+            },
+            dismissButton = if (micSettings != null) {
+                { TextButton(onClick = { micDenied = false }) { Text("Not now") } }
+            } else {
+                null
+            }
+        )
+    }
+}
 
 /**
  * THE KEEP-RECORDING PILL.

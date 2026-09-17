@@ -1425,16 +1425,28 @@ internal fun PersonalCanvas(
                     )
                 } else if (block.isAudio) {
                     // v389 — a voice note in the page: the waveform is the block, and
-                    // the writing carries on under it.
-                    PersonalVoicePageBlock(
-                        path = block.audio.orEmpty(),
-                        seconds = block.audioSeconds,
-                        bars = block.audioBars,
-                        ink = ink,
-                        accent = accent,
-                        enabled = enabled,
-                        onRemove = { state.removeBlock(id) }
-                    )
+                    // the writing carries on under it. It can also be CARRIED to
+                    // another place on the page (user request: "add drag to move
+                    // the voice note too"): press and hold it, then drag, exactly
+                    // like a to-do row — a note belongs under the thought it is
+                    // about, and where the recording happened is not that place.
+                    PersonalMovableBlock(
+                        id = id,
+                        index = index,
+                        state = state,
+                        drag = rowDrag,
+                        enabled = enabled
+                    ) {
+                        PersonalVoicePageBlock(
+                            path = block.audio.orEmpty(),
+                            seconds = block.audioSeconds,
+                            bars = block.audioBars,
+                            ink = ink,
+                            accent = accent,
+                            enabled = enabled,
+                            onRemove = { state.removeBlock(id) }
+                        )
+                    }
                 } else if (state.keepsChecklistRows) {
                     // A to-do page: every text row can be picked up (long press),
                     // carried to another place, and swiped sideways off the list.

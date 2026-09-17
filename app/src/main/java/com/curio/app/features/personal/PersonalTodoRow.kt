@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -182,6 +184,121 @@ internal class PersonalRowDragState {
 
 /** How far a row must travel sideways before it leaves the list. */
 private const val SWIPE_AWAY_FRACTION = 0.34f
+
+/**
+ * v389 — IS A BLOCK BEING CARRIED?
+ *
+ * A carried VOICE NOTE is a waveform strip whose own gesture seeks (see
+ * [PersonalVoiceBar]), and two detectors on one finger is the bug the to-do rows
+ * already had once. The strip consults this and stands down while the block is
+ * being carried — provided by [PersonalMovableBlock] for its own content, so no
+ * page has to thread the drag state into a voice note.
+ */
+internal val LocalPersonalBlockCarried = staticCompositionLocalOf { false }
+
+/**
+ * v389 — PICK A BLOCK UP AND CARRY IT (the to-do row's gesture, without the
+ * swipe).
+ *
+ * The to-do list can be re-ordered; everything else on a page was fixed where it
+ * was written — which is wrong for a VOICE NOTE, because a note is a thing about
+the thought it sits under, and the place it arrived is just where the recording
+ * happened (user request: "add drag to move the voice note too, in journal page,
+ * also add in book review chapter review too"). So the same pick-up, the same
+ * measured slots (see [PersonalRowDragState.dragBy]) and the same commit — the
+ * page's order IS the stored document — wrapped around whichever block the page
+ * drew, exactly like [PersonalTodoRow] wraps a row.
+ *
+ * The caller hands in the SAME `drag` the page hoisted, so a page that is both a
+ * list and a page with a voice in it still has one gesture at a time.
+ */
+@Composable
+internal fun PersonalMovableBlock(
+    id: String,
+    index: Int,
+    state: PersonalEditorState,
+    drag: PersonalRowDragState,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val gapPx = with(LocalDensity.current) { 6.dp.toPx() }
+    var blockHeight by remember(id) { mutableFloatStateOf(0f) }
+
+    val isDragged = drag.draggedId == id
+    val lastIndex = state.blockIds.lastIndex
+    // The rows it passes slide out of the way; the commit at the drop is what
+    // makes that shift permanent, so it SNAPS when the gesture ends.
+    val shift by animateFloatAsState(
+        targetValue = if (isDragged) 0f else drag.shiftFor(index, lastIndex),
+        animationSpec = if (!drag.isDragging || isDragged) snap()
+        else spring(dampingRatio = 0.82f, stiffness = 700f),
+        label = "movableBlockShift"
+    )
+
+    // The lifted look, the project's own rule: shadow BEFORE the fill, and an
+    // OPAQUE fill (a translucent one lets the shadow bleed through).
+    val lifted = if (isDragged) {
+        Modifier
+            .shadow(6.dp, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest
+                else Color(0xFFF7F1E6)
+            )
+    } else {
+        Modifier
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .onSizeChanged {
+                if (it.height > 0) {
+                    blockHeight = it.height.toFloat()
+                    drag.measure(id, it.height.toFloat())
+                }
+            }
+            .zIndex(if (isDragged) 1f else 0f)
+            .graphicsLayer {
+                translationY = shift + (if (drag.draggedId == id) drag.travelY else 0f)
+                if (drag.draggedId == id) {
+                    scaleX = 1.02f
+                    scaleY = 1.02f
+                }
+            }
+            .then(lifted)
+            .then(
+                if (!enabled) Modifier
+                else Modifier.pointerInput(id, enabled) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = {
+                            if (blockHeight > 0f) drag.begin(id, index, blockHeight + gapPx)
+                        },
+                        onDrag = { change, amount ->
+                            change.consume()
+                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
+                        },
+                        onDragEnd = {
+                            val from = drag.fromIndex
+                            val to = drag.targetIndex(state.blockIds.lastIndex)
+                            if (from in 0..state.blockIds.lastIndex && from != to) {
+                                state.moveBlock(from, to)
+                            }
+                            drag.reset()
+                        },
+                        onDragCancel = { drag.reset() }
+                    )
+                }
+            )
+    ) {
+        // What is inside knows it is being carried, so a gesture of its own
+        // (the waveform's seek) can stand down for the ride.
+        CompositionLocalProvider(LocalPersonalBlockCarried provides isDragged) {
+            content()
+        }
+    }
+}
 
 /**
  * ONE TO-DO ROW, wrapped in the gestures above. The row itself is untouched —

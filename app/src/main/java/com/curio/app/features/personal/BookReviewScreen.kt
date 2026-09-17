@@ -9,6 +9,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -37,6 +39,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +52,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -132,6 +136,14 @@ fun BookReviewScreen(
     var notesLoaded by remember { mutableStateOf(false) }
     LaunchedEffect(notes) { notesLoaded = true }
 
+    // ── The page's own mic (v389) ──────────────────────────────────────
+    // The book review is its own layout, so it carries the family's mic by hand
+    // (see PersonalVoiceMic). `voiceId` is this PAGE's tag — stable for as long
+    // as the review is open, and what the keep-recording pill comes back to.
+    val voiceId = rememberSaveable(bookId) { "book-review-" + bookId }
+    val liveVoice = PersonalVoiceRecording.session?.takeIf { it.noteId == voiceId }
+    var leavePrompt by remember { mutableStateOf(false) }
+
     var editing by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf(PersonalDoc(emptyList())) }
     var seeded by remember { mutableStateOf(false) }
@@ -195,6 +207,11 @@ fun BookReviewScreen(
                 runCatching { PersonalRepositoryHolder.repo.saveBookReview(bookId, body) }
             }
         }
+    }
+
+    /** A recording outlives a page's back gesture only with the member's say-so. */
+    fun leave() {
+        if (liveVoice != null) leavePrompt = true
     }
 
     // Debounced while typing…
@@ -277,7 +294,11 @@ fun BookReviewScreen(
         ) {
             Surface(
                 onClick = {
-                    if (editing) {
+                    // A live recording is asked about FIRST (see PersonalVoice).
+                    val live = liveVoice != null
+                    if (live) {
+                        leave()
+                    } else if (editing) {
                         saveNow()
                         editing = false
                     } else {
@@ -488,6 +509,25 @@ fun BookReviewScreen(
                 }
             }
 
+            // THE PAGE'S OWN MIC. The Add-chapter door has the RIGHT corner
+            // (below), so the mic takes the LEFT: the two float side by side
+            // instead of on top of each other (user request: "in book review
+            // keep it mind theres add chapter floating button too so properly
+            // adjust it").
+            PersonalFloatingLayer(
+                visible = editing && liveVoice == null,
+                enter = fadeIn(tween(180)) + scaleIn(tween(220), initialScale = 0.80f),
+                exit = fadeOut(tween(120)) + scaleOut(tween(160), targetScale = 0.80f),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 18.dp, bottom = 12.dp)
+            ) {
+                PersonalVoiceMic(
+                    entryId = voiceId,
+                    route = CurioRoutes.bookReview(bookId)
+                )
+            }
+
             // THE FLOATING CHAPTER DOOR. It rides over the writing area, above
             // the dock, and it is the one thing the ordinary tool dock cannot
             // give: a marker in the member's own review.
@@ -598,8 +638,10 @@ fun BookReviewScreen(
             }
         }
 
+        // The dock steps aside for a live recording — a voice note is not a
+        // moment for bold — and the capsule takes the page's bottom.
         AnimatedVisibility(
-            visible = editing,
+            visible = editing && liveVoice == null,
             enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
             exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
             modifier = Modifier.fillMaxWidth()
@@ -616,6 +658,57 @@ fun BookReviewScreen(
                 )
             }
         }
+
+        AnimatedVisibility(
+            visible = editing && liveVoice != null,
+            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
+            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                val live = liveVoice
+                if (live != null) {
+                    PersonalVoiceRecorderCapsule(
+                        session = live,
+                        onKeep = {
+                            scope.launch {
+                                val voice = PersonalVoiceRecording.keep(context, voiceId)
+                                if (voice != null) editor.insertVoice(voice)
+                            }
+                        },
+                        onDiscard = { PersonalVoiceRecording.discard() }
+                    )
+                }
+            }
+        }
+    }
+
+    // The system's back gesture is guarded the same way the page's own is.
+    BackHandler(enabled = liveVoice != null) { leave() }
+
+    if (leavePrompt) {
+        PersonalVoiceLeaveDialog(
+            elapsed = liveVoice?.elapsed ?: "",
+            onKeepRecording = { leavePrompt = false },
+            onKeepNote = {
+                leavePrompt = false
+                scope.launch {
+                    val voice = PersonalVoiceRecording.keep(context, voiceId)
+                    if (voice != null) editor.insertVoice(voice)
+                    navController.popBackStack()
+                }
+            },
+            onDiscard = {
+                leavePrompt = false
+                PersonalVoiceRecording.discard()
+                navController.popBackStack()
+            }
+        )
     }
 }
 
