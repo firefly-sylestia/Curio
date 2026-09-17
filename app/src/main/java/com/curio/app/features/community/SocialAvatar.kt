@@ -83,10 +83,15 @@ private class AvatarArt(
      * oval, two highlights), so at a glance every member looked like the same
      * person in a different hat — the note they arrived with was "the eyes is
      * same and also very weird too; the eye should be different per individual
-     * matching the style". The gaze is now part of the character: ten eye
+     * matching the style". The gaze is now part of the character: twelve eye
      * designs, each drawn to suit the row it belongs to (a wizard's sparkle, a
-     * hood's shaded gleam, a beard's steady narrow eye, a beret's soft lid) and
-     * never shared with a neighbour. See [drawEyes], and [drawBrows], which
+     * hood's shaded gleam, a beard's steady narrow eye, a beret's soft lid).
+     * Twelve designs cannot cover twenty-eight faces once each, so what the
+     * table promises instead is that no portrait shares a gaze with the
+     * portraits it sits beside in the picker — and the two rows that broke even
+     * that (the flower crown, which wore the wizard's sparkle, and the space
+     * helmet, which wore the curious eye rather than looking through its own
+     * visor) were given gazes that fit them. See [drawEyes], and [drawBrows], which
      * shapes the brows to match the gaze they sit above.
      */
     val eye: Int
@@ -113,12 +118,20 @@ private val AVATARS: List<AvatarArt> = listOf(
     // a face under a shadow; warm and a touch deeper, with the hood itself
     // lifted off black (the row the note called out: "the black is the worse").
     AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), 14, EDGE_SHADOWED), // hood
-    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15, EDGE_WIDE), // space helmet
+    // v389b — the helmet's visor is GLASS, so the eyes behind it are the same
+    // design the two pairs of glasses wear: lit from above, no shine of their
+    // own to fight the lens. It used to wear the curious wide eye, which read
+    // as a bare face inside a helmet — and as the same gaze as the neighbours.
+    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15, EDGE_BEHIND_GLASS), // space helmet
     // ── v3xx52 — the SOFT SET: twelve feminine silhouettes (waves,
     // ponytails, braids, puffs, flower crowns, bows) in the same pastel
     // family, with a wider spread of skin and hair tones so every member can
     // pick something that looks like them.
-    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16, EDGE_STARRY), // waves + flower
+    // v389b — the flower crown had the wizard's four-point sparkle (the two rows
+    // sat one tile apart in the picker wearing the SAME eyes). The enchanted
+    // gaze belongs to the hat; the waves get the almond eye with the lash flick,
+    // which is a gaze no portrait on either side of it wears.
+    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16, EDGE_ALMOND), // waves + flower
     AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17, EDGE_UPTURNED), // high ponytail
     AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF4A3730), 18, EDGE_HAPPY), // twin braids
     AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF40332E), 19, EDGE_LIDDED), // hime cut

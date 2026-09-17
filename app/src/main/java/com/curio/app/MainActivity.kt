@@ -15,6 +15,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.IncursionStore
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.data.TopicJsonLoader
@@ -248,6 +249,12 @@ class MainActivity : ComponentActivity() {
                 CurioThemeTransitionHost {
                     CurioNavHost()
                 }
+                // v389 — INCURSION's one announcement. Composed at the root,
+                // over whatever page the member happened to type the phrase in,
+                // because the door it opens is on Home and they are somewhere
+                // else. It draws nothing at all until the lock is offered and
+                // accepted.
+                com.curio.app.features.incursion.IncursionUnlockReveal()
                 // v3xx54 — social arrivals while the app is alive (a friend's
                 // message, a new community post). It no-ops unless the user is
                 // signed in, Online Mode is on, and the Notifications switch
@@ -280,6 +287,10 @@ class MainActivity : ComponentActivity() {
         // (the vanish-then-reappear-after-restart symptom). The read is a
         // tiny prefs load and the in-memory state is always newer-or-equal.
         TopicProgressStore.seed(this)
+        // v389 — the hidden Incursion page's two facts: whether it has been
+        // unlocked on this device, and where each title stands. One small prefs
+        // read; nothing here touches the topic catalog or the database.
+        IncursionStore.seed(this)
     }
 
     override fun onDestroy() {

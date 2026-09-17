@@ -1,4 +1,5 @@
 FIX:
+- Social: two portraits were wearing the same eyes — the flower crown had the wizard's sparkle, and the space helmet wore the curious wide eye instead of looking through its own visor; each has a gaze of its own now, so no portrait shares one with the tile beside it.
 - Writing: a voice note is no longer a box — it is the waveform, the play button and the clock on the page itself, with the ✕ asking before it throws a recording away.
 - Writing: a note on a topic says the topic once — the bar carries the lane now, instead of repeating the name the page already shows.
 - Journals: the day's mood is six named chips in each feeling's own colour, instead of six grey glyphs to guess at.
@@ -13,6 +14,10 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Incursion: a hidden page holding the whole viewing order — every Marvel, Sony and X-Men film, series and short, in the order they are meant to be watched, with the essentials marked. It is not in any menu: type "i love you 3000" into any search box in the app and it unlocks, then opens from a floating "Incursion" button on Home.
+- Incursion: mark any title not watched, watching, planning, watched, on hold or dropped — the list says how far through you are, and the filter chips narrow it to essentials, what is left, what is in progress or what is done.
+- Incursion: mark a WHOLE PHASE in one tap — each phase (or era) header carries its own action for all six states, and can clear itself again after asking.
+- Incursion: list or grid, whichever you like reading a shelf in — two tiles across with each title's order and status, phases still heading their own blocks so the one-tap phase marking works in either view.
 - Writing: a photo is a print now — a page, half or small one chosen from the frame's own corner, sized as a share of the text's measure so nothing can ever land on top of it, with the caption written in the frame's wide bottom border.
 - Writing: a photo can be picked up and carried to another place on the page, exactly like a voice note.
 - Writing: a marker pen on the dock — four inks (amber, rose, sage, sky), the same four a book is marked with. Mark a selection outright, or arm a pen for the words you type next; the button wears the pen it is about to lay down.

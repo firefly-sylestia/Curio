@@ -1,5 +1,57 @@
 # Prompt Log — current request
 
+## Request (2026-09-17, batch F — INCURSION, built, plus bulk-by-phase)
+
+Verbatim (the live instruction): "continue and finish all the remaining task also add bulk
+watching by phase for incursion".
+
+**Status (2026-09-17): BUILT — committed locally. NOT pushed (the user asked to be asked
+first; the ask is pending).**
+
+### What landed
+
+1. **The dataset, imported rather than transcribed** (the thing that blocked batch E).
+   `scripts/import_incursion.mjs` fetches the three modules that hold the list —
+   `mcuData.js` (58KB), `sonyData.js` (3KB), `xmenData.js` (10KB) — imports them as
+   MODULES (only `new Set(` and `Object.freeze(` neutralised; every value read out by its
+   own exported name) and writes `app/src/main/assets/incursion/{marvel,sony,xmen}.json`:
+   **163 entries** (130 / 13 / 20) in ~89KB, every row carrying `id`, `order`, `group`,
+   `type`, `title` and `essential`. `trailerData.js` is never fetched (not wanted).
+   Verified: zero entries whose group id is absent from their studio's heading table.
+   **This is the fix for batch E's blocker** — the earlier session was right to refuse to
+   hand-copy a few hundred rows from a truncated read, and wrong about needing the user to
+   paste them: the files are fetchable, so a transform (not a transcription) is possible.
+2. **`data/IncursionCatalog.kt`** — the model + cached asset loader, stamping each entry's
+   studio-qualified `storageKey` (entry ids collide across the three tables by
+   construction).
+3. **`data/IncursionStore.kt`** — the unlock (`offer` — the phrase, accepted in any search
+   field, once per device) and the six-state status map in `curio_prefs`, reactive.
+4. **`features/incursion/IncursionScreen.kt`** — the page: its OWN four-way nav bar at its
+   own foot (Marvel · Sony · X-Men · Essentials), search, five filter chips, list + grid,
+   phase (era) headings with their own tally, and a detail sheet per title.
+5. **BULK WATCHING BY PHASE** (the new ask, and the reason the headers exist): every group
+   header carries a `Mark all` menu for all six states plus a confirming "Clear this
+   phase"; the page header's menu does the same for everything currently listed. Writes
+   once per group (`IncursionStore.setGroupStatus`), never a loop. The grid emits the SAME
+   header as a full-span row, so a grid cannot quietly lose the gesture.
+6. **`features/incursion/IncursionSurfaces.kt`** — the unlock announcement (root-level,
+   ~3.2s, tap to dismiss) and Home's floating `Incursion` button (absent until unlocked).
+7. **The lock lives in `CurioSearchField`** — one call site, so "type it anywhere" is true
+   of every search surface in the app, including ones added later.
+8. **Avatars.** The ten-portrait rebuild the user asked for landed in `029ae32b` (per-
+   character hair, bust and accessory art for all 28, twelve gazes) — checked, not
+   rebuilt. What that pass left was two collisions: the flower crown (#16) and the wizard
+   (#8) shared the starry eye, and the space helmet (#15) wore the curious wide eye while
+   its visor implies glass. Both now wear gazes that fit them and share with no neighbour.
+   **A pixel redesign cannot be verified from here — the user must eyeball it.**
+
+### Still open / not done
+
+- The READER's horizontal and continuous page styles, and the floating page changer —
+  from the earlier reader batch, still not built (not part of this instruction).
+- The "side by side" half of the photo ask (two small prints sharing a row).
+- The avatars' EYE CHECK is the user's to make; I can only see the table, not the render.
+
 ## Request (2026-09-17, batch C — the universal writing dock)
 
 Verbatim summary: the add-chapter flow double-names a chapter ("Chapter 1 · Chapter 1");
@@ -2788,8 +2840,11 @@ to be asked first).**
   (`personalMoodInk`), with a tick on the picked one; the collapsed pill wears the chosen
   feeling's colour. The old chip row was six icon-only buttons ~44dp wide with no words.
 
-**Still open from this prompt:** the avatar redesign (nos. 1, 5, 7, 9, 10, 11, 12, 15, 16,
-17, the eye matches and the general detail pass) — `SocialAvatar.kt`'s 28 portraits. And the
+**The avatar part is closed** — `029ae32b` rebuilt all 28 portraits' hair, bust and
+accessory art and gave each a gaze; batch F (top of this log) fixed the two gazes that
+still collided. What remains is the user's own EYE CHECK, which no session can do for them.
+
+**Still open from this prompt:** the
 "side by side" half of the photo ask: a photo can be sized and carried, but two small
 prints do not yet share a row.
 
@@ -2807,8 +2862,10 @@ and grid views, its own bottom-nav page style, unlocked by typing "i love you 30
 anywhere in the app, with a floating "Incursion" button on Home. Not visible to normal
 users at all.
 
-**Status (2026-09-17): PLANNED — the dataset is located and its schema is known; the
-feature itself is not built. Committed locally, NOT pushed.**
+**Status (2026-09-17): BUILT — see batch F at the top of this log (`scripts/import_incursion.mjs`
+imports the dataset; the screen, its own nav, the store and the lock are in). The blocker
+recorded below was real but had a third answer: the data is FETCHABLE, so it is transformed
+rather than transcribed. The note below is kept for the record of how the schema was read.**
 
 Decided with the user (ask_user): the phrase is accepted by ANY search field in the app;
 Incursion brings its OWN nav (marvel / sony / x-men / essential) and does not touch
@@ -2861,3 +2918,5 @@ unlocked.
 
 ## older prompt — the MCU repo
 https://github.com/firefly-sylestia/mcu-viewing-order lets add this as a secret, so i think it have all of the movies and series of marvel and x men etc i want you to add them, but they are not visible to normal user at all. also properly categories the movies and series, and make a new screen with marvel, sony, x men, option with the list with proper viewing order etc. from that repo, and essential etc. no trailer info, just watch and bookmark save and drop and etc status, in list and grid view, with its own buttm nav page style, and this screen can be acessed if the user types, " i love you 3000" and the button will be in home screen floating ith name as incursion. 
+
+## next prompt, also 

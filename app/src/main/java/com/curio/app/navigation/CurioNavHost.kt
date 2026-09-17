@@ -1054,6 +1054,13 @@ fun CurioNavHost(
             composable(route = CurioRoutes.BOOKS) {
                 BookShelfScreen(navController = navController)
             }
+            // v389 — INCURSION, the hidden viewing order. Registered like any
+            // other push destination so it can arrive and leave with the app's
+            // own transition, and deliberately NOT a bottom-nav prefix: the
+            // page draws its own bar at its own foot.
+            composable(route = CurioRoutes.INCURSION) {
+                com.curio.app.features.incursion.IncursionScreen(navController = navController)
+            }
             composable(
                 route = CurioRoutes.BOOK_DETAIL,
                 arguments = listOf(navArgument("bookId") { type = NavType.StringType })

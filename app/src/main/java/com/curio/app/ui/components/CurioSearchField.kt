@@ -32,12 +32,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.IncursionStore
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -116,6 +118,7 @@ fun CurioSearchField(
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     Surface(
         shape = pillShape,
@@ -148,7 +151,17 @@ fun CurioSearchField(
                 }
                 BasicTextField(
                     value = query,
-                    onValueChange = onQueryChange,
+                    // INCURSION — the app's one lock, offered on every keystroke in
+                    // every search field in the app. It lives HERE rather than in
+                    // each screen because this component is what all of them
+                    // wear, which is what makes "type it anywhere" a fact about
+                    // the app instead of a list of call sites someone has to
+                    // remember to update. The check is a length test and a
+                    // comparison, and it stops doing even that once unlocked.
+                    onValueChange = { next ->
+                        IncursionStore.offer(context, next)
+                        onQueryChange(next)
+                    },
                     singleLine = true,
                     textStyle = textStyle.copy(color = resolvedInk),
                     cursorBrush = SolidColor(resolvedInk),
