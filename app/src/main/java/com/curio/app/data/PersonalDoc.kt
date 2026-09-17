@@ -74,16 +74,6 @@ data class PersonalRun(
      * which is a note that looks plain, never a note that looks broken.
      */
     val font: String = "",
-    /**
-     * v389 — HOW BIG AN ATTACHED PHOTO SITS on the writing column: one of
-     * [PersonalPhotoSize]'s keys, or "" for a page-wide print.
-     *
-     * A key rather than a dp value: a photo placed before this existed is
-     * [PersonalPhotoSize.PAGE], which is what it already looked like, so the
-     * field costs old notes nothing and a future size is a new key rather than
-     * a re-layout of everybody's pages.
-     */
-    val photoSize: String = ""
 )
 
 /** Alignment of one block's paragraph. */
@@ -112,6 +102,8 @@ data class PersonalBlock(
     val photo: String? = null,
     /** Optional one-line caption shown under a photo. */
     val caption: String = "",
+    /** Stable key for the photo's print size; empty means page-wide. */
+    val photoSize: String = "",
     val align: PersonalAlign = PersonalAlign.START,
     /**
      * A VOICE NOTE's audio file (v389) — an absolute path under
