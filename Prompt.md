@@ -64,12 +64,21 @@ they wrote in the neutral sans on a bordered chip. `RichTextEditor` gained `jour
 (the app's `WritingFontFamily`, the hand the journal writes in), and both editors now pass it with
 `surface = Color.Transparent` and `showFieldBorder = false`, so the words sit straight on the page.
 
-### Still open from this instruction (not guessed at)
+### Still open from this instruction (asked; the answers are below)
 
-- **The 28 portraits, fully redrawn** — a real art pass over `SocialAvatar.kt` (1792 lines), not
-  done here.
-- **The save-your-take lag** (both shells: `CaptureStudio` and the classic page) — not
-  diagnosed yet.
+- **The 28 portraits, fully redrawn.** Answer: *illustrated characters with distinct
+  silhouettes* — each portrait its own pose/props and a clearly different outline. That is a real
+  art pass over `SocialAvatar.kt` (1792 lines), not done here.
+- **The save-your-take lag.** Answer: *both shells, and scrolling the take rail* — so it is the
+  whole page, not one field. What the reading turned up so far:
+  - the classic body is ONE `Column` with `verticalScroll` holding every card, and the take rail
+    (`CaptureTakeTabs`) draws every take; a keystroke in any note updates
+    `CaptureSectionState.data`, which every reader of `hasAnyDraft` / `canSave` / the rail
+    re-runs — so a keystroke recomposes the page, and a scroll rides the same work;
+  - `RichTextEditor.emit` rebuilds the whole `AnnotatedString` (and rebases every span) on each
+    keystroke — O(length of the note) per key on a long note.
+  Both are plausible causes and neither has been measured; the honest next step is a profiler
+  run (or a quick instrumentation of recomposition counts), not a speculative rewrite.
 
 ## Request (2026-09-18, batch P — the flip stops shifting, Portrait prints, and a quieter voice note)
 
