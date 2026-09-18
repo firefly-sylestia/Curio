@@ -144,6 +144,31 @@ jobs:
           done
           echo "Verified ${#apks[@]} release APK(s) — none signed with the debug key."
 
+      # TEMPORARY DIAGNOSTIC (branch only, never merged): the release build's
+      # R8 step fails on a Kotlin compiler artifact (`$$$$$NON_LOCAL_RETURN$$$$$`
+      # with a method named `<anonymous>`). This prints which method carries it.
+      - name: Diagnose the Kotlin non-local-return artifact
+        if: always()
+        run: |
+          set -uo pipefail
+          classes=app/build/intermediates/built_in_kotlinc/release/compileReleaseKotlin/classes
+          echo "classes dir: $classes"
+          cd "$classes" || exit 0
+          hits=$(grep -rl 'NON_LOCAL_RETURN' . || true)
+          echo "== classes mentioning the sentinel =="
+          echo "$hits"
+          echo
+          for f in $hits; do
+            echo "=============================================================="
+            echo "=== $f"
+            javap -p -c "$f" > /tmp/dis.txt 2>&1 || true
+            echo "-- methods whose bytecode carries it:"
+            awk '/^  [^ ].*\(.*\)/ { m=$0 } /NON_LOCAL_RETURN/ { print "   IN: " m; print "      " $0 }' /tmp/dis.txt | head -60
+            echo "-- head of the disassembly:"
+            head -30 /tmp/dis.txt
+            echo
+          done
+
       - name: Upload lint reports
         if: always()
         uses: actions/upload-artifact@v6
