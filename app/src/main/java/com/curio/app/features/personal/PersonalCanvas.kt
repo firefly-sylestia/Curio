@@ -279,9 +279,9 @@ private fun personalAnnotateLinks(base: AnnotatedString): AnnotatedString {
     val text = base.text
     val matches = URL_REGEX.findAll(text).toList()
     if (matches.isEmpty()) return base
-    return androidx.compose.ui.text.buildAnnotatedString {
+    val annotated = androidx.compose.ui.text.buildAnnotatedString {
         append(base)
-        matches.forEach { match ->
+        for (match in matches) {
             addStyle(
                 SpanStyle(
                     color = Color(0xFF5C3A20),
@@ -298,6 +298,7 @@ private fun personalAnnotateLinks(base: AnnotatedString): AnnotatedString {
             )
         }
     }
+    return annotated
 }
 /** The face's name as the menu shows it. */
 internal fun personalFontLabel(key: String): String = when (key) {

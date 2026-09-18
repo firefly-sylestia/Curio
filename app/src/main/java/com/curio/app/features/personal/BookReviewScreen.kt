@@ -62,6 +62,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -416,9 +417,10 @@ fun BookReviewScreen(
                     ) {
                         // v389d — THE CANVAS' PLACE IN THE SCROLL.
                         var aboveContentHeight by remember { mutableFloatStateOf(0f) }
+                        val density = LocalDensity.current
                         Box(
                             Modifier.onSizeChanged {
-                                aboveContentHeight = it.height.toFloat() + 4.dp.toPx()
+                                aboveContentHeight = it.height.toFloat() + with(density) { 4.dp.toPx() }
                             }
                         ) { Spacer(Modifier.height(0.dp)) }
                         PersonalCanvas(
