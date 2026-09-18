@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -583,9 +584,10 @@ internal fun PersonalWritingPage(
                         // scrolling content must be added. A simple measurement box
                         // (which also houses [aboveCanvas]) gives that offset.
                         var aboveContentHeight by remember { mutableFloatStateOf(0f) }
+                        val density = LocalDensity.current
                         Box(
                             Modifier.onSizeChanged {
-                                aboveContentHeight = it.height.toFloat() + 6.dp.toPx()
+                                aboveContentHeight = it.height.toFloat() + with(density) { 6.dp.toPx() }
                             }
                         ) { aboveCanvas() }
                         PersonalCanvas(
