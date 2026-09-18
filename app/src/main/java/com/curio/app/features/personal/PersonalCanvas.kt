@@ -2181,7 +2181,18 @@ internal fun PersonalCanvas(
                                     )
                                 }
                             }
-                            Box(Modifier.weight(0.58f)) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(0.58f)
+                                    // The drag's own arithmetic counts a slot's
+                                    // height, so the line beside the print has
+                                    // to report the height it actually takes.
+                                    .onSizeChanged { size ->
+                                        if (size.height > 0) {
+                                            rowDrag.measure(nextId, size.height.toFloat())
+                                        }
+                                    }
+                            ) {
                                 PersonalTextBlock(
                                     id = nextId,
                                     state = state,
