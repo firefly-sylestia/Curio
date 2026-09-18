@@ -933,48 +933,617 @@ private fun DrawScope.hairLock(hair: Color, u: Float, x: Float, y: Float, width:
  * the old character templates.
  */
 private fun DrawScope.drawEditorialCharacter(art: AvatarArt, u: Float) {
-    val variant = art.kind.coerceIn(0, 19)
-    val shadow = darken(art.garment, 0.24f)
-    val hairShadow = darken(art.hair, 0.22f)
-    val face = Path().apply {
-        mv(31f, 28f, u); cu(27f, 40f, 29f, 58f, 50f, 63f, u)
-        cu(71f, 58f, 73f, 40f, 69f, 28f, u)
-        cu(61f, 19f, 39f, 19f, 31f, 28f, u); close()
+    /*
+     * Curio portrait reset:
+     * The 20 slots stay exactly the same, but the character identity now comes
+     * from the HAIR SILHOUETTE rather than hats, props and random geometric marks.
+     *
+     * The drawing is intentionally simple at small sizes:
+     * - one clean bust
+     * - one organic head shape
+     * - one clearly different hairstyle per slot
+     * - restrained face details
+     *
+     * Kinds 0..9 are shorter / masculine-leaning cuts and 10..19 are longer /
+     * feminine-leaning cuts, but every hairstyle is usable as a character choice.
+     */
+
+    val kind = art.kind.coerceIn(0, 19)
+    val hair = art.hair
+    val hairDark = darken(hair, 0.24f)
+    val hairLight = lighten(hair, 0.24f)
+    val garment = art.garment
+    val garmentDark = darken(garment, 0.20f)
+    val skin = art.skin
+    val skinShade = shadeSkin(skin, 0.55f)
+
+    fun path(fill: Color, block: Path.() -> Unit) {
+        drawPath(Path().apply(block), fill)
     }
-    drawRoundRect(shadow, o(17f, 68f, u), Size(s(66f, u), s(42f, u)), cr(22f, u))
-    drawPath(Path().apply { mv(17f, 82f, u); qd(35f, 67f, 50f, 75f, u); qd(67f, 67f, 83f, 82f, u); ln(83f, 100f, u); ln(17f, 100f, u); close() }, art.garment)
-    drawRoundRect(art.skin, o(43f, 57f, u), Size(s(14f, u), s(18f, u)), cr(5f, u))
-    drawPath(face, art.skin)
-    drawPath(Path().apply { mv(31f, 29f, u); cu(29f, 17f, 45f, 11f, 58f, 18f, u); cu(70f, 23f, 73f, 39f, 69f, 47f, u); qd(61f, 31f, 59f, 28f, u); qd(47f, 23f, 31f, 29f, u); close() }, art.hair)
-    val eyeY = 43f + (variant % 3) * 1.5f
-    val eyeGap = 8f + (variant % 4)
-    drawLine(INK, o(50f - eyeGap, eyeY, u), o(50f - 2f, eyeY + (variant % 2), u), s(1.7f, u), cap = StrokeCap.Round)
-    drawLine(INK, o(50f + 2f, eyeY + (variant % 2), u), o(50f + eyeGap, eyeY, u), s(1.7f, u), cap = StrokeCap.Round)
-    drawLine(darken(art.skin, 0.38f), o(50f, 45f, u), o(48f + (variant % 3), 50f, u), s(1.2f, u), cap = StrokeCap.Round)
-    drawLine(LIP, o(46f, 54f + (variant % 2), u), o(54f, 54f - (variant % 2), u), s(1.5f, u), cap = StrokeCap.Round)
-    drawLine(lighten(art.garment, 0.35f), o(32f, 82f, u), o(68f, 82f, u), s(1.4f, u), cap = StrokeCap.Round)
-    when (variant) {
-        0 -> drawArc(hairShadow, 18f, 180f, false, o(26f, 13f, u), Size(s(48f, u), s(24f, u)), style = Stroke(width = s(5f, u)))
-        1 -> drawCircle(art.garment, s(9f, u), o(74f, 25f, u))
-        2 -> drawLine(art.hair, o(28f, 24f, u), o(20f, 58f, u), s(6f, u), cap = StrokeCap.Round)
-        3 -> drawCircle(lighten(art.garment, 0.2f), s(7f, u), o(27f, 23f, u))
-        4 -> drawLine(art.garment, o(18f, 31f, u), o(82f, 31f, u), s(4f, u), cap = StrokeCap.Round)
-        5 -> drawCircle(art.garment, s(8f, u), o(25f, 49f, u))
-        6 -> drawLine(art.hair, o(70f, 25f, u), o(82f, 57f, u), s(5f, u), cap = StrokeCap.Round)
-        7 -> drawRoundRect(art.garment, o(34f, 13f, u), Size(s(32f, u), s(8f, u)), cr(4f, u))
-        8 -> drawCircle(lighten(art.garment, 0.2f), s(4f, u), o(28f, 38f, u))
-        9 -> drawLine(art.garment, o(22f, 69f, u), o(78f, 69f, u), s(4f, u), cap = StrokeCap.Round)
-        10 -> drawCircle(art.garment, s(9f, u), o(25f, 27f, u))
-        11 -> drawLine(art.hair, o(73f, 24f, u), o(78f, 58f, u), s(7f, u), cap = StrokeCap.Round)
-        12 -> drawRoundRect(art.garment, o(28f, 15f, u), Size(s(44f, u), s(9f, u)), cr(4f, u))
-        13 -> drawCircle(lighten(art.garment, 0.18f), s(5f, u), o(76f, 39f, u))
-        14 -> drawLine(art.garment, o(24f, 61f, u), o(76f, 61f, u), s(3f, u), cap = StrokeCap.Round)
-        15 -> drawRoundRect(art.garment, o(24f, 18f, u), Size(s(52f, u), s(6f, u)), cr(3f, u))
-        16 -> drawCircle(art.garment, s(8f, u), o(73f, 21f, u))
-        17 -> drawLine(art.hair, o(74f, 22f, u), o(88f, 12f, u), s(5f, u), cap = StrokeCap.Round)
-        18 -> drawLine(art.hair, o(27f, 30f, u), o(18f, 65f, u), s(5f, u), cap = StrokeCap.Round)
-        19 -> drawRoundRect(art.garment, o(25f, 12f, u), Size(s(50f, u), s(7f, u)), cr(3f, u))
+
+    fun outlinedPath(fill: Color, block: Path.() -> Unit) {
+        val p = Path().apply(block)
+        drawPath(p, fill)
+        drawPath(
+            p,
+            INK.copy(alpha = 0.34f),
+            style = Stroke(width = s(1.25f, u), cap = StrokeCap.Round)
+        )
     }
+
+    fun hairStrand(
+        x1: Float, y1: Float,
+        cx1: Float, cy1: Float,
+        cx2: Float, cy2: Float,
+        x2: Float, y2: Float
+    ) {
+        drawPath(
+            Path().apply {
+                mv(x1, y1, u)
+                cu(cx1, cy1, cx2, cy2, x2, y2, u)
+            },
+            hairLight.copy(alpha = 0.34f),
+            style = Stroke(width = s(1.15f, u), cap = StrokeCap.Round)
+        )
+    }
+
+    // Bust. A soft, asymmetric shoulder shape gives the portraits a little life
+    // without turning the avatar into a detailed illustration at 36dp.
+    path(garment) {
+        mv(10f, 100f, u)
+        cu(12f, 86f, 22f, 77f, 37f, 75f, u)
+        cu(44f, 74f, 47f, 74f, 50f, 74f, u)
+        cu(53f, 74f, 56f, 74f, 63f, 75f, u)
+        cu(78f, 77f, 88f, 86f, 90f, 100f, u)
+        close()
+    }
+    drawPath(
+        Path().apply {
+            mv(14f, 94f, u)
+            cu(25f, 83f, 34f, 80f, 40f, 80f, u)
+        },
+        Color.White.copy(alpha = 0.16f),
+        style = Stroke(width = s(2f, u), cap = StrokeCap.Round)
+    )
+
+    // Neck behind the head.
+    path(skinShade) {
+        mv(42f, 57f, u)
+        ln(58f, 57f, u)
+        ln(60f, 77f, u)
+        cu(56f, 80f, 44f, 80f, 40f, 77f, u)
+        close()
+    }
+
+    // Hair-back silhouettes. These are the important part of the redesign:
+    // deliberately different outlines rather than recoloured circles/rectangles.
+    when (kind) {
+        0 -> { // textured crop
+            outlinedPath(hair) {
+                mv(29f, 38f, u)
+                cu(26f, 29f, 29f, 20f, 37f, 18f, u)
+                cu(43f, 13f, 58f, 14f, 67f, 19f, u)
+                cu(74f, 23f, 76f, 31f, 72f, 39f, u)
+                cu(67f, 33f, 62f, 28f, 56f, 27f, u)
+                cu(49f, 25f, 42f, 27f, 36f, 33f, u)
+                close()
+            }
+        }
+        1 -> { // side-parted taper
+            outlinedPath(hair) {
+                mv(28f, 43f, u)
+                cu(25f, 32f, 29f, 21f, 39f, 17f, u)
+                cu(50f, 12f, 65f, 17f, 71f, 27f, u)
+                cu(76f, 35f, 73f, 43f, 70f, 48f, u)
+                cu(66f, 41f, 62f, 33f, 55f, 29f, u)
+                cu(47f, 25f, 39f, 25f, 33f, 31f, u)
+                close()
+            }
+        }
+        2 -> { // undercut with swept top
+            outlinedPath(hair) {
+                mv(30f, 43f, u)
+                cu(28f, 34f, 31f, 23f, 40f, 19f, u)
+                cu(49f, 14f, 64f, 16f, 72f, 24f, u)
+                cu(76f, 28f, 75f, 34f, 71f, 37f, u)
+                cu(62f, 32f, 53f, 27f, 43f, 30f, u)
+                cu(37f, 32f, 34f, 37f, 32f, 43f, u)
+                close()
+            }
+        }
+        3 -> { // tight curls
+            listOf(
+                31f to 25f, 39f to 20f, 49f to 18f, 59f to 20f, 68f to 25f,
+                28f to 34f, 72f to 34f
+            ).forEach { (x, y) ->
+                drawCircle(hair, s(8.5f, u), o(x, y, u))
+            }
+        }
+        4 -> { // medium swept-back waves
+            outlinedPath(hair) {
+                mv(28f, 43f, u)
+                cu(24f, 32f, 29f, 19f, 41f, 17f, u)
+                cu(53f, 14f, 65f, 19f, 73f, 28f, u)
+                cu(76f, 33f, 75f, 39f, 72f, 45f, u)
+                cu(67f, 38f, 63f, 31f, 56f, 28f, u)
+                cu(49f, 25f, 41f, 26f, 35f, 32f, u)
+                close()
+            }
+        }
+        5 -> { // short fringe
+            outlinedPath(hair) {
+                mv(28f, 43f, u)
+                cu(25f, 30f, 31f, 19f, 42f, 17f, u)
+                cu(55f, 14f, 69f, 19f, 73f, 31f, u)
+                ln(70f, 38f, u)
+                cu(65f, 34f, 61f, 36f, 56f, 38f, u)
+                cu(51f, 34f, 47f, 34f, 43f, 38f, u)
+                cu(39f, 34f, 34f, 35f, 30f, 40f, u)
+                close()
+            }
+        }
+        6 -> { // curly high top
+            outlinedPath(hair) {
+                mv(30f, 43f, u)
+                cu(27f, 34f, 30f, 23f, 38f, 20f, u)
+                cu(42f, 12f, 56f, 10f, 65f, 17f, u)
+                cu(72f, 18f, 75f, 27f, 72f, 35f, u)
+                cu(65f, 31f, 60f, 27f, 54f, 27f, u)
+                cu(46f, 25f, 38f, 28f, 34f, 37f, u)
+                close()
+            }
+            drawCircle(hairLight.copy(alpha = 0.20f), s(5f, u), o(43f, 17f, u))
+        }
+        7 -> { // low fade + curls
+            outlinedPath(hair) {
+                mv(30f, 43f, u)
+                cu(27f, 35f, 30f, 25f, 37f, 21f, u)
+                cu(43f, 16f, 58f, 17f, 66f, 23f, u)
+                cu(72f, 27f, 73f, 34f, 70f, 40f, u)
+                cu(63f, 34f, 57f, 29f, 51f, 30f, u)
+                cu(43f, 30f, 36f, 35f, 34f, 43f, u)
+                close()
+            }
+        }
+        8 -> { // medium center-parted hair
+            outlinedPath(hair) {
+                mv(27f, 49f, u)
+                cu(24f, 34f, 27f, 21f, 39f, 17f, u)
+                cu(46f, 14f, 49f, 15f, 50f, 17f, u)
+                cu(51f, 15f, 55f, 14f, 62f, 17f, u)
+                cu(73f, 21f, 77f, 34f, 73f, 49f, u)
+                cu(69f, 43f, 67f, 37f, 65f, 32f, u)
+                cu(59f, 26f, 55f, 23f, 50f, 22f, u)
+                cu(45f, 23f, 40f, 27f, 36f, 33f, u)
+                cu(32f, 39f, 31f, 44f, 27f, 49f, u)
+                close()
+            }
+        }
+        9 -> { // messy fringe / bedhead
+            outlinedPath(hair) {
+                mv(27f, 44f, u)
+                cu(25f, 33f, 28f, 21f, 38f, 18f, u)
+                cu(43f, 13f, 50f, 18f, 55f, 14f, u)
+                cu(60f, 11f, 63f, 18f, 69f, 18f, u)
+                cu(75f, 20f, 77f, 30f, 72f, 39f, u)
+                cu(66f, 34f, 61f, 38f, 56f, 34f, u)
+                cu(51f, 39f, 47f, 34f, 42f, 35f, u)
+                cu(37f, 40f, 33f, 37f, 27f, 44f, u)
+                close()
+            }
+        }
+        10 -> { // blunt bob
+            outlinedPath(hair) {
+                mv(25f, 47f, u)
+                cu(23f, 29f, 30f, 18f, 42f, 16f, u)
+                cu(54f, 14f, 68f, 20f, 73f, 32f, u)
+                cu(77f, 44f, 73f, 59f, 69f, 68f, u)
+                ln(61f, 68f, u)
+                ln(61f, 47f, u)
+                cu(57f, 43f, 43f, 43f, 39f, 47f, u)
+                ln(39f, 68f, u)
+                ln(31f, 68f, u)
+                cu(27f, 59f, 24f, 53f, 25f, 47f, u)
+                close()
+            }
+        }
+        11 -> { // long straight center part
+            outlinedPath(hair) {
+                mv(24f, 45f, u)
+                cu(21f, 27f, 29f, 16f, 41f, 15f, u)
+                cu(46f, 14f, 48f, 16f, 50f, 18f, u)
+                cu(52f, 16f, 55f, 14f, 61f, 15f, u)
+                cu(73f, 17f, 79f, 30f, 76f, 46f, u)
+                ln(73f, 88f, u)
+                ln(65f, 88f, u)
+                ln(61f, 45f, u)
+                cu(57f, 37f, 43f, 37f, 39f, 45f, u)
+                ln(35f, 88f, u)
+                ln(27f, 88f, u)
+                close()
+            }
+        }
+        12 -> { // long side-parted waves
+            outlinedPath(hair) {
+                mv(23f, 47f, u)
+                cu(19f, 29f, 27f, 17f, 41f, 15f, u)
+                cu(56f, 12f, 70f, 19f, 75f, 33f, u)
+                cu(80f, 48f, 74f, 66f, 78f, 82f, u)
+                cu(72f, 88f, 67f, 83f, 66f, 74f, u)
+                cu(64f, 62f, 68f, 53f, 64f, 43f, u)
+                cu(59f, 34f, 49f, 31f, 42f, 36f, u)
+                cu(34f, 42f, 34f, 58f, 30f, 76f, u)
+                cu(27f, 83f, 22f, 84f, 20f, 77f, u)
+                cu(17f, 64f, 23f, 56f, 23f, 47f, u)
+                close()
+            }
+        }
+        13 -> { // high ponytail
+            outlinedPath(hair) {
+                mv(28f, 47f, u)
+                cu(25f, 31f, 30f, 19f, 42f, 17f, u)
+                cu(54f, 14f, 67f, 19f, 71f, 31f, u)
+                cu(74f, 38f, 70f, 46f, 68f, 51f, u)
+                cu(73f, 39f, 80f, 28f, 88f, 23f, u)
+                cu(91f, 37f, 86f, 52f, 79f, 61f, u)
+                cu(74f, 66f, 70f, 59f, 68f, 51f, u)
+                close()
+            }
+        }
+        14 -> { // low ponytail
+            outlinedPath(hair) {
+                mv(26f, 47f, u)
+                cu(23f, 31f, 30f, 19f, 42f, 17f, u)
+                cu(55f, 14f, 68f, 20f, 72f, 32f, u)
+                cu(76f, 45f, 71f, 54f, 68f, 60f, u)
+                cu(76f, 57f, 84f, 59f, 88f, 68f, u)
+                cu(89f, 76f, 82f, 83f, 75f, 85f, u)
+                cu(78f, 76f, 74f, 68f, 68f, 60f, u)
+                close()
+            }
+        }
+        15 -> { // twin braids
+            outlinedPath(hair) {
+                mv(27f, 47f, u)
+                cu(24f, 30f, 30f, 19f, 42f, 16f, u)
+                cu(54f, 13f, 67f, 19f, 73f, 32f, u)
+                cu(76f, 45f, 71f, 53f, 69f, 57f, u)
+                cu(72f, 65f, 76f, 72f, 75f, 82f, u)
+                cu(74f, 90f, 67f, 91f, 65f, 84f, u)
+                cu(64f, 74f, 66f, 65f, 69f, 57f, u)
+                close()
+            }
+            // Left braid hangs separately, giving the hairstyle its unmistakable pair.
+            outlinedPath(hair) {
+                mv(31f, 53f, u)
+                cu(27f, 62f, 23f, 70f, 25f, 81f, u)
+                cu(27f, 91f, 34f, 91f, 36f, 84f, u)
+                cu(37f, 75f, 34f, 65f, 31f, 53f, u)
+                close()
+            }
+            for (i in 0..3) {
+                val y = 64f + i * 7f
+                drawLine(
+                    hairLight.copy(alpha = 0.38f),
+                    o(27f, y, u), o(34f, y + 4f, u),
+                    strokeWidth = s(1.1f, u), cap = StrokeCap.Round
+                )
+                drawLine(
+                    hairLight.copy(alpha = 0.38f),
+                    o(73f, y, u), o(67f, y + 4f, u),
+                    strokeWidth = s(1.1f, u), cap = StrokeCap.Round
+                )
+            }
+        }
+        16 -> { // messy bun with loose sides
+            drawCircle(hair, s(11f, u), o(57f, 17f, u))
+            outlinedPath(hair) {
+                mv(25f, 49f, u)
+                cu(22f, 31f, 29f, 18f, 42f, 16f, u)
+                cu(55f, 13f, 69f, 20f, 73f, 33f, u)
+                cu(77f, 48f, 71f, 61f, 68f, 72f, u)
+                ln(61f, 70f, u)
+                cu(61f, 55f, 60f, 43f, 56f, 38f, u)
+                cu(51f, 33f, 43f, 33f, 38f, 40f, u)
+                cu(34f, 48f, 36f, 61f, 35f, 72f, u)
+                ln(28f, 72f, u)
+                close()
+            }
+        }
+        17 -> { // shoulder-length curls
+            outlinedPath(hair) {
+                mv(24f, 47f, u)
+                cu(20f, 29f, 28f, 18f, 41f, 16f, u)
+                cu(55f, 13f, 70f, 20f, 76f, 34f, u)
+                cu(81f, 50f, 75f, 65f, 78f, 76f, u)
+                cu(75f, 86f, 68f, 87f, 67f, 78f, u)
+                cu(68f, 67f, 73f, 58f, 68f, 48f, u)
+                cu(64f, 38f, 57f, 32f, 50f, 32f, u)
+                cu(42f, 32f, 34f, 38f, 31f, 49f, u)
+                cu(29f, 60f, 34f, 68f, 31f, 78f, u)
+                cu(29f, 86f, 22f, 85f, 21f, 76f, u)
+                cu(20f, 66f, 25f, 57f, 24f, 47f, u)
+                close()
+            }
+        }
+        18 -> { // half-up hair
+            outlinedPath(hair) {
+                mv(24f, 47f, u)
+                cu(21f, 30f, 29f, 18f, 42f, 16f, u)
+                cu(55f, 13f, 70f, 20f, 75f, 34f, u)
+                cu(79f, 51f, 74f, 68f, 76f, 83f, u)
+                cu(70f, 87f, 64f, 84f, 64f, 75f, u)
+                cu(63f, 61f, 66f, 51f, 62f, 43f, u)
+                cu(58f, 34f, 42f, 31f, 36f, 43f, u)
+                cu(31f, 51f, 34f, 64f, 31f, 78f, u)
+                cu(29f, 84f, 23f, 83f, 22f, 76f, u)
+                close()
+            }
+            // The gathered top section is deliberately visible as a shape, not a dot.
+            outlinedPath(hair) {
+                mv(36f, 28f, u)
+                cu(40f, 17f, 53f, 15f, 64f, 22f, u)
+                cu(67f, 25f, 66f, 30f, 63f, 33f, u)
+                cu(54f, 27f, 46f, 26f, 36f, 28f, u)
+                close()
+            }
+        }
+        19 -> { // hime-inspired straight cut
+            outlinedPath(hair) {
+                mv(23f, 46f, u)
+                cu(20f, 28f, 29f, 16f, 42f, 15f, u)
+                cu(55f, 13f, 70f, 19f, 76f, 33f, u)
+                cu(79f, 46f, 74f, 57f, 73f, 68f, u)
+                ln(68f, 68f, u)
+                ln(68f, 53f, u)
+                cu(63f, 48f, 59f, 45f, 55f, 44f, u)
+                ln(45f, 44f, u)
+                cu(40f, 45f, 36f, 48f, 32f, 53f, u)
+                ln(32f, 68f, u)
+                ln(27f, 68f, u)
+                cu(26f, 58f, 23f, 53f, 23f, 46f, u)
+                close()
+            }
+        }
+    }
+
+    // A clean face sits inside the hair. The jaw is softer than the old
+    // "circle + line" construction and the features are intentionally quiet.
+    outlinedPath(skin) {
+        mv(50f, 24f, u)
+        cu(62f, 24f, 69f, 32f, 69f, 44f, u)
+        cu(69f, 56f, 62f, 64f, 50f, 67f, u)
+        cu(38f, 64f, 31f, 56f, 31f, 44f, u)
+        cu(31f, 32f, 38f, 24f, 50f, 24f, u)
+        close()
+    }
+
+    // Neck shading tucked under the jaw.
+    drawPath(
+        Path().apply {
+            mv(40f, 62f, u)
+            cu(44f, 66f, 56f, 66f, 60f, 62f, u)
+        },
+        shadeSkin(skin, 1f).copy(alpha = 0.48f),
+        style = Stroke(width = s(1.8f, u), cap = StrokeCap.Round)
+    )
+
+    // Fringe / front hair. This is where each hairstyle becomes readable.
+    when (kind) {
+        0 -> {
+            path(hair) {
+                mv(30f, 35f, u)
+                cu(35f, 27f, 43f, 24f, 50f, 25f, u)
+                cu(57f, 24f, 65f, 27f, 70f, 33f, u)
+                cu(64f, 30f, 58f, 33f, 52f, 32f, u)
+                cu(45f, 30f, 39f, 32f, 30f, 35f, u)
+                close()
+            }
+        }
+        1 -> {
+            path(hair) {
+                mv(31f, 35f, u)
+                cu(37f, 27f, 47f, 23f, 58f, 25f, u)
+                cu(54f, 29f, 49f, 34f, 44f, 38f, u)
+                cu(40f, 34f, 36f, 33f, 31f, 35f, u)
+                close()
+            }
+        }
+        2 -> {
+            path(hair) {
+                mv(31f, 37f, u)
+                cu(39f, 29f, 51f, 25f, 65f, 27f, u)
+                cu(61f, 31f, 56f, 34f, 52f, 39f, u)
+                cu(45f, 34f, 39f, 35f, 31f, 37f, u)
+                close()
+            }
+        }
+        3, 6, 7 -> {
+            // Individual curl shapes instead of one hard cap.
+            listOf(
+                34f to 31f, 43f to 27f, 53f to 27f, 62f to 31f
+            ).forEach { (x, y) ->
+                drawCircle(hair, s(6.2f, u), o(x, y, u))
+            }
+        }
+        4 -> {
+            path(hair) {
+                mv(29f, 35f, u)
+                cu(38f, 25f, 48f, 25f, 56f, 29f, u)
+                cu(62f, 31f, 67f, 35f, 71f, 38f, u)
+                cu(62f, 35f, 55f, 34f, 49f, 36f, u)
+                cu(42f, 32f, 36f, 34f, 29f, 35f, u)
+                close()
+            }
+        }
+        5, 9 -> {
+            path(hair) {
+                mv(30f, 36f, u)
+                cu(37f, 28f, 46f, 27f, 53f, 30f, u)
+                cu(60f, 33f, 64f, 31f, 70f, 35f, u)
+                cu(65f, 39f, 59f, 38f, 54f, 36f, u)
+                cu(48f, 40f, 41f, 35f, 30f, 36f, u)
+                close()
+            }
+        }
+        8, 11 -> {
+            // Center part: two clean curtain sections.
+            path(hair) {
+                mv(29f, 36f, u)
+                cu(35f, 28f, 42f, 24f, 49f, 25f, u)
+                ln(50f, 42f, u)
+                cu(44f, 35f, 37f, 33f, 29f, 36f, u)
+                close()
+            }
+            path(hair) {
+                mv(51f, 25f, u)
+                cu(59f, 24f, 66f, 29f, 71f, 36f, u)
+                cu(63f, 33f, 57f, 35f, 51f, 42f, u)
+                close()
+            }
+        }
+        10 -> {
+            path(hair) {
+                mv(28f, 37f, u)
+                cu(35f, 27f, 44f, 24f, 50f, 25f, u)
+                cu(57f, 24f, 66f, 28f, 72f, 37f, u)
+                ln(68f, 45f, u)
+                cu(62f, 40f, 58f, 39f, 54f, 39f, u)
+                cu(49f, 36f, 44f, 37f, 39f, 41f, u)
+                cu(35f, 39f, 31f, 39f, 28f, 37f, u)
+                close()
+            }
+        }
+        12, 17 -> {
+            path(hair) {
+                mv(27f, 36f, u)
+                cu(36f, 26f, 46f, 24f, 56f, 27f, u)
+                cu(63f, 29f, 67f, 34f, 71f, 40f, u)
+                cu(63f, 35f, 57f, 32f, 51f, 35f, u)
+                cu(44f, 31f, 36f, 34f, 27f, 36f, u)
+                close()
+            }
+        }
+        13, 14 -> {
+            path(hair) {
+                mv(29f, 37f, u)
+                cu(37f, 27f, 48f, 24f, 59f, 27f, u)
+                cu(65f, 29f, 69f, 34f, 72f, 39f, u)
+                cu(64f, 35f, 57f, 33f, 50f, 35f, u)
+                cu(43f, 31f, 36f, 34f, 29f, 37f, u)
+                close()
+            }
+        }
+        15 -> {
+            path(hair) {
+                mv(28f, 37f, u)
+                cu(36f, 27f, 45f, 24f, 50f, 25f, u)
+                cu(56f, 24f, 65f, 28f, 72f, 37f, u)
+                cu(64f, 33f, 58f, 35f, 51f, 37f, u)
+                cu(44f, 34f, 37f, 34f, 28f, 37f, u)
+                close()
+            }
+        }
+        16 -> {
+            path(hair) {
+                mv(29f, 36f, u)
+                cu(37f, 27f, 46f, 25f, 56f, 28f, u)
+                cu(63f, 30f, 67f, 35f, 70f, 40f, u)
+                cu(61f, 34f, 54f, 33f, 48f, 36f, u)
+                cu(41f, 32f, 35f, 34f, 29f, 36f, u)
+                close()
+            }
+        }
+        18 -> {
+            path(hair) {
+                mv(28f, 37f, u)
+                cu(36f, 27f, 47f, 24f, 58f, 27f, u)
+                cu(64f, 29f, 68f, 33f, 71f, 38f, u)
+                cu(63f, 34f, 57f, 34f, 50f, 36f, u)
+                cu(42f, 32f, 35f, 34f, 28f, 37f, u)
+                close()
+            }
+        }
+        19 -> {
+            path(hair) {
+                mv(28f, 36f, u)
+                cu(35f, 27f, 45f, 24f, 50f, 25f, u)
+                cu(57f, 24f, 66f, 28f, 72f, 36f, u)
+                cu(64f, 33f, 57f, 34f, 50f, 36f, u)
+                cu(43f, 33f, 36f, 33f, 28f, 36f, u)
+                close()
+            }
+        }
+    }
+
+    // Subtle hair light keeps the colour from reading like a flat SVG fill.
+    when (kind) {
+        0, 1, 2, 4, 5, 8, 9, 10, 11, 13, 14, 18, 19 ->
+            hairStrand(34f, 23f, 42f, 19f, 54f, 19f, 63f, 24f)
+        3, 6, 7 ->
+            hairStrand(34f, 25f, 42f, 20f, 51f, 20f, 60f, 25f)
+        12, 17 ->
+            hairStrand(31f, 25f, 42f, 20f, 56f, 20f, 68f, 27f)
+        15, 16 ->
+            hairStrand(34f, 24f, 44f, 19f, 55f, 20f, 65f, 25f)
+    }
+
+    // Face: two slightly varied eye shapes, a tiny nose and a soft mouth.
+    val eyeY = when (kind % 5) {
+        0 -> 45f
+        1 -> 44f
+        2 -> 46f
+        3 -> 45f
+        else -> 44.5f
+    }
+    val eyeScale = when (kind % 4) {
+        0 -> 1.0f
+        1 -> 0.90f
+        2 -> 1.08f
+        else -> 0.95f
+    }
+
+    listOf(42.5f to -1f, 57.5f to 1f).forEach { (x, side) ->
+        val ew = 3.7f * eyeScale
+        val eh = 4.7f * eyeScale
+        drawOval(
+            hairDark,
+            topLeft = o(x - ew, eyeY - eh, u),
+            size = Size(s(ew * 2f, u), s(eh * 2f, u))
+        )
+        drawCircle(Color.White.copy(alpha = 0.92f), s(1.35f, u), o(x - 1f, eyeY - 1.6f, u))
+        if (kind % 3 == 0) {
+            drawLine(
+                INK.copy(alpha = 0.70f),
+                o(x - ew - 0.6f, eyeY - eh + 0.8f, u),
+                o(x + side * (ew + 1.2f), eyeY - eh + 1.2f, u),
+                strokeWidth = s(1.15f, u),
+                cap = StrokeCap.Round
+            )
+        }
+    }
+
+    drawPath(
+        Path().apply {
+            mv(48.2f, 53f, u)
+            qd(50f, 54.5f, 51.8f, 53f, u)
+        },
+        shadeSkin(skin, 1f).copy(alpha = 0.52f),
+        style = Stroke(width = s(1.15f, u), cap = StrokeCap.Round)
+    )
+
+    drawPath(
+        Path().apply {
+            mv(45.8f, 58.2f, u)
+            qd(50f, 60.5f, 54.2f, 58.2f, u)
+        },
+        LIP.copy(alpha = 0.72f),
+        style = Stroke(width = s(1.25f, u), cap = StrokeCap.Round)
+    )
+
+    // Two restrained cheek touches. They disappear naturally at small sizes.
+    drawCircle(BLUSH.copy(alpha = 0.10f), s(5f, u), o(35.8f, 52.8f, u))
+    drawCircle(BLUSH.copy(alpha = 0.10f), s(5f, u), o(64.2f, 52.8f, u))
 }
 
 /**
@@ -2209,12 +2778,12 @@ private fun heartClipPath(center: Offset, half: Float): Path = Path().apply {
  * v3xx52 — the chosen portrait is marked by a ROUNDED SELECTION RING (a soft
  * accent halo plus a 2dp circular outline, with the portrait stepping up a
  * little), not by a tick badge laid over the face: the face is the point of
- * the tile, and a check covering its chin read as an error mark on a picker
+ * thhe tile, and a check covering its chin read as an error mark on a picker
  * where every option is valid. The ring hugs the disc exactly like the app's
  * other selected chips (RoundedCornerShape(50) = a circle here), so the picker
  * speaks the same language as the rails and filter pills.
  */
-@Composable
+@Composabl
 internal fun AvatarPickerIcon(
     style: Int,
     selected: Boolean,
