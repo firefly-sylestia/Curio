@@ -72,6 +72,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.curio.app.data.PersonalBookEntity
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
@@ -512,7 +513,7 @@ fun BookReviewScreen(
             // Through `PersonalFloatingLayer`: this is a Box inside a Column, so
             // a bare `AnimatedVisibility` resolves to the ColumnScope overload
             // and is then rejected (see that function's own note).
-            PersonalPinnedLine(
+            if (AppPreferences.pinnedTitleViewState) PersonalPinnedLine(
                 label = pinnedChapter,
                 accent = accent,
                 onClick = {
