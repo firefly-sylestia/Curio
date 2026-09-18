@@ -1,5 +1,61 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch I — the selection's aim, and one sheet for the four lanes)
+
+Live instruction: "continue", on top of the user's answers to the open questions —
+"google books wasnt working though but add as a fallback. ye keep building, also the
+setect text in pdf and epub is kind of glitchy fix it also the box which eppars to show
+the hihgloght color etc is transparent for the selected text fix it too, also the pdf
+select text is bad it selects the whole page instead of just the text i wnt to select."
+
+**Status: DONE, committed and pushed.**
+
+### What was already in place (verified, not rebuilt)
+
+- The selection bar's transparency — the user's second bullet. `ReaderSelectionBar` wears
+  `palette.surface`, and all four skins' surfaces are opaque now (`0xFFF3E7D3` paper,
+  `0xFF252018` night, `0xFFF5F5F5` white, `0xFFF5F0E8` sepia) from `1fd62182`. Highlight
+  circles are the ink at 35% with the ink as their border.
+- Clickable journal links and the Google Books chapter fallback, both `1fd62182`.
+
+### What this batch changed
+
+- **"It selects the whole page" — the hit test, finally aimed.** `PdfPageText.glyphAt`
+  answered a press with the NEAREST glyph ANYWHERE on the page. On a press that lands in a
+  margin (or a hair off a line) that is a word from a different line, so the anchor sat
+  far away and the sweep between the anchor and the finger spanned most of the sheet. It
+  now settles on the LINE the point landed on — glyphs whose vertical band holds it, with
+  half a line of slack — and takes the nearest of THOSE by x.
+- **The page's own crop box.** `PdfRenderer` draws a page's CROP box and PDFBox measures
+  its glyphs from that same box, but the ratio was taken from `mediaBox`. On a trimmed
+  scan those differ, and every press answered from the wrong line. It now uses `cropBox`
+  (falling back to `mediaBox` when it is degenerate).
+- **The margin keeps its old meaning.** A press a line and a half from any type still hands
+  the press back and marks the whole page exactly as before; every press that sits ON the
+  words is a sweep. A drag that leaves the page's text also holds the last word instead of
+  jumping across the sheet.
+- **The reflowable half stops throwing.** `ReaderParagraphBlock`'s sweep did arithmetic on
+  `block.text.length - 1` — an empty text (an image with no caption) made `coerceIn(0, -1)`
+  throw out of the gesture. The range is clamped once, and an empty block declines the
+  press.
+- **One sheet for the four poster lanes.** Movies / anime / songs opened `PosterSimilarSheet`
+  ("Similar Movie", a teaser, a tag row, one line of copy, no way to keep the topic). It is
+  GONE — the user asked for it by name — and `PosterNotesSheet` replaces it: the same
+  anatomy as the book / album / series sheets (top hairline, artwork beside its own title
+  and byline, the Cabinet shelf toggles, the synopsis accordion with the lane's own glyph,
+  the tag row) and the same per-topic artwork key the reveal card already stored, so it
+  never re-resolves art that is already on screen.
+- **`.env.example` is the provider guide it was asked to be** — the free tier of every
+  artwork / chapter / author source the sheets read, with the keyless ones named as
+  keyless and the three optional keys (Google Books, LibraryThing, Spotify) plus the
+  Supabase and account-site values.
+
+### Still open (from the pending prompt, unchanged)
+
+- The artwork sheet and the author sheet (an author's written works).
+- More browsed-book chapter numbers/titles beyond the Open Library + Google Books pair.
+- The voice/photo carry's remaining placement glitches.
+
 ## Request (2026-09-17, batch H — the reader's last gaps closed)
 
 Verbatim (the live instruction): "text selection for both pdf and epub and epub page list

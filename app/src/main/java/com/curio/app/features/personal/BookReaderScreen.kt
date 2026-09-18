@@ -1902,33 +1902,37 @@ private fun ReaderParagraphBlock(
                         detectDragGesturesAfterLongPress(
                             onDragStart = { start ->
                                 val result = layout ?: return@detectDragGesturesAfterLongPress
-                                val at = result.getOffsetForPosition(start)
+                                // v389d — an EMPTY block (an image with no caption)
+                                // has no offset to ask for and no word to bound, and
+                                // asking anyway threw out of the gesture.
+                                if (block.text.isEmpty()) {
+                                    return@detectDragGesturesAfterLongPress
+                                }
+                                val last = block.text.length - 1
+                                val at = result.getOffsetForPosition(start).coerceIn(0, last)
                                 val word = result.getWordBoundary(at)
-                                val range = word.start..(word.end - 1).coerceAtLeast(word.start)
+                                val range = word.start.coerceIn(0, last)..
+                                    (word.end - 1).coerceIn(0, last)
                                 anchorWord = range
-                                onSelect(range, block.text.substring(
-                                    range.first.coerceIn(0, block.text.length),
-                                    range.last.coerceIn(0, block.text.length - 1).plus(1)
-                                        .coerceAtMost(block.text.length)
-                                ))
+                                onSelect(range, block.text.substring(range.first, range.last + 1))
                             },
                             onDrag = { change, _ ->
                                 val result = layout ?: return@detectDragGesturesAfterLongPress
                                 val anchor = anchorWord ?: return@detectDragGesturesAfterLongPress
-                                val at = result.getOffsetForPosition(change.position)
-                                val word = result.getWordBoundary(at)
-                                val end = (word.end - 1).coerceAtLeast(word.start)
-                                val range = if (word.start < anchor.first) {
-                                    word.start..anchor.last
-                                } else {
-                                    anchor.first..maxOf(end, anchor.last)
+                                if (block.text.isEmpty()) {
+                                    return@detectDragGesturesAfterLongPress
                                 }
-                                val from = range.first.coerceIn(0, block.text.length)
-                                val to = (range.last + 1).coerceIn(from, block.text.length)
-                                onSelect(
-                                    from..(to - 1).coerceAtLeast(from),
-                                    block.text.substring(from, to)
-                                )
+                                val last = block.text.length - 1
+                                val at = result.getOffsetForPosition(change.position)
+                                    .coerceIn(0, last)
+                                val word = result.getWordBoundary(at)
+                                val end = (word.end - 1).coerceIn(0, last)
+                                val range = if (word.start < anchor.first) {
+                                    word.start.coerceIn(0, last)..anchor.last.coerceAtMost(last)
+                                } else {
+                                    anchor.first.coerceAtMost(last)..maxOf(end, anchor.last)
+                                }
+                                onSelect(range, block.text.substring(range.first, range.last + 1))
                             },
                             onDragEnd = { }
                         )
@@ -3085,10 +3089,18 @@ private fun PdfPageTextLayer(
                 detectDragGesturesAfterLongPress(
                     onDragStart = { start ->
                         val words = liveText.value ?: return@detectDragGesturesAfterLongPress
+                        // v389d — THE MARGIN, NOT THE WORDS. A press only keeps
+                        // the old "hold to mark the whole page" meaning when it
+                        // is a clear line and a half away from any type (or the
+                        // page has no text layer at all). Everywhere else it is
+                        // a sweep, settled on the LINE the finger landed on —
+                        // which is what stops a hold on the words from washing
+                        // the entire page (the reported selection bug).
+                        val offWords = words.lineDistance(start.x, start.y, liveWidth.value) > 1.5f
                         val at = words.glyphAt(start.x, start.y, liveWidth.value)
                         val word = if (at < 0) IntRange.EMPTY else words.wordAround(at)
                         anchorGlyph = word
-                        if (word.isEmpty()) {
+                        if (word.isEmpty() || offWords) {
                             // The finger is on the page's own margin, or on a
                             // page of pictures: nothing here to sweep, so the
                             // press keeps the meaning it has always had.
@@ -3101,6 +3113,18 @@ private fun PdfPageTextLayer(
                         val anchor = anchorGlyph ?: return@detectDragGesturesAfterLongPress
                         if (anchor.isEmpty()) return@detectDragGesturesAfterLongPress
                         val words = liveText.value ?: return@detectDragGesturesAfterLongPress
+                        // A finger that leaves the page (the top or foot margin,
+                        // or past the edge while sweeping) keeps the word it was
+                        // last over rather than jumping to a glyph on the far
+                        // side of the page — the other half of the same bug.
+                        if (words.lineDistance(
+                                change.position.x,
+                                change.position.y,
+                                liveWidth.value
+                            ) > 1.5f
+                        ) {
+                            return@detectDragGesturesAfterLongPress
+                        }
                         val at = words.glyphAt(change.position.x, change.position.y, liveWidth.value)
                         if (at < 0) return@detectDragGesturesAfterLongPress
                         report(anchor, at)

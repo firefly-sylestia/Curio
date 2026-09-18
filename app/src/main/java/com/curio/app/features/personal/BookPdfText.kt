@@ -80,24 +80,62 @@ internal class PdfPageText(
         return start..end
     }
 
-    /** The glyph nearest a point, given the size the page is being DRAWN at. */
+    /**
+     * The glyph a point belongs to, given the size the page is being DRAWN at.
+     *
+     * v389d — ON THE LINE, FIRST. This used to be "the nearest glyph anywhere on
+     * the page", which is only right when the press lands on type: a finger in
+     * the page's margin was answered with a word from a line it was nowhere near,
+     * and a sweep from that anchor washed a whole page instead of the passage the
+     * member meant (the reported "it selects the whole page"). Now the press is
+     * settled on the LINE it landed on — the glyphs whose vertical band holds the
+     * point, with half a line of slack — and only their nearest by x. The plain
+     * nearest glyph is kept as a last resort, for a page whose glyphs come back
+     * without usable heights.
+     */
     fun glyphAt(x: Float, y: Float, drawnWidth: Float): Int {
-        if (glyphs.isEmpty() || pageWidthPt <= 0f) return -1
+        if (glyphs.isEmpty() || pageWidthPt <= 0f || drawnWidth <= 0f) return -1
         // Where the page is drawn: the caller hands the display width, and the
         // page's own point width is what the glyphs are measured in.
         val scale = drawnWidth / pageWidthPt
         val px = x / scale
         val py = y / scale
-        var best = -1
-        var bestDistance = Float.MAX_VALUE
+        var onLine = -1
+        var onLineDistance = Float.MAX_VALUE
+        var nearest = -1
+        var nearestDistance = Float.MAX_VALUE
         glyphs.forEachIndexed { index, glyph ->
-            val dx = (px - (glyph.x + glyph.width / 2f))
-            val dy = (py - (glyph.y + glyph.height / 2f))
-            val distance = dx * dx + dy * dy
-            if (distance < bestDistance) {
-                bestDistance = distance
-                best = index
+            val height = if (glyph.height > 0f) glyph.height else 10f
+            val dx = px - (glyph.x + glyph.width / 2f)
+            val dy = py - (glyph.y + glyph.height / 2f)
+            if (kotlin.math.abs(dy) <= height * 0.6f && kotlin.math.abs(dx) < onLineDistance) {
+                onLineDistance = kotlin.math.abs(dx)
+                onLine = index
             }
+            val distance = dx * dx + dy * dy
+            if (distance < nearestDistance) {
+                nearestDistance = distance
+                nearest = index
+            }
+        }
+        return if (onLine >= 0) onLine else nearest
+    }
+
+    /**
+     * HOW FAR the nearest glyph is from a point, in LINE HEIGHTS — 0 on a line of
+     * type, 1 a whole line above or below it. The caller uses it to tell a press
+     * meant for the words from one meant for the page's own margin: only the
+     * second may hand the press back and mark the whole page.
+     */
+    fun lineDistance(x: Float, y: Float, drawnWidth: Float): Float {
+        if (glyphs.isEmpty() || pageWidthPt <= 0f || drawnWidth <= 0f) return Float.MAX_VALUE
+        val scale = drawnWidth / pageWidthPt
+        val py = y / scale
+        var best = Float.MAX_VALUE
+        glyphs.forEach { glyph ->
+            val height = if (glyph.height > 0f) glyph.height else 10f
+            val dy = kotlin.math.abs(py - (glyph.y + glyph.height / 2f)) / height
+            if (dy < best) best = dy
         }
         return best
     }
@@ -242,7 +280,17 @@ internal fun extractPdfPageText(
                     if (textPositions.isNullOrEmpty()) return
                     textPositions.forEach { position ->
                         val word = position.unicode ?: return@forEach
-                        if (word.isBlank()) return@forEach
+                        // v389d — THE SPACES ARE KEPT. Dropping every blank
+                        // glyph used to leave a page as ONE unbroken run of
+                        // letters: [wordAround] could then only ever answer with
+                        // the whole page (which is exactly the reported "it
+                        // selects the whole page instead of just the text i
+                        // want"), a stored passage came back with no spaces in
+                        // it, and looking those words up on the page to draw the
+                        // highlight back never matched. A space is a glyph with
+                        // no ink — it is also the only thing that says where one
+                        // word ends.
+                        if (word.isEmpty()) return@forEach
                         glyphs.add(
                             PdfGlyph(
                                 text = word,
@@ -262,7 +310,18 @@ internal fun extractPdfPageText(
                 endPage = index + 1
             }
             stripper.getText(loaded)
-            val box = page.mediaBox
+            // v389d — THE BOX THE PAGE IS ACTUALLY DRAWN IN. Android's renderer
+            // draws a page's CROP box, and PDFBox measures its glyphs from that
+            // same box, so that (not the media box) is the one the point ratio
+            // may be taken from. On a trimmed scan the two differ, and a hit
+            // test taken from the media box answered every press with a word from
+            // the wrong line.
+            val cropped = page.cropBox
+            val box = if (cropped != null && cropped.width > 0f && cropped.height > 0f) {
+                cropped
+            } else {
+                page.mediaBox
+            }
             PdfPageText(
                 glyphs = glyphs,
                 pageWidthPt = box.width,

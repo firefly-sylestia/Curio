@@ -1321,7 +1321,14 @@ fun TopicRevealScreen(
         else -> null
     }
     if (posterSheetTopic != null && posterSheetKind != null) {
-        PosterSimilarSheet(
+        // v389d — THE MOVIE / ANIME / SONG SHEET IS THE SHEET THE OTHER THREE
+        // LANES ALREADY HAVE (user request: "for animes, movies and songs etc
+        // the button sheet they are opening they are so bad. remove them and use
+        // the same style as book button sheet album button sheet series button
+        // sheet style"). The old "Similar Movie" panel — a heading, a teaser and
+        // a tag row with no way to keep the topic — is gone.
+        PosterNotesSheet(
+            cat = cat,
             topic = posterSheetTopic,
             kind = posterSheetKind,
             onDismiss = {
@@ -6089,76 +6096,221 @@ private fun albumListenUrl(topic: CurioTopic, service: String): String {
 // ── Film / Anime / Song info sections ──────────────────────────────────────
 
 /**
- * FILM section — poster card with film details. Mirrors [SeriesInfoSection]
- * for TV shows. The poster is fetched from iTunes/TVMaze on demand.
+ * v389d — A MOVIE, AN ANIME OR A SONG'S OWN SHEET.
+ *
+ * The three poster lanes used to open a "Similar …" panel that could not keep
+ * the topic, said nothing the reveal card had not already said, and looked like
+ * no other sheet in the app. This is the same sheet the books, albums and
+ * series open: the top hairline, the artwork beside its own title and byline,
+ * the Cabinet's shelf toggles, and the synopsis in the collapsible card — only
+ * the artwork's RESOLVER differs by lane (a film goes to iTunes/TVMaze, an anime
+ * to Jikan, a song to iTunes), and it reads the very URL the reveal card
+ * already resolved and stored, so the poster inside the sheet is the poster on
+ * the card.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PosterSimilarSheet(
+private fun PosterNotesSheet(
+    cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
     kind: String,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val fetchConsent = AppPreferences.bookFetchEnabledState
+    // The same key the reveal card's poster uses, so opening the sheet never
+    // re-resolves artwork that is already on screen.
+    val artKey = when (kind) {
+        "Anime" -> "anime|${topic.name}"
+        "Song" -> "song|${topic.name}"
+        else -> "film|${topic.name}"
+    }
+    var artUrl by remember(topic.imageUrl) {
+        mutableStateOf(
+            AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+                ?: topic.imageUrl?.takeIf { it.isNotBlank() }
+        )
+    }
+    LaunchedEffect(topic.imageUrl, fetchConsent) {
+        val stored = AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+        val resolved = stored ?: if (fetchConsent) {
+            when (kind) {
+                "Anime" -> AnimePosterFetch.resolvePosterUrl(topic.name)
+                "Song" -> SongArtFetch.resolveArtworkUrl(topic.name, topic.byline)
+                else -> FilmPosterFetch.resolvePosterUrl(topic.name)
+            }
+        } else {
+            null
+        }
+        artUrl = resolved ?: topic.imageUrl?.takeIf { it.isNotBlank() }
+        if (resolved != null && stored == null) {
+            AppPreferences.setSheetArtUrl(context, artKey, resolved)
+        }
+    }
+    val accent = cat.themedAccent()
+    val ink = cat.categoryInk()
+    val surface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // The reveal card shows the teaser; the sheet is where the longer word lives,
+    // so a topic with no authored synopsis says its teaser here rather than
+    // leaving the card out.
+    val about = topic.synopsis?.takeIf { it.isNotBlank() }
+        ?: topic.teaser.takeIf { it.isNotBlank() }
+    val label = when (kind) {
+        "Anime" -> "ANIME NOTES"
+        "Song" -> "SONG NOTES"
+        else -> "FILM NOTES"
+    }
+    val aboutLabel = when (kind) {
+        "Anime" -> "ABOUT THIS ANIME"
+        "Song" -> "ABOUT THIS SONG"
+        else -> "ABOUT THIS FILM"
+    }
+    val icon = when (kind) {
+        "Anime" -> CurioIcons.PlayCircle
+        "Song" -> CurioIcons.MusicNote
+        else -> CurioIcons.Movies
+    }
+    val meta = buildString {
+        append(kind.uppercase())
+        topic.episodeCount?.let { append(" \u00b7 $it episodes") }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        dragHandle = { BottomSheetDefaults.DragHandle() }
+        sheetState = sheetState,
+        // The same category-tinted wash + top hairline as the book / album /
+        // series sheets.
+        containerColor = cat.notesSheetContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .widthIn(max = CurioContentMaxWidth)
+                .fillMaxHeight(0.92f)
+                .padding(bottom = 20.dp)
         ) {
-            Text(
-                "Similar $kind",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                topic.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = personalAccentInkForReveal()
-            )
-            if (topic.teaser.isNotBlank()) {
-                Text(
-                    topic.teaser,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (topic.tags.isNotEmpty()) {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(topic.tags.take(8)) { tag ->
-                        Surface(
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh
-                        ) {
-                            Text(
-                                tag,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                            )
+            NotesSheetTopHairline(accent)
+            Spacer(Modifier.height(10.dp))
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    modifier = Modifier
+                        .size(84.dp)
+                        .shadow(3.dp, RoundedCornerShape(12.dp))
+                ) {
+                    if (!artUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(artUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "${topic.name} artwork",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(12.dp))
+                        )
+                    } else {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CurioIcon(icon, null, tint = ink.copy(alpha = 0.5f), size = 26.dp)
                         }
                     }
                 }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.4.sp
+                        ),
+                        color = ink
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        topic.name,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    topic.byline.takeIf { it.isNotBlank() }?.let { byline ->
+                        Text(
+                            byline,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        meta,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ink
+                    )
+                }
             }
-            Text(
-                "Explore related ${kind.lowercase()} topics from this reveal.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 18.dp)
+
+            Spacer(Modifier.height(12.dp))
+            CabinetShelfToggleChips(
+                context = context,
+                topicId = topic.id,
+                topicName = topic.name,
+                byline = topic.byline,
+                categoryId = cat.id,
+                ink = ink,
+                onSurface = onSurface,
+                surface = surface
             )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (about != null) {
+                    Spacer(Modifier.height(12.dp))
+                    BookSynopsisAccordion(
+                        surface = surface,
+                        accent = accent,
+                        ink = ink,
+                        onSurface = onSurface,
+                        synopsis = about,
+                        initiallyExpanded = true,
+                        label = aboutLabel,
+                        icon = icon,
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
+                TagsRow(
+                    cat = cat,
+                    resolved = topic,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+            }
         }
     }
 }
 
-@Composable
-private fun personalAccentInkForReveal(): Color = com.curio.app.ui.theme.curioRoseInk()
-
+/**
+ * FILM section — poster card with film details. Mirrors [SeriesInfoSection]
+ * for TV shows. The poster is fetched from iTunes/TVMaze on demand.
+ */
 @Composable
 private fun FilmInfoSection(
     cat: com.curio.app.data.CurioCategory,
