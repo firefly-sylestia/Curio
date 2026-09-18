@@ -31,10 +31,11 @@ create table if not exists public.profiles (
     id                  uuid primary key references auth.users (id) on delete cascade,
     display_name        text,
     username            text,
-    -- 0..27 = the 28 code-drawn portraits (SOCIAL_AVATAR_STYLE_COUNT in the
-    -- app's SocialApi.kt). Widen this bound in the SAME commit that adds a
-    -- style to the app's AVATARS list, or the new pick is rejected on write.
-    avatar_style        smallint not null default 0 check (avatar_style between 0 and 19),
+    -- 0..27 = the 28 code-drawn avatars: twenty portraits (0..19) then eight
+    -- cozy icons (20..27), matching SOCIAL_AVATAR_STYLE_COUNT in the app's
+    -- SocialApi.kt. Widen this bound in the SAME commit that adds a style to
+    -- the app's PORTRAITS/ICONS lists, or the new pick is rejected on write.
+    avatar_style        smallint not null default 0 check (avatar_style between 0 and 27),
     online_mode_enabled boolean not null default false,
     created_at          timestamptz not null default now(),
     updated_at          timestamptz not null default now()
@@ -46,19 +47,20 @@ alter table public.profiles add column if not exists presence_mode text not null
 alter table public.profiles drop constraint if exists profiles_presence_mode_check;
 alter table public.profiles add constraint profiles_presence_mode_check check (presence_mode in ('active', 'dnd', 'hidden'));
 alter table public.profiles add column if not exists avatar_style smallint not null default 0;
--- v3xx52 — the portrait count grew from 16 to 28 (the soft set), so the range
--- check is REPLACED rather than merely created: an install that already
--- carries the old 0..15 constraint must be widened, or picking a new style
--- fails the write. Idempotent — re-pasting with the new bound is a no-op.
+-- v395 — the avatar count is 28 (the twenty redrawn portraits plus the eight
+-- cozy icons), so the range check is REPLACED rather than merely created: an
+-- install that already carries an older bound (0..15 from the first set, 0..19
+-- from the portrait-only set) must be widened, or picking a new style fails the
+-- write. Idempotent — re-pasting with the new bound is a no-op.
 do $$
 begin
     if not exists (select 1 from pg_constraint where conname = 'profiles_avatar_style_range') then
         alter table public.profiles add constraint profiles_avatar_style_range
-            check (avatar_style between 0 and 19);
+            check (avatar_style between 0 and 27);
     else
         alter table public.profiles drop constraint profiles_avatar_style_range;
         alter table public.profiles add constraint profiles_avatar_style_range
-            check (avatar_style between 0 and 19);
+            check (avatar_style between 0 and 27);
     end if;
 end $$;
 create unique index if not exists profiles_username_unique

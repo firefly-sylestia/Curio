@@ -16,14 +16,15 @@ const val PROFILE_VISIBILITY_PUBLIC = "public"
 const val PROFILE_VISIBILITY_FRIENDS = "friends"
 
 /**
- * How many code-drawn social portraits exist (the `AVATARS` list in
- * `features/community/SocialAvatar.kt`). `profiles.avatar_style` is an index
- * into that list, so EVERY read and write clamps against this constant — a
- * style added later must never be truncated by a stale `coerceIn(0, 15)` at a
- * cache or API boundary. `supabase/schema.sql`'s `avatar_style` check must be
- * widened in the same commit (currently `between 0 and 27`).
+ * How many code-drawn social avatars exist — the `PORTRAITS` list (20) plus the
+ * `ICONS` list (8) in `features/community/SocialAvatar.kt`, in that order.
+ * `profiles.avatar_style` is an index into that list, so EVERY read and write
+ * clamps against this constant — a style added later must never be truncated by
+ * a stale `coerceIn(0, 19)` at a cache or API boundary. `supabase/schema.sql`'s
+ * `avatar_style` check must be widened in the same commit (now
+ * `between 0 and 27`).
  */
-const val SOCIAL_AVATAR_STYLE_COUNT = 20
+const val SOCIAL_AVATAR_STYLE_COUNT = 28
 
 /**
  * Someone else's PUBLIC identity — the only thing another account can ever see

@@ -545,7 +545,8 @@ internal fun CurioAccountIdentityCard(
 }
 
 /**
- * The 28 code-drawn portraits, as one horizontal picker.
+ * The 28 code-drawn avatars (twenty portraits, then eight cozy icons), as one
+ * horizontal picker.
  *
  * Shared so the portrait is chosen in exactly one visual language wherever it
  * is offered. The caller owns persistence: this only says which one was

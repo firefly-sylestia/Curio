@@ -1,5 +1,65 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch Z3 — the avatars, drawn again from zero)
+
+Verbatim: "now the current avatars are so bad now, like genuily so bad, no detail and all, i want
+you to fully redrawn them from scratch, currently whatever i did i messed it up, also add some
+icon style avatar, like moon icon, or yk emoji icon, kind of coozy minimal style avatars."
+
+### What changed
+
+`features/community/SocialAvatar.kt` was DELETED and rewritten (2,252 lines of accumulated passes
+gone, 1,280 lines in its place). The old file was the sum of four passes — construction → detail →
+illustration → pose — each adding shapes to the SAME drawing, which is exactly why 28 rows read as
+one bust in 28 hats once they were 40 dp tall. Nothing was carried over; the user chose “cozy
+minimal, completely redrawn, no reference from the current”.
+
+1. **The cast is 20 portraits + 8 icons = 28 styles.** `PORTRAITS` (ten men, ten women) then
+   `ICONS` (moon, sun, star, cloud, leaf, mountain, cup, heart). `SOCIAL_AVATAR_STYLE_COUNT` went
+   20 → 28 in the same commit and `supabase/schema.sql`'s `profiles_avatar_style_range` check went
+   `0..19` → `0..27` in BOTH places (the column's inline check and the idempotent constraint
+   block) — the count is a contract in four places and they move together.
+2. **One drawing language.** One warm disc (radial gradient lit top-left + a finishing light), one
+   BUST for the whole cast (a shoulder path with a collar, a neckline fold), one HEAD (oval, two
+   ears, a blush, one ink contour), and a FACE from a small named vocabulary: five gazes
+   (`FACE_OPEN` / `HAPPY` / `SLEEPY` / `WINK` / `CALM`) and four mouths (`MOUTH_SMILE` / `GRIN` /
+   `SOFT` / `OPEN`), two brows, a nose tick. Every mass is a filled path with ONE ink contour
+   (`fill`), every line a round-capped stroke (`bar`), every shape a `dot` / `oval` / `ring` /
+   `arc` / `slab` / `leaf` / `flower` / `star`, all on one 100×100 grid (`u`, and `Path.scaled(u)`
+   for the unit-scale point lists) — so a portrait is the same portrait at 26 dp and at 96 dp.
+3. **One silhouette and one prop per character.** `drawHairBack` (behind the head) and
+   `drawHairFront` (fringes, the beard, the falls over the shoulder) plus `drawProp` — a pompom, a
+   headphone cup with a mic boom, a leaning wizard cone, a laurel, a hairpin, a tie, a kanzashi
+   pin, a flower crown, a beret's nub, a headband and earring, space buns and a clip. The pose is
+   two numbers per row: `tilt` (the head, about the base of the neck) and `lean` (the whole
+   character, off the disc's centre).
+4. **The icons are the same disc.** A thick stroked crescent with craters and two stars, a sun
+   with twelve rays, a five-point star, a cloud with three drops, a leaf with its veins and stem,
+   two mountains under a sun with snow caps, a mug on a saucer with two curls of steam, and a
+   heart with one shine. Same grounds, same light, same ink as the portraits.
+
+### Fixed while drawing it
+
+- **A hat or crown buried the face.** The first draft gave the hat rows the skull's own cap as
+  their FRONT mass — and that cap reaches grid 42, which is where the eyes live (a gaze is at
+  39.5). A new `hairFringe` is as much hair as fits between a hat's band and the brow line, and
+  the hat rows, the crown rows and the curly row use it.
+- **The beard ate the smile** on the bearded row: its inner edge now sits BELOW the mouth's own dip
+  (the smile's lowest stroke lands near grid 51).
+- **Nothing is cropped by the disc.** The top-knot, the high bun, the beanie's pompom, the
+  wizard's cone (now bent, so a tall hat fits) and the beret were all lowered to clear grid 0.
+
+### Still open / honest limits
+
+`drawSocialAvatar` is still the single entry point, so the picker, every avatar in the app and
+`NotificationAvatars.of` (the notification wallpaper's off-screen bitmap) all draw the new art with
+nothing to keep in step. The art itself has never been seen on a device by me: the brace balance
+is clean (0/0/0), every helper resolves, and the shapes are placed by grid arithmetic — but colour,
+weight and face balance need eyes on a build, and a `DevFullAppTestRunner` pass in Developer
+Settings is the cheapest way to see all 28 at once.
+
+---
+
 ## Request (2026-09-18, batch Z2 — the to-do row's own box)
 
 Verbatim: "do the chekcbox fix in todo"
