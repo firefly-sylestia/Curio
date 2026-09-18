@@ -264,6 +264,17 @@ private fun plain(html: String): String = html
  * Read on demand (it is a parse, like everything else PDFBox does), so the
  * chapters sheet opens on a background dispatcher.
  */
+/**
+ * v389e — HOW LONG THE FILE IS.
+ *
+ * The member's own PDF is the one place a page count can be trusted: the
+ * catalog's count is for ITS edition and a lookup's is a guess. The last chapter
+ * of the file's own contents runs to this page, and the reader's foot quotes it
+ * (user request: "also the page number from the file"). 0 when it cannot be read.
+ */
+internal fun pdfPageCount(context: Context, document: String): Int =
+    withPdfDocument(context, document) { loaded -> loaded.numberOfPages } ?: 0
+
 internal fun pdfOutline(context: Context, document: String): List<ReaderOutlineEntry> =
     withPdfDocument(context, document) { loaded ->
         val outline = loaded.documentCatalog.documentOutline ?: return@withPdfDocument emptyList()

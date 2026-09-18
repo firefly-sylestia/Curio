@@ -339,7 +339,17 @@ internal fun ArtworkSheet(
     onDismiss: () -> Unit
 ) {
     val accent = cat.themedAccent()
-    val ink = cat.categoryInk()
+    // ── v389e — THE WORDS ARE INK, NOT THE ACCENT ────────────────────────
+    //
+    // The sheet drew every word in the category's own INK — an accent-derived
+    // colour — over a container that is a pale tint of that SAME accent (see
+    // `notesSheetContainerColor`). A pale accent on its own wash is the worst
+    // contrast in the app, and this is the sheet a member opens to READ: the
+    // words are the app's own ink now, and the accent stays where it belongs —
+    // the hairline, the record pill, a glyph's tint (user report: "for artowkrs
+    // and the authors artists singers etc the review in topic reveal is bad with
+    // the text colro for the buttom sheet").
+    val ink = MaterialTheme.colorScheme.onSurface
     val surface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant

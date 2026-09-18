@@ -245,6 +245,27 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             } else {
                 withContext(Dispatchers.IO) {
                     runCatching { PersonalRepositoryHolder.repo.setDocument(bookId, path) }
+                    // ── v389e — THE FILE TAKES THE BOOK OVER ────────────
+                    //
+                    // The member's own copy is the book now: its own contents
+                    // and its own page count are read straight out of it and
+                    // written onto the row, so the chapter rows are the ones the
+                    // file prints and the progress stepper counts the pages the
+                    // file has — not the ones a lookup guessed for some other
+                    // edition (user request: "when i add a books own file it
+                    // takes over the fetched file, and takes info from the book
+                    // if there is one. also the page number from the file").
+                    // A file with no contents of its own answers nothing and
+                    // leaves what was fetched where it was.
+                    runCatching {
+                        val fromFile = documentChapters(context, path)
+                        val pages = if (path.lowercase().endsWith(".pdf")) {
+                            pdfPageCount(context, path)
+                        } else {
+                            0
+                        }
+                        PersonalRepositoryHolder.repo.adoptDocumentFacts(bookId, fromFile, pages)
+                    }
                 }
                 navController.navigate(CurioRoutes.reader(bookId)) { launchSingleTop = true }
             }

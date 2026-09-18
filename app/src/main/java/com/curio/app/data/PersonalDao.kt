@@ -416,6 +416,40 @@ class PersonalRepository(private val dao: PersonalDao) {
         )
     }
 
+    /**
+     * v389e — THE MEMBER'S OWN FILE, AS THE BOOK'S OWN FACTS.
+     *
+     * Called the moment a document is wired to a book (see BookDetailScreen).
+     * The file is the book: what IT says about its chapters and its length is the
+     * truth about the copy on this phone, while a catalog's chapter list is the
+     * truth about Curio's edition and a lookup's is about somebody else's (user
+     * request: "when i add a books own file it takes over the fetched file, and
+     * takes info from the book if there is one. also the page number from the
+     * file").
+     *
+     * So this is the one write allowed to REPLACE a fetched chapter list — and it
+     * still refuses to invent: a file with no contents of its own (a scan, a plain
+     * text) leaves what the lookup found exactly where it was, and a file whose
+     * length cannot be read leaves the page count alone.
+     */
+    suspend fun adoptDocumentFacts(
+        bookId: String,
+        chapters: List<PersonalChapter>,
+        pageCount: Int
+    ) {
+        val current = dao.book(bookId) ?: return
+        if (chapters.isEmpty() && pageCount <= 0) return
+        dao.upsertBook(
+            current.copy(
+                chaptersJson = if (chapters.isEmpty()) current.chaptersJson
+                else PersonalChapterCodec.encode(chapters),
+                totalChapters = if (chapters.isEmpty()) current.totalChapters else chapters.size,
+                pageCount = if (pageCount > 0) pageCount else current.pageCount,
+                updatedAtMillis = System.currentTimeMillis()
+            )
+        )
+    }
+
     fun observeTopicNotes(topicId: String): Flow<List<PersonalNoteEntity>> =
         dao.observeTopicNotes(topicId)
 

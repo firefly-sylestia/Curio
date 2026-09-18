@@ -194,7 +194,11 @@ internal fun AuthorWorksSheet(
     onDismiss: () -> Unit
 ) {
     val accent = cat.themedAccent()
-    val ink = cat.categoryInk()
+    // v389e — the sheet's words are the app's own ink, not the category's accent
+    // ink over a wash of that same accent (see ArtworkSheet: a sheet is where the
+    // member READS, and a pale accent on its own tint is the least readable pair
+    // in the app). The accent keeps the hairline and the glyphs.
+    val ink = MaterialTheme.colorScheme.onSurface
     val surface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant

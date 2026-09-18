@@ -77,10 +77,21 @@ internal object BookEnrichment {
             learned += "the catalog's own record"
         }
         if (updated.chaptersJson.isBlank()) {
-            // v392 — Open Library first, then Google Books as fallback.
+            // v389e — FREE FIRST, KEYS LAST.
+            //
+            // Open Library and Crossref both answer for nothing, and between
+            // them they cover a table of contents someone typed AND an academic
+            // book's chapters registered as DOIs. Google Books used to sit in the
+            // middle of that list, and it is the one source that FAILS without a
+            // key: the anonymous endpoint answers 429 ("Quota exceeded … Queries
+            // per day", checked live from this repo), so every chapter lookup on a
+            // build with no key spent a request on a source that could not answer
+            // (user report: "the book chapters still doesnt fetch i am sure
+            // googlebooks api doesnt work"). It is asked LAST, and only when a key
+            // is actually configured (see googleBooksChapters).
             val chapters = openLibraryChapters(updated.title, updated.author)
-                ?: googleBooksChapters(updated.title, updated.author)
                 ?: crossrefChapters(updated.title, updated.author)
+                ?: googleBooksChapters(updated.title, updated.author)
             chapters?.let { list ->
                 updated = updated.copy(
                     chaptersJson = PersonalChapterCodec.encode(list),
@@ -365,14 +376,21 @@ internal object BookEnrichment {
      * v392 — GOOGLE BOOKS CHAPTER FALLBACK.
      *
      * When Open Library has no table of contents for a book, Google Books
-     * sometimes does (its `volumeInfo.tableOfContents`). The keyless endpoint
-     * works, but the keyed endpoint returns more results; this reads the
-     * [com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY] when set.
+     * sometimes does (its `volumeInfo.tableOfContents`).
+     *
+     * v389e — AND IT NEEDS THE KEY NOW, on purpose. The anonymous endpoint is a
+     * shared daily quota, it is very often spent (a live check from this repo
+     * answered `429 Quota exceeded … Queries per day` for the keyless URL), and a
+     * request that is answered with an error is worse than no request: it costs
+     * the member a wait and looks like a broken feature. So this asks only when
+     * [com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY] is set, and the answer no
+     * longer depends on a quota nobody controls.
      */
     private suspend fun googleBooksChapters(
         title: String, author: String
     ): List<PersonalChapter>? {
         if (title.isBlank()) return null
+        if (com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY.isBlank()) return null
         if (!AppPreferences.bookFetchEnabledState) return null
         return withContext(Dispatchers.IO) {
             runCatching {
@@ -386,7 +404,7 @@ internal object BookEnrichment {
                 }
                 val key = com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY
                 val url = "https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3" +
-                    if (key.isNotBlank()) "&key=$key" else ""
+                    "&key=$key"
                 val json = getJson(url) ?: return@runCatching null
                 val items = json.asJsonObject.array("items")
                 for (item in items) {

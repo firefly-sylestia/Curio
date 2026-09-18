@@ -2,9 +2,13 @@ package com.curio.app.features.personal
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.platform.LocalContext
 import com.curio.app.data.BookChapter
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalChapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.zip.ZipFile
 
 /**
  * ONE BOOK'S CHAPTER LIST, whichever way the book came in by.
@@ -31,14 +35,24 @@ internal fun BookChapter.asPersonal(): PersonalChapter = PersonalChapter(
 )
 
 /**
- * The chapters to show for [book]: the catalog's own list when the book is a
- * catalog book, else the list learned from Open Library, else nothing (the
- * book page then offers numbered rows instead).
+ * The chapters to show for [book]: the MEMBER'S OWN FILE first when the book is
+ * wired to one, then the catalog's own list, then the list learned from Open
+ * Library, else nothing (the book page then offers numbered rows instead).
+ *
+ * v389e — AND THE FILE WINS.
+ *
+ * An attached document is the book itself, so what IT says about its chapters
+ * and its pages is the truth about the book on the phone, while a catalog's list
+ * is the truth about Curio's edition and a lookup's is about someone's
+ * (user request: "when i add a books own file it takes over the fetched file, and
+ * takes info from the book if there is one. also the page number from the file").
  */
 @Composable
 internal fun rememberBookChapters(book: PersonalBookEntity?): List<PersonalChapter> {
     val catalogId = book?.catalogId.orEmpty()
     val stored = book?.chapters.orEmpty()
+    val document = book?.documentPath.orEmpty()
+    val context = LocalContext.current
     // ── THE ANSWER THE LAST VISIT ENDED ON (v389c) ────────────────────────
     //
     // This can only answer once the book's ROW has arrived, and that is a Room
@@ -51,17 +65,74 @@ internal fun rememberBookChapters(book: PersonalBookEntity?): List<PersonalChapt
     // ended on; the list below is still what actually decides, and it wins the
     // moment the book is readable.
     val remembered = BookPageMemory.chapters(book)
-    // Re-reads only when the book (or the list it learned) actually changes.
+    // Re-reads only when the book (or the list it learned, or the file it is
+    // wired to) actually changes.
     val state = produceState(
         initialValue = stored.ifEmpty { remembered },
         catalogId,
-        book?.chaptersJson
+        book?.chaptersJson,
+        document
     ) {
-        val resolved = if (catalogId.isBlank()) stored
-        else BookCatalog.chapters(catalogId).map { it.asPersonal() }
+        // The file's own contents cost a parse, so they are read OFF the main
+        // thread and only when there is a file to read.
+        val fromFile = if (document.isBlank()) emptyList() else withContext(Dispatchers.IO) {
+            documentChapters(context, document)
+        }
+        val resolved = when {
+            fromFile.isNotEmpty() -> fromFile
+            catalogId.isNotBlank() -> BookCatalog.chapters(catalogId).map { it.asPersonal() }
+            else -> stored
+        }
         val answer = resolved.ifEmpty { remembered }
         BookPageMemory.rememberChapters(book, answer)
         value = answer
     }
     return state.value
+}
+
+/**
+ * THE MEMBER'S OWN FILE, AS A CHAPTER LIST.
+ *
+ * An EPUB carries its contents in its nav document or NCX and a PDF in its own
+ * outline; both are already read for the reader's chapter sheet (see
+ * [epubOutline] / [pdfOutline]), so this is the same reading in the shape the
+ * BOOK PAGE renders. A PDF's entries name the page each chapter OPENS, so a
+ * chapter's own range runs to where the next one starts — and the last one to the
+ * file's last page, which is the file's own page count and not a lookup's guess.
+ *
+ * A file with no contents (a scanned novel, a plain text) answers nothing, and
+ * the fetched list stands.
+ *
+ * Internal rather than private because the page that ATTACHES a file uses it
+ * too: the moment a document is wired, the row is rewritten from it (see
+ * `PersonalRepository.adoptDocumentFacts`).
+ */
+internal fun documentChapters(
+    context: android.content.Context,
+    document: String
+): List<PersonalChapter> {
+    val lower = document.lowercase()
+    val isPdf = lower.endsWith(".pdf")
+    val outline = when {
+        lower.endsWith(".epub") -> runCatching {
+            ZipFile(document).use { zip -> epubOutline(zip) }
+        }.getOrDefault(emptyList())
+        isPdf -> runCatching { pdfOutline(context, document) }.getOrDefault(emptyList())
+        else -> emptyList()
+    }
+    if (outline.isEmpty()) return emptyList()
+    val lastPage = if (isPdf) pdfPageCount(context, document) else 0
+    return outline.mapIndexed { index, entry ->
+        val start = if (entry.isPage) entry.page else 0
+        val end = if (start <= 0) 0 else {
+            val next = outline.drop(index + 1).firstOrNull { it.isPage && it.page > start }?.page
+            ((next ?: (lastPage + 1)) - 1).coerceAtLeast(start)
+        }
+        PersonalChapter(
+            number = index + 1,
+            title = entry.title,
+            pageStart = start,
+            pageEnd = end
+        )
+    }
 }
