@@ -3310,6 +3310,10 @@ internal fun PersonalDocView(
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
     val bulletInk = personalBulletColor()
     val toggle = onToggleChecked ?: LocalPersonalCheckToggle.current
+    // v389g — the read view's double-tap-to-write action, read ONCE in the
+    // composable scope (see the pointerInput below for why it cannot be read
+    // inside the gesture).
+    val tapToEdit = LocalPersonalTapToEdit.current
     // v389 — a quoted line is ONE thing with its quoted neighbour, so which of
     // the two sides leads into another quoted line is decided once, here, and
     // the panels reach into the gap to meet (see QUOTE_JOIN_VIEW).
@@ -3514,13 +3518,18 @@ internal fun PersonalDocView(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .pointerInput(linkText) {
+                        .pointerInput(linkText, tapToEdit) {
                             // v389g — the detector that owns the words also owns the
                             // double tap, so the pen answers over text exactly as it
                             // does over blank space (see [LocalPersonalTapToEdit]).
-                            val tapToEdit = { LocalPersonalTapToEdit.current?.invoke() }
+                            // The action is captured, NOT read here: a Composition
+                            // local's `.current` is a @Composable read, and this block
+                            // is an ordinary suspend lambda — the compiler rejects it.
+                            // Reading it into a parameter above keeps the local's
+                            // value fresh (the key restarts the detector when it
+                            // changes) without a composable call in the gesture.
                             detectTapGestures(
-                                onDoubleTap = { tapToEdit() }
+                                onDoubleTap = { tapToEdit?.invoke() }
                             ) { offset ->
                                 val layout = linkLayout ?: return@detectTapGestures
                                 val pos = layout.getOffsetForPosition(offset)
