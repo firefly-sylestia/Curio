@@ -366,10 +366,10 @@ internal fun personalBlockIsQuote(text: String, mask: IntArray): Boolean =
 internal fun PersonalDoc.checklistProgress(): Pair<Int, Int> {
     var done = 0
     var total = 0
-    blocks.forEach { block ->
-        if (block.isPhoto || block.text.isBlank()) return@forEach
+    for (block in blocks) {
+        if (block.isPhoto || block.text.isBlank()) continue
         val mask = runsToMask(block.text.length, block.runs)
-        if (!personalBlockCarries(block.text, mask, FLAG_CHECKBOX)) return@forEach
+        if (!personalBlockCarries(block.text, mask, FLAG_CHECKBOX)) continue
         total++
         if (block.checked) done++
     }
@@ -826,8 +826,13 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val blockMask = mask(id)
         val selection = selections[id]
         val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
-        return fontKeyOf(caretFlags(id)).ifEmpty {
-            if (selection?.collapsed != false && at == 0) fontKeyOf(armedFont ?: 0) else ""
+        val currentFont = fontKeyOf(caretFlags(id))
+        return if (currentFont.isNotEmpty()) {
+            currentFont
+        } else if (selection?.collapsed != false && at == 0) {
+            fontKeyOf(armedFont ?: 0)
+        } else {
+            ""
         }
     }
 
@@ -874,10 +879,15 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val blockMask = mask(id)
         val selection = selections[id]
         val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
-        return highlightKeyOf(caretFlags(id)) .ifEmpty {
+        val currentHighlight = highlightKeyOf(caretFlags(id))
+        return if (currentHighlight.isNotEmpty()) {
+            currentHighlight
+        } else if (selection?.collapsed != false && at == 0) {
             // A caret at the very start of the block has nothing to its left or
             // right to inherit from, so it wears the standing pen.
-            if (selection?.collapsed != false && at == 0) highlightKeyOf(armedHighlight ?: 0) else ""
+            highlightKeyOf(armedHighlight ?: 0)
+        } else {
+            ""
         }
     }
 
