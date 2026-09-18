@@ -840,10 +840,19 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * again, so the menu is a toggle and not a one-way door.
      */
     fun applyFont(key: String) {
-        val id = focusedId ?: run {
+        // v389d — NO LAMBDA, AND SO NO NON-LOCAL RETURN. `focusedId ?: run { …
+        // return }` makes the compiler emit its `$$$$$NON_LOCAL_RETURN$$$$$`
+        // synthetic class, and R8 could not dex it ("Method name '<anonymous>'
+        // in class '$$$$$NON_LOCAL_RETURN$$$$$' cannot be represented in dex
+        // format") — which broke the RELEASE build while the debug build was
+        // perfectly happy. A plain branch does the same thing without asking
+        // the compiler for a synthetic class.
+        val focused = focusedId
+        if (focused == null) {
             armedFont = fontMaskFor(key)
             return
         }
+        val id = focused
         val block = blocks[id] ?: return
         val selection = selections[id]
         if (selection != null && !selection.collapsed) {
@@ -882,10 +891,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * editor's highlighter toggle behaves.
      */
     fun applyHighlight(key: String) {
-        val id = focusedId ?: run {
+        // Same as applyFont above: the standing pen is set without a non-local
+        // return, so the compiler never has to generate that synthetic class.
+        val focused = focusedId
+        if (focused == null) {
             armedHighlight = highlightMaskFor(key)
             return
         }
+        val id = focused
         val block = blocks[id] ?: return
         val selection = selections[id]
         if (selection != null && !selection.collapsed) {

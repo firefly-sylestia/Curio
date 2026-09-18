@@ -71,16 +71,22 @@ object SeriesEpisodeFetcher {
         val title = showName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
         episodeCache[title]?.let { return it }
 
-        val showId = lookupShowId(title) ?: run {
+        // v389d — PLAIN BRANCHES, NOT `?: run { … return }`. A non-local return
+        // out of an inline lambda makes the compiler emit its
+        // `$$$$$NON_LOCAL_RETURN$$$$$` class, and R8 cannot dex that class's
+        // method name — which broke the release build while debug built fine.
+        // Behaviour is identical; only the synthetic class is gone.
+        val showId = lookupShowId(title)
+        if (showId == null) {
             episodeCache[title] = emptyList()
             return emptyList()
         }
 
         val json = httpGet("https://api.tvmaze.com/shows/$showId/episodes")
-            ?: run {
-                episodeCache[title] = emptyList()
-                return emptyList()
-            }
+        if (json == null) {
+            episodeCache[title] = emptyList()
+            return emptyList()
+        }
 
         return try {
             val arr = org.json.JSONArray(json)
