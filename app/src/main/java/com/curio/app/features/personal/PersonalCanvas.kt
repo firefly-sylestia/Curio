@@ -87,6 +87,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import com.curio.app.ui.components.CurioMenuToggle
 import com.curio.app.ui.components.TextHistoryBrowser
 import com.curio.app.ui.components.TextHistoryRestoreMode
 import com.curio.app.ui.components.rememberTextHistoryCapture
@@ -1250,6 +1251,17 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // and the pen after them is whatever they wear.
             if (armedHighlight != null) armedHighlight = null
             if (armedFont != null) armedFont = null
+            // v393 — A TO-DO ROW KEEPS ITS BOX. The flag lived on the row's
+            // CHARACTERS, so deleting every word deleted the checkbox with
+            // them — and the next word typed came out plain, because there was
+            // nothing left to inherit from (user report: "in todo the checkbox
+            // deletes when i delete all the text after writing something").
+            // A row emptied on the list page arms the box again: the box stands
+            // while the row is empty, and the first word typed wears it.
+            if (keepsChecklistRows && newText.isBlank()) {
+                armed = armed or FLAG_CHECKBOX
+                armedOff = armedOff and FLAG_CHECKBOX.inv()
+            }
         }
         selections[id] = value.selection
         compositions[id] = value.composition
@@ -2710,9 +2722,13 @@ private fun PersonalTextBlock(
     val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
-    val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
-    // v389 — the list furniture's own metrics: the marker centres on the FIRST
-    // line's height, which is what puts a box level with the words it labels.
+    // v393 — an EMPTY row on the list page still draws its box: the row's flag
+    // lives on its characters, and an emptied row has none — but a to-do row
+    // without a box reads as a row that lost its place in the list, not as a
+    // row waiting to be written (user report: "the checkbox deletes when i
+    // delete all the text").
+    val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX) ||
+        (text.isEmpty() && state.keepsChecklistRows)
     val lineHeight = if (isTitle) 34.sp else if (isSmall) 22.sp else rowBody.sp
     // The tick the writer actually made is on the BLOCK now, not in this row's
     // widget state, so a reload cannot lose it.
@@ -3076,7 +3092,7 @@ private fun PersonalPhotoBlock(
     // mid-flight. The block underneath is passive until it lands.
     val carried = LocalPersonalBlockCarried.current
     val actionable = enabled && !carried
-    val sizeMenu = remember(uri) { PersonalMenuToggle() }
+    val sizeMenu = remember(uri) { CurioMenuToggle() }
     val imageHeight = when (size) {
         PersonalPhotoSize.PAGE -> 168.dp
         PersonalPhotoSize.HALF -> 128.dp
@@ -3384,7 +3400,12 @@ internal fun PersonalDocView(
             val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
             val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
             val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
-            val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
+            // v393 — the read view's half of the same rule: an EMPTY row on a
+            // to-do page (the read view knows the page by its [rowSize]) still
+            // draws its box, so a list re-opened after emptying a row looks
+            // like the page that was written.
+            val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX) ||
+                (text.isEmpty() && rowSize.isSpecified)
             // v389 — the same metrics and the same renderers as the editor
             // (this view draws a checklist row that the editor ticked).
             //
@@ -3716,37 +3737,7 @@ internal fun PersonalDocView(
  */
 private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
 
-/**
- * v393 — MENU STATE THAT CLOSES ON THE TAP THAT DISMISSED IT.
- *
- * The dock's menus are non-focusable popups (they keep the keyboard), so a tap
- * outside them reaches the app underneath: the popup dismisses first AND the
- * same tap lands on the tool button that opened it. An unconditional open on
- * click re-opened the menu on the very tap meant to close it (user report:
- * "tapping it again when the drop down is open it keeps opening it instead of
- * closing it next time"). A tap within a breath of the dismissal IS the
- * closing tap; only an independent tap opens.
- */
-private class PersonalMenuToggle {
-    var open by mutableStateOf(false)
-    private var dismissedAt = 0L
 
-    /** The popup's [onDismissRequest] — outside tap, back press. */
-    fun dismissed() {
-        open = false
-        dismissedAt = System.currentTimeMillis()
-    }
-
-    /** The tool button's click. */
-    fun buttonClick() {
-        open = if (System.currentTimeMillis() - dismissedAt < 400L) false else !open
-    }
-
-    /** A menu item's own close. */
-    fun close() {
-        open = false
-    }
-}
 
 /**
  * The tool dock — it rides ABOVE the keyboard (the caller pins it to the
@@ -3852,7 +3843,7 @@ internal fun PersonalToolDock(
             // written in one font is a list of words (user request: "the font
             // chnage … add in the universal tool bar").
             Box {
-                val fontMenu = remember { PersonalMenuToggle() }
+                val fontMenu = remember { CurioMenuToggle() }
                 val face = state.fontOfFocused()
                 PersonalToolButton(
                     label = "Font: ${personalFontLabel(face)}",
@@ -3904,7 +3895,7 @@ internal fun PersonalToolDock(
             // highlighter colr of the word"). The button WEARS the pen it is
             // about to use, so the dock says which colour before the tap does.
             Box {
-                val penMenu = remember { PersonalMenuToggle() }
+                val penMenu = remember { CurioMenuToggle() }
                 val pen = state.highlightOfFocused()
                 val penOn = pen.isNotEmpty()
                 PersonalToolButton(
@@ -3995,7 +3986,7 @@ internal fun PersonalToolDock(
             // wears the focused line's own marker, so the dock always echoes
             // what the line is wearing.
             Box {
-                val markerMenu = remember { PersonalMenuToggle() }
+                val markerMenu = remember { CurioMenuToggle() }
                 val focusedMarker = state.markerOfFocused()
                 val bulletOn = active and FLAG_BULLET != 0
                 PersonalToolButton(

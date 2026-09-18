@@ -1800,9 +1800,9 @@ private fun RichTextPaperMenu(
     ink: Color,
     enabled: Boolean
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val menu = remember { CurioMenuToggle() }
     Box {
-        RichTextDockButton("Paper", expanded, accent, ink, enabled, { expanded = !expanded }) {
+        RichTextDockButton("Paper", menu.open, accent, ink, enabled, { menu.buttonClick() }) {
             Box(contentAlignment = Alignment.Center) {
                 CurioIcon(CurioIcons.Palette, null, size = 20.dp)
                 Box(
@@ -1815,8 +1815,8 @@ private fun RichTextPaperMenu(
             }
         }
         CurioDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
+            expanded = menu.open,
+            onDismissRequest = { menu.dismissed() },
             accent = accent
         ) {
             Column(
@@ -1874,12 +1874,12 @@ private fun RichTextDockMenu(
     onPick: (String?) -> Unit,
     glyph: @Composable () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val menu = remember { CurioMenuToggle() }
     Box {
-        RichTextDockButton(label, active, accent, ink, enabled, { expanded = true }) { glyph() }
+        RichTextDockButton(label, active, accent, ink, enabled, { menu.buttonClick() }) { glyph() }
         CurioDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
+            expanded = menu.open,
+            onDismissRequest = { menu.dismissed() },
             accent = accent
         ) {
             options.forEach { (key, text) ->
@@ -1891,7 +1891,7 @@ private fun RichTextDockMenu(
                         { CurioIcon(CurioIcons.Check, null, tint = accent, size = 16.dp) }
                     } else null,
                     onClick = {
-                        expanded = false
+                        menu.close()
                         onPick(key)
                     }
                 )
@@ -2160,7 +2160,7 @@ private fun SizePickerButton(
      *  chip (the full-screen editors' dock). */
     dock: Boolean = false
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val menu = remember { CurioMenuToggle() }
     Box {
         if (dock) {
             RichTextDockButton(
@@ -2169,7 +2169,7 @@ private fun SizePickerButton(
                 accent = accent,
                 ink = MaterialTheme.colorScheme.onSurfaceVariant,
                 enabled = enabled,
-                onClick = { expanded = true }
+                onClick = { menu.buttonClick() }
             ) {
                 CurioIcon(icon, null, size = 20.dp)
             }
@@ -2179,14 +2179,14 @@ private fun SizePickerButton(
             active = active,
             accent = accent,
             enabled = enabled,
-            onClick = { expanded = true },
+            onClick = { menu.buttonClick() },
             paper = paper
         )
         // v30 — the shared accent-themed menu: the current size row lights
         // up in the format accent with a trailing check.
         CurioDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
+            expanded = menu.open,
+            onDismissRequest = { menu.dismissed() },
             accent = accent
         ) {
             // "Default" first — the field's base size, checked when nothing
@@ -2211,7 +2211,7 @@ private fun SizePickerButton(
                     }
                 } else null,
                 onClick = {
-                    expanded = false
+                    menu.close()
                     onPick(BASE_FONT_SP)
                 }
             )
@@ -2232,7 +2232,7 @@ private fun SizePickerButton(
                         }
                     } else null,
                     onClick = {
-                        expanded = false
+                        menu.close()
                         onPick(sp)
                     }
                 )

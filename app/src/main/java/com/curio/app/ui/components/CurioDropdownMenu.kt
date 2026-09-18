@@ -20,12 +20,49 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+
+/**
+ * v393 — MENU STATE THAT CLOSES ON THE TAP THAT DISMISSED IT.
+ *
+ * The writing docks' menus are non-focusable popups (they keep the keyboard),
+ * so a tap outside one reaches the app underneath: the popup dismisses first AND
+ * the same tap lands on the tool button that opened it. An unconditional open on
+ * click re-opened the menu on the very tap meant to close it (user report:
+ * "tapping it again when the drop down is open it keeps opening it instead of
+ * closing it next time" — on the journal dock AND the Save-your-take dock
+ * alike). A click within a breath of the dismissal IS the closing tap; only an
+ * independent tap opens.
+ */
+class CurioMenuToggle {
+    var open by mutableStateOf(false)
+        private set
+    private var dismissedAt = 0L
+
+    /** The popup's [onDismissRequest] — outside tap, back press. */
+    fun dismissed() {
+        open = false
+        dismissedAt = System.currentTimeMillis()
+    }
+
+    /** The tool button's click. */
+    fun buttonClick() {
+        open = if (System.currentTimeMillis() - dismissedAt < 400L) false else !open
+    }
+
+    /** A menu item's own close. */
+    fun close() {
+        open = false
+    }
+}
 
 /**
  * v30 — the ONE dropdown language for the whole app. Every menu (sort

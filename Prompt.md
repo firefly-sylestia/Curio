@@ -1,5 +1,32 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch Y — the checkbox that left with its words, and the other dock's menus)
+
+Verbatim: "also in todo the checkbox deleesets when i delete all the text after writing
+something. also the tapping it again keep sopening the dro down when its already open, that
+bug is on save your take dock too, so fix that. too"
+
+### What changed
+
+1. **A to-do row keeps its box.** The checkbox flag lived on the row's CHARACTERS (the mask),
+   so deleting every word deleted the box with them and the next word typed came out plain —
+   there was nothing left to inherit from. Two halves, in `PersonalCanvas.kt`:
+   - `onFieldChange`: a row emptied on the list page (`keepsChecklistRows`) re-arms
+     FLAG_CHECKBOX, so the box stands while the row is empty and the first word typed wears
+     it again;
+   - both renderers (editor and read view) draw the box for an EMPTY row on a list page —
+     the editor knows the page by `state.keepsChecklistRows`, the read view by its own
+     `rowSize.isSpecified` — so a re-opened list looks like the page that was written.
+2. **The other dock's menus.** The Save-your-take dock's font, paper and size menus
+   (`RichTextDockMenu`, `RichTextPaperMenu`, `SizePickerButton` in `RichTextEditor.kt`) still
+   opened with an unconditional `expanded = true`, and their popups are non-focusable — so
+   the tap that dismissed a menu landed on the button and re-opened it. The shared
+   `CurioMenuToggle` (moved into `CurioDropdownMenu.kt`, where both docks can see it; the
+   journal dock's private copy deleted) now runs all seven menus: a click within 400 ms of a
+   dismissal IS the closing tap, and only an independent tap opens.
+
+---
+
 ## Request (2026-09-18, batch X — the dock's lit state, the menu tap, and the paragraph face)
 
 Verbatim: "theres a bug with selected tool, when im writing and i wrote something then i
