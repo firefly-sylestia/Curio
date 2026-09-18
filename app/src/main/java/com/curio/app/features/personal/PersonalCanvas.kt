@@ -3223,7 +3223,7 @@ private fun PersonalPhotoBlock(
                         }
                     }
                     DropdownMenu(
-                        expanded = sizeMenu,
+                        expanded = sizeMenu.open,
                         onDismissRequest = { sizeMenu.dismissed() },
                         // v389h — a print's size menu sits over a page being
                         // written in; it must not close the keyboard the way the
