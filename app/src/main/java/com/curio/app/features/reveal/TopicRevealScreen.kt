@@ -5728,7 +5728,6 @@ private fun SeriesPoster(
  * toggle). The whole sheet wears the poster's extracted palette when the
  * series cover-fetch toggle is on; otherwise the category tint.
  */
-@Composable
 /**
  * WHICH LANE THE SHARED EPISODE SHEET IS SPEAKING FOR (v389f).
  *

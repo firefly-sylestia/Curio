@@ -80,6 +80,13 @@ object TmdbFetch {
     }
 
     private val factsCache = ConcurrentHashMap<String, Facts>()
+
+    /**
+     * A title → its episodes. An EMPTY list is a real, remembered answer —
+     * "asked, not a show" — because `ConcurrentHashMap` cannot hold a null value,
+     * so "no answer yet" and "no show here" have to be told apart by the key
+     * being absent rather than by the value being null.
+     */
     private val episodeCache = ConcurrentHashMap<String, List<SeriesEpisode>>()
 
     /** The poster for a film (or a show), or null when there is no answer. */
@@ -115,17 +122,20 @@ object TmdbFetch {
         if (!isConfigured) return@withContext null
         val name = clean(title)
         if (name.isBlank()) return@withContext null
-        if (episodeCache.containsKey(name)) return@withContext episodeCache[name]
+        episodeCache[name]?.let { return@withContext it.ifEmpty { null } }
         val record = facts(name)
         val showId = record?.showId ?: 0
         if (showId <= 0) {
-            episodeCache[name] = null
+            episodeCache[name] = emptyList()
             return@withContext null
         }
         val seasons = record?.seasonCount ?: 0
         val episodes = runCatching { readShowEpisodes(showId, seasons) }.getOrDefault(emptyList())
         episodeCache[name] = episodes
-        episodes
+        // A show whose list came back empty reads as "no show" to the caller —
+        // which is the safe direction: the film sheet it then opens still shows
+        // the work's own record, where an empty episode sheet would show nothing.
+        episodes.ifEmpty { null }
     }
 
     // ── films ───────────────────────────────────────────────────────────────

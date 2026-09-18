@@ -64,6 +64,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.notesSheetContainerColor
+import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import java.net.HttpURLConnection
 import java.net.URL

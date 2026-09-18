@@ -676,7 +676,10 @@ internal fun PersonalWritingPage(
                     // `remember`ed on the editor so the local's value is stable:
                     // a fresh lambda every recomposition would invalidate every
                     // reader of the local, which is the whole read subtree.
-                    val tapToEdit = remember(editor) {
+                    // The explicit `() -> Unit` type is load-bearing: without it
+                    // `remember` infers the lambda's own return type, which then
+                    // has to match the local's `(() -> Unit)?` and would not.
+                    val tapToEdit: () -> Unit = remember(editor) {
                         {
                             editing = true
                             editor.focusLastLine()
