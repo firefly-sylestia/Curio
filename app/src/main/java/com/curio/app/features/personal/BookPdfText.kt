@@ -291,11 +291,21 @@ internal fun extractPdfPageText(
                         // no ink — it is also the only thing that says where one
                         // word ends.
                         if (word.isEmpty()) return@forEach
+                        // v394 — THE BOX SITS ON THE LETTERS. PDFBox's yDirAdj is
+                        // the BASELINE, and the old glyph band ran from the
+                        // baseline DOWN (y .. y + height), so every highlight
+                        // washed the ground under its words instead of the words
+                        // (user report: "the pdf text highlight is kind of
+                        // inaccurate like its little to the buttom"). Stored as a
+                        // true top-left box: the top is lifted to roughly the
+                        // ascender line (0.72 of the font height above the
+                        // baseline), the bottom a little past the baseline for the
+                        // tails.
                         glyphs.add(
                             PdfGlyph(
                                 text = word,
                                 x = position.xDirAdj,
-                                y = position.yDirAdj,
+                                y = position.yDirAdj - position.heightDir * 0.72f,
                                 width = position.widthDirAdj,
                                 height = position.heightDir
                             )

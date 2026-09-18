@@ -1,4 +1,11 @@
 FIX:
+- Reading: a PDF highlight sits ON the letters again — the box was measured from the baseline down, so every wash ran a little under its words.
+- Reading: a zoomed PDF page moves with one finger — the drag was being left to the page turn — and a swipe at the edge still changes pages without zooming out first.
+- Reading: pinch zoom works in Pages mode too, and the pages sit flush — a turn is a slide of the paper, not a gap between cards.
+- Reading: the page's ink tool wears a palette icon instead of the "Tt" that read as a text-size control.
+- Reading: bookmarks, reading progress and contents live in ONE sheet now — two tabs, with a bookmark pill per chapter so a chapter can be marked straight from the list.
+- Reading: the head's flow control is an icon instead of a word.
+- Social: the avatars are redrawn from zero — twenty portraits, ten men and ten women, each shelf with its own build (the men's shoulders broader and squarer, the women's narrower and softer), its own hair, gaze and pose, and no two portraits sharing a silhouette.
 - Writing: a pen or a face chosen for the words you type next lights its tool the moment it is armed, instead of waiting for the next keystroke to prove it.
 - Writing: tapping a tool whose menu is open closes it — the outside tap used to dismiss the menu AND re-open it in the same breath, so the menu never went away. The Save your take dock's font, paper and size menus had the same habit, now fixed.
 - To-do: a row keeps its checkbox when you delete its words — the box stood on the row's characters, so emptying a row took the box with it; the box now stays while the row is empty and the next word typed wears it again.

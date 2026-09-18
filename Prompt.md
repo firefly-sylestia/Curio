@@ -1,5 +1,58 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch Z — twenty portraits, and the reader's rough edges)
+
+Verbatim: "now for avatars, i want you to fully redrawn them like redesign remaking them
+with proper male and female version. and total of 10 avatars for male an female. also for
+the pdf text highlight its kind of inaccurate like its little to the buttom, also when i
+pinch to zoom then i cant just drag to move with one finger, also i have to minimise it to
+be able to switch pages, also for the book backgroud color it shows tt as icon which is
+wrong fix it. and for bookmarks reading progress and contents, make it one bottom sheet
+with bookmark option per chapter or content too. proper ui for it. also instead of
+scrolling and pages text show it as icon also when im in pages i cant pinch to zoom, also
+the pages are not continuous connected, fix these"
+
+### What changed
+
+1. **Twenty portraits, ten men and ten women** (`SocialAvatar.kt`, `SocialApi.kt`,
+   `supabase/schema.sql`). The 28-row table is now 20 rows, first ten men, last ten women;
+   `SOCIAL_AVATAR_STYLE_COUNT` is 20 and the schema check clamps to 0..19 (old rows above 19
+   fall back by the existing clamp on read, so nothing breaks). The cast is built on the
+   existing detailed drawing branches — men: beanie, full beard, man bun + glasses, curls,
+   headphones, wizard, leaf crown, goggles, freckles, hood; women: bob, long waves +
+   earring, pigtails, beret, top bun + bow, space helmet, flowered waves, ponytail, twin
+   braids, hime cut — every row a distinct silhouette, gaze and pose. `drawShoulders` now
+   draws TWO builds: a man's bust runs wider and squarer, a woman's narrower and softer, so
+   the two shelves read as male and female characters, not one figure in twenty wigs.
+2. **The PDF highlight sits on its words** (`BookPdfText.kt`). PDFBox's `yDirAdj` is the
+   BASELINE, and the glyph band ran baseline → baseline+height, so every wash drew under the
+   letters. Glyphs now store a true top-left box (top lifted 0.72 of the height, the
+   ascender line).
+3. **A zoomed page answers one finger** (`BookReaderScreen.kt`). `pinchToZoom` gained a
+   `zoomed: () -> Boolean` answer: while the PDF is in close, a single-finger drag is claimed
+   as a PAN (with a 12px re-anchor so a plain tap still reaches the page), and the pager
+   STAYS ENABLED, so a swipe at the zoomed page's edge turns the page — no more zooming out
+   first.
+4. **Pages mode pinches and sits flush.** The text pager carries the same type-scale pinch
+   the scroll has, and both pagers' `pageSpacing` is 0 — pages read as one continuous
+   document instead of cards with gaps.
+5. **The ink tool wears a palette**, not "Tt". The head's flow control is an icon too
+   (layers while turning pages, a book while scrolling).
+6. **One places sheet.** `ReaderMarksSheet` and `ReaderChaptersSheet` are merged into
+   `ReaderPlacesSheet` — two tabs (Bookmarks & progress / Contents), the contents rows keep
+   their hierarchy and printed pages, and every chapter row wears a small bookmark pill that
+   marks the chapter straight from the list. Both the marks door and the chapters door open
+   it, on the tab that was asked for.
+
+### Honest limits
+
+The avatar count change means profiles carrying styles 20–27 now clamp to a valid row on
+read (the existing `coerceIn`) — no migration needed, and the schema check was widened from
+the read side's perspective, not narrowed, so old clients can still write their values.
+The shoulder shapes and the merged sheet need eyes on a build; the brace checker is clean.
+
+---
+
 ## Request (2026-09-18, batch Y — the checkbox that left with its words, and the other dock's menus)
 
 Verbatim: "also in todo the checkbox deleesets when i delete all the text after writing

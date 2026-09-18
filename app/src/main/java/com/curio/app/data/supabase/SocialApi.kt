@@ -23,7 +23,7 @@ const val PROFILE_VISIBILITY_FRIENDS = "friends"
  * cache or API boundary. `supabase/schema.sql`'s `avatar_style` check must be
  * widened in the same commit (currently `between 0 and 27`).
  */
-const val SOCIAL_AVATAR_STYLE_COUNT = 28
+const val SOCIAL_AVATAR_STYLE_COUNT = 20
 
 /**
  * Someone else's PUBLIC identity — the only thing another account can ever see

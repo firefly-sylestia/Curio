@@ -34,7 +34,7 @@ create table if not exists public.profiles (
     -- 0..27 = the 28 code-drawn portraits (SOCIAL_AVATAR_STYLE_COUNT in the
     -- app's SocialApi.kt). Widen this bound in the SAME commit that adds a
     -- style to the app's AVATARS list, or the new pick is rejected on write.
-    avatar_style        smallint not null default 0 check (avatar_style between 0 and 27),
+    avatar_style        smallint not null default 0 check (avatar_style between 0 and 19),
     online_mode_enabled boolean not null default false,
     created_at          timestamptz not null default now(),
     updated_at          timestamptz not null default now()
@@ -54,11 +54,11 @@ do $$
 begin
     if not exists (select 1 from pg_constraint where conname = 'profiles_avatar_style_range') then
         alter table public.profiles add constraint profiles_avatar_style_range
-            check (avatar_style between 0 and 27);
+            check (avatar_style between 0 and 19);
     else
         alter table public.profiles drop constraint profiles_avatar_style_range;
         alter table public.profiles add constraint profiles_avatar_style_range
-            check (avatar_style between 0 and 27);
+            check (avatar_style between 0 and 19);
     end if;
 end $$;
 create unique index if not exists profiles_username_unique

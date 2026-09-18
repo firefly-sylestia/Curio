@@ -35,12 +35,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * The 28 code-drawn social portraits.
+ * The 20 code-drawn social portraits: ten men, ten women.
  *
  * Everything lives in a disc of one warm ground colour, lit from the top-left
  * with a soft inner rim, so an avatar reads as a pressed paper button rather
  * than a flat blob; the character on top is drawn in the garment / skin / hair
- * tones of its row plus a warm ink, and each of the 28 is a DIFFERENT
+ * tones of its row plus a warm ink, and each of the 20 is a DIFFERENT
  * character — a beanie, a bob, a bun with glasses, headphones, a wizard hat,
  * an explorer's goggles, a space helmet, plus the twelve soft silhouettes of
  * the v3xx52 set (long waves, a high ponytail, twin braids, a hime cut, a puff
@@ -67,8 +67,8 @@ import kotlin.math.sin
  *     glare sweep and a riveted collar, braids with interlocking plaits).
  *
  * The tone tables are untouched: shading is derived from each row's own
- * garment / skin / hair colours (`darken`, `lighten`), so 28 detailed
- * characters still cost 28 small integers — no new assets, no new fields.
+ * garment / skin / hair colours (`darken`, `lighten`), so 20 detailed
+ * characters still cost 20 small integers — no new assets, no new fields.
  *
  * v392 — THE ILLUSTRATED PASS. Detailed is not the same as ILLUSTRATED: the
  * cast was still twenty-eight characters in one pose, and where two of them wore
@@ -101,7 +101,7 @@ private class AvatarArt(
     /**
      * v389 — WHOSE GAZE THIS IS.
      *
-     * All 28 portraits used to wear the SAME pair of chibi eyes (one big dark
+     * All 20 portraits used to wear the SAME pair of chibi eyes (one big dark
      * oval, two highlights), so at a glance every member looked like the same
      * person in a different hat — the note they arrived with was "the eyes is
      * same and also very weird too; the eye should be different per individual
@@ -143,50 +143,41 @@ private class AvatarArt(
 
 // The palette is the app's own warm paper family with a few lane accents, so
 // the discs sit naturally beside the rose settings family and the lane chips.
+//
+// v394 — THE REDRAW, FROM ZERO (user request: "fully redrawn them like redesign
+// remaking them with proper male and female version. and total of 10 avatars for
+// male an female"). Twenty characters, ten of each, and every row names WHICH:
+// the cast is now a deliberate pair of shelves rather than one mixed pile. The
+// kinds are the numbered drawings below ([drawHairBack] / [drawHeadAssembly] /
+// [drawHairFront]), 0–9 the men, 10–19 the women, and no two rows share a
+// silhouette, a gaze or a pose.
 private val AVATARS: List<AvatarArt> = listOf(
-    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), 0, 0, -5f, 2f),  // beanie
-    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), 1, EDGE_ALMOND, 4f, -2f),  // bob
-    AvatarArt(Color(0xFFA9C7A0), Color(0xFFEFE3D2), Color(0xFFEFC9A6), Color(0xFF3B2F2A), 2, EDGE_LIDDED, -3f, 1f),  // bun + glasses
-    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF4A362C), 3, EDGE_WIDE, 6f, 3f),  // curls
-    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF443222), 4, EDGE_SLEEPY, -6f, -2f),  // cap + headphones
-    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), 5, EDGE_SOFT, 3f, -3f),  // long + earring
-    AvatarArt(Color(0xFFD8A98F), Color(0xFF6B5A4E), Color(0xFFE8C09A), Color(0xFF463832), 6, EDGE_STEADY, -1f, 0f),  // beard
-    AvatarArt(Color(0xFFF0AEC4), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFF7A4A2C), 7, EDGE_UPTURNED, -7f, 4f),  // pigtails
-    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFFEDE6D6), 8, EDGE_STARRY, 5f, -1f),  // wizard hat
-    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFF4A6B33), 9, EDGE_HAPPY, -4f, 2f),  // leaf crown
-    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF453730), 10, EDGE_BEHIND_GLASS, 7f, -3f), // goggles
-    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF4A3634), 11, EDGE_SOFT, -6f, 3f), // beret
-    AvatarArt(Color(0xFFEFA785), Color(0xFF4F7F72), Color(0xFFF7DEC6), Color(0xFF6B3F26), 12, EDGE_ALMOND, 2f, -2f), // top bun + bow
-    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFFC98A3E), 13, EDGE_WIDE, -2f, 2f), // short + freckles
-    // The hood's skin was a near-white grey that read as paper rather than as
-    // a face under a shadow; warm and a touch deeper, with the hood itself
-    // lifted off black (the row the note called out: "the black is the worse").
-    AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), 14, EDGE_SHADOWED, -8f, -2f), // hood
-    // v389b — the helmet's visor is GLASS, so the eyes behind it are the same
-    // design the two pairs of glasses wear: lit from above, no shine of their
-    // own to fight the lens. It used to wear the curious wide eye, which read
-    // as a bare face inside a helmet — and as the same gaze as the neighbours.
+    // ── THE MEN (the beanie, the beard, the man-bun, the curls, the
+    //    headphones, the wizard, the laurel, the goggles, the freckles, the
+    //    hood — the drawings kinds 0, 6, 2, 3, 4, 8, 9, 10, 13, 14) ──
+    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), 0, EDGE_ROUND, -5f, 2f),        // beanie
+    AvatarArt(Color(0xFFD8A98F), Color(0xFF6B5A4E), Color(0xFFE8C09A), Color(0xFF463832), 6, EDGE_STEADY, -1f, 0f),       // full beard
+    AvatarArt(Color(0xFFA9C7A0), Color(0xFFEFE3D2), Color(0xFFEFC9A6), Color(0xFF3B2F2A), 2, EDGE_BEHIND_GLASS, -3f, 1f), // man bun + glasses
+    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF4A362C), 3, EDGE_WIDE, 6f, 3f),          // curls
+    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF443222), 4, EDGE_SLEEPY, -6f, -2f),      // headphones
+    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFFEDE6D6), 8, EDGE_STARRY, 5f, -1f),       // wizard hat
+    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFF4A6B33), 9, EDGE_HAPPY, -4f, 2f),        // leaf crown
+    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF453730), 10, EDGE_BEHIND_GLASS, 7f, -3f),// goggles
+    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFFC98A3E), 13, EDGE_WIDE, -2f, 2f),        // short + freckles
+    AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), 14, EDGE_SHADOWED, -8f, -2f),   // hood
+    // ── THE WOMEN (the bob, the waves, the pigtails, the beret, the top
+    //    bun, the helmet, the flowered waves, the ponytail, the braids and
+    //    the hime cut — kinds 1, 5, 7, 11, 12, 15, 16, 17, 18, 19) ────
+    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), 1, EDGE_ALMOND, 4f, -2f),       // bob
+    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), 5, EDGE_SOFT, 3f, -3f),         // long + earring
+    AvatarArt(Color(0xFFF0AEC4), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFF7A4A2C), 7, EDGE_UPTURNED, -7f, 4f),     // pigtails
+    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF4A3634), 11, EDGE_SOFT, -6f, 3f),        // beret
+    AvatarArt(Color(0xFFEFA785), Color(0xFF4F7F72), Color(0xFFF7DEC6), Color(0xFF6B3F26), 12, EDGE_ALMOND, 2f, -2f),      // top bun + bow
     AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15, EDGE_BEHIND_GLASS, 3f, 0f), // space helmet
-    // ── v3xx52 — the SOFT SET: twelve feminine silhouettes (waves,
-    // ponytails, braids, puffs, flower crowns, bows) in the same pastel
-    // family, with a wider spread of skin and hair tones so every member can
-    // pick something that looks like them.
-    // v389b — the flower crown had the wizard's four-point sparkle (the two rows
-    // sat one tile apart in the picker wearing the SAME eyes). The enchanted
-    // gaze belongs to the hat; the waves get the almond eye with the lash flick,
-    // which is a gaze no portrait on either side of it wears.
-    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16, EDGE_ALMOND, 5f, -3f), // waves + flower
-    AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17, EDGE_UPTURNED, -5f, 3f), // high ponytail
-    AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF4A3730), 18, EDGE_HAPPY, 3f, -4f), // twin braids
-    AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF40332E), 19, EDGE_LIDDED, -2f, 1f), // hime cut
-    AvatarArt(Color(0xFFF6D5C0), Color(0xFF9ED0B8), Color(0xFFEFC8A4), Color(0xFF8A4E2E), 20, EDGE_SOFT, 6f, -1f), // bob + bow
-    AvatarArt(Color(0xFFE6E0F5), Color(0xFFC98FA8), Color(0xFFF5D8BE), Color(0xFF4A3A32), 21, EDGE_BEHIND_GLASS, -1f, -2f), // half-up bun
-    AvatarArt(Color(0xFFD6E7C6), Color(0xFFE9A5BE), Color(0xFFF7DCC0), Color(0xFF7A4A2C), 22, EDGE_HAPPY, 4f, -3f), // flower crown
-    AvatarArt(Color(0xFFF0C4D8), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF443329), 23, EDGE_UPTURNED, -3f, 4f), // waves + star clips
-    AvatarArt(Color(0xFFCCE3E8), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFFC98A3E), 24, EDGE_ALMOND, 7f, -2f), // pixie + heart clip
-    AvatarArt(Color(0xFFF3D9B0), Color(0xFF5E8C7A), Color(0xFFE9BE97), Color(0xFF40322A), 25, EDGE_BEHIND_GLASS, -5f, 1f), // waves + glasses
-    AvatarArt(Color(0xFFE2D2F0), Color(0xFFF0A88C), Color(0xFF8C5A3C), Color(0xFF42332C), 26, EDGE_STEADY, 3f, 3f), // puff + bow
-    AvatarArt(Color(0xFFF7CFA8), Color(0xFF7E5AA0), Color(0xFFF2D3B8), Color(0xFF5B3A24), 27, EDGE_SLEEPY, -3f, -1f)  // braided crown
+    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16, EDGE_UPTURNED, 5f, -3f),    // waves + flower
+    AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17, EDGE_LIDDED, -5f, 3f),      // high ponytail
+    AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF4A3730), 18, EDGE_HAPPY, 3f, -4f),       // twin braids
+    AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF40332E), 19, EDGE_LIDDED, -2f, 1f)       // hime cut
 )
 
 // ── the ten gazes ─────────────────────────────────────────────────────────
@@ -296,7 +287,7 @@ internal fun SocialAvatar(
         if (online) {
             // CUT OUT of the portrait, not painted over it: the ring of page
             // colour separates the dot from the art, which is what keeps it
-            // readable on all 28 grounds in both themes.
+            // readable on all 20 grounds in both themes.
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -379,7 +370,7 @@ private val ActiveDot = Color(0xFF2FBF71)
 /**
  * The finishing light EVERY portrait gets.
  *
- * The 28 characters are different drawings, so what makes them one family is
+ * The 20 characters are different drawings, so what makes them one family is
  * the light: a rim along the side the disc's own light falls on, and a soft
  * lift where the shoulder catches it. Without this the faces read flat and
  * slightly stuck-on at large sizes (a profile portrait), which is exactly
@@ -414,12 +405,23 @@ private fun DrawScope.drawAvatarLight(u: Float) {
 private fun DrawScope.drawShoulders(art: AvatarArt, u: Float) {
     val garment = art.garment
     val shade = darken(garment, 0.22f)
+    // v394 — THE TWO BUILDS. The ten men and the ten women share a drawing
+    // language but not a body: a man's shoulders run wider and squarer (out to
+    // 9 and 91 with a flatter rise), a woman's narrower and softer (16 and 84,
+    // a longer slope into the neck). One shape per build, so the cast reads as
+    // "proper male and female versions" rather than one figure in twenty
+    // wigs (user request).
+    val wide = art.kind in setOf(0, 2, 3, 4, 6, 8, 9, 10, 13, 14)
+    val shoulderOut = if (wide) 9f else 16f
+    val shoulderRise = if (wide) 91f else 89f
+    val shoulderFlat = if (wide) 36f else 39f
+    val neckOut = if (wide) 44f else 41f
     val bust = Path().apply {
-        mv(13f, 100f, u)
-        cu(15f, 89f, 25f, 80.5f, 38f, 78.6f, u)
-        cu(43f, 77.8f, 45f, 80.6f, 50f, 80.6f, u)
-        cu(55f, 80.6f, 57f, 77.8f, 62f, 78.6f, u)
-        cu(75f, 80.5f, 85f, 89f, 87f, 100f, u)
+        mv(shoulderOut, 100f, u)
+        cu(shoulderOut + 2f, shoulderRise, 25f, 80.5f, shoulderFlat, 78.6f, u)
+        cu(neckOut, 77.8f, 45f, 80.6f, 50f, 80.6f, u)
+        cu(55f, 80.6f, 100f - neckOut, 77.8f, 100f - shoulderFlat, 78.6f, u)
+        cu(75f, 80.5f, 100f - shoulderOut - 2f, shoulderRise, 100f - shoulderOut, 100f, u)
         close()
     }
     drawPath(bust, garment)

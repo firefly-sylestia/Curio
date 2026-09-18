@@ -308,6 +308,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
 
+
+
     // ── THE PAGE BAR ─────────────────────────────────────────────────────
     // The floating bar that turns a page, and the only place the reader says
     // WHICH page it is in terms the member can act on. It belongs to the CHROME,
@@ -702,10 +704,19 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onDismiss = { sheet = null }
         )
 
-        ReaderSheet.MARKS -> ReaderMarksSheet(
+        // v394 — ONE SHEET for where you are, what you kept and where you can
+        // go: the marks door now opens bookmarks, highlights, the reading
+        // progress AND the book's contents (with a bookmark pill per chapter),
+        // so the three questions a reader asks are answered in one place. The
+        // chapters door keeps the same sheet for a book being browsed.
+        ReaderSheet.MARKS, ReaderSheet.CHAPTERS -> ReaderPlacesSheet(
             marks = marks,
             position = openedAt ?: marks.firstOrNull { it.isPosition },
+            content = content,
+            chapters = chapters,
+            pages = printedPages,
             palette = palette,
+            marksFirst = sheet == ReaderSheet.MARKS,
             onJump = { mark ->
                 sheet = null
                 scope.launch { jumpToMark(mark.positionIndex) }
@@ -717,14 +728,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     }
                 }
             },
-            onDismiss = { sheet = null }
-        )
-
-        ReaderSheet.CHAPTERS -> ReaderChaptersSheet(
-            content = content,
-            chapters = chapters,
-            pages = printedPages,
-            palette = palette,
             onPickBlock = { block ->
                 sheet = null
                 if (block >= 0) jumpToBlock(block)
@@ -735,6 +738,17 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 scope.launch {
                     pagerState.scrollToPage(
                         (page - 1).coerceIn(0, (pagerState.pageCount - 1).coerceAtLeast(0))
+                    )
+                }
+            },
+            onBookmarkHere = { paragraph ->
+                scope.launch {
+                    saveReaderMark(
+                        bookId = bookId,
+                        document = document,
+                        paragraph = paragraph,
+                        kind = ReaderMarkKind.BOOKMARK,
+                        text = paragraph.text.take(90)
                     )
                 }
             },
@@ -1329,13 +1343,25 @@ private fun TextPagedReader(
             }
     }
 
+    // v394 — PAGES PINCH TOO (user report: "when im in pages i cant pinch to
+    // zoom"): the same re-lay-the-type zoom the scroll carries, so a book read
+    // as pages answers the two fingers like the same book read as a scroll.
+    val pagerZoom = Modifier.pinchToZoom { zoom, _ ->
+        val next = (ReaderLook.textScale * zoom).coerceIn(0.8f, 2.6f)
+        if (next != ReaderLook.textScale) ReaderLook.textScale = next
+    }
+
     HorizontalPager(
         state = pagerState,
         modifier = Modifier
             .fillMaxSize()
+            .then(pagerZoom)
             .onSizeChanged { room = it }
             .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
-        pageSpacing = 14.dp
+        // v394 — PAGES SIT FLUSH. A gutter between self-made pages read as one
+        // book cut into cards (user report: "the pages are not continuosn
+        // connected"); with no gap a turn is a slide of the paper itself.
+        pageSpacing = 0.dp
     ) { page ->
         val range = pages.getOrNull(page) ?: return@HorizontalPager
         Column(
@@ -1575,7 +1601,13 @@ private fun PageReader(
     // PINCH ZOOMS THE PAGE ITSELF. A PDF page is not reflowable — zooming it has
     // to mean magnifying it, which is also what makes the small print of a
     // scanned document legible on a phone at all (v389).
-    val zoomModifier = Modifier.pinchToZoom { zoom, pan ->
+    //
+    // v394 — AND A ZOOMED PAGE STAYS READABLE: one finger pans it (the modifier
+    // claims the drag while [zoomed] answers true), and the pager STAYS ON so a
+    // swipe at the page's edge still turns it — the pan simply runs out of room
+    // and the unclaimed edge drag belongs to the pager again (user report: "i
+    // have to minimise it to be able to switch pages").
+    val zoomModifier = Modifier.pinchToZoom(zoomed = { ReaderLook.pdfZoom > 1.02f }) { zoom, pan ->
         val next = (ReaderLook.pdfZoom * zoom).coerceIn(1f, 4f)
         ReaderLook.pdfZoom = next
         if (next <= 1.02f) {
@@ -1590,11 +1622,9 @@ private fun PageReader(
     HorizontalPager(
         state = pagerState,
         modifier = Modifier.fillMaxSize().then(zoomModifier),
-        // A zoomed page is being INSPECTED, not turned: while the member is in
-        // close, the horizontal drag belongs to the pan and the pager takes it
-        // back the moment they are out again.
-        userScrollEnabled = ReaderLook.pdfZoom <= 1.02f,
-        pageSpacing = 8.dp
+        // v394 — the PDF's pages sit flush too: a scan read as pages is one
+        // document being slid across, not a stack of cards with gaps between.
+        pageSpacing = 0.dp
     ) { page ->
         val bitmap by produceState<Bitmap?>(null, document, page) {
             value = withContext(Dispatchers.IO) {
@@ -2099,19 +2129,28 @@ private fun ReaderChrome(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // HOW THE BOOK FLOWS — the one control that changes the whole
-                // page, so it sits where the thumb already is and names the
-                // OTHER way of reading rather than the one it is in.
+                // page, so it sits where the thumb already is. v394 — and it is
+                // an ICON now: the button names the OTHER way of reading (a
+                // book while you scroll, a stack of layers while you turn
+                // pages) instead of a word at the foot of the page (user
+                // request: "instead of scrolling and pages text show it as
+                // icon").
                 Surface(
                     onClick = onToggleFlow,
-                    shape = RoundedCornerShape(50),
-                    color = palette.surface
+                    shape = CircleShape,
+                    color = Color.Transparent,
+                    modifier = Modifier.size(38.dp)
                 ) {
-                    Text(
-                        if (flowLabel == ReaderFlow.PAGED.label) "Scrolling" else "Pages",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.ink.copy(alpha = 0.8f),
-                        modifier = Modifier.padding(horizontal = 11.dp, vertical = 7.dp)
-                    )
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            if (flowLabel == ReaderFlow.PAGED.label) CurioIcons.Layers
+                            else CurioIcons.MenuBook,
+                            if (flowLabel == ReaderFlow.PAGED.label) "Read as one scroll"
+                            else "Read as pages",
+                            tint = palette.ink.copy(alpha = 0.75f),
+                            size = 19.dp
+                        )
+                    }
                 }
                 // WHERE THEY ARE, as a fact about the book rather than a
                 // sentence of advice: a reader does not need to be told to hold
@@ -2127,7 +2166,11 @@ private fun ReaderChrome(
                 }
                 Spacer(Modifier.weight(1f))
                 ReaderChromeButton(CurioIcons.Search, "Search this book", palette) { onSearch() }
-                ReaderChromeButton(CurioIcons.FormatText, "The page's ink", palette) { onInk() }
+                // v394 — THE INK IS A COLOUR, SO IT WEARS THE PALETTE. The old
+                // text_fields glyph read as "Tt" — a type-size tool — and the
+                // member tapped it expecting larger words (user report: "for the
+                // book backgroud color it shows tt as icon which is wrong").
+                ReaderChromeButton(CurioIcons.Palette, "The page's ink", palette) { onInk() }
                 ReaderChromeButton(CurioIcons.Bookmark, "Bookmarks and highlights", palette) { onMarks() }
                 ReaderChromeButton(CurioIcons.MenuBook, "Chapters", palette) { onChapters() }
             }
@@ -2381,49 +2424,290 @@ private fun ReaderInkSheet(
 }
 
 @Composable
-private fun ReaderMarksSheet(
+private fun ReaderPlacesSheet(
+    marks: List<ReaderMarkEntity>,
+    position: ReaderMarkEntity?,
+    content: ReaderContent?,
+    chapters: List<ReaderOutlineEntry>,
+    pages: List<ReaderOutlineEntry>,
+    palette: ReaderPalette,
+    marksFirst: Boolean,
+    onJump: (ReaderMarkEntity) -> Unit,
+    onDelete: (ReaderMarkEntity) -> Unit,
+    onPickBlock: (Int) -> Unit,
+    onPickPage: (Int) -> Unit,
+    onBookmarkHere: (ReaderParagraph) -> Unit,
+    onDismiss: () -> Unit
+) {
+    // The sheet opens on the section the member asked for, but the OTHER one is
+    // one tap away — this is one surface with two halves, not two sheets.
+    var showingMarks by remember { mutableStateOf(marksFirst) }
+    ReaderSheetFrame("Places in this book", palette, onDismiss) {
+        Column {
+            // THE TWO HALVES. Marked as chips, the way the sheet's own
+            // contents/page switch already worked — one tab is your marks and
+            // how far through you are, the other is the book's own contents.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                listOf(
+                    true to "Bookmarks & progress",
+                    false to "Contents"
+                ).forEach { (asMarks, label) ->
+                    val on = asMarks == showingMarks
+                    Surface(
+                        onClick = { showingMarks = asMarks },
+                        shape = RoundedCornerShape(50),
+                        color = if (on) palette.accent else palette.ink.copy(alpha = 0.08f)
+                    ) {
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal
+                            ),
+                            color = if (on) palette.paper else palette.ink.copy(alpha = 0.75f),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                        )
+                    }
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (showingMarks) {
+                    ReaderMarksSection(
+                        marks = marks,
+                        position = position,
+                        palette = palette,
+                        onJump = onJump,
+                        onDelete = onDelete
+                    )
+                } else {
+                    ReaderContentsSection(
+                        content = content,
+                        chapters = chapters,
+                        pages = pages,
+                        palette = palette,
+                        onPickBlock = onPickBlock,
+                        onPickPage = onPickPage,
+                        onBookmarkHere = onBookmarkHere
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** The marks half: the reading progress, then every bookmark, highlight and
+ *  note the book carries. */
+@Composable
+private fun ReaderMarksSection(
     marks: List<ReaderMarkEntity>,
     position: ReaderMarkEntity?,
     palette: ReaderPalette,
     onJump: (ReaderMarkEntity) -> Unit,
-    onDelete: (ReaderMarkEntity) -> Unit,
-    onDismiss: () -> Unit
+    onDelete: (ReaderMarkEntity) -> Unit
 ) {
-    ReaderSheetFrame("Bookmarks & highlights", palette, onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 420.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            if (position != null && position.positionIndex > 0) {
-                val through = (position.positionFraction * 100f).roundToInt()
-                ReaderMarkRow(
-                    label = "Last read \u00b7 auto",
-                    body = if (through > 0) "$through% through" else "Section ${position.positionIndex + 1}",
-                    palette = palette,
-                    onJump = { onJump(position) },
-                    onDelete = null
-                )
+    if (position != null && position.positionIndex > 0) {
+        val through = (position.positionFraction * 100f).roundToInt()
+        ReaderMarkRow(
+            label = "Last read \u00b7 auto",
+            body = if (through > 0) "$through% through" else "Section ${position.positionIndex + 1}",
+            palette = palette,
+            onJump = { onJump(position) },
+            onDelete = null
+        )
+    }
+    if (marks.filter { !it.isPosition }.isEmpty()) {
+        Text(
+            "Nothing marked yet \u2014 hold a passage while you read.",
+            style = MaterialTheme.typography.bodySmall,
+            color = palette.ink.copy(alpha = 0.55f)
+        )
+    }
+    marks.forEach { mark ->
+        if (mark.isPosition) return@forEach
+        ReaderMarkRow(
+            label = if (mark.isNote) "Note" else mark.markKind.label,
+            body = mark.text.ifBlank { "Section ${mark.positionIndex + 1}" },
+            palette = palette,
+            note = mark.note,
+            onJump = { onJump(mark) },
+            onDelete = { onDelete(mark) }
+        )
+    }
+}
+
+/** The contents half: the book's own chapters and printed pages, each with a
+ *  small bookmark pill so a chapter can be marked straight from the list. */
+@Composable
+private fun ReaderContentsSection(
+    content: ReaderContent?,
+    chapters: List<ReaderOutlineEntry>,
+    pages: List<ReaderOutlineEntry>,
+    palette: ReaderPalette,
+    onPickBlock: (Int) -> Unit,
+    onPickPage: (Int) -> Unit,
+    onBookmarkHere: (ReaderParagraph) -> Unit
+) {
+    var showingPages by remember { mutableStateOf(false) }
+    val entries = if (showingPages) pages else chapters
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (pages.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                listOf(false to "Contents", true to "Printed pages").forEach { (asPages, label) ->
+                    val on = asPages == showingPages
+                    Surface(
+                        onClick = { showingPages = asPages },
+                        shape = RoundedCornerShape(50),
+                        color = if (on) palette.accent else palette.ink.copy(alpha = 0.08f)
+                    ) {
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal
+                            ),
+                            color = if (on) palette.paper else palette.ink.copy(alpha = 0.75f),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                        )
+                    }
+                }
             }
-            if (marks.isEmpty()) {
+        }
+        when {
+            entries.isNotEmpty() -> entries.forEach { entry ->
+                val openable = entry.block >= 0 || entry.isPage
+                Surface(
+                    onClick = {
+                        if (entry.isPage) onPickPage(entry.page) else onPickBlock(entry.block)
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    color = palette.surface,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(
+                            start = (14 + (entry.depth - 1) * 18).dp,
+                            end = 12.dp,
+                            top = if (entry.depth <= 1) 12.dp else 9.dp,
+                            bottom = if (entry.depth <= 1) 12.dp else 9.dp
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(9.dp)
+                    ) {
+                        if (entry.depth > 1) {
+                            Box(
+                                modifier = Modifier
+                                    .width(3.dp)
+                                    .height(if (entry.depth == 2) 16.dp else 11.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(palette.accent.copy(alpha = if (entry.depth == 2) 0.75f else 0.4f))
+                            )
+                        }
+                        Text(
+                            entry.title,
+                            style = TextStyle(
+                                fontFamily = WritingFontFamily,
+                                fontSize = when (entry.depth) {
+                                    1 -> 16.sp
+                                    2 -> 14.5.sp
+                                    else -> 13.5.sp
+                                },
+                                fontWeight = if (entry.depth <= 1) FontWeight.SemiBold
+                                else FontWeight.Normal,
+                                color = palette.ink
+                            ),
+                            maxLines = 2,
+                            modifier = Modifier.weight(1f)
+                        )
+                        // v394 — A BOOKMARK PER CHAPTER. The pill lands the
+                        // mark on the chapter's own opening, so the marks list
+                        // later reads the chapter's name — without opening the
+                        // reader, finding the heading and holding it.
+                        if (openable && !entry.isPage) {
+                            Surface(
+                                onClick = {
+                                    onBookmarkHere(
+                                        ReaderParagraph(entry.block, 0, entry.title, true)
+                                    )
+                                },
+                                shape = RoundedCornerShape(50),
+                                color = palette.ink.copy(alpha = 0.07f)
+                            ) {
+                                Box(Modifier.padding(4.dp)) {
+                                    CurioIcon(
+                                        CurioIcons.Bookmark,
+                                        "Bookmark this chapter",
+                                        tint = palette.ink.copy(alpha = 0.6f),
+                                        size = 14.dp
+                                    )
+                                }
+                            }
+                        }
+                        Text(
+                            when {
+                                entry.isPage -> "p ${entry.page}"
+                                openable -> ""
+                                else -> "not in this file"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.ink.copy(alpha = 0.45f)
+                        )
+                    }
+                }
+            }
+            content is ReaderContent.Pages -> {
                 Text(
-                    "Nothing marked yet \u2014 hold a passage while you read.",
+                    "This PDF carries no contents of its own.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = palette.ink.copy(alpha = 0.55f)
+                    color = palette.ink.copy(alpha = 0.6f)
                 )
+                val chunks = (0 until content.pageCount).chunked(4)
+                chunks.take(60).forEachIndexed { row, pageRow ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        pageRow.forEach { page ->
+                            Surface(
+                                onClick = { onPickPage(page + 1) },
+                                shape = RoundedCornerShape(10.dp),
+                                color = palette.surface,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    "Page ${page + 1}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = palette.ink,
+                                    modifier = Modifier.padding(vertical = 9.dp)
+                                )
+                            }
+                        }
+                        if (pageRow.size < 4) {
+                            Spacer(Modifier.weight((4 - pageRow.size).toFloat()))
+                        }
+                    }
+                    if (row == 59) {
+                        Text(
+                            "More in the file itself",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.ink.copy(alpha = 0.5f)
+                        )
+                    }
+                }
             }
-            marks.forEach { mark ->
-                ReaderMarkRow(
-                    label = if (mark.isNote) "Note" else mark.markKind.label,
-                    body = mark.text.ifBlank { "Section ${mark.positionIndex + 1}" },
-                    palette = palette,
-                    note = mark.note,
-                    onJump = { onJump(mark) },
-                    onDelete = { onDelete(mark) }
-                )
-            }
+            content is ReaderContent.Text -> Text(
+                "This file has no chapter headings of its own.",
+                style = MaterialTheme.typography.bodySmall,
+                color = palette.ink.copy(alpha = 0.6f)
+            )
+            else -> Text(
+                "Still opening the file\u2026",
+                style = MaterialTheme.typography.bodySmall,
+                color = palette.ink.copy(alpha = 0.6f)
+            )
         }
     }
 }
@@ -2485,192 +2769,6 @@ private fun ReaderMarkRow(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ReaderChaptersSheet(
-    content: ReaderContent?,
-    chapters: List<ReaderOutlineEntry>,
-    pages: List<ReaderOutlineEntry>,
-    palette: ReaderPalette,
-    onPickBlock: (Int) -> Unit,
-    onPickPage: (Int) -> Unit,
-    onDismiss: () -> Unit
-) {
-    // ── THE BOOK'S TWO ANSWERS (v389c) ─────────────────────────────────
-    //
-    // "Where does chapter four begin" and "where is printed page 42" are
-    // different questions, and a typeset EPUB answers both — the first with its
-    // contents list, the second with its page-list. So the sheet offers both,
-    // marked by the book's own words for them, with Contents first because that
-    // is what a reader is usually looking for.
-    var showingPages by remember { mutableStateOf(false) }
-    val entries = if (showingPages) pages else chapters
-    ReaderSheetFrame("Contents", palette, onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 420.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            // The book offers two ways of naming a place, so the sheet says
-            // which one it is showing instead of quietly picking. Only a book
-            // that HAS printed pages gets the choice.
-            if (pages.isNotEmpty()) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(7.dp),
-                    modifier = Modifier.padding(bottom = 2.dp)
-                ) {
-                    listOf(false to "Contents", true to "Printed pages").forEach { (asPages, label) ->
-                        val on = asPages == showingPages
-                        Surface(
-                            onClick = { showingPages = asPages },
-                            shape = RoundedCornerShape(50),
-                            color = if (on) palette.accent
-                            else palette.ink.copy(alpha = 0.08f)
-                        ) {
-                            Text(
-                                label,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal
-                                ),
-                                color = if (on) palette.paper else palette.ink.copy(alpha = 0.75f),
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
-                            )
-                        }
-                    }
-                }
-            }
-            when {
-                // THE FILE'S OWN CONTENTS (v389). An EPUB's nav/NCX and a PDF's
-                // outline both carry real chapter names, so this is a list of
-                // chapters rather than a page grid — the naming is the book's,
-                // the indent says how deep it sits, and a part's own chapters
-                // read as being under it. [entries] is that list, or the book's
-                // own printed page numbers when the member asked for those.
-                entries.isNotEmpty() -> entries.forEach { entry ->
-                    val openable = entry.block >= 0 || entry.isPage
-                    Surface(
-                        onClick = {
-                            if (entry.isPage) onPickPage(entry.page) else onPickBlock(entry.block)
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        color = palette.surface,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                // The indent is the HIERARCHY, so it has to be an
-                                // indent: 18dp a level, with the row's own type
-                                // and weight falling as it goes deeper. The old
-                                // 14dp and 1sp step made a part and its chapters
-                                // look like one flat list.
-                                start = (14 + (entry.depth - 1) * 18).dp,
-                                end = 12.dp,
-                                top = if (entry.depth <= 1) 12.dp else 9.dp,
-                                bottom = if (entry.depth <= 1) 12.dp else 9.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(9.dp)
-                        ) {
-                            // A deeper row wears a small mark in the accent, so
-                            // the level is legible even where the indent is
-                            // slight (a wrapped title starts at the same edge
-                            // whatever it is, which is what an indent alone
-                            // cannot say).
-                            if (entry.depth > 1) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(3.dp)
-                                        .height(if (entry.depth == 2) 16.dp else 11.dp)
-                                        .clip(RoundedCornerShape(2.dp))
-                                        .background(palette.accent.copy(alpha = if (entry.depth == 2) 0.75f else 0.4f))
-                                )
-                            }
-                            Text(
-                                entry.title,
-                                style = TextStyle(
-                                    fontFamily = WritingFontFamily,
-                                    fontSize = when (entry.depth) {
-                                        1 -> 16.sp
-                                        2 -> 14.5.sp
-                                        else -> 13.5.sp
-                                    },
-                                    fontWeight = if (entry.depth <= 1) FontWeight.SemiBold
-                                    else FontWeight.Normal,
-                                    color = palette.ink
-                                ),
-                                maxLines = 2,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                when {
-                                    entry.isPage -> "p ${entry.page}"
-                                    openable -> ""
-                                    else -> "not in this file"
-                                },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = palette.ink.copy(alpha = 0.45f)
-                            )
-                        }
-                    }
-                }
-
-                content is ReaderContent.Pages -> {
-                    Text(
-                        "This PDF carries no contents of its own.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = palette.ink.copy(alpha = 0.6f)
-                    )
-                    // The fallback: a page grid, because on a file with no
-                    // contents the only jumps there are ARE the pages.
-                    val chunks = (0 until content.pageCount).chunked(4)
-                    chunks.take(60).forEachIndexed { row, pages ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            pages.forEach { page ->
-                                Surface(
-                                    onClick = { onPickPage(page + 1) },
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = palette.surface,
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(
-                                        "Page ${page + 1}",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = palette.ink,
-                                        modifier = Modifier.padding(vertical = 9.dp)
-                                    )
-                                }
-                            }
-                            if (pages.size < 4) {
-                                Spacer(Modifier.weight((4 - pages.size).toFloat()))
-                            }
-                        }
-                        if (row == 59) {
-                            Text(
-                                "More in the file itself",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = palette.ink.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-                }
-
-                content is ReaderContent.Text -> Text(
-                    "This file has no chapter headings of its own.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = palette.ink.copy(alpha = 0.6f)
-                )
-
-                else -> Text(
-                    "Still opening the file\u2026",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = palette.ink.copy(alpha = 0.6f)
-                )
             }
         }
     }
@@ -3467,24 +3565,53 @@ private fun pdfTint(
  * turn it, which on a reader is the gesture that matters most. This waits until
  * a SECOND finger is down before it claims anything, so pinch is free and the
  * single-finger scroll and swipe are untouched.
+ *
+ * v394 — AND ONE FINGER MOVES A ZOOMED PAGE (user report: "when i pinch to zoom
+ * then i cant just drag to move with one finger"). While the content is in
+ * close, [zoomed] answers true and a single-finger drag is claimed as a PAN —
+ * the drag the pager would otherwise take for a page turn. The caller decides
+ * when the content is zoomed; the pan keeps arriving even past the content's
+ * edge, clamped there.
  */
-private fun Modifier.pinchToZoom(onZoom: (zoom: Float, pan: Offset) -> Unit): Modifier =
-    pointerInput(Unit) {
-        awaitEachGesture {
-            awaitFirstDown(requireUnconsumed = false)
-            do {
-                val event = awaitPointerEvent()
-                if (event.changes.count { it.pressed } >= 2) {
-                    val zoom = event.calculateZoom()
-                    val pan = event.calculatePan()
-                    if (zoom != 1f || pan != Offset.Zero) {
-                        onZoom(zoom, pan)
-                        event.changes.forEach { it.consume() }
-                    }
+private fun Modifier.pinchToZoom(
+    zoomed: () -> Boolean = { false },
+    onZoom: (zoom: Float, pan: Offset) -> Unit
+): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false)
+        var panning = false
+        var last: Offset? = null
+        do {
+            val event = awaitPointerEvent()
+            val pressed = event.changes.filter { it.pressed }
+            if (pressed.size >= 2) {
+                val zoom = event.calculateZoom()
+                val pan = event.calculatePan()
+                if (zoom != 1f || pan != Offset.Zero) {
+                    onZoom(zoom, pan)
+                    event.changes.forEach { it.consume() }
                 }
-            } while (event.changes.any { it.pressed })
-        }
+            } else if (pressed.size == 1 && zoomed()) {
+                // One finger on a zoomed page: a pan, claimed from the pager.
+                val position = pressed.first().position
+                val previous = last
+                if (panning && previous != null) {
+                    onZoom(1f, position - previous)
+                    pressed.forEach { it.consume() }
+                } else {
+                    // The first move after the pinch lets go re-anchors; a tap
+                    // (no real travel) is left alone for the page's own tap.
+                    panning = (position - (previous ?: position)).getDistance() > 12f
+                    if (panning) pressed.forEach { it.consume() }
+                }
+                last = position
+            } else {
+                panning = false
+                last = null
+            }
+        } while (event.changes.any { it.pressed })
     }
+}
 
 // @Composable because the default ink asks [isCurioDarkTheme] what the app is
 // wearing — one reader, two themes.
