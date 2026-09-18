@@ -1,4 +1,6 @@
 FIX:
+- Cabinet: the Notes shelf is your own notes now — the pages you wrote about a topic and your to-do lists, each opening the page it belongs to. The captures you saved under "notes" keep their own shelf, the Cupboard and search; they no longer share a shelf with your writing.
+- Journals: a journal list is journal days only — a to-do list and a note about a topic are no longer listed among the days, and the Personal shelf keeps the days too.
 - Books: the file you attach IS the book now — its own contents and its own page count are read out of it and written onto the book the moment it is wired, so the chapter rows and the length come from your copy instead of a lookup for someone else's edition. A file with no contents of its own leaves what was fetched where it was.
 - Books: chapters are looked up in the sources that actually answer — Open Library's own table of contents and Crossref first, Google Books asked last and only when a key is set (its keyless endpoint answers a quota error, checked live).
 - Reveal: the artwork, artist, painter and author sheets read in the app's own ink, instead of a pale accent drawn on a wash of that same accent — the least readable pair in the app, on the screen you open to read.

@@ -232,6 +232,22 @@ fun CabinetV2Content(navController: NavController) {
             PersonalRepositoryHolder.repo.observeBooks().collect { value = it }
         }
     }
+    // ── v389e — THE THREE KINDS OF PAGE, ON THE SHELF THAT OWNS EACH ──────
+    //
+    // The personal store keeps journals, notes on topics and to-do lists in one
+    // table, and the Personal shelf listed all three. The member's own split:
+    // PERSONAL keeps the journal days (a page per day), the NOTES collection
+    // takes the notes and the lists, and the journals list stops showing a
+    // to-do list among the days it is not (user request: "for topic notes dont
+    // add them in personal but add them in the notes collection, no more saved
+    // entires in notes, also todo goes inside notes too, no more in journa, the
+    // journal in personal keep sthe journals only").
+    val journalDays = remember(personalJournals) {
+        personalJournals.filter { !it.isTodo && !it.hasTopic }
+    }
+    val notePages = remember(personalJournals) {
+        personalJournals.filter { it.isTodo || it.hasTopic }
+    }
     val books = remember(AppPreferences.bookFavoritesState, AppPreferences.bookCoverUrlsState) {
         AppPreferences.getBookFavorites(context)
             .map { name -> V2Liked(name, V2Kind.BOOK, findLikedTopic(V2Kind.BOOK, name)) }
@@ -303,7 +319,11 @@ fun CabinetV2Content(navController: NavController) {
         collections.filterNot { it.id in seededShelfIds }
     }
     val allLikes = remember(books, albums, series) { books + albums + series }
-    val noteEntries = remember(entries) { entries.filter { it.format in noteFormats } }
+    // v389e — the ARCHIVE's note-formatted captures used to be `noteEntries`,
+    // and they were the whole of the Notes shelf. That shelf is the member's own
+    // notes now (see `notePages`), so the archive's ones are read where they have
+    // always been read as entities — the Saved shelf, the Cupboard, search and
+    // Everything — and no longer by a shelf that is about writing.
     // v3xx34 — the add-sheet's LIGHTWEIGHT projection (id + display text +
     // format glyph), computed once. The picker never carries full
     // [CurioEntry] objects — their capture payloads are what made the old
@@ -398,8 +418,8 @@ fun CabinetV2Content(navController: NavController) {
         readingBooks.count { it.title.trim().lowercase() !in saved }
     }
     val shelfCounts = remember(
-        allLikes.size, likedTopics.size, entries.size, noteEntries.size, seededById,
-        personalJournals.size, personalBooks.size, readingNowExtra
+        allLikes.size, likedTopics.size, entries.size, notePages.size, seededById,
+        journalDays.size, personalBooks.size, readingNowExtra
     ) {
         mapOf(
             V2ShelfId.FAVORITES to likedTopics.size,
@@ -408,10 +428,11 @@ fun CabinetV2Content(navController: NavController) {
             V2ShelfId.WANT_TO_READ to (seededById["shelf:want-to-read"]?.members?.size ?: 0),
             V2ShelfId.SAVED to entries.size,
             V2ShelfId.COMPLETED to likedTopics.size,
-            V2ShelfId.NOTES to noteEntries.size,
-            // v387 — Personal counts the WRITING now (journals + books); its
-            // saved members are still counted on the collection's own door.
-            V2ShelfId.PERSONAL to (personalJournals.size + personalBooks.size)
+            // v389e — Notes counts the member's own notes and lists; Personal
+            // counts the journal days and the books (the same split the two
+            // shelves themselves use).
+            V2ShelfId.NOTES to notePages.size,
+            V2ShelfId.PERSONAL to (journalDays.size + personalBooks.size)
         )
     }
 
@@ -526,10 +547,13 @@ fun CabinetV2Content(navController: NavController) {
             }
         }
     }
-    val visibleIds = remember(openLevel, shownEntries, entries, noteEntries) {
+    val visibleIds = remember(openLevel, shownEntries, entries) {
         when (openLevel) {
             SHELF_LEVEL_SAVED -> entries.map { it.id }.toSet()
-            SHELF_LEVEL_NOTES -> noteEntries.map { it.id }.toSet()
+            // v389e — the Notes collection holds the member's own pages (topic
+            // notes, to-do lists), so there is nothing of the ARCHIVE to select
+            // there: its rows open a page rather than joining a selection.
+            SHELF_LEVEL_NOTES -> emptySet()
             "everything" -> shownEntries.map { it.id }.toSet()
             "" -> entries.map { it.id }.toSet() // home Saved-entries section
             else -> emptySet()
@@ -607,9 +631,15 @@ fun CabinetV2Content(navController: NavController) {
         openLevel == SHELF_LEVEL_FAVORITES -> "${likedTopics.size} liked topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_COMPLETED -> "${likedTopics.size} completed topic${if (likedTopics.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
-        openLevel == SHELF_LEVEL_NOTES -> "${noteEntries.size} notes & voice captures"
+        openLevel == SHELF_LEVEL_NOTES -> buildString {
+            val notes = notePages.count { !it.isTodo }
+            val todos = notePages.count { it.isTodo }
+            append(if (notes == 1) "1 note" else "$notes notes")
+            append(" · ")
+            append(if (todos == 1) "1 list" else "$todos lists")
+        }
         openLevel == SHELF_LEVEL_PERSONAL -> buildString {
-            append(if (personalJournals.size == 1) "1 journal" else "${personalJournals.size} journals")
+            append(if (journalDays.size == 1) "1 journal" else "${journalDays.size} journals")
             append(" · ")
             append(if (personalBooks.size == 1) "1 book" else "${personalBooks.size} books")
         }
@@ -844,9 +874,13 @@ fun CabinetV2Content(navController: NavController) {
                         ) { launchSingleTop = true }
                     }
                 )
-                // v3xx50 — the saved/notes shelves hold the same archive, so
-                // they hold the same skeleton instead of an empty verdict.
-                (openLevel == SHELF_LEVEL_SAVED || openLevel == SHELF_LEVEL_NOTES) && !archiveReady ->
+                // v3xx50 — the saved shelf holds the same archive, so it holds
+                // the same skeleton instead of an empty verdict.
+                //
+                // v389e — NOTES IS NOT THAT SHELF ANY MORE: it lists the
+                // member's own notes and to-do lists, so it waits on the PERSONAL
+                // store and not on the capture archive (see the shelf below).
+                openLevel == SHELF_LEVEL_SAVED && !archiveReady ->
                     v2SkeletonItems(count = skeletonCount)
                 openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
                     title = "Saved entries",
@@ -871,33 +905,46 @@ fun CabinetV2Content(navController: NavController) {
                     },
                     onLikedMore = { coverSourceItem = it }
                 )
-                openLevel == SHELF_LEVEL_NOTES -> v2VirtualShelfItems(
-                    title = "Notes",
-                    likes = emptyList(),
-                    entries = noteEntries,
+                // ── v389e — THE NOTES COLLECTION ─────────────────────────
+                //
+                // This shelf held the capture entries filed under "notes" (the
+                // saves from the field). It is the member's NOTES now: the pages
+                // written about a topic and the to-do lists, which are the two
+                // things they write that are neither a journal day nor a book.
+                // The saved captures are not deleted and not hidden elsewhere —
+                // they keep their own shelf, the Cupboard, search and Everything
+                // (user decision: "Replaced by the notes and lists … saved
+                // capture entries stop appearing on that shelf").
+                openLevel == SHELF_LEVEL_NOTES -> v2PersonalWritingItems(
+                    journals = notePages,
+                    books = emptyList(),
                     searchQuery = searchQuery,
-                    selectedEntryIds = selectedEntryIds,
-                    selectionMode = selectionMode,
-                    onOpenLiked = { item -> item.open(navController) },
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
+                    savedMemberCount = 0,
+                    onOpenJournal = { id ->
+                        val page = notePages.firstOrNull { it.id == id }
+                        navController.navigate(
+                            page?.let { personalRouteFor(it) } ?: CurioRoutes.entryDetail(id)
+                        ) { launchSingleTop = true }
                     },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    }
+                    onOpenBook = {},
+                    // The heading is the shelf's OWN name, and the shelf is the
+                    // whole list: it leads nowhere rather than to the journals
+                    // list, which is a different set of pages.
+                    onOpenAllJournals = {},
+                    onOpenShelf = {},
+                    onOpenSavedMembers = {},
+                    headings = "Notes",
+                    unit = "notes",
+                    emptyTitle = "Notes on a topic, and your to-do lists",
+                    emptyDoors = false
                 )
                 // v387 — the PERSONAL shelf: journals + books, each in its
                 // own small view, with the collection's saved members one tap
                 // away at the foot (nothing that lived here was removed).
                 openLevel == SHELF_LEVEL_PERSONAL -> v2PersonalWritingItems(
-                    journals = personalJournals,
+                    // v389e — the days only: a note and a list live in the Notes
+                    // collection (see `journalDays`).
+                    journals = journalDays,
                     books = personalBooks,
                     searchQuery = searchQuery,
                     savedMemberCount = builtInShelves

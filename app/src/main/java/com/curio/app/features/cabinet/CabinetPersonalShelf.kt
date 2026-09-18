@@ -69,7 +69,24 @@ internal fun LazyGridScope.v2PersonalWritingItems(
     onOpenBook: (String) -> Unit,
     onOpenAllJournals: () -> Unit,
     onOpenShelf: () -> Unit,
-    onOpenSavedMembers: () -> Unit
+    onOpenSavedMembers: () -> Unit,
+    /**
+     * v389e — WHAT THIS LIST OF PAGES IS CALLED.
+     *
+     * The Personal shelf was the only caller when this was written, so its
+     * heading, its unit and its empty state were baked in as "Journals" / "pages".
+     * The NOTES collection now reuses the same tiles for the pages that are not
+     * journal days (a note on a topic, a to-do list), and it has to say its own
+     * name (user request: "for topic notes dont add them in personal but add them
+     * in the notes collection … and todo goes inside notes too, no more in
+     * journa").
+     */
+    headings: String = "Journals",
+    unit: String = "pages",
+    emptyTitle: String = "Your own writing lives here",
+    /** The empty card's two doors are the JOURNAL ones — a collection of notes
+     *  has no shelf of books to send anyone to, so it turns them off. */
+    emptyDoors: Boolean = true
 ) {
     val needle = searchQuery.trim().lowercase()
     fun journalMatches(journal: PersonalNoteEntity): Boolean =
@@ -89,7 +106,9 @@ internal fun LazyGridScope.v2PersonalWritingItems(
             PersonalShelfEmpty(
                 hasAny = journals.isNotEmpty() || books.isNotEmpty(),
                 onOpenAllJournals = onOpenAllJournals,
-                onOpenShelf = onOpenShelf
+                onOpenShelf = onOpenShelf,
+                title = emptyTitle,
+                doors = emptyDoors
             )
         }
         if (savedMemberCount > 0) {
@@ -109,8 +128,8 @@ internal fun LazyGridScope.v2PersonalWritingItems(
     if (shownJournals.isNotEmpty()) {
         item(key = "personal-journals-head", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
             PersonalShelfHeading(
-                title = "Journals",
-                caption = if (journals.size == 1) "1 page" else "${journals.size} pages",
+                title = headings,
+                caption = if (journals.size == 1) "1 ${unit.dropLast(1)}" else "${journals.size} $unit",
                 onClick = onOpenAllJournals
             )
         }
@@ -350,7 +369,11 @@ private fun BookShelfTile(book: PersonalBookEntity, onClick: () -> Unit) {
 private fun PersonalShelfEmpty(
     hasAny: Boolean,
     onOpenAllJournals: () -> Unit,
-    onOpenShelf: () -> Unit
+    onOpenShelf: () -> Unit,
+    /** v389e — the empty card's own words, for the collection that is not the
+     *  Personal shelf (see v2PersonalWritingItems). */
+    title: String = "Your own writing lives here",
+    doors: Boolean = true
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     Surface(
@@ -360,25 +383,27 @@ private fun PersonalShelfEmpty(
     ) {
         Column(Modifier.padding(20.dp)) {
             Text(
-                if (hasAny) "Nothing matches that search" else "Your own writing lives here",
+                if (hasAny) "Nothing matches that search" else title,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.SemiBold
                 ),
                 color = ink
             )
-            Spacer(Modifier.height(14.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PersonalShelfPill(
-                    glyph = CurioIcons.Note,
-                    label = "Journals",
-                    onClick = onOpenAllJournals
-                )
-                PersonalShelfPill(
-                    glyph = CurioIcons.MenuBook,
-                    label = "My shelf",
-                    onClick = onOpenShelf
-                )
+            if (doors) {
+                Spacer(Modifier.height(14.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PersonalShelfPill(
+                        glyph = CurioIcons.Note,
+                        label = "Journals",
+                        onClick = onOpenAllJournals
+                    )
+                    PersonalShelfPill(
+                        glyph = CurioIcons.MenuBook,
+                        label = "My shelf",
+                        onClick = onOpenShelf
+                    )
+                }
             }
         }
     }

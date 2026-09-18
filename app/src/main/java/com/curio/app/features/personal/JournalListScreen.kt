@@ -74,10 +74,22 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun JournalListScreen(navController: NavController) {
-    val journals by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
+    // ── v389e — DAYS ONLY ─────────────────────────────────────────────
+    //
+    // The personal store keeps journals, notes on topics and to-do lists in one
+    // table, and this list used to show all three — a to-do list sitting among
+    // the days it is not, and a note about a topic in a list about a day's
+    // feelings. The list is the JOURNAL's: the pages that are neither live in the
+    // Notes collection in the Cabinet (user request: "the journal in personal
+    // keep sthe journals only … also todo goes inside notes too, no more in
+    // journa").
+    val pages by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
         runCatching {
             PersonalRepositoryHolder.repo.observeJournals().collect { value = it }
         }
+    }
+    val journals = remember(pages) {
+        pages.filter { !it.isTodo && !it.hasTopic }
     }
     var pendingDelete by remember { mutableStateOf<PersonalNoteEntity?>(null) }
     val scope = rememberCoroutineScope()
