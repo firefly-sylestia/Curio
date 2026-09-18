@@ -370,6 +370,11 @@ fun TopicRevealScreen(
     // surfaces a pill whose action opens the collection picker; the topic
     // is pinned into the chosen collection.
     var showFileToPill by remember { mutableStateOf(false) }
+    // v389d — the AUTHOR sheet: the name under a book's title opens their other
+    // works (Open Library, keyless). Its own state, so the book sheet underneath
+    // keeps its place and dismissing the author's shelf comes back to it.
+    var authorSheetName by remember { mutableStateOf<String?>(null) }
+    // v388 — the file-to-collection flow (see the sheet at the foot of this file)
     var showFileToSheet by remember { mutableStateOf(false) }
     // v371 — the topic SHARE sheet + chapter-note sharing live at FUNCTION
     // level: the Book Notes sheet (rendered later in this composable) opens
@@ -1285,11 +1290,21 @@ fun TopicRevealScreen(
                 pendingChapterShare = Triple(chNum, noteText, spans)
                 showShareSheet = true
             },
+            onOpenAuthor = { name -> authorSheetName = name },
             onDismiss = {
                 showSynopsisDialog = false
                 selectedChapter = null
             }
         )
+
+        // The author's own shelf, over the book's — dismissing it comes back.
+        authorSheetName?.let { name ->
+            AuthorWorksSheet(
+                cat = cat,
+                author = name,
+                onDismiss = { authorSheetName = null }
+            )
+        }
     }
 
     // v332 — the album track-list UI mirrors the book notes sheet: one
@@ -3291,6 +3306,9 @@ private fun BookNotesSheet(
     // chapter's note pre-seeded as the Chapter review text. v375 — the
     // note's rich runs (spans) ride along so formatting survives.
     onShareNote: (chapterNumber: Int, noteText: String, spans: List<TextSpan>) -> Unit = { _, _, _ -> },
+    // v389d — the author's name in this sheet's header opens their written
+    // works (the author sheet). A no-op default keeps every other caller.
+    onOpenAuthor: (String) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -3541,13 +3559,34 @@ private fun BookNotesSheet(
                         overflow = TextOverflow.Ellipsis
                     )
                     topic.byline.takeIf { it.isNotBlank() }?.let { byline ->
-                        Text(
-                            byline,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        // v389d — THE AUTHOR IS A DOOR ("author button sheet with
+                        // authors written books"): the name under the title opens
+                        // their other books, wearing the small book glyph so the
+                        // tap is discoverable rather than hidden.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .clickable { onOpenAuthor(byline) }
+                        ) {
+                            Text(
+                                byline,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = ink.copy(alpha = 0.85f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            CurioIcon(
+                                CurioIcons.MenuBook,
+                                "Their written works",
+                                tint = ink.copy(alpha = 0.7f),
+                                size = 13.dp
+                            )
+                        }
                     }
                     // v355 — the rating sits just below the author name: the
                     // fetched Google Books average AND the user's own rating
@@ -4286,7 +4325,7 @@ private fun BookSynopsisAccordion(
  * different color than the cover-tinted sheet.
  */
 @Composable
-private fun NotesSheetTopHairline(accent: Color) {
+internal fun NotesSheetTopHairline(accent: Color) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

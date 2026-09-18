@@ -21,6 +21,7 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Books: the author under a book's title is a door now — tap it and their written works open in their own sheet (every other book Open Library knows them for, with covers and first publication years), on the same keyless source the rest of the app already reads.
 - Setup: every artwork, chapter and author source the sheets read now has its free tier written down in `.env.example` — which ones need no key at all (Open Library, iTunes, TVMaze, Jikan, MusicBrainz, Cover Art Archive) and which three buy more when set (Google Books, LibraryThing, Spotify).
 - Reading: tap links in journal pages — URLs are detected and underlined in the read-only view, and tap them to open in the browser.
 - Reading: the selection bar is opaque now — highlight colours and actions sit on a solid surface that matches the reader's skin, instead of a near-transparent wash.

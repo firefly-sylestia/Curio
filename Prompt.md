@@ -50,11 +50,27 @@ select text is bad it selects the whole page instead of just the text i wnt to s
   keyless and the three optional keys (Google Books, LibraryThing, Spotify) plus the
   Supabase and account-site values.
 
+### Also this batch — the author's shelf (`AuthorWorks.kt`)
+
+- **The author is a door.** The name under a book's title in the book sheet now opens
+  `AuthorWorksSheet`: Open Library's `search/authors.json` resolves the name to the
+  author's own `OL…A` id (an exact name beats a partial one), then
+  `authors/<id>/works.json` lists their works with covers and first publication years.
+  The sheet wears the same anatomy as every other one (top hairline, header, the list),
+  keeps an in-process cache per name — misses included — so reopening never re-asks, and
+  degrades to a "Search Open Library" door when the name is unknown.
+- `NotesSheetTopHairline` became `internal` so the new sheet can wear the same hairline
+  instead of a copy of it.
+
 ### Still open (from the pending prompt, unchanged)
 
-- The artwork sheet and the author sheet (an author's written works).
+- The ARTWORK sheet — the ask ("add artwork button sheet too") does not say what it
+  should show or from which source, and the app has no artwork provider at all today
+  (the ARTWORKS lane reads no API). Asked rather than guessed.
 - More browsed-book chapter numbers/titles beyond the Open Library + Google Books pair.
 - The voice/photo carry's remaining placement glitches.
+- The small-print photo with text beside it (the side-by-side pairing shipped; the
+  "text in the space remaining" half did not).
 
 ## Request (2026-09-17, batch H — the reader's last gaps closed)
 
