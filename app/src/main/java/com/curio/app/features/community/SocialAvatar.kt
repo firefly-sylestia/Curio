@@ -928,6 +928,56 @@ private fun DrawScope.hairLock(hair: Color, u: Float, x: Float, y: Float, width:
 // ── the character ───────────────────────────────────────────────────────────
 
 /**
+ * A fresh editorial-vector portrait system. Each ID gets a different crop,
+ * silhouette, facial geometry, and graphic accessory rather than recolouring
+ * the old character templates.
+ */
+private fun DrawScope.drawEditorialCharacter(art: AvatarArt, u: Float) {
+    val variant = art.kind.coerceIn(0, 19)
+    val shadow = darken(art.garment, 0.24f)
+    val hairShadow = darken(art.hair, 0.22f)
+    val face = Path().apply {
+        mv(31f, 28f, u); cu(27f, 40f, 29f, 58f, 50f, 63f, u)
+        cu(71f, 58f, 73f, 40f, 69f, 28f, u)
+        cu(61f, 19f, 39f, 19f, 31f, 28f, u); close()
+    }
+    drawRoundRect(shadow, o(17f, 68f, u), Size(s(66f, u), s(42f, u)), cr(22f, u))
+    drawPath(Path().apply { mv(17f, 82f, u); qd(35f, 67f, 50f, 75f, u); qd(67f, 67f, 83f, 82f, u); ln(83f, 100f, u); ln(17f, 100f, u); close() }, art.garment)
+    drawRoundRect(art.skin, o(43f, 57f, u), Size(s(14f, u), s(18f, u)), cr(5f, u))
+    drawPath(face, art.skin)
+    drawPath(Path().apply { mv(31f, 29f, u); cu(29f, 17f, 45f, 11f, 58f, 18f, u); cu(70f, 23f, 73f, 39f, 69f, 47f, u); qd(61f, 31f, 59f, 28f, u); qd(47f, 23f, 31f, 29f, u); close() }, art.hair)
+    val eyeY = 43f + (variant % 3) * 1.5f
+    val eyeGap = 8f + (variant % 4)
+    drawLine(INK, o(50f - eyeGap, eyeY, u), o(50f - 2f, eyeY + (variant % 2), u), s(1.7f, u), cap = StrokeCap.Round)
+    drawLine(INK, o(50f + 2f, eyeY + (variant % 2), u), o(50f + eyeGap, eyeY, u), s(1.7f, u), cap = StrokeCap.Round)
+    drawLine(darken(art.skin, 0.38f), o(50f, 45f, u), o(48f + (variant % 3), 50f, u), s(1.2f, u), cap = StrokeCap.Round)
+    drawLine(LIP, o(46f, 54f + (variant % 2), u), o(54f, 54f - (variant % 2), u), s(1.5f, u), cap = StrokeCap.Round)
+    drawLine(lighten(art.garment, 0.35f), o(32f, 82f, u), o(68f, 82f, u), s(1.4f, u), cap = StrokeCap.Round)
+    when (variant) {
+        0 -> drawArc(hairShadow, 18f, 180f, false, o(26f, 13f, u), Size(s(48f, u), s(24f, u)), style = Stroke(width = s(5f, u)))
+        1 -> drawCircle(art.garment, s(9f, u), o(74f, 25f, u))
+        2 -> drawLine(art.hair, o(28f, 24f, u), o(20f, 58f, u), s(6f, u), cap = StrokeCap.Round)
+        3 -> drawCircle(lighten(art.garment, 0.2f), s(7f, u), o(27f, 23f, u))
+        4 -> drawLine(art.garment, o(18f, 31f, u), o(82f, 31f, u), s(4f, u), cap = StrokeCap.Round)
+        5 -> drawCircle(art.garment, s(8f, u), o(25f, 49f, u))
+        6 -> drawLine(art.hair, o(70f, 25f, u), o(82f, 57f, u), s(5f, u), cap = StrokeCap.Round)
+        7 -> drawRoundRect(art.garment, o(34f, 13f, u), Size(s(32f, u), s(8f, u)), cr(4f, u))
+        8 -> drawCircle(lighten(art.garment, 0.2f), s(4f, u), o(28f, 38f, u))
+        9 -> drawLine(art.garment, o(22f, 69f, u), o(78f, 69f, u), s(4f, u), cap = StrokeCap.Round)
+        10 -> drawCircle(art.garment, s(9f, u), o(25f, 27f, u))
+        11 -> drawLine(art.hair, o(73f, 24f, u), o(78f, 58f, u), s(7f, u), cap = StrokeCap.Round)
+        12 -> drawRoundRect(art.garment, o(28f, 15f, u), Size(s(44f, u), s(9f, u)), cr(4f, u))
+        13 -> drawCircle(lighten(art.garment, 0.18f), s(5f, u), o(76f, 39f, u))
+        14 -> drawLine(art.garment, o(24f, 61f, u), o(76f, 61f, u), s(3f, u), cap = StrokeCap.Round)
+        15 -> drawRoundRect(art.garment, o(24f, 18f, u), Size(s(52f, u), s(6f, u)), cr(3f, u))
+        16 -> drawCircle(art.garment, s(8f, u), o(73f, 21f, u))
+        17 -> drawLine(art.hair, o(74f, 22f, u), o(88f, 12f, u), s(5f, u), cap = StrokeCap.Round)
+        18 -> drawLine(art.hair, o(27f, 30f, u), o(18f, 65f, u), s(5f, u), cap = StrokeCap.Round)
+        19 -> drawRoundRect(art.garment, o(25f, 12f, u), Size(s(50f, u), s(7f, u)), cr(3f, u))
+    }
+}
+
+/**
  * The character itself, in FOUR passes so every style reads as the same
  * drawing with a different silhouette:
  *
@@ -939,7 +989,10 @@ private fun DrawScope.hairLock(hair: Color, u: Float, x: Float, y: Float, width:
  *  4. [drawFace] + the face accessories (glasses, freckles, an earring).
  */
 private fun DrawScope.drawCharacter(art: AvatarArt, u: Float) {
-    // ── v392 — THE POSE ────────────────────────────────────────────────
+  drawEditorialCharacter(art, u)
+  return
+
+  // ── v392 — THE POSE ────────────────────────────────────────────────
     // The head assembly (the skull, what it wears, its hair and its face) turns
     // about the top of the neck; the shoulders and the neck itself stay put, the
     // way a real head turns on a body. The hair that falls BEHIND the head turns
