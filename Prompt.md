@@ -1,5 +1,22 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch W — the dock's menus keep the keyboard)
+
+Landed and pushed as `dbac568f`. The root cause was not the dock at all: Material's
+`DropdownMenu` opens a FOCUSABLE popup by default, and a focusable popup pulls the window focus off
+the text field — which closes the IME — and the dock (riding the IME inset in the page, on a blur
+grace in Save your take) folded away with it. `PopupProperties(focusable = false)` is the fix the
+rich-text editor's own floating bar already used; it is now applied to the writing dock's font, pen
+and bullet menus, the print's size menu, and by default to every `CurioDropdownMenu` in the app
+(the Save-your-take dock's paper/colour and size menus go through it). Nothing in any of these
+menus needs the keyboard, so non-focusable costs nothing.
+
+Also noted while reading the dock: a plain tool TAP never took focus itself (`PersonalToolButton` is
+a Surface with `combinedClickable`, no `clearFocus`), so the old "tapping a tool hides the
+keyboard" report was the MENUS, not the buttons — which is why it only reproduced on font, pen,
+bullet, paper and size.
+
+
 ## Request (2026-09-18, batch V — anime as series, TMDB, the read pair, and the PDF door)
 
 Landed and pushed on `main` across `2bb6906d`, `b76c64e1`, `be219100` and `bb7a1230`.
