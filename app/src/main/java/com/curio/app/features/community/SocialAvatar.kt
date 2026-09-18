@@ -1307,6 +1307,25 @@ private fun DrawScope.drawEditorialCharacter(art: AvatarArt, u: Float) {
         }
     }
 
+    // Continuous scalp foundation.
+    //
+    // Every hairstyle starts from one connected mass. The head is painted over
+    // this foundation below, so the foundation only peeks out where real hair
+    // should exist: crown, temples and the sides of the skull. This prevents the
+    // old "floating hair pieces with skin-colored gaps" look.
+    outlinedPath(hair) {
+        mv(25f, 45f, u)
+        cu(22f, 31f, 29f, 18f, 42f, 15.5f, u)
+        cu(50f, 13f, 58f, 15f, 65f, 20f, u)
+        cu(73f, 26f, 77f, 36f, 75f, 48f, u)
+        cu(74f, 52f, 72f, 55f, 70f, 58f, u)
+        cu(67f, 48f, 66f, 39f, 61f, 32f, u)
+        cu(55f, 25f, 45f, 24f, 39f, 31f, u)
+        cu(33f, 39f, 33f, 49f, 30f, 58f, u)
+        cu(28f, 55f, 26f, 51f, 25f, 45f, u)
+        close()
+    }
+
     // A clean face sits inside the hair. The jaw is softer than the old
     // "circle + line" construction and the features are intentionally quiet.
     outlinedPath(skin) {
@@ -1476,6 +1495,48 @@ private fun DrawScope.drawEditorialCharacter(art: AvatarArt, u: Float) {
         }
     }
 
+    // Connected temple locks.
+    //
+    // These sit on TOP of the face edge and connect the crown to the lower hair
+    // mass. They are narrow enough not to cover the eyes, but make every style
+    // read as hair growing from the scalp instead of separate stickers.
+    val sideLockLength = when (kind) {
+        0, 1, 2, 3, 4, 5, 6, 7, 9 -> 9f
+        8, 10, 11, 13, 14, 15, 16, 18, 19 -> 25f
+        12, 17 -> 31f
+        else -> 18f
+    }
+    path(hair) {
+        mv(29.5f, 35f, u)
+        cu(27f, 43f, 28f, 51f, 30.5f, 57f + sideLockLength * 0.10f, u)
+        cu(32f, 59f + sideLockLength * 0.08f, 34f, 57f, 34f, 52f, u)
+        cu(33f, 45f, 33f, 39f, 35f, 34f, u)
+        close()
+    }
+    path(hair) {
+        mv(70.5f, 35f, u)
+        cu(73f, 43f, 72f, 51f, 69.5f, 57f + sideLockLength * 0.10f, u)
+        cu(68f, 59f + sideLockLength * 0.08f, 66f, 57f, 66f, 52f, u)
+        cu(67f, 45f, 67f, 39f, 65f, 34f, u)
+        close()
+    }
+    if (kind in setOf(8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)) {
+        path(hair) {
+            mv(30.5f, 48f, u)
+            cu(28f, 58f, 28.5f, 69f, 31.5f, 78f, u)
+            cu(33f, 82f, 36f, 80f, 36f, 75f, u)
+            cu(35f, 64f, 36f, 55f, 37f, 49f, u)
+            close()
+        }
+        path(hair) {
+            mv(69.5f, 48f, u)
+            cu(72f, 58f, 71.5f, 69f, 68.5f, 78f, u)
+            cu(67f, 82f, 64f, 80f, 64f, 75f, u)
+            cu(65f, 64f, 64f, 55f, 63f, 49f, u)
+            close()
+        }
+    }
+
     // Subtle hair light keeps the colour from reading like a flat SVG fill.
     when (kind) {
         0, 1, 2, 4, 5, 8, 9, 10, 11, 13, 14, 18, 19 ->
@@ -1488,41 +1549,110 @@ private fun DrawScope.drawEditorialCharacter(art: AvatarArt, u: Float) {
             hairStrand(34f, 24f, 44f, 19f, 55f, 20f, 65f, 25f)
     }
 
-    // Face: two slightly varied eye shapes, a tiny nose and a soft mouth.
-    val eyeY = when (kind % 5) {
-        0 -> 45f
-        1 -> 44f
-        2 -> 46f
-        3 -> 45f
-        else -> 44.5f
+    // Proper eyes: soft sclera, coloured iris, pupil, one clean catchlight,
+    // an upper lid and a restrained brow. The eye shape varies by character,
+    // while the construction stays consistent enough to feel like one Curio family.
+    val eyeY = when (kind % 4) {
+        0 -> 46.2f
+        1 -> 45.7f
+        2 -> 46.6f
+        else -> 45.9f
     }
-    val eyeScale = when (kind % 4) {
-        0 -> 1.0f
-        1 -> 0.90f
-        2 -> 1.08f
-        else -> 0.95f
+    val eyeWidth = when (kind % 5) {
+        0 -> 4.8f
+        1 -> 4.4f
+        2 -> 5.1f
+        3 -> 4.6f
+        else -> 4.9f
     }
+    val eyeHeight = when (kind % 4) {
+        0 -> 3.35f
+        1 -> 2.9f
+        2 -> 3.7f
+        else -> 3.15f
+    }
+    val irisColor = when (kind % 5) {
+        0 -> Color(0xFF59443B)
+        1 -> Color(0xFF49635A)
+        2 -> Color(0xFF5A4D70)
+        3 -> Color(0xFF76523C)
+        else -> Color(0xFF43586B)
+    }
+    val browColor = darken(hair, 0.38f)
 
-    listOf(42.5f to -1f, 57.5f to 1f).forEach { (x, side) ->
-        val ew = 3.7f * eyeScale
-        val eh = 4.7f * eyeScale
-        drawOval(
-            hairDark,
-            topLeft = o(x - ew, eyeY - eh, u),
-            size = Size(s(ew * 2f, u), s(eh * 2f, u))
-        )
-        drawCircle(Color.White.copy(alpha = 0.92f), s(1.35f, u), o(x - 1f, eyeY - 1.6f, u))
-        if (kind % 3 == 0) {
-            drawLine(
-                INK.copy(alpha = 0.70f),
-                o(x - ew - 0.6f, eyeY - eh + 0.8f, u),
-                o(x + side * (ew + 1.2f), eyeY - eh + 1.2f, u),
-                strokeWidth = s(1.15f, u),
-                cap = StrokeCap.Round
+    listOf(42.4f to -1f, 57.6f to 1f).forEach { (x, side) ->
+        // Almond-shaped white of the eye.
+        val sclera = Path().apply {
+            mv(x - eyeWidth, eyeY, u)
+            cu(
+                x - eyeWidth * 0.55f, eyeY - eyeHeight,
+                x + eyeWidth * 0.55f, eyeY - eyeHeight,
+                x + eyeWidth, eyeY, u
             )
+            cu(
+                x + eyeWidth * 0.55f, eyeY + eyeHeight * 0.78f,
+                x - eyeWidth * 0.55f, eyeY + eyeHeight * 0.78f,
+                x - eyeWidth, eyeY, u
+            )
+            close()
         }
+        drawPath(sclera, Color(0xFFFFF9F1))
+
+        // Iris is deliberately smaller than the old dark oval, leaving visible
+        // sclera so the eyes read as eyes rather than two ink blobs.
+        val irisR = eyeHeight * 0.86f
+        drawCircle(irisColor, s(irisR, u), o(x + side * 0.25f, eyeY + 0.15f, u))
+        drawCircle(INK.copy(alpha = 0.92f), s(irisR * 0.47f, u), o(x + side * 0.25f, eyeY + 0.25f, u))
+        drawCircle(Color.White.copy(alpha = 0.96f), s(irisR * 0.30f, u), o(x - 1.05f, eyeY - 1.05f, u))
+
+        // Upper eyelid: organic rather than a hard horizontal bar.
+        drawPath(
+            Path().apply {
+                mv(x - eyeWidth, eyeY, u)
+                cu(
+                    x - eyeWidth * 0.48f, eyeY - eyeHeight * 1.08f,
+                    x + eyeWidth * 0.48f, eyeY - eyeHeight * 1.08f,
+                    x + eyeWidth, eyeY, u
+                )
+            },
+            INK.copy(alpha = 0.78f),
+            style = Stroke(width = s(1.35f, u), cap = StrokeCap.Round)
+        )
+
+        // A tiny lower lid, only on the outside half.
+        drawPath(
+            Path().apply {
+                mv(x + side * eyeWidth * 0.34f, eyeY + eyeHeight * 0.55f, u)
+                qd(
+                    x + side * eyeWidth * 0.76f,
+                    eyeY + eyeHeight * 0.72f,
+                    x + side * eyeWidth,
+                    eyeY + eyeHeight * 0.12f,
+                    u
+                )
+            },
+            INK.copy(alpha = 0.25f),
+            style = Stroke(width = s(0.85f, u), cap = StrokeCap.Round)
+        )
+
+        // Individual brow, slightly lifted toward the centre.
+        drawPath(
+            Path().apply {
+                mv(x - eyeWidth * 0.82f, eyeY - 6.1f, u)
+                qd(
+                    x,
+                    eyeY - 7.5f - (kind % 3) * 0.25f,
+                    x + eyeWidth * 0.82f,
+                    eyeY - 6.3f,
+                    u
+                )
+            },
+            browColor.copy(alpha = 0.82f),
+            style = Stroke(width = s(1.35f, u), cap = StrokeCap.Round)
+        )
     }
 
+    // Small nose bridge shadow and a natural mouth.
     drawPath(
         Path().apply {
             mv(48.2f, 53f, u)
@@ -1534,11 +1664,12 @@ private fun DrawScope.drawEditorialCharacter(art: AvatarArt, u: Float) {
 
     drawPath(
         Path().apply {
-            mv(45.8f, 58.2f, u)
-            qd(50f, 60.5f, 54.2f, 58.2f, u)
+            mv(46f, 58.7f, u)
+            qd(48.1f, 60f, 50f, 59.2f, u)
+            qd(51.9f, 60f, 54f, 58.7f, u)
         },
-        LIP.copy(alpha = 0.72f),
-        style = Stroke(width = s(1.25f, u), cap = StrokeCap.Round)
+        LIP.copy(alpha = 0.68f),
+        style = Stroke(width = s(1.15f, u), cap = StrokeCap.Round)
     )
 
     // Two restrained cheek touches. They disappear naturally at small sizes.
@@ -1558,29 +1689,7 @@ private fun DrawScope.drawEditorialCharacter(art: AvatarArt, u: Float) {
  *  4. [drawFace] + the face accessories (glasses, freckles, an earring).
  */
 private fun DrawScope.drawCharacter(art: AvatarArt, u: Float) {
-  drawEditorialCharacter(art, u)
-  return
-
-  // ── v392 — THE POSE ────────────────────────────────────────────────
-    // The head assembly (the skull, what it wears, its hair and its face) turns
-    // about the top of the neck; the shoulders and the neck itself stay put, the
-    // way a real head turns on a body. The hair that falls BEHIND the head turns
-    // with it (a bob cannot stay level while the head inside it tilts), and the
-    // whole character sits [AvatarArt.lean] units off the disc's centre. The
-    // pivot sits INSIDE the neck, so the chin swings while the throat stays
-    // joined — no seam appears at the collar on any of the twenty-eight.
-    val neckPivot = o(50f, 63f, u)
-    val offCentre = s(art.lean, u)
-    rotate(degrees = art.tilt, pivot = neckPivot) {
-        translate(left = offCentre) { drawHairBack(art, u) }
-    }
-    translate(left = offCentre) {
-        drawShoulders(art, u)
-        drawNeck(art, u)
-    }
-    rotate(degrees = art.tilt, pivot = neckPivot) {
-        translate(left = offCentre) { drawHeadAssembly(art, u) }
-    }
+    drawEditorialCharacter(art, u)
 }
 
 /**
