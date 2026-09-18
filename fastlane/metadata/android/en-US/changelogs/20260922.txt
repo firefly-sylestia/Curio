@@ -1,4 +1,6 @@
 FIX:
+- Books: an author's written works are kept on the device — the list the sheet showed last time is on screen in its first frame, offline included, and a lookup that failed is not remembered as "wrote nothing" for someone with a shelf full of books.
+- Releases: the writing page compiles again — the drag's auto-scroll imports the two things it calls and takes the pixel travel as a float.
 - Cabinet: the Notes shelf is your own notes now — the pages you wrote about a topic and your to-do lists, each opening the page it belongs to. The captures you saved under "notes" keep their own shelf, the Cupboard and search; they no longer share a shelf with your writing.
 - Journals: a journal list is journal days only — a to-do list and a note about a topic are no longer listed among the days, and the Personal shelf keeps the days too.
 - Books: the file you attach IS the book now — its own contents and its own page count are read out of it and written onto the book the moment it is wired, so the chapter rows and the length come from your copy instead of a lookup for someone else's edition. A file with no contents of its own leaves what was fetched where it was.
@@ -57,6 +59,7 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Books: a work in an author's sheet opens IN the app — its cover, its year, what Open Library says about it and its subject headings, with the work's own page a tap away in the corner and a pill that files it onto My shelf as a book you can read and write in.
 - Writing: a photo can be a Portrait — the tall frame a phone picture of a person or a doorway actually is, for the vertical photos the other three sizes had to crop.
 - Art: the artwork, artist, painter and author cards on the reveal wear their own picture — an artwork shows itself (the Met's public-domain image, then Wikipedia's), an artist or a painter shows a work the Met attributes to them, and an author shows their portrait (Wikipedia's lead image for the name, or the cover of the first of their books when there is no photograph). The resolved picture is remembered per topic, so the sheet that opens on a tap is painted from the same one.
 - Art: an artwork, an artist and a painter open a sheet of their own — the work's record (its title, maker, date, medium, museum and a public-domain image from the Metropolitan Museum's open-access API, with Wikipedia's own words and its article as the words half), or, for an artist or a painter, the works the Met attributes to them. Both sources are keyless and free.

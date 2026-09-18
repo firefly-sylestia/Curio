@@ -20,6 +20,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -541,7 +543,10 @@ internal fun PersonalWritingPage(
                 if (towards < 0f && !pageScroll.canScrollBackward) continue
                 val before = pageScroll.value
                 pageScroll.scrollBy(towards)
-                val moved = pageScroll.value - before
+                // ScrollState measures in whole pixels while the drag is in
+                // floats, so the travel is taken as a float — as an Int the
+                // comparison and the hand-off below would not even compile.
+                val moved = (pageScroll.value - before).toFloat()
                 if (moved != 0f) {
                     editor.rowDrag.advanceBy(moved, editor.blockIds, editor.blockIds.lastIndex)
                 }

@@ -376,6 +376,10 @@ fun TopicRevealScreen(
     // place and dismissing the author's shelf comes back to it. The AUTHORS lane
     // opens the same sheet from its own section card.
     var authorSheetName by remember { mutableStateOf<String?>(null) }
+    // v389e — one of that author's works, opened OVER the author sheet when a row
+    // in it is tapped. Kept separate from [authorSheetName] so dismissing the
+    // work returns to the author's list rather than to the reveal.
+    var authorWorkSheet by remember { mutableStateOf<AuthorWork?>(null) }
     // v389d — the ART lanes' sheet: an artwork opens its own record (the Met +
     // Wikipedia), an artist or a painter opens the works the Met attributes to
     // them. Null = closed.
@@ -1405,8 +1409,26 @@ fun TopicRevealScreen(
         AuthorWorksSheet(
             cat = cat,
             author = name,
-            onDismiss = { authorSheetName = null }
+            onOpenWork = { work -> authorWorkSheet = work },
+            onDismiss = {
+                // The work's page belongs to the list underneath it: closing the
+                // list closes both, or the work would be left floating over the
+                // reveal with no way back to its author.
+                authorWorkSheet = null
+                authorSheetName = null
+            }
         )
+    }
+    // The work's own page, over its author's list.
+    authorSheetName?.let { name ->
+        authorWorkSheet?.let { work ->
+            AuthorWorkSheet(
+                cat = cat,
+                author = name,
+                work = work,
+                onDismiss = { authorWorkSheet = null }
+            )
+        }
     }
 
     val posterSheetTopic = resolved

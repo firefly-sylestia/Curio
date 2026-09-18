@@ -864,7 +864,6 @@ object AppPreferences {
         communityAdminRepliesState = replies
     }
 
-    // ── Resolved album/series sheet artwork URLs (v375) ─────────────────
     // Keyed "album|<topic name>" / "series|<topic name>". See KEY_SHEET_ART_URLS.
     fun getSheetArtUrls(context: Context): Map<String, String> {
         val raw = prefs(context).getString(KEY_SHEET_ART_URLS, null) ?: return emptyMap()
@@ -880,6 +879,44 @@ object AppPreferences {
         }.getOrDefault(emptyMap())
     }
 
+    // ── An author's written works, as fetched once (v389e) ─────────────
+    //
+    // The author sheet looks a person's books up on Open Library, keyless and
+    // free, and used to hold the answer only for the life of the process: open
+    // the sheet again tomorrow and it went looking a second time — and a lookup
+    // that failed answered "no books" for someone who has plenty (user request:
+    // "authors written work should save as cache"). The LIST is what is cached,
+    // not a verdict: only an answer with rows in it is written down, so a failure
+    // can never become a fact about the author.
+    //
+    // Stored as the raw JSON the fetcher produced, because the shape belongs to
+    // the reveal (`AuthorWork`) and this file owns no feature types.
+    private const val KEY_AUTHOR_WORKS = "author_works_json"
+
+    /** The JSON an author's works were fetched as, or null when never fetched. */
+    fun getAuthorWorksJson(context: Context, author: String): String? {
+        val key = author.trim().lowercase()
+        if (key.isBlank()) return null
+        val raw = prefs(context).getString(KEY_AUTHOR_WORKS, null) ?: return null
+        return runCatching {
+            org.json.JSONObject(raw).optString(key).takeIf { it.isNotBlank() }
+        }.getOrNull()
+    }
+
+    /** Keeps an author's works (ignores blanks, so a failure stores nothing). */
+    fun setAuthorWorksJson(context: Context, author: String, json: String) {
+        val key = author.trim().lowercase()
+        if (key.isBlank() || json.isBlank()) return
+        runCatching {
+            val raw = prefs(context).getString(KEY_AUTHOR_WORKS, null)
+            val root = if (raw.isNullOrBlank()) org.json.JSONObject()
+            else runCatching { org.json.JSONObject(raw) }.getOrDefault(org.json.JSONObject())
+            root.put(key, json)
+            prefs(context).edit().putString(KEY_AUTHOR_WORKS, root.toString()).apply()
+        }
+    }
+
+    // ── Resolved album/series sheet artwork URLs (v375) ─────────────────
     /** Remember the resolved artwork URL for a sheet (ignores blanks). */
     fun setSheetArtUrl(context: Context, key: String, url: String) {
         if (key.isBlank() || url.isBlank()) return

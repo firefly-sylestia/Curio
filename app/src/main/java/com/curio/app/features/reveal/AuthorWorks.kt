@@ -1,8 +1,11 @@
 package com.curio.app.features.reveal
 
 import android.net.Uri
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
@@ -30,14 +35,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -46,6 +54,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.PersonalBookEntity
+import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.data.newPersonalBookId
 import com.curio.app.data.openSearchUrl
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.theme.CurioIcon
@@ -58,6 +69,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
@@ -96,7 +108,16 @@ object AuthorWorksFetch {
     /** A name → its works (an empty list is a real answer, and is kept). */
     private val cache = ConcurrentHashMap<String, List<AuthorWork>>()
 
-    /** The author's works, best-effort; empty when the name is unknown. */
+    /**
+     * The works, in-process only — no device cache is read or written.
+     *
+     * This is what an ART CARD wants: it only needs one cover URL out of the
+     * list, and it already keeps its own copy of the URL it resolved (see
+     * [AppPreferences.setSheetArtUrl]). Letting a card write the whole book list
+     * into prefs would be storage for nothing, so the device cache belongs to
+     * [works] below, which the author sheet — the surface that actually shows
+     * the list — calls.
+     */
     internal suspend fun works(author: String): List<AuthorWork> = withContext(Dispatchers.IO) {
         val name = author.trim()
         if (name.isBlank()) return@withContext emptyList()
@@ -105,6 +126,160 @@ object AuthorWorksFetch {
         cache[name] = resolved
         resolved
     }
+
+    /**
+     * The author's works, best-effort; empty when the name is unknown.
+     *
+     * v389e — AND THE ANSWER IS KEPT ON THE DEVICE.
+     *
+     * The session map below only remembers a name while the app is running, so
+     * the sheet went looking again the next day (user request: "authors written
+     * work should save as cache"). The list is written down (see
+     * [AppPreferences.setAuthorWorksJson]) and read back as the FIRST answer, so
+     * the sheet opens with the books it showed last time and the lookup only ever
+     * refreshes them.
+     *
+     * Only an answer WITH ROWS is stored. A lookup that failed is not a fact
+     * about the author — a name Open Library is briefly unable to answer for must
+     * not be remembered as "wrote nothing" — so a failure falls back to whatever
+     * was cached and never overwrites it.
+     */
+    internal suspend fun works(context: android.content.Context, author: String): List<AuthorWork> =
+        withContext(Dispatchers.IO) {
+            val name = author.trim()
+            if (name.isBlank()) return@withContext emptyList()
+            cache[name]?.let { return@withContext it }
+            val resolved = runCatching { lookup(name) }.getOrDefault(emptyList())
+            if (resolved.isNotEmpty()) {
+                cache[name] = resolved
+                AppPreferences.setAuthorWorksJson(context, name, encode(resolved))
+                return@withContext resolved
+            }
+            val stored = stored(context, name)
+            if (stored.isNotEmpty()) cache[name] = stored
+            stored
+        }
+
+    /** What the device already knows about [author], without any network. */
+    internal fun stored(context: android.content.Context, author: String): List<AuthorWork> {
+        val name = author.trim()
+        if (name.isBlank()) return emptyList()
+        val json = AppPreferences.getAuthorWorksJson(context, name) ?: return emptyList()
+        return runCatching {
+            val array = org.json.JSONArray(json)
+            buildList {
+                for (index in 0 until array.length()) {
+                    val row = array.optJSONObject(index) ?: continue
+                    val title = row.optString("title")
+                    if (title.isBlank()) continue
+                    add(
+                        AuthorWork(
+                            key = row.optString("key"),
+                            title = title,
+                            year = row.optString("year"),
+                            coverUrl = row.optString("cover")
+                        )
+                    )
+                }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    /** The list as one small JSON array — the shape [stored] reads back. */
+    private fun encode(works: List<AuthorWork>): String = runCatching {
+        val array = org.json.JSONArray()
+        works.forEach { work ->
+            array.put(
+                JSONObject()
+                    .put("key", work.key)
+                    .put("title", work.title)
+                    .put("year", work.year)
+                    .put("cover", work.coverUrl)
+            )
+        }
+        array.toString()
+    }.getOrDefault("")
+
+    // ── ONE WORK, AS OPEN LIBRARY DESCRIBES IT (v389e) ────────────────────
+    //
+    // The author sheet's list gave a title and a year, and tapping a row left
+    // the app for a browser page. The member asked for the work to "open in the
+    // app with the fetched details", so the work's own record is read here —
+    // keyless, free, the same source as everything else — and the sheet renders
+    // it. A description in Open Library is either a string or an object with a
+    // `value` (both shapes are in the wild), so both are read.
+
+    /** One work's own facts, as the sheet shows them. */
+    internal data class WorkDetail(
+        val title: String,
+        val year: String,
+        val coverUrl: String,
+        /** The long word about the work — "" when Open Library has none. */
+        val about: String,
+        /** Subject headings, kept short: the first few are the useful few. */
+        val subjects: List<String>
+    )
+
+    /**
+     * A work's own record, memoised for the session like [works]. A miss is
+     * remembered too, so a work Open Library cannot describe is not asked about
+     * twice while the app is running.
+     */
+    internal suspend fun detail(work: AuthorWork): WorkDetail? = withContext(Dispatchers.IO) {
+        val key = work.key.trim()
+        if (key.isBlank()) return@withContext null
+        if (detailCache.containsKey(key)) return@withContext detailCache[key]
+        val json = httpGet("https://openlibrary.org$key.json")
+        if (json == null) {
+            detailCache[key] = null
+            return@withContext null
+        }
+        val parsed = runCatching {
+            val row = JSONObject(json)
+            val description = when (val raw = row.opt("description")) {
+                is String -> raw
+                is JSONObject -> raw.optString("value")
+                else -> ""
+            }.trim()
+            val subjects = runCatching {
+                val array = row.optJSONArray("subjects") ?: return@runCatching emptyList()
+                buildList {
+                    for (index in 0 until array.length()) {
+                        if (size >= 8) break
+                        val subject = array.optString(index).trim()
+                        // "Accessible book" and friends are library plumbing, not
+                        // subjects — they would be noise as chips.
+                        if (subject.isBlank() || subject.lowercase().contains("accessible")) continue
+                        add(subject)
+                    }
+                }
+            }.getOrDefault(emptyList())
+            val coverFromWork = runCatching {
+                val covers = row.optJSONArray("covers") ?: return@runCatching ""
+                for (index in 0 until covers.length()) {
+                    val id = covers.optInt(index, 0)
+                    if (id > 0) return@runCatching "https://covers.openlibrary.org/b/id/$id-L.jpg"
+                }
+                ""
+            }.getOrDefault("")
+            WorkDetail(
+                title = work.title.ifBlank {
+                    row.optString("title").trim()
+                },
+                year = work.year.ifBlank {
+                    row.optString("first_publish_date").take(4)
+                },
+                coverUrl = work.coverUrl.ifBlank { coverFromWork },
+                about = description,
+                subjects = subjects
+            )
+        }.getOrNull()
+        detailCache[key] = parsed
+        parsed
+    }
+
+    /** Memo for [detail] — a work key → its facts (null = asked, none found). */
+    private val detailCache = ConcurrentHashMap<String, WorkDetail?>()
 
     private fun lookup(name: String): List<AuthorWork> {
         val search = httpGet(
@@ -191,6 +366,7 @@ object AuthorWorksFetch {
 internal fun AuthorWorksSheet(
     cat: CurioCategory,
     author: String,
+    onOpenWork: (AuthorWork) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val accent = cat.themedAccent()
@@ -205,7 +381,14 @@ internal fun AuthorWorksSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val fetchConsent = AppPreferences.bookFetchEnabledState
-    var works by remember(author) { mutableStateOf<List<AuthorWork>?>(null) }
+    // v389e — THE DEVICE'S ANSWER OPENS THE SHEET, not a blank beat. The list
+    // that was written down the last time this author was looked up is read here
+    // (a prefs read inside `remember`, so once per author and not per frame) and
+    // the lookup below only refreshes it. That is the whole point of caching it:
+    // the sheet shows books on its first frame, offline included.
+    var works by remember(author) {
+        mutableStateOf(AuthorWorksFetch.stored(context, author).takeIf { it.isNotEmpty() })
+    }
     // v389d — THE PERSON'S OWN PICTURE, in the header (user request: "show the
     // author's portrait in the author sheet header, not just on the reveal
     // card"). The reveal card already resolved one and stored it under
@@ -217,7 +400,9 @@ internal fun AuthorWorksSheet(
         )
     }
     LaunchedEffect(author, fetchConsent) {
-        works = AuthorWorksFetch.works(author)
+        // `works()` itself falls back to the stored list when the lookup finds
+        // nothing, so this assignment can never blank a list already on screen.
+        works = AuthorWorksFetch.works(context, author)
         // The reveal card only looks a face up when cover fetching is ON, so
         // the sheet honours the same switch: with it off, whatever that card
         // cached is what shows and no new call goes out for a picture.
@@ -393,14 +578,12 @@ internal fun AuthorWorksSheet(
                 ) {
                     items(items = listed, key = { it.key.ifBlank { it.title } }) { work ->
                         Surface(
-                            onClick = {
-                                if (work.key.isNotBlank()) {
-                                    openSearchUrl(
-                                        context,
-                                        "https://openlibrary.org${work.key}"
-                                    )
-                                }
-                            },
+                            // v389e — THE TAP STAYS IN THE APP. This used to hand
+                            // the member to a browser; it now opens the work's own
+                            // page over this sheet (the member asked for exactly
+                            // that), and the browser is a quiet pill in there for
+                            // when the full Open Library page is what they want.
+                            onClick = { onOpenWork(work) },
                             shape = RoundedCornerShape(18.dp),
                             color = surface,
                             modifier = Modifier.fillMaxWidth()
@@ -469,6 +652,397 @@ internal fun AuthorWorksSheet(
                         }
                     }
                     item("author-end") { Spacer(Modifier.height(6.dp)) }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * ONE WORK'S OWN PAGE, IN THE APP (v389e).
+ *
+ * Tapping a row in the author sheet used to hand the member to a browser. The
+ * member asked for the opposite: "opening them should open them in the app with
+ * the fetched details". So the work opens here — its cover, its year, what Open
+ * Library says about it, and its subject headings — in the same sheet anatomy as
+ * the rest of the reveal (top hairline, header, one scroll), which also means it
+ * can be filed onto My shelf without leaving Curio.
+ *
+ * The shelf pill is deliberately the BOOK pill, not a collection toggle: a work
+ * you liked is something you intend to read, so it lands on My shelf as a book
+ * with its real author and cover, ready for chapters and notes (the same shape
+ * the book reveal's own pill writes). Adding is additive, never destructive —
+ * tapping twice does nothing rather than removing anything.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+internal fun AuthorWorkSheet(
+    cat: CurioCategory,
+    author: String,
+    work: AuthorWork,
+    onDismiss: () -> Unit
+) {
+    val accent = cat.themedAccent()
+    val ink = MaterialTheme.colorScheme.onSurface
+    val surface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    var detail by remember(work.key) { mutableStateOf<AuthorWorksFetch.WorkDetail?>(null) }
+    var looked by remember(work.key) { mutableStateOf(false) }
+    var onShelf by remember(work.key) { mutableStateOf(false) }
+    var aboutExpanded by remember(work.key) { mutableStateOf(true) }
+
+    LaunchedEffect(work.key) {
+        detail = AuthorWorksFetch.detail(work)
+        looked = true
+    }
+    // Whether this work is already on My shelf, so the pill opens in the right
+    // state instead of offering to add something that is already there.
+    LaunchedEffect(work.key) {
+        onShelf = withContext(Dispatchers.IO) {
+            runCatching {
+                PersonalRepositoryHolder.repo.books().any {
+                    it.title.trim().equals(work.title.trim(), ignoreCase = true)
+                }
+            }.getOrDefault(false)
+        }
+    }
+
+    val cover = detail?.coverUrl?.takeIf { it.isNotBlank() }
+        ?: work.coverUrl.takeIf { it.isNotBlank() }
+    val year = detail?.year?.takeIf { it.isNotBlank() } ?: work.year
+    val about = detail?.about?.takeIf { it.isNotBlank() }
+    val subjects = detail?.subjects.orEmpty()
+
+    fun shelve() {
+        if (onShelf) return
+        onShelf = true
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        val now = System.currentTimeMillis()
+        val shelfCover = cover.orEmpty()
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    PersonalRepositoryHolder.repo.saveBook(
+                        PersonalBookEntity(
+                            id = newPersonalBookId(),
+                            title = work.title,
+                            author = author,
+                            coverUrl = shelfCover,
+                            createdAtMillis = now,
+                            updatedAtMillis = now
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = cat.notesSheetContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = CurioContentMaxWidth)
+                .fillMaxHeight(0.92f)
+                .padding(bottom = 20.dp)
+        ) {
+            NotesSheetTopHairline(accent)
+            Spacer(Modifier.height(10.dp))
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    modifier = Modifier
+                        .width(66.dp)
+                        .height(96.dp)
+                        // Shadow first, then the fill/clip — a shadow after the
+                        // background paints its blur over the artwork
+                        // (AGENTS rule 11).
+                        .shadow(3.dp, RoundedCornerShape(10.dp))
+                ) {
+                    if (cover != null) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(cover)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = work.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(10.dp))
+                        )
+                    } else {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CurioIcon(CurioIcons.MenuBook, null, tint = ink.copy(alpha = 0.5f), size = 20.dp)
+                        }
+                    }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "WRITTEN WORK",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.4.sp
+                        ),
+                        color = ink
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        work.title,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = onSurface,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        buildString {
+                            append(author)
+                            if (year.isNotBlank()) append(" \u00b7 $year")
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Surface(
+                    onClick = { shelve() },
+                    shape = RoundedCornerShape(50),
+                    // Opaque when it is already shelved, so the pill reads as a
+                    // state and not as a pressed button.
+                    color = if (onShelf) accent else accent.copy(alpha = 0.14f)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
+                    ) {
+                        CurioIcon(
+                            if (onShelf) CurioIcons.Check else CurioIcons.Add,
+                            null,
+                            tint = if (onShelf) {
+                                cat.onAccent()
+                            } else {
+                                ink
+                            },
+                            size = 15.dp
+                        )
+                        Text(
+                            if (onShelf) "ON MY SHELF" else "ADD TO MY SHELF",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.8.sp
+                            ),
+                            color = if (onShelf) cat.onAccent() else ink
+                        )
+                    }
+                }
+                if (work.key.isNotBlank()) {
+                    Surface(
+                        onClick = {
+                            openSearchUrl(context, "https://openlibrary.org${work.key}")
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = surface
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp)
+                        ) {
+                            CurioIcon(CurioIcons.OpenInNew, null, tint = ink, size = 14.dp)
+                            Text(
+                                "OPEN LIBRARY",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 0.8.sp
+                                ),
+                                color = ink
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                when {
+                    !looked -> {
+                        Spacer(Modifier.height(14.dp))
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = surface,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                                .height(72.dp)
+                        ) {}
+                    }
+                    about == null && subjects.isEmpty() -> {
+                        Spacer(Modifier.height(14.dp))
+                        Text(
+                            "Open Library has no description for this work yet. Its page " +
+                                "still has the editions, so the link above is the way in.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                    }
+                    else -> {
+                        if (about != null) {
+                            Spacer(Modifier.height(14.dp))
+                            Surface(
+                                shape = RoundedCornerShape(18.dp),
+                                color = surface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp)
+                                    .clickable { aboutExpanded = !aboutExpanded }
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateContentSize()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = accent.copy(alpha = 0.16f)
+                                        ) {
+                                            CurioIcon(
+                                                CurioIcons.MenuBook,
+                                                null,
+                                                tint = ink,
+                                                size = 15.dp,
+                                                modifier = Modifier.padding(6.dp)
+                                            )
+                                        }
+                                        Text(
+                                            "ABOUT THIS WORK",
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontWeight = FontWeight.ExtraBold,
+                                                letterSpacing = 1.2.sp
+                                            ),
+                                            color = ink,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Text(
+                                            if (aboutExpanded) "Hide" else "Read",
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = ink.copy(alpha = 0.9f)
+                                        )
+                                        CurioIcon(
+                                            if (aboutExpanded) {
+                                                CurioIcons.KeyboardArrowUp
+                                            } else {
+                                                CurioIcons.KeyboardArrowDown
+                                            },
+                                            if (aboutExpanded) "Collapse description" else "Expand description",
+                                            tint = ink,
+                                            size = 20.dp
+                                        )
+                                    }
+                                    Text(
+                                        about,
+                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                        color = onSurface,
+                                        maxLines = if (aboutExpanded) Int.MAX_VALUE else 3,
+                                        overflow = if (aboutExpanded) {
+                                            TextOverflow.Clip
+                                        } else {
+                                            TextOverflow.Ellipsis
+                                        },
+                                        modifier = Modifier.padding(top = 10.dp)
+                                    )
+                                }
+                            }
+                        }
+                        if (subjects.isNotEmpty()) {
+                            Spacer(Modifier.height(14.dp))
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    "SUBJECTS",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 1.2.sp
+                                    ),
+                                    color = ink
+                                )
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    subjects.forEach { subject ->
+                                        Surface(
+                                            shape = RoundedCornerShape(50),
+                                            color = surface
+                                        ) {
+                                            Text(
+                                                subject,
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                modifier = Modifier.padding(
+                                                    horizontal = 10.dp,
+                                                    vertical = 6.dp
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(10.dp))
+                    }
                 }
             }
         }

@@ -1,5 +1,66 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch U — the author's works, and the compile fix)
+
+Two things: the leftover half of the batch-U list ("authors written work should save as cache and
+opening them should open them in the app with the fetched details") and the CI failure on
+`447172b3`.
+
+### What changed
+
+1. **The works are kept on the device.** `AppPreferences` gained `getAuthorWorksJson` /
+   `setAuthorWorksJson` — one prefs key (`author_works_json`) holding a
+   `lowercase(author) → JSON array` map, the raw shape the fetcher produced, because the shape
+   belongs to the reveal and `AppPreferences` owns no feature types. Only an answer WITH ROWS is
+   written, so a lookup that failed (offline, a timeout) can never become the stored fact "this
+   author wrote nothing" — the failure falls back to whatever was cached and does not overwrite it.
+2. **Two entry points, deliberately.** `works(author)` stays in-process only: the ART CARD is its
+   caller and it wants one cover URL out of the list, which it already caches itself under
+   `sheetArtUrl`, so letting a card write a 50-row book list into prefs would be storage for
+   nothing. `works(context, author)` is the sheet's: it reads the stored list first, then refreshes
+   it, and falls back to the stored list when the lookup comes back empty.
+3. **The sheet opens on what the device already knows** (`AuthorWorksSheet`): the list is seeded
+   from `stored(context, author)` inside a `remember(author)` — once per author, not per frame — so
+   the first frame already has books on it, offline included.
+4. **A work opens in the app.** New `AuthorWorkSheet` + `AuthorWorksFetch.detail`: the work's own
+   Open Library record (`/works/OL…W.json`, keyless and free) read for its description — which
+   arrives either as a string or as an object with a `value`, both handled — its first publication
+   year, its cover (falling back to the search hit's, then to the record's own `covers[0]`), and its
+   subject headings, with the library's plumbing headings (`Accessible book`) filtered out. It wears
+   the same sheet anatomy as every other reveal sheet: top hairline, cover-plus-title header, one
+   scroll, the description in a folding card. Asked and answered: the header's shelf pill is the
+   BOOK pill, so a work you liked files onto My shelf as a book with its real author and cover,
+   ready for chapters and notes — additive only, a second tap does nothing. Tapping a row no longer
+   leaves the app; the browser link is a quiet pill inside the work's own page.
+5. **The page opens over the author's list, not over the reveal.** `TopicRevealScreen` gained
+   `authorWorkSheet` beside `authorSheetName`, and closing the author's sheet closes the work with
+   it — otherwise the work would be left floating with no way back to its author.
+6. **The compile fix.** `PersonalPage.kt` was missing `androidx.compose.foundation.gestures.scrollBy`
+   and both it and `PersonalTodoRow.kt` were missing `androidx.compose.ui.layout.positionInRoot`;
+   and `ScrollState.value` is an Int while the drag is in floats, so `moved` is now
+   `(pageScroll.value - before).toFloat()` — as an Int neither the `!= 0f` comparison nor the
+   `advanceBy` hand-off compiled. Swept the tree: no other file calls either without the import.
+
+### Answers locked with the user (ask_user)
+
+- A work in the author's list: **an in-app detail sheet with a Save to My shelf pill**.
+- Films and animated movies: **episodes when the source maps the title to a show**, otherwise the
+  details sheet — still to build (see below).
+
+### Honest limits
+
+Gradle cannot run here. Verification is the project's brace checker (clean, 273 files), an
+import/usage sweep for the two missing imports, and a check that every symbol the new sheet calls
+exists (`CurioCategory.onAccent`, `notesSheetContainerColor`, `saveBook`, `newPersonalBookId`, and
+the four `CurioIcons` it uses). The work page's rendering needs your eyes on a build.
+
+### Still to build from this prompt
+
+The anime / film half: anime gets the series treatment (its own episode list, fetched from Jikan —
+the keyless source already used for its poster and synopsis — plus an episode preview on the reveal
+card), and a film that the source maps to a show lists its episodes the same way, falling back to
+the fetched detail rows when it is a film and not a show.
+
 ## Request (2026-09-18, batch T — six fixes: the head, the print, the drag, the eye views, the composer)
 
 Live instruction: "fix 1, the mood select and the journal title the space between them is bad now,
@@ -3675,11 +3736,18 @@ are invalidated.
 
 ## next prompt
 
-**Status: IN PROGRESS (batch U).** The prompt below was found cleared from this section (the
-heading was left empty); it is restored verbatim from the working tree it was dropped from, so
-the contract holds and nothing in it is silently lost. Blocking questions were asked before any
-code was touched — the notes-collection move is a REMOVAL (the Cabinet's Notes shelf loses its
-saved entries), which the project rules require confirming first.
+**Status: NEARLY DONE (batch U).** See the batch-U entry at the top of this log for what landed.
+Seven of the eight items shipped in `79289776`, `2d3b45cf` and `447172b3` (the to-do sizes, the
+chapter sources, the four art sheets in the app's ink, the doors, the day's numeral, the notes
+collection, and the author's works cached and openable in the app). Only the anime / film half
+remains: anime's sheet and reveal preview get the series treatment with a Jikan episode list, and a
+film the source maps to a show lists those episodes, falling back to the fetched detail rows.
+
+The prompt below was found cleared from this section (the heading was left empty); it is restored
+verbatim from the working tree it was dropped from, so the contract holds and nothing in it is
+silently lost. Blocking questions were asked before any code was touched — the notes-collection
+move is a REMOVAL (the Cabinet's Notes shelf loses its saved entries), which the project rules
+require confirming first.
 
 feature additon and refinements,
 make the todo list fonts overall page font and checkboxsize fonts etc they should be larger. 
