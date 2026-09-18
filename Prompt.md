@@ -1,5 +1,35 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch V — anime as series, TMDB, the read pair, and the PDF door)
+
+Landed and pushed on `main` across `2bb6906d`, `b76c64e1`, `be219100` and `bb7a1230`.
+
+- **TMDB, keyed.** `TMDB_API_KEY` → `BuildConfig.TMDB_API_KEY`; `TmdbFetch` (artwork, a film's facts,
+  and whether a title is a FILM or a SHOW), wired as the FALLBACK behind the keyless providers so a
+  build with no secret behaves identically. Exported by BOTH `android.yml` and `release.yml` — the
+  older optional keys were only in the PR workflow, so a TAGGED release shipped without them (fixed
+  for all of them). `.github/AGENTS.md` gained the step-by-step guide (secret name, the four edits
+  adding a provider needs, fork-PR behaviour, rotation).
+- **Anime is a series.** `AnimeEpisodeFetcher` (Jikan, keyless, paginated, 429-retry) plus a
+  `variant` on the shared `EpisodeNotesSheet`: anime and a show-like film read the SAME sheet as a
+  series (poster, watched rail, likes, shelf toggles), with their own episode source and their own
+  artwork key. The anime reveal card previews its episodes as a series card does.
+- **A film that is really a show.** `SeriesEpisodeFetcher.fetchForAny` answers from TMDB when a key
+  is set, TVMaze otherwise; the film lane opens the film sheet while it is being answered and swaps
+  to the episode sheet only when the source says it is a show (only one sheet is ever mounted).
+- **A pair of prints stays a pair** in the read view: the read pass never marked the right-hand print
+  of a two-photo row, so a page read back drew each at its own fraction and the pair came apart.
+- **The PDF door asks the engine for PDFs** — `filetype:pdf` instead of the words "free pdf
+  download"; the EPUB and public-domain doors keep their word searches.
+- **A double tap on the WORDS** of a page being read puts the pen back, through
+  `LocalPersonalTapToEdit`: the read view's text has to own its taps (links open the browser), which
+  is why the page's own detector never saw a tap that landed on text.
+
+**Still open** (asked back to the user rather than guessed): attachments inside a paragraph (a photo
+or voice note currently SPLITS the block, so Select all stops at the split and a note cannot be
+placed between two paragraphs of one block), more than one photo pair / a 3-or-4 photo stack, the
+dock's menus dismissing the keyboard, and the pinned-heading audit.
+
 ## Request (2026-09-18, batch U — the author's works, and the compile fix)
 
 Two things: the leftover half of the batch-U list ("authors written work should save as cache and

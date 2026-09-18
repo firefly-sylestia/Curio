@@ -743,6 +743,24 @@ internal fun PersonalWritingPage(
                         Column(
                             Modifier.onSizeChanged {
                                 aboveContentHeight = it.height.toFloat() + with(density) { 6.dp.toPx() }
+                                // v389h — AND THIS IS THE NUMBER THE PIN READS.
+                                //
+                                // `canvasTop` was declared, read by the pin maths,
+                                // and never assigned: the head's height was measured
+                                // into a local that nothing outside this Column could
+                                // see, so the canvas' place in the scroll stayed 0
+                                // and every heading was judged against a coordinate
+                                // that stopped at the canvas' own top. That is the
+                                // whole of the reported misbehaviour — the bar lit
+                                // up against the wrong heading when a page had two
+                                // chapters ("chapter 1 and chapter 2 it doesnt show
+                                // both of them but only shows the last one"), it
+                                // arrived before the heading had really left the
+                                // screen, and a tap on it scrolled to the canvas'
+                                // top rather than to the heading it named ("tapping
+                                // it scrolls all the way to the top instead of going
+                                // to that chapter").
+                                canvasTop = aboveContentHeight
                             }
                         ) { aboveCanvas() }
                         PersonalCanvas(
