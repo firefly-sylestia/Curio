@@ -97,7 +97,7 @@ object AuthorWorksFetch {
     private val cache = ConcurrentHashMap<String, List<AuthorWork>>()
 
     /** The author's works, best-effort; empty when the name is unknown. */
-    suspend fun works(author: String): List<AuthorWork> = withContext(Dispatchers.IO) {
+    internal suspend fun works(author: String): List<AuthorWork> = withContext(Dispatchers.IO) {
         val name = author.trim()
         if (name.isBlank()) return@withContext emptyList()
         cache[name]?.let { return@withContext it }

@@ -1,5 +1,47 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch N — the wall's late first frame, and the visibility break)
+
+Live instruction: "in community the last 24 hours nothing here yet appears late, same for
+moderator each time i open and close social they appears very late, also fix this." plus the
+CI log (three "'public' function exposes its 'internal' return type" errors).
+
+**Status: DONE, committed and pushed.**
+
+### The CI break
+
+`internal data class ArtworkInfo` / `internal data class AuthorWork` are returned by public
+functions on `ArtworkFetch` / `AuthorWorksFetch`. Each function that RETURNS one is now an
+`internal suspend fun` (`ArtworkFetch.artwork`, `ArtworkFetch.worksBy`,
+`AuthorWorksFetch.works`). Every caller is in the app module, so nothing else changes; the
+return-`String?` fetchers (`makerArtwork`, `portraitOrCover`) stay public. A sweep over the
+reveal package found no other public function carrying an internal type, and
+`TopicRevealScreen`'s only public function does not touch one.
+
+### Why the wall looked late — three separate mechanisms, each fixed at its source
+
+1. **The session was restored in a `LaunchedEffect`, which runs AFTER the first frame.**
+   With a stored session the page therefore painted `!eligible` first: the signed-in member
+   read "Sign in to see the social wall" and only then did "Last 24 hours" appear — the
+   section the user named as late. `OnlineAccount.restore(context)` is now called in a
+   `remember` BEFORE `OnlineAccount.state` is read (it is idempotent and only touches
+   storage when it has no session), and the now-redundant effect is gone.
+2. **`cards` started empty and was seeded from the device's cache INSIDE that effect.**
+   So the first rendered frame had no cards, `loading` was still false and there was no
+   error: the "Nothing here yet" card was claimed and then swapped out when the cache
+   landed. `cards` now seeds from `SocialFeedCache.read(context)` in the `remember`
+   initializer — the same read the effect made (its own memory map answers every repeat),
+   one frame earlier — and a new `answered` flag keeps the empty card from being claimed
+   before an answer (cache or server) has actually been seen: an empty wall and an unread
+   wall are not the same thing.
+3. **The Moderation door was re-derived by a network round trip on every single open.**
+   `isCommunityAdmin` / `canModerateReplies` started `false` each time, so the section could
+   only appear after `myAdminRow` answered — the "very late, every time I open and close
+   social" the user described. Both now seed from `AppPreferences.communityAdminState` /
+   `communityAdminRepliesState`, which `setCommunityAdmin` writes whenever the server
+   answers (and clears on a signed-out open). The server remains the authority; this is
+   only what was already known, so the door is on the page from the first frame.
+
 ## Request (2026-09-18, batch M — the author's face in their own sheet)
 
 Live instruction: "Show the author's portrait in the author sheet header, not just on the

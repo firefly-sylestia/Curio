@@ -106,7 +106,7 @@ object ArtworkFetch {
     private val cache = ConcurrentHashMap<String, ArtworkInfo>()
 
     /** The work's own record, best-effort; null when neither source knows it. */
-    suspend fun artwork(title: String, artist: String): ArtworkInfo? = withContext(Dispatchers.IO) {
+    internal suspend fun artwork(title: String, artist: String): ArtworkInfo? = withContext(Dispatchers.IO) {
         val key = "${title.trim()}|${artist.trim()}"
         if (title.isBlank()) return@withContext null
         cache[key]?.let { return@withContext it }
@@ -135,7 +135,7 @@ object ArtworkFetch {
      * is how many records to open, so the reveal card can ask for one and the
      * sheet can ask for eight.
      */
-    suspend fun worksBy(maker: String, limit: Int = MAKER_LIMIT): List<AuthorWork> =
+    internal suspend fun worksBy(maker: String, limit: Int = MAKER_LIMIT): List<AuthorWork> =
         withContext(Dispatchers.IO) {
         val name = maker.trim()
         if (name.isBlank()) return@withContext emptyList()

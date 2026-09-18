@@ -9,6 +9,9 @@ FIX:
 - Reading: a PDF page is drawn for the screen it is on — it was rendered at a fixed size and then stretched back up, which is what made it soft on a high-density phone — and the foot of the reader no longer states the page a second time while the page bar is already saying it.
 - Reading: the scrolling reader shows ONE page at a time again — every page takes the screen it is given and fits inside it, so a page and the next one's top are no longer stacked under each other.
 - Reading: a book's own contents keep their shape — a part's chapters are indented and marked by their level, from the EPUB's nav document, its NCX and a PDF's outline alike, instead of reading as one flat list.
+- Social: the wall opens on the page this phone already has — "Last 24 hours" and its cards are on screen from the first frame, instead of the section arriving a beat late and a "Nothing here yet" card showing before the wall you already had.
+- Social: the session is read before the page paints, so a signed-in account no longer opens on "Sign in to see the social wall" and then swap to the wall.
+- Social: the Moderation door is remembered from the last time the server confirmed it, so it is on the page the moment Social opens instead of a check later — and that check still corrects it.
 - Social: two portraits were wearing the same eyes — the flower crown had the wizard's sparkle, and the space helmet wore the curious wide eye instead of looking through its own visor; each has a gaze of its own now, so no portrait shares one with the tile beside it.
 - Writing: a voice note is no longer a box — it is the waveform, the play button and the clock on the page itself, with the ✕ asking before it throws a recording away.
 - Writing: a note on a topic says the topic once — the bar carries the lane now, instead of repeating the name the page already shows.

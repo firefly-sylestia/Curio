@@ -288,6 +288,15 @@ object AppPreferences {
     // second" lag. The resolved URL is persisted so a revisit skips the
     // lookup and goes straight to the (also cached) swatches.
     private const val KEY_SHEET_ART_URLS = "sheet_art_urls"
+    // v389d — WHAT THIS ACCOUNT MAY MODERATE, remembered between opens. The
+    // Social page started from "not an admin" and only raised its Moderation
+    // door once `myAdminRow` answered, so the door was missing for a round trip
+    // every single time the page opened (user report: "in moderator … each time
+    // i open and close social they appear very late"). The flag the server last
+    // confirmed is kept here and each open's own check still corrects it — the
+    // server is the authority, this is only what was already known.
+    private const val KEY_COMMUNITY_ADMIN = "community_admin"
+    private const val KEY_COMMUNITY_ADMIN_REPLIES = "community_admin_replies"
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -836,6 +845,25 @@ object AppPreferences {
         coverSwatchCacheState = cur
     }
 
+    // ── Remembered moderation rights (v389d) ─────────────────────────────
+    /** The last confirmed moderation right, for the Social page's own door. */
+    fun isCommunityAdmin(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_COMMUNITY_ADMIN, false)
+
+    fun canModerateReplies(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_COMMUNITY_ADMIN_REPLIES, false)
+
+    /** Remember what the server just said (no write when nothing changed). */
+    fun setCommunityAdmin(context: Context, admin: Boolean, replies: Boolean) {
+        if (communityAdminState == admin && communityAdminRepliesState == replies) return
+        prefs(context).edit()
+            .putBoolean(KEY_COMMUNITY_ADMIN, admin)
+            .putBoolean(KEY_COMMUNITY_ADMIN_REPLIES, replies)
+            .apply()
+        communityAdminState = admin
+        communityAdminRepliesState = replies
+    }
+
     // ── Resolved album/series sheet artwork URLs (v375) ─────────────────
     // Keyed "album|<topic name>" / "series|<topic name>". See KEY_SHEET_ART_URLS.
     fun getSheetArtUrls(context: Context): Map<String, String> {
@@ -1288,6 +1316,13 @@ object AppPreferences {
         internal set
     // v375 — last resolved album/series sheet artwork URL per "family|name".
     var sheetArtUrlsState by mutableStateOf<Map<String, String>>(emptyMap())
+        internal set
+    // v389d — the moderation right the server last confirmed for this account
+    // (see KEY_COMMUNITY_ADMIN). Reactive so the door appears the moment it is
+    // confirmed, and is already there on the next open.
+    var communityAdminState by mutableStateOf(false)
+        internal set
+    var communityAdminRepliesState by mutableStateOf(false)
         internal set
     // v336 — per-album favorite tracks (heart picks): album name → picked
     // track titles in pick order. Reactive so the sheet hearts + the Vinyl
@@ -1814,6 +1849,8 @@ object AppPreferences {
         bookCoverUrlsState = getBookCoverUrls(context)
         coverSwatchCacheState = getCoverSwatchCache(context)
         sheetArtUrlsState = getSheetArtUrls(context)
+        communityAdminState = prefs(context).getBoolean(KEY_COMMUNITY_ADMIN, false)
+        communityAdminRepliesState = prefs(context).getBoolean(KEY_COMMUNITY_ADMIN_REPLIES, false)
         bookRatingVisibleState = isBookRatingVisible(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)
