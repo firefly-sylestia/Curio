@@ -190,6 +190,7 @@ import com.curio.app.data.coverSwatchesToArgbs
 import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.ui.components.RichTextEditor
 import com.curio.app.ui.components.RichTextToolbarMode
+import com.curio.app.ui.components.clearWritingOnOutsideTap
 import com.curio.app.ui.components.TextHistoryBrowser
 import com.curio.app.ui.components.TextHistoryPill
 import com.curio.app.ui.components.TextHistoryRestoreMode
@@ -4078,7 +4079,15 @@ private fun BookNotesSheet(
                 // v3xx — imePadding lifts the sheet above the keyboard and
                 // the editor area scrolls, so a long note's text is always
                 // reachable and selectable without closing the keyboard.
-                Column(Modifier.fillMaxSize().imePadding().padding(20.dp)) {
+                // v391 — and the page around the writing answers a tap: the
+                // caret and the selection let go (see [clearWritingOnOutsideTap]).
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .imePadding()
+                        .padding(20.dp)
+                        .clearWritingOnOutsideTap()
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Text(
                             "Note · CH ${editCh.number}${editCh.title.takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""}",
@@ -4115,6 +4124,8 @@ private fun BookNotesSheet(
                         minHeight = 140.dp,
                         maxCharacters = 2000,
                         dockPinned = true,
+                        // v391 — the journal page's own writing hand.
+                        journalInk = true,
                             // v389 — the note expand wears the JOURNAL's dock: a
                             // floating strip at the foot of the field with every
                             // tool its own button (bold, italic, underline,
@@ -4123,8 +4134,11 @@ private fun BookNotesSheet(
                         toolbarMode = RichTextToolbarMode.DOCK,
                         accent = MaterialTheme.colorScheme.primary,
                         ink = MaterialTheme.colorScheme.onSurface,
-                        surface = MaterialTheme.colorScheme.surfaceVariant,
-                        showFieldBorder = true
+                        // v391 — and the words sit ON the page, the way the
+                        // journal's own lines do: no bordered chip around the
+                        // writing, only the sheet's background behind it.
+                        surface = Color.Transparent,
+                        showFieldBorder = false
                     )
                     Spacer(Modifier.height(8.dp))
                     // Share the note straight to the share card as a Chapter

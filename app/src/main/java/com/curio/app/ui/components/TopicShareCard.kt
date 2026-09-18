@@ -10435,7 +10435,15 @@ fun TopicShareSheet(
                                 // keyboard and the editor area scrolls, so a
                                 // long note's text can always be reached and
                                 // selected without closing the keyboard.
-                                Column(Modifier.fillMaxSize().imePadding().padding(20.dp)) {
+                                // v391 — a tap on the page around the writing
+                                // lets the caret and the selection go.
+                                Column(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .imePadding()
+                                        .padding(20.dp)
+                                        .clearWritingOnOutsideTap()
+                                ) {
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                         Text(
                                             when (writeBoxTarget) {
@@ -10477,6 +10485,8 @@ fun TopicShareSheet(
                                         placeholder = "Start writing…",
                                         minHeight = 140.dp,
                                         dockPinned = true,
+                                        // v391 — the journal page's own writing hand.
+                                        journalInk = true,
                                             // v389 — the card's full-screen editor
                                             // writes on the JOURNAL's dock: a
                                             // floating strip at the foot of the
@@ -10487,8 +10497,11 @@ fun TopicShareSheet(
                                         toolbarMode = RichTextToolbarMode.DOCK,
                                         accent = MaterialTheme.colorScheme.primary,
                                         ink = MaterialTheme.colorScheme.onSurface,
-                                        surface = MaterialTheme.colorScheme.surfaceVariant,
-                                        showFieldBorder = true
+                                        // v391 — the words sit ON the page, the
+                                        // way the journal's own lines do: no
+                                        // bordered chip around the writing.
+                                        surface = Color.Transparent,
+                                        showFieldBorder = false
                                     )
                                 }
                             }

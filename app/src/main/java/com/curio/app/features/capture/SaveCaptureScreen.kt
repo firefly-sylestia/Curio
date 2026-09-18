@@ -101,6 +101,7 @@ import com.curio.app.features.capture.formats.ReelNotesFormat
 import com.curio.app.features.capture.formats.SoundBiteFormat
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.clearWritingOnOutsideTap
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.EmberBurst
 import com.curio.app.ui.components.TextHistoryBrowser
@@ -495,6 +496,10 @@ fun SaveCaptureScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // v391 — a tap on the PAGE (outside every note's paper) lets the
+            // caret and the selection go, so a writer never has to find the
+            // exact line they selected to drop it.
+            .clearWritingOnOutsideTap()
             // Category tint wash — the capture screen wears a faint wash of
             // the active category over the theme background, matching the
             // Spin page so saving stays in the same color story. Theme-aware:

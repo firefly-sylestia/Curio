@@ -192,7 +192,9 @@ fun ReelNotesFormat(
             placeholder = "What did you think of the film?",
             // v3xx — the review joins the global text-history feed.
             historyField = "Film review",
-            toolbarMode = RichTextToolbarMode.TOGGLE,
+            // v391 — the journal's own floating dock, so the note field carries
+            // NO tools of its own until a finger is in it.
+            toolbarMode = RichTextToolbarMode.DOCK,
             minHeight = 140.dp,
             ink = paperInk(),
             accent = MaterialTheme.colorScheme.tertiary,

@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -456,6 +457,42 @@ internal fun PersonalWritingPage(
         snapshotFlow { pageScroll.value }.collect { report(it) }
     }
 
+    // ── v391 — THE DOCK IS A TYPING INSTRUMENT, NOT FURNITURE ─────────────
+    //
+    // Two things decide whether the tools are up (user request: "hide the tool
+    // bar when keyboard is closed and i scroll down, smoothly hide it … only
+    // show the journal tool bar when the keyboard is open and the cursor is in
+    // focus in the text field"):
+    //
+    //   1. the KEYBOARD. The IME inset is read in composition the way the rest
+    //      of the app reads it, so with no keyboard up there is nothing to
+    //      format — which is also exactly the moment a page is being READ
+    //      rather than written. Focus alone could not say this: dismissing the
+    //      keyboard leaves the caret in the line.
+    //   2. the SCROLL DIRECTION. A downward scroll means the member is moving
+    //      through the page (looking for a place to type, or reading what they
+    //      wrote) — the tools step out of the way; the smallest upward nudge
+    //      brings them back, and so does coming back to write (see the reset
+    //      below). The threshold is what keeps a stray pixel of drift from
+    //      flapping the dock in and out.
+    val densityNow = LocalDensity.current
+    val keyboardUp = WindowInsets.ime.getBottom(densityNow) > 0
+    var dockScrolledAway by remember { mutableStateOf(false) }
+    LaunchedEffect(pageScroll) {
+        val threshold = with(densityNow) { 18.dp.toPx() }
+        var last = pageScroll.value
+        snapshotFlow { pageScroll.value }.collect { now ->
+            val travel = now - last
+            last = now
+            if (travel > threshold) dockScrolledAway = true
+            else if (travel < -threshold) dockScrolledAway = false
+        }
+    }
+    // Writing again is what asks for the tools back.
+    LaunchedEffect(editor.focusedId, keyboardUp) {
+        if (keyboardUp) dockScrolledAway = false
+    }
+
     // ── THE PAGE'S OWN SECTIONS, HELD AT THE TOP (v389) ─────────────────
     //
     // The book review's pinned chapter, on EVERY writing page: a TITLE line is a
@@ -675,8 +712,11 @@ internal fun PersonalWritingPage(
         // The dock rides the keyboard while the page is being WRITTEN and steps
         // out of the way while it is being read. A live recording REPLACES it:
         // the voice capsule is what the page's bottom is for while it runs.
+        //
+        // v391 — and "being written" now means the keyboard is actually up and
+        // the page was not just scrolled down through (see the two rules above).
         AnimatedVisibility(
-            visible = editing && liveVoice == null,
+            visible = editing && liveVoice == null && keyboardUp && !dockScrolledAway,
             enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
             exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
             modifier = Modifier.fillMaxWidth()

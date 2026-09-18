@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
@@ -41,7 +43,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -91,6 +103,47 @@ import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.PatrickHandFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
+
+/**
+ * v391 — WHICH FIELDS ARE BEING WRITTEN IN, in ROOT coordinates.
+ *
+ * [Modifier.clearWritingOnOutsideTap] asks this before it takes a tap away from
+ * somebody: a tap that landed on a field's own paper is that field's business,
+ * and only a tap on the page AROUND the paper is "I am done with this" (user
+ * request: "when i've something selected in the text … and i click the blank
+ * area below it should auto deselect"). Every editor registers the paper it is
+ * written on while it is in the tree and takes it back when it leaves.
+ */
+internal val richTextWritingRects = mutableMapOf<Any, Rect>()
+
+/**
+ * v391 — TAP THE PAGE, AND THE WRITING LETS GO.
+ *
+ * The host wraps a screen (or a full-screen editor sheet) whose text fields sit
+ * on note-paper cards. A tap that some CHILD did not consume — the field itself,
+ * a button, a swatch — and that landed outside every registered paper folds the
+ * writing away: the caret goes, the selection with it, and a floating dock
+ * standing under the field drops with the keyboard. Scrolling is untouched: only
+ * a press that lifts without a child claiming it and without travelling counts.
+ */
+@Composable
+internal fun Modifier.clearWritingOnOutsideTap(): Modifier {
+    val focusManager = LocalFocusManager.current
+    var hostOrigin by remember { mutableStateOf(Offset.Zero) }
+    return this
+        .onGloballyPositioned { coords -> hostOrigin = coords.boundsInRoot().topLeft }
+        .pointerInput(Unit) {
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false)
+                val up = waitForUpOrCancellation()
+                if (up != null && !down.isConsumed && !up.isConsumed) {
+                    val root = up.position + hostOrigin
+                    val onPaper = richTextWritingRects.values.any { it.contains(root) }
+                    if (!onPaper) focusManager.clearFocus()
+                }
+            }
+        }
+}
 
 /**
  * The rich-text flags the toolbar can apply. [TextSpan] stores each as a
@@ -671,6 +724,13 @@ fun RichTextEditor(
     onPaperColorChange: (NotePaperColor) -> Unit = {},
     /** Content inset of the paper card when [paper] is true. */
     paperContentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+    /** v391 — WEAR THE JOURNAL PAGE'S OWN INK. The journal writes its lines in
+     *  the app's warm writing hand on the theme's page background rather than on
+     *  a note-paper slip, and the two full-screen note editors are journal pages
+     *  now (user request: "use the journal exact page screen style for the full
+     *  screen editor in the add note expand editor") — this was the one thing
+     *  still different about them. Note-paper fields keep their own hand. */
+    journalInk: Boolean = false,
     /** Optional trailing action (e.g. a small dictation button) rendered at
      *  the END of the field's own toolbar row, opposite the format toggle. */
     trailingAction: (@Composable () -> Unit)? = null,
@@ -1117,16 +1177,34 @@ fun RichTextEditor(
         // STICKS (the member moved to another note, or tapped the page) hides it.
         var fieldFocused by remember { mutableStateOf(false) }
         var dockVisible by remember { mutableStateOf(false) }
-        LaunchedEffect(fieldFocused) {
-            if (fieldFocused) {
+        // ── v391 — "TYPING IN THIS BOX" MEANS THE KEYBOARD IS UP ──────────
+        //
+        // Focus alone used to hold the dock up, and a dismissed keyboard left a
+        // row of formatting buttons standing under a note nobody was writing in
+        // (user request: "hide the tool bar when keyboard is closed"). The IME
+        // inset is read HERE, in composition, the way the rest of the app reads
+        // it ([WindowInsets.ime] on a live window), and the same blur grace still
+        // covers a tap on the dock's own buttons — which blurs the field for an
+        // instant — so only a keyboard that is really gone folds the tools away.
+        val keyboardUp = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+        LaunchedEffect(fieldFocused, keyboardUp) {
+            if (fieldFocused && keyboardUp) {
                 dockVisible = true
             } else {
                 delay(DOCK_BLUR_GRACE_MS)
                 dockVisible = false
             }
         }
-        val showTopStrip = toolbarMode != RichTextToolbarMode.DOCK ||
-            paper || trailingAction != null || historyField != null
+        // ── v391 — IN DOCK MODE THE STRIP ABOVE THE FIELD IS GONE ─────────
+        //
+        // The dock IS the toolbar: the paper style toggle, its colour swatches,
+        // the text-history pill and the field's own trailing action have all
+        // moved down into it (user request: "remove the above tools from save
+        // your take express yourself notes text field … in the floating buttom
+        // tool bar of save your take, show the paper and its color changing tool
+        // too"). The compact capture strips (MAIN / TOGGLE) keep their row, so
+        // nothing about the other fields on those screens changes.
+        val showTopStrip = toolbarMode != RichTextToolbarMode.DOCK
         if (showTopStrip) Surface(
             shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
@@ -1239,6 +1317,17 @@ fun RichTextEditor(
         // On note-paper ([paper]) the field renders inside a PaperCard with
         // the toolbar OUTSIDE the card, so the ruled lines line up under the
         // text while typing — matching the saved detail view's paper pages.
+        //
+        // v391 — AND THIS PAPER TELLS THE HOST WHERE IT IS. A tap that lands
+        // here is this field's business; a tap on the page around it is the
+        // writer saying they are done (see [clearWritingOnOutsideTap]).
+        val writingKey = remember { Any() }
+        val paperMeasured = Modifier.onGloballyPositioned { coords ->
+            richTextWritingRects[writingKey] = coords.boundsInRoot()
+        }
+        DisposableEffect(writingKey) {
+            onDispose { richTextWritingRects.remove(writingKey) }
+        }
         val fieldBlock: @Composable () -> Unit = {
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 Surface(
@@ -1251,16 +1340,23 @@ fun RichTextEditor(
                     shape = if (paper) RoundedCornerShape(0.dp) else RoundedCornerShape(14.dp),
                     color = if (paper) Color.Transparent else surface,
                     shadowElevation = if (paper || !showFieldBorder) 0.dp else 2.dp,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(if (paper) Modifier else paperMeasured)
                 ) {
                     BasicTextField(
                         value = tfv,
                         onValueChange = { emit(it) },
                         enabled = enabled,
                         textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            // Paper notes wear the handwritten Patrick Hand;
+                            // Paper notes wear the handwritten Patrick Hand, a
+                            // journal page wears the journal's writing hand, and
                             // plain (non-paper) fields keep the neutral sans.
-                            fontFamily = if (paper) PatrickHandFontFamily else FontFamily.Default,
+                            fontFamily = when {
+                                paper -> PatrickHandFontFamily
+                                journalInk -> WritingFontFamily
+                                else -> FontFamily.Default
+                            },
                             color = effectiveInk
                         ),
                         cursorBrush = SolidColor(effectiveAccent),
@@ -1338,7 +1434,11 @@ fun RichTextEditor(
                 Text(
                     text = placeholder,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontFamily = if (paper) PatrickHandFontFamily else FontFamily.Default,
+                        fontFamily = when {
+                            paper -> PatrickHandFontFamily
+                            journalInk -> WritingFontFamily
+                            else -> FontFamily.Default
+                        },
                         color = effectiveInk.copy(alpha = 0.45f)
                     ),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -1356,7 +1456,7 @@ fun RichTextEditor(
             // decoration) render here — same flags as [NotePaperCard].
             if (paperStyle.torn) {
                 TornPaperCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().then(paperMeasured),
                     ruled = paperStyle.ruled,
                     coffeeStains = paperStyle.coffee,
                     folded = paperStyle.folded,
@@ -1372,7 +1472,7 @@ fun RichTextEditor(
                 }
             } else {
                 PaperCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().then(paperMeasured),
                     ruled = true,
                     // v7.39 — the rounded-top + watermark options of the
                     // style apply here too (previously only [NotePaperCard]
@@ -1449,6 +1549,18 @@ fun RichTextEditor(
                         ),
                         onAlign = { applyAlign(it) },
                         onFont = { applyFont(it) },
+                        // The rest of the universal toolbar — the tools that used
+                        // to sit on the strip above the field.
+                        paper = paper,
+                        paperStyle = paperStyle,
+                        onPaperStyleChange = onPaperStyleChange,
+                        paperColor = paperColor,
+                        onPaperColorChange = onPaperColorChange,
+                        showColorTool = showColorTool,
+                        onHistory = if (historyField != null) {
+                            { historyOpen = true }
+                        } else null,
+                        trailingAction = trailingAction,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -1562,6 +1674,16 @@ private fun RichTextDock(
     fontKey: String?,
     onAlign: (String?) -> Unit,
     onFont: (String?) -> Unit,
+    // ── v391 — the tools the strip above the field used to carry ──────
+    /** Paper style + colour, the field's history pill, its trailing action. */
+    paper: Boolean = false,
+    paperStyle: NotePaperStyle = NotePaperStyle.RULED,
+    onPaperStyleChange: (NotePaperStyle) -> Unit = {},
+    paperColor: NotePaperColor = NotePaperColor.CREAM,
+    onPaperColorChange: (NotePaperColor) -> Unit = {},
+    showColorTool: Boolean = true,
+    onHistory: (() -> Unit)? = null,
+    trailingAction: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -1579,6 +1701,12 @@ private fun RichTextDock(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(1.dp)
         ) {
+            // TEXT HISTORY, the dock's first tool — the same placement the
+            // journal page's own dock gives it.
+            if (onHistory != null) {
+                TextHistoryPill(onClick = onHistory, size = 30.dp)
+                Spacer(Modifier.width(3.dp))
+            }
             RichTextDockButton("Bold", boldActive, accent, ink, enabled, onBold) {
                 CurioIcon(CurioIcons.FormatBold, null, size = 20.dp)
             }
@@ -1629,6 +1757,90 @@ private fun RichTextDock(
                 onPick = onFont,
                 glyph = { RichFontGlyph() }
             )
+            // The sheet this field is written on, and the colour of it.
+            if (paper) {
+                RichTextPaperMenu(
+                    style = paperStyle,
+                    onStyleChange = onPaperStyleChange,
+                    color = paperColor,
+                    onColorChange = onPaperColorChange,
+                    showColorTool = showColorTool,
+                    accent = accent,
+                    ink = ink,
+                    enabled = enabled
+                )
+            }
+            // …and whatever the field itself rides (the dictation mic).
+            if (trailingAction != null) {
+                Spacer(Modifier.width(2.dp))
+                trailingAction()
+            }
+        }
+    }
+}
+
+/**
+ * THE PAPER TOOLS, ON THE DOCK (v391).
+ *
+ * The strip above the field used to unfold the style toggle and the colour
+ * swatches under the tools; with that strip gone in DOCK mode they live behind
+ * one Palette button here — the glyph wears the sheet's live colour, so the
+ * button answers "which paper is this?" without being opened, and the swatches
+ * are already out when it is.
+ */
+@Composable
+private fun RichTextPaperMenu(
+    style: NotePaperStyle,
+    onStyleChange: (NotePaperStyle) -> Unit,
+    color: NotePaperColor,
+    onColorChange: (NotePaperColor) -> Unit,
+    showColorTool: Boolean,
+    accent: Color,
+    ink: Color,
+    enabled: Boolean
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        RichTextDockButton("Paper", expanded, accent, ink, enabled, { expanded = !expanded }) {
+            Box(contentAlignment = Alignment.Center) {
+                CurioIcon(CurioIcons.Palette, null, size = 20.dp)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(9.dp)
+                        .clip(CircleShape)
+                        .background(notePaperSurface(color))
+                )
+            }
+        }
+        CurioDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            accent = accent
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                NotePaperStyleToggle(
+                    style = style,
+                    onStyleChange = onStyleChange,
+                    accent = accent,
+                    enabled = enabled,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (showColorTool) {
+                    NotePaperColorToggle(
+                        color = color,
+                        onColorChange = onColorChange,
+                        accent = accent,
+                        enabled = enabled,
+                        // The menu IS the colour's own door — one tap to the
+                        // swatches rather than two.
+                        startExpanded = true
+                    )
+                }
+            }
         }
     }
 }

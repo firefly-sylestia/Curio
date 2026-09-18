@@ -192,7 +192,8 @@ fun FieldNotesFormat(
                 placeholder = "What did you see, hear, notice?",
                 // v3xx — this section joins the global text-history feed.
                 historyField = "What I observed",
-                toolbarMode = RichTextToolbarMode.TOGGLE,
+                // v391 — the journal's floating dock (see ReelNotesFormat).
+                toolbarMode = RichTextToolbarMode.DOCK,
                 minHeight = 100.dp,
                 ink = paperInk(),
                 accent = MaterialTheme.colorScheme.tertiary,
@@ -242,7 +243,7 @@ fun FieldNotesFormat(
                 placeholder = "What was unexpected or delightful?",
                 // v3xx — this section joins the global text-history feed.
                 historyField = "What surprised me",
-                toolbarMode = RichTextToolbarMode.TOGGLE,
+                toolbarMode = RichTextToolbarMode.DOCK,
                 minHeight = 100.dp,
                 ink = paperInk(),
                 accent = MaterialTheme.colorScheme.tertiary,
@@ -292,7 +293,7 @@ fun FieldNotesFormat(
                 placeholder = "Where does this lead?",
                 // v3xx — this section joins the global text-history feed.
                 historyField = "What I want to learn next",
-                toolbarMode = RichTextToolbarMode.TOGGLE,
+                toolbarMode = RichTextToolbarMode.DOCK,
                 minHeight = 100.dp,
                 ink = paperInk(),
                 accent = MaterialTheme.colorScheme.tertiary,

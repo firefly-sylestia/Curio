@@ -1,4 +1,9 @@
 FIX:
+- Save your take: a note's tools come up with the keyboard — the floating dock rides the keyboard while you write in the box and folds away the moment it is dismissed, instead of a formatting row standing under a note nobody is writing in.
+- Save your take: the strip of tools above a note is gone — the sheet's style, its colour, the text-history pill and the mic all ride the same floating dock, so the box is nothing but paper until a finger lands in it.
+- Writing: a tap on the page outside a note's paper drops the caret and the selection with it, so a passage is released by tapping anywhere rather than by finding the exact line it sits on.
+- Journals: the tool bar rides the keyboard and steps aside as you scroll down the page, and the smallest upward nudge brings it back.
+- Writing: the full-screen card editor and the book's note editor write in the journal's own hand, straight on the page, with no bordered chip around the words.
 - Journals: the keyboard no longer comes up by itself when a saved day is flipped from the eye to the pen — the page stops shifting at the switch — and a day being made still opens with the caret in its title and the keyboard up.
 - Writing: taking the eye puts the keyboard away, so a page being read is not sitting under an inset.
 - Writing: a voice note's play control is the filled glyph on the page itself, with no disc behind it, and its clock shows one figure — the position while it sounds, the recording's own length while it stands — so nothing shifts as it counts.

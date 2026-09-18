@@ -489,7 +489,8 @@ fun SoundBiteFormat(
             placeholder = "What did this recording capture?",
             // v3xx — the note joins the global text-history feed.
             historyField = "Soundbite note",
-            toolbarMode = RichTextToolbarMode.TOGGLE,
+            // v391 — the journal's floating dock (see ReelNotesFormat).
+            toolbarMode = RichTextToolbarMode.DOCK,
             minHeight = 96.dp,
             enabled = recordingState != AudioRecorder.State.RECORDING,
             ink = paperInk(),

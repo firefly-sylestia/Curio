@@ -1,5 +1,76 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch Q — the toolbar is a typing instrument, and the page answers a tap)
+
+Live instruction (with the lint log pasted): fix the lint error, then — "hide the tool bar when
+keyboard is closed and i scroll down, smoothly hide it, then i want you to use the journal exact
+page screen style fo the full screen editor in the add note expand editor, and also please remove
+the above tools from save your take express yourself notes text field please, and only show the
+journal tool bar when the keyboard is open and the curso ris in focus in the text field. also add
+curosr or out of select when i tap outsid eof the note paper, and in the floating buttom tool bar
+of save your take, show the paper and its color changing tool too. also the save your take page
+was kind of laggy can u check why its laggy for both take studio and the old one. and then fully
+redrawn the 28 avatars of profile, like fully redrawn. also fix this and push and merge the both
+branch then work on this in an new branch but dont push it to the main, just push the fix and the
+previous work to the main"
+
+**Status: BRANCH WORK COMMITTED, NOT PUSHED** (branch `feat/toolbar-note-avatars`, off `main` at
+`56898ff8`).
+
+### The lint error (shipped on `main`, pushed)
+
+`CommunityScreen` restored the session inside `remember { OnlineAccount.restore(context) }`.
+The call has to happen exactly there — during the first composition and BEFORE the account is
+read on the next line, which is what puts the signed-in wall on the first frame (the fix for the
+"wall arrives late" report) — but lint's `RememberReturnType` check fails the release job on a
+`remember` that returns `Unit`. It is wrapped so the composition holds a value:
+`remember(context) { OnlineAccount.restore(context); true }`. Lint error gone, behaviour
+unchanged.
+
+### The dock is a typing instrument, not furniture
+
+`RichTextEditor` gained a keyboard gate and lost the strip above the field, both in DOCK mode:
+
+- `keyboardUp = WindowInsets.ime.getBottom(LocalDensity.current) > 0` is read in composition
+  (the pattern `CurioFloatingPet` already uses) and joins `fieldFocused` as the dock's condition,
+  keeping the existing 250 ms blur grace so a tap on the dock's own buttons cannot fold it.
+- `showTopStrip = toolbarMode != DOCK`. Everything the strip carried in DOCK mode — the paper
+  style toggle, its colour swatches, the text-history pill, the field's trailing action (the
+  dictation mic) — now rides the dock itself. The paper tools sit behind one Palette button whose
+  glyph wears the sheet's live colour, opening a menu with the style toggle and (one tap) the
+  swatches: `NotePaperColorToggle` gained `startExpanded` for exactly this. The compact capture
+  strips (MAIN / TOGGLE) are untouched.
+- The save-your-take note fields (Field Notes ×3, Marginalia, Reel Notes, Soundbite) were
+  switched onto the dock, so a note box is nothing but paper until a finger lands in it.
+
+### The journal page's own dock
+
+`PersonalWritingPage` now shows it only while the keyboard is genuinely up, and steps it aside on
+an 18dp downward scroll (the smallest upward nudge brings it back, and coming back to a field
+resets it) — the two rules the member asked for in one sentence.
+
+### Tap the page, and the writing lets go
+
+`Modifier.clearWritingOnOutsideTap()`: a tap no child consumed and that landed outside every
+registered paper folds the writing away (`focusManager.clearFocus()`). Editors register the paper
+they are written on (`richTextWritingRects`, keyed per editor, released on dispose) so a tap ON a
+note is never mistaken for a tap outside it. Wired into the enlarged card editor, the book's note
+sheet and the save page.
+
+### The full-screen editors wear the journal page
+
+Both already had the page background and the pinned dock; what was still different was the ink —
+they wrote in the neutral sans on a bordered chip. `RichTextEditor` gained `journalInk`
+(the app's `WritingFontFamily`, the hand the journal writes in), and both editors now pass it with
+`surface = Color.Transparent` and `showFieldBorder = false`, so the words sit straight on the page.
+
+### Still open from this instruction (not guessed at)
+
+- **The 28 portraits, fully redrawn** — a real art pass over `SocialAvatar.kt` (1792 lines), not
+  done here.
+- **The save-your-take lag** (both shells: `CaptureStudio` and the classic page) — not
+  diagnosed yet.
+
 ## Request (2026-09-18, batch P — the flip stops shifting, Portrait prints, and a quieter voice note)
 
 Live instruction: "the journal etc shifts when switichin gbetween edit and view due to the

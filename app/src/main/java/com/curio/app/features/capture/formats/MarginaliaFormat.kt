@@ -234,7 +234,8 @@ fun MarginaliaFormat(
                 placeholder = "What did this book make you think about?",
                 // v3xx — the journal joins the global text-history feed.
                 historyField = "My thoughts",
-                toolbarMode = RichTextToolbarMode.MAIN,
+                // v391 — the journal's floating dock (see ReelNotesFormat).
+                toolbarMode = RichTextToolbarMode.DOCK,
                 minHeight = 140.dp,
                 ink = paperInk(),
                 accent = MaterialTheme.colorScheme.tertiary,

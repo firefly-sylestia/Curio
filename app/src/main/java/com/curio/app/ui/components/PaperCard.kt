@@ -2091,12 +2091,16 @@ fun NotePaperColorToggle(
     onColorChange: (NotePaperColor) -> Unit,
     accent: Color = paperAccent(),
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    /** v391 — start with the swatches already out. The dock's own Palette
+     *  menu is a colour door, so its swatches are the first thing shown (the
+     *  chip's two-tap fold stays the default everywhere else). */
+    startExpanded: Boolean = false
 ) {
     // Collapsible: the six swatches hide behind a compact "Color" chip so
     // the toolbar rows stay clean; the chip's own dot shows the current
     // paper color, and tapping expands the swatch row below it.
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(startExpanded) }
     // Theme-aware on the dock/page: collapsed follows the theme's muted
     // tokens, expanded blooms in the accent (no hardcoded dark-mode bumps).
     val ink = if (expanded) accent else MaterialTheme.colorScheme.onSurfaceVariant
