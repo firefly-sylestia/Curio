@@ -22,6 +22,7 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -1162,13 +1163,21 @@ private fun PdfScrollReader(
     // is a page, and the only place two pages meet is the 10dp gap between them.
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val pageHeight = maxHeight
+        val zoomModifier = Modifier.pinchToZoom { zoom, _ ->
+            ReaderLook.pdfZoom = (ReaderLook.pdfZoom * zoom).coerceIn(1f, 4f)
+            if (ReaderLook.pdfZoom <= 1.02f) {
+                ReaderLook.pdfPanX = 0f
+                ReaderLook.pdfPanY = 0f
+            }
+        }
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
+                .then(zoomModifier)
                 .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
             contentPadding = PaddingValues(start = 14.dp, end = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
         items(count = pageCount, key = { page -> "pdf-page-$page" }) { page ->
             val bitmap by produceState<Bitmap?>(null, document, page) {
@@ -1192,13 +1201,15 @@ private fun PdfScrollReader(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(pageHeight)
+                    .then(
+                        bitmap?.let { rendered ->
+                            Modifier.aspectRatio(rendered.width.toFloat() / rendered.height.toFloat())
+                        } ?: Modifier.height(pageHeight)
+                    )
                     .onSizeChanged { container = it }
                     .pointerInput(page) {
                         detectTapGestures(
                             onTap = { onTap() },
-                            // A page whose words are in hand gives the press to
-                            // the sweep; a page of pictures keeps the old one.
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
                     },
@@ -1206,43 +1217,45 @@ private fun PdfScrollReader(
             ) {
                 val drawn = bitmap
                 if (drawn != null) {
-                    Image(
-                        bitmap = drawn.asImageBitmap(),
-                        contentDescription = "Page ${page + 1}",
-                        // FIT, not FillWidth: the page is fitted into the one
-                        // screen it is given, so no second page can be showing
-                        // under it.
-                        contentScale = ContentScale.Fit,
-                        colorFilter = readerPdfFilter(palette.inkKey),
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .graphicsLayer {
+                                scaleX = ReaderLook.pdfZoom
+                                scaleY = ReaderLook.pdfZoom
+                                translationX = ReaderLook.pdfPanX
+                                translationY = ReaderLook.pdfPanY
+                            }
                             .clip(RoundedCornerShape(6.dp))
-                    )
-                    words?.let { read ->
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            PdfPageTextLayer(
-                                text = read,
-                                page = page,
-                                bitmapSize = IntSize(drawn.width, drawn.height),
-                                container = container,
-                                palette = palette,
-                                highlights = highlightsFor(marks, page),
-                                selection = selection,
-                                onSelect = onSelect,
-                                onPagePress = { onLongPress(page) }
-                            )
+                    ) {
+                        Image(
+                            bitmap = drawn.asImageBitmap(),
+                            contentDescription = "Page ${page + 1}",
+                            contentScale = ContentScale.Fit,
+                            colorFilter = readerPdfFilter(palette.inkKey),
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        words?.let { read ->
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                PdfPageTextLayer(
+                                    text = read,
+                                    page = page,
+                                    bitmapSize = IntSize(drawn.width, drawn.height),
+                                    container = container,
+                                    palette = palette,
+                                    highlights = highlightsFor(marks, page),
+                                    selection = selection,
+                                    onSelect = onSelect,
+                                    onPagePress = { onLongPress(page) }
+                                )
+                            }
                         }
                     }
                 } else {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(320.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = palette.accent)
-                    }
+                    CircularProgressIndicator(color = palette.accent)
                 }
                 val marksHere = marks.count { it.positionIndex == page && !it.isPosition }
                 if (marksHere > 0) {
@@ -1261,8 +1274,8 @@ private fun PdfScrollReader(
                 }
             }
         }
-        }
     }
+}
 }
 
 /**
@@ -3579,34 +3592,31 @@ private fun Modifier.pinchToZoom(
 ): Modifier = pointerInput(Unit) {
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false)
-        var panning = false
         var last: Offset? = null
+        var hadMultiplePointers = false
         do {
             val event = awaitPointerEvent()
             val pressed = event.changes.filter { it.pressed }
             if (pressed.size >= 2) {
+                hadMultiplePointers = true
                 val zoom = event.calculateZoom()
                 val pan = event.calculatePan()
                 if (zoom != 1f || pan != Offset.Zero) {
                     onZoom(zoom, pan)
                     event.changes.forEach { it.consume() }
                 }
+                last = null
             } else if (pressed.size == 1 && zoomed()) {
-                // One finger on a zoomed page: a pan, claimed from the pager.
+                // Once zoomed, every one-finger move belongs to the page. This
+                // prevents the pager from interpreting the first drag after a
+                // pinch as a page turn.
                 val position = pressed.first().position
                 val previous = last
-                if (panning && previous != null) {
-                    onZoom(1f, position - previous)
-                    pressed.forEach { it.consume() }
-                } else {
-                    // The first move after the pinch lets go re-anchors; a tap
-                    // (no real travel) is left alone for the page's own tap.
-                    panning = (position - (previous ?: position)).getDistance() > 12f
-                    if (panning) pressed.forEach { it.consume() }
-                }
+                if (previous != null) onZoom(1f, position - previous)
+                if (hadMultiplePointers || previous != null) pressed.forEach { it.consume() }
                 last = position
             } else {
-                panning = false
+                hadMultiplePointers = false
                 last = null
             }
         } while (event.changes.any { it.pressed })

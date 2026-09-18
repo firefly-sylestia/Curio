@@ -158,6 +158,17 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            item { SettingsSectionHeading("Reading") }
+            item {
+                SettingsOptionCard {
+                    ExperimentSwitchRow(
+                        "Pinned title view",
+                        "Keep the current Book Review and Journal title visible while scrolling. Experimental.",
+                        AppPreferences.pinnedTitleViewState
+                    ) { AppPreferences.setPinnedTitleViewEnabled(context, it) }
+                }
+            }
+
             item { SettingsSectionHeading("Headers") }
             item {
                 SettingsOptionCard {

@@ -355,7 +355,7 @@ object AppPreferences {
             .apply()
     }
 
-    // ── Online Mode ──────────────────────────────────────────────────
+    // ── Online Mode ───────────────────────────────────��──────────────
     fun isOnlineModeEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_ONLINE_MODE_ENABLED, false)
 
@@ -1215,6 +1215,9 @@ object AppPreferences {
     // the current screen is frozen and peels away from where you tapped, a
     // touch faster than the theme wipe. Off = today's plain transitions.
     var screenRevealEnabledState by mutableStateOf(false)
+    // v394 — PINNED TITLES experiment (Settings ▸ Experiments, default OFF):
+    // keeps the current title line visible while scrolling Book Review and Journal.
+    var pinnedTitleViewState by mutableStateOf(false)
     // v3xx52 — CAPTURE STUDIO experiment (Settings ▸ Experiments, default OFF):
     // the Save-your-take page gets a redesigned workspace shell — tinted topic
     // hero, a take rail riding the bottom tray, pickers moved into a tools
@@ -1826,6 +1829,7 @@ object AppPreferences {
         glassClarityState = isGlassClarityEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
+        pinnedTitleViewState = isPinnedTitleViewEnabled(context)
         captureStudioState = isCaptureStudioEnabled(context)
         socialTextEditingState = isSocialTextEditingEnabled(context)
         mutedConversationsState = mutedConversations(context)
@@ -2172,6 +2176,7 @@ object AppPreferences {
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
+    private const val KEY_PINNED_TITLE_VIEW = "pinned_title_view_experiment"
     private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
   private const val KEY_SOCIAL_TEXT_EDITING = "social_text_editing_enabled"
   private const val KEY_MUTED_CONVERSATIONS = "social_muted_conversations"
@@ -2299,6 +2304,15 @@ object AppPreferences {
     fun setScreenRevealEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SCREEN_REVEAL, enabled).apply()
         screenRevealEnabledState = enabled
+    }
+
+    /** Whether the pinned title view experiment is on (default OFF). */
+    fun isPinnedTitleViewEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PINNED_TITLE_VIEW, false)
+
+    fun setPinnedTitleViewEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PINNED_TITLE_VIEW, enabled).apply()
+        pinnedTitleViewState = enabled
     }
 
     /** Whether the Capture studio experiment is on (default OFF; see the
@@ -3977,7 +3991,7 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_AUTO_BACKUP_URI, uri).apply()
     }
 
-    // v227c — auto-backup FREQUENCY in days: 1 = daily (the old fixed
+    // v227c �� auto-backup FREQUENCY in days: 1 = daily (the old fixed
     // cadence, still the default), 3, or 7. MainActivity reads this for
     // its due check; BackupToolsScreen renders the picker.
     val autoBackupFrequencyDaysOptions = intArrayOf(1, 3, 7)
