@@ -350,14 +350,18 @@ private fun JournalTopBar(
             Surface(
                 onClick = if (editing) onPickDate else ({}),
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.surfaceContainer
+                // v394 — THE DAY IS A FILLED PILL (user request: "make some
+                // button solid filled in journal: today date"): the accent's
+                // full colour under the day's own readable ink, the same
+                // pairing the Home doors wear — not a pale container wash.
+                color = personalAccent()
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
-                    CurioIcon(CurioIcons.CalendarToday, null, tint = personalAccentInk(), size = 15.dp)
+                    CurioIcon(CurioIcons.CalendarToday, null, tint = personalOnAccent(), size = 15.dp)
                     // v389 — the day MOVES when it changes (user report: "date
                     // switching isnt smooth"): a later day rises in and an
                     // earlier day drops in, so the arrow the thumb pressed and
@@ -382,7 +386,7 @@ private fun JournalTopBar(
                         Text(
                             if (millis.toLocalDate() == LocalDate.now()) "Today" else millis.prettyDate(),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = personalAccentInk()
+                            color = personalOnAccent()
                         )
                     }
                 }

@@ -26,12 +26,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
@@ -489,7 +487,6 @@ internal fun PersonalWritingPage(
     //      below). The threshold is what keeps a stray pixel of drift from
     //      flapping the dock in and out.
     val densityNow = LocalDensity.current
-    val keyboardUp = WindowInsets.ime.getBottom(densityNow) > 0
     var dockScrolledAway by remember { mutableStateOf(false) }
     LaunchedEffect(pageScroll) {
         val threshold = with(densityNow) { 18.dp.toPx() }
@@ -554,8 +551,8 @@ internal fun PersonalWritingPage(
         }
     }
     // Writing again is what asks for the tools back.
-    LaunchedEffect(editor.focusedId, keyboardUp) {
-        if (keyboardUp) dockScrolledAway = false
+    LaunchedEffect(editor.focusedId) {
+        dockScrolledAway = false
     }
 
     // ── THE PAGE'S OWN SECTIONS, HELD AT THE TOP (v389) ─────────────────
@@ -829,14 +826,17 @@ internal fun PersonalWritingPage(
         }
         }
 
-        // The dock rides the keyboard while the page is being WRITTEN and steps
-        // out of the way while it is being read. A live recording REPLACES it:
-        // the voice capsule is what the page's bottom is for while it runs.
+        // The dock rides with the page while it is being WRITTEN and steps
+        // out of the way only while it is being READ. A live recording REPLACES
+        // it: the voice capsule is what the page's bottom is for while it runs.
         //
-        // v391 — and "being written" now means the keyboard is actually up and
-        // the page was not just scrolled down through (see the two rules above).
+        // v394 — the dock NO LONGER WAITS FOR THE KEYBOARD (user request: "keep
+        // the tool visible in journal page when i close the keyboard dont hide
+        // it"): writing mode is the dock's home — the keyboard going down (to
+        // drag a photo, to read back a paragraph, to rest) never pulls the
+        // tools with it. It still yields to a recording and to a scroll down.
         AnimatedVisibility(
-            visible = editing && liveVoice == null && keyboardUp && !dockScrolledAway,
+            visible = editing && liveVoice == null && !dockScrolledAway,
             enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
             exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
             modifier = Modifier.fillMaxWidth()
@@ -1109,7 +1109,7 @@ internal fun PersonalModeSwitch(
         animationSpec = spring(dampingRatio = 0.82f, stiffness = 900f),
         label = "personal-mode-slide"
     )
-    val onInk = personalAccentInk()
+    val onInk = personalOnAccent()
     // The window is 34dp + the 2dp gap: one button each way.
     val travel = (slide.value * 36f).dp
     Surface(
@@ -1118,11 +1118,16 @@ internal fun PersonalModeSwitch(
         modifier = modifier
     ) {
         Box(modifier = Modifier.padding(3.dp)) {
+            // v394 — THE TRAVELLING HALF IS A SOLID FILL (user request: "make
+            // some button solid filled in journal: the eye and pen switch"). The
+            // airy 26% wash read as a selection, not a position; the accent's
+            // full colour under the lit icon reads as the switch it is. The
+            // lit icon wears the ink that sits ON the accent fill.
             Box(
                 modifier = Modifier
                     .offset(x = travel)
                     .size(34.dp)
-                    .background(color = accent.copy(alpha = 0.26f), shape = RoundedCornerShape(50))
+                    .background(color = accent, shape = RoundedCornerShape(50))
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
