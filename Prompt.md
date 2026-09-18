@@ -99,14 +99,27 @@ The next item in the order the user gave (chapters → **text beside small photo
 - **The line beside the print measures itself**, so a carried voice note or photo charges
   the right number of steps when it passes that slot.
 
+### Batch L (same session) — the cards' pictures, and read-side parity
+
+Two more asks, both closed.
+
+- **The art/artist/painter/author cards wear their own picture.** `ArtworkInfoSection`
+  resolves a cover per lane and persists it per topic (`artwork|`, `artist|`, `author|`),
+  the way the film/anime/song cards already do. `ArtworkFetch` gained `makerArtwork()` and
+  `portraitOrCover()` (Wikipedia's lead image for a person, else the first of their books
+  with a cover) and `worksBy(maker, limit)` — a card opens three records, the sheet eight,
+  and only the full list is cached. An artwork FITS its band (cropping a painting changes
+  what it is); a maker's work or a portrait fills it.
+- **The read view draws the beside pair now.** `PersonalDocView` and `PersonalCanvas` each
+  carried their OWN copy of the block renderer, which is why the pair existed only while
+  writing. The read view's line and print bodies are composable lambdas now
+  (`renderLine`, `renderPrint`) — the same code, reachable from one more place — and the
+  read view computes the same beside rule the editor does.
+
 ### Still open
 
-- **The READ view does not yet draw the beside-print pair** — `PersonalDocView` is a
-  separate renderer and still stacks the print over the line; the editor side (where the
-  request came from) does show it. Parity here needs the read renderer's text branch
-  extracted into its own composable.
 - The voice/photo carry's remaining placement glitches — last in the order the user gave,
-  and the off-by-one and the unmeasured slot above are the two found so far.
+  and the off-by-one and the unmeasured slot are the two found so far.
 - The topic-lane card the art/author sections use is a teaser card; whether an artwork's
   cover art should be fetched for it (as films/anime/songs do) is unasked.
 
