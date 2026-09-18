@@ -80,6 +80,54 @@ Everything else on this page is already in place for it (the block model splits 
 attachment dropped at the caret, and the two views share one renderer), so the work is the typing
 path, not the model. Asking before writing it.
 
+### 3a. The member's answer (recorded, so the next session starts from it)
+
+**Route A — rebuild the prose field on Compose's new `TextFieldState` API.** And the inline
+attachment takes ITS OWN PRINT SIZE: the same five sizes a standalone print has (`PAGE`, `HALF`,
+`PORTRAIT`, `SMALL`, `SMALL_PORTRAIT`), so a `PAGE`-sized attachment inside a paragraph takes the
+given measure and the words carry on below it. That is the member's own choice of consequence, and
+the flow must simply grow to hold it.
+
+### 3b. What the API actually offers (verified against the docs, not memory)
+
+This project is on Compose BOM `2026.05.01` (foundation `1.11.2`), well past the 1.8 release that
+introduced inline content in a text FIELD, so the pieces exist:
+
+- `TextFieldBuffer.addStyle(spanStyle, start, end)` — **only permitted inside an `OutputTransformation`**
+  unless `ComposeFoundationFlags.isBasicTextFieldStyledTextEnabled` is on; it is the supported way to
+  paint per-character marks in the new field, and the tracked-range form
+  (`addStyle(spanStyle, range, ExpandPolicy) -> TrackedRange<SpanStyle>`, with `spanStyle`,
+  `textRange`, `expandPolicy` as mutable properties and `getSpanStyles(range)` to read back)
+  REPLACES the per-character `IntArray` mask this page has used for marks.
+- `InlineTextContent(placeholder: Placeholder, children: @Composable (String) -> Unit)` — the placeholder
+  is what reserves the room in the text line ("different from a regular composable, a Placeholder is
+  also needed for text layout to reserve space"), which is exactly the printing-frame-shaped hole an
+  attached print needs, at whatever size the print's own key says.
+- `TextFieldState` + `TextFieldBuffer` (replace/insert/delete/placeCursor*/selectAll,
+  `originalText`/`originalSelection`/`revertAllChanges`, `ChangeList`) is the editing model the field is
+  driven by now.
+
+### 3c. The migration, in the order it should be done
+
+1. **The state, not the view.** One `TextFieldState` per prose block id, created from the block's
+   stored text; the DOC stays the source of truth and the existing plumbing (`onFieldChange`,
+   `mask`, `selection`, split/merge, undo, save) is fed from a snapshot sync, so nothing outside this
+   field has to change in the same step. Marks move to an `OutputTransformation` `.addStyle(…)` pass
+   built from the block's mask runs — the mask itself can stay the stored shape until step 4.
+2. **The inline content.** `inlineRefs: List<String>` on `PersonalBlock` (serialized with the rest),
+   the attachment inserted at the caret as its placeholder, and the placeholder's `children` drawing
+   the print at its own size — the same `PersonalPhotoBlock`/voice strip the standalone row draws, so
+   a print looks like itself inline or not.
+3. **The read view.** `BasicText(inlineContent = …)` with one `InlineTextContent` per placeholder, so
+   the page reads back exactly what was written (the read view and the editor must share the
+   placeholder's size rule or an inline print will jump on switch).
+4. **Then the marks.** Fold the mask into the field's own tracked spans (step 1's output pass becomes
+   the real store), which is what makes a mark survive inside an attachment-bearing paragraph without
+   a parallel index table.
+
+Each step is a CI cycle of its own: the new-API opt-ins, the flag name and the placeholder-measure
+rule cannot be confirmed from here, only by the compiler.
+
 ## Follow-ups from earlier batches (still open, unchanged)
 
 - Inline bold/italic inside an EPUB paragraph (`stripMarkup` drops every tag).
