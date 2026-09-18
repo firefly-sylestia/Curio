@@ -20,6 +20,29 @@
 -keep enum com.curio.app.data.NotePaperColor { *; }
 -keep enum com.curio.app.data.JournalMood { *; }
 
+# v389d — INCURSION, and the one Gson model that reads JSON THIS APP DID NOT
+# WRITE. The viewing order lives in `assets/incursion/{marvel,sony,xmen}.json`
+# and is parsed with plain Gson, so the files' keys have to match the model's
+# field names at RUNTIME. Without this, R8 renames every field in the release
+# build, Gson matches no key at all, and each studio arrives as an empty shell:
+# the page rendered with nothing in it, and Marvel (130 of the 163 rows) was
+# gone first because the destination falls back to Essentials when its own tab
+# has no content. The debug build was flawless, which is what made it look like
+# a data problem for so long.
+-keep class com.curio.app.data.IncursionStudio { *; }
+-keep class com.curio.app.data.IncursionGroup { *; }
+-keep class com.curio.app.data.IncursionEntry { *; }
+
+# The same reflection over data this app WRITES: the Room type converters keep a
+# book's chapters, an album's tracks and a series' episodes as Gson JSON, so a
+# build whose obfuscation map differs from the one that wrote the row reads the
+# lists back empty (a book losing its chapter names after an update, a lookup
+# that suddenly finds nothing). Keeping the field names makes what one build
+# stored readable by every later one.
+-keep class com.curio.app.data.BookChapter { *; }
+-keep class com.curio.app.data.AlbumTrack { *; }
+-keep class com.curio.app.data.SeriesEpisode { *; }
+
 # Preserve Gson's generic signatures and annotations used by reflective model
 # parsing. R8 still shrinks unrelated implementation code.
 -keepattributes Signature

@@ -2,8 +2,10 @@ package com.curio.app.features.incursion
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.IncursionCatalog
 import com.curio.app.data.IncursionEntry
@@ -568,105 +571,193 @@ private fun GroupHeader(
 ) {
     val accent = settingsRoseAccent()
     val keys = entries.map { it.storageKey }
+    val statuses = IncursionStore.statusState
     val watched = IncursionStore.count(keys) { it == IncursionStore.Status.WATCHED }
     val decided = IncursionStore.count(keys) { it.decided }
-    var menu by remember { mutableStateOf(false) }
-    Column(modifier = Modifier.padding(top = 12.dp, bottom = 2.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    group.label?.takeIf { it.isNotBlank() } ?: group.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onSurface
+    // THE ONE STATE THE WHOLE PHASE WEARS, when every row in it agrees. That chip
+    // then reads as taken, which is how a glance says "this phase is done"
+    // without counting rows; while the rows disagree (the usual case) nothing is
+    // pressed and the tally above is what speaks.
+    val unanimous = IncursionStore.Status.entries.firstOrNull { candidate ->
+        keys.isNotEmpty() && keys.all { key ->
+            val status = statuses[key]?.let { IncursionStore.Status.entries.getOrNull(it) }
+            (status ?: IncursionStore.Status.UNWATCHED) == candidate
+        }
+    }
+    // The block's own kind and name: "PHASE / Phase 1" for Marvel, "ERA 1 /
+    // Original Trilogy" for a line that numbers its eras as well as naming them.
+    val eyebrow = (group.label ?: studio.groupLabel).uppercase()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 14.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                lerp(
+                    MaterialTheme.colorScheme.surface,
+                    accent,
+                    if (isCurioDarkTheme()) 0.16f else 0.07f
                 )
-                if (group.label != null && group.tagline != null) {
-                    Text(
-                        group.tagline,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            // The phase's own tally, and its own action: this is the bulk-watch
-            // gesture the whole list is built around.
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                eyebrow,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.3.sp,
+                color = accent
+            )
+            Spacer(Modifier.weight(1f))
+            // The phase's own tally, right where the phase's own name is.
             Text(
                 "$watched/${keys.size}",
                 style = MaterialTheme.typography.labelMedium,
-                color = accent,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.ExtraBold,
+                color = accent
             )
-            Spacer(Modifier.width(8.dp))
-            Box {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = lerp(
-                        MaterialTheme.colorScheme.surface,
-                        accent,
-                        if (isCurioDarkTheme()) 0.22f else 0.12f
-                    ),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .clickable { menu = true }
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.TaskAlt,
-                            contentDescription = null,
-                            tint = accent,
-                            size = 15.dp
-                        )
-                        Spacer(Modifier.width(5.dp))
-                        Text(
-                            "Mark all",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = accent
-                        )
-                    }
-                }
-                CurioDropdownMenu(
-                    expanded = menu,
-                    onDismissRequest = { menu = false },
-                    accent = accent,
-                    header = {
-                        Text(
-                            "${group.name} · ${keys.size} titles",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
-                        )
-                    }
-                ) {
-                    IncursionStore.Status.entries.forEach { status ->
-                        CurioDropdownItem(
-                            text = { Text(status.label) },
-                            accent = accent,
-                            leadingIcon = {
-                                StatusDot(status = status, size = 12.dp)
-                            },
-                            onClick = {
-                                menu = false
-                                onBulk(keys, status)
-                            }
-                        )
-                    }
-                    if (decided > 0) {
-                        CurioDropdownItem(
-                            text = { Text("Clear this ${studio.groupLabel.lowercase()}") },
-                            accent = accent,
-                            danger = true,
-                            onClick = {
-                                menu = false
-                                onClear(keys, group.name)
-                            }
-                        )
-                    }
-                }
+        }
+        if (group.name.isNotBlank()) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                group.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        // The block's own words: its tagline where upstream wrote one, and the
+        // summary it carries otherwise. Two lines is the whole of it — this is a
+        // heading, not a synopsis.
+        val words = group.tagline?.takeIf { it.isNotBlank() }
+            ?: group.summary?.takeIf { it.isNotBlank() }
+        words?.let { line ->
+            Spacer(Modifier.height(3.dp))
+            Text(
+                line,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.height(9.dp))
+        // How far into the phase the member is, as one bar in the phase's own
+        // accent — the header's bar, at the size of a card.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(
+                        if (keys.isEmpty()) 0f else (watched.toFloat() / keys.size).coerceIn(0f, 1f)
+                    )
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(accent)
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        // ── PHASE BULK SELECT ──────────────────────────────────────────────
+        // The six states as themselves, on the phase they apply to: one tap
+        // takes the whole block to that state. This was a "Mark all" menu
+        // behind a tap, which meant the page's central gesture was invisible
+        // until you went looking for it. The row scrolls rather than wraps, so
+        // a phase header is three lines tall whatever the phone's width.
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.horizontalScroll(rememberScrollState())
+        ) {
+            IncursionStore.Status.entries.forEach { status ->
+                PhaseStatusChip(
+                    status = status,
+                    pressed = status == unanimous,
+                    onClick = { onBulk(keys, status) }
+                )
             }
+            if (decided > 0) {
+                PhaseClearChip(
+                    label = "Clear ${studio.groupLabel.lowercase()}",
+                    onClick = { onClear(keys, group.name) }
+                )
+            }
+        }
+    }
+}
+
+/** One state of the phase's bulk select — the whole block, in one tap. */
+@Composable
+private fun PhaseStatusChip(
+    status: IncursionStore.Status,
+    pressed: Boolean,
+    onClick: () -> Unit
+) {
+    val ink = statusInk(status)
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (pressed) {
+            ink.copy(alpha = if (isCurioDarkTheme()) 0.26f else 0.15f)
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        border = BorderStroke(
+            1.dp,
+            if (pressed) ink.copy(alpha = 0.5f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+        ),
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
+        ) {
+            StatusDot(status = status, size = 8.dp)
+            Spacer(Modifier.width(5.dp))
+            Text(
+                status.label,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (pressed) FontWeight.Bold else FontWeight.Medium,
+                color = if (pressed) ink else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** Putting a phase back to "not watched" — offered only once something is set. */
+@Composable
+private fun PhaseClearChip(label: String, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.35f)),
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
+            CurioIcon(
+                name = CurioIcons.Refresh,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                size = 12.dp
+            )
+            Spacer(Modifier.width(5.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.error
+            )
         }
     }
 }
@@ -700,7 +791,7 @@ private fun EntryRow(entry: IncursionEntry, onOpen: () -> Unit) {
                     )
             ) {
                 Text(
-                    entry.order.toString(),
+                    entry.orderLabel,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = if (status == IncursionStore.Status.WATCHED) ink
@@ -751,8 +842,14 @@ private fun entryMeta(entry: IncursionEntry): String = buildList {
     if (entry.type.lowercase() == "series") {
         val season = entry.season
         val episodes = entry.episodes
+        // A stated range beats a count: upstream names which episodes a row is
+        // ("S1 Eps 8–12" is a block of the season, not a season), and for the
+        // rows that carry no count at all it is the only thing there is to say.
+        val range = entry.episodeRange
         val body = when {
+            season != null && range != null -> "S$season · ep $range"
             season != null && episodes != null -> "S$season · $episodes ep"
+            range != null -> "ep $range"
             season != null -> "S$season"
             episodes != null -> "$episodes ep"
             else -> null
@@ -900,7 +997,7 @@ private fun EntryTile(entry: IncursionEntry, onOpen: () -> Unit) {
             Column(Modifier.padding(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "#${entry.order}",
+                        "#${entry.orderLabel}",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = settingsRoseAccent()

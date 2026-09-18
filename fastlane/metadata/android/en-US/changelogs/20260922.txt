@@ -9,6 +9,7 @@ FIX:
 - Reading: a PDF page is drawn for the screen it is on — it was rendered at a fixed size and then stretched back up, which is what made it soft on a high-density phone — and the foot of the reader no longer states the page a second time while the page bar is already saying it.
 - Reading: the scrolling reader shows ONE page at a time again — every page takes the screen it is given and fits inside it, so a page and the next one's top are no longer stacked under each other.
 - Reading: a book's own contents keep their shape — a part's chapters are indented and marked by their level, from the EPUB's nav document, its NCX and a PDF's outline alike, instead of reading as one flat list.
+- Books: a book keeps its chapters, an album its tracks and a series its episodes after an update — the stored lists are kept readable across builds instead of an update being able to read them back empty.
 - Social: the wall opens on the page this phone already has — "Last 24 hours" and its cards are on screen from the first frame, instead of the section arriving a beat late and a "Nothing here yet" card showing before the wall you already had.
 - Social: the session is read before the page paints, so a signed-in account no longer opens on "Sign in to see the social wall" and then swap to the wall.
 - Social: the Moderation door is remembered from the last time the server confirmed it, so it is on the page the moment Social opens instead of a check later — and that check still corrects it.
@@ -40,7 +41,8 @@ ADD:
 - Reading: a typeset book's own printed page numbers — the Contents sheet can show the page-list the edition carries, so "printed page 42" is a place to jump to, not a guess.
 - Incursion: a hidden page holding the whole viewing order — every Marvel, Sony and X-Men film, series and short, in the order they are meant to be watched, with the essentials marked. It is not in any menu: type "i love you 3000" into any search box in the app and it unlocks, then opens from a floating "Incursion" button on Home.
 - Incursion: mark any title not watched, watching, planning, watched, on hold or dropped — the list says how far through you are, and the filter chips narrow it to essentials, what is left, what is in progress or what is done.
-- Incursion: mark a WHOLE PHASE in one tap — each phase (or era) header carries its own action for all six states, and can clear itself again after asking.
+- Incursion: each phase is a card of its own — its name, what the phase is about, a bar for how far into it you are, and all six states as chips along its foot. A whole phase is one tap on that chip, and the phase can clear itself again after asking.
+- Incursion: a title's line says how much of it there is — a season's own episode range where the data states one (S1 · ep 8-12), which is all of what the seven X-Men seasons that carry no episode count have to say.
 - Incursion: list or grid, whichever you like reading a shelf in — two tiles across with each title's order and status, phases still heading their own blocks so the one-tap phase marking works in either view.
 - Writing: a photo is a print now — a page, half or small one chosen from the frame's own corner, sized as a share of the text's measure so nothing can ever land on top of it, with the caption written in the frame's wide bottom border.
 - Writing: a photo can be picked up and carried to another place on the page, exactly like a voice note.

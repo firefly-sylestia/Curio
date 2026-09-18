@@ -2,6 +2,10 @@ package com.curio.app.data
 
 import android.content.Context
 import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -47,8 +51,15 @@ data class IncursionGroup(
 
 data class IncursionEntry(
     val id: Int = 0,
-    /** Position in the viewing order — see the class note above. */
-    val order: Int = 0,
+    /**
+     * Position in the viewing order — see the class note above.
+     *
+     * A DOUBLE, because upstream's sequence genuinely has halves: X-Men '97's
+     * first season sits at 154.1, between two films numbered 154 and 155. It was
+     * an Int here, Gson's int reader throws on a decimal, and that single value
+     * silently cost the whole 130-row studio its place on the page.
+     */
+    val order: Double = 0.0,
     /** The [IncursionGroup] this falls under. */
     val group: Int = 0,
     val type: String = "film",
@@ -63,6 +74,14 @@ data class IncursionEntry(
     val seriesGroup: String? = null,
     val season: Int? = null,
     val episodes: Int? = null,
+    /**
+     * The episodes this row covers, where upstream states them (a season, or a
+     * block of one). Seven of the X-Men rows — every Legion, The Gifted and
+     * X-Men '97 season — carry ONLY these and have no episode count at all, so
+     * without them those rows said nothing about how much they are.
+     */
+    val epStart: Int? = null,
+    val epEnd: Int? = null,
     val runtime: Int? = null,
     val releaseDate: String? = null,
     val releaseLabel: String? = null,
@@ -79,6 +98,27 @@ data class IncursionEntry(
      */
     @Transient
     var storageKey: String = ""
+
+    /**
+     * The order as a row shows it: `154`, or `154.1` where upstream inserted a
+     * title between two numbers. The sequence is upstream's, so the label is
+     * too; nothing here rounds it into a position it does not have.
+     */
+    val orderLabel: String
+        get() = if (order % 1.0 == 0.0) order.toInt().toString() else order.toString()
+
+    /** `8-12`, or `16` for a single episode, when upstream states the range. */
+    val episodeRange: String?
+        get() {
+            val start = epStart
+            val end = epEnd
+            return when {
+                start != null && end != null && start != end -> "$start-$end"
+                end != null -> end.toString()
+                start != null -> start.toString()
+                else -> null
+            }
+        }
 
     /** A film / series / short, as the row should name it. */
     val typeLabel: String get() = when (type.lowercase()) {
@@ -120,7 +160,14 @@ object IncursionCatalog {
         val json = context.assets.open("incursion/$name.json").use { stream ->
             stream.bufferedReader().readText()
         }
-        val studio = gson.fromJson(json, IncursionStudio::class.java) ?: IncursionStudio()
+        // A strict parse first, then the same file read field by field. The
+        // fallback exists because of how this failed once: ONE `order` written
+        // 154.1 made Gson's int reader throw, the exception was swallowed by the
+        // caller's `runCatching`, and the whole 130-row studio disappeared from
+        // the page with nothing said about it. A single unexpected value must
+        // cost at most that value, never the list.
+        val parsed = runCatching { gson.fromJson(json, IncursionStudio::class.java) }.getOrNull()
+        val studio = parsed?.takeIf { it.entries.isNotEmpty() } ?: lenient(json, name)
         // The storage key is stamped here rather than in the JSON: it is a fact
         // about the app's own storage, not about upstream's data, and stamping
         // it at the one place the data enters the app means no screen can
@@ -129,6 +176,82 @@ object IncursionCatalog {
             entries = studio.entries.map { it.apply { storageKey = "${studio.id}:$id" } }
         )
     }
+
+    /**
+     * The same file, read field by field with nothing that can throw.
+     *
+     * Reached only when the strict parse throws or comes back empty, so the
+     * working path pays nothing for it. Every read answers a VALUE whatever the
+     * JSON holds — a missing key, a null, a number where a string was expected —
+     * so a single odd row decides that row, not the page.
+     */
+    private fun lenient(json: String, name: String): IncursionStudio {
+        val root = runCatching { JsonParser.parseString(json).asJsonObject }.getOrNull()
+            ?: return IncursionStudio(id = name, name = name)
+        return IncursionStudio(
+            id = root.string("id").ifBlank { name },
+            name = root.string("name").ifBlank { name },
+            blurb = root.string("blurb"),
+            groupLabel = root.string("groupLabel").ifBlank { "Phase" },
+            groups = root.objects("groups").map { row ->
+                IncursionGroup(
+                    id = row.int("id"),
+                    label = row.string("label").takeIf { it.isNotBlank() },
+                    name = row.string("name"),
+                    tagline = row.string("tagline").takeIf { it.isNotBlank() },
+                    summary = row.string("summary").takeIf { it.isNotBlank() }
+                )
+            },
+            entries = root.objects("entries").map { row ->
+                IncursionEntry(
+                    id = row.int("id"),
+                    order = row.number("order"),
+                    group = row.int("group"),
+                    type = row.string("type").ifBlank { "film" },
+                    title = row.string("title"),
+                    year = row.int("year").takeIf { it > 0 },
+                    essential = row.bool("essential"),
+                    ageRating = row.string("ageRating").takeIf { it.isNotBlank() },
+                    prereq = row.string("prereq").takeIf { it.isNotBlank() },
+                    desc = row.string("desc").takeIf { it.isNotBlank() },
+                    tmdbId = row.int("tmdbId").takeIf { it > 0 },
+                    seriesGroup = row.string("seriesGroup").takeIf { it.isNotBlank() },
+                    season = row.int("season").takeIf { it > 0 },
+                    episodes = row.int("episodes").takeIf { it > 0 },
+                    epStart = row.int("epStart").takeIf { it > 0 },
+                    epEnd = row.int("epEnd").takeIf { it > 0 },
+                    runtime = row.int("runtime").takeIf { it > 0 },
+                    releaseDate = row.string("releaseDate").takeIf { it.isNotBlank() },
+                    releaseLabel = row.string("releaseLabel").takeIf { it.isNotBlank() },
+                    releaseStatus = row.string("releaseStatus").takeIf { it.isNotBlank() }
+                )
+            }
+        )
+    }
+
+    // ── The lenient readers ─────────────────────────────────────────────
+    // Each answers a value for anything at all: a missing key, an explicit null,
+    // a value of the wrong shape. They are what makes the fallback above
+    // impossible to break with bad data.
+
+    private fun JsonObject.string(key: String): String =
+        runCatching { (get(key) as? JsonPrimitive)?.takeIf { it.isString }?.asString.orEmpty() }
+            .getOrDefault("")
+
+    private fun JsonObject.int(key: String): Int =
+        runCatching { (get(key) as? JsonPrimitive)?.asInt ?: 0 }.getOrDefault(0)
+
+    /** A number in an int's place (upstream's `154.1`) is still the number it is. */
+    private fun JsonObject.number(key: String): Double =
+        runCatching { (get(key) as? JsonPrimitive)?.asDouble ?: 0.0 }.getOrDefault(0.0)
+
+    private fun JsonObject.bool(key: String): Boolean =
+        runCatching { (get(key) as? JsonPrimitive)?.asBoolean ?: false }.getOrDefault(false)
+
+    private fun JsonObject.objects(key: String): List<JsonObject> =
+        runCatching { (get(key) as? JsonArray)?.mapNotNull { it as? JsonObject } }
+            .getOrNull()
+            .orEmpty()
 
     /** Every studio's essentials, for the page's Essentials tab. */
     fun essentials(studios: List<IncursionStudio>): List<Pair<IncursionStudio, IncursionEntry>> =
