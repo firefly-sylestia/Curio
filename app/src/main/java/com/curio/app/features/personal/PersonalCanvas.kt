@@ -1984,24 +1984,39 @@ internal fun PersonalCanvas(
         // the text wrapper's width between them, like the "side by side" the
         // member asked for. The SECOND of each pair is flagged so the loop
         // skips it as a standalone block.
-        val pairSkips = remember(state.blockIds) {
+        //
+        // v389d — NOT REMEMBERED, deliberately. Both answers are read straight
+        // from the page every time it composes (a photo's size and the words
+        // under it are exactly the things the member changes while looking at
+        // them), which is also what keeps the two passes from disagreeing: a
+        // remembered pair set flipped a resized print out of the page for good.
+        val pairSkips = mutableSetOf<String>()
+        val besideSkips = mutableSetOf<String>()
+        run {
             val ids = state.blockIds
-            val skips = mutableSetOf<String>()
             var i = 0
             while (i < ids.size - 1) {
                 val a = state.block(ids[i])
                 val b = state.block(ids[i + 1])
-                if (a?.isPhoto == true && b?.isPhoto == true &&
+                val paired = a?.isPhoto == true && b?.isPhoto == true &&
                     state.photoSize(ids[i]) != PersonalPhotoSize.PAGE &&
                     state.photoSize(ids[i + 1]) != PersonalPhotoSize.PAGE
-                ) {
-                    skips.add(ids[i + 1])
-                    i += 2
-                } else {
-                    i += 1
+                val beside = !paired && a?.isPhoto == true &&
+                    state.photoSize(ids[i]) == PersonalPhotoSize.SMALL &&
+                    b != null && !b.isPhoto && !b.isAudio &&
+                    b.text.isNotBlank() && b.photo.isNullOrBlank()
+                when {
+                    paired -> {
+                        pairSkips.add(ids[i + 1])
+                        i += 2
+                    }
+                    beside -> {
+                        besideSkips.add(ids[i + 1])
+                        i += 2
+                    }
+                    else -> i += 1
                 }
             }
-            skips
         }
         state.blockIds.forEachIndexed { index, id ->
             val block = state.block(id) ?: return@forEachIndexed
@@ -2135,6 +2150,48 @@ internal fun PersonalCanvas(
                                 }
                             }
                         }
+                    } else if (nextBlock != null && nextId != null &&
+                        besideSkips.contains(nextId)
+                    ) {
+                        // v389d — THE PRINT BESIDE THE WRITING. The print keeps
+                        // its own column, its own carry and its own size menu;
+                        // the words sit next to it on the same baseline, with
+                        // the row's own gap between them so a finger can still
+                        // reach the print's corner to resize it.
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(Modifier.weight(0.42f)) {
+                                PersonalMovableBlock(
+                                    id = id, index = index, state = state,
+                                    drag = rowDrag, enabled = enabled
+                                ) {
+                                    PersonalPhotoBlock(
+                                        uri = block.photo.orEmpty(),
+                                        caption = state.caption(id),
+                                        size = state.photoSize(id),
+                                        ink = ink, accent = accent,
+                                        enabled = enabled,
+                                        onCaption = { state.setCaption(id, it) },
+                                        onSize = { state.setPhotoSize(id, it) },
+                                        onRemove = { state.removeBlock(id) },
+                                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                                    )
+                                }
+                            }
+                            Box(Modifier.weight(0.58f)) {
+                                PersonalTextBlock(
+                                    id = nextId,
+                                    state = state,
+                                    ink = ink,
+                                    accent = accent,
+                                    enabled = enabled,
+                                    onTitlePosition = titleReport
+                                )
+                            }
+                        }
                     } else {
                         // v389 — A PHOTO CAN BE CARRIED TOO (user request:
                         // "similiar to voive note reorder add for photo reorder
@@ -2206,6 +2263,8 @@ internal fun PersonalCanvas(
                             onTitlePosition = titleReport
                         )
                     }
+                } else if (besideSkips.contains(id)) {
+                    // v389d — drawn inside the print above it (see [besideSkips]).
                 } else {
                     PersonalTextBlock(
                         id = id,
