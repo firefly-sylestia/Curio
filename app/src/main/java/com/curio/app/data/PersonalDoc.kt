@@ -24,10 +24,17 @@ import kotlin.math.roundToInt
  * [PersonalBlock.align] carries the paragraph's alignment, so every tool the
  * journal offers round-trips exactly.
  *
- * A block's text may hold newlines: blocks are not lines. A block is only ever
- * split when a PHOTO is inserted at the caret (that is the one thing plain
- * text cannot express), so typing, undo and the IME behave like an ordinary
- * multi-line field.
+ * A block's text may hold newlines: blocks are not lines. v389e — a PROSE block
+ * is a whole paragraph (Enter writes a newline into it), which is what keeps an
+ * entry ONE text field: the platform's own Select all, its drag handles, its
+ * cut and its undo then behave like ordinary writing instead of stopping at the
+ * edge of a field that held a single line.
+ *
+ * A block is split only where a LINE really is the page's unit: a photo or a
+ * voice note dropped at the caret (the one thing plain text cannot express), a
+ * checklist or bullet row (whose dot or box is drawn once, at the row's own
+ * height, and whose Enter means "the next item"), and a heading, which goes on
+ * a line of its own so every view reads it as one.
  *
  * NOTE ON STORAGE SHAPE: [PersonalRun] is deliberately NOT the capture
  * editor's `TextSpan` (ui/components/RichTextEditor.kt). They look alike, they

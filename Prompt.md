@@ -1,5 +1,64 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch S — why Select all only takes one line, and the line tools)
+
+Live instruction: "now for the journal page text writings and all tell me how it works and why
+it doesnt let me select all conenncted texts and just selects one line only. we will be properly
+fixing it, also fixing soe tool issues. example for the title tool that particular line should
+automatically get the title format when title is selected or the whole connecded paragrph" —
+followed by the confirmation that narrowed it down: "the select all is android own select all,
+also i think the problem is when i do enter oraste something it creates a totally new text block
+and for that reason the select all works only for that text block, something like that, and this
+issue isnt on the save your take notes text blocks the neter works fine."
+
+**Status: DONE and pushed (`v389e`).** The user was right on every point.
+
+### The diagnosis (what was told back, and what the code says)
+
+A journal page's body is a `PersonalDoc`: a list of `PersonalBlock`s, each drawn as its OWN
+`BasicTextField` (`PersonalCanvas.kt:2417`). v389 had made every newline a block split —
+`onPreviewKeyEvent` intercepted Enter into `splitAtCaret`, and any newline that reached the field
+was deferred one frame (`pendingSplit`) then cut into one block per line by `splitOnNewlines`.
+So a 5-line paragraph was 5 blocks, and Compose selection is scoped to ONE editable field: the
+platform's own Select all, its drag handles, its cut, its word movement and its IME batches all
+stop at the field's edge, which is exactly "it only selects one line". The save-your-take note is
+fine because `RichTextEditor` is a single field with `\n` inside the string.
+
+The title tool was a second, separate bug: with nothing selected, `toggle(flag)` did not touch
+the line at all — it armed `armed`/`armedOff` for the NEXT keystroke. Tapping Title on a line
+already written therefore changed nothing visible. Its siblings disagreed with it: `toggleListStyle`
+and `applyMarker` fell back to the whole line, and `setAlign` always acted on the block.
+
+Decided with ask_user: (1) Enter model — **prose paragraphs, lists stay rows**; (2) paragraph
+scope — **the line the caret is on** for the line tools; (3) align — **the whole page**, existing
+lines only.
+
+### What changed
+
+1. **Enter is a newline in prose.** `lineStartsNewRow(id)` decides: the to-do page
+   (`keepsChecklistRows`), a line carrying one of the new `LINE_FLAGS` (title, small, bullet,
+   checkbox), or an empty line with a list tool armed. Everything else lets the field write the
+   newline, and the deferred split (`onFieldChange` → `pendingSplit`) is gated on the same call —
+   so an entry is ONE text field again and the platform's selection is the whole entry.
+2. **`isolateCaretLine(id)`** puts the caret's line on a block of its own (before, line, after;
+   the two seam newlines dropped) when a line tool is applied, so a heading, a small note, a
+   bullet item and a checklist row keep the per-block furniture every view already reads
+   (the display serif, the drawn dot and box, the book review's pinned chapter, the read views).
+3. **The line tools act on the line.** `toggle(FLAG_TITLE/FLAG_SMALL)`, `toggleListStyle` and
+   `applyMarker` now set the caret's line (isolating it first) instead of arming; an EMPTY line
+   still arms, which is what "Add chapter" opens with. A non-collapsed selection still means
+   exactly the words chosen. The character tools (bold, italic, underline, strike, quote, pen,
+   font) keep their input-style behaviour, as the user asked for earlier.
+4. **Align is the page's.** `setAlign` sets every block; a line typed afterwards keeps its
+   block's alignment, a new block starts left.
+5. **Select all.** `pageIsOneField()` keeps the platform's own Select all on a one-field page
+   (real handles, real cut) and takes over only on a page that really is several fields — both
+   the toolbar override and Ctrl+A ask it.
+
+Honest limits: notes written before this pass keep their existing block boundaries (their lines
+stay separate fields until retyped — no silent rewrite of anybody's notes), and Gradle cannot run
+in this environment, so the verification is the project's brace checker plus a usage sweep.
+
 ## Request (2026-09-18, batch R — the save page lag, and the branch lands on main)
 
 Live instruction: "check the end of the prompt also merge this branch to the main and work on
@@ -3172,6 +3231,22 @@ missing-envelopes RPCs, comment edit column/trigger/policy, dm_messages
 edited_at + edit guard/policy are all in the file but NOT live until pasted.
 
 ## User prompts
+
+### Prompt (2026-09-18, DONE in this push — batch S: Select all, and the line tools)
+
+Verbatim, first: "now for the journal page text writings and all tell me how it works and why
+it doesnt let me select all conenncted texts and just selects one line only. we will be properly
+fixing it, also fixing soe tool issues. example for the title tool that particular line should
+automatically get the title format when title is selected or the whole connecded paragrph,
+please tell me hats the behavriour issue and we will fix it" — then the confirmation: "the
+select all is android own select all, also i think the problem is when i do enter oraste something
+it creates a totally new text block and for that reason the select all works only for that text
+block, something like that, and this issue isnt on the save your take notes text blocks the neter
+works fine."
+
+Status: DONE — answered and fixed (see batch S at the top of this log). The user's read of the
+cause was exactly right: Enter and paste were cutting the entry into one block per line, so the
+platform's Select all could only reach the field it was in.
 
 ### Prompt (2026-09-16, ANSWERED — push approved; Follow members + Quote-repost chosen as the next build)
 

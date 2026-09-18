@@ -51,6 +51,24 @@ internal val ALL_FLAGS = intArrayOf(
  */
 internal val ALL_FLAGS_MASK = ALL_FLAGS.fold(0) { mask, flag -> mask or flag }
 
+/**
+ * v389e — THE LINE'S OWN TOOLS: the flags that describe a LINE rather than the
+ * letters written on it (a heading, a small note, a bullet item, a checklist
+ * row).
+ *
+ * A character tool (bold, italic, a marker pen) is about the words; one of
+ * these is about the line those words sit on. That is why the dock points them
+ * at the line the caret is in, why they take effect the moment they are tapped
+ * instead of arming the next keystroke, and why Enter ENDS such a line rather
+ * than carrying on inside it — a heading is one line, and a list item is one
+ * row.
+ */
+internal val LINE_FLAGS = intArrayOf(FLAG_TITLE, FLAG_SMALL, FLAG_BULLET, FLAG_CHECKBOX)
+
+/** The same bits as a mask — what a line with nothing written on it can still
+ *  be ARMED as. */
+internal val LINE_FLAGS_MASK = LINE_FLAGS.fold(0) { mask, flag -> mask or flag }
+
 // ── v389 — THE MARKER PEN ─────────────────────────────────────────────
 //
 // A highlighter is a COLOUR, not a yes/no, and the mask is one int per

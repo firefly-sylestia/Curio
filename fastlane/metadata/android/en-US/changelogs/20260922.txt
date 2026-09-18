@@ -32,7 +32,10 @@ FIX:
 - Writing: a marker's colour and the face a line is set in travel with the words, so both survive Enter, a paste and reopening the page.
 - Reading: tapping the page brings the head and foot back — they used to hide themselves and then be unreachable, because every paragraph swallowed the tap.
 - Writing: tapping bold, italic, underline, strike, size or quote with nothing selected now sets what you type NEXT instead of rewriting the line you are on.
-- Writing: Enter is a new line — paste a paragraph and it arrives as its own lines, so you can drop a voice note between them and Select all works.
+- Writing: Enter keeps the writing together — a journal entry, a book review and a note are ONE text field again, so Android's own Select all, its drag handles and its cut take the whole entry instead of one line of it. A paste lands the same way, and a checklist or bullet row still starts a new row on Enter.
+- Writing: the title tool sets the LINE you are on — tapping it while writing a heading turns that line into the heading there and then, for the book's review and chapter pages as much as a journal, instead of only changing what you type next.
+- Writing: a heading, a small note and a list line stand on their own line of the page, so Enter under a heading starts prose and Enter under a bullet starts the next item.
+- Writing: the align tools take the whole page — left, centred, right and justified set every line at once, so a page cannot end up half one way and half another.
 - Writing: the title tool stops at the end of the title — Enter under a heading starts prose.
 - Writing: turning to the pen no longer fights the keyboard's rise; the page turns first and the keyboard follows.
 - Books: the pinned chapter no longer appears before its heading has actually scrolled away, and tapping it goes back to that heading.

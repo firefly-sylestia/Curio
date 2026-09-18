@@ -980,11 +980,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /**
      * v389d — A PASTE WAITING TO BE CUT INTO LINES.
      *
-     * A paragraph pasted into a line arrives as ONE value with newlines inside
-     * it, and the page's shape has to change to match (a block per line). That
+     * Several lines pasted into a ROW arrive as ONE value with newlines inside
+     * it, and the page's shape has to change to match (a row per line). That
      * shape change must not happen inside the keyboard's own edit batch — see
      * [onFieldChange] — so the words land first and this is what the canvas runs
-     * on its next frame.
+     * on its next frame. Prose is never cut this way: a pasted paragraph keeps
+     * its newlines and stays ONE field.
      */
     var pendingSplit by mutableStateOf<PersonalCaret?>(null)
         private set
@@ -1130,22 +1131,26 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // again, and a wash over the whole page beside a live caret reads
             // as a bug.
             pageSelected = false
-            // ── A LINE IS A LINE (v389) ────────────────────────────────
-            // A newline inside a field is not a newline in the text: it is a
-            // NEW LINE of the page, which is what a block is. Before this the
-            // character simply landed in the field, so a pasted paragraph came
-            // in as ONE element with invisible breaks inside it — nothing could
-            // be put between its lines (a voice note dragged there snapped to
-            // the paragraph's start or its end) and the platform's Select all
-            // set to work on a shape the page did not have (user reports: "when
-            // i use enter it creates a new line or something which isnt
-            // connected to the previous text … for that reason the select all
-            // doesnt work" and "when i paste a paragraph then that whole
-            // paragraph becomes one element and i cant put things between
-            // them"). Shift+Enter is still the plain newline — one paragraph,
-            // exactly as before — because the key handler consumes it before it
-            // ever reaches the field.
-            if (newText.indexOf('\n') >= 0) {
+            // ── A ROW IS A LINE; A PARAGRAPH IS NOT (v389e) ────────────
+            //
+            // A newline inside a field used to become a BLOCK, so Enter and a
+            // paste cut an entry into one field per line and the writing stopped
+            // being connected: the platform's own Select all, its drag handles,
+            // its cut and its replace-by-typing all stop at the edge of the
+            // text field they started in (user report: "the problem is when i do
+            // enter or paste something it creates a totally new text block and
+            // for that reason the select all works only for that text block …
+            // and this issue isnt on the save your take notes text blocks, the
+            // enter works fine").
+            //
+            // The cut is now made only where a line really IS the page's unit: a
+            // LIST line (a bullet or a checklist row) and the to-do page, whose
+            // dot or box is drawn once at the row's own height and whose Enter
+            // means "the next item". Everywhere else the newline stays in the
+            // paragraph, so a journal entry is ONE field and the keyboard's own
+            // selection, cut, undo and word movement behave like ordinary
+            // writing — exactly as they already did in a save-your-take note.
+            if (newText.indexOf('\n') >= 0 && lineStartsNewRow(id)) {
                 // ── THE PASTE LANDS AS TEXT FIRST (v389d) ──────────────
                 //
                 // A pasted paragraph used to be cut into lines RIGHT HERE —
@@ -1267,18 +1272,54 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     fun toggleListStyle(flag: Int) {
         val id = focusedId ?: return
-        val mask = mask(id)
+        val listFlags = FLAG_BULLET or FLAG_CHECKBOX
+        val other = if (flag == FLAG_BULLET) FLAG_CHECKBOX else FLAG_BULLET
+        // A page-wide selection applies the tool to the ROWS, in one sweep —
+        // all on or all off, the rule [toggle] follows for the same case.
+        if (pageSelected) {
+            val rows = order.filter { row -> blocks[row]?.let { !it.isPhoto && it.audio == null } == true }
+            val allOn = rows.isNotEmpty() && rows.all { row ->
+                val block = blocks[row] ?: return@all false
+                maskCovers(mask(row), 0, block.text.length, flag)
+            }
+            rows.forEach { row ->
+                val block = blocks[row] ?: return@forEach
+                var updated = maskApply(mask(row), 0, block.text.length, flag, !allOn)
+                if (!allOn) updated = maskApply(updated, 0, block.text.length, other, false)
+                masks[row] = updated
+            }
+            armed = armed and listFlags.inv()
+            onDocChanged(doc())
+            return
+        }
         val selection = selections[id]
-        val range = if (selection != null && !selection.collapsed) selection.min to selection.max else 0 to text(id).length
-        if (range.second <= range.first) {
-            armed = if (armed and flag != 0) armed and flag.inv() else (armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()) or flag
-        } else {
-            val current = maskCovers(mask, range.first, range.second, flag)
-            var updated = maskApply(mask, range.first, range.second, flag, !current)
-            val other = if (flag == FLAG_BULLET) FLAG_CHECKBOX else FLAG_BULLET
-            if (!current) updated = maskApply(updated, range.first, range.second, other, false)
+        if (selection != null && !selection.collapsed) {
+            val chosen = mask(id)
+            val current = maskCovers(chosen, selection.min, selection.max, flag)
+            var updated = maskApply(chosen, selection.min, selection.max, flag, !current)
+            if (!current) updated = maskApply(updated, selection.min, selection.max, other, false)
             masks[id] = updated
-            armed = armed and (FLAG_BULLET or FLAG_CHECKBOX).inv()
+            armed = armed and listFlags.inv()
+            onDocChanged(doc())
+            return
+        }
+        // v389e — NOTHING SELECTED: THE LIST DRESSES THE LINE UNDER THE CARET,
+        // and that line goes on its own block first. A list item IS a row — its
+        // dot or its box is drawn once, at the row's own height — so isolating
+        // the line is also what makes the next Enter mean "another item"
+        // instead of "another line of this paragraph".
+        val target = isolateCaretLine(id)
+        val lineText = text(target)
+        if (lineText.isEmpty()) {
+            armed = if (armed and flag != 0) armed and flag.inv()
+            else (armed and listFlags.inv()) or flag
+        } else {
+            val lineMask = mask(target)
+            val current = maskCovers(lineMask, 0, lineText.length, flag)
+            var updated = maskApply(lineMask, 0, lineText.length, flag, !current)
+            if (!current) updated = maskApply(updated, 0, lineText.length, other, false)
+            masks[target] = updated
+            armed = armed and listFlags.inv()
         }
         onDocChanged(doc())
     }
@@ -1304,10 +1345,16 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * rule the two list tools already followed.
      */
     fun applyMarker(marker: PersonalMarker?) {
-        val id = focusedId ?: order.firstOrNull() ?: return
+        val focused = focusedId ?: order.firstOrNull() ?: return
+        val listFlags = FLAG_BULLET or FLAG_CHECKBOX
+        // v389e — a marker dresses a LINE, so a plain tap gives the line the
+        // caret is on the bullet and its marker (the line goes on its own block
+        // first, see [isolateCaretLine]; a chosen RANGE still means exactly the
+        // words the member chose).
+        val selection = selections[focused]
+        val id = if (selection != null && !selection.collapsed) focused else isolateCaretLine(focused)
         val block = blocks[id] ?: return
         val text = block.text
-        val listFlags = FLAG_BULLET or FLAG_CHECKBOX
         if (text.isEmpty()) {
             // Nothing to mark yet: arm the tool so the first words typed arrive
             // as the list the writer asked for.
@@ -1323,6 +1370,20 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         blocks[id] = block.copy(marker = marker?.key.orEmpty())
         onDocChanged(doc())
     }
+
+    /**
+     * v389e — TRUE WHEN THE PAGE'S WRITING IS ONE FIELD.
+     *
+     * The ordinary journal entry is one field now (Enter writes a newline into
+     * the paragraph), and on a one-field page the platform's OWN Select all
+     * already means the whole entry — with real handles, real cut and real
+     * replace-by-typing. The page-wide wash is only worth taking over for a page
+     * that really is several fields (photos, voice notes, list rows), so both
+     * doors to "select all" ask this first.
+     */
+    fun pageIsOneField(): Boolean = order.count { id ->
+        blocks[id]?.let { !it.isPhoto && it.audio == null } == true
+    } == 1
 
     /** The focused line's marker — the dock's bullet button wears it. */
     fun markerOfFocused(): PersonalMarker {
@@ -1388,8 +1449,57 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             return
         }
         val id = focusedId ?: return
-        val blockMask = mask(id)
         val selection = selections[id]
+        // ── A LINE TOOL POINTS AT THE LINE (v389e) ─────────────────────
+        //
+        // A HEADING (and a small note) is the LINE'S OWN: it describes the line
+        // rather than the letters on it, so tapping it with nothing selected has
+        // to set the line the caret is on — automatically, which is what the
+        // member asked for ("for the title tool that particular line should
+        // automatically get the title format when title is selected"). Before
+        // this the tool only ARMED itself, so the line already written never
+        // changed and the button read as one that does nothing.
+        //
+        // The line goes on its own block first: a heading is ONE line of the
+        // page, and the block is the unit every view reads a heading from (the
+        // read-only page's display serif, the book review's pinned chapter).
+        if (flag == FLAG_TITLE || flag == FLAG_SMALL) {
+            if (selection != null && !selection.collapsed) {
+                // The words the member actually chose: exactly those, as ever.
+                val chosen = mask(id)
+                val on = !maskCovers(chosen, selection.min, selection.max, flag)
+                masks[id] = maskApply(chosen, selection.min, selection.max, flag, on)
+                armed = armed and flag.inv()
+                armedOff = armedOff and flag.inv()
+                onDocChanged(doc())
+                return
+            }
+            val target = isolateCaretLine(id)
+            val lineText = text(target)
+            if (lineText.isEmpty()) {
+                // An empty line has nothing to set, so the tool arms instead and
+                // the first words typed arrive as the heading — which is how
+                // "Add chapter" opens a chapter name to be written into.
+                val on = ((caretFlags(target) and armedOff.inv()) or armed) and flag != 0
+                if (!on) {
+                    armed = armed or flag
+                    armedOff = armedOff and flag.inv()
+                } else {
+                    armed = armed and flag.inv()
+                    armedOff = armedOff or flag
+                }
+                onDocChanged(doc())
+                return
+            }
+            val lineMask = mask(target)
+            val on = !maskCovers(lineMask, 0, lineText.length, flag)
+            masks[target] = maskApply(lineMask, 0, lineText.length, flag, on)
+            armed = armed and flag.inv()
+            armedOff = armedOff and flag.inv()
+            onDocChanged(doc())
+            return
+        }
+        val blockMask = mask(id)
         if (selection == null || selection.collapsed) {
             // NO SELECTION: the tool is an INPUT STYLE. Tapping it changes what
             // the NEXT keystroke wears — never the line already written, which
@@ -1415,20 +1525,25 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         onDocChanged(doc())
     }
 
-    /** Left / centre for the focused block (a paragraph is the unit a line
-     *  tool can point at). */
+    /**
+     * v389e — ALIGNMENT IS THE PAGE'S.
+     *
+     * The member's own rule: "for the align it should work for the whole page
+     * not just paragraph". It has to be the page's anyway — a text field has ONE
+     * alignment, so a block of several lines cannot hold a centred line above a
+     * left-aligned one, and pretending otherwise is what made the tool look
+     * broken (it used to set the FIRST line's alignment rather than the one
+     * being written). The tool now sets every line the page has when it is
+     * tapped. A line typed afterwards joins the block it is written in, so it
+     * keeps that block's alignment; a NEW block starts at the left, which is the
+     * member's own answer for what comes next ("lines you add afterwards start
+     * at the left again").
+     */
     fun setAlign(align: PersonalAlign) {
-        if (pageSelected) {
-            order.forEach { id ->
-                val block = blocks[id] ?: return@forEach
-                blocks[id] = block.copy(align = align)
-            }
-            onDocChanged(doc())
-            return
+        order.forEach { id ->
+            val block = blocks[id] ?: return@forEach
+            blocks[id] = block.copy(align = align)
         }
-        val id = focusedId ?: order.firstOrNull() ?: return
-        val block = blocks[id] ?: return
-        blocks[id] = block.copy(align = align)
         onDocChanged(doc())
     }
 
@@ -1652,8 +1767,134 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /**
-     * Enter: the paragraph splits at the caret and the caret lands at the start
-     * of the new one.
+     * v389e — THE LINE THE CARET IS ON, inside one block's text.
+     *
+     * A block is a PARAGRAPH again (Enter writes a newline into it), so a line
+     * is an offset pair inside the text rather than a block of its own. This is
+     * the range a line-level tool points at: from the newline before the caret
+     * to the newline after it. An EMPTY line answers an empty range.
+     */
+    private fun lineRange(text: String, caret: Int): IntRange {
+        val at = caret.coerceIn(0, text.length)
+        var start = at
+        while (start > 0 && text[start - 1] != '\n') start--
+        var end = at
+        while (end < text.length && text[end] != '\n') end++
+        return start until end
+    }
+
+    /** Where the caret sits inside [id]'s text (its end when nothing is
+     *  selected). */
+    private fun caretIn(id: String): Int {
+        val length = blocks[id]?.text?.length ?: return 0
+        return (selections[id]?.start ?: length).coerceIn(0, length)
+    }
+
+    /**
+     * v389e — DOES ENTER START A NEW ROW HERE?
+     *
+     * True on the to-do page (a row per line is what that page IS) and on a
+     * line that carries one of [LINE_FLAGS] — a bullet item, a checklist row, a
+     * heading, a small note — because one of those is a LINE of the page rather
+     * than prose: its furniture is drawn once, at the row's own height, and a
+     * heading is one line by definition. An EMPTY line with a list tool armed on
+     * it counts too, so Enter under a just-made bullet gives the next item.
+     *
+     * False for ordinary prose, which is the point: Enter then writes a newline
+     * into the paragraph instead of cutting the entry into another field.
+     */
+    fun lineStartsNewRow(id: String): Boolean {
+        if (keepsChecklistRows) return true
+        val block = blocks[id] ?: return false
+        if (block.isPhoto || block.isAudio) return false
+        val text = block.text
+        val range = lineRange(text, caretIn(id))
+        if (range.isEmpty()) return armed and LINE_FLAGS_MASK != 0
+        val lineMask = mask(id)
+        return LINE_FLAGS.any { flag -> lineCarries(text, lineMask, range, flag) }
+    }
+
+    /**
+     * True when every VISIBLE character of one line carries [flag].
+     *
+     * The same rule [personalBlockCarries] uses for a whole block (whitespace is
+     * not part of a line's style, and an empty line carries nothing), so the
+     * question "is this line a heading / a bullet item?" is answered the same way
+     * here as it is where the line is drawn.
+     */
+    private fun lineCarries(text: String, mask: IntArray, range: IntRange, flag: Int): Boolean {
+        var seen = false
+        for (i in range.first..range.last) {
+            val character = text.getOrNull(i) ?: break
+            if (character.isWhitespace()) continue
+            if (mask.getOrElse(i) { 0 } and flag == 0) return false
+            seen = true
+        }
+        return seen
+    }
+
+    /**
+     * v389e — ONE LINE, ON ITS OWN.
+     *
+     * A prose block holds a whole paragraph now, so a tool that describes a LINE
+     * (a heading, a small note, a bullet item, a checklist row) has to be able
+     * to point at ONE line of it. This cuts the block so the caret's line is a
+     * block of its own: what came before it and what comes after it keep their
+     * own blocks, the newlines at the two seams belong to neither side (they
+     * were only ever the break), and the page's ORDER is untouched — the three
+     * pieces stand exactly where the one block stood. The caret keeps its place
+     * INSIDE the line, so setting a heading from the dock never moves the
+     * writing.
+     *
+     * A line that already sits alone — a one-line block, the to-do page's rows,
+     * a photo or a voice note — comes back as it was.
+     */
+    private fun isolateCaretLine(id: String): String {
+        val block = blocks[id] ?: return id
+        if (block.isPhoto || block.isAudio) return id
+        val text = block.text
+        val caretIndex = caretIn(id)
+        val range = lineRange(text, caretIndex)
+        if (range.isEmpty()) return id
+        if (range.first == 0 && range.last == text.length - 1) return id
+        val offsetInLine = caretIndex - range.first
+        // WHAT COMES AFTER THE LINE GOES FIRST, so the block left behind still
+        // holds the line at its head and every offset computed below is still
+        // the one the member's caret came in with.
+        val afterStart = range.last + 2
+        if (afterStart < text.length) {
+            val afterId = splitBlock(id, afterStart, mask(id))
+            if (afterId.isBlank()) return id
+            dropBreakCharacter(id)
+            blocks[afterId] = blocks[afterId]?.copy(align = block.align) ?: return id
+        } else if (range.last < text.length - 1) {
+            // Nothing but the break follows the line: take it off this block.
+            dropBreakCharacter(id)
+        }
+        if (range.first > 0) {
+            val lineId = splitBlock(id, range.first, mask(id))
+            if (lineId.isBlank()) return id
+            dropBreakCharacter(id)
+            blocks[lineId] = blocks[lineId]?.copy(align = block.align) ?: return id
+            selections[lineId] = TextRange(offsetInLine)
+            focusedId = lineId
+            caret = PersonalCaret(lineId, offsetInLine)
+            onDocChanged(doc())
+            return lineId
+        }
+        // The line already starts the block, so what is left of it IS the line.
+        selections[id] = TextRange(offsetInLine)
+        focusedId = id
+        caret = PersonalCaret(id, offsetInLine)
+        onDocChanged(doc())
+        return id
+    }
+
+    /**
+     * v389e — ENTER ON A ROW: the line splits at the caret and the caret lands
+     * at the start of the new one. Only a line that really IS the page's unit
+     * gets here (see [lineStartsNewRow]) — prose keeps its newline inside the
+     * paragraph instead, so a journal entry stays ONE text field.
      *
      * v389 — THE LINE'S TOOLS CROSS THE BREAK. Before this the styles were cut
      * in two (so the words after the caret kept theirs) but the NEW line was
@@ -1981,7 +2222,18 @@ internal fun PersonalCanvas(
                     },
                     onPasteRequested = onPasteRequested,
                     onCutRequested = onCutRequested,
-                    onSelectAllRequested = { state.selectPage() }
+                    // v389e — a ONE-FIELD page keeps the platform's own Select
+                    // all: the whole entry is that field, so the native
+                    // selection (handles, cut, replace) is already what the
+                    // words mean. The page wash is for the pages that really are
+                    // several fields.
+                    onSelectAllRequested = {
+                        if (state.pageIsOneField()) {
+                            onSelectAllRequested?.invoke()
+                        } else {
+                            state.selectPage()
+                        }
+                    }
                 )
             }
         }
@@ -2500,39 +2752,53 @@ private fun PersonalTextBlock(
                 if (!enabled || event.type != KeyEventType.KeyDown) {
                     return@onPreviewKeyEvent false
                 }
-                // Enter makes a NEW line (a block), so a line tool can point
-                // at the line the caret is on. Shift+Enter keeps the plain
-                // newline inside the paragraph.
+                // ── A ROW ENDS; A PARAGRAPH CARRIES ON (v389e) ───────────
+                // A checklist row, a bullet item and the to-do page still begin
+                // a new row on Enter, because on those pages a row IS one line —
+                // its dot or its box is drawn once, at the row's own height, and
+                // Enter there means "the next item". Everywhere else Enter
+                // writes a NEWLINE into the paragraph being written: the entry
+                // stays ONE text field, so the platform's own Select all, its
+                // drag handles and its cut reach the whole entry, which is the
+                // fix for "the select all works only for that text block".
                 if (
                     (event.key == Key.Enter || event.key == Key.NumPadEnter) &&
-                    !event.isShiftPressed
+                    !event.isShiftPressed &&
+                    state.lineStartsNewRow(id)
                 ) {
                     state.splitAtCaret(id)
                     return@onPreviewKeyEvent true
                 }
                 // ── v389d — SELECT ALL MEANS THE PAGE ────────────────────
                 // The keyboard's own Ctrl+A selects the text of the field the
-                // caret is in, and a field here is a LINE — so "select all"
-                // selected one line of a page, which is not what the words mean
-                // (user report: "i can't even do select all as it only selects
-                // one line"). The toolbar's own Select all was already
-                // re-pointed at the page (see the page toolbar above); this is
-                // the same answer for the keyboard, so both doors agree.
+                // caret is in, and a field here IS the page's writing — so a
+                // page with photos, voice notes or list rows is several fields
+                // and "select all" reached only one of them (user report: "i
+                // can't even do select all as it only selects one line"). On
+                // such a page the keyboard's Select all is taken over and the
+                // page's own selection is used instead; on the ordinary
+                // one-field page the platform keeps it, because there it IS the
+                // whole entry, handles and all.
                 if (event.isCtrlPressed && event.key == Key.A) {
-                    state.selectPage()
-                    return@onPreviewKeyEvent true
+                    if (!state.pageIsOneField()) {
+                        state.selectPage()
+                        return@onPreviewKeyEvent true
+                    }
                 }
-                // BACKSPACE AT THE START OF A LINE takes the line back into the
-                // one above it — the key beside Enter has to be able to undo
-                // what Enter did (user report: "when i type back it doesnt
-                // delete it"). The live values are read here rather than
-                // captured, because this runs between two compositions.
+                // BACKSPACE AT THE START OF A BLOCK takes the block back into
+                // the one above it — the key beside Enter has to be able to undo
+                // a boundary (a row that was split off, a heading that was set,
+                // a photo that was dropped in). Inside a paragraph the field's
+                // own backspace does the work: it deletes the newline and the two
+                // lines join, which is exactly what a writer expects. The live
+                // values are read here rather than captured, because this runs
+                // between two compositions.
                 if (event.key == Key.Backspace) {
                     val live = state.text(id)
                     val selection = state.selection(id)
-                    val atLineStart = live.isEmpty() ||
+                    val atBlockStart = live.isEmpty() ||
                         (selection != null && selection.collapsed && selection.start == 0)
-                    if (atLineStart) {
+                    if (atBlockStart) {
                         return@onPreviewKeyEvent state.mergeWithPrevious(id)
                     }
                 }
