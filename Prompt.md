@@ -1,5 +1,54 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch R — the save page lag, and the branch lands on main)
+
+Live instruction: "check the end of the prompt also merge this branch to the main and work on
+main" — the pending prompt at the end of this log was "fix thhe save page lag".
+
+**Status: DONE on `main` and pushed.** `feat/toolbar-note-avatars` fast-forwarded into `main`
+(`c7604324`), so the dock/portrait work is on main; the lag fix below is on top of it.
+
+### What the lag actually was
+
+The capture page is ONE composable that owns the take list, and it computed — in its own body —
+four aggregates over every take:
+
+```kotlin
+val allReady = sections.isNotEmpty() && sections.all { it.canSave && it.data != null }
+val combinedData = …;  val anyTakeDraft = sections.any { … };  val sectionDraftData = …
+```
+
+A read in a composable body is a SUBSCRIPTION. So every write to any section's `data` — one per
+keystroke, because each editor emits its data continuously — invalidated `SaveCaptureScreen`
+itself and re-ran the entire page: the top bar, the topic strip, the format chips, the take rail
+and the active format body, whose callback lambdas make its cards unskippable, so a character
+cost the whole body. The `LaunchedEffect(allReady, combinedData, anyTakeDraft, sections.toList(),
+topic)` beside it then restarted on each of those keystrokes and wrote four more states, for a
+second page-wide pass. The debounced draft autosave was keyed on `draftData` (which changes per
+character) with those keys read in the same body, putting the page on that clock a third time.
+Both shells share all of this state, which is why the studio was slow too.
+
+### The fix
+
+1. The four aggregates are `remember(sections) { derivedStateOf { … } }`. The reads now happen
+   inside the derivation, so the body is no longer a reader; only a composable that asks for one
+   of the values is invalidated. They are keyed on the take LIST because `sections` is
+   re-remembered when the entry being edited arrives — a derivation or flow left on the old list
+   would keep describing a screen that is gone.
+2. The publish runs from `snapshotFlow { CaptureAggregate(…) }.distinctUntilChanged().collect { … }`
+   inside `LaunchedEffect(sections)`: the keys no longer subscribe the body, and because the
+   published states compare structurally, re-publishing an unchanged `canSave` invalidates
+   nothing.
+3. The debounced autosave moved into its own `CaptureDraftAutosave` composable, so its
+   per-character keys invalidate five parameters instead of a page.
+4. `currentCaptureData` is read only inside `performSave` at call time, so writing it invalidates
+   nothing at all.
+
+What is left in the chain after this: the ACTIVE format body still re-runs when you type in one
+of its fields (its sections hold their own state), which is the honest remaining cost and a
+bigger refactor (hoisting per-field state) than this pass. Everything measured here is by
+inspection of the subscriptions, not by a profiler run.
+
 ## Request (2026-09-18, batch Q — the toolbar is a typing instrument, and the page answers a tap)
 
 Live instruction (with the lint log pasted): fix the lint error, then — "hide the tool bar when
@@ -3482,5 +3531,10 @@ unlocked.
 ## older prompt — the MCU repo
 https://github.com/firefly-sylestia/mcu-viewing-order lets add this as a secret, so i think it have all of the movies and series of marvel and x men etc i want you to add them, but they are not visible to normal user at all. also properly categories the movies and series, and make a new screen with marvel, sony, x men, option with the list with proper viewing order etc. from that repo, and essential etc. no trailer info, just watch and bookmark save and drop and etc status, in list and grid view, with its own buttm nav page style, and this screen can be acessed if the user types, " i love you 3000" and the button will be in home screen floating ith name as incursion. 
 
-## next prompt 
-fix thhe save page lag
+## next prompt — ANSWERED (batch R, 2026-09-18): fix the save page lag
+
+Done on `main` (see the batch R entry at the top of this log). The unit tested was the
+recomposition count, not a stopwatch: the page's aggregate over every take's data was read in
+the screen's own body, so a keystroke in any note invalidated the whole page, and the draft
+autosave's keys put the page on the same per-character clock. Both now live where only they
+are invalidated.

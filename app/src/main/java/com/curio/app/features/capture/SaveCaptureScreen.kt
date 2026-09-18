@@ -38,6 +38,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -52,6 +53,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -134,6 +136,7 @@ import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
@@ -295,20 +298,11 @@ fun SaveCaptureScreen(
     // cleared, and a debounced write that was already in flight must NOT
     // re-save it (that would resurrect a "Resume draft?" prompt for a topic
     // that was just saved).
-    LaunchedEffect(draftData, hasAnyDraft, topic?.name, categorySlug, saveInProgress) {
-        if (editEntryId != null) return@LaunchedEffect
-        if (saveInProgress) return@LaunchedEffect
-        if (!hasAnyDraft) return@LaunchedEffect
-        val data = draftData ?: return@LaunchedEffect
-        val resolvedTopic = topic ?: return@LaunchedEffect
-        delay(700)
-        // Re-check after the debounce window — the user may have saved.
-        if (saveInProgress) return@LaunchedEffect
-        val stillCurrent = draftData ?: return@LaunchedEffect
-        CaptureDraftStore.save(
-            context, categorySlug, resolvedTopic.name, Gson().toJson(stillCurrent)
-        )
-    }
+    //
+    // v392 — the effect itself now lives in [CaptureDraftAutosave] (see below),
+    // because its keys read the draft that changes with every character: read
+    // here, in this body, they put the entire capture page on a per-keystroke
+    // recomposition clock.
 
     // v7.17 — back ALWAYS asks before leaving this capture page (both the
     // system back and the top-bar back button): leaving drops you out of
@@ -673,36 +667,101 @@ fun SaveCaptureScreen(
         }
 
         // ── Aggregate: all sections must be filled to save ──────────────
-        val allReady = sections.isNotEmpty() && sections.all { it.canSave && it.data != null }
-        val combinedData: CaptureData? = when {
-            !allReady -> null
-            sections.size == 1 -> sections[0].data
-            else -> CaptureData.Portfolio(
-                sections.map { CaptureData.CaptureSection(it.format, it.data!!) }
-            )
+        //
+        // v392 — THE AGGREGATE IS DERIVED, AND PUBLISHED FROM A FLOW.
+        //
+        // These four values used to be plain `val`s in this composable's body,
+        // which quietly subscribed THE WHOLE CAPTURE PAGE to every take's data:
+        // one keystroke in any note rewrote that section's `data`, invalidated
+        // this function, and re-ran the page — chrome, chips, the rail and the
+        // format body's every card (whose callback lambdas make them
+        // unskippable) — so a character cost a page-wide recomposition, and the
+        // effect below restarted with it and wrote four more states for a second
+        // pass (user report: "the save your take page was kind of laggy … both
+        // take studio and the old one").
+        //
+        // Wrapped in [derivedStateOf] the reads happen inside the derivation
+        // instead of during this composition, so only a composable that actually
+        // ASKS for one of these values is invalidated when a take changes — and
+        // the publish below runs on a snapshot flow (keyed on the take LIST, not
+        // on the values) so it neither re-subscribes this body nor restarts once
+        // per keystroke. The states it writes are structural-equality states, so
+        // re-publishing an unchanged `canSave` invalidates nothing.
+        // …keyed on the take LIST as well: `sections` is re-remembered when the
+        // entry being edited arrives, and a derivation built on the old list
+        // would go on reporting from a screen that is no longer there. (All four
+        // are keyed together, so they can never disagree about which list they
+        // are describing.)
+        val allReady by remember(sections) {
+            derivedStateOf {
+                sections.isNotEmpty() && sections.all { it.canSave && it.data != null }
+            }
+        }
+        val combinedData by remember(sections) {
+            derivedStateOf {
+                when {
+                    !allReady -> null
+                    sections.size == 1 -> sections[0].data
+                    else -> CaptureData.Portfolio(
+                        sections.map { CaptureData.CaptureSection(it.format, it.data!!) }
+                    )
+                }
+            }
         }
         // ANY take holding drafted content (or a live recording) — the leave
         // / switch / remove guards key on this.
-        val anyTakeDraft = sections.any { it.data != null || it.busy }
+        val anyTakeDraft by remember(sections) {
+            derivedStateOf { sections.any { it.data != null || it.busy } }
+        }
         // BEST-EFFORT draft snapshot for autosave — non-null even before
         // every section is complete, so a partial multi-section draft still
         // autosaves the filled content instead of nothing.
-        val sectionDraftData: CaptureData? = when {
-            sections.isEmpty() -> null
-            sections.size == 1 -> sections[0].data
-            else -> {
-                val filled = sections.mapNotNull { s ->
-                    s.data?.let { CaptureData.CaptureSection(s.format, it) }
+        val sectionDraftData by remember(sections) {
+            derivedStateOf {
+                when {
+                    sections.isEmpty() -> null
+                    sections.size == 1 -> sections[0].data
+                    else -> {
+                        val filled = sections.mapNotNull { s ->
+                            s.data?.let { CaptureData.CaptureSection(s.format, it) }
+                        }
+                        if (filled.isNotEmpty()) CaptureData.Portfolio(filled) else null
+                    }
                 }
-                if (filled.isNotEmpty()) CaptureData.Portfolio(filled) else null
             }
         }
-        LaunchedEffect(allReady, combinedData, anyTakeDraft, sections.toList(), topic) {
-            canSave = allReady && topic != null && (editEntryId == null || editingEntry != null)
-            hasAnyDraft = anyTakeDraft
-            currentCaptureData = combinedData
-            draftData = sectionDraftData
+        // Keyed on the take LIST: `sections` is re-remembered when the entry
+        // being edited arrives, and a flow started on the old list would go on
+        // reporting from a screen that is no longer there.
+        LaunchedEffect(sections) {
+            snapshotFlow {
+                CaptureAggregate(
+                    canSave = allReady && topic != null &&
+                        (editEntryId == null || editingEntry != null),
+                    hasAnyDraft = anyTakeDraft,
+                    combined = combinedData,
+                    draft = sectionDraftData
+                )
+            }
+                .distinctUntilChanged()
+                .collect { aggregate ->
+                    canSave = aggregate.canSave
+                    hasAnyDraft = aggregate.hasAnyDraft
+                    currentCaptureData = aggregate.combined
+                    draftData = aggregate.draft
+                }
         }
+        // The debounced draft autosave lives on its OWN island — its keys read
+        // the draft, which changes with every character typed, and a key read in
+        // this body would have put the whole page back on that clock.
+        CaptureDraftAutosave(
+            draftData = draftData,
+            hasAnyDraft = hasAnyDraft,
+            topicName = topic?.name,
+            categorySlug = categorySlug,
+            saveInProgress = saveInProgress,
+            editMode = editEntryId != null
+        )
         // The strip's mood pill toggles the shared mood selector pinned
         // under the strip (see the capture header below).
         var moodSelectorOpen by remember { mutableStateOf(false) }
@@ -1937,6 +1996,58 @@ private fun FormatChip(
                         else MaterialTheme.colorScheme.onSurface
             )
         }
+    }
+}
+
+/**
+ * v392 — WHAT THE PAGE'S TAKES ADD UP TO, as one comparable value.
+ *
+ * Published from a snapshot flow that emits only when this actually CHANGES:
+ * the note being written changes on every keystroke, but "every take is filled",
+ * "something is drafted" and "the save would be ready" almost never do, and a
+ * state written with an equal value invalidates nothing.
+ */
+private data class CaptureAggregate(
+    val canSave: Boolean,
+    val hasAnyDraft: Boolean,
+    val combined: CaptureData?,
+    val draft: CaptureData?
+)
+
+/**
+ * v392 — THE DEBOUNCED DRAFT AUTOSAVE, ON ITS OWN ISLAND.
+ *
+ * 700ms of quiet after the last change snapshots the take to the draft store;
+ * nothing is written while nothing is drafted, and a save in flight both blocks
+ * and re-checks the write (a debounced write landing after a save would resurrect
+ * a "Resume draft?" prompt for a topic that was just saved).
+ *
+ * It is its own composable for one reason: [draftData] changes with every
+ * character typed, so its keys are a per-keystroke clock. Read inside the capture
+ * page's own body they re-ran that whole page per keystroke; here, the only thing
+ * they invalidate is this function's five parameters.
+ */
+@Composable
+private fun CaptureDraftAutosave(
+    draftData: CaptureData?,
+    hasAnyDraft: Boolean,
+    topicName: String?,
+    categorySlug: String,
+    saveInProgress: Boolean,
+    editMode: Boolean
+) {
+    val context = LocalContext.current
+    LaunchedEffect(draftData, hasAnyDraft, topicName, categorySlug, saveInProgress) {
+        if (editMode) return@LaunchedEffect
+        if (saveInProgress) return@LaunchedEffect
+        if (!hasAnyDraft) return@LaunchedEffect
+        val data = draftData ?: return@LaunchedEffect
+        val name = topicName ?: return@LaunchedEffect
+        delay(700)
+        // Re-check after the debounce window — the user may have saved.
+        if (saveInProgress) return@LaunchedEffect
+        val stillCurrent = draftData ?: return@LaunchedEffect
+        CaptureDraftStore.save(context, categorySlug, name, Gson().toJson(stillCurrent))
     }
 }
 
