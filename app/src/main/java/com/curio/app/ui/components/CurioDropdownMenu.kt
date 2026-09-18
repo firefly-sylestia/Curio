@@ -69,6 +69,15 @@ fun CurioDropdownMenu(
     minWidth: Dp = 236.dp,
     header: (@Composable () -> Unit)? = null,
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null,
+    // v389h — keep the window's focus where it is. A focusable popup (the
+    // default) pulls focus off the text field being edited, which closes the
+    // keyboard — and with the keyboard gone every dock that rides the IME inset
+    // folds away, so opening a tool's menu read as the tools vanishing mid-word
+    // (the Save-your-take dock's paper/colour menus, the size picker). Every menu
+    // this component renders is a read-and-pick surface, so non-focusable costs
+    // nothing — and the writing docks' own stock DropdownMenus now pass the same
+    // properties (see PersonalCanvas' MenuKeepKeyboardProperties).
+    keepKeyboard: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (!expanded) return
@@ -105,6 +114,13 @@ fun CurioDropdownMenu(
             expanded = expanded,
             onDismissRequest = onDismissRequest,
             modifier = modifier.widthIn(min = minWidth),
+            // v389h — see [keepKeyboard]. The inline glass branch needs nothing:
+            // it is an inline Surface, not a Popup, so it never takes focus.
+            properties = if (keepKeyboard) {
+                androidx.compose.ui.window.PopupProperties(focusable = false)
+            } else {
+                androidx.compose.ui.window.PopupProperties(focusable = true)
+            },
             containerColor = container,
             shape = shape,
             tonalElevation = 3.dp,

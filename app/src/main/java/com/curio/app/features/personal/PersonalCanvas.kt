@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.LocalContentColor
@@ -3202,7 +3203,11 @@ private fun PersonalPhotoBlock(
                     }
                     DropdownMenu(
                         expanded = sizeMenu,
-                        onDismissRequest = { sizeMenu = false }
+                        onDismissRequest = { sizeMenu = false },
+                        // v389h — a print's size menu sits over a page being
+                        // written in; it must not close the keyboard the way the
+                        // dock's menus used to (see MenuKeepKeyboardProperties).
+                        properties = MenuKeepKeyboardProperties
                     ) {
                         PersonalPhotoSize.entries.forEach { option ->
                             DropdownMenuItem(
@@ -3678,6 +3683,26 @@ internal fun PersonalDocView(
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
+ * v389h — THE DOCK'S MENUS DO NOT STEAL THE KEYBOARD.
+ *
+ * A Material `DropdownMenu` opens a FOCUSABLE popup by default, and a focusable
+ * popup takes the focus off the text field the writer was in — which closes the
+ * keyboard. With the keyboard gone the dock folded away with it (the dock rides
+ * the IME inset), so opening the font, pen or bullet menu read as the tools
+ * vanishing mid-sentence (user report: "fix the issue of the tool bar hiding when
+ * i select a tool drop down while editing … opening the drop down of a tool or
+ * tapping it should not hide the keyboard").
+ *
+ * `focusable = false` leaves the window's focus where it was: the field keeps
+ * the caret and the IME stays up. This is the same fix the rich-text editor's
+ * own floating bar already shipped (see RichTextEditor's non-focusable popup),
+ * now applied to the writing dock's three menus. The menus are read-and-pick
+ * surfaces — nothing in them needs the keyboard — so a non-focusable popup costs
+ * nothing here.
+ */
+private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
+
+/**
  * The tool dock — it rides ABOVE the keyboard (the caller pins it to the
  * bottom of an `imePadding()` column), so the tools are always under the
  * writer's thumb while the words stay above the keys.
@@ -3795,7 +3820,8 @@ internal fun PersonalToolDock(
                 }
                 DropdownMenu(
                     expanded = fontMenuOpen,
-                    onDismissRequest = { fontMenuOpen = false }
+                    onDismissRequest = { fontMenuOpen = false },
+                    properties = MenuKeepKeyboardProperties
                 ) {
                     PERSONAL_FONT_KEYS.forEach { key ->
                         DropdownMenuItem(
@@ -3853,7 +3879,8 @@ internal fun PersonalToolDock(
                 }
                 DropdownMenu(
                     expanded = penMenuOpen,
-                    onDismissRequest = { penMenuOpen = false }
+                    onDismissRequest = { penMenuOpen = false },
+                    properties = MenuKeepKeyboardProperties
                 ) {
                     DropdownMenuItem(
                         text = { MarkerMenuLabel("Remove marker") },
@@ -3938,7 +3965,8 @@ internal fun PersonalToolDock(
                 }
                 DropdownMenu(
                     expanded = markerMenuOpen,
-                    onDismissRequest = { markerMenuOpen = false }
+                    onDismissRequest = { markerMenuOpen = false },
+                    properties = MenuKeepKeyboardProperties
                 ) {
                     DropdownMenuItem(
                         text = { MarkerMenuLabel("Remove list") },
