@@ -1,5 +1,40 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch Z2 — the to-do row's own box)
+
+Verbatim: "do the chekcbox fix in todo"
+
+### What changed (all in `PersonalCanvas.kt` — the v393 rule finished)
+
+The v393 pass answered "the checkbox deletes when i delete all the text after writing something"
+with two halves — arm `FLAG_CHECKBOX` when a row was emptied on a list page, and draw the box for a
+row that was perfectly `isEmpty()`. Both halves still spoke about the row's CHARACTERS, so the
+same report survived twice over: a row left holding one stray space failed `isEmpty()` (no box),
+and a box re-opened from the stored document had no `armed` memory to inherit from, so the first
+word typed rubbed it out. The rule is stated on the ROW now:
+
+1. **The box is the row's.** Both renderers — the editor's `PersonalTextBlock` and the read view's
+   `PersonalDocView` — draw the box for a row with no WORDS (`isBlank()`, not `isEmpty()`) on a
+   list page, so a leftover space is not a task either, and a re-opened list looks like the page
+   that was written.
+2. **The first words wear the box, whatever the arm remembers.** `onFieldChange` force-flags the
+   whole new text with `FLAG_CHECKBOX` when words land in a row that was blank, so the box takes
+   the next word typed even after a reload (the old arm-only trick lived in transient state). A
+   deliberately armed title or bullet on that row is left alone — the box must not step on a tool
+   the member chose.
+3. **Enter on a blank row still ends the list.** `splitBlock`'s "the to-do page's own manner" reads
+   `isBlank()` too, so a row holding one stray space ends the list the way a perfectly empty one
+   does. `checklistProgress()` already counted only rows with words, so the count agrees.
+
+### Honest limits
+
+`armed` still carries the box across the NEXT keystroke (the box lights in the dock as a pending
+style, which is deliberate). Structure check: paren/bracket/brace balance even with HEAD (0/0/0),
+no other file touched, and the behaviour needs eyes on a build — the box on an emptied row, the
+first word typed into a re-opened blank row, and Enter on a row holding one space.
+
+---
+
 ## Request (2026-09-18, batch Z — twenty portraits, and the reader's rough edges)
 
 Verbatim: "now for avatars, i want you to fully redrawn them like redesign remaking them

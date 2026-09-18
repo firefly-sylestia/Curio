@@ -1256,11 +1256,31 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // them — and the next word typed came out plain, because there was
             // nothing left to inherit from (user report: "in todo the checkbox
             // deletes when i delete all the text after writing something").
-            // A row emptied on the list page arms the box again: the box stands
-            // while the row is empty, and the first word typed wears it.
-            if (keepsChecklistRows && newText.isBlank()) {
-                armed = armed or FLAG_CHECKBOX
-                armedOff = armedOff and FLAG_CHECKBOX.inv()
+            //
+            // v393e — THE BOX IS THE ROW'S, NOT ITS CHARACTERS'. The first pass
+            // leaned on [armed] (transient state) to remember and drew the box
+            // for a row that was perfectly EMPTY — so a row left holding a
+            // leftover space lost its box, and a box re-opened from storage had
+            // nothing to inherit from: the first word typed rubbed it out, the
+            // very report the fix meant to answer. So the rule is now stated on
+            // the ROW, in both directions: a row with no words on the list page
+            // IS a box waiting to be written (the renderers draw it — see
+            // PersonalTextBlock / PersonalDocView), [armed] carries the box
+            // across the next keystroke, and the words landing in a row that was
+            // blank wear it whatever the page's memory of the arm was.
+            if (keepsChecklistRows) {
+                if (newText.isBlank()) {
+                    armed = armed or FLAG_CHECKBOX
+                    armedOff = armedOff and FLAG_CHECKBOX.inv()
+                } else if (old.text.isBlank() &&
+                    // …unless the member asked for something else on that row:
+                    // a title or a bullet armed on a blank line is what those
+                    // tools MEAN, and the box must not step on it.
+                    !personalBlockCarries(newText, mask(id), FLAG_TITLE) &&
+                    !personalBlockCarries(newText, mask(id), FLAG_BULLET)
+                ) {
+                    masks[id] = maskApply(mask(id), 0, newText.length, FLAG_CHECKBOX, true)
+                }
             }
         }
         selections[id] = value.selection
@@ -2011,10 +2031,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // a new line i mean it should auto select just the title format").
         val headFlags = lineFlags(block.text, maskBefore) and FLAG_TITLE.inv()
         val carried = when {
-            // The TO-DO page's own manner, kept: Enter on an EMPTY row ends the
+            // The TO-DO page's own manner, kept: Enter on a BLANK row ends the
             // list instead of arming the next row for ever (a page of checklists
-            // has to stop somewhere).
-            keepsChecklistRows && block.text.isEmpty() -> 0
+            // has to stop somewhere; a row holding one stray space has no words
+            // in it either, so it ends the list the same way).
+            keepsChecklistRows && block.text.isBlank() -> 0
             headFlags != 0 -> headFlags
             else -> armed and FLAG_TITLE.inv()
         }
@@ -2722,13 +2743,17 @@ private fun PersonalTextBlock(
     val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
-    // v393 — an EMPTY row on the list page still draws its box: the row's flag
-    // lives on its characters, and an emptied row has none — but a to-do row
-    // without a box reads as a row that lost its place in the list, not as a
-    // row waiting to be written (user report: "the checkbox deletes when i
-    // delete all the text").
+    // v393 — a row with no words on the list page still draws its box: the row's
+    // flag lives on its characters, and an emptied row has none — but a to-do row
+    // without a box reads as a row that lost its place in the list, not as a row
+    // waiting to be written (user report: "the checkbox deletes when i delete all
+    // the text").
+    //
+    // v393e — BLANK, not only perfectly empty: a leftover space is not a task
+    // either, and the box used to vanish the moment a word was deleted down to
+    // one (the same report, on the row that still had a character in it).
     val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX) ||
-        (text.isEmpty() && state.keepsChecklistRows)
+        (text.isBlank() && state.keepsChecklistRows)
     val lineHeight = if (isTitle) 34.sp else if (isSmall) 22.sp else rowBody.sp
     // The tick the writer actually made is on the BLOCK now, not in this row's
     // widget state, so a reload cannot lose it.
@@ -3400,12 +3425,14 @@ internal fun PersonalDocView(
             val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
             val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
             val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
-            // v393 — the read view's half of the same rule: an EMPTY row on a
-            // to-do page (the read view knows the page by its [rowSize]) still
-            // draws its box, so a list re-opened after emptying a row looks
-            // like the page that was written.
+            // v393/v393e — the read view's half of the same rule: a row with no
+            // WORDS on a to-do page (the read view knows the page by its
+            // [rowSize]) still draws its box, so a list re-opened after emptying
+            // a row looks like the page that was written. Blank rather than
+            // perfectly empty, so a row left holding one stray space keeps the
+            // box its writer still sees in the editor.
             val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX) ||
-                (text.isEmpty() && rowSize.isSpecified)
+                (text.isBlank() && rowSize.isSpecified)
             // v389 — the same metrics and the same renderers as the editor
             // (this view draws a checklist row that the editor ticked).
             //
