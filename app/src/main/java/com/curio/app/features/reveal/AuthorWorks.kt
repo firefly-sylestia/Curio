@@ -200,6 +200,7 @@ internal fun AuthorWorksSheet(
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
+    val fetchConsent = AppPreferences.bookFetchEnabledState
     var works by remember(author) { mutableStateOf<List<AuthorWork>?>(null) }
     // v389d — THE PERSON'S OWN PICTURE, in the header (user request: "show the
     // author's portrait in the author sheet header, not just on the reveal
@@ -211,9 +212,12 @@ internal fun AuthorWorksSheet(
             AppPreferences.sheetArtUrlsState["author|$author"]?.takeIf { it.isNotBlank() }
         )
     }
-    LaunchedEffect(author) {
+    LaunchedEffect(author, fetchConsent) {
         works = AuthorWorksFetch.works(author)
-        if (portrait == null) {
+        // The reveal card only looks a face up when cover fetching is ON, so
+        // the sheet honours the same switch: with it off, whatever that card
+        // cached is what shows and no new call goes out for a picture.
+        if (portrait == null && fetchConsent) {
             val found = ArtworkFetch.portraitOrCover(author)
             if (!found.isNullOrBlank()) {
                 portrait = found
@@ -246,17 +250,22 @@ internal fun AuthorWorksSheet(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             ) {
+                val face = portrait?.takeIf { it.isNotBlank() }
                 Surface(
                     shape = CircleShape,
                     color = accent.copy(alpha = 0.16f),
+                    // v389d — the silhouette wears the sibling sheet's flat
+                    // 16% tint with NO shadow: a shadow behind a translucent
+                    // fill bleeds through it (AGENTS rule 11). Only the
+                    // portrait, which is opaque, sits on one.
                     modifier = Modifier
                         .size(44.dp)
-                        .shadow(3.dp, CircleShape)
+                        .then(if (face != null) Modifier.shadow(3.dp, CircleShape) else Modifier)
                 ) {
-                    if (!portrait.isNullOrBlank()) {
+                    if (face != null) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(portrait)
+                                .data(face)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = author,

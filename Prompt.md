@@ -1,5 +1,34 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch M — the author's face in their own sheet)
+
+Live instruction: "Show the author's portrait in the author sheet header, not just on the
+reveal card".
+
+**Status: DONE, committed and pushed.**
+
+The portrait itself was already wired when the ask arrived (commit `6bb12921`), so the
+batch was an audit of that chain plus the two things the audit turned up:
+
+- **The chain, verified end to end.** `ArtworkInfoSection` resolves an author card's
+  picture through `ArtworkFetch.portraitOrCover(topic.name)` (Wikipedia's lead image for
+  the name, else the first of their books that has a cover) and persists it under
+  `author|<name>` via `AppPreferences.setSheetArtUrl`; `AuthorWorksSheet` seeds its own
+  state from `AppPreferences.sheetArtUrlsState["author|<author>"]`, so the sheet the card
+  opens is painted from the picture already on screen. `onOpenAuthor` reaches it from both
+  the book sheet's byline (`TopicRevealScreen:3651`) and the AUTHORS lane's own card.
+- **FIX — a shadow behind a translucent fill.** The header disc wore
+  `Modifier.shadow(3.dp, CircleShape)` over the family's `accent.copy(alpha = 0.16f)`
+  tint, which is what `AGENTS.md` rule 11 calls out: the blur reads through a fill under
+  1 alpha. It was worst on the common path — the first frame of an open, when the
+  silhouette glyph is what is on screen. The disc now keeps the sibling `MakerHeader`'s
+  flat tint with no shadow, and only the portrait (opaque by nature) sits on one.
+- **FIX — the sheet obeys the switch that filled the cache.** The card only looks a
+  picture up when cover fetching is ON, but the sheet re-resolved regardless, so an
+  install with fetching off made a network call the moment the sheet opened. The lookup
+  is now behind the same `AppPreferences.bookFetchEnabledState`, and with it off the
+  cached picture is what shows.
+
 ## Request (2026-09-18, batch I — the selection's aim, and one sheet for the four lanes)
 
 Live instruction: "continue", on top of the user's answers to the open questions —
