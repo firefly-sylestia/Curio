@@ -1,5 +1,146 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch Z4 — the zoomed page, and the sheet that would not merge)
+
+Verbatim: "now the book pdf reader, well when im zoomed in and im moving around, it chnages page by
+mistake, can u fix it, also in vertical connected page, when i pin zoom it the pages overlap with
+each other really buggy fix it, also the merged buttom sheet of contents and bookmarks, its not good
+yet, it also doesnt have bookamrk option for contents, also they are not merged in one page and one
+button, also the progress view make it visually great. also dont push this untill i say, also before
+you start this, can u check again what else was remaing and isnt done yet, im sure it was in this
+conversation or in prompt"
+
+**Status: COMMITTED, NOT PUSHED** (the user asked to hold the push). All in
+`features/personal/BookReaderScreen.kt` (556 insertions / 128 deletions), plus the changelog and this
+log.
+
+### 1. A zoomed page turned while you moved around it — why, exactly
+
+`Modifier.pinchToZoom` consumed a one-finger move only from the gesture's SECOND event
+(`if (hadMultiplePointers || previous != null)`), so the FIRST movement of every pan went to the
+pager unconsumed — and one movement of a few px is exactly what a scrollable needs to start
+believing a drag has begun. That is the mis-turn, one event wide, and no amount of clamping would
+have hidden it. The modifier now ASKS the caller what the pan was worth: `onZoom` returns the part
+of the drag the zoomed view actually TOOK (an `Offset`), and
+
+- a drag the page can take is consumed from the first movement past `touchSlop * 0.6f` — a
+  threshold UNDER the pager's own slop, so the pager can never reach its threshold first, and above
+  a tap's jitter, so a tap on a zoomed page still reaches the page and still raises the chrome;
+- a drag the page has NO room for (the pan is already at its edge that way, in the drag's dominant
+  axis) returns `Offset.Zero`, is not consumed, and the pager takes it — the v394 "swipe at the edge
+  turns the page while zoomed" behaviour, now decided by arithmetic instead of by accident.
+
+The three type-size zoom call sites (the reflowed scroll, the reflowed pager and the text pager)
+return `Offset.Zero`: a reflowed book's zoom re-lays its type out, so there is no pan to take and
+one finger keeps scrolling.
+
+### 2. A zoomed page could be dragged off the screen
+
+The pan was accumulated with no bound at all. It is now clamped against the page's OWN drawn size
+at this zoom: the letterboxed size (`ContentScale.Fit` inside the viewport) is derived from the
+viewport's measured size and the page's own aspect — the aspect reported by the page being looked
+at, re-reported on every page turn — and the travel is `max(0, (drawn * zoom - viewport) / 2)` per
+axis. Past that the page simply does not move, and the drag becomes the pager's.
+
+### 3. The vertical reader's pages overlapped when zoomed
+
+Root cause, and it was not subtle once seen: in the continuous column each page magnified ITSELF
+with a `graphicsLayer` scale inside its own slot. A draw scale grows about the slot's centre, so a
+page zoomed 2× painted a full page-height over the page above AND the page below. Scale-and-pan is
+right for ONE page on a screen (the paged flow keeps it); a column cannot use it, because its
+neighbours are in the flow.
+
+So in the column the page's own BOX grows instead: `requiredWidth(pageWidth * zoom)` and
+`requiredHeight((pageWidth / aspect) * zoom)` on the item, one `graphicsLayer` for the sideways pan
+plus the recentring offset, and `clipToBounds()` on the column. Consequences, all deliberate:
+
+- two pages can never overlap, because the LAYOUT places them one after the other;
+- reading down a magnified page IS the scroll, so a vertical drag is never claimed (a vertical drag
+  returns `Offset.Zero` from the pan and falls through to the list);
+- only a sideways drag pans, and it is bounded by half the page's growth, which is the travel that
+  brings either edge of the magnified page to the screen's edge;
+- at zoom 1 the item measures exactly what it did before (`aspectRatio(aspect)` with the width
+  filled), so nothing about the un-zoomed reader moved;
+- the text layer and its highlights still land on their glyphs, because `PdfPageTextLayer` derives
+  its scale from `fittedSize(bitmapSize, container)` and the box aspect still equals the page's.
+
+### 4. The places sheet: one page, one button, and a bookmark that says what it is
+
+`ReaderSheet.MARKS` and `ReaderSheet.CHAPTERS` are gone; there is one `PLACES`, one chrome button
+(the `Bookmark` glyph, "Bookmarks, progress and contents") instead of a bookmark glyph AND a menu
+book. The sheet is one scroll in the order a reader asks:
+
+1. **A progress card** — "YOUR PLACE IN THIS BOOK", the percentage as a big Fraunces figure, a
+   9dp rail filled in the reader's own accent with a gradient, the chapter (or PDF page) it belongs
+   to, and two pills: **Continue reading** and **Mark my place** (which toggles the bookmark for
+   that place, and reads "Bookmarked" when it is on). It replaced a "Last read · auto" list row
+   that said the same number in a smaller voice and could only be tapped;
+2. **YOUR MARKS** — the bookmarks, highlights and notes, each row jumping to its place;
+3. **CONTENTS** — the chapters and printed pages, no longer hidden behind a chip.
+
+The progress it shows is the LIVE auto-bookmark (`marks.firstOrNull { it.isPosition }` first, the
+row read at open only as a fallback) — the reader writes its position as the member reads, so the
+card follows them instead of naming the place the book happened to open at.
+
+**The bookmark in the contents** (the part that was actually missing for a PDF): the per-chapter
+pill existed but only for a reflowed book (`openable && !entry.isPage`) — a PDF's outline entries
+are all `isPage`, so a PDF's contents had no bookmark at all. The pill is now on every openable row,
+it is filled in the accent when that row is already bookmarked (matched by the place it marks), and
+tapping a filled one takes the bookmark back. The two chips inside Contents were renamed
+"Chapters / Printed pages" so they read as a filter of one section, not as the old top-level tabs.
+
+### Honest limits
+
+Gradle cannot run in this environment. What was checked: `node scripts/check_braces.js` (275 files,
+clean — the file is 740/740 braces, 2040/2040 parens, 52/52 brackets), a sweep for every symbol
+this pass removed (`ReaderSheet.MARKS`, `ReaderSheet.CHAPTERS`, `marksFirst`, `onMarks`,
+`onChapters` — none left anywhere), and a symbol check on everything new (`requiredWidth`,
+`requiredHeight`, `clipToBounds`, `Brush` imported; `readerPlaceTitle`, `readerContentsBookmark`,
+`readerParagraphFor`, `ReaderPlacesHeader`, `ReaderProgressCard`, `ReaderPlaceAction` all defined
+and called).
+
+The one piece that genuinely needs eyes on a device: `Modifier.requiredWidth` inside a `LazyColumn`
+item. It is what makes the column's layout re-measure a magnified page, and it is the standard way
+to ask for a size larger than the incoming constraints — but it is a large item in a lazy layout, so
+the falling-back option if it misbehaves is the per-item `graphicsLayer` scale with `clipToBounds`
+(which would cut the overlap but could not let the scroll reveal the page's far edges). Also unseen:
+the feel of `touchSlop * 0.6f` (it is one constant) and the progress card's balance at a long
+chapter name.
+
+### The audit the user asked for (what is genuinely still open)
+
+Reader / books:
+
+- **Inline bold and italic inside an EPUB paragraph** (batch B, still open). `epubBlocks` turns
+  `<img>`, `<h1..h6>` and pagebreak markers into their own blocks and then `stripMarkup` deletes
+  every remaining tag — so `<b>`, `<em>`, `<i>`, `<strong>` inside a sentence are flattened to plain
+  text. Headings and images are read; emphasis is not.
+- **The series/anime episode lists are mostly FETCHED, not authored.** `data/topics/series.json` has
+  199 shows and all 199 carry a synopsis, but only **2** carry an authored `episodes` list; anime
+  (124 topics) carries only an `episodeCount` and no synopsis. The runtime fetchers (TVMaze, Jikan)
+  fill the gap, so the sheet works — the authored "batch after batch" pass the user described is
+  unfinished. For the record on the earlier question: **all 999 albums have tracks and all 796 books
+  have a synopsis**, so those two passes are complete.
+- **A "Watch" pill in the series sheet** — never built (Apple Music/Spotify/YouTube Music have no TV
+  equivalent; it needs the right video service named).
+- **A series share card** drawing on the watched/favourite data — never built.
+
+Writing / personal pages:
+
+- **Attachments inside a paragraph** (batch V, asked back rather than guessed): a photo or a voice
+  note SPLITS the block, so Select all stops at the split and a note cannot be placed between two
+  paragraphs of one entry.
+- **More than one photo pair, and a 3- or 4-photo stack** — only a pair and a single are laid out.
+- **The pinned-heading audit** (batch V) — never done.
+- **The voice/photo carry's remaining placement glitches** (batch I) — the off-by-one and the
+  unmeasured slot were the two found; the carry has not been re-audited since.
+- **The save-your-take lag** (batch Q/R) — the page-wide recomposition is fixed (the aggregates are
+  derived values published from a snapshot), but the ACTIVE format body still re-runs on every
+  keystroke and `RichTextEditor.emit` still rebuilds the whole `AnnotatedString` and rebases every
+  span per character. Both are by inspection, not by a profiler run.
+- **The topic-lane teaser card** the art/author sections use — whether an artwork's cover art should
+  be fetched for it is still unasked.
+
 ## Request (2026-09-18, batch Z3 — the avatars, drawn again from zero)
 
 Verbatim: "now the current avatars are so bad now, like genuily so bad, no detail and all, i want
