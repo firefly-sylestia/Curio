@@ -24,18 +24,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,10 +48,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalNoteEntity
@@ -57,6 +65,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * v387 — THE PERSONAL FAMILY ON HOME.
@@ -79,6 +88,13 @@ import com.curio.app.ui.theme.FrauncesFontFamily
  *  whatever the writing contains. */
 private val CHIP_WIDTH = 96.dp
 private val CHIP_HEIGHT = 118.dp
+
+/**
+ * v389 — WHERE A ROW'S CONTENT MAY BEGIN: past the pinned door and the air
+ * around it. The door holds the left edge of its row (see [PinnedDoorRow]), so
+ * the chips start HERE and slide back under the door as the row is dragged.
+ */
+private val DOOR_GUTTER = 16.dp + CHIP_WIDTH + 10.dp
 
 /**
  * The floating create button. [visible] is owned by the caller (the page's
@@ -192,12 +208,16 @@ fun CreateEntrySheet(
                 accent = personalAccent(),
                 onClick = onTopicNote
             )
+            // v389 — the door wears the CHECKBOX the to-do page itself draws
+            // (the same mark the journal's to-do tool wears), instead of the
+            // `task_alt` icon, which reads as "task added", not "a list".
             CreateEntryOption(
-                glyph = CurioIcons.TaskAlt,
+                glyph = null,
                 title = "A to-do list",
                 body = "Check off tasks as you go",
                 accent = personalAccent(),
-                onClick = onTodoList
+                onClick = onTodoList,
+                drawn = { TodoGlyph(active = false, iconSize = 20.dp) }
             )
         }
     }
@@ -205,11 +225,14 @@ fun CreateEntrySheet(
 
 @Composable
 private fun CreateEntryOption(
-    glyph: String,
+    glyph: String?,
     title: String,
     body: String,
     accent: androidx.compose.ui.graphics.Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    /** A drawn door mark, for the doors whose icon the bundled font subset
+     *  cannot say — the to-do list wears the page's OWN checklist box. */
+    drawn: (@Composable () -> Unit)? = null
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     // The glyph tone is NOT the raw accent: in light mode the accent is too
@@ -232,7 +255,11 @@ private fun CreateEntryOption(
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
-                    CurioIcon(glyph, null, tint = glyphTint, size = 20.dp)
+                    if (drawn != null) {
+                        CompositionLocalProvider(LocalContentColor provides glyphTint) { drawn() }
+                    } else {
+                        CurioIcon(glyph.orEmpty(), null, tint = glyphTint, size = 20.dp)
+                    }
                 }
             }
             Column(Modifier.weight(1f)) {
@@ -262,6 +289,19 @@ private fun CreateEntryOption(
 fun PersonalChipsRow(
     navController: NavController,
     onWrite: () -> Unit,
+    /**
+     * v389d — THE PAGE'S OWN BACKDROP, for the doors' plate.
+     *
+     * The two doors ride on an opaque fill so the chips can slide under them —
+     * and that fill was the theme's plain `background`, which on Home is NOT
+     * what the page is painted with (Home wears a lane wash, or its own rose
+     * tint). The doors therefore sat on a pale plate of their own, a visible
+     * seam in every theme that is not plain white (user report: "in home screen
+     * the stikky pages and your my shelf. they have a white background which
+     * creates weird theme issues with background"). The caller hands over what
+     * it actually painted with.
+     */
+    backdrop: Color = MaterialTheme.colorScheme.background,
     modifier: Modifier = Modifier
 ) {
     val journals by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
@@ -277,11 +317,9 @@ fun PersonalChipsRow(
     val ink = MaterialTheme.colorScheme.onBackground
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item("all-journals") {
+        PinnedDoorRow(
+            backdrop = backdrop,
+            door = {
                 DoorChip(
                     glyph = CurioIcons.Note,
                     label = "Pages",
@@ -289,7 +327,12 @@ fun PersonalChipsRow(
                     onClick = { navController.navigate(CurioRoutes.JOURNALS) { launchSingleTop = true } }
                 )
             }
-            items(items = journals.take(3), key = { it.id }) { journal ->
+        ) {
+            // v389d — MORE THAN THREE (user question: "why only 3 books and 3
+            // journal shows. add more keeping scroll too"). The row has always
+            // been a LazyRow — it scrolls — so the cap was the only reason the
+            // rest of the library could not be reached from here.
+            items(items = journals.take(CHIP_ROW_LIMIT), key = { it.id }) { journal ->
                 JournalChip(journal = journal, onClick = {
                     // v389 — the chip opens the page's OWN screen (a to-do list is
                     // not a journal day; see personalRouteFor).
@@ -297,11 +340,9 @@ fun PersonalChipsRow(
                 })
             }
         }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item("all-books") {
+        PinnedDoorRow(
+            backdrop = backdrop,
+            door = {
                 DoorChip(
                     glyph = CurioIcons.MenuBook,
                     label = "My shelf",
@@ -309,7 +350,8 @@ fun PersonalChipsRow(
                     onClick = { navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true } }
                 )
             }
-            items(items = books.take(3), key = { it.id }) { book ->
+        ) {
+            items(items = books.take(CHIP_ROW_LIMIT), key = { it.id }) { book ->
                 BookChip(book = book, onClick = {
                     navController.navigate(CurioRoutes.bookDetail(book.id)) { launchSingleTop = true }
                 })
@@ -317,6 +359,67 @@ fun PersonalChipsRow(
         }
     }
 }
+
+/**
+ * v389 — A ROW WHOSE DOOR CANNOT SCROLL AWAY.
+ *
+ * The door ("Pages" / "My shelf") holds the row's left edge and the content
+ * scrolls BESIDE it, sliding UNDER it — so the way into the full list is one tap
+ * away however far the row has been dragged (user request: "make the pages and
+ * my shelf sticky … the content of them stays scrollable and it goes under
+ * that").
+ *
+ * The door rides in an opaquely filled overlay because what passes beneath it
+ * has to be HIDDEN: the fill is the page's own background, not a translucent
+ * scrim, which would ghost the sliding chips through the door and its shadow.
+ */
+@Composable
+private fun PinnedDoorRow(
+    backdrop: Color,
+    door: @Composable () -> Unit,
+    content: LazyListScope.() -> Unit
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        LazyRow(
+            // The strip the door occupies is RESERVED, so the first chip starts
+            // clear of it and only slides under once the row is dragged.
+            contentPadding = PaddingValues(start = DOOR_GUTTER, end = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            content = content
+        )
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                // The plate: the page's own backdrop, solid under the door and
+                // FADED at its trailing edge — an opaque rectangle laid over a
+                // tinted page reads as a seam, and a bare fade would ghost the
+                // chips through the door's own text.
+                .drawBehind {
+                    val tail = 18.dp.toPx().coerceAtMost(size.width)
+                    val solid = (size.width - tail).coerceAtLeast(0.001f)
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            colorStops = arrayOf(
+                                0f to backdrop,
+                                (solid / size.width).coerceIn(0f, 1f) to backdrop,
+                                1f to backdrop.copy(alpha = 0f)
+                            )
+                        )
+                    )
+                }
+                .padding(start = 16.dp, end = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            door()
+        }
+    }
+}
+
+/**
+ * v389d — HOW MANY CHIPS A HOME ROW OFFERS. The row scrolls, so this is only
+ * about not building a chip for a library of hundreds on first frame.
+ */
+private const val CHIP_ROW_LIMIT = 12
 
 @Composable
 private fun NewChip(onClick: () -> Unit) {
@@ -458,9 +561,17 @@ private fun BookChip(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
+                    // v389 — the footer's type is SMALL (user request: "make
+                    // the title font more smaller"): it sits on a 24dp strip
+                    // under the artwork, so it names the book rather than
+                    // competing with its cover.
                     Text(
                         book.title,
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 10.sp,
+                            letterSpacing = 0.1.sp
+                        ),
                         color = ink,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -477,8 +588,14 @@ private fun BookChip(
  *
  * v389 — it has DEPTH now: a soft shadow plus a hairline edge, the way the
  * Cabinet's shelves read, so the two doors (Pages / My shelf) sit ABOVE the
- * chips around them instead of flat beside them (user request). The fill stays
- * OPAQUE — a translucent fill lets a shadow bleed through it.
+ * chips around them instead of flat beside them (user request).
+ *
+ * AND IT WEARS THE ACCENT (user request: "give them the theme color accent to
+ * the card of it"): an opaque wash of the member's own accent over the surface,
+ * with an accent hairline and the accent's deep shade as the ink, so the door is
+ * unmistakably the way in rather than a third chip. The wash is OPAQUE on
+ * purpose — the row slides under this card, so a translucent fill would show the
+ * chips passing beneath it and let the shadow bleed through.
  */
 @Composable
 private fun DoorChip(
@@ -487,13 +604,19 @@ private fun DoorChip(
     caption: String,
     onClick: () -> Unit
 ) {
-    val ink = MaterialTheme.colorScheme.onSurface
+    val accent = personalAccent()
+    val accentInk = personalAccentInk()
+    val fill = lerp(
+        MaterialTheme.colorScheme.surfaceContainer,
+        accent,
+        if (isCurioDarkTheme()) 0.28f else 0.16f
+    )
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shadowElevation = 4.dp,
-        border = BorderStroke(1.dp, ink.copy(alpha = 0.07f)),
+        color = fill,
+        shadowElevation = 6.dp,
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.42f)),
         modifier = Modifier
             .width(CHIP_WIDTH)
             .height(CHIP_HEIGHT)
@@ -503,17 +626,17 @@ private fun DoorChip(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CurioIcon(glyph, null, tint = ink.copy(alpha = 0.62f), size = 22.dp)
+            CurioIcon(glyph, null, tint = accentInk, size = 22.dp)
             Spacer(Modifier.height(8.dp))
             Text(
                 label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = ink
+                color = accentInk
             )
             Text(
                 caption,
                 style = MaterialTheme.typography.labelSmall,
-                color = ink.copy(alpha = 0.5f)
+                color = accentInk.copy(alpha = 0.62f)
             )
         }
     }

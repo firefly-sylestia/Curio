@@ -808,15 +808,13 @@ private fun LivePostPreview(
                     TextPostPreview(
                         label = "QUOTE",
                         body = draft.factText,
-                        credit = draft.byline,
-                        accent = accent
+                        credit = draft.byline
                     )
                 } else {
                     TextPostPreview(
                         label = "NOTE",
                         body = draft.factText,
-                        credit = "",
-                        accent = accent
+                        credit = ""
                     )
                 }
             }
@@ -883,9 +881,7 @@ private fun EmptyPreviewState(title: String, body: String) {
 private fun TextPostPreview(
     label: String,
     body: String,
-    credit: String,
-    /** The post's own accent — a quote is pulled in the colour it will wear. */
-    accent: Color
+    credit: String
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -909,7 +905,6 @@ private fun TextPostPreview(
                 SocialPullQuote(
                     words = body.ifBlank { "The words you keep will be set like this" },
                     credit = credit.ifBlank { "Who said it" },
-                    accent = accent,
                     placeholder = body.isBlank() && credit.isBlank()
                 )
                 return@Column

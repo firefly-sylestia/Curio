@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -239,6 +240,50 @@ internal fun checklistLabel(done: Int, total: Int): String = when {
     else -> "$done of $total done"
 }
 
+/**
+ * v389 — A TO-DO LIST PREVIEWED AS ITS OWN THING.
+ *
+ * A checklist that appeared in the journals list previewed as a paragraph of its
+ * text, with its rows and their ticks lost inside the prose — so a finished list
+ * and an unfinished one read alike. This is the list's own preview: the rows
+ * themselves, each wearing the page's checklist box (ticked or not), capped at
+ * [maxRows] so a long list never turns a row into a wall.
+ */
+@Composable
+internal fun ChecklistPreview(
+    doc: PersonalDoc,
+    ink: androidx.compose.ui.graphics.Color,
+    maxRows: Int = 3
+) {
+    val rows = doc.blocks.filter { !it.isPhoto && !it.isAudio && it.text.isNotBlank() }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        rows.take(maxRows).forEach { row ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                TodoGlyph(active = row.checked, iconSize = 14.dp)
+                Text(
+                    row.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (row.checked) ink.copy(alpha = 0.45f) else ink.copy(alpha = 0.8f),
+                    textDecoration = if (row.checked) TextDecoration.LineThrough else null,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        if (rows.size > maxRows) {
+            Text(
+                "+${rows.size - maxRows} more",
+                style = MaterialTheme.typography.labelSmall,
+                color = ink.copy(alpha = 0.45f)
+            )
+        }
+    }
+}
+
 @Composable
 private fun TodoReadView(
     title: String,
@@ -274,7 +319,16 @@ private fun TodoReadView(
             color = personalAccentInk()
         )
         Spacer(Modifier.height(18.dp))
-        PersonalDocView(doc = doc, ink = ink, accent = accent, onOpenPhoto = onOpenPhoto)
+        // v389 — a list is USED, not read back: its rows wear the bigger size,
+        // and the box ticks right here (user request: "make the todo screen text
+        // size more larger … the check box should be tickable in read view too").
+        PersonalDocView(
+            doc = doc,
+            ink = ink,
+            accent = accent,
+            onOpenPhoto = onOpenPhoto,
+            rowSize = ROW_VIEW_SIZE
+        )
         Spacer(Modifier.height(120.dp))
     }
 }

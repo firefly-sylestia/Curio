@@ -1,6 +1,7 @@
 package com.curio.app.features.personal
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -8,13 +9,17 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,9 +48,11 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +65,7 @@ import androidx.navigation.NavController
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -142,9 +150,17 @@ fun ChapterScreen(
 
     val liveDraft = rememberUpdatedState(draft)
 
+    /**
+     * v389d — AN EMPTIED CHAPTER NOTE IS AN EDIT (see the book review's own):
+     * deleting every word and leaving must clear what is stored, not be skipped
+     * because there is now nothing to write.
+     */
+    fun shouldWrite(): Boolean =
+        !liveDraft.value.isEmpty || review?.doc?.isEmpty == false
+
     fun saveNow() {
         val body = liveDraft.value
-        if (body.isEmpty) return
+        if (!shouldWrite()) return
         val title = chapterMeta?.title.orEmpty()
         scope.launch {
             withContext(Dispatchers.IO + NonCancellable) {
@@ -157,8 +173,7 @@ fun ChapterScreen(
 
     // Debounced while typing…
     LaunchedEffect(editing, draft) {
-        if (!editing) return@LaunchedEffect
-        if (draft.isEmpty) return@LaunchedEffect
+        if (!editing || !shouldWrite()) return@LaunchedEffect
         delay(700)
         withContext(Dispatchers.IO) {
             runCatching {
@@ -199,6 +214,14 @@ fun ChapterScreen(
     val chapterName = chapterMeta?.title.orEmpty()
     val words = remember(review?.id, review?.updatedAtMillis) { review?.doc?.wordsLabel().orEmpty() }
 
+    // ── The page's own mic (v389) ──────────────────────────────────────
+    // A chapter review is its own layout, so it carries the family's mic by hand
+    // (see PersonalVoiceMic) — the same floating button, permission door and
+    // guards the journal has.
+    val voiceId = rememberSaveable(bookId, chapter) { "chapter-" + bookId + "-" + chapter }
+    val liveVoice = PersonalVoiceRecording.session?.takeIf { it.noteId == voiceId }
+    var leavePrompt by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -216,7 +239,10 @@ fun ChapterScreen(
         ) {
             Surface(
                 onClick = {
-                    if (editing) {
+                    // A live recording is asked about FIRST (see PersonalVoice).
+                    if (liveVoice != null) {
+                        leavePrompt = true
+                    } else if (editing) {
                         saveNow()
                         editing = false
                     } else {
@@ -256,25 +282,16 @@ fun ChapterScreen(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Surface(
-                onClick = {
-                    if (editing) {
-                        saveNow()
-                        editing = false
-                    } else {
-                        editing = true
-                    }
-                },
-                shape = RoundedCornerShape(50),
-                color = if (editing) accent.copy(alpha = 0.16f) else accent
-            ) {
-                Text(
-                    text = if (editing) "Done" else if (review == null) "Write" else "Edit",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (editing) personalIconTint(accent) else personalOnAccent(),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                )
-            }
+            // THE FAMILY'S EYE/PEN (user request). The text pill it replaces
+            // was this page's only "Done", so leaving the pen still SAVES
+            // first — a chapter review must never leave writing unwritten.
+            PersonalModeSwitch(
+                editing = editing,
+                onToggleMode = { writing ->
+                    if (!writing) saveNow()
+                    editing = writing
+                }
+            )
         }
 
         // Where this chapter sits in the book: a hairline rail with one mark,
@@ -287,22 +304,29 @@ fun ChapterScreen(
             ink = ink
         )
 
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
         Crossfade(
             targetState = editing,
             animationSpec = tween(220),
             label = "chapter-read-write",
-            modifier = Modifier.fillMaxWidth().weight(1f)
-        ) { writing ->
-            if (writing) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 20.dp)
-                        .widthIn(max = 680.dp)
-                ) {
-                    Spacer(Modifier.height(4.dp))
-                    PersonalCanvas(
+            modifier = Modifier.fillMaxSize()
+        ) { writing ->             if (writing) {
+                 Column(
+                     modifier = Modifier
+                         .fillMaxSize()
+                         .verticalScroll(rememberScrollState())
+                         // v389 — the blank part of the review is writing space:
+                         // a tap in the gaps hands the caret to the LAST line and
+                         // the keyboard follows (user report: "i tap the blank
+                         // space to write but the cursor doesnt start and my
+                         // keyboard too"). The journal's writing column has done
+                         // this since v389; this page had not.
+                         .clickable { editor.focusLastLine() }
+                         .padding(horizontal = 20.dp)
+                         .widthIn(max = 680.dp)
+                 ) {
+                     Spacer(Modifier.height(4.dp))
+                     PersonalCanvas(
                         state = editor,
                         modifier = Modifier.fillMaxWidth(),
                         accent = accent,
@@ -311,6 +335,22 @@ fun ChapterScreen(
                     Spacer(Modifier.height(140.dp))
                 }
             } else {
+                // A DOUBLE TAP ON THE READING SIDE hands the pen back (user
+                // request: "when im on eye view and i double tap switch to edit
+                // pen mode, for all"). The detector sits UNDER the view, so a
+                // child that consumes its own tap keeps it.
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onDoubleTap = {
+                                    editing = true
+                                    editor.focusLastLine()
+                                }
+                            )
+                        }
+                ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -348,13 +388,33 @@ fun ChapterScreen(
                     }
                     Spacer(Modifier.height(120.dp))
                 }
+                }
+            }
+        }
+
+            // THE PAGE'S OWN MIC, floating over the writing (no Add-chapter
+            // door lives on this page, so it takes the corner the journal's own
+            // mic takes).
+            PersonalFloatingLayer(
+                visible = editing && liveVoice == null,
+                enter = fadeIn(tween(180)) + scaleIn(tween(220), initialScale = 0.80f),
+                exit = fadeOut(tween(120)) + scaleOut(tween(160), targetScale = 0.80f),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 18.dp, bottom = 16.dp)
+            ) {
+                PersonalVoiceMic(
+                    entryId = voiceId,
+                    route = CurioRoutes.chapter(bookId, chapter)
+                )
             }
         }
 
         // The dock is a WRITING tool, so it only exists while writing — it
         // rises with the keyboard instead of standing over the reading view.
+        // A live recording REPLACES it (see PersonalVoice).
         AnimatedVisibility(
-            visible = editing,
+            visible = editing && liveVoice == null,
             enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
             exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
             modifier = Modifier.fillMaxWidth()
@@ -371,6 +431,57 @@ fun ChapterScreen(
                 )
             }
         }
+
+        AnimatedVisibility(
+            visible = editing && liveVoice != null,
+            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
+            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                val live = liveVoice
+                if (live != null) {
+                    PersonalVoiceRecorderCapsule(
+                        session = live,
+                        onKeep = {
+                            scope.launch {
+                                val voice = PersonalVoiceRecording.keep(context, voiceId)
+                                if (voice != null) editor.insertVoice(voice)
+                            }
+                        },
+                        onDiscard = { PersonalVoiceRecording.discard() }
+                    )
+                }
+            }
+        }
+    }
+
+    // The system's back gesture is guarded the same way the page's own is.
+    BackHandler(enabled = liveVoice != null) { leavePrompt = true }
+
+    if (leavePrompt) {
+        PersonalVoiceLeaveDialog(
+            elapsed = liveVoice?.elapsed ?: "",
+            onKeepRecording = { leavePrompt = false },
+            onKeepNote = {
+                leavePrompt = false
+                scope.launch {
+                    val voice = PersonalVoiceRecording.keep(context, voiceId)
+                    if (voice != null) editor.insertVoice(voice)
+                    navController.popBackStack()
+                }
+            },
+            onDiscard = {
+                leavePrompt = false
+                PersonalVoiceRecording.discard()
+                navController.popBackStack()
+            }
+        )
     }
 }
 

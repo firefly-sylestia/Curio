@@ -3,8 +3,15 @@ package com.curio.app.features.personal
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +27,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -37,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -61,7 +73,9 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.data.ReaderMarkEntity
 import com.curio.app.data.openSearchUrl
+import com.curio.app.features.community.SocialPullQuote
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -84,14 +98,41 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun BookDetailScreen(navController: NavController, bookId: String) {
-    val book by produceState<com.curio.app.data.PersonalBookEntity?>(initialValue = null) {
+    // v389c — THE FIRST FRAME IS THE LAST VISIT'S ANSWER.
+    //
+    // Both of these are Room flows, and a flow's first value lands a frame or
+    // two after the page composes — so reopening a book began from nothing: the
+    // head without its title, then the title; the chapter rows as numbered
+    // placeholders, then their real names and page ranges. BookPageMemory keeps
+    // what the last visit ended on and hands it over as the initial value only;
+    // the flows below still decide, and they win on their first emission (user
+    // report: "the chapter view well sometimes it reload like it fetches the
+    // chapter notes etc then when i close and open again for a berif moment i
+    // see pages").
+    val book by produceState<com.curio.app.data.PersonalBookEntity?>(
+        initialValue = BookPageMemory.row(bookId)
+    ) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeBook(bookId).collect { value = it }
+            PersonalRepositoryHolder.repo.observeBook(bookId).collect {
+                BookPageMemory.rememberRow(it)
+                value = it
+            }
         }
     }
-    val notes by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
+    val notes by produceState(initialValue = BookPageMemory.notes(bookId)) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeBookNotes(bookId).collect { value = it }
+            PersonalRepositoryHolder.repo.observeBookNotes(bookId).collect {
+                BookPageMemory.rememberNotes(bookId, it)
+                value = it
+            }
+        }
+    }
+    // THE MARGINS: what the member marked while READING this book in Curio's
+    // reader. A highlight carries the passage's own WORDS, so the page can hold
+    // it as a quote without opening the file again.
+    val margins by produceState(initialValue = emptyList<ReaderMarkEntity>(), bookId) {
+        runCatching {
+            PersonalRepositoryHolder.repo.observeBookMarks(bookId).collect { value = it }
         }
     }
     // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
@@ -181,6 +222,9 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // The download-help sheet (PDF / EPUB).
     var downloadSheet by remember(bookId) { mutableStateOf(false) }
 
+    // The Read pill's own menu — held down, not tapped (see BookReadPill).
+    var fileMenu by remember(bookId) { mutableStateOf(false) }
+
     // ── The book's own FILE (v389) ─────────────────────────────────────
     // A PDF or EPUB the member wires to THIS book. The picked file is COPIED
     // into the app's own storage ([BookFiles]) and opened in Curio's reader,
@@ -237,11 +281,40 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // on (the seed runs ONCE, when the notes first arrive, so it can never
     // override a toggle they just made).
     var editing by remember(bookId) { mutableStateOf(true) }
-    var modeSeeded by remember(bookId) { mutableStateOf(false) }
-    LaunchedEffect(notes) {
-        if (modeSeeded) return@LaunchedEffect
-        modeSeeded = true
-        if (notes.isNotEmpty()) editing = false
+    // v389 — the seed keeps FOLLOWING the shelf until the member touches the
+    // switch, which is what makes it right on a slow first read: `notes` is a
+    // FLOW, so it emits an empty list first and the real rows a moment later,
+    // and deciding on that first emission read "nothing written" before
+    // anything had been read — a book WITH writing still opened as the book
+    // view (user report: "why i picked for book in eye it doesnt show that",
+    // and "similar to journal opening in view do the same for saved books
+    // too"). It also asks for actual WRITING rather than for a row: a review
+    // that was opened and left empty is nothing to read back, and a book with
+    // nothing written opens with the pen down exactly like a journal page.
+    var modeTouched by remember(bookId) { mutableStateOf(false) }
+    LaunchedEffect(notes, book) {
+        if (modeTouched) return@LaunchedEffect
+        // Wait for the book row itself: "has writing" is a question for the
+        // store, and it is only worth asking once the store has answered.
+        if (book == null) return@LaunchedEffect
+        editing = notes.none { !it.doc.isEmpty }
+    }
+
+    // ── The page's own scroll, so its head can ROLL UP ──────────────────
+    // The title is on the page twice: big, with the cover, and here in the
+    // head. The head's copy is a roll-up — it stays out of the way until the
+    // page's own title has gone under it (see [PersonalHeader.titleRevealed]),
+    // which is exactly where "which book am I in" stops being answered by the
+    // page itself.
+    val pageScroll = rememberLazyListState()
+    val titleScrollThreshold = with(LocalDensity.current) {
+        remember { 26.dp.roundToPx() }
+    }
+    val titleRolled by remember(pageScroll) {
+        derivedStateOf {
+            pageScroll.firstVisibleItemIndex > 0 ||
+                pageScroll.firstVisibleItemScrollOffset > titleScrollThreshold
+        }
     }
 
     Column(
@@ -253,11 +326,22 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     ) {
         val current = book
         PersonalHeader(
-            title = current?.title ?: " ",
-            subtitle = current?.author.orEmpty().ifBlank { "Your book" },
+            title = current?.title.orEmpty(),
+            subtitle = current?.author.orEmpty(),
+            titleRevealed = titleRolled,
+            // The head's idle line names the SHELF the book sits on: while the
+            // page is still showing the book's own title and author there is
+            // nothing for the head to add (user request: "instead of initial
+            // blank say your shelf").
+            idleTitle = "Your shelf",
             onBack = { navController.popBackStack() },
             action = {
-                PersonalModeSwitch(editing = editing, onToggleMode = { editing = it })
+                PersonalModeSwitch(
+                    editing = editing,
+                    // The member's own toggle wins from here on — the seed above
+                    // never overrides a side they have chosen.
+                    onToggleMode = { modeTouched = true; editing = it }
+                )
             }
         )
 
@@ -283,6 +367,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         // and the Read pill floats OVER it so it is reachable wherever the        // member has scrolled to.
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             LazyColumn(
+                state = pageScroll,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -334,18 +419,26 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                             // again (the first pass runs by itself), or go looking
                             // for a copy to download.
                             Spacer(Modifier.height(8.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
                             // The app's own doors belong to the WRITING side: a
                             // reader does not need "look it up" or a download
                             // search sitting over the words they came back for.
-                            if (editing) {
-                                LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
-                                DownloadPill(enabled = true) { downloadSheet = true }
+                            // They FOLD with the switch instead of appearing the
+                            // instant the pen is pressed, so the eye/pen flip is
+                            // one move rather than a page that snaps (user
+                            // report: the family's switch "looks clanky").
+                            AnimatedVisibility(
+                                visible = editing,
+                                enter = fadeIn(tween(180)) + expandVertically(tween(220)),
+                                exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
+                                    DownloadPill(enabled = true) { downloadSheet = true }
+                                }
                             }
-                        }
                             if (lookingUp || lookupNote != null) {
                                 Spacer(Modifier.height(6.dp))
                                 Text(
@@ -354,13 +447,36 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
                                 )
                             }
-                        if (editing) {
-                            Spacer(Modifier.height(12.dp))
-                            BlurbField(
-                                value = blurb,
-                                onValueChange = { blurb = it },
-                                enabled = blurbSeeded
-                            )
+                        AnimatedVisibility(
+                            visible = editing,
+                            enter = fadeIn(tween(180)) + expandVertically(tween(220)),
+                            exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
+                        ) {
+                            Column {
+                                Spacer(Modifier.height(12.dp))
+                                BlurbField(
+                                    value = blurb,
+                                    onValueChange = { blurb = it },
+                                    enabled = blurbSeeded
+                                )
+                            }
+                        }
+                        // WHY I PICKED IT UP, READ BACK (v389). The note was only
+                        // ever drawn while the pen was down, so the one thing a
+                        // member writes BEFORE reading was the one thing the eye
+                        // could not see (user report: "in book page the why i
+                        // picked it up isnt visible in read view so fix it
+                        // please"). A member who never wrote it sees nothing —
+                        // an empty card would be a box of nothing.
+                        AnimatedVisibility(
+                            visible = !editing && blurb.isNotBlank(),
+                            enter = fadeIn(tween(200)),
+                            exit = fadeOut(tween(120))
+                        ) {
+                            Column {
+                                Spacer(Modifier.height(12.dp))
+                                BlurbReadBack(value = blurb)
+                            }
                         }
                     }
                 }
@@ -384,6 +500,54 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                     }
                 )
             }
+
+                // v389 — FROM THE MARGINS. The passage is quoted from the mark
+                // itself (a highlight stores the words it was made on), so the
+                // page can show what the member kept without re-reading the
+                // file — and tapping one opens the reader AT that mark, which is
+                // what makes this a door rather than a museum. Made read-side
+                // only: the margins are something to read back, not a pile of
+                // cards to scroll past on the way to the writing.
+                if (margins.isNotEmpty()) {
+                    item("margins") {
+                        // Read-side only, and it folds like the writing tools
+                        // do: the margins are what a reader comes back for, so
+                        // they arrive with the eye rather than blink into place.
+                        // Hoisted into `PersonalFloatingLayer` on purpose: a bare
+                        // `AnimatedVisibility` inside a `LazyColumn` item resolves
+                        // to the ColumnScope overload and is then rejected (see
+                        // that function's own note).
+                        PersonalFloatingLayer(
+                            visible = !editing,
+                            enter = fadeIn(tween(200)) + expandVertically(tween(240)),
+                            exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
+                        ) {
+                        MarginsCard(
+                            marks = margins,
+                            onOpen = { mark ->
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            // The reader restores where it was
+                                            // left, so "go to this mark" is
+                                            // written as a position first.
+                                            PersonalRepositoryHolder.repo.saveReaderPosition(
+                                                bookId = bookId,
+                                                sourceKey = mark.sourceKey,
+                                                index = mark.positionIndex,
+                                                fraction = mark.positionFraction
+                                            )
+                                        }
+                                    }
+                                    navController.navigate(CurioRoutes.reader(bookId)) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
+                        )
+                        }
+                    }
+                }
 
                 item("progress") {
                     ProgressCard(
@@ -483,12 +647,63 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 item("shelf-tail") { Spacer(Modifier.height(96.dp)) }
             }
 
+            // HOLD THE READ PILL: the FILE itself.
+            //
+            // Tapping it reads (or asks for a file the first time); holding it
+            // says which DOCUMENT Curio opens and how to swap it — the member
+            // who downloaded the wrong edition, or who has the PDF now and the
+            // EPUB later, should not have to hunt for that door (user request:
+            // "when i tap and hold the read button it should show a drop down to
+            // change the pdf the file attach").
+            val attachedFile = BookFiles.documentOf(current.documentPath, current.coverUrl)
+            if (fileMenu) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 18.dp, bottom = 74.dp)
+                ) {
+                    DropdownMenu(
+                        expanded = true,
+                        onDismissRequest = { fileMenu = false }
+                    ) {
+                        if (attachedFile.isBlank()) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "Curio has no file for this book yet",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                },
+                                enabled = false,
+                                onClick = {}
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text("Choose a PDF", color = MaterialTheme.colorScheme.onSurface) },
+                            onClick = {
+                                fileMenu = false
+                                documentPicker.launch(arrayOf("application/pdf"))
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Choose an EPUB", color = MaterialTheme.colorScheme.onSurface) },
+                            onClick = {
+                                fileMenu = false
+                                documentPicker.launch(
+                                    arrayOf("application/epub+zip", "text/plain")
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+
             // THE READ PILL. With a file wired to the book it opens the reader;
             // without one it asks for the file first. It used to be a plain
             // "Read" text button tucked beside "Download help", which only
             // appeared when a `content://` handle happened to be sitting in the
             // cover column.
-            val attachedFile = BookFiles.documentOf(current.documentPath, current.coverUrl)
             BookReadPill(
                 hasFile = attachedFile.isNotBlank(),
                 onClick = {
@@ -500,6 +715,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         )
                     }
                 },
+                onLongPress = { fileMenu = true },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp, bottom = 20.dp)
@@ -550,6 +766,76 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         )
     }
 }
+
+/**
+ * THE BOOK'S MARGINS — what the member marked while reading it.
+ *
+ * A quote is the family's own pull quote ([SocialPullQuote]): the same rule down
+ * the side and the same coffee ink the journal's quote panel and the community's
+ * text posts wear, so a quote is one thing across the app. The member's own note
+ * rides as the credit — their words tied to the passage they were about — and a
+ * highlight with no note reads as what it is.
+ */
+@Composable
+private fun MarginsCard(
+    marks: List<ReaderMarkEntity>,
+    onOpen: (ReaderMarkEntity) -> Unit
+) {
+    val accent = personalAccent()
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(15.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CurioIcon(CurioIcons.Bookmark, null, tint = accent, size = 17.dp)
+                Text(
+                    "From the margins",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = FrauncesFontFamily,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    "${marks.size}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = accent
+                )
+            }
+            marks.take(MARGINS_SHOWN).forEach { mark ->
+                Spacer(Modifier.height(12.dp))
+                Surface(
+                    onClick = { onOpen(mark) },
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color.Transparent,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    SocialPullQuote(
+                        words = mark.text.ifBlank { "Chapter ${mark.chapter}" },
+                        credit = mark.note.ifBlank { mark.markKind.label }
+                    )
+                }
+            }
+            if (marks.size > MARGINS_SHOWN) {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "${marks.size - MARGINS_SHOWN} more in the reader",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                )
+            }
+        }
+    }
+}
+
+/** How many margins the book page quotes: enough to read back, never a wall. */
+private const val MARGINS_SHOWN = 4
 
 @Composable
 private fun ProgressCard(
@@ -671,6 +957,52 @@ private fun ProgressCard(
     }
 }
 
+/**
+ * v389 — WHY I PICKED IT UP, as the eye reads it.
+ *
+ * The same words the field holds, drawn as a note on the page rather than as a
+ * box: no placeholder, no caret, no container that says "type here". It is
+ * something to read back, which is what the reading side is for.
+ */
+@Composable
+private fun BlurbReadBack(value: String) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp),
+            horizontalArrangement = Arrangement.spacedBy(9.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 3.dp, height = 15.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(personalAccent())
+            )
+            Column {
+                Text(
+                    "Why I picked it up",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = personalAccentInk()
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    value,
+                    style = TextStyle(
+                        fontFamily = LoraFontFamily,
+                        fontSize = 13.sp,
+                        lineHeight = 19.sp,
+                        color = ink
+                    )
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun BlurbField(
     value: String,
@@ -782,7 +1114,9 @@ private fun ChapterCard(
                     Text(
                         // The book's OWN chapter name leads when the catalog has
                         // one; the number stays for the ones it does not.
-                        text = catalogTitle.takeIf { it.isNotBlank() } ?: "Chapter $chapter",
+                        // The edition's own title with our number said once —
+                        // see chapterNameOnly (v389).
+                        text = chapterNameOnly(chapter - 1, catalogTitle),
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontFamily = FrauncesFontFamily,
                             fontWeight = FontWeight.SemiBold
@@ -1206,19 +1540,24 @@ private fun BookReviewDoor(
  * pill with on-accent ink because it is the page's one primary action — the
  * look-up and download pills beside it are tinted, and a third tinted pill
  * would make none of them read as the thing to do.
+ *
+ * HOLD IT for the file itself: the tap reads, the hold asks WHICH document
+ * Curio opens (see the page's own file menu). It is the same door — the
+ * difference is how long the finger stays, which is the one thing a second
+ * pill in this corner could not say without crowding the page.
  */
 @Composable
 private fun BookReadPill(
     hasFile: Boolean,
     onClick: () -> Unit,
+    onLongPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
-        onClick = onClick,
         shape = RoundedCornerShape(50),
         color = personalAccentInk(),
         shadowElevation = 8.dp,
-        modifier = modifier
+        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = onLongPress)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),

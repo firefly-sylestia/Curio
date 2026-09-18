@@ -151,3 +151,82 @@ data class PersonalBookEntity(
     /** The learned chapter list, in order. */
     val chapters: List<PersonalChapter> get() = PersonalChapterCodec.decode(chaptersJson)
 }
+
+/**
+ * v389 — WHAT A ROW IN `reader_marks` IS.
+ *
+ * Three of these are things the member MADE (a bookmark, a highlight, a note on
+ * a passage); the fourth is not a mark at all but the answer to "where was I"
+ * — see [ReaderMarkEntity]. Keeping it in the same table means the reader's
+ * memory arrived with ONE migration and can never drift out of step with the
+ * marks it sits beside.
+ */
+enum class ReaderMarkKind(val key: String, val label: String) {
+    BOOKMARK("bookmark", "Bookmark"),
+    HIGHLIGHT("highlight", "Highlight"),
+    NOTE("note", "Note"),
+
+    /** Not a mark: where the member stopped reading (one row per book + file). */
+    POSITION("position", "Last read");
+
+    companion object {
+        fun fromKey(key: String?): ReaderMarkKind =
+            entries.firstOrNull { it.key == key } ?: BOOKMARK
+    }
+}
+
+/**
+ * v389 — ONE MARK IN A BOOK'S READER.
+ *
+ * The reader is where a member actually READS a book, so it is where they mark
+ * one up: a place to come back to ([ReaderMarkKind.BOOKMARK]), a passage worth
+ * keeping ([ReaderMarkKind.HIGHLIGHT] — the WORDS are stored, so a mark can be
+ * listed, jumped to and quoted without re-parsing the file), and a thought of
+ * their own attached to a passage ([ReaderMarkKind.NOTE]).
+ *
+ * A mark belongs to the BOOK **and to the FILE** it was made in ([sourceKey]):
+ * re-wiring a book to a different PDF would otherwise land every highlight on
+ * text that is not there any more, so a new file starts its own marks and its
+ * own position.
+ *
+ * [positionIndex] is what the mark points at, and it means the format's own
+ * unit: a SECTION index for an EPUB (its paragraphs are flat list items) and a
+ * PAGE for a PDF. It is deliberately not called "page" — an EPUB has no pages
+ * until it is rendered. [positionFraction] says how far INTO that unit the
+ * member was, because a chapter is taller than a screen and an index alone
+ * would send them back to the top of something they had read half of.
+ */
+@Entity(
+    tableName = "reader_marks",
+    indices = [Index("bookId"), Index("bookId", "sourceKey")]
+)
+data class ReaderMarkEntity(
+    @PrimaryKey val id: String,
+    val bookId: String,
+    /** Which file of the book this was made in (see [BookFiles]). */
+    val sourceKey: String = "",
+    /** A section index (EPUB / text) or a page number (PDF). */
+    val positionIndex: Int = 0,
+    /** How far into that section, 0f..1f. */
+    val positionFraction: Float = 0f,
+    /** See [ReaderMarkKind] — stored as ITS KEY, so the table is readable. */
+    val kind: String = ReaderMarkKind.BOOKMARK.key,
+    /** The marked words (highlights and notes). */
+    val text: String = "",
+    /** The member's own words on the passage (a note). */
+    val note: String = "",
+    /** The highlight's ink key — see the reader's own ink table. */
+    val colorKey: String = "",
+    /** The 1-based chapter/section the mark belongs to (0 when unknown). */
+    val chapter: Int = 0,
+    val createdAtMillis: Long = 0L,
+    val updatedAtMillis: Long = 0L
+) {
+    val markKind: ReaderMarkKind get() = ReaderMarkKind.fromKey(kind)
+
+    val isHighlight: Boolean get() = markKind == ReaderMarkKind.HIGHLIGHT
+
+    val isNote: Boolean get() = markKind == ReaderMarkKind.NOTE
+
+    val isPosition: Boolean get() = markKind == ReaderMarkKind.POSITION
+}

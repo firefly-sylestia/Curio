@@ -1,6 +1,826 @@
 # Prompt Log — current request
 
-## Request (2026-09-17, IN PROGRESS — the piled-up prompt: to-do row gestures, the take studio pills, the reminder clock, and the book family)
+## Request (2026-09-18, batch N — the wall's late first frame, and the visibility break)
+
+Live instruction: "in community the last 24 hours nothing here yet appears late, same for
+moderator each time i open and close social they appears very late, also fix this." plus the
+CI log (three "'public' function exposes its 'internal' return type" errors).
+
+**Status: DONE, committed and pushed.**
+
+### The CI break
+
+`internal data class ArtworkInfo` / `internal data class AuthorWork` are returned by public
+functions on `ArtworkFetch` / `AuthorWorksFetch`. Each function that RETURNS one is now an
+`internal suspend fun` (`ArtworkFetch.artwork`, `ArtworkFetch.worksBy`,
+`AuthorWorksFetch.works`). Every caller is in the app module, so nothing else changes; the
+return-`String?` fetchers (`makerArtwork`, `portraitOrCover`) stay public. A sweep over the
+reveal package found no other public function carrying an internal type, and
+`TopicRevealScreen`'s only public function does not touch one.
+
+### Why the wall looked late — three separate mechanisms, each fixed at its source
+
+1. **The session was restored in a `LaunchedEffect`, which runs AFTER the first frame.**
+   With a stored session the page therefore painted `!eligible` first: the signed-in member
+   read "Sign in to see the social wall" and only then did "Last 24 hours" appear — the
+   section the user named as late. `OnlineAccount.restore(context)` is now called in a
+   `remember` BEFORE `OnlineAccount.state` is read (it is idempotent and only touches
+   storage when it has no session), and the now-redundant effect is gone.
+2. **`cards` started empty and was seeded from the device's cache INSIDE that effect.**
+   So the first rendered frame had no cards, `loading` was still false and there was no
+   error: the "Nothing here yet" card was claimed and then swapped out when the cache
+   landed. `cards` now seeds from `SocialFeedCache.read(context)` in the `remember`
+   initializer — the same read the effect made (its own memory map answers every repeat),
+   one frame earlier — and a new `answered` flag keeps the empty card from being claimed
+   before an answer (cache or server) has actually been seen: an empty wall and an unread
+   wall are not the same thing.
+3. **The Moderation door was re-derived by a network round trip on every single open.**
+   `isCommunityAdmin` / `canModerateReplies` started `false` each time, so the section could
+   only appear after `myAdminRow` answered — the "very late, every time I open and close
+   social" the user described. Both now seed from `AppPreferences.communityAdminState` /
+   `communityAdminRepliesState`, which `setCommunityAdmin` writes whenever the server
+   answers (and clears on a signed-out open). The server remains the authority; this is
+   only what was already known, so the door is on the page from the first frame.
+
+## Request (2026-09-18, batch M — the author's face in their own sheet)
+
+Live instruction: "Show the author's portrait in the author sheet header, not just on the
+reveal card".
+
+**Status: DONE, committed and pushed.**
+
+The portrait itself was already wired when the ask arrived (commit `6bb12921`), so the
+batch was an audit of that chain plus the two things the audit turned up:
+
+- **The chain, verified end to end.** `ArtworkInfoSection` resolves an author card's
+  picture through `ArtworkFetch.portraitOrCover(topic.name)` (Wikipedia's lead image for
+  the name, else the first of their books that has a cover) and persists it under
+  `author|<name>` via `AppPreferences.setSheetArtUrl`; `AuthorWorksSheet` seeds its own
+  state from `AppPreferences.sheetArtUrlsState["author|<author>"]`, so the sheet the card
+  opens is painted from the picture already on screen. `onOpenAuthor` reaches it from both
+  the book sheet's byline (`TopicRevealScreen:3651`) and the AUTHORS lane's own card.
+- **FIX — a shadow behind a translucent fill.** The header disc wore
+  `Modifier.shadow(3.dp, CircleShape)` over the family's `accent.copy(alpha = 0.16f)`
+  tint, which is what `AGENTS.md` rule 11 calls out: the blur reads through a fill under
+  1 alpha. It was worst on the common path — the first frame of an open, when the
+  silhouette glyph is what is on screen. The disc now keeps the sibling `MakerHeader`'s
+  flat tint with no shadow, and only the portrait (opaque by nature) sits on one.
+- **FIX — the sheet obeys the switch that filled the cache.** The card only looks a
+  picture up when cover fetching is ON, but the sheet re-resolved regardless, so an
+  install with fetching off made a network call the moment the sheet opened. The lookup
+  is now behind the same `AppPreferences.bookFetchEnabledState`, and with it off the
+  cached picture is what shows.
+
+## Request (2026-09-18, batch I — the selection's aim, and one sheet for the four lanes)
+
+Live instruction: "continue", on top of the user's answers to the open questions —
+"google books wasnt working though but add as a fallback. ye keep building, also the
+setect text in pdf and epub is kind of glitchy fix it also the box which eppars to show
+the hihgloght color etc is transparent for the selected text fix it too, also the pdf
+select text is bad it selects the whole page instead of just the text i wnt to select."
+
+**Status: DONE, committed and pushed.**
+
+### What was already in place (verified, not rebuilt)
+
+- The selection bar's transparency — the user's second bullet. `ReaderSelectionBar` wears
+  `palette.surface`, and all four skins' surfaces are opaque now (`0xFFF3E7D3` paper,
+  `0xFF252018` night, `0xFFF5F5F5` white, `0xFFF5F0E8` sepia) from `1fd62182`. Highlight
+  circles are the ink at 35% with the ink as their border.
+- Clickable journal links and the Google Books chapter fallback, both `1fd62182`.
+
+### What this batch changed
+
+- **"It selects the whole page" — the hit test, finally aimed.** `PdfPageText.glyphAt`
+  answered a press with the NEAREST glyph ANYWHERE on the page. On a press that lands in a
+  margin (or a hair off a line) that is a word from a different line, so the anchor sat
+  far away and the sweep between the anchor and the finger spanned most of the sheet. It
+  now settles on the LINE the point landed on — glyphs whose vertical band holds it, with
+  half a line of slack — and takes the nearest of THOSE by x.
+- **The page's own crop box.** `PdfRenderer` draws a page's CROP box and PDFBox measures
+  its glyphs from that same box, but the ratio was taken from `mediaBox`. On a trimmed
+  scan those differ, and every press answered from the wrong line. It now uses `cropBox`
+  (falling back to `mediaBox` when it is degenerate).
+- **The margin keeps its old meaning.** A press a line and a half from any type still hands
+  the press back and marks the whole page exactly as before; every press that sits ON the
+  words is a sweep. A drag that leaves the page's text also holds the last word instead of
+  jumping across the sheet.
+- **The reflowable half stops throwing.** `ReaderParagraphBlock`'s sweep did arithmetic on
+  `block.text.length - 1` — an empty text (an image with no caption) made `coerceIn(0, -1)`
+  throw out of the gesture. The range is clamped once, and an empty block declines the
+  press.
+- **One sheet for the four poster lanes.** Movies / anime / songs opened `PosterSimilarSheet`
+  ("Similar Movie", a teaser, a tag row, one line of copy, no way to keep the topic). It is
+  GONE — the user asked for it by name — and `PosterNotesSheet` replaces it: the same
+  anatomy as the book / album / series sheets (top hairline, artwork beside its own title
+  and byline, the Cabinet shelf toggles, the synopsis accordion with the lane's own glyph,
+  the tag row) and the same per-topic artwork key the reveal card already stored, so it
+  never re-resolves art that is already on screen.
+- **`.env.example` is the provider guide it was asked to be** — the free tier of every
+  artwork / chapter / author source the sheets read, with the keyless ones named as
+  keyless and the three optional keys (Google Books, LibraryThing, Spotify) plus the
+  Supabase and account-site values.
+
+### Also this batch — the author's shelf (`AuthorWorks.kt`)
+
+- **The author is a door.** The name under a book's title in the book sheet now opens
+  `AuthorWorksSheet`: Open Library's `search/authors.json` resolves the name to the
+  author's own `OL…A` id (an exact name beats a partial one), then
+  `authors/<id>/works.json` lists their works with covers and first publication years.
+  The sheet wears the same anatomy as every other one (top hairline, header, the list),
+  keeps an in-process cache per name — misses included — so reopening never re-asks, and
+  degrades to a "Search Open Library" door when the name is unknown.
+- `NotesSheetTopHairline` became `internal` so the new sheet can wear the same hairline
+  instead of a copy of it.
+
+### Batch J (same session) — the user's answers, built
+
+The ask_user came back: **"do the both"** (artwork sheet sources), **"in Authors category
+of its own buttom sheet and also for artists painting etc"** (where the author/artist door
+lives), and a work order — **chapters, then text beside small photos, then the drag**.
+
+- **Chapters first, as asked — three sources, not two.** `BookEnrichment` now reads Open
+  Library's own WORK record as well as its editions' tables (and takes the RICHEST table
+  instead of the first with three rows — an edition's ToC is often a bare stub), Google
+  Books, and **Crossref**: `type:book-chapter` items scoped to the book's own container
+  title, sorted by the page each chapter starts on. Crossref is the only one of the three
+  that answers for an academic or edited volume, and it brings page ranges with it. All
+  keyless; the Crossref pass runs only when the other two found nothing.
+- **The artwork sheet, both sources** (`ArtworkSheet.kt`): the Metropolitan Museum's
+  open-access API for the FACTS (title, maker, date, medium, department, public-domain
+  image, record URL) and Wikipedia's page summary for the WORDS (with its own guard: a
+  disambiguation page or a page that never names the maker is refused). Wrapped in
+  `ArtworkInfo`; either half may be missing and the sheet draws what arrived.
+- **The art lanes get a door** — an ARTWORK opens its record, an ARTIST or a PAINTER opens
+  the works the Met attributes to them (`artistOrCulture=true`, capped at eight), and an
+  AUTHORS topic opens the written-works sheet.
+
+### Batch K (same session) — the writing beside the print
+
+The next item in the order the user gave (chapters → **text beside small photos** → drag).
+
+- **A small print keeps room for the writing.** In `PersonalCanvas`, a SMALL photo takes a
+  narrow column and the ONE text block under it moves in beside it (42/58), claiming only
+  that first block so prose that runs on still flows under the print. Two non-PAGE photos
+  still pair first — a photo's neighbour is another photo's, not the writing's.
+- **The pair/beside passes are computed, not remembered.** They read a photo's size and
+  the words under it — exactly what the member changes while looking at them — and a
+  remembered set left the two passes able to disagree (a resized print dropped out of the
+  page). One pass now fills both sets.
+- **The line beside the print measures itself**, so a carried voice note or photo charges
+  the right number of steps when it passes that slot.
+
+### Batch L (same session) — the cards' pictures, and read-side parity
+
+Two more asks, both closed.
+
+- **The art/artist/painter/author cards wear their own picture.** `ArtworkInfoSection`
+  resolves a cover per lane and persists it per topic (`artwork|`, `artist|`, `author|`),
+  the way the film/anime/song cards already do. `ArtworkFetch` gained `makerArtwork()` and
+  `portraitOrCover()` (Wikipedia's lead image for a person, else the first of their books
+  with a cover) and `worksBy(maker, limit)` — a card opens three records, the sheet eight,
+  and only the full list is cached. An artwork FITS its band (cropping a painting changes
+  what it is); a maker's work or a portrait fills it.
+- **The read view draws the beside pair now.** `PersonalDocView` and `PersonalCanvas` each
+  carried their OWN copy of the block renderer, which is why the pair existed only while
+  writing. The read view's line and print bodies are composable lambdas now
+  (`renderLine`, `renderPrint`) — the same code, reachable from one more place — and the
+  read view computes the same beside rule the editor does.
+
+### Still open
+
+- The voice/photo carry's remaining placement glitches — last in the order the user gave,
+  and the off-by-one and the unmeasured slot are the two found so far.
+- The topic-lane card the art/author sections use is a teaser card; whether an artwork's
+  cover art should be fetched for it (as films/anime/songs do) is unasked.
+
+## Request (2026-09-17, batch H — the reader's last gaps closed)
+
+Verbatim (the live instruction): "text selection for both pdf and epub and epub page list
+and also the chapter list reload please then after finishing look at promot end."
+
+**Status: DONE, pushed.** Three of the four were already in place from batch G's own
+follow-ups (the user had answered the open questions); the fourth — the PDF half of text
+selection — was half-built and uncommitted in the tree from the interrupted session, and is
+now finished, wired into both PDF surfaces, and shipped.
+
+### What was found already built (so nothing was rebuilt)
+
+- **EPUB page-list** — `epubPageList` reads `nav[epub:type="page-list"]` /
+  `role="doc-pagelist"`, `splitHref` keeps the href's FRAGMENT, `ReaderBlock.anchor`
+  records the book's own pagebreak markers, `blockForEntry` matches anchor first, and the
+  Contents sheet carries a Contents / Printed pages toggle that only appears for a book
+  that has them. Shipped in `d06a05fe`.
+- **EPUB text selection** — the reflowable paragraph selects by word on a long press and
+  extends on a drag, in BOTH flows (scroll and paged), reported to the ONE selection bar.
+  Shipped in `9e157b83`.
+- **The book page's chapter list reload** — `BookPageMemory` (per-book, fingerprinted) hands
+  the last visit's chapter list, book row and note list to each Room flow as its INITIAL
+  value only, so a reopen's first frame is the answer the last visit ended on. Shipped in
+  `56851ab5`.
+
+### What this batch added
+
+- **PDF text selection, finished and wired.** `PdfPageTextLayer` existed as dead code (never
+  called, and it parsed the page itself). Now: the CALLER reads the page's words (the page
+  being looked at, plus any page already wearing a mark — the 6-page `PdfTextCache` keeps it
+  cheap) and hands them in, so a long press never has to wait for a parse. The layer sits
+  exactly over the drawn page's letterbox, INSIDE the zoom layer (a magnified page carries
+  its marks and its sweep), draws every stored passage back onto its own glyphs by char→glyph
+  offset, and turns long-press → drag into a word-to-word sweep reported as the same
+  `ReaderSelection(isPage = true)` a paragraph reports. Placed in BOTH PDF surfaces — the
+  pager and the continuous scroll — with the long-press gated on the words being in hand, so
+  a page with no text layer (a scan) or a press on the page's own margin HANDS THE PRESS BACK
+  and marking a whole page still works exactly as it did.
+- Dead code removed from the layer: no internal parse, no "press twice, the first one starts
+  the parse" affordance, no stale-capture reads (the gesture reads the words, the callbacks
+  and the drawn width through `rememberUpdatedState`).
+
+### Still open (unchanged, and not this batch's ask)
+
+- The "side by side" half of the photo ask (two small prints in one row).
+- The tail of this log — `## next prompt, also` — is an EMPTY heading: no pending prompt was
+  dropped there, so there is nothing to start from it.
+
+## Request (2026-09-17, batch G — the reader's second pass, PARTIAL)
+
+Verbatim (the live instruction, the user's own words): "build them add pinch to zoom fix
+the pdf quality, add text selects and highlights in the page itself and reader remember it,
+also the chapter view well sometimes it reload like it fetches the chapter notes etc then
+when i close and open again for a brief moment i see pages, also make the chapter points
+more broader with proper hirarcy, also for epub add more detetable chapters and pages do a
+research for that and a good vie for them, also for pdf it was showing double pages view so
+fix that too".
+
+**Status (2026-09-17): PARTIAL — the two that could be ESTABLISHED from the code are done;
+the rest need either a decision from the user or a lot more room. Pushed.**
+
+### Done
+
+- **PDF page quality.** `renderPdfPage` drew every page at a fixed `1.5f`, and the reader
+  then stretched it to the box (`ContentScale.Fit`) — so on a 400dpi phone the page was
+  rendered SMALLER than the screen showing it, and a bitmap scaled up is exactly the soft
+  page reported. The scale is now the one that makes the page as many pixels wide as the
+  screen (`displayMetrics.widthPixels / page.width`), clamped to 1x..3x.
+- **The PDF's page number was stated twice.** In the paged flow the chrome drew the page bar
+  ("Page 7 of 300", chevrons and all) AND the footer's position label, which for a PDF is
+  that same sentence. The footer now says what the bar cannot (the marks), and in the
+  scrolling flow it says no page at all rather than a stale one — the pager is not what is
+  being scrolled there.
+- **Chapter hierarchy, from the files themselves.** Both of `BookOutline`'s EPUB readers
+  (the EPUB 3 nav document and the EPUB 2 NCX) flattened every entry to depth 1 — the nav's
+  nested `<ol>`s and the NCX's nested `<navPoint>`s ARE the book's shape, and they were being
+  discarded. Both now count nesting as they walk, and the contents sheet indents 18dp a level
+  with type and weight falling as it goes, plus an accent mark on every deeper row (an indent
+  alone cannot say it — a wrapped title restarts at the same edge).
+
+### Answered by the user (so the next session starts warm)
+
+- **"Double pages view" for a PDF = two page images stacked** — confirmed. The SCROLL flow
+  sized every page by its WIDTH, so a page was taller than the screen and the next one's top
+  showed under it. FIXED: each page now takes the viewport and fits inside it
+  (`BoxWithConstraints` → item height = `maxHeight`, `ContentScale.Fit`), so the column
+  still scrolls continuously but a page is a page.
+- **"It reloads" = the BOOK PAGE's chapter list** — confirmed (not the reader's sheet).
+  DONE in `56851ab5` (`BookPageMemory`).
+- **EPUB page-list: the user chose the FULL pass** — carry the href's fragment through
+  `resolveTarget`, record the book's own pagebreak anchors on the blocks, and give the
+  Contents sheet its own view of the printed page numbers. DONE in `d06a05fe`.
+
+### Still to do (the honest list)
+
+- ~~**Text selection and highlighting ON a PDF page**~~ — **DONE in batch H** (top of this
+  log): the overlay, the glyph mapping and the press-back for a page of pictures are all in.
+- ~~**EPUB's own page numbers**~~ — **DONE** in `d06a05fe`.
+- ~~**"Sometimes it reloads."**~~ — **DONE** in `56851ab5` (the user confirmed the book page's
+  chapter list; `BookPageMemory` answers the first frame of every flow).
+- ~~**"Double pages view" for a PDF**~~ — **DONE** in `db38383b` (the user confirmed two
+  stacked page images; each page now takes the viewport and fits inside it).
+- **EPUB's own page numbers.** EPUB 3 carries them as `nav[epub:type="page-list"]` whose
+  links point at `#pageN` anchors, plus inline `<span epub:type="pagebreak">` markers. Curio
+  keeps only the FILE half of an href (`resolveTarget` drops the fragment), so every page
+  anchor in a book would land on one block. Doing it properly = a fragment field on
+  `ReaderOutlineEntry`, an anchor field on `ReaderBlock` filled when the parser meets a
+  pagebreak marker, and the match between them. Worth its own pass.
+- **"Sometimes it reloads."** Not reproduced. Likely sites: the chapter resolution
+  (`withContext(IO) { epubOutline }` / `pdfOutline`) re-running every time the sheet opens,
+  and the book page's chapter list resolving through the repository on every visit — both
+  would show a loading state for a moment. **Needs the user to say where.**
+- **"Double pages view" for a PDF.** Not established. The paged flow composes ONE pager with
+  one page per slot; the scrolling flow stacks pages on purpose. The only literal duplicate
+  found is the page number above. **Needs the user to say which they saw.**
+
+## Request (2026-09-17, batch F — INCURSION, built, plus bulk-by-phase)
+
+Verbatim (the live instruction): "continue and finish all the remaining task also add bulk
+watching by phase for incursion".
+
+**Status (2026-09-17): BUILT — committed locally. NOT pushed (the user asked to be asked
+first; the ask is pending).**
+
+### What landed
+
+1. **The dataset, imported rather than transcribed** (the thing that blocked batch E).
+   `scripts/import_incursion.mjs` fetches the three modules that hold the list —
+   `mcuData.js` (58KB), `sonyData.js` (3KB), `xmenData.js` (10KB) — imports them as
+   MODULES (only `new Set(` and `Object.freeze(` neutralised; every value read out by its
+   own exported name) and writes `app/src/main/assets/incursion/{marvel,sony,xmen}.json`:
+   **163 entries** (130 / 13 / 20) in ~89KB, every row carrying `id`, `order`, `group`,
+   `type`, `title` and `essential`. `trailerData.js` is never fetched (not wanted).
+   Verified: zero entries whose group id is absent from their studio's heading table.
+   **This is the fix for batch E's blocker** — the earlier session was right to refuse to
+   hand-copy a few hundred rows from a truncated read, and wrong about needing the user to
+   paste them: the files are fetchable, so a transform (not a transcription) is possible.
+2. **`data/IncursionCatalog.kt`** — the model + cached asset loader, stamping each entry's
+   studio-qualified `storageKey` (entry ids collide across the three tables by
+   construction).
+3. **`data/IncursionStore.kt`** — the unlock (`offer` — the phrase, accepted in any search
+   field, once per device) and the six-state status map in `curio_prefs`, reactive.
+4. **`features/incursion/IncursionScreen.kt`** — the page: its OWN four-way nav bar at its
+   own foot (Marvel · Sony · X-Men · Essentials), search, five filter chips, list + grid,
+   phase (era) headings with their own tally, and a detail sheet per title.
+5. **BULK WATCHING BY PHASE** (the new ask, and the reason the headers exist): every group
+   header carries a `Mark all` menu for all six states plus a confirming "Clear this
+   phase"; the page header's menu does the same for everything currently listed. Writes
+   once per group (`IncursionStore.setGroupStatus`), never a loop. The grid emits the SAME
+   header as a full-span row, so a grid cannot quietly lose the gesture.
+6. **`features/incursion/IncursionSurfaces.kt`** — the unlock announcement (root-level,
+   ~3.2s, tap to dismiss) and Home's floating `Incursion` button (absent until unlocked).
+7. **The lock lives in `CurioSearchField`** — one call site, so "type it anywhere" is true
+   of every search surface in the app, including ones added later.
+8. **Avatars.** The ten-portrait rebuild the user asked for landed in `029ae32b` (per-
+   character hair, bust and accessory art for all 28, twelve gazes) — checked, not
+   rebuilt. What that pass left was two collisions: the flower crown (#16) and the wizard
+   (#8) shared the starry eye, and the space helmet (#15) wore the curious wide eye while
+   its visor implies glass. Both now wear gazes that fit them and share with no neighbour.
+   **A pixel redesign cannot be verified from here — the user must eyeball it.**
+
+### Still open / not done
+
+- The READER's horizontal and continuous page styles, and the floating page changer —
+  from the earlier reader batch, still not built (not part of this instruction).
+- The "side by side" half of the photo ask (two small prints sharing a row).
+- The avatars' EYE CHECK is the user's to make; I can only see the table, not the render.
+
+## Request (2026-09-17, compile repair from CI log)
+
+The pasted CI failure was caused by the photo-size field being attached to `PersonalRun` instead of `PersonalBlock`, an invalid `@Composable` annotation on `PersonalPhotoSize`, a missing `fillMaxSize` import, and a `BasicTextField` text alignment argument placed outside `TextStyle`. Moved the field to the block model, corrected the annotation/import/API usage, and left Gradle verification to CI per the repository rule.
+
+## Request (2026-09-17, batch C — the universal writing dock)
+
+Verbatim summary: the add-chapter flow double-names a chapter ("Chapter 1 · Chapter 1");
+the book page's "why I picked it up" is invisible in the read view; the full-screen note
+editor and the share card's expand should wear the journal's chrome; the journal's dock
+wants a text-history pill FIRST and a watermark/marker with colour options; the dock's
+alignments (left / right / centre / justified) and the font and text size should all live
+in ONE universal toolbar; "Save your take" should lose its per-note toolbar for a floating
+one that appears only while typing and goes when the note is left; EPUBs that already
+print their own page numbers must not get Curio's as well; the reader's Chapters tab must
+list the file's real table of contents with a floating page bar for pages; horizontal
+reading and continuous vertical page styles for both formats; and the system status bar
+hidden in the reader.
+
+**Status (2026-09-17): PARTIAL — pushed; the reader items were already shipped.**
+
+Already delivered in `cb4e8113` (the user is describing the released build, not the
+branch): the reader's Chapters tab IS the file's own contents (EPUB 3 nav document, EPUB 2
+NCX, a PDF's outline — `BookOutline.kt`), the system status bar IS hidden in the reader,
+`carriesOwnPageMarkers` DOES detect a file that prints its own page numbers,
+`chapterMarkerLabel` DOES strip a book's own "Chapter 7" so it cannot be printed twice, and
+the book page DOES read "Why I picked it up" back on the reading side.
+
+Delivered this batch:
+
+- `c8d933c2` — the dock's marker pen (four inks, shared with the reader's), four-way
+alignment (right and justified are new), and text history as the dock's FIRST tool.
+- `3edbf668` — the dock's font menu (four faces the app already bundles).
+- The `RichTextDock` on "Save your take" and the full-screen editors is now FOCUS-gated:
+it rises out of the field's foot while writing and folds away when the note is left, with a
+grace period so a tap on a dock button cannot dismiss the dock. Tapping blank space on the
+save page now ends the typing (a tap detector on the scroller, under every card).
+
+Still open (they fit the ORIGINAL reader pass, not a new one): horizontal reading, the
+continuous vertical page styles for PDF and EPUB, and the floating page bar in the reader's
+tool bar. And the "## next prompt" at the foot of this file (avatars, the voice note's
+backgroundless graph, photo reorder, polaroid photos) is still pending.
+
+**Decided with the user (ask_user, this batch):** the font menu ships WITHOUT a separate
+text-size control, because Title and Small already are the two sizes the dock has (no third
+overlapping concept); and the save page's dock is flat above the Add take area when idle
+while it disappears the moment no field is focused.
+
+## Request (2026-09-17, batch B — the reader deepened, the writing rules tightened)
+
+Verbatim summary: deepen the book reader (pinch-to-zoom, EPUB images/styled headings,
+in-book search, chapter-level highlights, PDF ink change + proper text selection on both
+formats); the reader's tools must come back on a tap of the page and go on a second tap
+or a scroll; and the writing surfaces want Enter to make real lines, the title tool to
+stop at the end of a title, marks to act as an input style rather than rewriting the
+line, the book review's pinned chapter fixed (it appeared too early; tapping it should
+jump), a journal equivalent, a bigger pinned bar nearer the header, the book page's head
+to roll up the author too and say "Your shelf" at rest, the eye/pen switch not to fight
+the keyboard, and a pasted paragraph to be split so things can go between its lines.
+
+### Decisions taken with the user (asked, not guessed)
+
+- **PDF text selection:** the member chose a TEXT EXTRACTOR. Android's PdfRenderer has
+  no text layer at all. `com.tom-roush:pdfbox-android` (2.0.27.0) is added and used
+  LAZILY — one page at a time, on IO, cached — so opening a PDF is exactly as fast as it
+  was (the member's own objection: "why the pdf needs to get slower in open").
+- **Highlights:** both an exact run and a whole-chapter highlight.
+- **"Your shelf":** the book page's head, before the title rolls up.
+
+### What landed
+
+- **The reader's chrome is reachable again.** Every paragraph carried a long-press
+  detector with no tap of its own, and Compose consumes the press — so a tap on the page
+  did nothing and the auto-hidden head/foot could never be brought back. Both surfaces
+  now answer a tap themselves, a scroll puts the chrome away, and an auto-hide timer
+  still runs.
+- **Zoom** — `Modifier.pinchToZoom`, two fingers only so a single-finger scroll or page
+  turn is never stolen. A reflowed book's zoom is its TYPE size (`ReaderLook.textScale`,
+  applied to every size in `ReaderParagraphBlock`); a PDF's is a real scale-and-pan in a
+  `graphicsLayer`, and the pager stands down while it is in close.
+- **PDF ink + full fit** — `readerPdfFilter(palette.inkKey)` is a colour matrix per skin
+  (sepia tint, a night inversion, a paper softening, nothing for white), and the page is
+  `ContentScale.Fit` over `fillMaxSize` instead of stretched across the width.
+- **Search** — a `ReaderSearch` object (query, token, progress, hits) swept in the
+  background: one pass over the blocks of a reflowed book, or page by page through
+  `extractPdfPageText` for a PDF, giving the frame back between pages and reporting
+  "read N of M". Finds are washed in the text themselves (`buildAnnotatedString`).
+- **Chapter highlight** — offered on a HEADING in the marks sheet, so "mark this
+  chapter" is one act rather than a paragraph at a time.
+- **EPUB images and styled headings** — `epubBlocks` turns `<img>` and `<h1..h6>` into
+  markers BEFORE the markup is stripped, so the document's own order survives in one
+  pass: pictures are copied out of the archive to a cache file and drawn between the
+  paragraphs they stood between, and headings keep three sizes.
+- **The writing rules** — `PersonalEditorState.armedOff` is the other half of `armed`
+  (marks switched OFF for what comes next), so with no selection the dock is an INPUT
+  STYLE: tapping bold inside a bold phrase un-bolds the next words instead of rewriting
+  the line. `splitBlock` is the one split (Enter, a held Enter, a paste) and a TITLE
+  never crosses it. `onFieldChange` splits on any newline, so a pasted paragraph becomes
+  the page's own lines — which is also what made Select all and "put a voice note between
+  these lines" work.
+- **The pinned line** — `PersonalPinnedLine` is shared by the book review, the chapter
+  review and every writing page (via `LocalPersonalTitleReport`, because the reading
+  half is the caller's view), it is bigger and nearer the header, it appears only once a
+  heading's BOTTOM has gone by (the glitch: its top edge was enough, so chapter one was
+  pinned before anything was scrolled), and tapping it goes back to that heading.
+- **The heads** — `PersonalHeader` rolls the author up with the title and has an
+  `idleTitle`, which the book page fills with "Your shelf".
+- **The switch** — the journal focuses its title immediately but opens the keyboard 260ms
+  later, after the page has turned, so the cross-fade is not lifted mid-flight.
+
+### Still open (NOT done in this pass — deliberately reported, not hidden)
+
+- **On-page PDF text selection.** The extractor, its cache and the glyph geometry are in
+  (`BookPdfText.kt`), including `wordAround`, `glyphAt`, `textBetween` — but the selection
+  OVERLAY on the page (drag handles, the wash drawn over the glyphs, and the
+  highlight/quote/note bar over it) is not wired up yet. A PDF can be searched today; it
+  cannot yet be dragged over.
+- **Inline bold/italic inside an EPUB paragraph.** Headings' levels and images are read;
+  emphasis inside a paragraph (`<b>`, `<em>`) is still flattened to plain text.
+
+## Request (2026-09-17, DONE — the rolling heads, the pinned chapter, one switch for every page)
+
+Verbatim: "fix this … first fix the cl and push it, then d the rest of the work, dont push
+though just commit" + the `PersonalCanvas` CI log (background/pointerInput/isSpecified/
+minDimension).
+
+### What landed
+
+- **The CI log FIRST, pushed as its own commit (`2d260552`).** Four real faults, all
+  mine: the page-select wash asked `TextSelectionColors` for a member it does not have
+  (`backgroundColor`, not `background`), the tick target's `Modifier.pointerInput` and
+  the row-size `isSpecified` check were used with no import, and `TodoGlyph` named its
+  `Dp` parameter `size` — which shadows `DrawScope.size` under its own `Canvas` (the
+  project's rule 7), so its geometry read a `Dp`. Renamed `iconSize`, three call sites
+  follow.
+- **The book page's head ROLLS UP.** `PersonalHeader` gained `titleRevealed`: the head's
+  title is invisible while the page's own title (with the cover) is on screen and comes
+  in as that one scrolls under it, driven by the page's `LazyListState`. The line is
+  always laid out, so nothing below the head can jump.
+- **HOLD THE READ PILL for the file.** `BookReadPill` is a `combinedClickable`: tap
+  reads, hold opens the file menu (the book's document state + Choose a PDF / Choose an
+  EPUB) feeding the same picker/`BookFiles.import` the first-run flow uses.
+- **THE PINNED CHAPTER (book review).** Both doc views report each TITLE block's place
+  in the scrolling content (`onTitlePosition`); the screen subtracts the active side's
+  scroll offset, so the marker that has gone above the top is the current chapter and
+  the bar names the chapter BEFORE it while a marker is still visible. A floating pill
+  at the page's top edge with an `AnimatedContent` label.
+- **The journal's own roll-up title.** `PersonalWritingPage` reports its writing scroll
+  (`onScroll`); the top bar takes the day's title once the title field's content offset
+  minus the scroll has passed the top, fading into the bar's empty middle with
+  `weight(1f, fill = false)` — the bar's height never changes.
+- **One switch, and it MOVES.** `PersonalModeSwitch` draws a single lit fill that
+  travels between its halves while both glyphs tint through the same slide. The page's
+  mode swap is a cross-fade with a few dp of upward travel on both sides (no horizontal
+  slide) — the keyboard is what actually moves, so the swap agrees with the inset
+  instead of sliding against it. The book page's writing-only rows and its read-only
+  margins FOLD with the switch. `BookReviewScreen` and `ChapterScreen` wear the switch
+  too (their text pills are gone; leaving the pen still saves).
+- **The blank space ALWAYS starts the writing.** `PersonalEditorState.tapTarget` /
+  `tapTick` are the proof a finger landed — the caret token is consumed the moment the
+  line honours it, so a tap on a page whose caret was already in that line did nothing.
+- **Double-tap the reading side for the pen** (journals/notes/to-do, book review,
+  chapter review), with the detector UNDER the view so a child's own tap still wins.
+
+### ⏭ Still open
+
+- **The voice note's DRAG (asked, not guessed).** "drag to move the voice note" reads
+  three ways — the floating mic button dragged around the canvas, the voice BLOCK moved
+  in the page, or the waveform scrub (which already seeks by tap OR drag). It also
+  implies voice notes on the book/chapter review pages, which have no mic today.
+
+---
+
+## Request (2026-09-17, DONE — the portraits' own gazes, the pinned topic head, and a new page's identity)
+
+Verbatim: "do the avatar redesign each one properly then the pinning the dock and post
+composer for a note of topic".
+
+### What landed
+
+- **The portraits.** `AvatarArt` gained `eye`; twelve named gazes (`EDGE_*`), assigned
+  per character to suit it, drawn by the new `drawEyes` (which replaced the eye block
+  inside `drawFace`), with `drawBrows` now shaped per gaze. The near-black hair/hood
+  tones came up off black and the hooded face's near-white skin warmed, since "the
+  black is the worse" was a real read of a black mass on a pastel ground. Everything
+  else — the clip, the light, the 28 rows' colours, `socialAvatarBitmap` — is
+  untouched, and the notification wallpaper draws through the same function.
+- **The topic head is pinned.** `PersonalWritingPage` gained `pinnedHead`, a slot
+  under the top bar and OUTSIDE the writing scroll; the topic note puts its
+  `TopicHead` there (it used to ride `aboveCanvas`, inside the scroll, which is what
+  hid the "choose the topic" door under the fold).
+- **A new page keeps its identity.** The page's `entryId` — minted on the first
+  composition — and the topic note's topic/category/date/picker state are
+  `rememberSaveable` now. Navigating to the topic page and back DISPOSES the
+  composition, so a `remember`ed id was re-minted, which saved a second row and asked
+  for the topic again.
+
+### ⏭ Still open
+
+Nothing from this batch — the dock pinning is the pass below.
+
+## Request (2026-09-17, DONE — the editor's dock pinned to the screen's foot)
+
+Verbatim of the last open piece: "then the pinning the dock".
+
+### What landed
+
+- `RichTextEditor` gained `dockPinned` (inert unless the mode is DOCK). With it the
+  editor scrolls the WRITING inside itself — the paper wrapper and the field are one
+  `fieldArea` lambda owned by a `Box(weight(1f).verticalScroll(...))` — and the dock
+  renders BELOW that box, so it holds the foot of the editor's column.
+- Both call sites (the Share Hub's card editor, the book sheet's note expand) dropped
+  their own `Column(weight(1f).verticalScroll(...))` wrapper and hand the editor
+  `Modifier.weight(1f).fillMaxWidth()` plus `dockPinned = true`, so the dock holds the
+  foot of the screen instead of travelling with the words.
+- The eight capture formats never pass `dockPinned`, so nothing else about the shared
+  editor moved.
+
+## Request (2026-09-17, DONE — the dock's two model tools, page-wide Select all, read-view ticks, and the to-do's own preview)
+
+The ask_user answers this pass implements:
+
+1. "Add both to the model" — per-run justification and font family.
+2. "the full screen editor that u chnage make its backgroud screen and all the journal style with the same buttom tool style" — done for the background + dock (the dock was already the journal's; PINNING it to the screen's foot is still open, see below).
+3. "do all of them together, also fixing all the text write so when i do select all it only selects one line … also in the + buttom sheet of home the a todo list icon chnag e it too".
+
+### What landed
+
+- **`TextSpan.alignKey` + `TextSpan.fontKey`** (`data/CaptureData.kt`): keys, not
+  ordinals; `null` = inherit. Rendered by `buildRichAnnotated` (family as a span
+  style, ALIGNMENT as a PARAGRAPH style because the stack aligns whole lines), read
+  back by `extractRichSpans` (span styles + paragraph styles), carried through
+  `merged()` / `rebaseSpans` (which now COPIES rather than rebuilding positionally,
+  so a shifted run keeps every attribute). `setSpanAlign` / `setSpanFont` use the
+  flag toggles' split-at-the-edges shape; `richFontFamily` / `richFontKey` /
+  `richTextAlign` / `richAlignKey` are the two-way tables. The dock's two doors
+  (`RichTextDockMenu` + drawn `RichAlignGlyph` / `RichFontGlyph`, because the icon
+  subset has no alignment marks) apply to the selection or to the caret's own
+  PARAGRAPH when nothing is selected — "centre this line" is one tap.
+- **Select all = the PAGE.** `PersonalCanvas` wraps `LocalTextToolbar`: the platform
+  toolbar keeps its look and every other action, Select all sets
+  `PersonalEditorState.pageSelected`, Copy then copies `pageText()` to the clipboard,
+  every row wears the selection wash, and the dock's tools branch to ALL rows
+  (`toggle`, `setAlign`). Typing clears the mode.
+- **A read-view tick.** `PersonalDocView` answers a tap on the checkbox's own lead
+  square through `LocalPersonalCheckToggle`, which `PersonalWritingPage` provides
+  from the store it owns (so the tick rides the page's normal debounce).
+- **The to-do page:** rows read bigger (`ROW_VIEW_SIZE`), `ChecklistPreview` is the
+  journals list's own preview of a checklist, and the Home "+" sheet's to-do door
+  wears the drawn `TodoGlyph` instead of `task_alt`.
+- **The two editors' page:** the enlarged card editor and the book's note expand now
+  sit on the journal's own page background (`colorScheme.background`).
+
+### ⏭ Still open in this batch
+
+- **Pinning the dock to the screen's foot** in those two editors (it currently sits
+  at the foot of the FIELD, in the scroll): pinning needs the editor's state hoisted
+  to each screen, because the dock lives inside the editor while the scroll belongs
+  to the screen.
+- **The post composer:** the choose-a-topic block sitting under the fold, and the
+  chosen topic surviving a trip to the topic page and back.
+- **The avatar redesign** (all 28 portraits).
+
+## Request (2026-09-17, DONE — the book reader becomes a reading surface, and its marks reach the book page)
+
+This is the READER half of the prompt standing in the "Next prompt" slot at the end of
+this file. Verbatim of that half:
+
+"and now let's fix the pdf book reader and the epub reader. we need to add hold select
+tools such as highlights, notes book marks for chapters. etc etc proper book reader
+features and also for eye adjustment background color changer. for epub proper
+continuous scroll and page and position remember of the last read. and also auto
+marking the perfect read. and fix the pdf reader the page are not full screen. hide
+the header when reading. proper pinch to zoom swipe to change pages not a next and
+back button and all for pdf too and if texts are scanned proper highlights etc again
+y bookmarks etc too. suggest more book features and add and also keep the auto hide
+style consistent so when reading the reader never sees any distraction."
+
+### Decisions (ask_user, answered)
+
+- **Order**: readers first (EPUB, then PDF, with the annotation table); the two named
+  editors after. The rest of the pending prompt stays pending.
+- **"highlights can become quote notes in the book page"**: the book page SHOWS the
+  marks made while reading as quotes from the margins, each one a door back into the
+  reader at that mark — and it lands read-side only.
+- **The reader opens like a book should**: an existing file resumes where it was left;
+  a page with nothing marked still opens at the start, never at a forced place.
+
+### Shipped
+
+- **`reader_marks`** (`data/PersonalEntity.kt`, migration 18 → 19 in
+  `CurioDatabase.MIGRATION_18_19`): one table for a bookmark, a highlight, a note
+  **and** where the member stopped (`ReaderMarkKind.POSITION`), keyed by book id PLUS
+  the document path (`sourceKey`) — so re-wiring a book to another PDF starts that
+  file's own marks instead of landing the old highlights on text that is not there.
+  The DDL is byte-for-byte what Room expects (every column NOT NULL, both indices
+  named Room's way) or `validateMigration` fails on the next open.
+- **`PersonalDao` / `PersonalRepository`**: `observeReaderMarks`, `readerMarks`,
+  `readerPosition`, `saveReaderMark` (an upsert — re-highlighting a passage is the
+  SAME mark in a new ink), `deleteReaderMark`, `saveReaderPosition` (one row per book +
+  file, rewritten: "where was I" is a fact about the book, not a history of it) and
+  `observeBookMarks` (every mark in the book, across files — the book page's margins).
+- **`BookReaderScreen.kt`** — the reader as a place to READ:
+  - EPUB / plain text read CONTINUOUSLY (the file's `h1`/`h2`/`h3` become in-flow
+    headings, one section per archive entry), so there is no page boundary to fight.
+  - A PDF is a pager, but each page renders ON DEMAND (`produceState` per page) — the
+    first pass drew every page at open, which is why a long PDF took seconds to appear
+    and held a phone's memory while it did.
+  - The head and foot hide themselves (4.2s, and while a sheet is up) and come back on
+    a tap — the same auto-hide for both formats, and the tap sits UNDER the words so
+    it never eats a long press meant for a passage.
+  - A HOLD raises the ink bar: four highlighters, a note, a bookmark. Marks are listed
+    in the reader with their words, and a tap lands back on the passage.
+  - **`jumpToMark` vs `jumpToChapter`** — two jumps, because a mark points at a BLOCK
+    and the chapter sheet names a SECTION; the old single `jumpTo` sent a highlight to
+    whichever heading happened to share its block number.
+  - The foot names the chapter (the page, for a PDF) from the LIVE position, and the
+    stored fraction is progress through the book ("38% through"), not a pixel offset.
+  - Four page inks (paper / sepia / night / white), held for the process — an ink is
+    chosen for READING, not for one novel.
+- **`BookDetailScreen.kt`** — `MarginsCard`: the book's highlights and notes as quotes
+  from the margins (the family's own `SocialPullQuote`), read-side only, each one a
+  door into the reader at that mark.
+- Docs: `app/AGENTS.md` (the reader + the marks table) and the 20260922 store changelog.
+
+### Verified statically
+
+`check_braces.js` over every touched file, a scan for duplicate adjacent annotations,
+and a read-through for suspend-called-from-non-suspend. **No Gradle here — CI is the
+compile check.**
+
+### ⏭ Still pending from the same prompt
+
+- Pinch-to-zoom and a real text layer over a scanned PDF page are NOT in this pass
+  (they need a different rendering strategy than `PdfRenderer` gives).
+- The editors' dock landed in the pass below; the two additions that need a MODEL
+  change (per-run justification and font family — `TextSpan` has neither) are waiting
+  on the ask_user.
+
+## Request (2026-09-17, DONE — the two named full-screen editors wear the journal's dock)
+
+Verbatim of this half of the pending prompt:
+
+"now yk the full screen text editor in share card and also in the add note expand of
+book buttom sheet. well they should use the new journal style buttom tool bar editing
+with the all tools support. except the image."
+
+### Decisions (ask_user, answered)
+
+- **Keep them separate, restyle the share-card toolbar** — the two editors are not
+  merged; only the way they present their tools changed.
+- **All tools as individual dock buttons** — no grouped menus in the dock.
+- **Both in one pass.**
+
+### What landed
+
+- **`RichTextEditor.kt`** — `RichTextToolbarMode.DOCK`, a third mode (the capture
+  formats' MAIN / TOGGLE strips are untouched, so nothing else in the app moved):
+  - `RichTextDock` + `RichTextDockButton` are the journal's dock — 22dp surface,
+    `surfaceContainerHigh`, 6dp lift, one horizontally scrolling row, every tool its
+    own 36dp circular button, the active one filled with the accent at 24%.
+  - It sits at the **foot of the field**, and the head strip only renders when it still
+    has something of its own to say (`showTopStrip`: paper tools, a trailing action, the
+    text history). The `Format` toggle is hidden in DOCK mode — no second toolbar
+    unfolding over the words.
+  - `SizePickerButton` gained `dock = true`, so the size door wears the dock's button
+    while still opening the same size menu.
+- **Underline, for the first time in a toolbar.** `TextSpan.underline` has existed since
+  v379 (the share card's selection bar sets it) but no toolbar ever offered it;
+  `applyUnderline()` / `hasUnderlineAt()` and the armed `pendingUnderline` now follow the
+  other flags exactly (a collapsed caret arms, a selection is one-shot), including
+  inheritance while typing inside an underlined run and in the sticky-format path.
+- **Two call sites, and only two**: the Share Hub's full-screen card editor
+  (`TopicShareCard`) and the book sheet's chapter-note expand (`TopicRevealScreen`,
+  plus the new `RichTextToolbarMode` import).
+
+### Verified statically
+
+`check_braces.js` over every touched file, no duplicate imports, and no `when` over
+`RichTextToolbarMode` (so the new constant cannot make an existing branch
+non-exhaustive). **No Gradle here — CI is the compile check.**
+
+## Request (2026-09-17, DONE — line tools across Enter, backspace joins a line, the coffee quote, the pinned doors, and the mic)
+
+Verbatim:
+"in journal the voive note isnt working and also its above the toolbar so move it
+up, when i say its not working tapping it doesnt do anything, so fix it also give
+it a dark shade, and the tool bar check boc icon chnag e it, also when i tap the
+bulletpoint dont show the drop down, by default add the 1st bulletpoint tapping it
+again should show the drop down, also instead of writing no list write cancel or
+something, and also make the buulletpoint colors darker coffe deep color not the
+theme accent, then in home screen make the pages ad my shelf stikcy and in that
+position also give them the theme color accent fto the card of it, then make itthe
+content of them stay scrollable and it goes under that and for book cover footer
+make the title font more smller in size. then in typing in ournal its bad, like
+when i use enter to create a new line it create the new line but when i type back
+it doesnt delete it, and also when i have a tool selected from the tool nbar and i
+tap enter it deselects the tool and create a new line, also same with quotes it
+shouldnt do that and also chnage the quote style so its better view and a new line
+with enter for quote looks beautiful. also in posts the quote auses the same accent
+of theme instead use deep dark cfee color in social post too and in preview as
+well, and also switvhing betwen eye and pen isnt smoothwith proper animation and
+same for date swithcing its not smooth, also the calender selected date highlight
+is too dark so fix that. too and ask if any doubt and fix this cl first and push and
+dont push after each task" (plus a pasted CI log).
+
+### Decisions (ask_user, answered)
+
+- **The pinned doors**: EACH door holds its own row's left edge — the chips scroll
+  beside it and slide under it. The door card wears the accent.
+- **The marker menu's first row**: it keeps REMOVING the list; only the wording
+  changes ("No list" → "Remove list").
+- **The quote's coffee**: the journal writing (editor + read view) and the community
+  post — i.e. the pull-quote shared by the composer's preview and the wall. Not the
+  share card, not the topic detail page.
+
+### The pasted CI log was already fixed
+
+The log (`CaptureStudio.kt` unresolved `curio`, the two `ColumnScope.AnimatedVisibility`
+scoping errors, `CurioNavHost`'s missing `BookReviewScreen` import) is the build that
+`c8c14f8e` fixed — verified against the working tree before starting, so nothing had
+to be re-landed.
+
+### Done
+
+- **`PersonalVoice.kt` / `PersonalPage.kt` — the mic works, and it moved.** It now
+  lives in the page's WRITING box (bottom-right, 18/16dp clear of the dock, fade +
+  scale in), not on the dock's top edge: a control placed outside its parent's bounds
+  is never hit-tested, which is exactly why only a sliver of the disc responded. Its
+  fill is `personalAccentInk()` (the deep shade), and the permission door starts the
+  recording from the GRANTED callback instead of after a Boolean read (the old
+  `if (!ask()) start()` launched the dialog AND built a recorder with no permission).
+- **`PersonalCanvas.kt`** — `splitAtCaret` carries the line's own flags (and an armed
+  tool) across Enter, with the to-do page's "Enter on an empty row ends the list"
+  kept; new `mergeWithPrevious` joins a line back into the one above and is wired to
+  Backspace in `onPreviewKeyEvent`; the bullet tool applies the first marker on one tap
+  and opens the menu on the next; "Remove list"; `personalBulletColor()` (deep coffee);
+  `TodoGlyph` replaces the struck-through task icon in the dock; a quote is a coffee
+  PANEL and a run of quoted lines draws as one continuous block (editor and read view).
+- **`PersonalHome.kt`** — `PinnedDoorRow`: each door pinned at its row's left edge over
+  an opaquely filled strip, chips scrolling under it; the door wears an opaque accent
+  wash + accent hairline + deep accent ink; the book footer's title drops to 10sp.
+- **`JournalEditorScreen.kt`** — the date moves (slide + fade, direction from the
+  shift) instead of swapping; the calendar's picked day is `personalAccent()` with
+  on-accent ink instead of the deep `personalAccentInk()`.
+- **`SocialComponents.kt` / `CommunityPostScreen.kt`** — `SocialPullQuote` (composer
+  preview AND wall) takes no accent: rule, mark, dash and credit are
+  `personalQuoteDeepColor()`, theme-aware deep coffee.
+- Docs: `app/AGENTS.md` (the line's tools, the panel quote, the pinned doors, the mic
+  and its permission door) + the 20260922 store changelog.
+- Verified statically: `check_braces.js` over the touched trees, `git diff --check`.
+  No Gradle in this environment — CI is the compile check.
+
+### ⏭ The pending prompt at the end of this file is NEXT
+
+Not started in this pass (it is its own large piece of work: unifying the full-screen
+editors on the journal dock, the PDF/EPUB reader features, a tickable read view, a
+to-do preview, journals opening on the eye, and the post-composer topic picker).
+
+## Request (2026-09-17, DONE — the piled-up prompt: to-do row gestures, the take studio pills, the reminder clock, and the book family)
 
 Verbatim (moved up out of the "Next prompt" slot — nothing dropped):
 "Let todo rows be recorded by long press drag and swiped away to delete. also a
@@ -2251,3 +3071,176 @@ Done:
 - **TopicRevealScreen**: FilmInfoSection, AnimeInfoSection, SongInfoSection with poster cards.
 
 ### Next prompt (the next instruction goes here — never cleared by an agent)
+
+**Status (2026-09-17):** BOTH halves named in the ask_user are DONE — the reader
+(continuous EPUB/text, PDF pages on demand, hold-to-mark with its own `reader_marks`
+table, position memory, four page inks, auto-hiding chrome, the book page's "From the
+margins") and the two full-screen editors now writing on the journal's own dock (with
+underline, which no toolbar ever offered). See the request sections at the TOP of this
+file. **Still pending here:** the additions that need a data-model change (per-run
+justify + font family — `TextSpan` has neither), pinch-to-zoom, a text layer over a
+scanned PDF page, and everything else in this slot below (tickable read view, bigger
+to-do rows with a to-do preview, journals opening on the eye, the post-composer topic
+picker, the avatar redesign).
+
+now yk the full screen text editor in share card and also in the add note expand of book buttom sheet. well they should use the new journal style buttom tool bar editing with the all tools support. except the image. and also add more tools to the journal buttom tool bar like text size from the save your take notes format editor, more formats of justify etc etc from share card. keeping it as one format button with drop down. font change etc.
+
+remember the journal style buttom floating tool bar na fits page style to be the shared for the new full screen text editors ask again if any confusion.
+
+and now let's fix the pdf book reader and the epub reader. we need to add hold select tools such as highlights, notes book marks for chapters. etc etc proper book reader features and also for eye adjustment background color changer.
+for epub proper continuous scroll and page and position remember of the last read. and also auto marking the perfect read. 
+and fix the pdf reader the page are not full screen. hide the header when reading. proper pinch to zoom swipe to change pages not a next and back button and all  for pdf too and if texts are scanned proper highlights etc again and y
+bookmarks etc too. suggest more book features and add and also keep the auto hide style consistent so when reading the reader never sees any  distraction. 
+also the check box should be tickable in read view too. and also make the todo screen text size more larger and it's preview as a separate todo preview not inside the journal.
+also when i open a journal to read from the home screen or from personal or journals page don't open it on edit page but the eye page
+also in the post topic screen the choose a topic area gets hidden as it's not on top the page. it's little scrolled down so fix it, also a note on a topic, so when i select one and i tap the look the topic from the header and i press back the previous topic gets saved and it asks me again to choose a new can u fix that too.
+
+
+## next prompt 
+and importantly for the profile social avatars, all of them are bad like the black is the worse and also all of the design is bad and the eyes is same and also very weird too the eye should be different per individual matching the style. fix redesign all of them properly
+
+## next promot
+see if the previous prompts are implemented if so makr them pass and do the thing, then in home screen the pages and my shelf they are caring a backgroud or something which i ca ntoice, also the journal card and books cards they dont wear the aceen like the pages and  my shelf do so fix that, also make the journl date darker shade please, also the journal text editing for bold italic underline etc, those can be per word too not always on line maybe like when i wrote something then seleted the Bold text and then i wrote a word that word and next stays bold kind of like that also back spacing dleteing that line glitches and deselets the tool too so fix that push everything also fix the select all for texts in ournal and book etc etc the one its shared and watch cl
+
+## next prompt (2026-09-17) — batch B, STATUS: COMMITTED
+
+Deepen the book reader + the writing-surface fixes. See the request block at the top of
+this log. Status: implemented and committed in one batch (the CI fix is not needed — there
+was no red log with this request). The two deliberate gaps are listed under "Still open".
+
+---
+
+## older prompt (2026-09-17)
+
+fix this (the `PersonalCanvas` CI log), also did u do the full proper book reader implementation? also in the book read floating option when i tap and hold the read button it should sho a drop down to chnage the pdf the file attach, in book also in header it shows the title and then below too, instead show the titile when the buttom title scrolls above with proper smooth transition, also for eye and pen switch for journals etc the transition is very bad even though the information was already there the smooth tranition isnt smooth but looks clanky specially when th ekeyboard opens the transiton moved up, also add proper tap to start writin gin blank always even when th e cursor was there, also when im on eye view and i double tap switch to edit pen mode, for all also the book review it doesnt have the eye and pen style switch fix that, also suppose im writng in book review for a chapter by adding a chapter, add like a top pinned chapter switching like when the chapter scrolls aways it shows there pinned and when im on the start point of that chapter it swicthes to the revious chapter view, similiar to title add in journal too the tooo bar titlee, great additon isnt it? suggest similiar mode, also add drag to move the voice note too, in journal page, also add int in book review chapter review too, in book review keep it mind theres add chapter floating button too so properly adjust it. and first fix the cl and push it, then d the rest of the work, dont push them though just commit
+
+**Status (2026-09-17):** ALL DONE. The CI fix is PUSHED (`2d260552`);
+the batch is PUSHED (`53c61624`, `b2b824a6`); the voice-note carry + mic-on-both-pages
+is PUSHED (`c73f4f2a`). The voice-note drag was "the voice block in the page" — the
+voice block can now be long-press-dragged to a new place (the waveform's seek stands
+down while it is carried, via `LocalPersonalBlockCarried`). Voice notes are now on the
+book review AND the chapter review: the same floating mic, permission door, capsule-
+replaces-the-dock, and leave-guard the journal already has. The book review's mic
+sits at the bottom-LEFT to keep clear of the Add-chapter pill.
+
+## Request (2026-09-17, batch D — the page's own surfaces)
+
+Verbatim summary: fully redesign avatars 1, 5, 7, 9, 10, 11, 12, 15, 16, 17 and fix the
+eyes that do not match, refining the rest's detail; the note on a topic shows the topic
+name twice in the view; the voice note is a box on the page but should be the graph with
+play and cross and no background, the cross asking before it deletes; photos want the
+same carry the voice note has; the in-page photo should be a small polaroid that follows
+the text wrapper (so text never overlaps), with multiple photos and polaroid sizes, side
+by side or wherever the member puts them; and redesign "how did the day feel".
+
+**Status (2026-09-17): DONE except the avatars — committed, NOT pushed (the user asked
+to be asked first).**
+
+- The topic note's bar no longer repeats the topic's name: it carries the LANE, which is
+  the one thing about the note the page does not already say (the name has a home in both
+  modes — the pinned card while writing, the heading while reading).
+- The voice note is backgroundless: the container came off `PersonalVoiceBar`, so what is
+  left is the play button, the waveform and the clock sitting on the page. The ✕ now
+  opens a dialog naming the cost, and the audio file is only unlinked on the confirm.
+- Photos can be carried: `PersonalMovableBlock` (the voice note's own machinery) wraps the
+  photo block, and the photo's tap-to-open and remove stand down while it is in the air
+  (it reads `LocalPersonalBlockCarried`).
+- Photos are PRINTS: `PersonalPhotoSize` (page / half / small) stored per block as a key
+  (`ps`, absent = page, so old notes are untouched), drawn as a share of the text
+  wrapper's width with shadow-before-opaque-fill, the caption inside the frame's wide
+  bottom border — and the READ side draws the identical print, because a page read back
+  has to look like the page that was written.
+- "How did the day feel" is six NAMED chips in two rows, each in the feeling's own ink
+  (`personalMoodInk`), with a tick on the picked one; the collapsed pill wears the chosen
+  feeling's colour. The old chip row was six icon-only buttons ~44dp wide with no words.
+
+**The avatar part is closed** — `029ae32b` rebuilt all 28 portraits' hair, bust and
+accessory art and gave each a gaze; batch F (top of this log) fixed the two gazes that
+still collided. What remains is the user's own EYE CHECK, which no session can do for them.
+
+**Still open from this prompt:** the
+"side by side" half of the photo ask: a photo can be sized and carried, but two small
+prints do not yet share a row.
+
+## older prompt — avatar redesign
+, now i want you to fully redesign these avatar, like fully chnage avatar no. 1,5,7,9,10,11,12,15,16,17,
+also many of them still dont match the eye properly so fix it and refine the others details. also the note on a topic, it shows duplicate topic name in view fix that too. 
+and for voice note on journal and all, it shows on the page as a box, but i want it with the graph only and the play and cross button no backgroud, also the cross button should ask for confimation before deleting it. also similiar to voive note reorder add for photo reorder too. and for the photo preview on page, mak eit polaroid style but make sure it follows the text wrapper style so texts doesnt overlap, when i say polaroid not the whole polaroid phot but a smal lstyle kind of, and support multiple photos and also sizes of polaroid. make them be next to each other or wherver the user wants them. and before pushing use ask user to ask me also redeign the how did the day feel option. 
+
+## Request (2026-09-17, batch E — INCURSION, the secret screen)
+
+Verbatim: add `https://github.com/firefly-sylestia/mcu-viewing-order` as a secret — all
+its Marvel/Sony/X-Men titles, properly categorised, a new screen with marvel / sony /
+x-men + viewing order and essentials, no trailer info, watch/bookmark/drop statuses, list
+and grid views, its own bottom-nav page style, unlocked by typing "i love you 3000"
+anywhere in the app, with a floating "Incursion" button on Home. Not visible to normal
+users at all.
+
+**Status (2026-09-17): BUILT — see batch F at the top of this log (`scripts/import_incursion.mjs`
+imports the dataset; the screen, its own nav, the store and the lock are in). The blocker
+recorded below was real but had a third answer: the data is FETCHABLE, so it is transformed
+rather than transcribed. The note below is kept for the record of how the schema was read.**
+
+Decided with the user (ask_user): the phrase is accepted by ANY search field in the app;
+Incursion brings its OWN nav (marvel / sony / x-men / essential) and does not touch
+Curio's four tabs.
+
+### Where the data actually lives (found, verified)
+
+NOT `src/data/titles.ts` (404). The repo splits its data per studio under `src/data/`:
+
+- `mcuData.js` — `PHASES`, `NO_PREREQ`, `ESSENTIAL_LIST`, `ADDITIONAL_LIST`
+- `sonyData.js`, `xmenData.js` (and `dcData.js`, which was NOT asked for)
+- `connections.js`, `timelineModes.js`, `afterCreditsData.js`, `trailerData.js`
+  (`trailerData.js` is explicitly NOT wanted)
+
+Entry shape, exactly as the repo writes it:
+
+```
+{ id, order, phase, type: 'film'|'series'|'short', year, essential: bool,
+  episodes: Int?, tmdbId, season?, epStart?, epEnd?, title, seriesGroup?,
+  ageRating, prereq, desc, releaseDate?, releaseStatus?: 'released'|'upcoming'|'TBA' }
+```
+
+`order` is the chronological viewing order the whole feature is about. `essential` is the
+essentials flag. `prereq` is a prerequisite sentence (its "None …" variants are listed in
+`NO_PREREQ`). `desc` is a short synopsis. `id` is NOT dense (it runs 1–67 then jumps to
+101+, and reuses numbers across seasons), so it cannot be used as a list index.
+
+Size: `mcuData.js` alone is 150+ entries before truncation, and `ADDITIONAL_LIST` includes
+every Netflix series episode-by-episode (Daredevil, Jessica Jones, Luke Cage, Iron Fist,
+The Defenders, Punisher, Runaways, Cloak & Dagger, every Agents of SHIELD episode block,
+WHiH Newsfront…). With Sony and X-Men that is a few hundred rows.
+
+### Why it is not built yet, and what it needs
+
+Transcribing a few hundred rows by hand, from a truncated fetch, would ship either
+truncated or invented data in a screen the member would then trust — worse than absent.
+The dataset must arrive VERBATIM. Two clean ways:
+
+1. The user pastes the three files (or their raw URLs are fetched in a session with
+   budget for a few hundred lines of transcription), and they land as
+   `app/src/main/assets/incursion/*.json` — a mechanical transform of the shape above.
+2. A small script in the repo converts the .js modules to the JSON asset, so the data can
+   be re-imported whenever the upstream list moves.
+
+Once the asset exists, the rest is the app's own patterns: a prefs-backed status store
+(Five-state: watched / watching / plan / on-hold / dropped + unwatched, mirroring the
+repo), a screen with its own nav bar, list + grid, essentials filter, the "i love you
+3000" acceptance in each search field, and the Home floating button that only exists once
+unlocked.
+
+## older prompt — the MCU repo
+https://github.com/firefly-sylestia/mcu-viewing-order lets add this as a secret, so i think it have all of the movies and series of marvel and x men etc i want you to add them, but they are not visible to normal user at all. also properly categories the movies and series, and make a new screen with marvel, sony, x men, option with the list with proper viewing order etc. from that repo, and essential etc. no trailer info, just watch and bookmark save and drop and etc status, in list and grid view, with its own buttm nav page style, and this screen can be acessed if the user types, " i love you 3000" and the button will be in home screen floating ith name as incursion. 
+
+## next prompt, also 
+also for photos in journal add side by side photos and also text writing to the side of the photos in small view for photos where there's space remaining
+also fix the voice note drag and move placing issues with lines where they weirdly shifts and switches places it's really buggy and glitchy fix it and same pass for the photo drag and move too
+
+features adding
+add clicable links in journal too i mean when i add a link make it clickable with proper coffee dark view.
+in quotes when i enter to create a new line don't create a new quote stay in that quote and keep it with style.
+add proper chapter no. look it up for books and also chapter titles too for browsed books. add more free providers if there's any or if there's any with free api key add guide in env example , add them please.
+for animes, movies and songs etc the button sheet they are opening they are so bad. remove them and use the same style as book button sheet album button sheet series button sheet style. for topic reveal screen.
+also add artwork button sheet too and author button sheet with authors written books, and similar more with their free apis added or if some need manual addition, add proper guide in env.example which have free tiers
+in home screen the stikky pages and your my shelf. they have a white background which creates weird theme issues with background fix it and also why only 3 books and 3 journal shows. add more keeping scroll too.

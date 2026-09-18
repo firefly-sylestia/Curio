@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
@@ -74,45 +75,92 @@ private class AvatarArt(
     val skin: Color,
     val hair: Color,
     /** Which character to draw — see [drawCharacter]. */
-    val kind: Int
+    val kind: Int,
+    /**
+     * v389 — WHOSE GAZE THIS IS.
+     *
+     * All 28 portraits used to wear the SAME pair of chibi eyes (one big dark
+     * oval, two highlights), so at a glance every member looked like the same
+     * person in a different hat — the note they arrived with was "the eyes is
+     * same and also very weird too; the eye should be different per individual
+     * matching the style". The gaze is now part of the character: twelve eye
+     * designs, each drawn to suit the row it belongs to (a wizard's sparkle, a
+     * hood's shaded gleam, a beard's steady narrow eye, a beret's soft lid).
+     * Twelve designs cannot cover twenty-eight faces once each, so what the
+     * table promises instead is that no portrait shares a gaze with the
+     * portraits it sits beside in the picker — and the two rows that broke even
+     * that (the flower crown, which wore the wizard's sparkle, and the space
+     * helmet, which wore the curious eye rather than looking through its own
+     * visor) were given gazes that fit them. See [drawEyes], and [drawBrows], which
+     * shapes the brows to match the gaze they sit above.
+     */
+    val eye: Int
 )
 
 // The palette is the app's own warm paper family with a few lane accents, so
 // the discs sit naturally beside the rose settings family and the lane chips.
 private val AVATARS: List<AvatarArt> = listOf(
-    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), 0),  // beanie
-    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), 1),  // bob
-    AvatarArt(Color(0xFFA9C7A0), Color(0xFFEFE3D2), Color(0xFFEFC9A6), Color(0xFF3B2F2A), 2),  // bun + glasses
-    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF3A2B24), 3),  // curls
-    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF32261F), 4),  // cap + headphones
-    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), 5),  // long + earring
-    AvatarArt(Color(0xFFD8A98F), Color(0xFF6B5A4E), Color(0xFFE8C09A), Color(0xFF2E2622), 6),  // beard
-    AvatarArt(Color(0xFFF0AEC4), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFF7A4A2C), 7),  // pigtails
-    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFFEDE6D6), 8),  // wizard hat
-    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFF4A6B33), 9),  // leaf crown
-    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF3A2E27), 10), // goggles
-    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF3C2A2A), 11), // beret
-    AvatarArt(Color(0xFFEFA785), Color(0xFF4F7F72), Color(0xFFF7DEC6), Color(0xFF6B3F26), 12), // top bun + bow
-    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFFC98A3E), 13), // short + freckles
-    AvatarArt(Color(0xFFAE8FBC), Color(0xFF3E4A5C), Color(0xFFEEF0F4), Color(0xFF2B3038), 14), // hood
-    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15), // space helmet
+    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), 0, 0),  // beanie
+    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), 1, EDGE_ALMOND),  // bob
+    AvatarArt(Color(0xFFA9C7A0), Color(0xFFEFE3D2), Color(0xFFEFC9A6), Color(0xFF3B2F2A), 2, EDGE_LIDDED),  // bun + glasses
+    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF4A362C), 3, EDGE_WIDE),  // curls
+    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF443222), 4, EDGE_SLEEPY),  // cap + headphones
+    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), 5, EDGE_SOFT),  // long + earring
+    AvatarArt(Color(0xFFD8A98F), Color(0xFF6B5A4E), Color(0xFFE8C09A), Color(0xFF463832), 6, EDGE_STEADY),  // beard
+    AvatarArt(Color(0xFFF0AEC4), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFF7A4A2C), 7, EDGE_UPTURNED),  // pigtails
+    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFFEDE6D6), 8, EDGE_STARRY),  // wizard hat
+    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFF4A6B33), 9, EDGE_HAPPY),  // leaf crown
+    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF453730), 10, EDGE_BEHIND_GLASS), // goggles
+    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF4A3634), 11, EDGE_SOFT), // beret
+    AvatarArt(Color(0xFFEFA785), Color(0xFF4F7F72), Color(0xFFF7DEC6), Color(0xFF6B3F26), 12, EDGE_ALMOND), // top bun + bow
+    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFFC98A3E), 13, EDGE_WIDE), // short + freckles
+    // The hood's skin was a near-white grey that read as paper rather than as
+    // a face under a shadow; warm and a touch deeper, with the hood itself
+    // lifted off black (the row the note called out: "the black is the worse").
+    AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), 14, EDGE_SHADOWED), // hood
+    // v389b — the helmet's visor is GLASS, so the eyes behind it are the same
+    // design the two pairs of glasses wear: lit from above, no shine of their
+    // own to fight the lens. It used to wear the curious wide eye, which read
+    // as a bare face inside a helmet — and as the same gaze as the neighbours.
+    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15, EDGE_BEHIND_GLASS), // space helmet
     // ── v3xx52 — the SOFT SET: twelve feminine silhouettes (waves,
     // ponytails, braids, puffs, flower crowns, bows) in the same pastel
     // family, with a wider spread of skin and hair tones so every member can
     // pick something that looks like them.
-    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16), // waves + flower
-    AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17), // high ponytail
-    AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF3E2E28), 18), // twin braids
-    AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF241E1C), 19), // hime cut
-    AvatarArt(Color(0xFFF6D5C0), Color(0xFF9ED0B8), Color(0xFFEFC8A4), Color(0xFF8A4E2E), 20), // bob + bow
-    AvatarArt(Color(0xFFE6E0F5), Color(0xFFC98FA8), Color(0xFFF5D8BE), Color(0xFF4A3A32), 21), // half-up bun
-    AvatarArt(Color(0xFFD6E7C6), Color(0xFFE9A5BE), Color(0xFFF7DCC0), Color(0xFF7A4A2C), 22), // flower crown
-    AvatarArt(Color(0xFFF0C4D8), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF2E2622), 23), // waves + star clips
-    AvatarArt(Color(0xFFCCE3E8), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFFC98A3E), 24), // pixie + heart clip
-    AvatarArt(Color(0xFFF3D9B0), Color(0xFF5E8C7A), Color(0xFFE9BE97), Color(0xFF3A2B24), 25), // waves + glasses
-    AvatarArt(Color(0xFFE2D2F0), Color(0xFFF0A88C), Color(0xFF8C5A3C), Color(0xFF2A211D), 26), // puff + bow
-    AvatarArt(Color(0xFFF7CFA8), Color(0xFF7E5AA0), Color(0xFFF2D3B8), Color(0xFF5B3A24), 27)  // braided crown
+    // v389b — the flower crown had the wizard's four-point sparkle (the two rows
+    // sat one tile apart in the picker wearing the SAME eyes). The enchanted
+    // gaze belongs to the hat; the waves get the almond eye with the lash flick,
+    // which is a gaze no portrait on either side of it wears.
+    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16, EDGE_ALMOND), // waves + flower
+    AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17, EDGE_UPTURNED), // high ponytail
+    AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF4A3730), 18, EDGE_HAPPY), // twin braids
+    AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF40332E), 19, EDGE_LIDDED), // hime cut
+    AvatarArt(Color(0xFFF6D5C0), Color(0xFF9ED0B8), Color(0xFFEFC8A4), Color(0xFF8A4E2E), 20, EDGE_SOFT), // bob + bow
+    AvatarArt(Color(0xFFE6E0F5), Color(0xFFC98FA8), Color(0xFFF5D8BE), Color(0xFF4A3A32), 21, EDGE_BEHIND_GLASS), // half-up bun
+    AvatarArt(Color(0xFFD6E7C6), Color(0xFFE9A5BE), Color(0xFFF7DCC0), Color(0xFF7A4A2C), 22, EDGE_HAPPY), // flower crown
+    AvatarArt(Color(0xFFF0C4D8), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF443329), 23, EDGE_UPTURNED), // waves + star clips
+    AvatarArt(Color(0xFFCCE3E8), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFFC98A3E), 24, EDGE_ALMOND), // pixie + heart clip
+    AvatarArt(Color(0xFFF3D9B0), Color(0xFF5E8C7A), Color(0xFFE9BE97), Color(0xFF40322A), 25, EDGE_BEHIND_GLASS), // waves + glasses
+    AvatarArt(Color(0xFFE2D2F0), Color(0xFFF0A88C), Color(0xFF8C5A3C), Color(0xFF42332C), 26, EDGE_STEADY), // puff + bow
+    AvatarArt(Color(0xFFF7CFA8), Color(0xFF7E5AA0), Color(0xFFF2D3B8), Color(0xFF5B3A24), 27, EDGE_SLEEPY)  // braided crown
 )
+
+// ── the ten gazes ─────────────────────────────────────────────────────────
+// Named rather than numbered, because the table above is read as a cast list:
+// "the bob has the almond eye with the lash flick" says something a bare 3
+// does not.
+private const val EDGE_ROUND = 0        // the open chibi eye
+private const val EDGE_ALMOND = 1       // narrow, lifted at the outer corner
+private const val EDGE_UPTURNED = 2     // cat-eye, doubled lash line
+private const val EDGE_SOFT = 3         // kind, the lid dipping outward
+private const val EDGE_LIDDED = 4       // heavy steady lid
+private const val EDGE_SLEEPY = 5       // half closed, unbothered
+private const val EDGE_STARRY = 6       // enchanted: a four-point sparkle
+private const val EDGE_WIDE = 7         // bright and curious
+private const val EDGE_HAPPY = 8        // closed in a smile
+private const val EDGE_STEADY = 9       // short and level
+private const val EDGE_SHADOWED = 10    // a gleam under a brow
+private const val EDGE_BEHIND_GLASS = 11 // round, framed by lens shine
 
 // The style count lives in the data layer (SocialApi.SOCIAL_AVATAR_STYLE_COUNT)
 // because every read and write clamps against it AND because it must stay in
@@ -457,6 +505,252 @@ private fun DrawScope.drawHead(art: AvatarArt, u: Float) {
  * UNDER a fringe and under a beanie cuff, so painting them with the rest of
  * the face would stamp dark arcs on top of a hat, or across a light fringe.
  */
+/**
+ * v389 — THE GAZE, WHICH BELONGS TO THE CHARACTER.
+ *
+ * Ten designs, chosen per row (see [AvatarArt.eye]) and drawn to suit the person
+ * wearing them: a wizard's four-point sparkle, a hood's shaded gleam, a beard's
+ * short steady eye, a beret's soft lid, a flower crown's closed smile. Every one
+ * keeps the chibi rule — ONE big dark shape whose character comes from its
+ * silhouette, not from lines inside it — so they still read as one family at
+ * 24dp while never reading as the same person twice.
+ */
+private fun DrawScope.drawEyes(art: AvatarArt, u: Float) {
+    val iris = darken(art.hair, 0.45f)
+    val cy = 47.4f
+    listOf(42.6f to -1f, 57.4f to 1f).forEach { (ex, side) ->
+        when (art.eye) {
+            EDGE_ALMOND -> {
+                // Narrower, and lifted at the OUTER corner, with the one lash
+                // flick that goes with it.
+                rotate(degrees = side * 8f, pivot = o(ex, cy, u)) {
+                    drawOval(
+                        color = iris,
+                        topLeft = o(ex - 4.1f, cy - 5.6f, u),
+                        size = Size(s(8.2f, u), s(11.2f, u))
+                    )
+                    drawCircle(INK, s(2.8f, u), o(ex, cy + 0.4f, u))
+                    drawCircle(Color.White.copy(alpha = 0.95f), s(2.4f, u), o(ex - 1.4f, cy - 2.8f, u))
+                }
+                drawPath(
+                    Path().apply {
+                        mv(ex + side * 3.2f, cy - 3.6f, u)
+                        qd(ex + side * 6.4f, cy - 5.8f, ex + side * 8.0f, cy - 4.4f, u)
+                    },
+                    INK.copy(alpha = 0.85f),
+                    style = Stroke(width = s(1.4f, u), cap = StrokeCap.Round)
+                )
+            }
+
+            EDGE_UPTURNED -> {
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.4f, cy - 6.2f, u),
+                    size = Size(s(8.8f, u), s(12.4f, u))
+                )
+                drawCircle(INK, s(3.0f, u), o(ex, cy + 0.4f, u))
+                drawCircle(Color.White.copy(alpha = 0.95f), s(2.5f, u), o(ex - 1.4f, cy - 3.2f, u))
+                drawCircle(Color.White.copy(alpha = 0.70f), s(1.1f, u), o(ex + 1.4f, cy + 3.0f, u))
+                // Two lashes sweeping up and outward.
+                listOf(0f to 0f, 2.4f to 1.3f).forEach { (dx, dy) ->
+                    drawPath(
+                        Path().apply {
+                            mv(ex + side * (3.9f + dx), cy - 4.4f + dy, u)
+                            qd(ex + side * (6.7f + dx), cy - 7.4f + dy, ex + side * (8.2f + dx), cy - 6.8f + dy, u)
+                        },
+                        INK.copy(alpha = 0.80f),
+                        style = Stroke(width = s(1.3f, u), cap = StrokeCap.Round)
+                    )
+                }
+            }
+
+            EDGE_SOFT -> {
+                // The lid dips as it goes outward: kind, and faintly amused.
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.5f, cy - 5.8f, u),
+                    size = Size(s(9.0f, u), s(11.6f, u))
+                )
+                drawCircle(INK, s(2.9f, u), o(ex, cy + 0.6f, u))
+                drawCircle(Color.White.copy(alpha = 0.92f), s(2.3f, u), o(ex - 1.3f, cy - 3.0f, u))
+                drawArc(
+                    color = INK.copy(alpha = 0.78f),
+                    startAngle = if (side < 0f) 196f else 168f,
+                    sweepAngle = 150f,
+                    useCenter = false,
+                    topLeft = o(ex - 4.8f, cy - 6.6f, u),
+                    size = Size(s(9.6f, u), s(8.4f, u)),
+                    style = Stroke(width = s(1.5f, u), cap = StrokeCap.Round)
+                )
+            }
+
+            EDGE_LIDDED -> {
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.3f, cy - 4.4f, u),
+                    size = Size(s(8.6f, u), s(9.4f, u))
+                )
+                drawCircle(INK, s(2.7f, u), o(ex, cy + 0.6f, u))
+                drawCircle(Color.White.copy(alpha = 0.90f), s(2.1f, u), o(ex - 1.2f, cy - 2.2f, u))
+                // A straight heavy lid: the whole character of this eye.
+                drawLine(
+                    color = INK.copy(alpha = 0.88f),
+                    start = o(ex - 4.9f, cy - 4.4f, u),
+                    end = o(ex + 4.9f, cy - 5.4f, u),
+                    strokeWidth = s(1.8f, u),
+                    cap = StrokeCap.Round
+                )
+            }
+
+            EDGE_SLEEPY -> {
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.2f, cy - 3.6f, u),
+                    size = Size(s(8.4f, u), s(8.6f, u))
+                )
+                drawCircle(INK, s(2.6f, u), o(ex, cy + 0.8f, u))
+                drawCircle(Color.White.copy(alpha = 0.86f), s(2.0f, u), o(ex - 1.2f, cy - 1.8f, u))
+                drawPath(
+                    Path().apply {
+                        mv(ex - 4.9f, cy - 3.4f, u)
+                        qd(ex, cy - 5.8f, ex + 4.9f, cy - 3.8f, u)
+                    },
+                    INK.copy(alpha = 0.85f),
+                    style = Stroke(width = s(1.6f, u), cap = StrokeCap.Round)
+                )
+            }
+
+            EDGE_STARRY -> {
+                // A four-point sparkle where every other eye has a round
+                // highlight — the enchanted one.
+                drawOval(
+                    color = darken(art.hair, 0.28f),
+                    topLeft = o(ex - 4.8f, cy - 6.8f, u),
+                    size = Size(s(9.6f, u), s(13.6f, u))
+                )
+                drawCircle(INK, s(3.0f, u), o(ex, cy + 0.6f, u))
+                drawPath(
+                    Path().apply {
+                        mv(ex, cy - 5.6f, u)
+                        qd(ex + 1.5f, cy - 1.2f, ex + 5.0f, cy + 0.4f, u)
+                        qd(ex + 1.5f, cy + 1.9f, ex, cy + 5.8f, u)
+                        qd(ex - 1.5f, cy + 1.9f, ex - 5.0f, cy + 0.4f, u)
+                        qd(ex - 1.5f, cy - 1.2f, ex, cy - 5.6f, u)
+                        close()
+                    },
+                    Color.White.copy(alpha = 0.92f)
+                )
+            }
+
+            EDGE_WIDE -> {
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.8f, cy - 7.4f, u),
+                    size = Size(s(9.6f, u), s(14.8f, u))
+                )
+                drawCircle(INK, s(3.4f, u), o(ex, cy + 0.8f, u))
+                drawCircle(Color.White.copy(alpha = 0.95f), s(3.1f, u), o(ex - 1.6f, cy - 3.8f, u))
+                drawCircle(Color.White.copy(alpha = 0.70f), s(1.3f, u), o(ex + 1.6f, cy + 3.6f, u))
+                // A third, smaller glint — the curious eye.
+                drawCircle(Color.White.copy(alpha = 0.55f), s(0.9f, u), o(ex + 0.4f, cy - 5.8f, u))
+            }
+
+            EDGE_HAPPY -> {
+                // Closed in a smile: an upward arc and one lash, no iris at all.
+                drawPath(
+                    Path().apply {
+                        mv(ex - 4.8f, cy + 0.6f, u)
+                        qd(ex, cy - 5.8f, ex + 4.8f, cy + 0.6f, u)
+                    },
+                    INK.copy(alpha = 0.82f),
+                    style = Stroke(width = s(1.7f, u), cap = StrokeCap.Round)
+                )
+                drawPath(
+                    Path().apply {
+                        mv(ex + side * 3.0f, cy - 2.4f, u)
+                        qd(ex + side * 5.4f, cy - 5.2f, ex + side * 6.4f, cy - 4.6f, u)
+                    },
+                    INK.copy(alpha = 0.70f),
+                    style = Stroke(width = s(1.2f, u), cap = StrokeCap.Round)
+                )
+            }
+
+            EDGE_STEADY -> {
+                // Short and level — a grown-up eye.
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.9f, cy - 3.4f, u),
+                    size = Size(s(9.8f, u), s(7.6f, u))
+                )
+                drawCircle(INK, s(2.5f, u), o(ex, cy - 0.2f, u))
+                drawCircle(Color.White.copy(alpha = 0.85f), s(1.6f, u), o(ex - 1.8f, cy - 1.6f, u))
+                drawLine(
+                    color = INK.copy(alpha = 0.80f),
+                    start = o(ex - 5.2f, cy - 3.2f, u),
+                    end = o(ex + 5.2f, cy - 3.7f, u),
+                    strokeWidth = s(1.6f, u),
+                    cap = StrokeCap.Round
+                )
+            }
+
+            EDGE_SHADOWED -> {
+                // The hood swallows the eye: a dark slot and two gleams.
+                drawOval(
+                    color = INK.copy(alpha = 0.86f),
+                    topLeft = o(ex - 4.6f, cy - 3.8f, u),
+                    size = Size(s(9.2f, u), s(8.6f, u))
+                )
+                drawCircle(Color.White.copy(alpha = 0.90f), s(1.7f, u), o(ex - 1.4f, cy - 1.0f, u))
+                drawCircle(Color.White.copy(alpha = 0.55f), s(0.9f, u), o(ex + 1.8f, cy + 1.6f, u))
+            }
+
+            EDGE_BEHIND_GLASS -> {
+                // Round, and lit from above — the eye a pair of lenses is
+                // dropped onto, with no shine of its own to fight the glass.
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.2f, cy - 5.6f, u),
+                    size = Size(s(8.4f, u), s(11.2f, u))
+                )
+                drawCircle(INK, s(2.8f, u), o(ex, cy + 0.4f, u))
+                drawCircle(Color.White.copy(alpha = 0.92f), s(2.3f, u), o(ex - 1.2f, cy - 2.8f, u))
+                drawArc(
+                    color = Color.White.copy(alpha = 0.22f),
+                    startAngle = 214f,
+                    sweepAngle = 100f,
+                    useCenter = false,
+                    topLeft = o(ex - 5.4f, cy - 6.2f, u),
+                    size = Size(s(10.8f, u), s(10.4f, u)),
+                    style = Stroke(width = s(1.4f, u), cap = StrokeCap.Round)
+                )
+            }
+
+            else -> {
+                // EDGE_ROUND — the open chibi eye the family is built on:
+                // taller than wide, tilted a touch outward, two highlights and
+                // one lid stroke, so it survives being 24dp in a chat row.
+                drawOval(
+                    color = iris,
+                    topLeft = o(ex - 4.6f, cy - 6.6f, u),
+                    size = Size(s(9.2f, u), s(13.2f, u))
+                )
+                drawCircle(INK, s(3.1f, u), o(ex, cy + 0.6f, u))
+                drawCircle(Color.White.copy(alpha = 0.95f), s(2.7f, u), o(ex - 1.5f, cy - 3.4f, u))
+                drawCircle(Color.White.copy(alpha = 0.72f), s(1.25f, u), o(ex + 1.5f, cy + 3.2f, u))
+                drawArc(
+                    color = INK.copy(alpha = 0.80f),
+                    startAngle = if (side < 0f) 206f else 194f,
+                    sweepAngle = 140f,
+                    useCenter = false,
+                    topLeft = o(ex - 4.9f, cy - 7.2f, u),
+                    size = Size(s(9.8f, u), s(8.6f, u)),
+                    style = Stroke(width = s(1.5f, u), cap = StrokeCap.Round)
+                )
+            }
+        }
+    }
+}
+
 private fun DrawScope.drawBrows(art: AvatarArt, u: Float) {
     // A BROW is a short warm mark, not a hair-coloured arc: mixing the hair
     // toward the ink turned light-haired characters grey, and the two arcs were
@@ -471,56 +765,35 @@ private fun DrawScope.drawBrows(art: AvatarArt, u: Float) {
     } else {
         lerp(art.hair, INK, 0.18f)
     }.copy(alpha = 0.92f)
+    // v389 — the brow ANSWERS the gaze above it: a lifted, fine brow over a
+    // cat-eye, a flat heavy one over a steady eye, a high soft one over a
+    // smile. Before this every brow was the same gentle arc, which was half of
+    // why 28 faces read as one person.
+    val (lift, weight) = when (art.eye) {
+        EDGE_UPTURNED, EDGE_ALMOND -> 1.0f to 2.0f
+        EDGE_LIDDED, EDGE_STEADY -> 0.30f to 2.4f
+        EDGE_SHADOWED -> 0.20f to 2.6f
+        EDGE_HAPPY -> 1.3f to 1.9f
+        EDGE_STARRY, EDGE_WIDE -> 1.1f to 1.9f
+        EDGE_SOFT, EDGE_BEHIND_GLASS -> 0.60f to 2.1f
+        else -> 0.75f to 2.2f
+    }
     listOf(42.6f to -1f, 57.4f to 1f).forEach { (ex, side) ->
         drawPath(
             Path().apply {
-                // Outer end, a whisper lower than the inner one — the gentlest
-                // lift — mirrored through `side` so both brows agree.
-                mv(ex + side * 5.2f, 39.6f, u)
-                qd(ex + side * 0.6f, 36.4f, ex - side * 5.2f, 39.2f, u)
+                // Outer end lower than the inner one — the gentlest lift —
+                // mirrored through `side` so both brows agree.
+                mv(ex + side * 5.2f, 39.6f - lift * 1.2f, u)
+                qd(ex + side * 0.6f, 36.4f - lift * 2.4f, ex - side * 5.2f, 39.2f - lift * 1.0f, u)
             },
             brow,
-            style = Stroke(width = s(2.2f, u), cap = StrokeCap.Round)
+            style = Stroke(width = s(weight, u), cap = StrokeCap.Round)
         )
     }
 }
 
 private fun DrawScope.drawFace(art: AvatarArt, u: Float, withMouth: Boolean = true) {
-    val iris = darken(art.hair, 0.45f)
-    // ── eyes ──────────────────────────────────────────────────────────────
-    // CHIBI EYES. The detailed pair — a white sclera, a lash line, a lid crease
-    // and a lower lid — was four grey lines smeared together at 40dp, and the
-    // whites made every face read startled at hero size. A chibi eye is ONE big
-    // dark shape with two highlights; its character comes from the size and the
-    // tilt, not from the number of lines inside it.
-    listOf(42.6f to -1f, 57.4f to 1f).forEach { (ex, side) ->
-        val cy = 47.4f
-        // Taller than wide, tilted a touch outward: open, friendly, and still
-        // exactly the shape the glasses' round lenses expect.
-        drawOval(
-            color = iris,
-            topLeft = o(ex - 4.6f, cy - 6.6f, u),
-            size = Size(s(9.2f, u), s(13.2f, u))
-        )
-        // A deeper centre, so the eye has an inside rather than reading flat.
-        drawCircle(INK, s(3.1f, u), o(ex, cy + 0.6f, u))
-        // The big top highlight and one lower spark: two is the chibi
-        // signature, and at chip size they are what keeps the eye from closing.
-        drawCircle(Color.White.copy(alpha = 0.95f), s(2.7f, u), o(ex - 1.5f, cy - 3.4f, u))
-        drawCircle(Color.White.copy(alpha = 0.72f), s(1.25f, u), o(ex + 1.5f, cy + 3.2f, u))
-        // The upper lid: ONE stroke, the outer corner a little heavier (the
-        // `side` swing), so the eye stays defined when the whole portrait is
-        // 24dp in a chat row.
-        drawArc(
-            color = INK.copy(alpha = 0.80f),
-            startAngle = if (side < 0f) 206f else 194f,
-            sweepAngle = 140f,
-            useCenter = false,
-            topLeft = o(ex - 4.9f, cy - 7.2f, u),
-            size = Size(s(9.8f, u), s(8.6f, u)),
-            style = Stroke(width = s(1.5f, u), cap = StrokeCap.Round)
-        )
-    }
+    drawEyes(art, u)
     // ── nose ──────────────────────────────────────────────────────────────
     // A chibi nose is a hint: one short warm shadow under the tip. The bridge
     // line and the two nostril dots were three more marks that only ever

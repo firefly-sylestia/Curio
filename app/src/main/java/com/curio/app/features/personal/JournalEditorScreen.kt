@@ -1,10 +1,14 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -39,6 +43,8 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,11 +59,15 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import com.curio.app.data.PAGE_KIND_JOURNAL
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMood
@@ -111,9 +121,25 @@ fun JournalEditorScreen(
     val keyboardController =
         androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
 
+    // ── THE DAY'S TITLE, ROLLED UP INTO THE BAR ────────────────────────
+    //
+    // The title is written ON the page, so once it has scrolled away the page
+    // has stopped saying which day this is (user request: "similar to title add
+    // in journal too the toolbar title"). The bar takes it over at exactly that
+    // moment: the title field reports its own place in the writing (an offset
+    // inside the scrolling column, which does not change as it scrolls) and the
+    // page's scroll offset says where the writing has got to. Both are needed
+    // because a position in the WINDOW is only re-reported on layout, not on
+    // scroll — this asks a question the scroll itself answers.
+    var pageScrollY by remember { mutableIntStateOf(0) }
+    var titleTop by remember { mutableFloatStateOf(0f) }
+    var titleHeight by remember { mutableFloatStateOf(0f) }
+    val titleRolled = titleHeight > 0f && (titleTop + titleHeight) - pageScrollY <= 0f
+
     PersonalWritingPage(
         entryIdArg = entryIdArg,
         photos = photos,
+        onScroll = { pageScrollY = it },
         // The page's own way out (the core guards it: a live voice recording is
         // asked about before a back gesture can drop it — see PersonalVoice).
         onExit = { navController.popBackStack() },
@@ -139,6 +165,7 @@ fun JournalEditorScreen(
                 dateMillis = dateMillis,
                 saving = saving,
                 editing = editing,
+                rolledTitle = if (titleRolled) title else "",
                 onToggleMode = onEditing,
                 onShiftDate = { days -> dateMillis = shiftDay(dateMillis, days) },
                 onPickDate = {
@@ -179,10 +206,19 @@ fun JournalEditorScreen(
                 ) {
                     DatePicker(
                         state = pickerState,
+                        // v389 — the selected day is the ACCENT's airy tone, not
+                        // its deep ink: the deep shade made the picked day the
+                        // darkest thing on the calendar and swallowed the
+                        // numeral (user report: "the calendar selected date
+                        // highlight is too dark"). The pairing is the same one
+                        // every accent FILL in the app uses — the airy fill,
+                        // the readable ink on it.
                         colors = DatePickerDefaults.colors(
-                            selectedDayContainerColor = personalAccentInk(),
+                            selectedDayContainerColor = personalAccent(),
                             selectedDayContentColor = personalOnAccent(),
-                            todayDateBorderColor = personalAccentInk(),
+                            selectedYearContainerColor = personalAccent(),
+                            selectedYearContentColor = personalOnAccent(),
+                            todayDateBorderColor = personalAccent(),
                             todayContentColor = personalAccentInk()
                         )
                     )
@@ -204,7 +240,17 @@ fun JournalEditorScreen(
             // writing, so the first thing to do is type (this block is only
             // composed in the writing mode, which is what makes that true).
             LaunchedEffect(Unit) {
+                // FOCUS first — that is instant and silent — and let the page's
+                // own turn finish before the keyboard's inset starts to rise.
+                // The two used to happen at once, so the cross-fade was lifted
+                // mid-flight and read as a jump (user report: "when i switch to
+                // edit the keyboard automatically opens up and that makes the
+                // crossfading animation looks bad and it also shifts so fix it
+                // properly without disabling the keyboard"). The keyboard is
+                // still opened by the page itself: it just arrives AFTER the
+                // turn, which is the order the eye expects.
                 titleFocusRequester.requestFocus()
+                delay(260)
                 keyboardController?.show()
             }
             MoodSelector(selected = mood, onSelect = { mood = it }, ink = ink)
@@ -228,7 +274,14 @@ fun JournalEditorScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(titleFocusRequester),
+                    .focusRequester(titleFocusRequester)
+                    // Where the title sits in the WRITING (not in the window):
+                    // the column's own scroll turns this into "scrolled past".
+                    .onGloballyPositioned { coordinates ->
+                        val bounds = coordinates.boundsInParent()
+                        titleTop = bounds.top
+                        titleHeight = bounds.height
+                    },
                 decorationBox = { inner ->
                     Box {
                         if (title.isEmpty()) {
@@ -257,13 +310,15 @@ private fun JournalTopBar(
     dateMillis: Long,
     saving: Boolean,
     editing: Boolean,
+    /** The day's title once its own line has left the page — empty while the
+     *  title is still on screen (see the caller). */
+    rolledTitle: String,
     onToggleMode: (Boolean) -> Unit,
     onShiftDate: (Long) -> Unit,
     onPickDate: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val accent = personalAccent()
-    val today = dateMillis.toLocalDate() == LocalDate.now()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -298,13 +353,35 @@ private fun JournalTopBar(
                     horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
                     CurioIcon(CurioIcons.CalendarToday, null, tint = personalAccentInk(), size = 15.dp)
-                    Text(
-                        if (today) "Today" else dateMillis.prettyDate(),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-color = personalAccentInk()
-                )
+                    // v389 — the day MOVES when it changes (user report: "date
+                    // switching isnt smooth"): a later day rises in and an
+                    // earlier day drops in, so the arrow the thumb pressed and
+                    // the direction the date travels agree. Vertical on purpose
+                    // — the two dates are the same height, so the pill never has
+                    // to resize while they swap.
+                    AnimatedContent(
+                        targetState = dateMillis,
+                        transitionSpec = {
+                            val forward = targetState > initialState
+                            val enter = if (forward) 1 else -1
+                            (
+                                fadeIn(tween(200)) +
+                                    slideInVertically(tween(240)) { height -> enter * height / 2 }
+                                ) togetherWith (
+                                fadeOut(tween(140)) +
+                                    slideOutVertically(tween(180)) { height -> -enter * height / 2 }
+                                )
+                        },
+                        label = "journal-date"
+                    ) { millis ->
+                        Text(
+                            if (millis.toLocalDate() == LocalDate.now()) "Today" else millis.prettyDate(),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = personalAccentInk()
+                        )
+                    }
+                }
             }
-        }
         if (editing) Surface(
                 onClick = { onShiftDate(1L) },
                 shape = CircleShape,
@@ -315,6 +392,31 @@ color = personalAccentInk()
                     CurioIcon(CurioIcons.ChevronRight, "Next day", tint = personalAccentInk(), size = 18.dp)
                 }
             }
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        // THE TITLE, once the page's own has gone up. It fades into the bar's
+        // empty middle, so the bar never changes height and never pushes a line
+        // of the page (the weight is `fill = false`: the title takes only what
+        // it needs and the spacer either side keeps the date and the switch in
+        // their corners).
+        AnimatedVisibility(
+            visible = rolledTitle.isNotBlank(),
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(140)),
+            modifier = Modifier.weight(1f, fill = false)
+        ) {
+            Text(
+                rolledTitle,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = ink.copy(alpha = 0.8f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
         Spacer(Modifier.weight(1f))
@@ -366,8 +468,10 @@ private fun MoodSelector(
         Surface(
             onClick = { open = !open },
             shape = RoundedCornerShape(50),
-            color = if (selected != null) personalAccent().copy(alpha = 0.24f)
-            else MaterialTheme.colorScheme.surfaceContainer
+            // The pill wears the CHOSEN feeling's ink, so the collapsed state
+            // and the options below it are visibly the same thing.
+            color = selected?.let { personalMoodInk(it).copy(alpha = 0.20f) }
+                ?: MaterialTheme.colorScheme.surfaceContainer
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -378,7 +482,7 @@ private fun MoodSelector(
                     CurioIcon(
                         personalMoodGlyph(selected),
                         null,
-                        tint = personalAccentInk(),
+                        tint = personalMoodInk(selected),
                         size = 17.dp
                     )
                 }
@@ -387,12 +491,12 @@ private fun MoodSelector(
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = if (selected != null) personalAccentInk() else ink.copy(alpha = 0.6f)
+                    color = if (selected != null) ink else ink.copy(alpha = 0.6f)
                 )
                 CurioIcon(
                     if (open) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
                     null,
-                    tint = if (selected != null) personalAccentInk() else ink.copy(alpha = 0.5f),
+                    tint = ink.copy(alpha = 0.5f),
                     size = 18.dp
                 )
             }
@@ -402,37 +506,122 @@ private fun MoodSelector(
             enter = expandVertically(tween(180)) + fadeIn(tween(140)),
             exit = shrinkVertically(tween(140)) + fadeOut(tween(110))
         ) {
-            Row(
+            // v389 — SIX NAMED OPTIONS, IN TWO ROWS.
+            //
+            // They used to be six icon-only chips squeezed into one row at equal
+            // width: on a phone that is a row of grey faces roughly 44dp wide,
+            // with no words at all, so telling Calm from Curious meant guessing
+            // at a glyph (user request: "also redeign the how did the day feel
+            // option"). Now each mood is a chip that SAYS ITS NAME, gives the
+            // feeling its own ink, and ticks when it is the one the day felt.
+            Column(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                PersonalMood.entries.forEach { mood ->
-                    val on = mood == selected
-                    Surface(
-                        onClick = {
-                            onSelect(if (on) null else mood)
-                            open = false
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = if (on) personalAccent() else MaterialTheme.colorScheme.surfaceContainer,
-                        modifier = Modifier.weight(1f)
+                PersonalMood.entries.chunked(2).forEach { pair ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Box(
-                            modifier = Modifier.height(38.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CurioIcon(
-                                personalMoodGlyph(mood),
-                                mood.label,
-                                tint = if (on) personalOnAccent() else personalAccentInk(),
-                                size = 18.dp
+                        pair.forEach { mood ->
+                            MoodOption(
+                                mood = mood,
+                                on = mood == selected,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    onSelect(if (mood == selected) null else mood)
+                                    open = false
+                                }
                             )
                         }
+                        // An odd number of moods leaves the last row half full.
+                        // The blank keeps every chip the same width rather than
+                        // letting the last one stretch across the page.
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
             }
         }
     }
+}
+
+/**
+ * v389 — ONE FEELING, AS AN OPTION.
+ *
+ * The disc carries the mood's own ink whether or not it is picked, so the six
+ * read as six DIFFERENT feelings instead of six grey glyphs that only light up
+ * after the choice has been made — and the chip is a chip rather than a button,
+ * which is what makes a row of them read as a set of states to choose from.
+ */
+@Composable
+private fun MoodOption(
+    mood: PersonalMood,
+    on: Boolean,
+    ink: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val tint = personalMoodInk(mood)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = if (on) tint.copy(alpha = 0.20f)
+        else MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = if (on) tint else tint.copy(alpha = 0.20f),
+                modifier = Modifier.size(27.dp)
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        personalMoodGlyph(mood),
+                        mood.label,
+                        tint = if (on) personalOnAccent() else tint,
+                        size = 16.dp
+                    )
+                }
+            }
+            Text(
+                mood.label,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Medium
+                ),
+                color = if (on) ink else ink.copy(alpha = 0.72f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (on) {
+                CurioIcon(CurioIcons.Check, null, tint = tint, size = 15.dp)
+            }
+        }
+    }
+}
+
+/**
+ * v389 — A FEELING'S OWN INK.
+ *
+ * The marker pens' four colours proved the point on this page (see
+ * personalHighlightInk), so the moods borrow the same language: each feeling
+ * gets a colour that means it, drawn from the journal's own palette rather than
+ * the theme's accent — because six chips in one accent say "these are six
+ * buttons", and six chips in six inks say "these are six different days".
+ */
+internal fun personalMoodInk(mood: PersonalMood): Color = when (mood) {
+    PersonalMood.CALM -> Color(0xFF7FA8C9)
+    PersonalMood.HAPPY -> Color(0xFFE0A33C)
+    PersonalMood.CURIOUS -> Color(0xFF8FB08A)
+    PersonalMood.INSPIRED -> Color(0xFFD98A8A)
+    PersonalMood.TIRED -> Color(0xFF9B8AA6)
+    PersonalMood.HEAVY -> Color(0xFF6E6A72)
 }
 
 // v389 — the eye/pen switch (ModeButton + EyeGlyph) moved to PersonalPage.kt
@@ -470,7 +659,14 @@ private fun JournalReadView(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                CurioIcon(personalMoodGlyph(mood), null, tint = ink.copy(alpha = 0.55f), size = 15.dp)
+                // The mood's own ink here too, so the day's feeling reads the
+                // same colour whether it is being picked or read back.
+                CurioIcon(
+                    personalMoodGlyph(mood),
+                    null,
+                    tint = personalMoodInk(mood).copy(alpha = 0.85f),
+                    size = 15.dp
+                )
                 Text(
                     mood.label,
                     style = MaterialTheme.typography.labelSmall,

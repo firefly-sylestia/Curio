@@ -1,15 +1,20 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -21,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -36,14 +42,18 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -57,35 +67,50 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import com.curio.app.ui.components.TextHistoryBrowser
+import com.curio.app.ui.components.TextHistoryRestoreMode
+import com.curio.app.ui.components.rememberTextHistoryCapture
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.TextToolbar
+import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -98,7 +123,10 @@ import com.curio.app.data.newBlockId
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.GeomFontFamily
+import com.curio.app.ui.theme.SpaceMonoFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
+import com.curio.app.data.openSearchUrl
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -127,6 +155,9 @@ private val QUOTE_VIEW_SIZE = 15.sp
 /** A TITLE line and a SMALL line, in the editor and in the read-only view. */
 private val TITLE_BODY_SIZE = 24.sp
 private val TITLE_VIEW_SIZE = 22.sp
+
+/** The read size of a page whose ROWS are the content — the to-do list. */
+internal val ROW_VIEW_SIZE = 19.sp
 private val SMALL_BODY_SIZE = 13.5.sp
 private val SMALL_VIEW_SIZE = 12.5.sp
 
@@ -142,6 +173,166 @@ internal fun personalQuoteColor(): Color = Color(0xFF9A6A43)
 /** The rule beside a quoted block: the same coffee, at rule strength. */
 @Composable
 internal fun personalQuoteRule(): Color = personalQuoteColor().copy(alpha = 0.85f)
+
+/**
+ * THE PANEL BEHIND A QUOTED LINE — the same coffee, at a whisper (user
+ * decision: "Coffee panel"). A quotation is a passage SOMEONE ELSE wrote, so it
+ * reads as a panel laid onto the page rather than as the member's own voice; the
+ * rule alone left that to one 3dp bar.
+ */
+@Composable
+internal fun personalQuoteWash(): Color =
+    personalQuoteColor().copy(alpha = if (isCurioDarkTheme()) 0.18f else 0.085f)
+
+/**
+ * THE QUOTE'S INK WHERE IT IS DRAWN OUTSIDE A PAGE — the same coffee family,
+ * one shade deeper and theme-aware, for the social pull-quote (which is BOTH the
+ * composer's preview and the post on the wall — one composable, see
+ * SocialPullQuote). A quotation is never drawn in the member's accent: on a rose
+ * or an azure theme the rule and the credit read as a highlight somebody had
+ * selected rather than as somebody else's words (user request).
+ */
+@Composable
+internal fun personalQuoteDeepColor(): Color =
+    if (isCurioDarkTheme()) Color(0xFFC09263) else Color(0xFF5C3A20)
+
+/**
+ * v389 — THE BULLET'S OWN COLOUR: DEEP COFFEE, never the theme's accent.
+ *
+ * A list marker is typography, not a highlight: a rose dot on a rose-accent
+ * theme made every bullet look like something the member had just selected (user
+ * request: "make the bulletpoint colors darker coffe deep color not the theme
+ * accent"). It wears the same coffee family as a quotation — the deep twin on a
+ * light page, the milky one on a dark page so it cannot vanish.
+ */
+@Composable
+internal fun personalBulletColor(): Color =
+    if (isCurioDarkTheme()) Color(0xFFB08255) else Color(0xFF6E4A2E)
+
+/**
+ * v389 — THE FOUR MARKER PENS.
+ *
+ * Keyed, not coloured, in storage (see [PersonalRun.highlight]) so the palette
+ * can be tuned without touching a single saved note. They are the READER's own
+ * four highlighters, which means a page marked in the journal and a passage
+ * marked in a book are the same four inks.
+ *
+ * Painted at a wash alpha by [personalAnnotated], so the ink under them is
+ * always the page's own — a marker is a pen held over the text, not a fill.
+ */
+internal fun personalHighlightInk(key: String): Color = when (key) {
+    "rose" -> Color(0xFFD98A8A)
+    "sage" -> Color(0xFF8FB08A)
+    "sky" -> Color(0xFF7FA8C9)
+    else -> Color(0xFFE0A33C)
+}
+
+/** The pen's name as the menu shows it. */
+/**
+ * v389 — AN ALIGNMENT, AS THE TEXT ENGINE WANTS IT.
+ *
+ * One mapping, in one place, because the four kinds are drawn by four callers
+ * (both canvas surfaces, both document views) and a fifth kind added in three
+ * of them would silently lay out as left.
+ */
+internal fun PersonalAlign.toTextAlign(): TextAlign = when (this) {
+    PersonalAlign.START -> TextAlign.Start
+    PersonalAlign.CENTER -> TextAlign.Center
+    PersonalAlign.END -> TextAlign.End
+    PersonalAlign.JUSTIFY -> TextAlign.Justify
+}
+
+/**
+ * v389 — A FACE, AS THE TEXT ENGINE WANTS IT.
+ *
+ * The four are what [PERSONAL_FONT_KEYS] names, and each is a family the app
+ * ALREADY bundles, chosen so the menu is four genuinely different voices rather
+ * than four weights of one: the page's own writing serif (Lora, by far the best
+ * reading face at writing size, and what every note written before this menu
+ * already is), a geometric sans for notes that are lists and fragments, a mono
+ * for anything with code or numbers in it, and the display serif the titles
+ * already wear.
+ *
+ * A TITLE still forces the display serif when no face was picked, because that
+ * is what the title tool has always meant; an explicit face wins, because a
+ * member who chose one meant it.
+ */
+internal fun personalFontFamilyOf(flags: Int): FontFamily? = when (fontKeyOf(flags)) {
+    "sans" -> GeomFontFamily
+    "mono" -> SpaceMonoFontFamily
+    "display" -> FrauncesFontFamily
+    else -> if (flags and FLAG_TITLE != 0) FrauncesFontFamily else null
+}
+
+// ── v392 ── CLICKABLE LINKS ──────────────────────────────────────────────
+private const val PERSONAL_LINK_TAG = "personal_url"
+private val URL_REGEX = Regex(
+    "https?://[\u0021-\u007E]+" // ASCII printable URL characters
+)
+
+/**
+ * Adds clickable URL annotations to an existing AnnotatedString.
+ * Each match is tagged [PERSONAL_LINK_TAG] so the read-only view can open it
+ * on tap with the coffee-dark underline style.
+ */
+private fun personalAnnotateLinks(base: AnnotatedString): AnnotatedString {
+    val text = base.text
+    val matches = URL_REGEX.findAll(text).toList()
+    if (matches.isEmpty()) return base
+    val annotated = androidx.compose.ui.text.buildAnnotatedString {
+        append(base)
+        for (match in matches) {
+            addStyle(
+                SpanStyle(
+                    color = Color(0xFF5C3A20),
+                    textDecoration = TextDecoration.Underline
+                ),
+                match.range.first,
+                match.range.last + 1
+            )
+            addStringAnnotation(
+                PERSONAL_LINK_TAG,
+                match.value,
+                match.range.first,
+                match.range.last + 1
+            )
+        }
+    }
+    return annotated
+}
+/** The face's name as the menu shows it. */
+internal fun personalFontLabel(key: String): String = when (key) {
+    "sans" -> "Sans"
+    "mono" -> "Mono"
+    "display" -> "Display"
+    else -> "Serif"
+}
+
+/** The family the menu previews that name in — the menu is the four faces, so
+ *  the row itself is set in the face it is offering. */
+internal fun personalFontPreview(key: String): FontFamily = when (key) {
+    "sans" -> GeomFontFamily
+    "mono" -> SpaceMonoFontFamily
+    "display" -> FrauncesFontFamily
+    else -> WritingFontFamily
+}
+
+internal fun personalHighlightLabel(key: String): String = when (key) {
+    "rose" -> "Rose"
+    "sage" -> "Sage"
+    "sky" -> "Sky"
+    "amber" -> "Amber"
+    else -> key.replaceFirstChar { it.uppercase() }
+}
+
+/**
+ * HOW FAR A QUOTE PANEL REACHES INTO THE GAP BESIDE IT: half of it, so two
+ * quoted lines typed over one Enter meet in the middle and read as ONE panel
+ * instead of a stack of bars. The editor sets its blocks 6dp apart, the read-only
+ * views 8dp — each half is the world it belongs to.
+ */
+private val QUOTE_JOIN_EDITOR = 3.dp
+private val QUOTE_JOIN_VIEW = 4.dp
 
 // ────────────────────────────────────────────────────────────────────────────
 // Style → pixels
@@ -198,6 +389,18 @@ internal val PERSONAL_MARKER_GAP = 10.dp
 /** The whole lead-in — what a list line indents its TEXT by, so a wrapped line
  *  lines up under the first word instead of under the marker. */
 internal val PERSONAL_MARKER_LEAD = PERSONAL_MARKER_SIZE + PERSONAL_MARKER_GAP
+
+/**
+ * v389 — A CHECKLIST ROW CAN BE TICKED WHILE THE PAGE IS BEING READ.
+ *
+ * The tick lived in the editor alone, so a to-do list had to be opened with the
+ * pen down to finish anything — while a list is exactly the page whose READING
+ * side you act on. [PersonalDocView] draws the box; the page that owns the
+ * document (see `PersonalWritingPage`) provides the write here, because a view
+ * renders a document it must never edit itself. The index is the BLOCK's own
+ * position in the document, which is what the view has to hand.
+ */
+internal val LocalPersonalCheckToggle = staticCompositionLocalOf<((Int) -> Unit)?> { null }
 
 /**
  * v389 — ONE BULLET RENDERER for the whole family: the editor, every read-only
@@ -406,6 +609,11 @@ internal fun personalAnnotated(
         var j = i + 1
         while (j < text.length && mask.getOrElse(j) { 0 } == flags) j++
         if (flags != 0) {
+            // The pen rides in the same int as the flags, so a marker-only
+            // stretch (flags == its colour bits) has to paint a background even
+            // though no flag is set — which is why this is inside `flags != 0`
+            // rather than in a branch of its own.
+            val pen = highlightKeyOf(flags)
             val decorations = ArrayList<TextDecoration>(2)
             if (flags and FLAG_UNDERLINE != 0) decorations.add(TextDecoration.Underline)
             if (flags and FLAG_STRIKE != 0) decorations.add(TextDecoration.LineThrough)
@@ -422,13 +630,21 @@ internal fun personalAnnotated(
                         flags and FLAG_SMALL != 0 -> smallSize
                         else -> TextUnit.Unspecified
                     },
-                    fontFamily = if (flags and FLAG_TITLE != 0) FrauncesFontFamily else null,
+                    fontFamily = personalFontFamilyOf(flags),
                     fontWeight = when {
                         flags and FLAG_BOLD != 0 -> FontWeight.Bold
                         flags and FLAG_TITLE != 0 -> FontWeight.SemiBold
                         else -> null
                     },
                     fontStyle = if (flags and FLAG_ITALIC != 0) FontStyle.Italic else null,
+                    // A WASH, so the words stay the page's ink — and unspecified
+                    // rather than transparent, which would punch a hole through
+                    // a quote panel it sat inside.
+                    background = if (pen.isEmpty()) {
+                        Color.Unspecified
+                    } else {
+                        personalHighlightInk(pen).copy(alpha = 0.40f)
+                    },
                     textDecoration = when (decorations.size) {
                         0 -> null
                         1 -> decorations.first()
@@ -458,6 +674,21 @@ internal data class PersonalCaret(val blockId: String, val index: Int)
 internal data class PersonalRemovedRow(val block: PersonalBlock, val index: Int)
 
 /**
+ * v389 — WHERE A PAGE'S TITLE LINES SIT, for a page that cannot be handed the
+ * callback.
+ *
+ * A writing page owns both halves of itself, but the READING half is the
+ * CALLER's view (`readView`), so the page has nothing to pass it. It provides
+ * this local instead, and both [PersonalCanvas] and [PersonalDocView] fall back
+ * to it when their own parameter is null — which is what lets the journal's
+ * pinned section work on the reading side as well as the writing one.
+ */
+internal val LocalPersonalTitleReport =
+    staticCompositionLocalOf<
+        ((id: String, label: String, top: Float, bottom: Float) -> Unit)?
+        > { null }
+
+/**
  * The canvas' brain: the block list, each block's text + style mask, and the
  * toolbar's live state. Deliberately NOT a Compose UI class — a screen can
  * drive it (auto-save, "add a photo", programmatic focus) without touching
@@ -485,6 +716,27 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /**
+     * v389 — THE PAGE WAS TAPPED (see [focusLastLine]).
+     *
+     * [focusedId] says which line the keyboard is in and [caret] says where the
+     * caret should go, but neither of them can say WHEN: the caret is consumed
+     * the moment the line it names honours it, so a tap on the blank part of a
+     * page whose caret is already in that line changed NOTHING (user report:
+     * "add proper tap to start writing in blank always even when the cursor was
+     * there"). This is the proof that a finger landed, and it names the line it
+     * asked for.
+     */
+    var tapTarget by mutableStateOf<String?>(null)
+        private set
+    var tapTick by mutableIntStateOf(0)
+        private set
+
+    /** Called by the line the tap named, so no other line answers it twice. */
+    fun consumeTap(id: String) {
+        if (tapTarget == id) tapTarget = null
+    }
+
+    /**
      * v389 — "start writing here". A tap anywhere on the blank part of a page
      * (under the last line, in the gap above the tools) hands the caret to the
      * LAST line at its end, which is what a writer means by tapping the empty
@@ -501,8 +753,30 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             val b = blocks[block]
             b != null && !b.isPhoto && b.audio == null
         } ?: return
+        // ── A TAP ELSEWHERE LETS GO OF WHAT WAS SELECTED (v389d) ────────
+        //
+        // A selected passage used to survive a tap on the blank part of the
+        // page: the only way to drop it was to tap the SAME line again and put
+        // the caret somewhere in it, which is not how any editor behaves (user
+        // report: "when I've something selected in the text for journal book
+        // review and all and i click the blank area below it should auto
+        // deselect. instead i have to tap that exact line to deselect it").
+        // Tapping the page is a deliberate "not that" — so every range is
+        // collapsed and the page-wide wash goes with it.
+        if (selections.any { (_, range) -> !range.collapsed } || pageSelected) {
+            selections.keys.toList().forEach { key ->
+                selections[key] = TextRange(text(key).length)
+            }
+            pageSelected = false
+        }
         focusedId = id
         caret = PersonalCaret(id, text(id).length)
+        // A pending OFF belongs to the place the caret was, not to this one.
+        armedOff = 0
+        // …and the TAP itself, so the line takes the caret (and the keyboard)
+        // again even when both of the lines above are already true of it.
+        tapTarget = id
+        tapTick++
     }
 
     fun armCheckboxOnEmptyLine() {
@@ -511,6 +785,135 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /** Tools switched on with nothing to apply them to (an empty line). */
     var armed by mutableIntStateOf(0)
+
+    /**
+     * v389 — TOOLS SWITCHED **OFF** FOR WHAT IS TYPED NEXT.
+     *
+     * With no selection the dock is an INPUT STYLE, not a command that rewrites
+     * the line (user report: "the bold italic underline strikethough … size
+     * quotes etc they should not work for the whole line when i tap to active
+     * them it should only work after the text written just like in rich text
+     * editor"). [armed] is the tools switched ON; this is the tools switched
+     * OFF — the only way to write plain words in the middle of a bold sentence,
+     * which is what tapping Bold with the caret inside a bold run now means.
+     * The two are always disjoint ([toggle] keeps them so).
+     */
+    var armedOff by mutableIntStateOf(0)
+        private set
+
+    /**
+     * v389 — THE PEN SWITCHED ON FOR WHAT IS TYPED NEXT.
+     *
+     * `null` is "whatever pen the caret already sits in" — the state a marker
+     * spends almost all its life in, and the reason this is nullable: the pen
+     * being TAKEN OFF is a real, distinct setting (0), and a plain Int could not
+     * tell it apart from "unchanged". Cleared as soon as a keystroke consumes
+     * it, the same as [armed].
+     */
+    var armedHighlight by mutableStateOf<Int?>(null)
+        private set
+
+    /** v389 — THE FACE SWITCHED ON FOR WHAT IS TYPED NEXT, with [armedHighlight]'s
+     *  own meaning of null ("unchanged"), so the page's own face can be chosen
+     *  deliberately as well as inherited. */
+    var armedFont by mutableStateOf<Int?>(null)
+        private set
+
+    /** The face the caret sits in — "" for the page's own. What the dock's font
+     *  menu ticks. */
+    fun fontOfFocused(): String {
+        val id = focusedId ?: return fontKeyOf(armedFont ?: 0)
+        val blockMask = mask(id)
+        val selection = selections[id]
+        val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
+        return fontKeyOf(caretFlags(id)).ifEmpty {
+            if (selection?.collapsed != false && at == 0) fontKeyOf(armedFont ?: 0) else ""
+        }
+    }
+
+    /**
+     * v389 — THE FONT MENU.
+     *
+     * Exactly the marker's manner: a selection is re-set outright, and with the
+     * caret alone the face becomes the style of the next words typed — except
+     * when they are already set in that face, which chooses the page's own
+     * again, so the menu is a toggle and not a one-way door.
+     */
+    fun applyFont(key: String) {
+        // v389d — NO LAMBDA, AND SO NO NON-LOCAL RETURN. `focusedId ?: run { …
+        // return }` makes the compiler emit its `$$$$$NON_LOCAL_RETURN$$$$$`
+        // synthetic class, and R8 could not dex it ("Method name '<anonymous>'
+        // in class '$$$$$NON_LOCAL_RETURN$$$$$' cannot be represented in dex
+        // format") — which broke the RELEASE build while the debug build was
+        // perfectly happy. A plain branch does the same thing without asking
+        // the compiler for a synthetic class.
+        val focused = focusedId
+        if (focused == null) {
+            armedFont = fontMaskFor(key)
+            return
+        }
+        val id = focused
+        val block = blocks[id] ?: return
+        val selection = selections[id]
+        if (selection != null && !selection.collapsed) {
+            val start = selection.min.coerceIn(0, block.text.length)
+            val end = selection.max.coerceIn(0, block.text.length)
+            masks[id] = maskApplyFont(mask(id), start, end, key)
+            armedFont = null
+            onDocChanged(doc())
+            return
+        }
+        val current = fontOfFocused()
+        armedFont = if (current == key) fontMaskFor("") else fontMaskFor(key)
+    }
+
+    /** The pen the caret sits in right now — what the dock's marker button
+     *  lights from and names. "" for none. */
+    fun highlightOfFocused(): String {
+        val id = focusedId ?: return highlightKeyOf(armedHighlight ?: 0)
+        val blockMask = mask(id)
+        val selection = selections[id]
+        val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
+        return highlightKeyOf(caretFlags(id)) .ifEmpty {
+            // A caret at the very start of the block has nothing to its left or
+            // right to inherit from, so it wears the standing pen.
+            if (selection?.collapsed != false && at == 0) highlightKeyOf(armedHighlight ?: 0) else ""
+        }
+    }
+
+    /**
+     * v389 — THE MARKER BUTTON.
+     *
+     * A selection is marked outright (and the selection is kept, so the writer
+     * can see what they just did). With nothing selected the pen becomes an
+     * INPUT STYLE — the next words typed wear it — except when the caret is
+     * already in that exact pen, which takes it OFF, which is how a rich text
+     * editor's highlighter toggle behaves.
+     */
+    fun applyHighlight(key: String) {
+        // Same as applyFont above: the standing pen is set without a non-local
+        // return, so the compiler never has to generate that synthetic class.
+        val focused = focusedId
+        if (focused == null) {
+            armedHighlight = highlightMaskFor(key)
+            return
+        }
+        val id = focused
+        val block = blocks[id] ?: return
+        val selection = selections[id]
+        if (selection != null && !selection.collapsed) {
+            val start = selection.min.coerceIn(0, block.text.length)
+            val end = selection.max.coerceIn(0, block.text.length)
+            // Tapping the pen the stretch already wears takes it off.
+            val every = (start until end).all { highlightKeyOf(mask(id).getOrElse(it) { 0 }) == key }
+            masks[id] = maskApplyHighlight(mask(id), start, end, if (every) null else key)
+            armedHighlight = null
+            onDocChanged(doc())
+            return
+        }
+        val current = highlightOfFocused()
+        armedHighlight = if (current == key) 0 else highlightMaskFor(key)
+    }
 
     /**
      * v389 — a CHECKLIST page keeps making rows: Enter at the END of a row
@@ -552,6 +955,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         compositions.clear()
         focusedId = null
         armed = 0
+        armedOff = 0
         caret = null
         val source = if (document.blocks.isEmpty()) listOf(PersonalBlock(id = newBlockId()))
         else document.blocks
@@ -571,6 +975,25 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** Called by the block that took the caret, so no other block re-asks. */
     fun consumeCaret(id: String) {
         if (caret?.blockId == id) caret = null
+    }
+
+    /**
+     * v389d — A PASTE WAITING TO BE CUT INTO LINES.
+     *
+     * A paragraph pasted into a line arrives as ONE value with newlines inside
+     * it, and the page's shape has to change to match (a block per line). That
+     * shape change must not happen inside the keyboard's own edit batch — see
+     * [onFieldChange] — so the words land first and this is what the canvas runs
+     * on its next frame.
+     */
+    var pendingSplit by mutableStateOf<PersonalCaret?>(null)
+        private set
+
+    /** Runs the deferred cut, once the IME's batch is behind us. */
+    fun runPendingSplit(caret: PersonalCaret) {
+        pendingSplit = null
+        splitOnNewlines(caret.blockId, caret.index)
+        onDocChanged(doc())
     }
 
     init {
@@ -599,6 +1022,24 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     fun text(id: String): String = blocks[id]?.text.orEmpty()
 
+    /**
+     * v389 — REPLACE A LINE'S WORDS OUTRIGHT.
+     *
+     * The dock's text-history browser restores a whole version over whichever
+     * line the caret was on. That is an edit like any other, so it goes through
+     * [maskAfterEdit] rather than swapping the text in: a mask shorter than its
+     * text paints the wrong characters on the tail of the line, and a restore
+     * is exactly the case where the two lengths nearly always differ.
+     */
+    fun setBlockText(id: String, text: String) {
+        val block = blocks[id] ?: return
+        if (text == block.text) return
+        masks[id] = maskAfterEdit(block.text, text, mask(id), 0, 0)
+        blocks[id] = block.copy(text = text)
+        selections[id] = TextRange(text.length)
+        onDocChanged(doc())
+    }
+
     fun mask(id: String): IntArray = masks[id] ?: emptyMask(text(id).length)
 
     fun photo(id: String): String? = blocks[id]?.photo
@@ -610,12 +1051,53 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** A checklist line's tick — stored with the block (v389). */
     fun checked(id: String): Boolean = blocks[id]?.checked == true
 
+    /** v389 — an attached photo's size on the column (page-wide by default). */
+    fun photoSize(id: String): PersonalPhotoSize =
+        PersonalPhotoSize.fromKey(blocks[id]?.photoSize)
+
+    /** v389 — how big that photo sits. The block is the unit, so this is a
+     *  property of the block, saved with the rest of the page. */
+    fun setPhotoSize(id: String, size: PersonalPhotoSize) {
+        val block = blocks[id] ?: return
+        if (block.isPhoto.not()) return
+        blocks[id] = block.copy(photoSize = size.key)
+        onDocChanged(doc())
+    }
+
     /** The line's bullet marker (the default dot when it never picked one). */
     fun marker(id: String): PersonalMarker = blocks[id]?.markerStyle ?: PersonalMarker.DOT
 
-    fun selection(id: String): TextRange? = selections[id]
+    /**
+     * v389d — THE CARET, FITTED TO THE TEXT IT IS ABOUT TO SIT IN.
+     *
+     * These ranges arrive from the IME (its selection, and its COMPOSING region
+     * while a keyboard is mid-word) and were being handed straight back to
+     * Compose by whatever the block's text happened to be a moment later — and a
+     * block's text does not only change by typing: a tool rewrites a line, a
+     * paste splits it into new lines, a merge puts two together, the page
+     * reloads. When the text got SHORTER than a composing range, the next
+     * `TextFieldValue` carried a region past the end of its own string, and the
+     * IME's own batch-edit then fell over on it (crash report: 
+     * `IndexOutOfBoundsException: toIndex (776) is greater than size (768)` out
+     * of `endBatchEdit`, while deleting text in a book review — the 776 was the
+     * composing region, the 768 the text it no longer fitted).
+     *
+     * So the two ranges are read FITTED: a composition that no longer fits is
+     * gone (it is over — the words it belonged to are not there any more), and a
+     * selection that no longer fits collapses to the end, which is where a caret
+     * that was past the new end belongs.
+     */
+    fun selection(id: String): TextRange? {
+        val length = blocks[id]?.text?.length ?: return null
+        val range = selections[id] ?: return null
+        return range.takeIf { it.min >= 0 && it.max <= length } ?: TextRange(length)
+    }
 
-    fun composition(id: String): TextRange? = compositions[id]
+    fun composition(id: String): TextRange? {
+        val length = blocks[id]?.text?.length ?: return null
+        val range = compositions[id] ?: return null
+        return range.takeIf { it.min >= 0 && it.min <= it.max && it.max <= length }
+    }
 
     /** True when nothing has been written yet (the screen's save gate). */
     fun isEmpty(): Boolean = doc().isEmpty
@@ -644,41 +1126,127 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val old = blocks[id] ?: return
         val newText = value.text
         if (newText != old.text) {
-            masks[id] = maskAfterEdit(old.text, newText, mask(id), armed)
+            // Typing ends a page-wide selection: the member is editing a row
+            // again, and a wash over the whole page beside a live caret reads
+            // as a bug.
+            pageSelected = false
+            // ── A LINE IS A LINE (v389) ────────────────────────────────
+            // A newline inside a field is not a newline in the text: it is a
+            // NEW LINE of the page, which is what a block is. Before this the
+            // character simply landed in the field, so a pasted paragraph came
+            // in as ONE element with invisible breaks inside it — nothing could
+            // be put between its lines (a voice note dragged there snapped to
+            // the paragraph's start or its end) and the platform's Select all
+            // set to work on a shape the page did not have (user reports: "when
+            // i use enter it creates a new line or something which isnt
+            // connected to the previous text … for that reason the select all
+            // doesnt work" and "when i paste a paragraph then that whole
+            // paragraph becomes one element and i cant put things between
+            // them"). Shift+Enter is still the plain newline — one paragraph,
+            // exactly as before — because the key handler consumes it before it
+            // ever reaches the field.
+            if (newText.indexOf('\n') >= 0) {
+                // ── THE PASTE LANDS AS TEXT FIRST (v389d) ──────────────
+                //
+                // A pasted paragraph used to be cut into lines RIGHT HERE —
+                // inside the IME's own commit/`endBatchEdit` batch. Whatever the
+                // page did to its shape at that moment (a block removed, a
+                // block added, the focus handed to a field that did not exist a
+                // frame ago) was done underneath a keyboard still holding the
+                // edit open, which is why a long paste could not be made to
+                // stick at all (user report: "i wasn't able to paste long larger
+                // paragraph"). The words are therefore accepted first — the
+                // field's own value is never invalidated under the IME — and the
+                // line-cutting is deferred to the next frame ([pendingSplit]).
+                masks[id] = maskAfterEdit(
+                    old.text, newText, mask(id), armed, armedOff, armedHighlight, armedFont
+                )
+                blocks[id] = old.copy(text = newText)
+                if (armed != 0) armed = 0
+                if (armedOff != 0) armedOff = 0
+                if (armedHighlight != null) armedHighlight = null
+                if (armedFont != null) armedFont = null
+                selections[id] = value.selection
+                compositions[id] = value.composition
+                caret = PersonalCaret(id, value.selection.start.coerceIn(0, newText.length))
+                pendingSplit = caret
+                onDocChanged(doc())
+                return
+            }
+            masks[id] = maskAfterEdit(
+                old.text, newText, mask(id), armed, armedOff, armedHighlight, armedFont
+            )
             blocks[id] = old.copy(text = newText)
-            // An armed tool has now been used: what follows continues in the
-            // style just typed, so the button stops being "pending".
+            // A pending tool has now been used: what follows continues in the
+            // style just typed, so the buttons stop being "pending".
             if (armed != 0) armed = 0
+            if (armedOff != 0) armedOff = 0
+            // The pen is consumed the same way — the words just typed wear it
+            // and the pen after them is whatever they wear.
+            if (armedHighlight != null) armedHighlight = null
+            if (armedFont != null) armedFont = null
         }
         selections[id] = value.selection
         compositions[id] = value.composition
         onDocChanged(doc())
     }
 
+    /**
+     * v389d — THE LINE THE TOOLS ACT ON STAYS THE LINE.
+     *
+     * This used to forget the focused block the moment it lost focus — and a
+     * block loses focus for all sorts of momentary reasons: a tap on a dock
+     * button, the photo picker coming up, the eye/pen switch. Every tool that
+     * falls back to "the focused line, else the first one" then quietly acted on
+     * the FIRST LINE of the page instead, which is exactly what a broken align
+     * button looks like (user report: "the left side format doesn't work in
+     * journal and all" — it was setting the first line's alignment, not the one
+     * being written). The last line the caret was in is remembered and used as
+     * that fallback; the caret itself still moves where the member puts it.
+     */
     fun onFocusChanged(id: String, focused: Boolean) {
         if (focused) focusedId = id
-        else if (focusedId == id) focusedId = null
     }
 
     /** The flags of whatever the focused tool bar would act on right now —
      *  drives which buttons read as switched on. */
+    /**
+     * The style the CARET sits in: the character just left of it, else the one
+     * just right (typing at the start of a styled run continues that run). This
+     * is what a rich text editor lights its buttons from when nothing is
+     * selected — what the next keystroke will wear.
+     */
+    private fun caretFlags(id: String): Int {
+        val blockMask = mask(id)
+        val at = (selections[id]?.start ?: blockMask.size).coerceIn(0, blockMask.size)
+        return when {
+            at - 1 in blockMask.indices && blockMask[at - 1] != 0 -> blockMask[at - 1]
+            at in blockMask.indices && blockMask[at] != 0 -> blockMask[at]
+            else -> 0
+        }
+    }
+
+    /** The tools as the dock should light them right now. */
     fun activeFlags(): Int {
         val id = focusedId ?: return armed
         val selection = selections[id]
-        // No selection: the LINE decides, exactly like the tap would — a tool
-        // lights only when the whole line already carries it, so what the dock
-        // shows is what another tap on that button would do.
-        val range = if (selection != null && !selection.collapsed) {
-            selection.min to selection.max
-        } else {
-            0 to text(id).length
+        if (selection == null || selection.collapsed) {
+            // NO SELECTION: the buttons are an INPUT STYLE, exactly like a rich
+            // text editor's — they report what the NEXT keypress wears, which is
+            // the style the caret already sits in unless the member has switched
+            // something on or off (v389). Before this, a tool lit only when the
+            // WHOLE LINE carried it, so the dock described the line instead of
+            // the typing, and tapping a button rewrote everything already
+            // written.
+            return (caretFlags(id) and armedOff.inv()) or armed
         }
+        val range = selection.min to selection.max
         val blockMask = mask(id)
         var flags = 0
         ALL_FLAGS.forEach { flag ->
             if (maskCovers(blockMask, range.first, range.second, flag)) flags = flags or flag
         }
-        return flags or armed
+        return flags
     }
 
     /**
@@ -762,29 +1330,102 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         return marker(id)
     }
 
+    /**
+     * v389 — THE WHOLE PAGE, SELECTED.
+     *
+     * A journal page is MANY text fields (one per paragraph), so the platform's
+     * own "Select all" could only ever reach the line the caret happened to sit
+     * in — exactly what a member saw ("when i do select all it only selects one
+     * line … its same for all journals book review chapter review and all"). A
+     * page-wide selection is therefore the PAGE's own state rather than a range
+     * inside one field: every row wears the selection wash, and the dock's tools
+     * then apply to all of them, which is what selecting a page and pressing
+     * Bold is supposed to do.
+     */
+    var pageSelected by mutableStateOf(false)
+        private set
+
+    fun selectPage() {
+        if (order.isEmpty()) return
+        pageSelected = true
+        // The caret lands at the END of the page, so the keyboard keeps
+        // inserting where the writing left off if the member carries on.
+        order.lastOrNull { id -> blocks[id]?.let { !it.isPhoto && it.audio == null } == true }
+            ?.let { id ->
+                focusedId = id
+                caret = PersonalCaret(id, text(id).length)
+            }
+    }
+
+    fun clearPageSelection() {
+        pageSelected = false
+    }
+
+    /** Every row's words, top to bottom — what Copy puts on the clipboard. */
+    fun pageText(): String = order
+        .mapNotNull { blocks[it] }
+        .filter { !it.isPhoto && it.audio == null }
+        .joinToString("\n") { it.text }
+        .trimEnd()
+
     fun toggle(flag: Int) {
-        val id = focusedId ?: return
-        val blockMask = mask(id)
-        val selection = selections[id]
-        val range = if (selection != null && !selection.collapsed) {
-            selection.min to selection.max
-        } else {
-            0 to text(id).length
-        }
-        if (range.second <= range.first) {
-            armed = armed xor flag
+        if (pageSelected) {
+            // A page-wide selection means the tool applies to the ROWS, not to
+            // a range inside one of them: the flag goes on for every row it is
+            // missing from, and off for every row that already has it (the same
+            // "toggle the whole thing" rule the dock's buttons follow).
+            val rows = order.filter { id -> blocks[id]?.let { !it.isPhoto && it.audio == null } == true }
+            val allOn = rows.isNotEmpty() && rows.all { id ->
+                val block = blocks[id] ?: return@all false
+                maskCovers(mask(id), 0, block.text.length, flag)
+            }
+            rows.forEach { id ->
+                val block = blocks[id] ?: return@forEach
+                masks[id] = maskApply(mask(id), 0, block.text.length, flag, !allOn)
+            }
+            armed = armed and flag.inv()
             onDocChanged(doc())
             return
         }
+        val id = focusedId ?: return
+        val blockMask = mask(id)
+        val selection = selections[id]
+        if (selection == null || selection.collapsed) {
+            // NO SELECTION: the tool is an INPUT STYLE. Tapping it changes what
+            // the NEXT keystroke wears — never the line already written, which
+            // is the whole point of the user report above. Inside a bold phrase
+            // that means turning bold OFF for what follows it; on a plain line
+            // it means switching bold ON for the words still to come.
+            val on = ((caretFlags(id) and armedOff.inv()) or armed) and flag != 0
+            if (!on) {
+                armed = armed or flag
+                armedOff = armedOff and flag.inv()
+            } else {
+                armed = armed and flag.inv()
+                armedOff = armedOff or flag
+            }
+            onDocChanged(doc())
+            return
+        }
+        val range = selection.min to selection.max
         val on = !maskCovers(blockMask, range.first, range.second, flag)
         masks[id] = maskApply(blockMask, range.first, range.second, flag, on)
         armed = armed and flag.inv()
+        armedOff = armedOff and flag.inv()
         onDocChanged(doc())
     }
 
     /** Left / centre for the focused block (a paragraph is the unit a line
      *  tool can point at). */
     fun setAlign(align: PersonalAlign) {
+        if (pageSelected) {
+            order.forEach { id ->
+                val block = blocks[id] ?: return@forEach
+                blocks[id] = block.copy(align = align)
+            }
+            onDocChanged(doc())
+            return
+        }
         val id = focusedId ?: order.firstOrNull() ?: return
         val block = blocks[id] ?: return
         blocks[id] = block.copy(align = align)
@@ -911,7 +1552,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         if (from == to) return
         if (from !in order.indices || to !in order.indices) return
         val id = order.removeAt(from)
-        order.add(to, id)
+        // v389d — removeAt shifts every index past the hole, so the target
+        // for a downward move has to be adjusted: [to] was counted against
+        // the ORIGINAL list, but the list is one shorter now. Without this,
+        // a row dragged one step down always landed two positions away (user
+        // report: "the todo rearrange works but also sometimes buggy" —
+        // "other items shuffle wrongly").
+        val adjustedTo = if (from < to) to - 1 else to
+        order.add(adjustedTo, id)
         onDocChanged(doc())
     }
 
@@ -977,68 +1625,269 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /**
-     * Enter: the paragraph splits at the caret and the caret lands at the
-     * start of the new one. The style of the characters travels with them (the
-     * mask is cut in two), but an ARMED tool does not cross the break: a new
-     * line is plain prose unless a tool is armed — or unless this is a
-     * checklist page, which arms its own rows (see [keepsChecklistRows]).
+     * The flags that cover EVERY visible character of a line — the tools that
+     * are really ON for that whole line (which is also what the dock lights /
+     * what [activeFlags] reports for a caret with no selection). A line with no
+     * visible characters has none.
+     */
+    private fun lineFlags(text: String, mask: IntArray): Int {
+        // Every bit to start with, then AND each visible character's own bits
+        // into it: what survives covers the whole line ([ALL_FLAGS] is the
+        // toolbar's ARRAY, so the mask has its own name — ALL_FLAGS_MASK).
+        var flags = ALL_FLAGS_MASK
+        var seen = false
+        for (i in text.indices) {
+            if (text[i].isWhitespace()) continue
+            seen = true
+            flags = flags and mask.getOrElse(i) { 0 }
+        }
+        return if (seen) flags else 0
+    }
+
+    /** True when the block at [id] is a quoted line (the quote panel's run). */
+    fun isQuoteLine(id: String): Boolean {
+        val block = blocks[id] ?: return false
+        if (block.isPhoto || block.isAudio) return false
+        return personalBlockCarries(block.text, mask(id), FLAG_QUOTE)
+    }
+
+    /**
+     * Enter: the paragraph splits at the caret and the caret lands at the start
+     * of the new one.
+     *
+     * v389 — THE LINE'S TOOLS CROSS THE BREAK. Before this the styles were cut
+     * in two (so the words after the caret kept theirs) but the NEW line was
+     * plain prose and the dock's button went dark, which read as the editor
+     * dropping the tool mid-sentence (user report: "when i have a tool selected
+     * from the tool nbar and i tap enter it deselects the tool"). Now the whole
+     * line's own tools — bold, a quote, a title, a bullet, a checklist row —
+     * carry to the new line, and an ARMED tool (nothing typed yet) carries too,
+     * because that is the same promise the editor makes everywhere else: what is
+     * switched on applies to what comes next.
+     *
+     * A checklist page keeps its own manner: Enter at the end of a row makes the
+     * next row (the row's own checkbox is one of the line's tools, so it carries),
+     * and Enter on an EMPTY row ends the list.
      */
     fun splitAtCaret(id: String) {
         val block = blocks[id] ?: return
-        // Read the row's own flags BEFORE the split rewrites the mask: a
-        // checklist page needs to know whether the line being left was a row.
-        val wasChecklistRow = personalBlockCarries(block.text, mask(id), FLAG_CHECKBOX)
-        val caretIndex = (selections[id]?.start ?: block.text.length)
-            .coerceIn(0, block.text.length)
+        splitBlock(id, selections[id]?.start ?: block.text.length, mask(id))
+    }
+
+    /**
+     * v389 — THE ONE SPLIT. Enter, a held-down Enter, and a pasted paragraph all
+     * end up here: the text splits at [at], the line's own whole-line tools
+     * cross the break, and the new block's id comes back so a caller splitting
+     * in a loop can carry on with the remainder.
+     *
+     * [maskBefore] is the mask of the text being split — passed in rather than
+     * read here, because a paste splits a paragraph that does not exist in the
+     * page yet.
+     */
+    private fun splitBlock(id: String, at: Int, maskBefore: IntArray): String {
+        val block = blocks[id] ?: return ""
+        val caretIndex = at.coerceIn(0, block.text.length)
         val index = order.indexOf(id)
-        if (index < 0) return
-        val head = block.copy(
-            text = block.text.take(caretIndex),
-            runs = maskToRuns(mask(id).copyOfRange(0, caretIndex))
-        )
+        if (index < 0) return ""
+        // What the line is wearing decides what the new one inherits; an armed
+        // tool (an empty line) inherits itself. A TITLE never crosses the break
+        // (v389): a title is ONE line, so Enter at the end of a title starts
+        // prose — which is exactly what the title button has to mean for the
+        // member to be able to write a body under it (user request: "for the
+        // title format in tool bar it should not work if we use enter to go to
+        // a new line i mean it should auto select just the title format").
+        val headFlags = lineFlags(block.text, maskBefore) and FLAG_TITLE.inv()
+        val carried = when {
+            // The TO-DO page's own manner, kept: Enter on an EMPTY row ends the
+            // list instead of arming the next row for ever (a page of checklists
+            // has to stop somewhere).
+            keepsChecklistRows && block.text.isEmpty() -> 0
+            headFlags != 0 -> headFlags
+            else -> armed and FLAG_TITLE.inv()
+        }
+        val before = maskBefore.copyOfRange(0, caretIndex)
+        val afterText = block.text.drop(caretIndex)
+        // A whole-line tool is a WHOLE-LINE tool on both sides of the break; a
+        // partly-styled line just keeps its own characters' styles.
+        val after = if (headFlags != 0 && afterText.isNotEmpty()) {
+            // v389 — the wholesale re-stamp is about the FLAGS; the pen each
+            // character was written with is its own and rides across untouched,
+            // or a marked line would come out of an Enter with its marker gone.
+            IntArray(afterText.length) { i ->
+                headFlags or
+                    (maskBefore.getOrElse(caretIndex + i) { 0 } and (HIGHLIGHT_BITS or FONT_BITS))
+            }
+        } else {
+            maskBefore.copyOfRange(caretIndex, block.text.length)
+        }
+        val tailMask = if (afterText.isEmpty()) after
+        else IntArray(after.size) { after[it] and FLAG_TITLE.inv() }
+        val head = block.copy(text = block.text.take(caretIndex), runs = maskToRuns(before))
         val tail = PersonalBlock(
             id = newBlockId(),
-            text = block.text.drop(caretIndex),
-            runs = maskToRuns(mask(id).copyOfRange(caretIndex, block.text.length)),
-            align = if (block.text.drop(caretIndex).isEmpty()) block.align else PersonalAlign.START
+            text = afterText,
+            runs = maskToRuns(tailMask),
+            align = if (afterText.isEmpty()) block.align else PersonalAlign.START
         )
-        masks[id] = runsToMask(head.text.length, head.runs)
         blocks[id] = head
+        masks[id] = runsToMask(head.text.length, head.runs)
         order.add(index + 1, tail.id)
         blocks[tail.id] = tail
         masks[tail.id] = runsToMask(tail.text.length, tail.runs)
         selections[tail.id] = TextRange(0)
         focusedId = tail.id
         caret = PersonalCaret(tail.id, 0)
-        // A checklist page (see [keepsChecklistRows]): Enter after a row with
-        // words in it makes the NEXT row; Enter on an empty row ends the list.
-        if (keepsChecklistRows && wasChecklistRow && tail.text.isEmpty() && head.text.isNotBlank()) {
-            armed = FLAG_CHECKBOX
-        }
+        armed = carried
+        armedOff = 0
         onDocChanged(doc())
+        return tail.id
     }
 
     /**
-     * v389 — "ADD CHAPTER": a marker lands on the page as its own TITLE line,
-     * with the caret on it and the line ARMED as a title, so the chapter's name
-     * arrives as the heading it is (the same mechanism the dock's title button
-     * uses).
+     * v389 — A FIELD'S NEWLINES BECOME THE PAGE'S OWN LINES.
+     *
+     * Runs [splitBlock] once per newline, so a pasted paragraph and a held-down
+     * Enter arrive at the same result: a block per line, each wearing the style
+     * its own characters had. The caret then lands where the writer's cursor
+     * actually was — in whichever line of the paste it belongs to — so carrying
+     * on typing does what the member expects.
+     *
+     * v389d — THE BREAK IS THE NEWLINE, NOT A CHARACTER OF A LINE. The split
+     * used to be made AT the newline, which left that character at the front of
+     * the tail block — so the next pass found a newline at offset 0 and split
+     * again, and every pasted paragraph came in with a phantom EMPTY line for
+     * each real one (user report: "why does it create like a separate line i mean
+     * enter should behave like enter but it creates some disconnected line"). The
+     * split is now made AFTER the break and the break is taken off the head, so a
+     * paste of N lines is N lines. The loop's own guard is generous on purpose: a
+     * long paste is exactly the case this exists for.
+     */
+    private fun splitOnNewlines(id: String, caretAt: Int) {
+        val block = blocks[id] ?: return
+        if (block.text.indexOf('\n') < 0) return
+        val at = caretAt.coerceIn(0, block.text.length)
+        // Where each line begins: what the caret's own line and the offset
+        // inside it are read from at the end.
+        val lineStarts = block.text.indices.filter { block.text[it] == '\n' }.map { it + 1 }
+        val lineIds = ArrayList<String>()
+        lineIds.add(id)
+        var remaining = block
+        var guard = 0
+        while (guard++ < 500) {
+            val breakAt = remaining.text.indexOf('\n')
+            if (breakAt < 0) break
+            val tailId = splitBlock(remaining.id, breakAt + 1, mask(remaining.id))
+            if (tailId.isBlank()) break
+            dropBreakCharacter(remaining.id)
+            val tail = blocks[tailId] ?: break
+            lineIds.add(tailId)
+            remaining = tail
+        }
+        // Where the writer's cursor was: the line it falls in, at the offset it
+        // was at within that line.
+        val line = lineStarts.count { it <= at }.coerceIn(0, (lineIds.size - 1).coerceAtLeast(0))
+        val lineId = lineIds.getOrNull(line) ?: return
+        val from = if (line == 0) 0 else lineStarts[line - 1]
+        val into = (at - from).coerceIn(0, text(lineId).length)
+        focusedId = lineId
+        caret = PersonalCaret(lineId, into)
+    }
+
+    /**
+     * The newline a break is made on belongs to neither line — take it off the
+     * head, words and mask together, so the two stay the same length.
+     */
+    private fun dropBreakCharacter(id: String) {
+        val block = blocks[id] ?: return
+        if (!block.text.endsWith("\n")) return
+        val shorter = block.text.dropLast(1)
+        val trimmed = mask(id).copyOf(shorter.length)
+        masks[id] = trimmed
+        blocks[id] = block.copy(text = shorter, runs = maskToRuns(trimmed))
+    }
+
+    /**
+     * v389 — BACKSPACE AT THE START OF A LINE takes that line into the one above
+     * it, the way every editor does.
+     *
+     * The split used to be one-way: Enter made a new line and NOTHING could take
+     * it back, so one accidental Enter left an empty paragraph the writer could
+     * never remove (user report: "when i use enter to create a new line it
+     * create the new line but when i type back it doesnt delete it"). An EMPTY
+     * line is dropped outright; a line with words in it hands them to the end of
+     * the line above. Returns false when there is nowhere to merge into (the
+     * first line, or a block above that is a photo or a voice note), so the key
+     * falls through to the field.
+     */
+    fun mergeWithPrevious(id: String): Boolean {
+        val index = order.indexOf(id)
+        if (index <= 0) return false
+        val block = blocks[id] ?: return false
+        val previousId = order[index - 1]
+        val previous = blocks[previousId] ?: return false
+        if (previous.isPhoto || previous.isAudio) return false
+        val ownMask = masks[id] ?: emptyMask(0)
+        val previousMask = mask(previousId)
+        val previousText = previous.text
+        val at = previousText.length
+        val mergedText = previousText + block.text
+        val mergedMask = IntArray(mergedText.length) { i ->
+            if (i < at) previousMask.getOrElse(i) { 0 }
+            else ownMask.getOrElse(i - at) { 0 }
+        }
+        order.removeAt(index)
+        blocks.remove(id)
+        masks.remove(id)
+        selections.remove(id)
+        compositions.remove(id)
+        blocks[previousId] = previous.copy(text = mergedText, runs = maskToRuns(mergedMask))
+        masks[previousId] = mergedMask
+        // Where the two halves met is where the caret belongs — the exact
+        // position the Enter was pressed at, one keystroke ago.
+        selections[previousId] = TextRange(at)
+        focusedId = previousId
+        caret = PersonalCaret(previousId, at)
+        onDocChanged(doc())
+        return true
+    }
+
+    /**
+     * v389 — "ADD CHAPTER": a marker lands on the page as its own TITLE line.
+     *
+     * With no [label] the line arrives EMPTY and ARMED as a title, so the
+     * chapter's name arrives as the heading it is (the same mechanism the dock's
+     * title button uses). With a [label] — the chapter the member PICKED out of
+     * the book's own chapter list — the line arrives already written and already
+     * a title, because re-typing a name the book already knows is an errand (user
+     * request: "in book review add chapter it should give option to add which
+     * chapter from the fetched or catalog chapter names or number").
      *
      * It is an ordinary block in the ordinary order — which is exactly what
      * lets a book's whole review stay ONE page: the markers are prose, and the
      * read view folds a chapter's own review in under the marker that names it.
      */
-    fun insertTitleLine() {
+    fun insertTitleLine(label: String = "") {
         val after = focusedId?.let { order.indexOf(it) }?.takeIf { it >= 0 }
             ?: order.indexOfLast { id -> !(blocks[id]?.isPhoto ?: false) }
         val at = if (after < 0) order.size else (after + 1).coerceAtMost(order.size)
-        val block = PersonalBlock(id = newBlockId())
+        val text = label.trim()
+        val block = if (text.isEmpty()) {
+            PersonalBlock(id = newBlockId())
+        } else {
+            PersonalBlock(
+                id = newBlockId(),
+                text = text,
+                runs = maskToRuns(IntArray(text.length) { FLAG_TITLE })
+            )
+        }
         order.add(at, block.id)
         blocks[block.id] = block
-        masks[block.id] = emptyMask(0)
-        caret = PersonalCaret(block.id, 0)
+        masks[block.id] = runsToMask(text.length, block.runs)
+        caret = PersonalCaret(block.id, text.length)
         focusedId = block.id
-        armed = FLAG_TITLE
+        // A picked chapter is already written, so nothing is armed: the next
+        // thing typed is prose under the heading.
+        armed = if (text.isEmpty()) FLAG_TITLE else 0
         onDocChanged(doc())
     }
 
@@ -1067,15 +1916,121 @@ internal fun PersonalCanvas(
     // overlay grows the picture out of the spot it was tapped in (see
     // PersonalPhotoOverlay), which a bare URI cannot say.
     onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    /**
+     * v389 — WHERE THE PAGE'S OWN TITLE LINES SIT (the book review's pinned
+     * chapter). A TITLE line is a chapter marker there, and a page that has
+     * scrolled past one should be able to say which chapter the words below it
+     * belong to — see BookReviewScreen. Reported as the line's own y WITHIN the
+     * scrolling content, so the caller can subtract its scroll offset (a
+     * position in the window would need the scroll to re-report itself).
+     *
+     * v389 — the line's BOTTOM is reported with its top, because "scrolled
+     * past" means the whole line, not its first pixel: a pinned bar that lit up
+     * the moment a heading touched the top edge named a chapter the member was
+     * still reading the heading of (user report: "it shows that title at the
+     * same position even though the title isnt scrolled awasy yet").
+     */
+    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
 ) {
+    // v389d — THE DEFERRED PASTE. A pasted paragraph is accepted as TEXT inside
+    // the keyboard's own edit batch and cut into the page's lines one frame
+    // later, so the block list never changes shape while the IME still holds the
+    // edit open (see PersonalEditorState.onFieldChange).
+    val pendingSplit = state.pendingSplit
+    LaunchedEffect(pendingSplit) {
+        val waiting = pendingSplit ?: return@LaunchedEffect
+        withFrameNanos { }
+        state.runPendingSplit(waiting)
+    }
+    // The page's own reporter, or the one its host provided (see
+    // [LocalPersonalTitleReport]).
+    val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
     // v389 — one drag for the whole list: the to-do page's rows share it, so
     // the row under the finger and the rows it passes agree about one gesture.
     val rowDrag = remember { PersonalRowDragState() }
+    val selectionWash = LocalTextSelectionColors.current.backgroundColor
+    // v389 — SELECT ALL MEANS THE PAGE (see [PersonalEditorState.selectPage]).
+    // The platform's toolbar keeps its own look and every one of its actions;
+    // only what "Select all" DOES changes, and Copy is re-pointed with it so the
+    // gesture carries through to the clipboard instead of copying one line.
+    val clipboard = LocalClipboardManager.current
+    val platformToolbar = LocalTextToolbar.current
+    val pageToolbar = remember(platformToolbar, clipboard) {
+        object : TextToolbar {
+            override val status: TextToolbarStatus get() = platformToolbar.status
+
+            override fun hide() = platformToolbar.hide()
+
+            override fun showMenu(
+                rect: Rect,
+                onCopyRequested: (() -> Unit)?,
+                onPasteRequested: (() -> Unit)?,
+                onCutRequested: (() -> Unit)?,
+                onSelectAllRequested: (() -> Unit)?
+            ) {
+                platformToolbar.showMenu(
+                    rect = rect,
+                    onCopyRequested = {
+                        val whole = state.pageText()
+                        if (state.pageSelected && whole.isNotBlank()) {
+                            clipboard.setText(AnnotatedString(whole))
+                        } else {
+                            onCopyRequested?.invoke()
+                        }
+                    },
+                    onPasteRequested = onPasteRequested,
+                    onCutRequested = onCutRequested,
+                    onSelectAllRequested = { state.selectPage() }
+                )
+            }
+        }
+    }
+    CompositionLocalProvider(LocalTextToolbar provides pageToolbar) {
     Column(
         modifier = modifier.clickable(enabled = enabled) { state.focusLastLine() },
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+        // v389d — TWO SMALL OR HALF PHOTOS SHARE A ROW.
+        //
+        // Two consecutive non-PAGE photos that sit next to each other split
+        // the text wrapper's width between them, like the "side by side" the
+        // member asked for. The SECOND of each pair is flagged so the loop
+        // skips it as a standalone block.
+        //
+        // v389d — NOT REMEMBERED, deliberately. Both answers are read straight
+        // from the page every time it composes (a photo's size and the words
+        // under it are exactly the things the member changes while looking at
+        // them), which is also what keeps the two passes from disagreeing: a
+        // remembered pair set flipped a resized print out of the page for good.
+        val pairSkips = mutableSetOf<String>()
+        val besideSkips = mutableSetOf<String>()
+        run {
+            val ids = state.blockIds
+            var i = 0
+            while (i < ids.size - 1) {
+                val a = state.block(ids[i])
+                val b = state.block(ids[i + 1])
+                val paired = a?.isPhoto == true && b?.isPhoto == true &&
+                    state.photoSize(ids[i]) != PersonalPhotoSize.PAGE &&
+                    state.photoSize(ids[i + 1]) != PersonalPhotoSize.PAGE
+                val beside = !paired && a?.isPhoto == true &&
+                    state.photoSize(ids[i]) == PersonalPhotoSize.SMALL &&
+                    b != null && !b.isPhoto && !b.isAudio &&
+                    b.text.isNotBlank() && b.photo.isNullOrBlank()
+                when {
+                    paired -> {
+                        pairSkips.add(ids[i + 1])
+                        i += 2
+                    }
+                    beside -> {
+                        besideSkips.add(ids[i + 1])
+                        i += 2
+                    }
+                    else -> i += 1
+                }
+            }
+        }
         state.blockIds.forEachIndexed { index, id ->
             val block = state.block(id) ?: return@forEachIndexed
             // v389 — the blocks are KEYED by their own id. The to-do page can
@@ -1084,29 +2039,232 @@ internal fun PersonalCanvas(
             // caret, the focus requester and the field's own scroll would all
             // follow the POSITION instead of the row.
             key(id) {
+                // v389 — whether a QUOTE panel has a quoted neighbour decides
+                // how far it reaches into the gap, so a quotation typed over
+                // several Enters draws as one continuous panel (see
+                // personalQuoteWash).
+                val quoteAbove = index > 0 && state.isQuoteLine(state.blockIds[index - 1])
+                val quoteBelow = index < state.blockIds.lastIndex &&
+                    state.isQuoteLine(state.blockIds[index + 1])
+
+                // v389 — EVERY BLOCK SHIFT makes room when a voice note is
+                // carried (see PersonalMovableBlock), so the gap says exactly
+                // where it will land — the same "make room" the to-do rows
+                // have, extended to the rest of the page.
+                val isDragged = rowDrag.draggedId == id
+                // v389 — a PHOTO is carried now too, and a carried block never
+                // shifts on the outer layer: PersonalMovableBlock moves the one
+                // under the finger itself, and shifting it here as well would
+                // double its travel. The same exemption the voice note has.
+                val ownCarry = block.isAudio || block.isPhoto
+                val blockShift by animateFloatAsState(
+                    targetValue = if (
+                        isDragged || ownCarry || state.keepsChecklistRows
+                    ) 0f else rowDrag.shiftFor(index, state.blockIds.lastIndex),
+                    animationSpec = if (
+                        !rowDrag.isDragging || isDragged ||
+                            ownCarry || state.keepsChecklistRows
+                    ) snap()
+                    else spring(dampingRatio = 0.82f, stiffness = 700f),
+                    label = "canvasBlockShift-$index"
+                )
+                // The DROP-LINE: a thin accent bar at the top of the block
+                // that will be right after the drop, so the carried voice note
+                // says where it is going to land.
+                val targetIdx = rowDrag.targetIndex(state.blockIds.lastIndex)
+                val showDropLine = rowDrag.isDragging && !isDragged &&
+                    !block.isAudio && !state.keepsChecklistRows &&
+                    index == targetIdx && rowDrag.fromIndex != targetIdx
+
+                // All blocks share the same shift-and-drop-line wrapper.
+                // Photo and text blocks slide to make room when a voice note
+                // is carried; audio and checklist blocks handle their own
+                // shift inside PersonalMovableBlock / PersonalTodoRow.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer { translationY = blockShift }
+                        .then(
+                            if (showDropLine) Modifier.drawWithContent {
+                                // A thin accent bar at the top of the target
+                                // block — this is where the voice note will land.
+                                // drawWithContent so it sits ON TOP of the text,
+                                // not behind it.
+                                drawContent()
+                                drawLine(
+                                    color = accent,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(size.width, 0f),
+                                    strokeWidth = 2.dp.toPx()
+                                )
+                            } else Modifier
+                        )
+                ) {
                 if (block.isPhoto) {
-                    PersonalPhotoBlock(
-                        uri = block.photo.orEmpty(),
-                        caption = state.caption(id),
-                        ink = ink,
-                        accent = accent,
-                        enabled = enabled,
-                        onCaption = { state.setCaption(id, it) },
-                        onRemove = { state.removeBlock(id) },
-                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
-                    )
+                    // v389d — SIDE-BY-SIDE PHOTOS.
+                    //
+                    // Two consecutive small or half photos share the row,
+                    // splitting the text wrapper between them. The SECOND of
+                    // each pair was flagged by [pairSkips] and is skipped here;
+                    // the FIRST renders both photos in a Row. Two PAGE-size
+                    // photos never pair — each is the width of the page.
+                    if (pairSkips.contains(id)) return@key
+                    val nextIndex = index + 1
+                    val nextId = state.blockIds.getOrNull(nextIndex)
+                    val nextBlock = nextId?.let { state.block(it) }
+                    val isPaired = nextBlock?.isPhoto == true &&
+                        state.photoSize(id) != PersonalPhotoSize.PAGE &&
+                        state.photoSize(nextId) != PersonalPhotoSize.PAGE
+                    if (isPaired && nextBlock != null && nextId != null) {
+                        // The two photos share the text measure. Each keeps
+                        // its own carry — a held photo lifts out of the pair
+                        // and the other stays — and the Row's spacing keeps
+                        // them from touching.
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(Modifier.weight(1f)) {
+                                PersonalMovableBlock(
+                                    id = id, index = index, state = state,
+                                    drag = rowDrag, enabled = enabled
+                                ) {
+                                    PersonalPhotoBlock(
+                                        uri = block.photo.orEmpty(),
+                                        caption = state.caption(id),
+                                        size = state.photoSize(id),
+                                        paired = true,
+                                        ink = ink, accent = accent,
+                                        enabled = enabled,
+                                        onCaption = { state.setCaption(id, it) },
+                                        onSize = { state.setPhotoSize(id, it) },
+                                        onRemove = { state.removeBlock(id) },
+                                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                                    )
+                                }
+                            }
+                            Box(Modifier.weight(1f)) {
+                                PersonalMovableBlock(
+                                    id = nextId, index = nextIndex, state = state,
+                                    drag = rowDrag, enabled = enabled
+                                ) {
+                                    PersonalPhotoBlock(
+                                        uri = nextBlock.photo.orEmpty(),
+                                        caption = state.caption(nextId),
+                                        size = state.photoSize(nextId),
+                                        paired = true,
+                                        ink = ink, accent = accent,
+                                        enabled = enabled,
+                                        onCaption = { state.setCaption(nextId, it) },
+                                        onSize = { state.setPhotoSize(nextId, it) },
+                                        onRemove = { state.removeBlock(nextId) },
+                                        onOpen = { bounds -> onOpenPhoto(nextBlock.photo.orEmpty(), bounds) }
+                                    )
+                                }
+                            }
+                        }
+                    } else if (nextBlock != null && nextId != null &&
+                        besideSkips.contains(nextId)
+                    ) {
+                        // v389d — THE PRINT BESIDE THE WRITING. The print keeps
+                        // its own column, its own carry and its own size menu;
+                        // the words sit next to it on the same baseline, with
+                        // the row's own gap between them so a finger can still
+                        // reach the print's corner to resize it.
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(Modifier.weight(0.42f)) {
+                                PersonalMovableBlock(
+                                    id = id, index = index, state = state,
+                                    drag = rowDrag, enabled = enabled
+                                ) {
+                                    PersonalPhotoBlock(
+                                        uri = block.photo.orEmpty(),
+                                        caption = state.caption(id),
+                                        size = state.photoSize(id),
+                                        ink = ink, accent = accent,
+                                        enabled = enabled,
+                                        onCaption = { state.setCaption(id, it) },
+                                        onSize = { state.setPhotoSize(id, it) },
+                                        onRemove = { state.removeBlock(id) },
+                                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                                    )
+                                }
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .weight(0.58f)
+                                    // The drag's own arithmetic counts a slot's
+                                    // height, so the line beside the print has
+                                    // to report the height it actually takes.
+                                    .onSizeChanged { size ->
+                                        if (size.height > 0) {
+                                            rowDrag.measure(nextId, size.height.toFloat())
+                                        }
+                                    }
+                            ) {
+                                PersonalTextBlock(
+                                    id = nextId,
+                                    state = state,
+                                    ink = ink,
+                                    accent = accent,
+                                    enabled = enabled,
+                                    onTitlePosition = titleReport
+                                )
+                            }
+                        }
+                    } else {
+                        // v389 — A PHOTO CAN BE CARRIED TOO (user request:
+                        // "similiar to voive note reorder add for photo reorder
+                        // too"). Exactly the voice note's manner: press and hold,
+                        // then drag — the rows make room, a drop-line says where
+                        // it lands, and the photo's own tap-to-open stands down
+                        // while it is in the air (it reads
+                        // LocalPersonalBlockCarried).
+                        PersonalMovableBlock(
+                            id = id, index = index, state = state,
+                            drag = rowDrag, enabled = enabled
+                        ) {
+                            PersonalPhotoBlock(
+                                uri = block.photo.orEmpty(),
+                                caption = state.caption(id),
+                                size = state.photoSize(id),
+                                ink = ink, accent = accent,
+                                enabled = enabled,
+                                onCaption = { state.setCaption(id, it) },
+                                onSize = { state.setPhotoSize(id, it) },
+                                onRemove = { state.removeBlock(id) },
+                                onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
+                            )
+                        }
+                    }
                 } else if (block.isAudio) {
                     // v389 — a voice note in the page: the waveform is the block, and
-                    // the writing carries on under it.
-                    PersonalVoicePageBlock(
-                        path = block.audio.orEmpty(),
-                        seconds = block.audioSeconds,
-                        bars = block.audioBars,
-                        ink = ink,
-                        accent = accent,
-                        enabled = enabled,
-                        onRemove = { state.removeBlock(id) }
-                    )
+                    // the writing carries on under it. It can also be CARRIED to
+                    // another place on the page (user request: "add drag to move
+                    // the voice note too"): press and hold it, then drag, exactly
+                    // like a to-do row — a note belongs under the thought it is
+                    // about, and where the recording happened is not that place.
+                    PersonalMovableBlock(
+                        id = id,
+                        index = index,
+                        state = state,
+                        drag = rowDrag,
+                        enabled = enabled
+                    ) {
+                        PersonalVoicePageBlock(
+                            path = block.audio.orEmpty(),
+                            seconds = block.audioSeconds,
+                            bars = block.audioBars,
+                            ink = ink,
+                            accent = accent,
+                            enabled = enabled,
+                            onRemove = { state.removeBlock(id) }
+                        )
+                    }
                 } else if (state.keepsChecklistRows) {
                     // A to-do page: every text row can be picked up (long press),
                     // carried to another place, and swiped sideways off the list.
@@ -1115,21 +2273,39 @@ internal fun PersonalCanvas(
                         index = index,
                         state = state,
                         drag = rowDrag,
-                        enabled = enabled
+                        enabled = enabled,
+                        ink = ink
                     ) {
                         PersonalTextBlock(
                             id = id,
                             state = state,
                             ink = ink,
                             accent = accent,
-                            enabled = enabled
+                            enabled = enabled,
+                            quoteJoinAbove = quoteAbove,
+                            quoteJoinBelow = quoteBelow,
+                            onTitlePosition = titleReport
                         )
                     }
+                } else if (besideSkips.contains(id)) {
+                    // v389d — drawn inside the print above it (see [besideSkips]).
                 } else {
-                    PersonalTextBlock(id = id, state = state, ink = ink, accent = accent, enabled = enabled)
+                    PersonalTextBlock(
+                        id = id,
+                        state = state,
+                        ink = ink,
+                        accent = accent,
+                        enabled = enabled,
+                        quoteJoinAbove = quoteAbove,
+                        quoteJoinBelow = quoteBelow,
+                        onTitlePosition = titleReport,
+                        selectionWash = if (state.pageSelected) selectionWash else Color.Transparent
+                    )
+                }
                 }
             }
         }
+    }
     }
 }
 
@@ -1137,16 +2313,25 @@ internal fun PersonalCanvas(
 private fun PersonalTextBlock(
     id: String,
     state: PersonalEditorState,
+    /** v389 — the page is SELECTED: this row wears the selection's own wash
+     *  (transparent on every ordinary page, so nothing changes there). */
+    selectionWash: Color = Color.Transparent,
     ink: Color,
     accent: Color,
-    enabled: Boolean
+    enabled: Boolean,
+    /** The gap above/below holds another quoted line — see QUOTE_JOIN_EDITOR. */
+    quoteJoinAbove: Boolean = false,
+    quoteJoinBelow: Boolean = false,
+    /** See [PersonalCanvas.onTitlePosition]. */
+    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
 ) {
     val text = state.text(id)
     val mask = state.mask(id)
     val align = state.align(id)
     val quoteRule = personalQuoteRule()
+    val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
-    val bulletInk = personalAccentInk()
+    val bulletInk = personalBulletColor()
     val isQuote = personalBlockIsQuote(text, mask)
     // A line that IS a title (or a small note) is set by the BLOCK, so a
     // heading really is bigger writing and not just a bolder word.
@@ -1188,7 +2373,9 @@ private fun PersonalTextBlock(
             .let { if (it.min < 0) TextRange(0) else it },
         composition = state.composition(id)
     )
-    val alignOf = if (align == PersonalAlign.CENTER) TextAlign.Center else TextAlign.Start
+    // One place maps an alignment to the way text lays out, so a fourth kind
+    // cannot be added in three of the four spots that draw a line.
+    val alignOf = align.toTextAlign()
     val bodyStyle = when {
         isTitle -> TextStyle(
             fontFamily = FrauncesFontFamily,
@@ -1219,6 +2406,25 @@ private fun PersonalTextBlock(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                // A TITLE line reports where it is, so a page whose head names
+                // the chapter can follow the writing (see onTitlePosition).
+                if (isTitle && onTitlePosition != null) {
+                    Modifier.onGloballyPositioned { coordinates ->
+                        val bounds = coordinates.boundsInParent()
+                        onTitlePosition(id, text, bounds.top, bounds.bottom)
+                    }
+                } else Modifier
+            )
+            .then(
+                if (selectionWash == Color.Transparent) Modifier
+                else Modifier.drawBehind {
+                    drawRoundRect(
+                        color = selectionWash,
+                        cornerRadius = CornerRadius(7.dp.toPx())
+                    )
+                }
+            )
             // A quoted line wears the coffee rule down its side, a bulleted
             // line wears a drawn dot (both on the block's own height, so they
             // grow with the writing).
@@ -1227,9 +2433,20 @@ private fun PersonalTextBlock(
                     isQuote -> Modifier
                         .drawBehind {
                             val barWidth = 3.dp.toPx()
+                            val join = QUOTE_JOIN_EDITOR.toPx()
+                            val top = if (quoteJoinAbove) -join else 0f
+                            val bottom = if (quoteJoinBelow) join else 0f
+                            val panelHeight = size.height + (bottom - top)
+                            drawRoundRect(
+                                color = quoteWash,
+                                topLeft = Offset(0f, top),
+                                size = Size(size.width, panelHeight),
+                                cornerRadius = CornerRadius(9.dp.toPx())
+                            )
                             drawRoundRect(
                                 color = quoteRule,
-                                size = Size(barWidth, size.height),
+                                topLeft = Offset(0f, top),
+                                size = Size(barWidth, panelHeight),
                                 cornerRadius = CornerRadius(barWidth / 2f)
                             )
                         }
@@ -1266,20 +2483,46 @@ private fun PersonalTextBlock(
             .focusRequester(focusRequester)
             .onFocusChanged { state.onFocusChanged(id, it.isFocused) }
             .onPreviewKeyEvent { event ->
+                if (!enabled || event.type != KeyEventType.KeyDown) {
+                    return@onPreviewKeyEvent false
+                }
                 // Enter makes a NEW line (a block), so a line tool can point
                 // at the line the caret is on. Shift+Enter keeps the plain
                 // newline inside the paragraph.
                 if (
-                    enabled &&
-                    event.type == KeyEventType.KeyDown &&
                     (event.key == Key.Enter || event.key == Key.NumPadEnter) &&
                     !event.isShiftPressed
                 ) {
                     state.splitAtCaret(id)
-                    true
-                } else {
-                    false
+                    return@onPreviewKeyEvent true
                 }
+                // ── v389d — SELECT ALL MEANS THE PAGE ────────────────────
+                // The keyboard's own Ctrl+A selects the text of the field the
+                // caret is in, and a field here is a LINE — so "select all"
+                // selected one line of a page, which is not what the words mean
+                // (user report: "i can't even do select all as it only selects
+                // one line"). The toolbar's own Select all was already
+                // re-pointed at the page (see the page toolbar above); this is
+                // the same answer for the keyboard, so both doors agree.
+                if (event.isCtrlPressed && event.key == Key.A) {
+                    state.selectPage()
+                    return@onPreviewKeyEvent true
+                }
+                // BACKSPACE AT THE START OF A LINE takes the line back into the
+                // one above it — the key beside Enter has to be able to undo
+                // what Enter did (user report: "when i type back it doesnt
+                // delete it"). The live values are read here rather than
+                // captured, because this runs between two compositions.
+                if (event.key == Key.Backspace) {
+                    val live = state.text(id)
+                    val selection = state.selection(id)
+                    val atLineStart = live.isEmpty() ||
+                        (selection != null && selection.collapsed && selection.start == 0)
+                    if (atLineStart) {
+                        return@onPreviewKeyEvent state.mergeWithPrevious(id)
+                    }
+                }
+                false
             },
         textStyle = bodyStyle,
         cursorBrush = SolidColor(personalAccentInk()),
@@ -1308,6 +2551,25 @@ private fun PersonalTextBlock(
             focusRequester.requestFocus()
             state.onFocusChanged(id, true)
             state.consumeCaret(id)
+        }
+    }
+
+    // …and the PAGE-TAP, which is a separate request on purpose: the caret
+    // above only fires when there is a caret to take. A tap on the blank space
+    // under a page whose caret is ALREADY in this line used to change nothing,
+    // because the state it would set was the state it had — so the keyboard
+    // never came back. The tap token says a finger landed, and the line it named
+    // takes the caret and the keyboard whether or not it already had them.
+    val tapTick = state.tapTick
+    // Read OUTSIDE the effect: a CompositionLocal cannot be reached from a
+    // LaunchedEffect body (see the project's compile-safety rules).
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    LaunchedEffect(tapTick, id) {
+        if (tapTick > 0 && state.tapTarget == id) {
+            focusRequester.requestFocus()
+            keyboard?.show()
+            state.onFocusChanged(id, true)
+            state.consumeTap(id)
         }
     }
 }
@@ -1357,37 +2619,103 @@ internal fun PersonalPagePhoto(
     )
 }
 
+/**
+ * v389 — HOW BIG A PRINT SITS ON THE COLUMN.
+ *
+ * [fraction] is of the writing WRAPPER's own width, never a fixed dp — that is
+ * what keeps a photo inside the text's measure, so a caption or a paragraph can
+ * never end up underneath it (user request: "make sure it follows the text
+ * wrapper style so texts doesnt overlap"). PAGE is the default and is what every
+ * photo placed before this existed already is.
+ */
+internal enum class PersonalPhotoSize(
+    val key: String,
+    val label: String,
+    val fraction: Float
+) {
+    PAGE("page", "Page", 1f),
+    HALF("half", "Half", 0.62f),
+    SMALL("small", "Small", 0.44f);
+
+    companion object {
+        fun fromKey(key: String?): PersonalPhotoSize =
+            entries.firstOrNull { it.key == key } ?: PAGE
+    }
+}
+
+/**
+ * A PHOTO AS A PRINT.
+ *
+ * It used to be a full-width card with a caption field under it, which read as
+ * a box of picture with a form attached (user request: "for the photo preview on
+ * page, mak eit polaroid style but make sure it follows the text wrapper style …
+ * when i say polaroid not the whole polaroid phot but a smal lstyle kind of, and
+ * support multiple photos and also sizes of polaroid"). A print is the shape
+ * itself: the picture, a narrow border, and a wider bottom border with the
+ * caption written in it — and it comes in the three sizes the dock's menu
+ * offers, all of them a fraction of the text's own measure.
+ */
 @Composable
 private fun PersonalPhotoBlock(
     uri: String,
     caption: String,
+    size: PersonalPhotoSize,
+    /**
+     * v389d — SIDE BY SIDE. A paired photo fills its own half of a shared row,
+     * rather than taking the full text measure at the size's usual fraction.
+     */
+    paired: Boolean = false,
     ink: Color,
     accent: Color,
     enabled: Boolean,
     onCaption: (String) -> Unit,
+    onSize: (PersonalPhotoSize) -> Unit,
     onRemove: () -> Unit,
     onOpen: (Rect?) -> Unit
 ) {
     // The preview is deliberately SMALL (it is a note in a page, not a
     // gallery) and its bounds are what the page's overlay grows out of.
     var bounds by remember(uri) { mutableStateOf<Rect?>(null) }
+    // v389 — while this photo is being CARRIED (see PersonalMovableBlock), its
+    // own taps stand down: a finger that is dragging a photo is not asking to
+    // open it, and the remove button must not be a thing that can be pressed
+    // mid-flight. The block underneath is passive until it lands.
+    val carried = LocalPersonalBlockCarried.current
+    val actionable = enabled && !carried
+    var sizeMenu by remember(uri) { mutableStateOf(false) }
+    val imageHeight = when (size) {
+        PersonalPhotoSize.PAGE -> 168.dp
+        PersonalPhotoSize.HALF -> 128.dp
+        PersonalPhotoSize.SMALL -> 100.dp
+    }
+    val captionSize = when (size) {
+        PersonalPhotoSize.PAGE -> 13.sp
+        PersonalPhotoSize.HALF -> 12.sp
+        PersonalPhotoSize.SMALL -> 10.sp
+    }
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(6.dp)
+            // A FRACTION of the wrapper's width, so the print can never be
+            // wider than the words it sits among.
+            .fillMaxWidth(if (paired) 1f else size.fraction)
+            // Shadow BEFORE the fill, and the fill OPAQUE — a translucent one
+            // lets the shadow bleed through the print (see AGENTS rule 11).
+            .shadow(5.dp, RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
+            .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(172.dp)
+                .height(imageHeight)
                 .onGloballyPositioned { bounds = it.boundsInWindow() }
-                .clip(RoundedCornerShape(14.dp))
-                .clickable(enabled = enabled) { onOpen(bounds) }
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color.Black.copy(alpha = 0.06f))
+                .clickable(enabled = actionable) { onOpen(bounds) }
         ) {
-            PersonalPagePhoto(uri = uri, height = 172.dp)
-            if (enabled) {
+            PersonalPagePhoto(uri = uri, height = imageHeight)
+            if (actionable) {
                 Surface(
                     onClick = onRemove,
                     shape = CircleShape,
@@ -1408,37 +2736,138 @@ private fun PersonalPhotoBlock(
                 }
             }
         }
-        if (enabled) {
-            BasicTextField(
-                value = caption,
-                onValueChange = onCaption,
-                singleLine = true,
-                textStyle = TextStyle(
-                    fontFamily = WritingFontFamily,
-                    fontSize = 13.sp,
-                    color = ink.copy(alpha = 0.72f)
-                ),
-                cursorBrush = SolidColor(personalAccentInk()),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                decorationBox = { inner ->
-                    Box {
-                        if (caption.isEmpty()) {
-                            Text(
-                                "Add a caption",
-                                style = TextStyle(
-                                    fontFamily = WritingFontFamily,
-                                    fontSize = 13.sp,
-                                    color = ink.copy(alpha = 0.34f)
+        // ── THE WIDE BOTTOM BORDER, with the caption written in it ────────
+        // This is the whole shape of a print: the picture, then a band of paper
+        // under it carrying what the picture is. Keeping the caption INSIDE the
+        // frame is also what stops it becoming a line of text loose on the page.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 2.dp, end = 0.dp, top = 5.dp, bottom = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            if (enabled) {
+                BasicTextField(
+                    value = caption,
+                    onValueChange = onCaption,
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        textAlign = TextAlign.Center,
+                        fontFamily = WritingFontFamily,
+                        fontSize = captionSize,
+                        color = ink.copy(alpha = 0.72f)
+                    ),
+                    cursorBrush = SolidColor(personalAccentInk()),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 3.dp),
+                    decorationBox = { inner ->
+                        Box(contentAlignment = Alignment.Center) {
+                            if (caption.isEmpty()) {
+                                Text(
+                                    "Add a caption",
+                                    style = TextStyle(
+                                        fontFamily = WritingFontFamily,
+                                        fontSize = captionSize,
+                                        color = ink.copy(alpha = 0.34f)
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+                            }
+                            inner()
+                        }
+                    }
+                )
+            } else if (caption.isNotBlank()) {
+                Text(
+                    caption,
+                    modifier = Modifier.weight(1f),
+                    style = TextStyle(
+                        fontFamily = WritingFontFamily,
+                        fontSize = captionSize,
+                        color = ink.copy(alpha = 0.72f)
+                    ),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (actionable) {
+                // The size the print sits at — in the frame's own border, where
+                // a print's own mark would be.
+                Box {
+                    Surface(
+                        onClick = { sizeMenu = true },
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        modifier = Modifier.size(26.dp)
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            PrintSizeGlyph(ink.copy(alpha = 0.42f))
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = sizeMenu,
+                        onDismissRequest = { sizeMenu = false }
+                    ) {
+                        PersonalPhotoSize.entries.forEach { option ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        option.label,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontFamily = WritingFontFamily
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (option == size) {
+                                        CurioIcon(
+                                            CurioIcons.Check,
+                                            null,
+                                            tint = personalAccentInk(),
+                                            size = 17.dp
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onSize(option)
+                                    sizeMenu = false
+                                }
                             )
                         }
-                        inner()
                     }
                 }
-            )
+            }
         }
+    }
+}
+
+/** Two prints, one big and one small — the size tool's own mark. Drawn rather
+ *  than taken from the icon subset, so it says "how big" at 16dp. */
+@Composable
+private fun PrintSizeGlyph(tint: Color) {
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(16.dp)) {
+        val stroke = 1.4f.dp.toPx()
+        val big = Size(size.width * 0.62f, size.height * 0.62f)
+        val small = Size(size.width * 0.44f, size.height * 0.44f)
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(0f, 0f),
+            size = big,
+            cornerRadius = CornerRadius(1.5f.dp.toPx()),
+            style = Stroke(width = stroke)
+        )
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(size.width - small.width, size.height - small.height),
+            size = small,
+            cornerRadius = CornerRadius(1.5f.dp.toPx()),
+            style = Stroke(width = stroke)
+        )
     }
 }
 
@@ -1460,40 +2889,314 @@ internal fun PersonalDocView(
      * review in right under the marker that names it; every other page passes
      * nothing and reads exactly as it did.
      */
-    afterTitle: (@Composable (String) -> Unit)? = null
+    afterTitle: (@Composable (String) -> Unit)? = null,
+    /**
+     * v389 — ticks a checklist row FROM THE READ VIEW. Null means the page is
+     * read-only here (a chapter review, a saved detail view): the box draws and
+     * does not answer. Otherwise it falls back to [LocalPersonalCheckToggle],
+     * which the writing page provides, so no page has to thread it down.
+     */
+    onToggleChecked: ((Int) -> Unit)? = null,
+    /**
+     * v389 — the row size for a page whose ROWS are the content (a to-do list),
+     * where the writing's own body size reads too small to act on. Unspecified
+     * keeps every other page exactly as it was.
+     */
+    rowSize: TextUnit = TextUnit.Unspecified,
+    /** See [PersonalCanvas.onTitlePosition] — the read side of the same page. */
+    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
 ) {
+    // The page's own reporter, or the host's — see [LocalPersonalTitleReport].
+    val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
     val quoteRule = personalQuoteRule()
+    val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
-    val bulletInk = personalAccentInk()
+    val bulletInk = personalBulletColor()
+    val toggle = onToggleChecked ?: LocalPersonalCheckToggle.current
+    // v389 — a quoted line is ONE thing with its quoted neighbour, so which of
+    // the two sides leads into another quoted line is decided once, here, and
+    // the panels reach into the gap to meet (see QUOTE_JOIN_VIEW).
+    fun isQuoteRun(block: PersonalBlock): Boolean =
+        !block.isPhoto && !block.isAudio && block.text.isNotBlank() &&
+            personalBlockIsQuote(block.text, runsToMask(block.text.length, block.runs))
+
+    // v389d — A SMALL PRINT KEEPS ROOM FOR THE WRITING, IN THE READ VIEW TOO.
+    //
+    // The editor does this (see PersonalCanvas); a page READ back has to look
+    // like the page that was written (user request: "make the read view draw the
+    // print with the writing beside it, the same as the editor"), so the same
+    // rule runs here: a SMALL print takes a narrow column and the ONE line under
+    // it moves in beside it. Two non-PAGE photos still pair as they did.
+    val besideSkips = mutableSetOf<String>()
+    run {
+        val blocks = doc.blocks
+        var i = 0
+        while (i < blocks.size - 1) {
+            val photo = blocks[i]
+            val next = blocks[i + 1]
+            val paired = photo.isPhoto && next.isPhoto &&
+                PersonalPhotoSize.fromKey(photo.photoSize) != PersonalPhotoSize.PAGE &&
+                PersonalPhotoSize.fromKey(next.photoSize) != PersonalPhotoSize.PAGE
+            val beside = !paired && photo.isPhoto &&
+                PersonalPhotoSize.fromKey(photo.photoSize) == PersonalPhotoSize.SMALL &&
+                !next.isPhoto && !next.isAudio && next.text.isNotBlank()
+            when {
+                paired -> i += 2
+                beside -> {
+                    besideSkips.add(next.id)
+                    i += 2
+                }
+                else -> i += 1
+            }
+        }
+    }
+
+    /**
+     * ONE LINE, DRAWN — the read view's own renderer as a lambda, so the print's
+     * pair can put the writing beside the picture with EXACTLY the rendering the
+     * rest of the page gets: the same spans, markers, ticks, links, sizes,
+     * alignment and chapter fold. Nothing about the drawing changes; it is the
+     * same body of code, reachable from one more place.
+     */
+    val renderLine: @Composable (Int, PersonalBlock, Boolean, Boolean) -> Unit =
+        { index, block, quoteAbove, quoteBelow ->
+            val text = block.text
+            val mask = runsToMask(text.length, block.runs)
+            val isQuote = personalBlockIsQuote(text, mask)
+            val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+            val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
+            val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+            val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
+            // v389 — the same metrics and the same renderers as the editor
+            // (this view draws a checklist row that the editor ticked).
+            val lineHeight = if (isTitle) 31.sp else if (isSmall) 21.sp else 27.sp
+            val markerFill = personalAccentInk()
+            val markerOnFill = MaterialTheme.colorScheme.surface
+            val markerOutline = ink.copy(alpha = 0.42f)
+            val alignOf = block.align.toTextAlign()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        when {
+                            isQuote -> Modifier
+                                .drawBehind {
+                                    val barWidth = 3.dp.toPx()
+                                    val join = QUOTE_JOIN_VIEW.toPx()
+                                    val top = if (quoteAbove) -join else 0f
+                                    val bottom = if (quoteBelow) join else 0f
+                                    val panelHeight = size.height + (bottom - top)
+                                    drawRoundRect(
+                                        color = quoteWash,
+                                        topLeft = Offset(0f, top),
+                                        size = Size(size.width, panelHeight),
+                                        cornerRadius = CornerRadius(9.dp.toPx())
+                                    )
+                                    drawRoundRect(
+                                        color = quoteRule,
+                                        topLeft = Offset(0f, top),
+                                        size = Size(barWidth, panelHeight),
+                                        cornerRadius = CornerRadius(barWidth / 2f)
+                                    )
+                                }
+                                .padding(start = 13.dp)
+                            isCheckbox -> Modifier
+                                .drawBehind {
+                                    drawPersonalCheckbox(
+                                        checked = block.checked,
+                                        outline = markerOutline,
+                                        fill = markerFill,
+                                        onFill = markerOnFill,
+                                        lineHeight = lineHeight.toPx()
+                                    )
+                                }
+                                // The BOX is the target: a tap on the mark
+                                // ticks the row, a tap on the words stays a
+                                // read (this view has no editing of its
+                                // own, so nothing else here answers a tap).
+                                .then(
+                                    if (toggle == null) {
+                                        Modifier
+                                    } else {
+                                        Modifier.pointerInput(index, block.checked) {
+                                            detectTapGestures { at ->
+                                                if (at.x <= PERSONAL_MARKER_LEAD.toPx() &&
+                                                    at.y <= lineHeight.toPx()
+                                                ) {
+                                                    toggle(index)
+                                                }
+                                            }
+                                        }
+                                    }
+                                )
+                                .padding(start = PERSONAL_MARKER_LEAD)
+                            isBullet -> Modifier
+                                .drawBehind {
+                                    drawPersonalMarker(
+                                        marker = block.markerStyle,
+                                        ink = bulletInk,
+                                        lineHeight = lineHeight.toPx()
+                                    )
+                                }
+                                .padding(start = PERSONAL_MARKER_LEAD)
+                            else -> Modifier
+                        }
+                    )
+                    // A TITLE line is a chapter marker on the book review's
+                    // page: it reports its own place so the head can say
+                    // which chapter is being read (see onTitlePosition).
+                    .then(
+                        if (isTitle && titleReport != null) {
+                            Modifier.onGloballyPositioned { coordinates ->
+                                val bounds = coordinates.boundsInParent()
+                                titleReport(block.id, text, bounds.top, bounds.bottom)
+                            }
+                        } else Modifier
+                    )
+            ) {
+                val baseText = personalAnnotated(
+                    text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
+                    titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
+                    smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
+                )
+                // v392 — CLICKABLE LINKS: URLs in the read-only view
+                // open in the browser with a coffee-dark underline so they
+                // read as ink, not as the app's accent.
+                val linkText = personalAnnotateLinks(baseText)
+                var linkLayout by remember(linkText) {
+                    mutableStateOf<TextLayoutResult?>(null)
+                }
+                val linkContext = LocalContext.current
+                Text(
+                    text = linkText,
+                    onTextLayout = { linkLayout = it },
+                    style = when {
+                        isTitle -> TextStyle(
+                            fontFamily = FrauncesFontFamily,
+                            fontSize = TITLE_VIEW_SIZE,
+                            lineHeight = 31.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = alignOf
+                        )
+                        isSmall -> TextStyle(
+                            fontFamily = WritingFontFamily,
+                            fontSize = SMALL_VIEW_SIZE,
+                            lineHeight = 21.sp,
+                            textAlign = alignOf
+                        )
+                        else -> TextStyle(
+                            fontFamily = WritingFontFamily,
+                            fontSize = if (rowSize.isSpecified) rowSize else 16.sp,
+                            lineHeight = if (rowSize.isSpecified) rowSize * 1.7f else 27.sp,
+                            textAlign = alignOf
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .pointerInput(linkText) {
+                            detectTapGestures { offset ->
+                                val layout = linkLayout ?: return@detectTapGestures
+                                val pos = layout.getOffsetForPosition(offset)
+                                linkText.getStringAnnotations(
+                                    PERSONAL_LINK_TAG, pos, pos
+                                ).firstOrNull()?.let { ann ->
+                                    openSearchUrl(linkContext, ann.item)
+                                }
+                            }
+                        }
+                )
+            }
+            if (isTitle) afterTitle?.invoke(text)
+        }
+
+    /**
+     * ONE PICTURE, DRAWN — the print the editor draws, at the width the caller
+     * has room for: the page's own fraction when it stands alone, or the narrow
+     * column beside the writing. The size chips, the paper frame, the caption in
+     * its wide bottom border and the bounds the overlay grows out of are all
+     * exactly as they were.
+     */
+    val renderPrint: @Composable (PersonalBlock, Modifier) -> Unit = { block, width ->
+        var bounds by remember(block.photo) { mutableStateOf<Rect?>(null) }
+        val printSize = PersonalPhotoSize.fromKey(block.photoSize)
+        Column(
+            modifier = width
+                .onGloballyPositioned { bounds = it.boundsInWindow() }
+                .shadow(5.dp, RoundedCornerShape(6.dp))
+                .clip(RoundedCornerShape(6.dp))
+                .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
+                .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
+                .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
+        ) {
+            PersonalPagePhoto(
+                uri = block.photo.orEmpty(),
+                height = when (printSize) {
+                    PersonalPhotoSize.PAGE -> 168.dp
+                    PersonalPhotoSize.HALF -> 128.dp
+                    PersonalPhotoSize.SMALL -> 100.dp
+                }
+            )
+            if (block.caption.isNotBlank()) {
+                Text(
+                    block.caption,
+                    style = TextStyle(
+                        fontFamily = WritingFontFamily,
+                        fontSize = 13.sp,
+                        color = ink.copy(alpha = 0.62f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 5.dp, bottom = 5.dp),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        doc.blocks.forEach { block ->
+        doc.blocks.forEachIndexed { index, block ->
+            val quoteAbove = index > 0 && isQuoteRun(doc.blocks[index - 1])
+            val quoteBelow = index < doc.blocks.lastIndex && isQuoteRun(doc.blocks[index + 1])
             if (block.isPhoto) {
                 // A saved page shows the picture SMALL — it is a page of
                 // writing, not a gallery — and hands its bounds to the
                 // overlay so tapping it grows out of exactly here.
-                var bounds by remember(block.photo) { mutableStateOf<Rect?>(null) }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onGloballyPositioned { bounds = it.boundsInWindow() }
-                        .clip(RoundedCornerShape(16.dp))
-                        .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
-                ) {
-                    PersonalPagePhoto(
-                        uri = block.photo.orEmpty(),
-                        height = 156.dp
-                    )
-                    if (block.caption.isNotBlank()) {
-                        Text(
-                            block.caption,
-                            style = TextStyle(
-                                fontFamily = WritingFontFamily,
-                                fontSize = 13.sp,
-                                color = ink.copy(alpha = 0.62f)
-                            ),
-                            modifier = Modifier.padding(top = 6.dp)
-                        )
+                //
+                // v389 — AND IT SHOWS THE PRINT THE EDITOR DRAWS: the size the
+                // member chose (a fraction of the text's own measure, so nothing
+                // can ever land on top of it), the same paper frame, and the
+                // caption in the frame's wide bottom border. Reading a page back
+                // has to look like the page that was written (see
+                // PersonalPhotoBlock, which owns the shape).
+                // v389d — THE PRINT AND THE WRITING SIDE BY SIDE, as the editor
+                // draws it: the print keeps a narrow column, the one line under
+                // it takes the rest, and the pair is shown with the same gap the
+                // editor leaves so a finger can still reach the print's frame.
+                val besideId = doc.blocks.getOrNull(index + 1)?.id
+                val besideLine = doc.blocks.getOrNull(index + 1)
+                    ?.takeIf { besideId != null && besideSkips.contains(it.id) }
+                if (besideLine != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(Modifier.weight(0.42f)) {
+                            renderPrint(block, Modifier.fillMaxWidth())
+                        }
+                        Box(Modifier.weight(0.58f)) {
+                            // A quote's panels reach into the gap above and below
+                            // to meet their quoted neighbour, which is the column's
+                            // business, not a pair's — the line beside a print
+                            // draws with its own edges square.
+                            renderLine(index + 1, besideLine, false, false)
+                        }
                     }
+                } else {
+                    val printSize = PersonalPhotoSize.fromKey(block.photoSize)
+                    renderPrint(block, Modifier.fillMaxWidth(printSize.fraction))
                 }
             } else if (block.isAudio) {
                 // v389 — a saved voice note reads as the waveform it was
@@ -1505,92 +3208,12 @@ internal fun PersonalDocView(
                     ink = ink,
                     accent = accent
                 )
+            } else if (besideSkips.contains(block.id)) {
+                // v389d — this line is drawn INSIDE the print above it (see the
+                // beside pair in the photo branch), so the column draws nothing
+                // for it and the page does not say it twice.
             } else if (block.text.isNotBlank()) {
-                val text = block.text
-                val mask = runsToMask(text.length, block.runs)
-                val isQuote = personalBlockIsQuote(text, mask)
-                val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
-                val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
-                val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
-                val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
-                // v389 — the same metrics and the same renderers as the editor
-                // (this view draws a checklist row that the editor ticked).
-                val lineHeight = if (isTitle) 31.sp else if (isSmall) 21.sp else 27.sp
-                val markerFill = personalAccentInk()
-                val markerOnFill = MaterialTheme.colorScheme.surface
-                val markerOutline = ink.copy(alpha = 0.42f)
-                val alignOf = if (block.align == PersonalAlign.CENTER) TextAlign.Center
-                else TextAlign.Start
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            when {
-                                isQuote -> Modifier
-                                    .drawBehind {
-                                        val barWidth = 3.dp.toPx()
-                                        drawRoundRect(
-                                            color = quoteRule,
-                                            size = Size(barWidth, size.height),
-                                            cornerRadius = CornerRadius(barWidth / 2f)
-                                        )
-                                    }
-                                    .padding(start = 13.dp)
-                                isCheckbox -> Modifier
-                                    .drawBehind {
-                                        drawPersonalCheckbox(
-                                            checked = block.checked,
-                                            outline = markerOutline,
-                                            fill = markerFill,
-                                            onFill = markerOnFill,
-                                            lineHeight = lineHeight.toPx()
-                                        )
-                                    }
-                                    .padding(start = PERSONAL_MARKER_LEAD)
-                                isBullet -> Modifier
-                                    .drawBehind {
-                                        drawPersonalMarker(
-                                            marker = block.markerStyle,
-                                            ink = bulletInk,
-                                            lineHeight = lineHeight.toPx()
-                                        )
-                                    }
-                                    .padding(start = PERSONAL_MARKER_LEAD)
-                                else -> Modifier
-                            }
-                        )
-                ) {
-                    Text(
-                        text = personalAnnotated(
-                            text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
-                            titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
-                            smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
-                        ),
-                        style = when {
-                            isTitle -> TextStyle(
-                                fontFamily = FrauncesFontFamily,
-                                fontSize = TITLE_VIEW_SIZE,
-                                lineHeight = 31.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                textAlign = alignOf
-                            )
-                            isSmall -> TextStyle(
-                                fontFamily = WritingFontFamily,
-                                fontSize = SMALL_VIEW_SIZE,
-                                lineHeight = 21.sp,
-                                textAlign = alignOf
-                            )
-                            else -> TextStyle(
-                                fontFamily = WritingFontFamily,
-                                fontSize = 16.sp,
-                                lineHeight = 27.sp,
-                                textAlign = alignOf
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                if (isTitle) afterTitle?.invoke(text)
+                renderLine(index, block, quoteAbove, quoteBelow)
             }
         }
     }
@@ -1619,6 +3242,26 @@ internal fun PersonalToolDock(
     val accent = personalAccent()
     val accentInk = personalAccentInk()
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    // v389 — TEXT HISTORY, the dock's FIRST tool.
+    //
+    // The writing pages had it everywhere else in Curio but here, so the one
+    // surface that holds the longest-lived writing in the app was the one with
+    // no way back to an earlier draft (user request: "in journal bottom tool bar
+    // add the text history option as the first"). It snapshots the LINE the
+    // caret is on — a line is what a block is, so that is the unit the member
+    // was actually editing — and a restore lands back on that same line.
+    val historyContext = LocalContext.current
+    var historyOpen by remember { mutableStateOf(false) }
+    val historyLine = state.focusedId ?: state.blockIds.firstOrNull()
+    val historyText = historyLine?.let { state.text(it) }.orEmpty()
+    if (historyLine != null) {
+        rememberTextHistoryCapture(
+            ctx = historyContext,
+            field = "Journal line",
+            text = historyText,
+            resetKey = historyLine
+        )
+    }
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = surface,
@@ -1635,6 +3278,17 @@ internal fun PersonalToolDock(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(1.dp)
         ) {
+            // First in the dock, deliberately: it is the tool a member reaches
+            // for when something has gone wrong with the writing, and that is
+            // not a tool to go hunting for.
+            PersonalToolButton(
+                label = "Text history",
+                active = false,
+                accent = accentInk, ink = ink,
+                onClick = { historyOpen = true }
+            ) {
+                CurioIcon(CurioIcons.History, null, size = 19.dp)
+            }
             PersonalToolButton(
                 label = "Bold",
                 active = active and FLAG_BOLD != 0,
@@ -1668,6 +3322,119 @@ internal fun PersonalToolDock(
             ) {
                 StrikeGlyph()
             }
+            // v389 — THE FACE. Four voices the app already bundles, one tap
+            // from a menu that is set IN each of them, because a font menu
+            // written in one font is a list of words (user request: "the font
+            // chnage … add in the universal tool bar").
+            Box {
+                var fontMenuOpen by remember { mutableStateOf(false) }
+                val face = state.fontOfFocused()
+                PersonalToolButton(
+                    label = "Font: ${personalFontLabel(face)}",
+                    // Lit only when a face was actually CHOSEN: the page's own
+                    // serif is not a setting, it is where a line starts.
+                    active = face.isNotEmpty(),
+                    accent = accentInk, ink = ink,
+                    onClick = { fontMenuOpen = true }
+                ) {
+                    FontGlyph(face)
+                }
+                DropdownMenu(
+                    expanded = fontMenuOpen,
+                    onDismissRequest = { fontMenuOpen = false }
+                ) {
+                    PERSONAL_FONT_KEYS.forEach { key ->
+                        DropdownMenuItem(
+                            text = {
+                                // Set in the face it offers — the preview and the
+                                // result are the same bytes.
+                                Text(
+                                    personalFontLabel(key),
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontFamily = personalFontPreview(key)
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            trailingIcon = {
+                                if (face == key) {
+                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                                }
+                            },
+                            onClick = {
+                                state.applyFont(key)
+                                fontMenuOpen = false
+                            }
+                        )
+                    }
+                }
+            }
+            // v389 — THE MARKER PEN, the first tool in the dock that is a
+            // COLOUR. It follows the bullet tool's manner exactly, because that
+            // is the manner this dock already taught the member: the first tap
+            // puts a pen down (the first one — the common case, one tap), and
+            // the tap after that opens the palette to change it or take it off
+            // (user request: "watermark with color options", "the text maker
+            // highlighter colr of the word"). The button WEARS the pen it is
+            // about to use, so the dock says which colour before the tap does.
+            Box {
+                var penMenuOpen by remember { mutableStateOf(false) }
+                val pen = state.highlightOfFocused()
+                val penOn = pen.isNotEmpty()
+                PersonalToolButton(
+                    label = if (penOn) "Marker: ${personalHighlightLabel(pen)}" else "Marker",
+                    active = penOn,
+                    // A lit marker wears its OWN ink rather than the theme's
+                    // accent — the same reason the menu's swatches are the pens
+                    // and not the theme: a colour tool that shows the accent
+                    // shows the wrong colour.
+                    accent = if (penOn) personalHighlightInk(pen) else accentInk,
+                    ink = ink,
+                    onClick = {
+                        if (penOn) penMenuOpen = true
+                        else state.applyHighlight(PERSONAL_HIGHLIGHT_KEYS.first())
+                    }
+                ) {
+                    MarkerPenGlyph(pen = if (penOn) personalHighlightInk(pen) else null)
+                }
+                DropdownMenu(
+                    expanded = penMenuOpen,
+                    onDismissRequest = { penMenuOpen = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { MarkerMenuLabel("Remove marker") },
+                        leadingIcon = {
+                            CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp)
+                        },
+                        trailingIcon = {
+                            if (!penOn) CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                        },
+                        onClick = {
+                            // With nothing selected this ARMS the eraser: the
+                            // words typed next come out unmarked, which is the
+                            // only way to write plain text inside a marked
+                            // sentence. With a selection it clears it outright.
+                            state.applyHighlight("")
+                            penMenuOpen = false
+                        }
+                    )
+                    PERSONAL_HIGHLIGHT_KEYS.forEach { key ->
+                        DropdownMenuItem(
+                            text = { MarkerMenuLabel(personalHighlightLabel(key)) },
+                            leadingIcon = { PenSwatch(personalHighlightInk(key)) },
+                            trailingIcon = {
+                                if (pen == key) {
+                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                                }
+                            },
+                            onClick = {
+                                state.applyHighlight(key)
+                                penMenuOpen = false
+                            }
+                        )
+                    }
+                }
+            }
   if (showJournalTools) PersonalToolButton(
   label = "Large bold text",
                 active = active and FLAG_TITLE != 0,
@@ -1683,7 +3450,7 @@ internal fun PersonalToolDock(
                 ink = ink,
                 onClick = { state.toggleListStyle(FLAG_CHECKBOX) }
             ) {
-                CurioIcon(CurioIcons.TaskAlt, null, size = 19.dp)
+                TodoGlyph(active = active and FLAG_CHECKBOX != 0)
             }
             PersonalToolButton(
                 label = "Small text",
@@ -1693,20 +3460,25 @@ internal fun PersonalToolDock(
             ) {
   CurioIcon(CurioIcons.TextDecrease, null, size = 20.dp)
             }
-            // v389 — THE MARKER MENU. The bullet tool opens a small anchored
-            // menu of list styles instead of toggling one hard-coded dot: the
-            // first row takes the list OFF the line, the rest give it that
-            // marker (stored per line — see PersonalBlock.marker). The button
-            // itself wears the focused line's own marker, so the dock always
-            // echoes what the line is wearing.
+            // v389 — THE MARKER MENU. The bullet tool gives the line the FIRST
+            // marker on its first tap (a dot — the common case, one tap) and
+            // opens the menu of styles on the tap after that, once the line is
+            // already a list (user request: "by default add the 1st bulletpoint
+            // tapping it again should show the drop down"). The button itself
+            // wears the focused line's own marker, so the dock always echoes
+            // what the line is wearing.
             Box {
                 var markerMenuOpen by remember { mutableStateOf(false) }
                 val focusedMarker = state.markerOfFocused()
+                val bulletOn = active and FLAG_BULLET != 0
                 PersonalToolButton(
                     label = "Bullet style",
-                    active = active and FLAG_BULLET != 0,
+                    active = bulletOn,
                     accent = accentInk, ink = ink,
-                    onClick = { markerMenuOpen = true }
+                    onClick = {
+                        if (bulletOn) markerMenuOpen = true
+                        else state.applyMarker(PersonalMarker.entries.first())
+                    }
                 ) {
                     MarkerGlyph(focusedMarker)
                 }
@@ -1715,7 +3487,7 @@ internal fun PersonalToolDock(
                     onDismissRequest = { markerMenuOpen = false }
                 ) {
                     DropdownMenuItem(
-                        text = { MarkerMenuLabel("No list") },
+                        text = { MarkerMenuLabel("Remove list") },
                         leadingIcon = {
                             CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp)
                         },
@@ -1763,7 +3535,7 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.setAlign(PersonalAlign.START) }
             ) {
-                AlignGlyph(center = false)
+                AlignGlyph(AlignKind.START)
             }
             PersonalToolButton(
                 label = "Align centre",
@@ -1771,7 +3543,23 @@ internal fun PersonalToolDock(
                 accent = accentInk, ink = ink,
                 onClick = { state.setAlign(PersonalAlign.CENTER) }
             ) {
-                AlignGlyph(center = true)
+                AlignGlyph(AlignKind.CENTER)
+            }
+            PersonalToolButton(
+                label = "Align right",
+                active = state.alignOfFocused() == PersonalAlign.END,
+                accent = accentInk, ink = ink,
+                onClick = { state.setAlign(PersonalAlign.END) }
+            ) {
+                AlignGlyph(AlignKind.END)
+            }
+            PersonalToolButton(
+                label = "Justify",
+                active = state.alignOfFocused() == PersonalAlign.JUSTIFY,
+                accent = accentInk, ink = ink,
+                onClick = { state.setAlign(PersonalAlign.JUSTIFY) }
+            ) {
+                AlignGlyph(AlignKind.JUSTIFY)
             }
             if (showJournalTools) PersonalToolButton(
                 label = "Add a photo",
@@ -1782,6 +3570,69 @@ internal fun PersonalToolDock(
                 CurioIcon(CurioIcons.Image, null, size = 18.dp)
             }
         }
+    }
+    // The browser rides OUTSIDE the surface: it is a sheet of its own, and
+    // nesting it in the dock's rounded pill would clip it to the pill.
+    if (historyOpen && historyLine != null) {
+        TextHistoryBrowser(
+            ctx = historyContext,
+            activeField = "Journal line",
+            currentText = historyText,
+            onRestore = { restored, mode ->
+                val merged = when (mode) {
+                    TextHistoryRestoreMode.REPLACE -> restored
+                    TextHistoryRestoreMode.ADD_TOP -> restored + "\n" + historyText
+                    // The line is ONE line, so "add below" means the line after
+                    // it — the second half is dropped in as its own block by the
+                    // newline rule rather than pressed into this one.
+                    TextHistoryRestoreMode.ADD_BOTTOM -> historyText + "\n" + restored
+                }
+                state.setBlockText(historyLine, merged)
+            },
+            onDismiss = { historyOpen = false }
+        )
+    }
+}
+
+/**
+ * v389 — THE TO-DO TOOL'S OWN GLYPH: the page's CHECKBOX, drawn.
+ *
+ * The bundled icon was a struck-through task glyph that read as a finished item
+ * rather than as the thing the button MAKES — and it shared no shape with the
+ * boxes the page draws down the margin (user request: "the tool bar check box
+ * icon change it"). This is that box and that tick, at dock size: the same
+ * rounded square, the same tick, filled with the accent when the line is
+ * already a row.
+ */
+@Composable
+internal fun TodoGlyph(active: Boolean, iconSize: Dp = 19.dp) {
+    val ink = LocalContentColor.current
+    val onFill = MaterialTheme.colorScheme.surface
+    // NB: the Canvas parameter must NOT be named `size` — it would shadow
+    // DrawScope.size, which the geometry below reads (see AGENTS rule 7).
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(iconSize)) {
+        val stroke = 1.7f.dp.toPx()
+        val side = size.minDimension * 0.80f
+        val left = (size.width - side) / 2f
+        val top = (size.height - side) / 2f
+        val corner = CornerRadius(side * 0.30f)
+        drawRoundRect(
+            color = ink,
+            topLeft = Offset(left, top),
+            size = Size(side, side),
+            cornerRadius = corner,
+            style = if (active) androidx.compose.ui.graphics.drawscope.Fill else Stroke(width = stroke)
+        )
+        val tick = Path().apply {
+            moveTo(left + side * 0.24f, top + side * 0.53f)
+            lineTo(left + side * 0.43f, top + side * 0.73f)
+            lineTo(left + side * 0.78f, top + side * 0.30f)
+        }
+        drawPath(
+            path = tick,
+            color = if (active) onFill else ink,
+            style = Stroke(width = stroke, cap = StrokeCap.Round, join = StrokeJoin.Round)
+        )
     }
 }
 
@@ -1808,6 +3659,57 @@ private fun StrikeGlyph() {
  * menu's preview is literally the glyph the line will wear (v389 — it used to
  * be a separate dot-and-rules drawing that matched nothing).
  */
+/**
+ * THE MARKER PEN as the dock draws it: a nib over a wash.
+ *
+ * Drawn rather than taken from the icon subset, for the same reason the marker
+ * and alignment glyphs are: the pen has to show the COLOUR it will lay down, and
+ * a tinted bundled icon is not a pen.
+ *
+ * [pen] is the ink the next words will wear, or null when no pen is down — in
+ * which case the wash is drawn in the content colour so the button still reads
+ * as a highlighter among the other glyphs.
+ */
+@Composable
+private fun MarkerPenGlyph(pen: Color?) {
+    val ink = LocalContentColor.current
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(19.dp)) {
+        val wash = pen ?: ink.copy(alpha = 0.55f)
+        val tip = 1.9f.dp.toPx()
+        // The wash: the band the pen leaves on the page.
+        drawRoundRect(
+            color = wash,
+            topLeft = Offset(size.width * 0.12f, size.height * 0.60f),
+            size = Size(size.width * 0.70f, size.height * 0.26f),
+            cornerRadius = CornerRadius(size.height * 0.13f)
+        )
+        // The nib: a diagonal bar rising out of the wash, cut square so it
+        // reads as a chisel tip rather than a pencil.
+        val nib = Path().apply {
+            moveTo(size.width * 0.30f, size.height * 0.55f)
+            lineTo(size.width * 0.52f, size.height * 0.16f)
+            lineTo(size.width * 0.74f, size.height * 0.28f)
+            lineTo(size.width * 0.50f, size.height * 0.66f)
+            close()
+        }
+        drawPath(path = nib, color = ink, style = Stroke(width = tip, join = StrokeJoin.Round))
+    }
+}
+
+/** One pen in the palette: a rounded wash in the pen's own ink, so the menu is
+ *  the four colours rather than four words that mean colours. */
+@Composable
+private fun PenSwatch(color: Color) {
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
+        drawRoundRect(
+            color = color.copy(alpha = 0.85f),
+            topLeft = Offset(0f, size.height * 0.16f),
+            size = Size(size.width, size.height * 0.68f),
+            cornerRadius = CornerRadius(size.height * 0.30f)
+        )
+    }
+}
+
 @Composable
 private fun MarkerGlyph(marker: PersonalMarker) {
     val ink = LocalContentColor.current
@@ -1827,19 +3729,65 @@ private fun MarkerMenuLabel(text: String) {
     )
 }
 
-/** The alignment tools draw their own glyph (three rules), so the dock never
- *  depends on a font subset that has no align icons. */
+/** Which of the four alignments a glyph draws. One enum rather than a
+ *  `center: Boolean`, which could never say "right" let alone "justify". */
+internal enum class AlignKind { START, CENTER, END, JUSTIFY }
+
+/**
+ * THE FONT BUTTON is a specimen: "Aa" drawn in the face the next words will be
+ * set in, so the dock answers "which font?" before the menu is even opened.
+ *
+ * The sample is deliberately short — two characters, at label size. A preview
+ * long enough to be readable is also long enough to change the dock's own
+ * layout as the face changes, and a dock that twitches when a font is picked
+ * reads as a bug rather than as an effect.
+ */
 @Composable
-private fun AlignGlyph(center: Boolean) {
+private fun FontGlyph(key: String) {
+    Text(
+        text = "Aa",
+        style = MaterialTheme.typography.labelLarge.copy(
+            fontFamily = personalFontPreview(key),
+            fontWeight = FontWeight.Medium
+        ),
+        color = LocalContentColor.current
+    )
+}
+
+/**
+ * The alignment tools draw their own glyph (four rules), so the dock never
+ * depends on a font subset that has no align icons. The rule lengths are what
+ * tell the four apart at 18dp: left is ragged right, right is ragged left,
+ * centre is ragged both ends, and justified is four FULL rules — which is the
+ * only one of the four that can be drawn flush on both edges without lying
+ * about what it does.
+ */
+@Composable
+private fun AlignGlyph(kind: AlignKind) {
     val ink = LocalContentColor.current
     androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
         val stroke = 1.8f.dp.toPx()
         val width = size.width
-        val gaps = listOf(1f, 0.72f, 1f, 0.72f)
-        gaps.forEachIndexed { index, fraction ->
+        // The last rule is short on every ragged style; the ones above it are
+        // full, which is the shape the eye reads as an alignment at a glance.
+        val fractions = when (kind) {
+            AlignKind.START -> listOf(1f, 0.68f, 1f, 0.5f)
+            AlignKind.END -> listOf(1f, 0.68f, 1f, 0.5f)
+            AlignKind.CENTER -> listOf(1f, 0.68f, 1f, 0.5f)
+            AlignKind.JUSTIFY -> listOf(1f, 1f, 1f, 1f)
+        }
+        fractions.forEachIndexed { index, fraction ->
             val y = size.height * (0.22f + index * 0.19f)
             val lineWidth = width * fraction
-            val x = if (center) (width - lineWidth) / 2f else 0f
+            val x = when (kind) {
+                AlignKind.START -> 0f
+                AlignKind.CENTER -> (width - lineWidth) / 2f
+                AlignKind.END -> width - lineWidth
+                // A justified rule starts at the margin on two of its four
+                // lines and is centred on the others — the way justified prose
+                // reads: flush, flush, and a short last line in the middle.
+                AlignKind.JUSTIFY -> if (index == 3) (width - lineWidth) / 2f else 0f
+            }
             drawLine(
                 color = ink,
                 start = Offset(x, y),

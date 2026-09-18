@@ -6,6 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -24,11 +28,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +49,12 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -76,7 +87,10 @@ import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.paperControlAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.paperHighlight
+import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.PatrickHandFontFamily
+import com.curio.app.ui.theme.WritingFontFamily
 
 /**
  * The rich-text flags the toolbar can apply. [TextSpan] stores each as a
@@ -100,12 +114,36 @@ private val SIZE_OPTIONS: List<Float> =
         .filterNot { it == BASE_FONT_SP }
 
 /** How the formatting toolbar is presented. */
+/**
+ * v389 — HOW LONG A BLUR IS ALLOWED TO LAST before the dock believes the member
+ * has left the field.
+ *
+ * A tap on a dock button can blur the field for an instant, and a floating dock
+ * that folded away the moment it was touched would be a dock nobody could use.
+ * Only a blur that sticks — moving to another note, tapping the page — is long
+ * enough to mean "stopped writing", and a quarter of a second is the shortest
+ * delay that survives a tap without feeling laggy when it is real.
+ */
+private const val DOCK_BLUR_GRACE_MS = 250L
+
 enum class RichTextToolbarMode {
     /** The Marginalia journal + quote cards (main option). */
     MAIN,
 
     /** Other text fields (Field Notes sections, Reel Notes review, …). */
-    TOGGLE
+    TOGGLE,
+
+    /**
+     * THE JOURNAL'S OWN DOCK, worn by the app's full-screen rich-text editors
+     * (the Share Hub's card editor and the book sheet's note expand): a floating
+     * rounded strip at the FOOT of the field, every tool its own button, the
+     * active one in the accent — the same dock the journal page writes on. The
+     * compact capture-format strips (MAIN / TOGGLE) are untouched.
+     *
+     * The IMAGE tool is deliberately not here: a rich-text field holds text, and
+     * the dock's photo door belongs to the page that has a page to put it on.
+     */
+    DOCK
 }
 
 /**
@@ -120,6 +158,20 @@ fun buildRichAnnotated(text: String, spans: List<TextSpan>, highlightColor: Colo
             val s = sp.start.coerceIn(0, text.length)
             val e = sp.end.coerceIn(s, text.length)
             if (e > s) {
+                // v389 — a run's FAMILY, when it has one (the dock's font tool).
+                // The text stack takes it as a span style, so only the letters
+                // in the run change hand.
+                val family = richFontFamily(sp.fontKey)
+                if (family != null) {
+                    addStyle(SpanStyle(fontFamily = family, fontSynthesis = FontSynthesis.All), s, e)
+                }
+                // v389 — a run's ALIGNMENT is a PARAGRAPH property: the stack
+                // aligns whole lines, so any run reaching into a line sets it
+                // for that line. Applied as its own style, so a bold run and an
+                // alignment run can cover the same words without either
+                // dropping the other.
+                val align = richTextAlign(sp.alignKey)
+                if (align != null) addStyle(ParagraphStyle(textAlign = align), s, e)
                 addStyle(
                     SpanStyle(
                         fontWeight = if (sp.bold) FontWeight.Bold else null,
@@ -179,8 +231,8 @@ fun rememberRichAnnotated(
  * read the editor's spans back out after Compose merges them while typing
  * (BasicTextField preserves span styles across edits, so no manual diffing).
  */
-fun extractRichSpans(annotated: AnnotatedString): List<TextSpan> =
-    annotated.spanStyles.mapNotNull { range ->
+fun extractRichSpans(annotated: AnnotatedString): List<TextSpan> {
+    val styled = annotated.spanStyles.mapNotNull { range ->
         val bold = range.item.fontWeight == FontWeight.Bold
         val italic = range.item.fontStyle == FontStyle.Italic
         val highlight = range.item.background != Color.Unspecified
@@ -188,9 +240,22 @@ fun extractRichSpans(annotated: AnnotatedString): List<TextSpan> =
         val underline = range.item.textDecoration == TextDecoration.Underline
         val size = range.item.fontSize
         val sizeSp = if (size.isSpecified) size.value else null
-        if (!bold && !italic && !highlight && !underline && sizeSp == null) null
-        else TextSpan(range.start, range.end, bold, italic, highlight, sizeSp, underline)
-    }.merged()
+        // v389 — and so do the family and the alignment: the family rides the
+        // span styles, the alignment rides the PARAGRAPH styles below.
+        val fontKey = richFontKey(range.item.fontFamily)
+        if (!bold && !italic && !highlight && !underline && sizeSp == null && fontKey == null) null
+        else TextSpan(
+            range.start, range.end, bold, italic, highlight, sizeSp, underline,
+            fontKey = fontKey
+        )
+    }
+    val aligned = annotated.paragraphStyles.mapNotNull { range ->
+        richAlignKey(range.item.textAlign)?.let { key ->
+            TextSpan(range.start, range.end, alignKey = key)
+        }
+    }
+    return (styled + aligned).merged()
+}
 
 /** Sorts and merges adjacent/overlapping spans with identical flags. */
 private fun List<TextSpan>.merged(): List<TextSpan> {
@@ -202,7 +267,8 @@ private fun List<TextSpan>.merged(): List<TextSpan> {
         if (last != null && last.end >= sp.start &&
             last.bold == sp.bold && last.italic == sp.italic &&
             last.highlight == sp.highlight && last.fontSizeSp == sp.fontSizeSp &&
-            last.underline == sp.underline
+            last.underline == sp.underline &&
+            last.alignKey == sp.alignKey && last.fontKey == sp.fontKey
         ) {
             out[out.size - 1] = last.copy(end = maxOf(last.end, sp.end))
         } else {
@@ -210,6 +276,113 @@ private fun List<TextSpan>.merged(): List<TextSpan> {
         }
     }
     return out
+}
+
+// ── v389 — the dock's family and alignment tables ──────────────────────
+//
+// Both directions live here: key → what to draw with, and what the text stack
+// handed back → key. The keys are what the saved JSON carries.
+
+/** The hands a run can be set in. `null` = the field's own default. */
+private val RICH_FONTS: List<Pair<String, FontFamily>> = listOf(
+    "default" to FontFamily.Default,
+    "book" to LoraFontFamily,
+    "writing" to WritingFontFamily,
+    "display" to FrauncesFontFamily
+)
+
+internal fun richFontFamily(key: String?): FontFamily? =
+    RICH_FONTS.firstOrNull { it.first == key }?.second
+
+internal fun richFontKey(family: FontFamily?): String? {
+    if (family == null) return null
+    return RICH_FONTS.firstOrNull { it.second == family }?.first
+}
+
+internal fun richTextAlign(key: String?): TextAlign? = when (key) {
+    "start" -> TextAlign.Start
+    "center" -> TextAlign.Center
+    "end" -> TextAlign.End
+    "justify" -> TextAlign.Justify
+    else -> null
+}
+
+internal fun richAlignKey(align: TextAlign?): String? = when (align) {
+    TextAlign.Center -> "center"
+    TextAlign.End, TextAlign.Right -> "end"
+    TextAlign.Justify -> "justify"
+    TextAlign.Start, TextAlign.Left -> "start"
+    else -> null
+}
+
+/** True when a run still says something after a property was cleared from it. */
+private val TextSpan.hasAnyStyle: Boolean
+    get() = bold || italic || highlight || underline || fontSizeSp != null ||
+        alignKey != null || fontKey != null
+
+/**
+ * Clears whatever [drop] takes off every run overlapping [s, e), splitting the
+ * runs at the edges exactly as the flag toggles do — the shape that lets a run
+ * carry ONE property at a time without disturbing its neighbours.
+ */
+private fun clearRunOver(
+    spans: List<TextSpan>,
+    s: Int,
+    e: Int,
+    drop: (TextSpan) -> TextSpan
+): List<TextSpan> {
+    if (e <= s) return spans
+    val out = mutableListOf<TextSpan>()
+    for (sp in spans) {
+        if (sp.end <= s || sp.start >= e) {
+            out.add(sp)
+            continue
+        }
+        if (sp.start < s) out.add(sp.copy(end = s))
+        val middle = drop(sp.copy(start = maxOf(sp.start, s), end = minOf(sp.end, e)))
+        if (middle.hasAnyStyle) out.add(middle)
+        if (sp.end > e) out.add(sp.copy(start = e))
+    }
+    return out
+}
+
+/** v389 — sets (or clears, with `null`) the ALIGNMENT of [s, e). */
+internal fun setSpanAlign(spans: List<TextSpan>, s: Int, e: Int, key: String?): List<TextSpan> {
+    val cleared = clearRunOver(spans, s, e) { it.copy(alignKey = null) }
+    return if (key == null) cleared.merged()
+    else (cleared + TextSpan(start = s, end = e, alignKey = key)).merged()
+}
+
+/** v389 — sets (or clears, with `null`) the FAMILY of [s, e). */
+internal fun setSpanFont(spans: List<TextSpan>, s: Int, e: Int, key: String?): List<TextSpan> {
+    val cleared = clearRunOver(spans, s, e) { it.copy(fontKey = null) }
+    return if (key == null) cleared.merged()
+    else (cleared + TextSpan(start = s, end = e, fontKey = key)).merged()
+}
+
+/** The alignment in force at [pos] — the innermost run that carries one. */
+internal fun alignKeyAt(spans: List<TextSpan>, pos: Int): String? =
+    spans.filter { it.alignKey != null && it.start <= pos && pos < it.end }
+        .minByOrNull { it.end - it.start }
+        ?.alignKey
+
+/** The family in force at [pos] — the innermost run that carries one. */
+internal fun fontKeyAt(spans: List<TextSpan>, pos: Int): String? =
+    spans.filter { it.fontKey != null && it.start <= pos && pos < it.end }
+        .minByOrNull { it.end - it.start }
+        ?.fontKey
+
+/**
+ * The paragraph the caret is in, as a range — what an alignment or a font
+ * applies to when the member has selected nothing ("justify this line").
+ */
+private fun paragraphRangeAt(text: String, caret: Int): IntRange {
+    val at = caret.coerceIn(0, text.length)
+    val from = text.lastIndexOf('\n', (at - 1).coerceAtLeast(0))
+    val start = if (from < 0 || at == 0) 0 else from + 1
+    val to = text.indexOf('\n', at)
+    val end = if (to < 0) text.length else to
+    return start until end
 }
 
 private fun TextSpan.has(flag: RichFlag): Boolean = when (flag) {
@@ -289,15 +462,13 @@ internal fun rebaseSpans(oldText: String, newText: String, spans: List<TextSpan>
             // Fully before the changed region — same coordinates.
             e <= prefix -> out.add(sp)
             // Fully after the changed region — shift by the length delta.
-            s >= oldEnd -> out.add(
-                TextSpan(s + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline)
-            )
+            // (A COPY, so the run keeps every attribute it had — a positional
+            // rebuild would quietly drop the ones it did not name.)
+            s >= oldEnd -> out.add(sp.copy(start = s + delta, end = e + delta))
             // Overlaps the changed region — keep only the untouched parts.
             else -> {
-                if (s < prefix) out.add(TextSpan(s, prefix, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline))
-                if (e > oldEnd) out.add(
-                    TextSpan(maxOf(s, oldEnd) + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline)
-                )
+                if (s < prefix) out.add(sp.copy(start = s, end = prefix))
+                if (e > oldEnd) out.add(sp.copy(start = maxOf(s, oldEnd) + delta, end = e + delta))
             }
         }
     }
@@ -455,6 +626,20 @@ fun RichTextEditor(
     /** Optional visual line cap; the field never grows beyond this many lines. */
     maxLines: Int? = null,
     toolbarMode: RichTextToolbarMode = RichTextToolbarMode.MAIN,
+    /**
+     * v389 — HOLD THE DOCK AT THE FOOT OF THE SCREEN.
+     *
+     * In [RichTextToolbarMode.DOCK] the tools normally sit at the foot of the
+     * FIELD, so they travel with the words. The app's full-screen editors want
+     * them still — the journal's own dock does not move while a page is written
+     * — so a pinned editor scrolls the writing INSIDE itself and keeps the dock
+     * below it, which is what lets the call site hand the editor a weighted
+     * height instead of wrapping it in a scroll of its own.
+     *
+     * Only meaningful with [RichTextToolbarMode.DOCK] (every other mode keeps its
+     * strip above the field, exactly as before).
+     */
+    dockPinned: Boolean = false,
     enabled: Boolean = true,
     accent: Color = MaterialTheme.colorScheme.primary,
     ink: Color = MaterialTheme.colorScheme.onSurface,
@@ -537,6 +722,10 @@ fun RichTextEditor(
     // arms a FIXED size so the next characters typed carry it (and the
     // dropdown icons stay lit — their true "active" state).
     var pendingSizeSp by remember { mutableStateOf<Float?>(null) }
+    // v389 — armed UNDERLINE. The model has carried the attribute since v379
+    // (the share card picks it up on a selection), but no toolbar ever offered
+    // it: the journal's dock does, and the dock is what these editors now wear.
+    var pendingUnderline by remember { mutableStateOf(false) }
     // Paper mode: the field floats directly on the card's paper — no inner
     // padding of its own (the card owns the margins). The toolbar + cursor
     // also switch to the warm paper accent: these controls sit on cream in
@@ -569,6 +758,7 @@ fun RichTextEditor(
             pendingBold = false
             pendingItalic = false
             pendingHighlight = false
+            pendingUnderline = false
             pendingSizeSp = null
         }
     }
@@ -655,6 +845,9 @@ fun RichTextEditor(
                 if (sp.highlight) {
                     spans = toggleSpanFlag(spans, caret, insertedRange.last + 1, RichFlag.HIGHLIGHT, true)
                 }
+                if (sp.underline) {
+                    spans = toggleSpanUnderline(spans, caret, insertedRange.last + 1, true)
+                }
                 sp.fontSizeSp?.let { size ->
                     spans = setSpanSize(spans, caret, insertedRange.last + 1, size)
                 }
@@ -665,7 +858,9 @@ fun RichTextEditor(
         // characters so typing continues in that style (BasicTextField only
         // inherits the style under the caret, so an armed format needs
         // explicit application). Pure deletions diff to null and are skipped.
-        if (pendingBold || pendingItalic || pendingHighlight || pendingSizeSp != null) {
+        if (pendingBold || pendingItalic || pendingHighlight || pendingUnderline ||
+            pendingSizeSp != null
+        ) {
             insertedRange?.let { range ->
                 if (pendingBold) {
                     spans = toggleSpanFlag(spans, range.first, range.last + 1, RichFlag.BOLD, true)
@@ -675,6 +870,9 @@ fun RichTextEditor(
                 }
                 if (pendingHighlight) {
                     spans = toggleSpanFlag(spans, range.first, range.last + 1, RichFlag.HIGHLIGHT, true)
+                }
+                if (pendingUnderline) {
+                    spans = toggleSpanUnderline(spans, range.first, range.last + 1, true)
                 }
                 pendingSizeSp?.let { size ->
                     spans = setSpanSize(spans, range.first, range.last + 1, size)
@@ -746,6 +944,69 @@ fun RichTextEditor(
         // branch above).
     }
 
+    /** Applies already-built spans, keeping the caret exactly where it was. */
+    fun applyRun(updated: List<TextSpan>) {
+        val caret = tfv.selection
+        val styled = TextFieldValue(
+            buildRichAnnotated(tfv.text, updated, effectiveHighlight),
+            selection = caret
+        )
+        tfv = styled
+        onRichTextChange(styled.text, extractRichSpans(styled.annotatedString))
+    }
+
+    /**
+     * v389 — JUSTIFY THIS PARAGRAPH. Alignment belongs to LINES, not to letters,
+     * so with nothing selected it lands on the line the caret is in ("centre
+     * this line") and with a selection it lands on every line the selection
+     * touches. `null` takes the alignment off and hands the line back to the
+     * field's own default.
+     */
+    fun applyAlign(key: String?) {
+        val sel = tfv.selection
+        val range = if (sel.collapsed) paragraphRangeAt(tfv.text, sel.start)
+        else minOf(sel.start, sel.end) until maxOf(sel.start, sel.end)
+        if (range.isEmpty()) return
+        applyRun(setSpanAlign(extractRichSpans(tfv.annotatedString), range.first, range.last + 1, key))
+    }
+
+    /**
+     * v389 — SET THE HAND this line is written in (or this selection). Same
+     * paragraph rule as [applyAlign], so the tool always does something visible
+     * even with the caret just sitting in a line.
+     */
+    fun applyFont(key: String?) {
+        val sel = tfv.selection
+        val range = if (sel.collapsed) paragraphRangeAt(tfv.text, sel.start)
+        else minOf(sel.start, sel.end) until maxOf(sel.start, sel.end)
+        if (range.isEmpty()) return
+        applyRun(setSpanFont(extractRichSpans(tfv.annotatedString), range.first, range.last + 1, key))
+    }
+
+    /**
+     * UNDERLINE, the dock's own addition — same manners as [applyFlag]: a
+     * collapsed caret ARMS it for the next characters typed, a selection is
+     * applied once (so the tool never stays lit after a single change).
+     */
+    fun applyUnderline() {
+        val sel = tfv.selection
+        if (sel.collapsed) {
+            pendingUnderline = !pendingUnderline
+            return
+        }
+        val s = minOf(sel.start, sel.end)
+        val e = maxOf(sel.start, sel.end)
+        val current = extractRichSpans(tfv.annotatedString)
+        val add = !spansUnderlineCovered(current, s, e)
+        val updated = toggleSpanUnderline(current, s, e, add)
+        val styled = TextFieldValue(
+            buildRichAnnotated(tfv.text, updated, effectiveHighlight),
+            selection = sel
+        )
+        tfv = styled
+        onRichTextChange(styled.text, extractRichSpans(styled.annotatedString))
+    }
+
     /** Applies the picked [targetSp] to the selection (if any) and arms it. */
     fun applyExactSize(targetSp: Float) {
         val sel = tfv.selection
@@ -810,6 +1071,20 @@ fun RichTextEditor(
         return spansFullyCovered(current, s, e, flag)
     }
 
+    /** Underline's own sibling of [hasFlagAt] — the dock's lit state. */
+    fun hasUnderlineAt(): Boolean {
+        val sel = tfv.selection
+        val s = minOf(sel.start, sel.end)
+        val e = maxOf(sel.start, sel.end)
+        val current = extractRichSpans(tfv.annotatedString)
+        if (sel.collapsed) {
+            val pos = s
+            val underCaret = current.any { sp -> sp.start <= pos && pos < sp.end && sp.underline }
+            return pendingUnderline || underCaret
+        }
+        return spansUnderlineCovered(current, s, e)
+    }
+
     Column(modifier = modifier) {
         // ── Tool dock — one theme-aware strip above the field ───────────
         // v7.98 — redesigned: a single rounded dock (theme surface)
@@ -820,7 +1095,39 @@ fun RichTextEditor(
         // divider. Every color comes from theme tokens (surface container,
         // outline variant, accent), so the dock is properly theme-aware in
         // light, dark, AMOLED and pastel — no hardcoded alpha bumps.
-        Surface(
+        // The journal-style dock (DOCK mode) carries the format tools at the
+        // FOOT of the field, so this head strip appears only when it still has
+        // something of its own to say — the paper tools, a trailing action or
+        // the text history. In the other modes it is the dock, as before.
+        // ── v389 — THE DOCK IS A TYPING INSTRUMENT, NOT FURNITURE ───────
+        //
+        // In DOCK mode the tools used to stand at the foot of every note field
+        // for as long as the note existed, whether or not anyone was writing in
+        // it — a row of formatting buttons parked under a filled-in note, and
+        // the same row under the next one, and the next (user request: "in save
+        // your take where the tool bar is for every notes, remove it and use a
+        // floating bottom tool bar style … remember it only appears when i open
+        // the keyboard to type in that text box … so the tool bar doesnt always
+        // stay when im not typing").
+        //
+        // So it follows the FIELD's focus, which is what "typing in this box"
+        // means — and the fleeting part is deliberate: a tap on a dock button
+        // can blur the field for an instant, and a dock that vanished the moment
+        // it was touched would be a dock nobody could use. Only a blur that
+        // STICKS (the member moved to another note, or tapped the page) hides it.
+        var fieldFocused by remember { mutableStateOf(false) }
+        var dockVisible by remember { mutableStateOf(false) }
+        LaunchedEffect(fieldFocused) {
+            if (fieldFocused) {
+                dockVisible = true
+            } else {
+                delay(DOCK_BLUR_GRACE_MS)
+                dockVisible = false
+            }
+        }
+        val showTopStrip = toolbarMode != RichTextToolbarMode.DOCK ||
+            paper || trailingAction != null || historyField != null
+        if (showTopStrip) Surface(
             shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shadowElevation = 2.dp,
@@ -849,7 +1156,7 @@ fun RichTextEditor(
                             }
                         )
                     }
-                    ToolToggleButton(
+                    if (toolbarMode != RichTextToolbarMode.DOCK) ToolToggleButton(
                         icon = CurioIcons.FormatText,
                         label = "Format",
                         expanded = toolbarExpanded,
@@ -972,7 +1279,10 @@ fun RichTextEditor(
                             .fillMaxWidth()
                             .heightIn(min = minHeight)
                             .padding(effectiveFieldPadding)
-                            .onFocusChanged { onFocusChanged?.invoke(it.isFocused) }
+                            .onFocusChanged {
+                                fieldFocused = it.isFocused
+                                onFocusChanged?.invoke(it.isFocused)
+                            }
                     )
                 }
 
@@ -1035,6 +1345,10 @@ fun RichTextEditor(
                 )
             }
         }
+        // The field and its paper wrapper as ONE unit: where it goes depends on
+        // the dock below it (a pinned editor scrolls the writing, so the area
+        // has to be something a Box can own).
+        val fieldArea: @Composable () -> Unit = {
         if (paper) {
             // v7.16 — universal style model: the base decides torn vs sharp
             // ruled paper and the style's flags drive every decoration, so
@@ -1077,6 +1391,70 @@ fun RichTextEditor(
         } else {
             fieldBlock()
         }
+        }
+        // PINNED: the writing scrolls on its own and the dock keeps the foot
+        // (the call site hands this editor a weighted height for exactly this).
+        if (dockPinned && toolbarMode == RichTextToolbarMode.DOCK) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Column { fieldArea() }
+            }
+        } else {
+            fieldArea()
+        }
+        // ── The journal's dock (DOCK mode) ─────────────────────────────
+        // At the FOOT of the field, where a thumb already is: the same shape,
+        // tokens and manners as the journal page's own tool dock, with every
+        // tool its own button (no grouped menus) — so the app's full-screen
+        // editors and the journal read as ONE writing surface.
+        if (toolbarMode == RichTextToolbarMode.DOCK) {
+            // The dock rises out of the field's own foot as the writing starts
+            // and folds away when it stops, which is also what keeps it clear of
+            // the save page's own buttons while a note is being READ rather
+            // than written.
+            AnimatedVisibility(
+                visible = dockVisible,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    Spacer(Modifier.height(8.dp))
+                    RichTextDock(
+                        boldActive = hasFlagAt(RichFlag.BOLD),
+                        italicActive = hasFlagAt(RichFlag.ITALIC),
+                        underlineActive = hasUnderlineAt(),
+                        highlightActive = hasFlagAt(RichFlag.HIGHLIGHT),
+                        sizeActive = pendingSizeSp != null,
+                        accent = effectiveAccent,
+                        ink = MaterialTheme.colorScheme.onSurfaceVariant,
+                        enabled = enabled,
+                        currentSp = currentSizeSp(),
+                        onBold = { applyFlag(RichFlag.BOLD) },
+                        onItalic = { applyFlag(RichFlag.ITALIC) },
+                        onUnderline = { applyUnderline() },
+                        onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
+                        onSizePick = { applyExactSize(it) },
+                        // The line's own justification and its hand, both read
+                        // from the run under the caret (the dock echoes what the
+                        // line is wearing).
+                        alignKey = alignKeyAt(
+                            extractRichSpans(tfv.annotatedString), tfv.selection.start
+                        ),
+                        fontKey = fontKeyAt(
+                            extractRichSpans(tfv.annotatedString), tfv.selection.start
+                        ),
+                        onAlign = { applyAlign(it) },
+                        onFont = { applyFont(it) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
         // The text-history browser for this field — self-contained: pill in
         // the dock → this sheet → restore straight back into the editor.
         if (historyOpen && historyField != null) {
@@ -1150,6 +1528,247 @@ internal fun SelectionFormatBar(
                 onPick = onSizePick,
                 paper = paper
             )
+        }
+    }
+}
+
+/**
+ * THE JOURNAL'S DOCK, worn by the app's full-screen rich-text editors.
+ *
+ * Shape, tokens and manners are the journal page's own tool dock
+ * (`PersonalToolDock`): a floating rounded strip in `surfaceContainerHigh`, a
+ * 6dp lift, the tools scrolling in one row and the active one filled with the
+ * accent at 24% and inked in the accent. A member who has written on a page
+ * arrives here knowing exactly where everything is.
+ */
+@Composable
+private fun RichTextDock(
+    boldActive: Boolean,
+    italicActive: Boolean,
+    underlineActive: Boolean,
+    highlightActive: Boolean,
+    sizeActive: Boolean,
+    accent: Color,
+    ink: Color,
+    enabled: Boolean,
+    currentSp: Float,
+    onBold: () -> Unit,
+    onItalic: () -> Unit,
+    onUnderline: () -> Unit,
+    onHighlight: () -> Unit,
+    onSizePick: (Float) -> Unit,
+    /** The line's own alignment / hand, and the doors that set them. */
+    alignKey: String?,
+    fontKey: String?,
+    onAlign: (String?) -> Unit,
+    onFont: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 6.dp,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                // The same reason the journal's dock scrolls: a row of tools
+                // that overflows a narrow phone must never clip the last one.
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            RichTextDockButton("Bold", boldActive, accent, ink, enabled, onBold) {
+                CurioIcon(CurioIcons.FormatBold, null, size = 20.dp)
+            }
+            RichTextDockButton("Italic", italicActive, accent, ink, enabled, onItalic) {
+                CurioIcon(CurioIcons.FormatItalic, null, size = 20.dp)
+            }
+            RichTextDockButton("Underline", underlineActive, accent, ink, enabled, onUnderline) {
+                CurioIcon(CurioIcons.FormatUnderline, null, size = 20.dp)
+            }
+            RichTextDockButton("Highlight", highlightActive, accent, ink, enabled, onHighlight) {
+                CurioIcon(CurioIcons.FormatHighlight, null, size = 20.dp)
+            }
+            // One text-size door — the A+/A− pair's single button, wearing the
+            // dock's own look instead of the compact strip's chip.
+            SizePickerButton(
+                icon = CurioIcons.TextIncrease,
+                label = "Text size",
+                active = sizeActive,
+                accent = accent,
+                enabled = enabled,
+                currentSp = currentSp,
+                onPick = onSizePick,
+                dock = true
+            )
+            // The two tools the app's full-screen editors asked for: a line's
+            // own JUSTIFICATION (left / centre / right / justified) and the HAND
+            // it is written in. Both are drawn rather than looked up — the
+            // bundled icon subset has no alignment marks.
+            RichTextDockMenu(
+                label = "Alignment",
+                active = alignKey != null,
+                accent = accent,
+                ink = ink,
+                enabled = enabled,
+                currentKey = alignKey,
+                options = RICH_ALIGN_OPTIONS,
+                onPick = onAlign,
+                glyph = { RichAlignGlyph(alignKey) }
+            )
+            RichTextDockMenu(
+                label = "Font",
+                active = fontKey != null,
+                accent = accent,
+                ink = ink,
+                enabled = enabled,
+                currentKey = fontKey,
+                options = RICH_FONT_OPTIONS,
+                onPick = onFont,
+                glyph = { RichFontGlyph() }
+            )
+        }
+    }
+}
+
+/** The four ways a line can sit, and the four hands it can be written in. */
+private val RICH_ALIGN_OPTIONS: List<Pair<String?, String>> = listOf(
+    null to "Left",
+    "center" to "Centred",
+    "end" to "Right",
+    "justify" to "Justified"
+)
+
+private val RICH_FONT_OPTIONS: List<Pair<String?, String>> = listOf(
+    null to "Default",
+    "book" to "Book serif",
+    "writing" to "Writing hand",
+    "display" to "Display serif"
+)
+
+/** A dock button that opens its own choices — the shape behind the two menus. */
+@Composable
+private fun RichTextDockMenu(
+    label: String,
+    active: Boolean,
+    accent: Color,
+    ink: Color,
+    enabled: Boolean,
+    currentKey: String?,
+    options: List<Pair<String?, String>>,
+    onPick: (String?) -> Unit,
+    glyph: @Composable () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        RichTextDockButton(label, active, accent, ink, enabled, { expanded = true }) { glyph() }
+        CurioDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            accent = accent
+        ) {
+            options.forEach { (key, text) ->
+                CurioDropdownItem(
+                    text = { Text(text) },
+                    selected = key == currentKey,
+                    accent = accent,
+                    trailingIcon = if (key == currentKey) {
+                        { CurioIcon(CurioIcons.Check, null, tint = accent, size = 16.dp) }
+                    } else null,
+                    onClick = {
+                        expanded = false
+                        onPick(key)
+                    }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The alignment mark, DRAWN: four hairlines laid out the way the line sits.
+ * The bundled icon subset carries no alignment glyphs (the journal's own dock
+ * draws its too), so a justified line is the one whose hairlines all run full
+ * width — right, centre and left step in on the side they lean to.
+ */
+@Composable
+private fun RichAlignGlyph(key: String?) {
+    val ink = LocalContentColor.current
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
+        val stroke = 1.8f.dp.toPx()
+        val width = size.width
+        val fractions = if (key == "justify") listOf(1f, 0.55f, 1f, 0.55f)
+        else listOf(1f, 0.68f, 1f, 0.68f)
+        fractions.forEachIndexed { index, fraction ->
+            val y = size.height * (0.24f + index * 0.18f)
+            val run = width * fraction
+            val x = when (key) {
+                "center" -> (width - run) / 2f
+                "end" -> width - run
+                else -> 0f
+            }
+            drawLine(
+                color = ink,
+                start = androidx.compose.ui.geometry.Offset(x, y),
+                end = androidx.compose.ui.geometry.Offset(x + run, y),
+                strokeWidth = stroke,
+                cap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
+        }
+    }
+}
+
+/** The font tool wears its own capital A — the letter IS the tool. */
+@Composable
+private fun RichFontGlyph() {
+    val ink = LocalContentColor.current
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(18.dp)) {
+        val stroke = 1.8f.dp.toPx()
+        val w = size.width
+        val h = size.height
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) = drawLine(
+            color = ink,
+            start = androidx.compose.ui.geometry.Offset(x1, y1),
+            end = androidx.compose.ui.geometry.Offset(x2, y2),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+        line(w * 0.18f, h * 0.84f, w * 0.5f, h * 0.18f)
+        line(w * 0.5f, h * 0.18f, w * 0.82f, h * 0.84f)
+        line(w * 0.31f, h * 0.60f, w * 0.69f, h * 0.60f)
+    }
+}
+
+/** One tool of the journal-style dock — the journal's `PersonalToolButton`. */
+@Composable
+private fun RichTextDockButton(
+    label: String,
+    active: Boolean,
+    accent: Color,
+    ink: Color,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(50),
+        color = if (active) accent.copy(alpha = 0.24f) else Color.Transparent,
+        modifier = Modifier.size(36.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CompositionLocalProvider(LocalContentColor provides if (active) accent else ink) {
+                Box(
+                    modifier = Modifier.semantics { contentDescription = label },
+                    contentAlignment = Alignment.Center
+                ) { content() }
+            }
         }
     }
 }
@@ -1323,11 +1942,25 @@ private fun SizePickerButton(
     enabled: Boolean,
     currentSp: Float,
     onPick: (Float) -> Unit,
-    paper: Boolean = false
+    paper: Boolean = false,
+    /** Wears the journal dock's own button instead of the compact strip's
+     *  chip (the full-screen editors' dock). */
+    dock: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        FormatToolButton(
+        if (dock) {
+            RichTextDockButton(
+                label = label,
+                active = active,
+                accent = accent,
+                ink = MaterialTheme.colorScheme.onSurfaceVariant,
+                enabled = enabled,
+                onClick = { expanded = true }
+            ) {
+                CurioIcon(icon, null, size = 20.dp)
+            }
+        } else FormatToolButton(
             icon = icon,
             label = label,
             active = active,

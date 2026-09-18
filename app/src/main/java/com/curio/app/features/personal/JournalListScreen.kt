@@ -1,5 +1,13 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -37,7 +45,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -303,7 +313,15 @@ private fun JournalRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (journal.preview.isNotBlank()) {
+                // v389 — a LIST is previewed as a list: its own rows with their
+                // ticks, rather than its text run into a paragraph where a
+                // finished row and an unfinished one read alike (user request:
+                // "its preview as a separate todo preview not inside the
+                // journal"). Everything else previews as prose exactly as before.
+                if (journal.isTodo) {
+                    Spacer(Modifier.height(6.dp))
+                    ChecklistPreview(doc = journal.doc, ink = ink)
+                } else if (journal.preview.isNotBlank()) {
                     Spacer(Modifier.height(4.dp))
                     Text(
                         journal.preview,
@@ -333,7 +351,29 @@ internal fun PersonalHeader(
     title: String,
     subtitle: String,
     onBack: () -> Unit,
-    action: @Composable (() -> Unit)? = null
+    action: @Composable (() -> Unit)? = null,
+    /**
+     * v389 — THE ROLLING TITLE (a book's page).
+     *
+     * A page that repeats its own title in the head AND in the body shows the
+     * same words twice before anything is scrolled (user report: "in book also
+     * in header it shows the title and then below too"). So the head's title is
+     * a ROLL-UP: it is invisible while the page's own title is on screen and
+     * comes in as that one scrolls under the head — which is what a reader
+     * means by "where am I" once the page's own title is gone. The line is
+     * always LAID OUT (only its ink moves), so nothing below it can jump.
+     */
+    titleRevealed: Boolean = true,
+    /**
+     * v389 — WHAT THE HEAD SAYS WHILE THE PAGE'S OWN TITLE IS STILL ON SCREEN.
+     *
+     * Empty (the default) is right for a page with no context to name. A book's
+     * page names its SHELF: until the book's own title and author have scrolled
+     * under the head there is nothing about the book for the head to add, and
+     * "Your shelf" is where the member actually is (user request: "instead of
+     * initial blank say your shelf").
+     */
+    idleTitle: String = ""
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     Row(
@@ -353,20 +393,47 @@ internal fun PersonalHeader(
                 CurioIcon(CurioIcons.ArrowBack, "Back", tint = ink, size = 20.dp)
             }
         }
-        Column(Modifier.weight(1f)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontFamily = FrauncesFontFamily,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = ink
-            )
-            Text(
-                subtitle,
-                style = MaterialTheme.typography.labelMedium,
-                color = ink.copy(alpha = 0.5f)
-            )
+        // ONE, not two: the head says one thing at a time, and it ROLLS — the
+        // idle line and the rolled one are the same two rows, so the swap is
+        // the words changing and the head never changes size. The AUTHOR comes
+        // in with the title (user request: "when i scroll away the title appears
+        // in header make the same for title author too not just title"): before
+        // the roll the page is still saying both of them itself, in the middle
+        // of the screen, at a size the head cannot match.
+        AnimatedContent(
+            targetState = titleRevealed,
+            transitionSpec = {
+                (
+                    fadeIn(tween(230)) +
+                        slideInVertically(tween(270)) { height -> -height / 3 }
+                    ) togetherWith (
+                    fadeOut(tween(150)) +
+                        slideOutVertically(tween(190)) { height -> -height / 3 }
+                    )
+            },
+            label = "personal-header-roll",
+            modifier = Modifier.weight(1f)
+        ) { rolled ->
+            Column(Modifier.fillMaxWidth()) {
+                Text(
+                    if (rolled) title else idleTitle,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFamily = FrauncesFontFamily,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = if (rolled) ink else ink.copy(alpha = 0.72f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    // The line HOLDS ITS HEIGHT while it is out of the way, so
+                    // the head is one size whatever it is saying.
+                    color = if (rolled) ink.copy(alpha = 0.5f) else Color.Transparent,
+                    maxLines = 1
+                )
+            }
         }
         action?.invoke()
     }

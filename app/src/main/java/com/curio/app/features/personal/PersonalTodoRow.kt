@@ -6,6 +6,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -13,13 +14,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +48,6 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * v389 — A TO-DO ROW'S OWN GESTURES: pick it up, carry it, or swipe it away.
@@ -98,6 +102,26 @@ internal class PersonalRowDragState {
     var stride: Float = 0f
         private set
 
+    /**
+     * v389 — EVERY ROW'S OWN HEIGHT, by row id.
+     *
+     * A to-do row WRAPS: a two-line task is twice the height of a one-line one,
+     * so a list's slots are not equal and ONE uniform `stride` for the whole list
+     * is what made a reorder of uneven rows land a place early or late — the
+     * finger had travelled past a tall row without the list noticing, or the list
+     * stepped before the finger had really cleared a short one (user report: "the
+     * todo rearrange works but also sometimes buggy"). Written from each row's own
+     * layout pass, read only by the gesture.
+     */
+    private val rowHeights = mutableMapOf<String, Float>()
+
+    fun measure(id: String, height: Float) {
+        if (height > 0f) rowHeights[id] = height
+    }
+
+    /** [id]'s measured height, or the carried row's own slot before it is known. */
+    private fun heightOf(id: String): Float = rowHeights[id] ?: stride
+
     val isDragging: Boolean get() = draggedId != null
 
     fun begin(id: String, index: Int, slotStride: Float) {
@@ -108,11 +132,31 @@ internal class PersonalRowDragState {
         stride = slotStride.coerceAtLeast(1f)
     }
 
-    fun dragBy(amountY: Float, lastIndex: Int) {
+    /**
+     * The finger moved [amountY] with [ids] as the list in its current order.
+     *
+     * Each step is charged the height of the row being PASSED — never less than
+     * the carried row's own slot — so crossing a wrapped, two-line task costs
+     * two lines' travel and the list steps exactly when the eye says it should.
+     * With equal rows this is the plain "half a slot per step" the list always
+     * had; with uneven ones it is the whole reason it now lands where the finger
+     * put it.
+     */
+    fun dragBy(amountY: Float, ids: List<String>, lastIndex: Int) {
         travel.floatValue += amountY
-        steps = (travel.floatValue / stride).roundToInt().let { raw ->
-            (fromIndex + raw).coerceIn(0, lastIndex) - fromIndex
+        val travel = travel.floatValue
+        val down = travel > 0f
+        var index = fromIndex
+        var spent = 0f
+        while ((down && index < lastIndex) || (!down && travel < 0f && index > 0)) {
+            val neighbour = ids.getOrElse(if (down) index + 1 else index - 1) { "" }
+            val cost = heightOf(neighbour).coerceAtLeast(stride)
+            val remaining = if (down) travel - spent else -travel - spent
+            if (remaining < cost / 2f) break
+            spent += cost
+            index += if (down) 1 else -1
         }
+        steps = index - fromIndex
     }
 
     fun targetIndex(lastIndex: Int): Int = (fromIndex + steps).coerceIn(0, lastIndex)
@@ -145,6 +189,135 @@ internal class PersonalRowDragState {
 private const val SWIPE_AWAY_FRACTION = 0.34f
 
 /**
+ * v389d — THE GRIP'S OWN ARM WIDTH.
+ *
+ * A to-do row is one text field from edge to edge, and a text field keeps the
+ * long press for itself (that is how a word gets selected in it) — so a long
+ * press meant to PICK THE ROW UP never reached the row at all: the first report
+ * of a broken reorder was simply a row that would not lift (user report: "the
+ * todo list doesn't reorder and it doesn't tap and hold it just sits right
+ * after"). The row therefore gives up this strip of its trailing edge to a grip
+ * that answers a PLAIN drag — no long press to wait through, nothing else living
+ * there to argue with — and the writing keeps the rest.
+ */
+private val TODO_GRIP_WIDTH = 32.dp
+
+/**
+ * v389 — IS A BLOCK BEING CARRIED?
+ *
+ * A carried VOICE NOTE is a waveform strip whose own gesture seeks (see
+ * [PersonalVoiceBar]), and two detectors on one finger is the bug the to-do rows
+ * already had once. The strip consults this and stands down while the block is
+ * being carried — provided by [PersonalMovableBlock] for its own content, so no
+ * page has to thread the drag state into a voice note.
+ */
+internal val LocalPersonalBlockCarried = staticCompositionLocalOf { false }
+
+/**
+ * v389 — PICK A BLOCK UP AND CARRY IT (the to-do row's gesture, without the
+ * swipe).
+ *
+ * The to-do list can be re-ordered; everything else on a page was fixed where it
+ * was written — which is wrong for a VOICE NOTE, because a note is a thing about
+the thought it sits under, and the place it arrived is just where the recording
+ * happened (user request: "add drag to move the voice note too, in journal page,
+ * also add in book review chapter review too"). So the same pick-up, the same
+ * measured slots (see [PersonalRowDragState.dragBy]) and the same commit — the
+ * page's order IS the stored document — wrapped around whichever block the page
+ * drew, exactly like [PersonalTodoRow] wraps a row.
+ *
+ * The caller hands in the SAME `drag` the page hoisted, so a page that is both a
+ * list and a page with a voice in it still has one gesture at a time.
+ */
+@Composable
+internal fun PersonalMovableBlock(
+    id: String,
+    index: Int,
+    state: PersonalEditorState,
+    drag: PersonalRowDragState,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val gapPx = with(LocalDensity.current) { 6.dp.toPx() }
+    var blockHeight by remember(id) { mutableFloatStateOf(0f) }
+
+    val isDragged = drag.draggedId == id
+    val lastIndex = state.blockIds.lastIndex
+    // The rows it passes slide out of the way; the commit at the drop is what
+    // makes that shift permanent, so it SNAPS when the gesture ends.
+    val shift by animateFloatAsState(
+        targetValue = if (isDragged) 0f else drag.shiftFor(index, lastIndex),
+        animationSpec = if (!drag.isDragging || isDragged) snap()
+        else spring(dampingRatio = 0.82f, stiffness = 700f),
+        label = "movableBlockShift"
+    )
+
+    // The lifted look, the project's own rule: shadow BEFORE the fill, and an
+    // OPAQUE fill (a translucent one lets the shadow bleed through).
+    val lifted = if (isDragged) {
+        Modifier
+            .shadow(6.dp, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest
+                else Color(0xFFF7F1E6)
+            )
+    } else {
+        Modifier
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .onSizeChanged {
+                if (it.height > 0) {
+                    blockHeight = it.height.toFloat()
+                    drag.measure(id, it.height.toFloat())
+                }
+            }
+            .zIndex(if (isDragged) 1f else 0f)
+            .graphicsLayer {
+                translationY = shift + (if (drag.draggedId == id) drag.travelY else 0f)
+                if (drag.draggedId == id) {
+                    scaleX = 1.02f
+                    scaleY = 1.02f
+                }
+            }
+            .then(lifted)
+            .then(
+                if (!enabled) Modifier
+                else Modifier.pointerInput(id, enabled) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = {
+                            if (blockHeight > 0f) drag.begin(id, index, blockHeight + gapPx)
+                        },
+                        onDrag = { change, amount ->
+                            change.consume()
+                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
+                        },
+                        onDragEnd = {
+                            val from = drag.fromIndex
+                            val to = drag.targetIndex(state.blockIds.lastIndex)
+                            if (from in 0..state.blockIds.lastIndex && from != to) {
+                                state.moveBlock(from, to)
+                            }
+                            drag.reset()
+                        },
+                        onDragCancel = { drag.reset() }
+                    )
+                }
+            )
+    ) {
+        // What is inside knows it is being carried, so a gesture of its own
+        // (the waveform's seek) can stand down for the ride.
+        CompositionLocalProvider(LocalPersonalBlockCarried provides isDragged) {
+            content()
+        }
+    }
+}
+
+/**
  * ONE TO-DO ROW, wrapped in the gestures above. The row itself is untouched —
  * this is a shell around whichever block the page drew, so the writing (and its
  * `key(id)` identity) is exactly what it is on every other page.
@@ -156,6 +329,8 @@ internal fun PersonalTodoRow(
     state: PersonalEditorState,
     drag: PersonalRowDragState,
     enabled: Boolean,
+    /** The page's ink, for the grip. */
+    ink: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -203,6 +378,10 @@ internal fun PersonalTodoRow(
             .onSizeChanged {
                 if (it.height > 0) rowHeight = it.height.toFloat()
                 if (it.width > 0) rowWidth = it.width.toFloat()
+                // The list needs to know how TALL each of its rows is, not just
+                // this one — a reorder is measured against the rows it passes
+                // (see PersonalRowDragState.dragBy).
+                drag.measure(id, it.height.toFloat())
             }
             .zIndex(if (isDragged) 1f else 0f)
             .graphicsLayer {
@@ -228,7 +407,7 @@ internal fun PersonalTodoRow(
                         },
                         onDrag = { change, amount ->
                             change.consume()
-                            drag.dragBy(amount.y, state.blockIds.lastIndex)
+                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
                         },
                         onDragEnd = {
                             val from = drag.fromIndex
@@ -246,25 +425,39 @@ internal fun PersonalTodoRow(
                 if (!enabled) Modifier
                 else Modifier.pointerInput(id, enabled) {
                     detectHorizontalDragGestures(
-                        onDragStart = { swipeRaw.floatValue = 0f },
+                        // v389 — A ROW BEING CARRIED UP OR DOWN IS NOT BEING
+                        // SWIPED. Both detectors sat on the same row, so one
+                        // gesture could satisfy both: a reorder with a sideways
+                        // wobble in it also dragged the row off the list, and a
+                        // swipe could nudge the order on its way out. The
+                        // long-press drag claims the gesture, and this one stands
+                        // down for as long as it holds it (user report: "the
+                        // todo rearrange works but also sometimes buggy").
+                        onDragStart = { if (!drag.isDragging) swipeRaw.floatValue = 0f },
                         onHorizontalDrag = { change, amount ->
-                            change.consume()
-                            swipeRaw.floatValue += amount
+                            if (!drag.isDragging) {
+                                change.consume()
+                                swipeRaw.floatValue += amount
+                            }
                         },
                         onDragEnd = {
-                            val gone = rowWidth > 0f &&
-                                abs(swipeRaw.floatValue) > rowWidth * SWIPE_AWAY_FRACTION
-                            val from = swipeRaw.floatValue
-                            if (gone) {
+                            if (drag.isDragging) {
                                 swipeRaw.floatValue = 0f
-                                state.removeRow(id)
-                            } else if (from != 0f) {
-                                swipeRaw.floatValue = 0f
-                                settling = true
-                                scope.launch {
-                                    settle.snapTo(from)
-                                    settle.animateTo(0f, tween(190))
-                                    settling = false
+                            } else {
+                                val gone = rowWidth > 0f &&
+                                    abs(swipeRaw.floatValue) > rowWidth * SWIPE_AWAY_FRACTION
+                                val from = swipeRaw.floatValue
+                                if (gone) {
+                                    swipeRaw.floatValue = 0f
+                                    state.removeRow(id)
+                                } else if (from != 0f) {
+                                    swipeRaw.floatValue = 0f
+                                    settling = true
+                                    scope.launch {
+                                        settle.snapTo(from)
+                                        settle.animateTo(0f, tween(190))
+                                        settling = false
+                                    }
                                 }
                             }
                         },
@@ -273,7 +466,62 @@ internal fun PersonalTodoRow(
                 }
             )
     ) {
-        content()
+        // The writing steps aside for the grip rather than running under it.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = TODO_GRIP_WIDTH)
+        ) {
+            content()
+        }
+        // ── THE GRIP ────────────────────────────────────────────────────
+        //
+        // Its own arm of the row, and its own gesture: a plain DRAG (no long
+        // press — a handle is already an invitation, and waiting half a second
+        // on one reads as a dead row). The height is the row's own measured
+        // height, because a row WRAPS: the target has to be the row, not a
+        // standard 48dp that a two-line task would overshoot.
+        val density = LocalDensity.current
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(TODO_GRIP_WIDTH)
+                .height(with(density) { rowHeight.toDp().coerceAtLeast(1.dp) })
+                .zIndex(if (isDragged) 1f else 0f)
+                .pointerInput(id, enabled) {
+                    if (!enabled) return@pointerInput
+                    detectDragGestures(
+                        onDragStart = {
+                            if (rowHeight > 0f) drag.begin(id, index, rowHeight + gapPx)
+                        },
+                        onDrag = { change, amount ->
+                            change.consume()
+                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
+                        },
+                        onDragEnd = {
+                            val from = drag.fromIndex
+                            val to = drag.targetIndex(state.blockIds.lastIndex)
+                            if (from in 0..state.blockIds.lastIndex && from != to) {
+                                state.moveBlock(from, to)
+                            }
+                            drag.reset()
+                        },
+                        onDragCancel = { drag.reset() }
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                CurioIcons.DragHandle,
+                "Hold to move this row",
+                // The page's own ink, held back — a handle is furniture, not
+                // writing (and Unspecified only happens for a caller that did
+                // not say, which no caller does).
+                tint = if (ink == Color.Unspecified) MaterialTheme.colorScheme.onSurfaceVariant
+                else ink.copy(alpha = 0.34f),
+                size = 19.dp
+            )
+        }
     }
 }
 

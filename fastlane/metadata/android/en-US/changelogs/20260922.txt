@@ -1,4 +1,80 @@
+FIX:
+- Writing: a page READ back now draws the small print with the writing beside it exactly as the page that was written does — the read view ran its own copy of the renderer, so the pair only existed while editing.
+- Writing: a small print keeps room for the writing — the print takes a narrow column and the line under it moves in beside it, like a picture set in a printed column, instead of pushing every word down the page (a half or page print, and a second photo, still pair as they did).
+- Books: a chapter list is read from more places — Open Library's own work record as well as its editions' (and the richest table wins, instead of the first one with three rows), Google Books, and Crossref, whose chapter records are the only source that answers for an academic or edited volume and carries the pages each chapter spans.
+- Reading: a PDF selection takes the words under your finger — the press settles on the line it landed on, measured in the page's own crop box, instead of reaching for whichever word was nearest anywhere on the page, which is what made a hold wash the whole page.
+- Reading: a paragraph of an image with no caption can no longer break a selection sweep.
+- Reading: a movie, an anime and a song open the same sheet the books, albums and series do — artwork beside its own title and byline, the shelf toggles, the synopsis in a folding card — instead of a "Similar …" panel that said nothing and could not keep the topic.
+- Books: reopening a book no longer flashes its placeholder rows — the head, the chapter names and their page ranges are the ones the last visit ended on from the first frame, instead of arriving a couple of frames late.
+- Reading: a PDF page is drawn for the screen it is on — it was rendered at a fixed size and then stretched back up, which is what made it soft on a high-density phone — and the foot of the reader no longer states the page a second time while the page bar is already saying it.
+- Reading: the scrolling reader shows ONE page at a time again — every page takes the screen it is given and fits inside it, so a page and the next one's top are no longer stacked under each other.
+- Reading: a book's own contents keep their shape — a part's chapters are indented and marked by their level, from the EPUB's nav document, its NCX and a PDF's outline alike, instead of reading as one flat list.
+- Social: the wall opens on the page this phone already has — "Last 24 hours" and its cards are on screen from the first frame, instead of the section arriving a beat late and a "Nothing here yet" card showing before the wall you already had.
+- Social: the session is read before the page paints, so a signed-in account no longer opens on "Sign in to see the social wall" and then swap to the wall.
+- Social: the Moderation door is remembered from the last time the server confirmed it, so it is on the page the moment Social opens instead of a check later — and that check still corrects it.
+- Social: two portraits were wearing the same eyes — the flower crown had the wizard's sparkle, and the space helmet wore the curious wide eye instead of looking through its own visor; each has a gaze of its own now, so no portrait shares one with the tile beside it.
+- Writing: a voice note is no longer a box — it is the waveform, the play button and the clock on the page itself, with the ✕ asking before it throws a recording away.
+- Writing: a note on a topic says the topic once — the bar carries the lane now, instead of repeating the name the page already shows.
+- Journals: the day's mood is six named chips in each feeling's own colour, instead of six grey glyphs to guess at.
+- Save your take: a note's tool bar appears while you are writing in it and folds away when you stop — tap the blank space beside a note to end the typing — instead of a formatting row parked under every note on the page.
+- Writing: a marker's colour and the face a line is set in travel with the words, so both survive Enter, a paste and reopening the page.
+- Reading: tapping the page brings the head and foot back — they used to hide themselves and then be unreachable, because every paragraph swallowed the tap.
+- Writing: tapping bold, italic, underline, strike, size or quote with nothing selected now sets what you type NEXT instead of rewriting the line you are on.
+- Writing: Enter is a new line — paste a paragraph and it arrives as its own lines, so you can drop a voice note between them and Select all works.
+- Writing: the title tool stops at the end of the title — Enter under a heading starts prose.
+- Writing: turning to the pen no longer fights the keyboard's rise; the page turns first and the keyboard follows.
+- Books: the pinned chapter no longer appears before its heading has actually scrolled away, and tapping it goes back to that heading.
+- Books: the book page's head rolls up the author along with the title.
+
 ADD:
+- Art: the artwork, artist, painter and author cards on the reveal wear their own picture — an artwork shows itself (the Met's public-domain image, then Wikipedia's), an artist or a painter shows a work the Met attributes to them, and an author shows their portrait (Wikipedia's lead image for the name, or the cover of the first of their books when there is no photograph). The resolved picture is remembered per topic, so the sheet that opens on a tap is painted from the same one.
+- Art: an artwork, an artist and a painter open a sheet of their own — the work's record (its title, maker, date, medium, museum and a public-domain image from the Metropolitan Museum's open-access API, with Wikipedia's own words and its article as the words half), or, for an artist or a painter, the works the Met attributes to them. Both sources are keyless and free.
+- Books: the author's own sheet leads with their face — the portrait the reveal card resolved sits in the header, read from the same stored picture instead of being looked up again, and it falls back to the person's silhouette when there is none to draw.
+- Books: an authors topic opens their written works straight from the reveal, the same sheet the author's name opens from a book.
+- Books: the author under a book's title is a door now — tap it and their written works open in their own sheet (every other book Open Library knows them for, with covers and first publication years), on the same keyless source the rest of the app already reads.
+- Setup: every artwork, chapter and author source the sheets read now has its free tier written down in `.env.example` — which ones need no key at all (Open Library, iTunes, TVMaze, Jikan, MusicBrainz, Cover Art Archive) and which three buy more when set (Google Books, LibraryThing, Spotify).
+- Reading: tap links in journal pages — URLs are detected and underlined in the read-only view, and tap them to open in the browser.
+- Reading: the selection bar is opaque now — highlight colours and actions sit on a solid surface that matches the reader's skin, instead of a near-transparent wash.
+- Books: Google Books chapter list as a fallback — when Open Library has no table of contents, the enrichment pass now tries Google Books' own chapter data (keyless, same consent toggle).
+- Reading: select words on a PDF page too — hold the page to take the word under your finger and drag to extend the passage, then highlight it, write a note on it or bookmark it from the same bar a reflowable book uses. A page of pictures still marks as a whole page, exactly as before.
+- Reading: a typeset book's own printed page numbers — the Contents sheet can show the page-list the edition carries, so "printed page 42" is a place to jump to, not a guess.
+- Incursion: a hidden page holding the whole viewing order — every Marvel, Sony and X-Men film, series and short, in the order they are meant to be watched, with the essentials marked. It is not in any menu: type "i love you 3000" into any search box in the app and it unlocks, then opens from a floating "Incursion" button on Home.
+- Incursion: mark any title not watched, watching, planning, watched, on hold or dropped — the list says how far through you are, and the filter chips narrow it to essentials, what is left, what is in progress or what is done.
+- Incursion: mark a WHOLE PHASE in one tap — each phase (or era) header carries its own action for all six states, and can clear itself again after asking.
+- Incursion: list or grid, whichever you like reading a shelf in — two tiles across with each title's order and status, phases still heading their own blocks so the one-tap phase marking works in either view.
+- Writing: a photo is a print now — a page, half or small one chosen from the frame's own corner, sized as a share of the text's measure so nothing can ever land on top of it, with the caption written in the frame's wide bottom border.
+- Writing: a photo can be picked up and carried to another place on the page, exactly like a voice note.
+- Writing: a marker pen on the dock — four inks (amber, rose, sage, sky), the same four a book is marked with. Mark a selection outright, or arm a pen for the words you type next; the button wears the pen it is about to lay down.
+- Writing: a font menu — the four faces the app already bundles (serif, sans, mono, display), with the menu itself set in each face and the button a lettered specimen of the face in use.
+- Writing: right and justified now join left and centred, so every alignment a line can wear is one tap on the dock.
+- Writing: text history is the dock's first tool — the line you are in is snapshotted as you write, and a version you restore lands back on that line.
+- Reading: pinch a book to zoom — a page magnifies and pans, a reflowed book re-lays itself out at a larger type size.
+- Reading: search any book from the foot of the page, and every find is washed where it sits.
+- Reading: highlight a whole chapter at once from its heading, instead of marking it paragraph by paragraph.
+- Reading: a PDF page now takes the reader's own ink — paper, sepia, night or white — and fills the screen it is on.
+- Reading: an EPUB's pictures are drawn in the place they stand in the file, and its headings keep their own three sizes.
+- Writing: every page can pin its own headings to the top as they scroll by, like the book review pins a chapter — tap the pinned line to go back to it.
+- Books: the book page's head names your shelf until the book's own title and author have scrolled up, then wears both.
+- Books: hold the "Read" pill to say which file Curio opens — pick the PDF or the EPUB, or swap the one it already has.
+- Books: a book review pins the chapter you are in to the top of the page as its markers scroll by, so a long review always says where you are.
+- Journals: the day's title comes into the top bar once the title you wrote has scrolled away.
+- Writing: the book review and the chapter review wear the same eye / pen switch as every other page, and the switch itself now slides between the two instead of swapping.
+- Writing: tap the blank part of a page to start writing even when the caret was already sitting there, and double-tap a page you are reading to put the pen back.
+- Writing: press and hold a voice note to carry it to a new place on the page, the way a to-do row already moves.
+- Books: the book review and the chapter review now have the journal's own mic — record a voice note in either page, and the waveform lands in the writing just like it does in a journal.
+- Writing: the card editor's and the book note's tool dock now HOLDS the foot of the screen while the writing moves under it, the way the journal page's dock does.
+- Social: every portrait has its own gaze now — twelve eye designs chosen per character (a wizard's sparkle, a hood's shaded gleam, a beard's steady eye, a flower crown's smile) with brows to match, instead of the same pair of eyes on all 28.
+- Writing: the dock's two last tools — put a line to the left, centred, right or justified, and set the hand it is written in (default, book serif, writing hand, display serif). Both work on a selection, or on the line you are in when nothing is selected, and they show in the card, the saved entry and the export alike.
+- Writing: the enlarged card editor and the book's note editor are the journal's page now — the same background, the same dock at the foot of the field.
+- To-do: a list previews as its OWN thing in the journals list — its rows with their boxes, ticked or not — instead of its text run into a paragraph.
+- To-do: rows read bigger on a list page, and the Home "+" sheet's to-do door wears the list's own box.
+- Writing: the card editor's full-screen writing and the book sheet's chapter-note editor now write on the journal's own tool dock — a floating strip at the foot of the page where every tool is its own button (bold, italic, underline, highlight, text size), instead of a Format toggle that unfolded a second toolbar.
+- Writing: underline is a tool now — arm it and the words you type carry it, or select a passage and apply it.
+- Reading: a book's own reader — tap once and the head and foot step out of the way, tap again and they come back, so the words get the whole screen.
+- Reading: mark a passage as you read — press and hold to highlight it in one of four inks, write a note on it, or drop a bookmark. Every mark is listed with the words it was made on, and jumping to one lands back on it.
+- Reading: what you marked while reading now shows on the book's page as quotes from the margins, and tapping one opens the reader at that mark.
+- Reading: an EPUB or a text file reads as one continuous scroll instead of a page at a time, with each chapter a heading you can jump to.
+- Reading: the page's own ink is yours to choose — paper, sepia, night or white — for daylight, lamplight or the dark.
 - Books: the shelf shows three covers across, split into what you are reading and what you have finished.
 - Books: a book added from the open library now arrives with its real chapter names and page ranges, read from the edition's own table of contents.
 - Books: a photo on a page now grows out of where you tapped it — no screen change, the page stays behind it.
@@ -28,6 +104,32 @@ ADD:
 - Writing: the bullet tool opens a menu of marks to choose from — dot, ring, dash, star, sparkle, crystal, arrow, leaf, heart and bolt — and each line keeps the one it wears.
 - Journals: the head shows today's date instead of a "Write today" pill, the same on the shelf instead of "Add a book".
 FIX:
+- Books: the book page stops repeating itself — its title comes into the head only as the page's own title scrolls under it, instead of sitting there twice.
+- Writing: the eye / pen flip is one move now — the two sides cross-fade upward into the keyboard instead of sliding past each other, so it no longer looks clunky while the keyboard comes up.
+- Social: no portrait reads as a black blob — the darkest hair and hood tones came off near-black, and the hooded face is a face rather than paper.
+- Writing: a note's topic stays pinned above the writing instead of scrolling out of view, so "choose the topic" can never hide under the fold.
+- Writing: going to a topic from a note's header and coming back keeps the note and the topic it was about — it no longer saves one page and then asks you to pick the topic again on a second one.
+- Writing: select all selects the PAGE now — the whole row set wears the selection and Copy puts all of it on the clipboard, instead of grabbing only the line the caret was in.
+- Writing: a to-do box can be ticked while READING a page, not only while writing it — and the tick saves itself like any other change.
+- Reading: a book opens exactly where you stopped, and the foot of the reader names the chapter you are in (the page, for a PDF) as you read instead of the place it opened at.
+- Reading: a PDF draws its pages as you reach them instead of every page up front, so a long PDF opens at once and stops holding so much of the phone's memory.
+- Reading: a mark belongs to the book AND to the file it was made in, so wiring a book to another PDF starts that file's own marks instead of landing the old highlights on text that is not there.
+- Books: a saved book opens the way a journal does — the reading side when it has writing and the pen when it has none (the shelf was being asked before it had answered, so a book with writing still opened as the book view).
+- To-do: picking a row up to move it no longer fights the swipe — a carried row cannot also be swiped off the list, and a task that wraps onto two lines counts for its own height, so the list lands where your finger put it.
+- Cabinet: tapping "Curiying now" on a book also puts it on your own shelf, so it shows up in My shelf on Home and the book's chapter notes attach to it — taking it back out of the shelf never deletes the book.
+- Writing: the blank part of a book or chapter review starts the writing — tap the empty space and the caret and the keyboard follow, instead of the page sitting there dead.
+- Books: "Add chapter" offers the book's own chapter list (its number and its name) and drops the one you pick straight in, instead of handing you a blank heading to type.
+- Journals: opening a saved journal lands on the reading side, while a page with nothing written on it still opens ready to write.
+- Writing: a line you made with Enter can be taken back — backspace at the start of a line joins it to the one above, and an empty line goes away.
+- Writing: the tool you have switched on stays on after Enter — a quote, a list or a title carries to the new line instead of dropping to plain prose.
+- Writing: a quote is a coffee panel now — a soft wash behind the words with the rule down its side — and a quotation typed over several Enters reads as one continuous block.
+- Writing: the bullet tool gives the line a dot on the first tap and opens the mark menu on the next, and the row that takes a list off a line reads "Remove list".
+- Writing: a bullet's mark is a deep coffee instead of your theme's accent, and the to-do tool wears the page's own checklist box instead of a struck-through task icon.
+- Writing: the page's mic floats over the writing, clear of the tool row, where the whole button can be tapped — and recording a voice note asks for the microphone properly (the first tap used to fail silently while Android's dialog was still up).
+- Writing: the eye / pen switch is a move instead of a swap — the writing slides in from one side and the reading from the other.
+- Journals: the date changes with a shift instead of swapping in place, and the calendar's picked day is the accent's lighter tone so the numeral stays readable.
+- Social: a quote is set in deep coffee instead of your theme's accent, in the composer's preview and on the wall alike.
+- Home: the Pages / My shelf doors hold their row's left edge while the chips scroll under them, and the doors wear your accent; the book cover footer's title is smaller.
 - Books: the description folds to a line while you are writing and opens on a tap, instead of pushing your own words down the page.
 - Books: a chapter review saves itself even when you back straight out of the page (the last change used to be lost).
 - Cabinet: "Curiying now" counts and lists the shelf books you are part-way through, instead of only the items saved onto that shelf.

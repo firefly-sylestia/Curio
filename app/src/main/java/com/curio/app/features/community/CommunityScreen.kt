@@ -119,6 +119,14 @@ import kotlinx.coroutines.withContext
 fun CommunityScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // v389d — THE SESSION IS RESTORED BEFORE THE FIRST READ of it, not in an
+    // effect that runs after the first frame. With a stored session the page
+    // painted the signed-OUT copy first ("Sign in to see the social wall") and
+    // then swapped in "Last 24 hours" — the section the user reported arriving
+    // late every time Social opened. [OnlineAccount.restore] is idempotent and
+    // only touches storage when it has no session yet, so the effect that used
+    // to sit further down is gone with it.
+    remember { OnlineAccount.restore(context) }
     val account = OnlineAccount.state
     val token = account.session?.accessToken
     val wide = windowWidthSizeClass().isWide
@@ -134,8 +142,19 @@ fun CommunityScreen(navController: NavController) {
     // a tab must not offer a "back" — the bar is the navigation) and clears
     // the floating bar at the bottom of the list.
     val asTab = AppPreferences.communityTabVisible
-    var cards by remember { mutableStateOf<List<CommunityCard>>(emptyList()) }
+    // v389d — THE WALL IS THE DEVICE'S OWN PAGE ON THE FIRST FRAME. `cards`
+    // started empty and was filled from the cache inside a LaunchedEffect (which
+    // runs AFTER the first frame), so every open painted "Nothing here yet" for
+    // a beat and then swapped in the wall the phone already had (user report:
+    // "in community the last 24 hours nothing here yet appears late"). The read
+    // is the one the effect already made — its own memory map answers every
+    // repeat — it just happens before the frame instead of after it.
+    var cards by remember { mutableStateOf(SocialFeedCache.read(context)) }
     var loading by remember { mutableStateOf(false) }
+    // True once an answer has actually been seen: the cache's page, or the
+    // server's. An empty wall and an unread wall are not the same thing, so the
+    // "Nothing here yet" card waits for one.
+    var answered by remember { mutableStateOf(false) }
     // The FOLLOWING filter (v389): off shows the whole wall; on shows only the
     // posts of members this account follows. The ids are read once when the
     // wall opens (and after each refresh), so the filter costs the feed
@@ -159,10 +178,14 @@ fun CommunityScreen(navController: NavController) {
     // scroll reset, no offline flag) so a post landing while you read is simply
     // there the next time you look up.
     var pushed by remember { mutableStateOf(0) }
-    var isCommunityAdmin by remember { mutableStateOf(false) }
+    // v389d — seeded from the right the server LAST confirmed (see
+    // AppPreferences.KEY_COMMUNITY_ADMIN), so the Moderation section is on the
+    // page the moment it opens instead of a round trip later. This open's own
+    // check below still corrects it; the database is the authority.
+    var isCommunityAdmin by remember { mutableStateOf(AppPreferences.communityAdminState) }
     // May THIS account remove someone else's reply — the sheet's one moderator
     // move. The database asks again; this only decides what is offered.
-    var canModerateReplies by remember { mutableStateOf(false) }
+    var canModerateReplies by remember { mutableStateOf(AppPreferences.communityAdminRepliesState) }
     // My OWN moderation state — only ever used to explain a hidden account to
     // the person it applies to.
     var moderation by remember { mutableStateOf<CurioModerationStatus?>(null) }
@@ -184,8 +207,6 @@ fun CommunityScreen(navController: NavController) {
         }
     }
 
-    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
-
     // The follow map the Following filter reads: one small request when the
     // wall opens, refreshed alongside the feed so a follow made on a profile
     // is honoured the next time the wall reloads.
@@ -205,12 +226,15 @@ fun CommunityScreen(navController: NavController) {
             CommunityApi.myAdminRow(active, userId).onSuccess { row ->
                 isCommunityAdmin = row != null
                 canModerateReplies = row?.allows("replies") == true
+                // Remembered, so the next open has the door already.
+                AppPreferences.setCommunityAdmin(context, row != null, canModerateReplies)
             }
             SocialApi.moderationStatus(active, userId).onSuccess { moderation = it }
         } else {
             isCommunityAdmin = false
             canModerateReplies = false
             moderation = null
+            AppPreferences.setCommunityAdmin(context, false, false)
         }
     }
 
@@ -252,6 +276,7 @@ fun CommunityScreen(navController: NavController) {
             }
         )
         loading = false
+        answered = true
     }
 
     /**
@@ -284,10 +309,10 @@ fun CommunityScreen(navController: NavController) {
 
     LaunchedEffect(eligible, token) {
         if (eligible) {
-            // The device's copy FIRST — an offline open is a wall, not a blank
-            // screen — then the server's answer replaces it in place.
-            val cached = SocialFeedCache.read(context)
-            if (cards.isEmpty()) cards = cached
+            // The device's copy is ALREADY on screen (seeded at composition),
+            // so this read only runs when the page opened with nothing; either
+            // way the server's answer replaces it in place.
+            if (cards.isEmpty()) cards = SocialFeedCache.read(context)
             load()
         } else {
             cards = emptyList()
@@ -589,7 +614,7 @@ fun CommunityScreen(navController: NavController) {
                     cards.filter { it.authorId in followingIds }
                 } else cards
 
-                if (visibleCards.isEmpty() && !loading && error == null) {
+                if (visibleCards.isEmpty() && !loading && error == null && answered) {
                     item {
                         SettingsOptionCard {
                             SettingsOptionInfoRow(

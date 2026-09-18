@@ -28,10 +28,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,14 +87,23 @@ fun TopicNoteScreen(
     // The topic the page is about. Seeded by the route when the note was
     // started FROM a topic (the reveal page's "write about this"), and picked on
     // the page otherwise — including later, on a page that started blank.
-    var topicId by remember { mutableStateOf(initialTopicId) }
-    var topicName by remember { mutableStateOf(initialTopicName) }
-    var categoryId by remember { mutableStateOf(initialCategoryId) }
+    // v389 — SAVED, not merely remembered. Tapping the topic in the header
+    // navigates to that topic's page; coming back disposed this composition, so
+    // the picked topic was forgotten and the page asked for a new one while the
+    // first choice had already been written to its row (user report: "when i
+    // select one and i tap the look the topic from the header and i press back
+    // the previous topic gets saved and it asks me again to choose a new").
+    var topicId by rememberSaveable { mutableStateOf(initialTopicId) }
+    var topicName by rememberSaveable { mutableStateOf(initialTopicName) }
+    var categoryId by rememberSaveable { mutableStateOf(initialCategoryId) }
     // A note about a topic is not a DAY, but it keeps the day it was written:
     // the journals list groups pages by date, and a page with no date would land
     // in January 1970. Set once, never moved.
-    var dateMillis by remember { mutableLongStateOf(startOfToday()) }
-    var pickerOpen by remember { mutableStateOf(initialTopicName.isBlank()) }
+    // A BOXED Long on purpose: `rememberSaveable` saves a MutableState, not the
+    // primitive holders (the Long / Int / Float state holders are never used with
+    // it anywhere in this app, and they are not what its state overload expects).
+    var dateMillis by rememberSaveable { mutableStateOf(startOfToday()) }
+    var pickerOpen by rememberSaveable { mutableStateOf(initialTopicName.isBlank()) }
 
     val category = categoryId.takeIf { it.isNotBlank() }
         ?.let { runCatching { CurioCategories.byId(CategoryId.valueOf(it)) }.getOrNull() }
@@ -162,7 +171,11 @@ fun TopicNoteScreen(
                 onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) }
             )
         },
-        aboveCanvas = {
+        // v389 — the topic head is PINNED above the writing instead of scrolling
+        // with it: the subject of a note is not a field on it, and a scrolled
+        // head is what hid the "choose the topic" door under the fold (user
+        // report). It stays put while the words move under it.
+        pinnedHead = {
             TopicHead(
                 topicName = topicName,
                 categoryName = category?.displayName.orEmpty(),
@@ -171,7 +184,7 @@ fun TopicNoteScreen(
                 ink = ink,
                 onChoose = { pickerOpen = true }
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
         }
     )
 
@@ -312,10 +325,20 @@ private fun TopicNoteTopBar(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
+                // THE TOPIC'S NAME IS NOT REPEATED HERE.
+                //
+                // It has a proper home on the page in both modes — the pinned
+                // card while writing, the heading while reading — so naming it
+                // in the bar as well made the page say the same thing twice
+                // (user report: "the note on a topic, it shows duplicate topic
+                // name in view fix that too"). This line carries the LANE
+                // instead, which is the one thing about the note the page does
+                // not already say; it falls back to the topic's own name only
+                // when there is no lane to name.
                 listOfNotNull(
-                    topicName.ifBlank { null },
-                    categoryName.ifBlank { null }
-                ).joinToString(" · ").ifBlank { "Pick a topic to write about" },
+                    categoryName.ifBlank { null },
+                    topicName.ifBlank { null }.takeIf { categoryName.isBlank() }
+                ).joinToString(" \u00b7 ").ifBlank { "Pick a topic to write about" },
                 style = MaterialTheme.typography.labelSmall,
                 color = ink.copy(alpha = 0.55f),
                 maxLines = 1,

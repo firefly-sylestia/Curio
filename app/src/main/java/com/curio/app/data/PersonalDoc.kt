@@ -53,11 +53,44 @@ data class PersonalRun(
     /** A bulleted line (the dot is drawn, never typed). */
     val bullet: Boolean = false,
     /** A checklist line (the box is drawn, never typed). */
-    val checkbox: Boolean = false
+    val checkbox: Boolean = false,
+    /**
+     * v389 — THE MARKER PEN this stretch of words was written with: one of
+     * [PERSONAL_HIGHLIGHT_KEYS], or "" for none.
+     *
+     * A run's own KEY rather than a colour, exactly like [PersonalMarker]: the
+     * page paints it (see personalHighlightInk) so the palette can move without
+     * rewriting anybody's notes, and an unseen key degrades to no marker rather
+     * than to a wrong colour.
+     */
+    val highlight: String = "",
+    /**
+     * v389 — THE FACE this stretch of words is set in: one of
+     * [PERSONAL_FONT_KEYS], or "" for the page's own writing face.
+     *
+     * A key again, and for the same reason as [highlight]: the family is chosen
+     * where it is painted, so a saved note names a CHOICE ("mono") rather than
+     * a file — and a build that does not know the key sets the page's own face,
+     * which is a note that looks plain, never a note that looks broken.
+     */
+    val font: String = "",
 )
 
 /** Alignment of one block's paragraph. */
-enum class PersonalAlign { START, CENTER }
+/**
+ * v389 — HOW A LINE SITS IN THE PAGE.
+ *
+ * [START] and [CENTER] were the only two for as long as the dock had only two
+ * buttons for them. The universal dock carries the other two (user request: "the
+ * full scren text editor formats of left right centered and justofied … add in
+ * the universal tool bar"), and they are the same shape of property — the
+ * block's, not a character's, because an alignment is a property of a line.
+ *
+ * Adding values is safe on disk: an old note never wrote one, and a note that
+ * writes one still opens in a build that does not know it (see the tolerant
+ * enum reading in the PersonalDoc codec).
+ */
+enum class PersonalAlign { START, CENTER, END, JUSTIFY }
 
 /** One block of the writing canvas: text, or an attached photo. */
 data class PersonalBlock(
@@ -69,6 +102,8 @@ data class PersonalBlock(
     val photo: String? = null,
     /** Optional one-line caption shown under a photo. */
     val caption: String = "",
+    /** Stable key for the photo's print size; empty means page-wide. */
+    val photoSize: String = "",
     val align: PersonalAlign = PersonalAlign.START,
     /**
      * A VOICE NOTE's audio file (v389) — an absolute path under
@@ -251,6 +286,7 @@ object PersonalDocCodec {
             b.addProperty("text", block.text)
             b.addProperty("photo", block.photo)
             b.addProperty("caption", block.caption)
+            if (block.photoSize.isNotEmpty()) b.addProperty("ps", block.photoSize)
             b.addProperty("align", block.align.name)
             // v389 — a ticked checklist line and a line's bullet marker. Both
             // are omitted at their defaults, so every page written before this
@@ -279,6 +315,11 @@ object PersonalDocCodec {
                 if (run.small) r.addProperty("m", true)
                 if (run.bullet) r.addProperty("l", true)
                 if (run.checkbox) r.addProperty("c", true)
+                // v389 — the marker pen, written only when a pen is down, so an
+                // unmarked note is byte-for-byte what it was before.
+                if (run.highlight.isNotEmpty()) r.addProperty("g", run.highlight)
+                // v389 — the face, written only when one was chosen.
+                if (run.font.isNotEmpty()) r.addProperty("f", run.font)
                 runs.add(r)
             }
             b.add("runs", runs)
@@ -311,7 +352,17 @@ object PersonalDocCodec {
                     title = r.flag("h"),
                     small = r.flag("m"),
                     bullet = r.flag("l"),
-                    checkbox = r.flag("c")
+                    checkbox = r.flag("c"),
+                    // v389 — an older note has no "g" key: it decodes as
+                    // unmarked. An UNKNOWN key (a pen a future build adds)
+                    // decodes as unmarked too rather than throwing, because
+                    // [personalHighlightInk] answers "" with the default pen and
+                    // a wrong colour is worse than no colour.
+                    highlight = r.str("g"),
+                    // v389 — absent on an older note (the page's own face), and
+                    // an unknown key falls back to the same place rather than
+                    // throwing away the whole run.
+                    font = r.str("f")
                 ).takeIf { it.end > it.start }
             }.orEmpty()
             PersonalBlock(
@@ -320,6 +371,9 @@ object PersonalDocCodec {
                 runs = runs,
                 photo = b.get("photo")?.takeIf { !it.isJsonNull }?.asString,
                 caption = b.str("caption"),
+                // v389 — absent on an older note, which reads as a page-wide
+                // print: exactly how that note already looked.
+                photoSize = b.str("ps"),
                 align = runCatching {
                     PersonalAlign.valueOf(b.str("align").ifBlank { PersonalAlign.START.name })
                 }.getOrDefault(PersonalAlign.START),
@@ -434,3 +488,7 @@ object PersonalChapterCodec {
 fun newBlockId(): String = "pb-" + java.util.UUID.randomUUID().toString()
 fun newNoteId(): String = "pn-" + java.util.UUID.randomUUID().toString()
 fun newPersonalBookId(): String = "bk-" + java.util.UUID.randomUUID().toString()
+
+/** A reader mark's id (see [ReaderMarkEntity]) — its own prefix, so a mark can
+ *  never be mistaken for a note or a book when one is logged out of context. */
+fun newReaderMarkId(): String = "rm-" + java.util.UUID.randomUUID().toString()

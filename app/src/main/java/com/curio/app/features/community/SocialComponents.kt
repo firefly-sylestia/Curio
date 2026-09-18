@@ -56,6 +56,7 @@ import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.SOCIAL_CACHE_PREFS
 import com.curio.app.data.supabase.SocialCache
+import com.curio.app.features.personal.personalQuoteDeepColor
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -482,8 +483,7 @@ internal fun SocialTextPost(
                 // line under it, which is not what a quote looks like anywhere.
                 SocialPullQuote(
                     words = card.factText,
-                    credit = card.byline,
-                    accent = parseAccent(card.accentHex)
+                    credit = card.byline
                 )
                 return@Column
             }
@@ -506,10 +506,19 @@ internal fun SocialTextPost(
  * is what the wall shows afterwards — which is the only reason a preview is
  * worth having.
  *
- * What makes it read as a quote rather than a paragraph: an ACCENT RULE down
+ * What makes it read as a quote rather than a paragraph: a DEEP COFFEE RULE down
  * the left carrying the whole block, an oversized opening mark, the words set
  * in the serif face the app reserves for writing, and the credit attached by a
  * short dash rather than floating under the text as a caption.
+ *
+ * v389 — AND THE RULE IS COFFEE, NOT THE ACCENT (user request: "in posts the
+ * quote uses the same accent of theme instead use deep dark coffee color"). A
+ * quotation is somebody else's words: in the member's own accent the rule and
+ * the credit read as a highlight someone had selected, and on a rose theme the
+ * whole quote went pink. The colour comes from the same helper the journal's own
+ * quotes use (see personalQuoteDeepColor), so a quote looks like a quote
+ * wherever the app draws one, and it is theme-aware — the deep coffee on a light
+ * surface, its milky twin on a dark one.
  *
  * @param placeholder the composer's empty state: the words shown are an
  *   invitation, not somebody's words, so they stay quiet.
@@ -518,10 +527,10 @@ internal fun SocialTextPost(
 internal fun SocialPullQuote(
     words: String,
     credit: String,
-    accent: Color,
     modifier: Modifier = Modifier,
     placeholder: Boolean = false
 ) {
+    val accent = personalQuoteDeepColor()
     Row(
         // IntrinsicSize.Min makes the rule exactly as tall as the words beside
         // it — a fixed height would leave the rule hanging past a short quote.

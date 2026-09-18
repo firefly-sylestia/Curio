@@ -282,6 +282,18 @@ object CurioRoutes {
      *  ChapterScreen). Its own route, because a chapter is a page — not an
      *  expanded row inside the chapter list. */
     const val CHAPTER = "books/{bookId}/chapter/{chapter}"
+    /**
+     * INCURSION — the viewing order (Marvel / Sony / X-Men).
+     *
+     * A HIDDEN page: nothing links here, it is not in the drawer, and it has no
+     * tab. It opens only once the member has typed "i love you 3000" into a
+     * search field (see `IncursionStore.offer`, called from the shared
+     * `CurioSearchField`), and its door is the floating button Home then shows.
+     * The page brings its OWN bottom nav, so it is deliberately absent from
+     * [bottomNavRoutePrefixes] — Curio's four tabs are not where a viewing order
+     * belongs.
+     */
+    const val INCURSION = "incursion"
     /** The "write something new" sentinel carried by [JOURNAL_EDITOR]. */
     const val PERSONAL_NEW = "new"
     const val EDIT_MOODBOARD = "edit-moodboard/{entryId}"

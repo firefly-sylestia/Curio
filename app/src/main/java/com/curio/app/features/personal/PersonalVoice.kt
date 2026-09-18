@@ -2,8 +2,10 @@ package com.curio.app.features.personal
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.RepeatMode
@@ -271,30 +273,56 @@ internal object PersonalVoiceRecording {
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * Whether the app may record, and the "ask for it" door. Callers get a Boolean
- * so a tap on the mic can start recording the moment permission is granted
- * instead of needing a second tap.
+ * THE MIC'S PERMISSION DOOR.
+ *
+ * The returned call is what a tap on the mic runs: it hands the question to
+ * Android's own launcher and NOTHING else. `RequestPermission` answers
+ * immediately when the permission is already held, so one path covers "already
+ * allowed", "never asked" and "asked before" — and recording starts from the
+ * GRANTED callback, never from the tap itself.
+ *
+ * v389 — this is the bug the member hit ("tapping it doesnt do anything"). The
+ * old version read the permission and returned a Boolean, and the caller was
+ * `if (!ask()) start()`: on the very FIRST tap the read said "not granted"
+ * (which launched the system dialog) AND `start()` still ran, so a
+ * MediaRecorder was built with no permission, threw, and put "Could not start
+ * recording" on the page while the dialog was still up. A tap that is refused
+ * for good now says so instead of failing silently — [onDenied] is the door to
+ * Android's app settings, which is the only way back from "Don't allow".
  */
 @Composable
-internal fun rememberRecordPermission(onGranted: () -> Unit): () -> Boolean {
-    val context = LocalContext.current
+internal fun rememberRecordPermission(
+    onGranted: () -> Unit,
+    onDenied: () -> Unit
+): () -> Unit {
     val granted = rememberUpdatedState(onGranted)
+    val denied = rememberUpdatedState(onDenied)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { allowed -> if (allowed) granted.value() }
-    return {
-        val allowed = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
-        if (!allowed) launcher.launch(Manifest.permission.RECORD_AUDIO)
-        allowed
+    ) { allowed ->
+        if (allowed) granted.value() else denied.value()
     }
+    return { launcher.launch(Manifest.permission.RECORD_AUDIO) }
 }
 
 /**
- * THE FLOATING MIC. It rides above the tool dock, on the page's own writing, so
- * "say it instead" is one tap from anywhere in a page.
+ * Android's own page for THIS app, where a permission that was refused for good
+ * can be given back. Returns null when the device has no such screen, so the
+ * caller can stay quiet rather than send the member nowhere.
+ */
+internal fun appPermissionSettingsIntent(context: Context): Intent? =
+    Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.fromParts("package", context.packageName, null)
+    ).takeIf { it.resolveActivity(context.packageManager) != null }
+
+/**
+ * THE FLOATING MIC. It floats over the writing ABOVE the tool dock, so "say it
+ * instead" is one tap away without ever sitting on the tools themselves.
+ *
+ * v389 — it wears the accent's DEEP shade as its fill rather than the airy one:
+ * a pale accent disc on a pale page reads as a disabled control, and this is
+ * the one button on the page whose whole job is to be pressed.
  */
 @Composable
 internal fun PersonalVoiceButton(
@@ -302,21 +330,20 @@ internal fun PersonalVoiceButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val accent = personalAccent()
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = CircleShape,
-        color = accent,
+        color = personalAccentInk(),
         shadowElevation = 8.dp,
-        modifier = modifier.size(46.dp)
+        modifier = modifier.size(48.dp)
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CurioIcon(
                 CurioIcons.Mic,
                 "Record a voice note",
-                tint = personalOnAccent(),
-                size = 21.dp
+                tint = MaterialTheme.colorScheme.surface,
+                size = 22.dp
             )
         }
     }
@@ -451,9 +478,12 @@ internal fun PersonalVoiceBar(
 ) {
     val context = LocalContext.current
     val samples = remember(bars) { PersonalAudioBars.decode(bars) }
+    val carried = LocalPersonalBlockCarried.current
     var isPlaying by rememberSaveable(path) { mutableStateOf(false) }
     var position by rememberSaveable(path) { mutableLongStateOf(0L) }
     var duration by rememberSaveable(path) { mutableLongStateOf(seconds * 1000L) }
+    /** The ✕ holds here until the member says yes (see the dialog below). */
+    var confirmRemove by remember(path) { mutableStateOf(false) }
 
     // A stored audio path is an absolute file path — wrap it, or ExoPlayer's
     // data source parses it as a schemeless URI and plays nothing.
@@ -527,12 +557,19 @@ internal fun PersonalVoiceBar(
         }
     }
 
+    // NO CONTAINER (v389): the note used to sit in a rounded surfaceContainerLow
+    // box, which made a recording look like a card parked in the writing rather
+    // than part of it (user request: "it shows on the page as a box, but i want
+    // it with the graph only and the play and cross button no backgroud"). What
+    // is left is the three things the note actually is — a play button, the
+    // waveform, and the clock — sitting on the page itself, starting where the
+    // paragraph starts. The LIFT while it is being carried still comes from
+    // PersonalMovableBlock, which is the only state that had any business
+    // drawing a surface here.
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(start = 6.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+            .padding(end = 8.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -561,7 +598,11 @@ internal fun PersonalVoiceBar(
                         if (!isPlaying) toggle()
                     }
                 }
-                .pointerInput(path) {
+                // v389 — AND THE STRIP STANDS DOWN WHILE THE BLOCK IS CARRIED:
+                // picking the note up (see PersonalMovableBlock) and scrubbing
+                // it are both drags, and one finger cannot mean two things.
+                .pointerInput(path, carried) {
+                    if (carried) return@pointerInput
                     detectDragGestures(
                         onDragStart = { offset -> seekTo(offset.x / size.width) },
                         onDrag = { change, _ ->
@@ -613,7 +654,13 @@ internal fun PersonalVoiceBar(
         )
         if (onRemove != null) {
             Surface(
-                onClick = onRemove,
+                // v389 — ASKS FIRST. The ✕ sits beside the play button, on the
+                // page, where a mis-tap during a scrub is easy — and what it
+                // destroys is a recording that cannot be made again (user
+                // request: "the cross button should ask for confimation before
+                // deleting it"). The dialog names the cost; the audio file is
+                // only unlinked on the confirm.
+                onClick = { confirmRemove = true },
                 shape = CircleShape,
                 color = Color.Transparent,
                 modifier = Modifier.size(30.dp)
@@ -628,6 +675,26 @@ internal fun PersonalVoiceBar(
                 }
             }
         }
+    }
+    if (confirmRemove) {
+        AlertDialog(
+            onDismissRequest = { confirmRemove = false },
+            title = { Text("Remove this voice note?") },
+            text = {
+                Text("The recording goes with it, and a recording cannot be made again.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmRemove = false
+                        onRemove?.invoke()
+                    }
+                ) { Text("Remove") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmRemove = false }) { Text("Keep it") }
+            }
+        )
     }
 }
 
@@ -667,6 +734,92 @@ internal fun PersonalVoicePageBlock(
 // ────────────────────────────────────────────────────────────────────────────
 // The keep-recording pill (app root) and the leave-page dialog
 // ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * v389 — A PAGE'S MIC, FOR A PAGE THAT IS NOT [PersonalWritingPage].
+ *
+ * The journal, a topic note and a to-do list get their mic from the writing
+ * core; the BOOK REVIEW and the CHAPTER REVIEW are their own layouts (a book's
+ * page is not a day), so they had none — which is what "also add in book review
+ * chapter review too" asked for. What is shared here is the whole door: the
+ * floating button, the ONE permission request ([rememberRecordPermission]), the
+ * two ways it can fail (refused, or the recorder busy) and the registration that
+ * stops the app's keep-recording pill covering the page it belongs to. What a
+ * page does with the RESULT stays with the page: it reads
+ * `PersonalVoiceRecording.session` for its own `noteId` to swap its dock for the
+ * capsule, and inserts what was kept at its caret ([PersonalEditorState.insertVoice]).
+ *
+ * [entryId] is any stable tag for the page — it names the session and is what
+ * the pill comes back to, so it does not have to be a stored row id.
+ */
+@Composable
+internal fun PersonalVoiceMic(
+    entryId: String,
+    route: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    var recordFailed by remember { mutableStateOf(false) }
+    var micDenied by remember { mutableStateOf(false) }
+
+    fun startVoice() {
+        val started = PersonalVoiceRecording.start(context, entryId, route)
+        if (started == null) recordFailed = true
+    }
+
+    val askToRecord = rememberRecordPermission(
+        onGranted = { startVoice() },
+        onDenied = { micDenied = true }
+    )
+
+    // Only the page whose page is OPEN hides the pill at the app's root.
+    DisposableEffect(entryId) {
+        PersonalVoiceRecording.setOnScreen(entryId)
+        onDispose { PersonalVoiceRecording.setOnScreen(null) }
+    }
+
+    PersonalVoiceButton(onClick = askToRecord, modifier = modifier)
+
+    if (recordFailed) {
+        AlertDialog(
+            onDismissRequest = { recordFailed = false },
+            title = { Text("Could not start recording") },
+            text = { Text("The microphone is busy or unavailable. Try again in a moment.") },
+            confirmButton = { TextButton(onClick = { recordFailed = false }) { Text("OK") } }
+        )
+    }
+
+    // Android's own page for THIS app, when the device has one.
+    val micSettings = remember(context) { appPermissionSettingsIntent(context) }
+    if (micDenied) {
+        AlertDialog(
+            onDismissRequest = { micDenied = false },
+            title = { Text("Curio needs the microphone") },
+            text = {
+                Text(
+                    "Recording a voice note on this page needs microphone access. " +
+                        "If Android will not ask again, its own page for Curio is " +
+                        "where it is turned back on."
+                )
+            },
+            confirmButton = {
+                if (micSettings != null) {
+                    TextButton(onClick = {
+                        micDenied = false
+                        runCatching { context.startActivity(micSettings) }
+                    }) { Text("Open settings") }
+                } else {
+                    TextButton(onClick = { micDenied = false }) { Text("OK") }
+                }
+            },
+            dismissButton = if (micSettings != null) {
+                { TextButton(onClick = { micDenied = false }) { Text("Not now") } }
+            } else {
+                null
+            }
+        )
+    }
+}
 
 /**
  * THE KEEP-RECORDING PILL.

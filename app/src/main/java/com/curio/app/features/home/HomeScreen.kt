@@ -116,6 +116,7 @@ import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.SavedQuote
 import com.curio.app.features.personal.CreateEntrySheet
+import com.curio.app.features.incursion.IncursionHomeButton
 import com.curio.app.features.personal.PersonalCreateLauncher
 import com.curio.app.features.personal.PersonalChipsRow
 import com.curio.app.data.CurioCategory
@@ -1052,6 +1053,10 @@ fun HomeScreen(navController: NavController) {
             PersonalChipsRow(
                 navController = navController,
                 onWrite = { writeSheetOpen = true },
+                // The doors' plate has to be the paint this page is actually
+                // wearing (a lane wash, or Home's own rose tint), or it shows as
+                // a pale rectangle across the row (see PinnedDoorRow).
+                backdrop = homeBg,
                 modifier = Modifier
                     // Wide windows: the same comfortable centered column the
                     // sections above and below ride in (phone untouched).
@@ -1249,6 +1254,25 @@ fun HomeScreen(navController: NavController) {
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp)
                     .padding(bottom = 92.dp + navInsets.calculateBottomPadding())
+            )
+
+            // ── v389 — INCURSION's door, and ONLY for a member who has typed
+            // the phrase into a search field somewhere in the app. It draws
+            // nothing, and reserves nothing, until then (the component itself
+            // checks the lock), so the app has no visible trace of the page for
+            // anyone else. It rides one slot above the writing "+" — 92dp of
+            // nav clearance, the disc's own 56dp, and a 10dp gap — and slips
+            // away on a downward scroll with it, because Home's floating
+            // furniture should behave like one family.
+            IncursionHomeButton(
+                visible = createVisible,
+                onClick = {
+                    navController.navigate(CurioRoutes.INCURSION) { launchSingleTop = true }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 18.dp)
+                    .padding(bottom = 158.dp + navInsets.calculateBottomPadding())
             )
 
             if (writeSheetOpen) {

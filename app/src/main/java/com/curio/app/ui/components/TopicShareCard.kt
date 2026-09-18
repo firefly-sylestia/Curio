@@ -10423,7 +10423,13 @@ fun TopicShareSheet(
                             // themes (the old white sheet broke dark mode).
                             Surface(
                                 Modifier.fillMaxSize(),
-                                color = MaterialTheme.colorScheme.surface
+                                // v389 — the enlarged writing is a JOURNAL PAGE:
+                                // the same page background the journal writes on,
+                                // with the journal's own dock at the foot of the
+                                // field (user request: "make its background
+                                // screen and all the journal style with the same
+                                // bottom tool style").
+                                color = MaterialTheme.colorScheme.background
                             ) {
                                 // v3xx — imePadding lifts the sheet above the
                                 // keyboard and the editor area scrolls, so a
@@ -10459,25 +10465,31 @@ fun TopicShareSheet(
                                     // wrapper now (weight inside a scrollable
                                     // Column is illegal), so a long note is
                                     // always reachable and selectable.
-                                    Column(
-                                        Modifier
-                                            .weight(1f)
-                                            .fillMaxWidth()
-                                            .verticalScroll(rememberScrollState())
-                                    ) {
-                                        RichTextEditor(
-                                            text = factFieldText,
-                                            spans = factFieldSpans,
-                                            onRichTextChange = { t, sp -> routeRichFact(t, sp) },
-                                            modifier = Modifier.fillMaxWidth(),
-                                            placeholder = "Start writing…",
-                                            minHeight = 140.dp,
-                                            accent = MaterialTheme.colorScheme.primary,
-                                            ink = MaterialTheme.colorScheme.onSurface,
-                                            surface = MaterialTheme.colorScheme.surfaceVariant,
-                                            showFieldBorder = true
-                                        )
-                                    }
+                                    // v389 — the editor now owns the scroll and
+                                    // the dock holds this sheet's foot: pinned,
+                                    // it is the journal's own behaviour (the words
+                                    // move, the tools do not).
+                                    RichTextEditor(
+                                        text = factFieldText,
+                                        spans = factFieldSpans,
+                                        onRichTextChange = { t, sp -> routeRichFact(t, sp) },
+                                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                                        placeholder = "Start writing…",
+                                        minHeight = 140.dp,
+                                        dockPinned = true,
+                                            // v389 — the card's full-screen editor
+                                            // writes on the JOURNAL's dock: a
+                                            // floating strip at the foot of the
+                                            // field, every tool its own button
+                                            // (bold, italic, underline, highlight,
+                                            // text size) instead of a Format
+                                            // toggle unfolding a second toolbar.
+                                        toolbarMode = RichTextToolbarMode.DOCK,
+                                        accent = MaterialTheme.colorScheme.primary,
+                                        ink = MaterialTheme.colorScheme.onSurface,
+                                        surface = MaterialTheme.colorScheme.surfaceVariant,
+                                        showFieldBorder = true
+                                    )
                                 }
                             }
                         }
