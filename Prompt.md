@@ -84,11 +84,29 @@ lives), and a work order — **chapters, then text beside small photos, then the
   the works the Met attributes to them (`artistOrCulture=true`, capped at eight), and an
   AUTHORS topic opens the written-works sheet.
 
+### Batch K (same session) — the writing beside the print
+
+The next item in the order the user gave (chapters → **text beside small photos** → drag).
+
+- **A small print keeps room for the writing.** In `PersonalCanvas`, a SMALL photo takes a
+  narrow column and the ONE text block under it moves in beside it (42/58), claiming only
+  that first block so prose that runs on still flows under the print. Two non-PAGE photos
+  still pair first — a photo's neighbour is another photo's, not the writing's.
+- **The pair/beside passes are computed, not remembered.** They read a photo's size and
+  the words under it — exactly what the member changes while looking at them — and a
+  remembered set left the two passes able to disagree (a resized print dropped out of the
+  page). One pass now fills both sets.
+- **The line beside the print measures itself**, so a carried voice note or photo charges
+  the right number of steps when it passes that slot.
+
 ### Still open
 
-- Text beside a small/half photo (the side-by-side pairing shipped; the "text in the
-  space remaining" half did not).
-- The voice/photo carry's remaining placement glitches — next in the order the user gave.
+- **The READ view does not yet draw the beside-print pair** — `PersonalDocView` is a
+  separate renderer and still stacks the print over the line; the editor side (where the
+  request came from) does show it. Parity here needs the read renderer's text branch
+  extracted into its own composable.
+- The voice/photo carry's remaining placement glitches — last in the order the user gave,
+  and the off-by-one and the unmeasured slot above are the two found so far.
 - The topic-lane card the art/author sections use is a teaser card; whether an artwork's
   cover art should be fetched for it (as films/anime/songs do) is unasked.
 
