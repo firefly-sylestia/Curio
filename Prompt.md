@@ -64,11 +64,48 @@ they wrote in the neutral sans on a bordered chip. `RichTextEditor` gained `jour
 (the app's `WritingFontFamily`, the hand the journal writes in), and both editors now pass it with
 `surface = Color.Transparent` and `showFieldBorder = false`, so the words sit straight on the page.
 
+### The portraits, redrawn as illustrated characters (asked; the answer was
+"illustrated characters with distinct silhouettes")
+
+`SocialAvatar.kt` grew a v392 pass. What it was: the cast had been detailed but
+still stood in ONE pose, and where two characters wore the same kind of hair they
+wore the same SHAPE of it (the two bobs were one rounded rectangle in two
+colours; the goggles' crop, the pixie and the braided crown were the same box in
+three). What it is now, per character:
+
+1. **A pose of its own** — `AvatarArt` gained `tilt` (degrees about the top of the
+   neck) and `lean` (grid units off the disc's centre), one pair per row. The head
+   assembly — the skull, its hair, its face and the props it wears — turns
+   together about a pivot INSIDE the neck, the shoulders and neck stay put, the
+   hair that falls behind the head turns with it, and the whole figure sits off
+   centre. The assembly moved into its own `drawHeadAssembly` to keep the three
+   passes readable.
+2. **A silhouette of its own** — the shared `drawHairBack` branches were split:
+   1 and 20 are two different bobs (one deeper on its left, one shorter and
+   flicked), 2/11/12/21 are four different masses (low nape bun, narrow under the
+   beret, high bun behind the crown, small crown knot), 3/22/26 are small springy
+   curls, wide low waves and one big dome, and 5/16/23/25 differ in length, part
+   and weight. 10 is a swept crop shaved at the nape, 24 a pixie with points over
+   the ears, 27 a gathered crown with its tail tucked.
+3. **An ink line of its own** — the bust and every hair mass, plait, tail, hood
+   and crop now carry a contour in the shared warm ink. A mass that sits behind
+   the head is covered by the head, so only its outside ever shows.
+4. **A prop of its own** that breaks the outline — a headband over the bob (1), a
+   bloom behind the curl (3), sunglasses pushed up onto the crop (13), a kanzashi
+   pin past the hime cut's straight sheet (19).
+
+No new assets, no new fields: the pose is two numbers per row, exactly like the
+`kind` and the `eye` beside it, so the notification wallpaper and the export draw
+the same character as the picker (both already go through `drawSocialAvatar`).
+Braces clean; Gradle cannot run here, so this rests on the brace checker and a
+sweep of every helper used (`translate` was added to the drawscope imports,
+`avatarFlower`/`drawRoundRect(style=)` were already in the file).
+
 ### Still open from this instruction (asked; the answers are below)
 
 - **The 28 portraits, fully redrawn.** Answer: *illustrated characters with distinct
-  silhouettes* — each portrait its own pose/props and a clearly different outline. That is a real
-  art pass over `SocialAvatar.kt` (1792 lines), not done here.
+  silhouettes* — each portrait its own pose/props and a clearly different outline. DONE (see the
+  v392 pass above): pose, split silhouettes, contours and four new props, in `SocialAvatar.kt`.
 - **The save-your-take lag.** Answer: *both shells, and scrolling the take rail* — so it is the
   whole page, not one field. What the reading turned up so far:
   - the classic body is ONE `Column` with `verticalScroll` holding every card, and the take rail
@@ -3445,17 +3482,5 @@ unlocked.
 ## older prompt — the MCU repo
 https://github.com/firefly-sylestia/mcu-viewing-order lets add this as a secret, so i think it have all of the movies and series of marvel and x men etc i want you to add them, but they are not visible to normal user at all. also properly categories the movies and series, and make a new screen with marvel, sony, x men, option with the list with proper viewing order etc. from that repo, and essential etc. no trailer info, just watch and bookmark save and drop and etc status, in list and grid view, with its own buttm nav page style, and this screen can be acessed if the user types, " i love you 3000" and the button will be in home screen floating ith name as incursion. 
 
-## next prompt, also 
-also for photos in journal add side by side photos and also text writing to the side of the photos in small view for photos where there's space remaining
-also fix the voice note drag and move placing issues with lines where they weirdly shifts and switches places it's really buggy and glitchy fix it and same pass for the photo drag and move too
-
-features adding
-add clicable links in journal too i mean when i add a link make it clickable with proper coffee dark view.
-in quotes when i enter to create a new line don't create a new quote stay in that quote and keep it with style.
-add proper chapter no. look it up for books and also chapter titles too for browsed books. add more free providers if there's any or if there's any with free api key add guide in env example , add them please.
-for animes, movies and songs etc the button sheet they are opening they are so bad. remove them and use the same style as book button sheet album button sheet series button sheet style. for topic reveal screen.
-also add artwork button sheet too and author button sheet with authors written books, and similar more with their free apis added or if some need manual addition, add proper guide in env.example which have free tiers
-in home screen the stikky pages and your my shelf. they have a white background which creates weird theme issues with background fix it and also why only 3 books and 3 journal shows. add more keeping scroll too.
-
 ## next prompt 
-fix the cl 
+fix thhe save page lag

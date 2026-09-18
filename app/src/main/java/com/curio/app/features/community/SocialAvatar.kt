@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
@@ -68,6 +69,27 @@ import kotlin.math.sin
  * The tone tables are untouched: shading is derived from each row's own
  * garment / skin / hair colours (`darken`, `lighten`), so 28 detailed
  * characters still cost 28 small integers — no new assets, no new fields.
+ *
+ * v392 — THE ILLUSTRATED PASS. Detailed is not the same as ILLUSTRATED: the
+ * cast was still twenty-eight characters in one pose, and where two of them wore
+ * the same kind of hair they wore the same SHAPE of it (two bobs shared one
+ * rounded rectangle; the goggles' crop, the pixie and the braided crown were the
+ * same box in three colours). A portrait is recognised by its outline before its
+ * face — a friend is known across a room that way — so every character now has:
+ *
+ *  1. a POSE of its own — a head [AvatarArt.tilt] about the neck and a
+ *     [AvatarArt.lean] off the disc's centre (see [drawCharacter]);
+ *  2. a SILHOUETTE of its own — the shared hair shapes were split apart, so the
+ *     bob is deeper on one side, the bob-with-a-bow is shorter and flicked, the
+ *     curls are small and springy while the puff is one big dome, and the four
+ *     waves differ in length, part and weight;
+ *  3. an INK LINE of its own — every mask, plait, hood, tail and shoulder now
+ *     carries the same drawn contour, which is what separates an illustration
+ *     from a coloured shape (the contour of a mass that sits BEHIND the head is
+ *     covered by the head, so only its outside ever shows);
+ *  4. a PROP of its own that breaks that outline — a headband over the bob, a
+ *     bloom behind a curl, sunglasses pushed up onto the crop, a kanzashi pin
+ *     past the straight sheet of a hime cut.
  */
 private class AvatarArt(
     val ground: Color,
@@ -94,35 +116,57 @@ private class AvatarArt(
      * visor) were given gazes that fit them. See [drawEyes], and [drawBrows], which
      * shapes the brows to match the gaze they sit above.
      */
-    val eye: Int
+    val eye: Int,
+    /**
+     * v392 — HOW THIS ONE STANDS.
+     *
+     * The cast was twenty-eight characters wearing the same pose: every head
+     * level on the same vertical, every pair of shoulders in the same place, so
+     * the portraits read as one drawing with different hats on (user note: the
+     * redraw should give each "its own pose, props and outline"). A portrait is
+     * recognised by its SILHOUETTE before its face — the same reason a friend is
+     * known across a room — so each character now leans and tilts as its own:
+     *
+     *  - [tilt] — the head, in degrees, turned about the top of the neck. The
+     *    hood ducked into its collar; the explorer looks up and out; the pigtails
+     *    cock away from the braid they hang over.
+     *  - [lean] — the whole character, in grid units, off centre. Positive moves
+     *    it to the right. Two units is a tenth of the disc, which is enough to
+     *    break the symmetry without the bust leaving its own light.
+     *
+     * Both travel WITH the drawing, so the pose is a property of the character
+     * (in the notification wallpaper and the export exactly as on screen) and
+     * costs two numbers per row. */
+    val tilt: Float = 0f,
+    val lean: Float = 0f
 )
 
 // The palette is the app's own warm paper family with a few lane accents, so
 // the discs sit naturally beside the rose settings family and the lane chips.
 private val AVATARS: List<AvatarArt> = listOf(
-    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), 0, 0),  // beanie
-    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), 1, EDGE_ALMOND),  // bob
-    AvatarArt(Color(0xFFA9C7A0), Color(0xFFEFE3D2), Color(0xFFEFC9A6), Color(0xFF3B2F2A), 2, EDGE_LIDDED),  // bun + glasses
-    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF4A362C), 3, EDGE_WIDE),  // curls
-    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF443222), 4, EDGE_SLEEPY),  // cap + headphones
-    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), 5, EDGE_SOFT),  // long + earring
-    AvatarArt(Color(0xFFD8A98F), Color(0xFF6B5A4E), Color(0xFFE8C09A), Color(0xFF463832), 6, EDGE_STEADY),  // beard
-    AvatarArt(Color(0xFFF0AEC4), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFF7A4A2C), 7, EDGE_UPTURNED),  // pigtails
-    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFFEDE6D6), 8, EDGE_STARRY),  // wizard hat
-    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFF4A6B33), 9, EDGE_HAPPY),  // leaf crown
-    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF453730), 10, EDGE_BEHIND_GLASS), // goggles
-    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF4A3634), 11, EDGE_SOFT), // beret
-    AvatarArt(Color(0xFFEFA785), Color(0xFF4F7F72), Color(0xFFF7DEC6), Color(0xFF6B3F26), 12, EDGE_ALMOND), // top bun + bow
-    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFFC98A3E), 13, EDGE_WIDE), // short + freckles
+    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), 0, 0, -5f, 2f),  // beanie
+    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), 1, EDGE_ALMOND, 4f, -2f),  // bob
+    AvatarArt(Color(0xFFA9C7A0), Color(0xFFEFE3D2), Color(0xFFEFC9A6), Color(0xFF3B2F2A), 2, EDGE_LIDDED, -3f, 1f),  // bun + glasses
+    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF4A362C), 3, EDGE_WIDE, 6f, 3f),  // curls
+    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF443222), 4, EDGE_SLEEPY, -6f, -2f),  // cap + headphones
+    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), 5, EDGE_SOFT, 3f, -3f),  // long + earring
+    AvatarArt(Color(0xFFD8A98F), Color(0xFF6B5A4E), Color(0xFFE8C09A), Color(0xFF463832), 6, EDGE_STEADY, -1f, 0f),  // beard
+    AvatarArt(Color(0xFFF0AEC4), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFF7A4A2C), 7, EDGE_UPTURNED, -7f, 4f),  // pigtails
+    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFFEDE6D6), 8, EDGE_STARRY, 5f, -1f),  // wizard hat
+    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFF4A6B33), 9, EDGE_HAPPY, -4f, 2f),  // leaf crown
+    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF453730), 10, EDGE_BEHIND_GLASS, 7f, -3f), // goggles
+    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF4A3634), 11, EDGE_SOFT, -6f, 3f), // beret
+    AvatarArt(Color(0xFFEFA785), Color(0xFF4F7F72), Color(0xFFF7DEC6), Color(0xFF6B3F26), 12, EDGE_ALMOND, 2f, -2f), // top bun + bow
+    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFFC98A3E), 13, EDGE_WIDE, -2f, 2f), // short + freckles
     // The hood's skin was a near-white grey that read as paper rather than as
     // a face under a shadow; warm and a touch deeper, with the hood itself
     // lifted off black (the row the note called out: "the black is the worse").
-    AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), 14, EDGE_SHADOWED), // hood
+    AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), 14, EDGE_SHADOWED, -8f, -2f), // hood
     // v389b — the helmet's visor is GLASS, so the eyes behind it are the same
     // design the two pairs of glasses wear: lit from above, no shine of their
     // own to fight the lens. It used to wear the curious wide eye, which read
     // as a bare face inside a helmet — and as the same gaze as the neighbours.
-    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15, EDGE_BEHIND_GLASS), // space helmet
+    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF9FB8E8), 15, EDGE_BEHIND_GLASS, 3f, 0f), // space helmet
     // ── v3xx52 — the SOFT SET: twelve feminine silhouettes (waves,
     // ponytails, braids, puffs, flower crowns, bows) in the same pastel
     // family, with a wider spread of skin and hair tones so every member can
@@ -131,18 +175,18 @@ private val AVATARS: List<AvatarArt> = listOf(
     // sat one tile apart in the picker wearing the SAME eyes). The enchanted
     // gaze belongs to the hat; the waves get the almond eye with the lash flick,
     // which is a gaze no portrait on either side of it wears.
-    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16, EDGE_ALMOND), // waves + flower
-    AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17, EDGE_UPTURNED), // high ponytail
-    AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF4A3730), 18, EDGE_HAPPY), // twin braids
-    AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF40332E), 19, EDGE_LIDDED), // hime cut
-    AvatarArt(Color(0xFFF6D5C0), Color(0xFF9ED0B8), Color(0xFFEFC8A4), Color(0xFF8A4E2E), 20, EDGE_SOFT), // bob + bow
-    AvatarArt(Color(0xFFE6E0F5), Color(0xFFC98FA8), Color(0xFFF5D8BE), Color(0xFF4A3A32), 21, EDGE_BEHIND_GLASS), // half-up bun
-    AvatarArt(Color(0xFFD6E7C6), Color(0xFFE9A5BE), Color(0xFFF7DCC0), Color(0xFF7A4A2C), 22, EDGE_HAPPY), // flower crown
-    AvatarArt(Color(0xFFF0C4D8), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF443329), 23, EDGE_UPTURNED), // waves + star clips
-    AvatarArt(Color(0xFFCCE3E8), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFFC98A3E), 24, EDGE_ALMOND), // pixie + heart clip
-    AvatarArt(Color(0xFFF3D9B0), Color(0xFF5E8C7A), Color(0xFFE9BE97), Color(0xFF40322A), 25, EDGE_BEHIND_GLASS), // waves + glasses
-    AvatarArt(Color(0xFFE2D2F0), Color(0xFFF0A88C), Color(0xFF8C5A3C), Color(0xFF42332C), 26, EDGE_STEADY), // puff + bow
-    AvatarArt(Color(0xFFF7CFA8), Color(0xFF7E5AA0), Color(0xFFF2D3B8), Color(0xFF5B3A24), 27, EDGE_SLEEPY)  // braided crown
+    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), 16, EDGE_ALMOND, 5f, -3f), // waves + flower
+    AvatarArt(Color(0xFFF7C9A9), Color(0xFF7FB4C9), Color(0xFFF3D4B4), Color(0xFFE0A44E), 17, EDGE_UPTURNED, -5f, 3f), // high ponytail
+    AvatarArt(Color(0xFFBFD9F0), Color(0xFFE7A6B5), Color(0xFFF6DCC2), Color(0xFF4A3730), 18, EDGE_HAPPY, 3f, -4f), // twin braids
+    AvatarArt(Color(0xFFD9C6EE), Color(0xFF6E7FB8), Color(0xFFF8E0C9), Color(0xFF40332E), 19, EDGE_LIDDED, -2f, 1f), // hime cut
+    AvatarArt(Color(0xFFF6D5C0), Color(0xFF9ED0B8), Color(0xFFEFC8A4), Color(0xFF8A4E2E), 20, EDGE_SOFT, 6f, -1f), // bob + bow
+    AvatarArt(Color(0xFFE6E0F5), Color(0xFFC98FA8), Color(0xFFF5D8BE), Color(0xFF4A3A32), 21, EDGE_BEHIND_GLASS, -1f, -2f), // half-up bun
+    AvatarArt(Color(0xFFD6E7C6), Color(0xFFE9A5BE), Color(0xFFF7DCC0), Color(0xFF7A4A2C), 22, EDGE_HAPPY, 4f, -3f), // flower crown
+    AvatarArt(Color(0xFFF0C4D8), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF443329), 23, EDGE_UPTURNED, -3f, 4f), // waves + star clips
+    AvatarArt(Color(0xFFCCE3E8), Color(0xFF8E7CC3), Color(0xFFF6DCC6), Color(0xFFC98A3E), 24, EDGE_ALMOND, 7f, -2f), // pixie + heart clip
+    AvatarArt(Color(0xFFF3D9B0), Color(0xFF5E8C7A), Color(0xFFE9BE97), Color(0xFF40322A), 25, EDGE_BEHIND_GLASS, -5f, 1f), // waves + glasses
+    AvatarArt(Color(0xFFE2D2F0), Color(0xFFF0A88C), Color(0xFF8C5A3C), Color(0xFF42332C), 26, EDGE_STEADY, 3f, 3f), // puff + bow
+    AvatarArt(Color(0xFFF7CFA8), Color(0xFF7E5AA0), Color(0xFFF2D3B8), Color(0xFF5B3A24), 27, EDGE_SLEEPY, -3f, -1f)  // braided crown
 )
 
 // ── the ten gazes ─────────────────────────────────────────────────────────
@@ -379,6 +423,12 @@ private fun DrawScope.drawShoulders(art: AvatarArt, u: Float) {
         close()
     }
     drawPath(bust, garment)
+    // v392 — THE BUST'S CONTOUR. Every one of the twenty-eight now wears an ink
+    // line along its own shoulder shape, which is what separates a drawn
+    // character from a coloured shape — and, with the pose, it is the part of
+    // the silhouette a member recognises before the face. The neck and hair are
+    // drawn over the middle of this line, so only the garment's own edge shows.
+    drawPath(bust, INK.copy(alpha = 0.34f), style = Stroke(width = s(1.5f, u)))
     // The collar: a light trim riding the neckline, so the bust reads as a
     // garment with an opening rather than a block of colour.
     drawPath(
@@ -887,16 +937,44 @@ private fun DrawScope.hairLock(hair: Color, u: Float, x: Float, y: Float, width:
  *  4. [drawFace] + the face accessories (glasses, freckles, an earring).
  */
 private fun DrawScope.drawCharacter(art: AvatarArt, u: Float) {
-    val hair = art.hair
-    drawHairBack(art, u)
-    drawShoulders(art, u)
-    drawNeck(art, u)
+    // ── v392 — THE POSE ────────────────────────────────────────────────
+    // The head assembly (the skull, what it wears, its hair and its face) turns
+    // about the top of the neck; the shoulders and the neck itself stay put, the
+    // way a real head turns on a body. The hair that falls BEHIND the head turns
+    // with it (a bob cannot stay level while the head inside it tilts), and the
+    // whole character sits [AvatarArt.lean] units off the disc's centre. The
+    // pivot sits INSIDE the neck, so the chin swings while the throat stays
+    // joined — no seam appears at the collar on any of the twenty-eight.
+    val neckPivot = o(50f, 63f, u)
+    val offCentre = s(art.lean, u)
+    rotate(degrees = art.tilt, pivot = neckPivot) {
+        translate(left = offCentre) { drawHairBack(art, u) }
+    }
+    translate(left = offCentre) {
+        drawShoulders(art, u)
+        drawNeck(art, u)
+    }
+    rotate(degrees = art.tilt, pivot = neckPivot) {
+        translate(left = offCentre) { drawHeadAssembly(art, u) }
+    }
+}
+
+/**
+ * v392 — THE HEAD, AND EVERYTHING IT WEARS.
+ *
+ * The skull, its brows, its hair and its face turn TOGETHER about the neck, which
+ * is what a pose is; the props the character is known for (the glasses, the hoop,
+ * the freckles) ride the same turn, or a tilted head would wear a level pair of
+ * glasses.
+ */
+private fun DrawScope.drawHeadAssembly(art: AvatarArt, u: Float) {
     drawHead(art, u)
     drawBrows(art, u)
     drawHairFront(art, u)
     // The hood swallows the mouth; the beard covers it (its own hair pass
     // draws the moustache), so the face knows before it draws.
     drawFace(art, u, withMouth = art.kind != 6 && art.kind != 14)
+    val hair = art.hair
     when (art.kind) {
         2, 25 -> {                       // round glasses with their temple arms
             drawCircle(INK, s(8.8f, u), o(41.6f, 46.4f, u), style = Stroke(width = s(1.6f, u)))
@@ -932,6 +1010,43 @@ private fun DrawScope.drawCharacter(art: AvatarArt, u: Float) {
             drawCircle(Color(0xFFF2C14E), s(2.6f, u), o(26.4f, 53.4f, u), style = Stroke(width = s(1.6f, u)))
             drawCircle(Color(0xFFF2C14E), s(0.9f, u), o(26.4f, 51.6f, u))
         }
+        1 -> {                           // a thin headband over the bob
+            drawArc(
+                color = art.garment,
+                startAngle = 200f, sweepAngle = 140f, useCenter = false,
+                topLeft = o(27f, 19f, u), size = Size(s(46f, u), s(30f, u)),
+                style = Stroke(width = s(2.6f, u), cap = StrokeCap.Round)
+            )
+            drawCircle(art.garment, s(3f, u), o(36f, 21.6f, u))
+            drawCircle(lighten(art.garment, 0.35f), s(1.4f, u), o(36f, 21.6f, u))
+        }
+        3 -> {                           // a bloom tucked behind the near ear
+            avatarFlower(
+                center = o(27.4f, 39.6f, u), petal = s(3.4f, u),
+                petalColor = Color(0xFFF6C6D8), coreColor = Color(0xFFF2C14E)
+            )
+        }
+        13 -> {                          // sunglasses pushed up onto the crop
+            drawCircle(darken(INK, 0.1f), s(7.6f, u), o(40.6f, 24.6f, u), style = Stroke(width = s(2f, u)))
+            drawCircle(darken(INK, 0.1f), s(7.6f, u), o(59.4f, 24.6f, u), style = Stroke(width = s(2f, u)))
+            drawCircle(darken(art.garment, 0.35f), s(7.6f, u), o(40.6f, 24.6f, u))
+            drawCircle(darken(art.garment, 0.35f), s(7.6f, u), o(59.4f, 24.6f, u))
+            drawLine(
+                darken(INK, 0.1f), o(47.6f, 24.2f, u), o(52.4f, 24.2f, u),
+                strokeWidth = s(1.8f, u), cap = StrokeCap.Round
+            )
+        }
+        19 -> {                          // a kanzashi pin, out past the sheet of hair
+            drawLine(
+                Color(0xFFF2C14E), o(62f, 26f, u), o(84f, 12f, u),
+                strokeWidth = s(2.2f, u), cap = StrokeCap.Round
+            )
+            drawCircle(Color(0xFFF2C14E), s(3.2f, u), o(62f, 26f, u))
+            avatarFlower(
+                center = o(84f, 12f, u), petal = s(3.6f, u),
+                petalColor = Color(0xFFEFA9C4), coreColor = Color(0xFFF2C14E)
+            )
+        }
         13 -> {                          // freckles across the nose and cheeks
             listOf(
                 38.6f to 51.4f, 42.4f to 53.2f, 35.4f to 54.6f,
@@ -954,42 +1069,178 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
     val hair = art.hair
     val shade = darken(hair, 0.30f)
     when (art.kind) {
-        1, 20 -> {                       // bob: an A-line mass past the jaw
+        1 -> {                           // bob: an A-line mass, deeper on its left
+            // v392 — the two bobs used to be the SAME letterbox (one round
+            // rect, two curl balls) in two colours. The classic bob is now
+            // deeper on the side the parting falls away from, so its outline
+            // is asymmetric at a glance; the bow's is shorter and flipped.
             drawRoundRect(
                 color = hair,
-                topLeft = o(24f, 19f, u), size = Size(s(52f, u), s(60f, u)),
-                cornerRadius = cr(25f, u)
+                topLeft = o(23f, 19f, u), size = Size(s(55f, u), s(62f, u)),
+                cornerRadius = cr(27f, u)
             )
             // The ends curl inward — what makes a bob a bob.
-            drawCircle(hair, s(8f, u), o(28f, 76f, u))
-            drawCircle(hair, s(8f, u), o(72f, 76f, u))
-            drawCircle(shade.copy(alpha = 0.5f), s(4.2f, u), o(28f, 78f, u))
-            drawCircle(shade.copy(alpha = 0.5f), s(4.2f, u), o(72f, 78f, u))
-        }
-        2, 11, 12, 21 -> {               // a mass behind, the rest is front hair
+            drawCircle(hair, s(9f, u), o(27.5f, 78f, u))
+            drawCircle(hair, s(6.6f, u), o(71.5f, 74.5f, u))
+            drawCircle(shade.copy(alpha = 0.5f), s(4.4f, u), o(27.5f, 80f, u))
+            drawCircle(shade.copy(alpha = 0.5f), s(3.4f, u), o(71.5f, 76.5f, u))
+            // The ink line that turns the mass into a DRAWN haircut.
             drawRoundRect(
-                color = hair,
-                topLeft = o(26f, 20f, u), size = Size(s(48f, u), s(46f, u)),
-                cornerRadius = cr(24f, u)
+                color = INK.copy(alpha = 0.32f),
+                topLeft = o(23f, 19f, u), size = Size(s(55f, u), s(62f, u)),
+                cornerRadius = cr(27f, u),
+                style = Stroke(width = s(1.4f, u))
             )
         }
-        3, 22, 26 -> {                   // a curl / puff cluster
+        20 -> {                          // bob + bow: shorter, flicked out to the right
+            drawRoundRect(
+                color = hair,
+                topLeft = o(24.5f, 20f, u), size = Size(s(51f, u), s(48f, u)),
+                cornerRadius = cr(24f, u)
+            )
+            drawCircle(hair, s(7.6f, u), o(26.5f, 68f, u))
+            drawRoundRect(               // the flick, a blunt blade of hair
+                color = hair,
+                topLeft = o(67f, 58f, u), size = Size(s(9f, u), s(17f, u)),
+                cornerRadius = cr(4.5f, u)
+            )
+            drawCircle(shade.copy(alpha = 0.45f), s(3.6f, u), o(26.5f, 70f, u))
+            drawRoundRect(
+                color = INK.copy(alpha = 0.32f),
+                topLeft = o(24.5f, 20f, u), size = Size(s(51f, u), s(48f, u)),
+                cornerRadius = cr(24f, u),
+                style = Stroke(width = s(1.4f, u))
+            )
+        }
+        2 -> {                           // bun + glasses: a low bun at the nape
+            drawRoundRect(
+                color = hair,
+                topLeft = o(25f, 20f, u), size = Size(s(48f, u), s(48f, u)),
+                cornerRadius = cr(24f, u)
+            )
+            // The bun sits BEHIND the crown and low, where a tied-back head
+            // actually gathers — the glasses' row wore a plain rect before.
+            drawRoundRect(
+                color = shade.copy(alpha = 0.9f),
+                topLeft = o(63f, 52f, u), size = Size(s(15f, u), s(14f, u)),
+                cornerRadius = cr(7f, u)
+            )
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(25f, 20f, u), size = Size(s(48f, u), s(48f, u)),
+                cornerRadius = cr(24f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        11 -> {                          // beret: a narrow mass, the hat owns the top
+            drawRoundRect(
+                color = hair,
+                topLeft = o(27f, 24f, u), size = Size(s(46f, u), s(46f, u)),
+                cornerRadius = cr(23f, u)
+            )
+            // One lock escaping under the brim on the left.
+            drawCircle(hair, s(6f, u), o(28f, 62f, u))
+            drawCircle(hair, s(4.6f, u), o(29f, 70f, u))
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(27f, 24f, u), size = Size(s(46f, u), s(46f, u)),
+                cornerRadius = cr(23f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        12 -> {                          // top bun: the tail gathered high behind
+            drawRoundRect(
+                color = hair,
+                topLeft = o(26f, 20f, u), size = Size(s(48f, u), s(44f, u)),
+                cornerRadius = cr(23f, u)
+            )
+            drawCircle(hair, s(9f, u), o(50f, 17f, u))
+            drawCircle(
+                shade.copy(alpha = 0.35f), s(5f, u), o(50f, 19f, u),
+                style = Stroke(width = s(1.2f, u))
+            )
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(26f, 20f, u), size = Size(s(48f, u), s(44f, u)),
+                cornerRadius = cr(23f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        21 -> {                          // half-up bun: a small knot at the crown
+            drawRoundRect(
+                color = hair,
+                topLeft = o(25.5f, 20f, u), size = Size(s(49f, u), s(52f, u)),
+                cornerRadius = cr(24.5f, u)
+            )
+            drawCircle(hair, s(7.4f, u), o(50.5f, 21f, u))
+            drawCircle(shade.copy(alpha = 0.30f), s(4f, u), o(50.5f, 22.5f, u))
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(25.5f, 20f, u), size = Size(s(49f, u), s(52f, u)),
+                cornerRadius = cr(24.5f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        3 -> {                           // curls: tight, small, springy
+            // v392 — three rows shared ONE cluster of seven circles, so a puff,
+            // a curl-set and a flower crown stood in the same silhouette. The
+            // curls are now small and many, hugging the skull.
             val curl = listOf(
-                Triple(33f, 25f, 11f), Triple(50f, 18.5f, 12.5f), Triple(67f, 25f, 11f),
-                Triple(25.5f, 39f, 9.5f), Triple(74.5f, 39f, 9.5f),
-                Triple(21.5f, 55f, 8.5f), Triple(78.5f, 55f, 8.5f)
+                Triple(31f, 23f, 8f), Triple(41f, 19f, 8.6f), Triple(52f, 18f, 8.6f),
+                Triple(63f, 20f, 8.2f), Triple(72f, 25f, 7.6f),
+                Triple(26f, 33f, 7.4f), Triple(24f, 44f, 7f), Triple(75f, 34f, 7.4f),
+                Triple(77f, 45f, 7f), Triple(23.5f, 56f, 6.4f), Triple(77.5f, 57f, 6.4f)
             )
             curl.forEach { (x, y, radius) ->
                 drawCircle(hair, s(radius, u), o(x, y, u))
             }
-            // Roots: a shade pass along the inside of the cluster.
             curl.forEachIndexed { index, (x, y, radius) ->
                 if (index % 2 == 0) {
                     drawCircle(shade.copy(alpha = 0.30f), s(radius * 0.5f, u), o(x - 1.5f, y + radius * 0.7f, u))
                 }
             }
+            // A ring of ink around the cluster's outside — the springy edge.
+            drawArc(
+                color = INK.copy(alpha = 0.30f),
+                startAngle = 150f, sweepAngle = 240f, useCenter = false,
+                topLeft = o(17f, 9f, u), size = Size(s(66f, u), s(58f, u)),
+                style = Stroke(width = s(1.3f, u))
+            )
         }
-        5, 16, 23, 25 -> {               // long waves over the shoulders
+        22 -> {                          // flower crown: a wide, low set of waves
+            drawRoundRect(
+                color = hair,
+                topLeft = o(21f, 22f, u), size = Size(s(58f, u), s(58f, u)),
+                cornerRadius = cr(29f, u)
+            )
+            hairLock(hair, u, x = 19.5f, y = 68f, width = 14f, length = 22f)
+            hairLock(hair, u, x = 66.5f, y = 68f, width = 14f, length = 22f)
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(21f, 22f, u), size = Size(s(58f, u), s(58f, u)),
+                cornerRadius = cr(29f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        26 -> {                          // puff + bow: one big soft dome
+            drawCircle(hair, s(24f, u), o(50f, 34f, u))
+            drawRoundRect(
+                color = hair,
+                topLeft = o(28f, 30f, u), size = Size(s(44f, u), s(34f, u)),
+                cornerRadius = cr(17f, u)
+            )
+            drawCircle(hair, s(8.6f, u), o(30f, 62f, u))
+            drawCircle(hair, s(8.6f, u), o(70f, 62f, u))
+            drawCircle(
+                color = shade.copy(alpha = 0.22f), s(21f, u), o(50f, 36f, u),
+                style = Stroke(width = s(1.4f, u))
+            )
+            drawCircle(
+                color = INK.copy(alpha = 0.30f), s(24f, u), o(50f, 34f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        5 -> {                           // long + earring: even waves, to the collar
             drawRoundRect(
                 color = hair,
                 topLeft = o(20.5f, 16.5f, u), size = Size(s(59f, u), s(72f, u)),
@@ -999,6 +1250,70 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
             hairLock(hair, u, x = 65f, y = 62f, width = 15f, length = 26f)
             drawCircle(shade.copy(alpha = 0.35f), s(6.4f, u), o(24f, 88f, u))
             drawCircle(shade.copy(alpha = 0.35f), s(6.4f, u), o(76f, 88f, u))
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(20.5f, 16.5f, u), size = Size(s(59f, u), s(72f, u)),
+                cornerRadius = cr(29f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        16 -> {                          // waves + flower: a centre part, one side
+            drawRoundRect(               // forward — the parting decides the shape
+                color = hair,
+                topLeft = o(20f, 17f, u), size = Size(s(58f, u), s(66f, u)),
+                cornerRadius = cr(29f, u)
+            )
+            hairLock(hair, u, x = 19f, y = 58f, width = 17f, length = 30f)
+            hairLock(hair, u, x = 67f, y = 62f, width = 12f, length = 24f)
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(20f, 17f, u), size = Size(s(58f, u), s(66f, u)),
+                cornerRadius = cr(29f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        23 -> {                          // waves + star clips: long and straight, flipped
+            drawRoundRect(
+                color = hair,
+                topLeft = o(21.5f, 16f, u), size = Size(s(57f, u), s(76f, u)),
+                cornerRadius = cr(28.5f, u)
+            )
+            hairLock(hair, u, x = 21f, y = 66f, width = 13f, length = 30f)
+            hairLock(hair, u, x = 66f, y = 66f, width = 13f, length = 30f)
+            // The tips kick outward, which is the whole point of the cut.
+            drawCircle(hair, s(7.4f, u), o(20f, 90f, u))
+            drawCircle(hair, s(7.4f, u), o(80f, 90f, u))
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(21.5f, 16f, u), size = Size(s(57f, u), s(76f, u)),
+                cornerRadius = cr(28.5f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        25 -> {                          // waves + glasses: the widest, a lock over
+            drawRoundRect(
+                color = hair,
+                topLeft = o(19f, 17f, u), size = Size(s(62f, u), s(70f, u)),
+                cornerRadius = cr(30f, u)
+            )
+            hairLock(hair, u, x = 18f, y = 60f, width = 16f, length = 30f)
+            hairLock(hair, u, x = 66f, y = 60f, width = 16f, length = 28f)
+            // …and one thick lock crossing its own shoulder.
+            drawPath(
+                Path().apply {
+                    mv(64f, 52f, u)
+                    cu(74f, 58f, 76f, 72f, 72f, 86f, u)
+                    cu(68f, 74f, 66f, 62f, 61f, 54f, u)
+                    close()
+                },
+                hair
+            )
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(19f, 17f, u), size = Size(s(62f, u), s(70f, u)),
+                cornerRadius = cr(30f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
         }
         7 -> {                           // pigtails: a tail each side
             listOf(20.5f, 79.5f).forEach { x ->
@@ -1007,26 +1322,61 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
                 drawCircle(hair, s(9.5f, u), o(x, 71f, u))
                 drawCircle(hair, s(7.5f, u), o(x, 81f, u))
                 drawCircle(shade.copy(alpha = 0.35f), s(5f, u), o(x, 82f, u))
+                // v392 — the tail's own contour, so the silhouette reads as a
+                // cut shape rather than four circles stacked up.
+                drawCircle(
+                    color = INK.copy(alpha = 0.30f), s(13f, u), o(x, 55f, u),
+                    style = Stroke(width = s(1.3f, u))
+                )
             }
-        }
-        10 -> {                          // a short mass under the goggles
             drawRoundRect(
                 color = hair,
-                topLeft = o(25.5f, 20f, u), size = Size(s(49f, u), s(50f, u)),
-                cornerRadius = cr(24.5f, u)
+                topLeft = o(28f, 20f, u), size = Size(s(44f, u), s(44f, u)),
+                cornerRadius = cr(22f, u)
             )
         }
-        14 -> {                          // the hood's outer shell
+        10 -> {                          // goggles: a swept crop, shaved at the nape
+            // v392 — 10, 24 and 27 were the SAME rect in three colours. The
+            // explorer's crop is high on one side and gone at the neck, which
+            // is the shape the goggles are strapped over.
             drawPath(
                 Path().apply {
-                    mv(50f, 12f, u)
-                    cu(71f, 12f, 81f, 30f, 81f, 52f, u)
-                    cu(81f, 72f, 70f, 84f, 50f, 84f, u)
-                    cu(30f, 84f, 19f, 72f, 19f, 52f, u)
-                    cu(19f, 30f, 29f, 12f, 50f, 12f, u)
+                    mv(26f, 44f, u)
+                    cu(25f, 26f, 36f, 18f, 50f, 18f, u)
+                    cu(64f, 18f, 75f, 26f, 74f, 44f, u)
+                    cu(72f, 36f, 66f, 30f, 56f, 28f, u)
+                    cu(44f, 26f, 34f, 32f, 32f, 44f, u)
                     close()
                 },
                 hair
+            )
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(25f, 19f, u), size = Size(s(50f, u), s(27f, u)),
+                cornerRadius = cr(13f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        14 -> {                          // the hood's outer shell
+            val shell = Path().apply {
+                mv(50f, 12f, u)
+                cu(71f, 12f, 81f, 30f, 81f, 52f, u)
+                cu(81f, 72f, 70f, 84f, 50f, 84f, u)
+                cu(30f, 84f, 19f, 72f, 19f, 52f, u)
+                cu(19f, 30f, 29f, 12f, 50f, 12f, u)
+                close()
+            }
+            drawPath(shell, hair)
+            // v392 — the hood gets the same ink line as the rest of the cast,
+            // which is what makes it read as a garment rather than a dark blob.
+            drawPath(shell, INK.copy(alpha = 0.34f), style = Stroke(width = s(1.5f, u)))
+            drawPath(
+                Path().apply {          // the fold of cloth over the far shoulder
+                    mv(78f, 40f, u)
+                    cu(84f, 54f, 82f, 70f, 76f, 82f, u)
+                },
+                hair.copy(alpha = 0.85f),
+                style = Stroke(width = s(2.6f, u), cap = StrokeCap.Round)
             )
         }
         15 -> {                          // the helmet's glass shell
@@ -1051,6 +1401,13 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
                 close()
             }
             drawPath(tail, hair)
+            drawPath(tail, INK.copy(alpha = 0.30f), style = Stroke(width = s(1.3f, u)))
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(24f, 18f, u), size = Size(s(52f, u), s(54f, u)),
+                cornerRadius = cr(26f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
         }
         18 -> {                          // twin braids
             drawRoundRect(
@@ -1072,6 +1429,14 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
                     topLeft = o(x - 3.4f, 94f, u), size = Size(s(6.8f, u), s(4f, u)),
                     cornerRadius = cr(2f, u)
                 )
+                // v392 — the plait's own edge, drawn down the outside.
+                for (i in 0 until 5) {
+                    drawCircle(
+                        color = INK.copy(alpha = 0.26f), s(7.9f - i * 1.05f, u),
+                        o(x - i * 0.9f * side, 60f + i * 9.5f, u),
+                        style = Stroke(width = s(1.2f, u))
+                    )
+                }
             }
         }
         19 -> {                          // hime cut: straight sheets past the jaw
@@ -1085,19 +1450,59 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
                 topLeft = o(23.5f, 84f, u), size = Size(s(53f, u), s(7f, u)),
                 cornerRadius = cr(3f, u)
             )
-        }
-        24 -> {                          // a short crop, a hint of mass behind
             drawRoundRect(
-                color = hair,
-                topLeft = o(27f, 21f, u), size = Size(s(46f, u), s(40f, u)),
-                cornerRadius = cr(23f, u)
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(22f, 18f, u), size = Size(s(56f, u), s(74f, u)),
+                cornerRadius = cr(22f, u),
+                style = Stroke(width = s(1.3f, u))
             )
         }
-        27 -> {                          // a mass under the braided crown
+        24 -> {                          // pixie: cropped at the ears, with points
             drawRoundRect(
                 color = hair,
-                topLeft = o(23.5f, 18f, u), size = Size(s(53f, u), s(64f, u)),
-                cornerRadius = cr(26.5f, u)
+                topLeft = o(26f, 20f, u), size = Size(s(48f, u), s(42f, u)),
+                cornerRadius = cr(22f, u)
+            )
+            // Two points of hair over the ears — a pixie's whole shape.
+            drawPath(
+                Path().apply {
+                    mv(26f, 40f, u)
+                    cu(23f, 48f, 24f, 56f, 27f, 60f, u)
+                    cu(29f, 52f, 29f, 45f, 30f, 40f, u)
+                    close()
+                },
+                hair
+            )
+            drawPath(
+                Path().apply {
+                    mv(74f, 40f, u)
+                    cu(77f, 48f, 76f, 56f, 73f, 60f, u)
+                    cu(71f, 52f, 71f, 45f, 70f, 40f, u)
+                    close()
+                },
+                hair
+            )
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(26f, 20f, u), size = Size(s(48f, u), s(42f, u)),
+                cornerRadius = cr(22f, u),
+                style = Stroke(width = s(1.3f, u))
+            )
+        }
+        27 -> {                          // braided crown: the hair is all UP, gathered
+            drawRoundRect(
+                color = hair,
+                topLeft = o(24f, 19f, u), size = Size(s(52f, u), s(56f, u)),
+                cornerRadius = cr(26f, u)
+            )
+            // The tail of the crown, tucked under the plait on one side.
+            drawCircle(hair, s(8f, u), o(73f, 68f, u))
+            drawCircle(hair, s(6f, u), o(76f, 76f, u))
+            drawRoundRect(
+                color = INK.copy(alpha = 0.30f),
+                topLeft = o(24f, 19f, u), size = Size(s(52f, u), s(56f, u)),
+                cornerRadius = cr(26f, u),
+                style = Stroke(width = s(1.3f, u))
             )
         }
     }
