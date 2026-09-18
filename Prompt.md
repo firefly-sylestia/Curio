@@ -1,5 +1,69 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch O — the release build's non-local return, NAMED and removed)
+
+Live instruction: the PR link — "https://github.com/firefly-sylestia/Curio/pull/153 check this
+merge maybe this did something" — plus the CI log whose `minifyReleaseWithR8` fails with
+"Method name '<anonymous>' in class '$$$$$NON_LOCAL_RETURN$$$$$' cannot be represented in dex
+format", origin `PersonalCanvasKt.class`. "also fix this."
+
+**Status: DONE, committed and pushed.**
+
+### The merge the user suspected
+
+`03669fb1` ("Fix UI scaling across different screen densities", merged 03:26) touched three
+files, `PersonalCanvas.kt` among them, and its branch head `517fbafa` was itself a
+non-local-return fix ("avoid non-local return in link annotation builder" — a `return` inside
+`matches.forEach { }` in `personalAnnotateLinks` became a `for` loop). So PR #153 is part of
+the same story, but not the source of THIS instance: `git log -S "return@key"` points at
+`ce8ea5f6` ("two small or half photos share a row"), the photo-pairing feature.
+
+### How the construct was named instead of guessed
+
+Earlier sessions burned whole cycles trying to find the construct with static scans (every
+`?: run { … return }`, `?: let { … }`, `forEach { … return }` shape in the file was already
+gone, and no `return` at all was left in an inline lambda there). This time the compiler was
+asked directly: a branch-only CI step (`diag/non-local-return`, PR #155, never merged for
+the app) compiled the release sources, then disassembled the class that mentions the
+sentinel on the runner:
+
+```
+== classes mentioning the sentinel ==
+./com/curio/app/features/personal/PersonalCanvasKt.class
+   IN:  private static final kotlin.Unit PersonalCanvas_pAZo6Ak$lambda$4(
+          Modifier, boolean, PersonalEditorState, PersonalRowDragState,
+          long, long, long, Function4, Function2, Composer, int);
+        2095: invokestatic  $$$$$NON_LOCAL_RETURN$$$$$."<anonymous>":()V
+```
+
+One call site, in a **composable** lambda. Of the three early exits in that function
+(`return@LaunchedEffect`, `return@forEachIndexed`, `return@key`), only the `key(id) { … }`
+block is a composable lambda — and a return out of one cannot be a `goto`, so the compiler
+implements it by throwing its synthetic sentinel class, whose method name R8 will not dex.
+The culprit was therefore `if (pairSkips.contains(id)) return@key`, one line, exactly where a
+`grep` could not see it and `javap` could.
+
+### The fix (`v389e`)
+
+`state.blockIds.forEachIndexed { index, id -> val block = state.block(id) ?: return@forEachIndexed;
+key(id) { … if (pairSkips.contains(id)) return@key … } }` became a list built FIRST and drawn
+second:
+
+```kotlin
+val rows = state.blockIds.mapIndexedNotNull { index, id ->
+    val block = state.block(id)
+    if (block != null && !pairSkips.contains(id)) Triple(index, id, block) else null
+}
+rows.forEach { (index, id, block) -> … key(id) { … } }
+```
+
+Nothing is stepped over INSIDE a composable lambda any more — the second photo of a pair and
+an id the page no longer holds are simply not in the list, which is also what `return@key`
+produced (the keyed block composed nothing either way). No indentation moved, no behaviour
+changed, the stale comment that said the skip happens inside the keyed block is corrected,
+and `node scripts/check_braces.js` is clean. The temporary diagnostic step was left on the
+discarded branch only; `main`'s `android.yml` was never touched.
+
 ## Request (2026-09-18, batch N — the wall's late first frame, and the visibility break)
 
 Live instruction: "in community the last 24 hours nothing here yet appears late, same for
@@ -3244,3 +3308,6 @@ add proper chapter no. look it up for books and also chapter titles too for brow
 for animes, movies and songs etc the button sheet they are opening they are so bad. remove them and use the same style as book button sheet album button sheet series button sheet style. for topic reveal screen.
 also add artwork button sheet too and author button sheet with authors written books, and similar more with their free apis added or if some need manual addition, add proper guide in env.example which have free tiers
 in home screen the stikky pages and your my shelf. they have a white background which creates weird theme issues with background fix it and also why only 3 books and 3 journal shows. add more keeping scroll too.
+
+## next prompt 
+fix the cl 

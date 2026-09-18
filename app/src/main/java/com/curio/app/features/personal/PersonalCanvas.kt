@@ -2031,8 +2031,22 @@ internal fun PersonalCanvas(
                 }
             }
         }
-        state.blockIds.forEachIndexed { index, id ->
-            val block = state.block(id) ?: return@forEachIndexed
+        // v389e — THE ROWS THAT DRAW, CHOSEN OUTSIDE THE COMPOSABLE LAMBDAS.
+        //
+        // A `return` out of a COMPOSABLE lambda is a non-local return, and the
+        // compiler has only one way to implement one: throw. It emits its
+        // `$$$$$NON_LOCAL_RETURN$$$$$` class for it, and R8 refuses to dex that
+        // class's method name — "Method name '<anonymous>' in class
+        // '$$$$$NON_LOCAL_RETURN$$$$$' cannot be represented in dex format" —
+        // which killed the RELEASE build while debug builds were perfectly
+        // happy. So nothing is stepped over INSIDE a composable lambda here:
+        // the second photo of a pair (see [pairSkips]) and an id the page no
+        // longer holds are left out of the list instead of returned past.
+        val rows = state.blockIds.mapIndexedNotNull { index, id ->
+            val block = state.block(id)
+            if (block != null && !pairSkips.contains(id)) Triple(index, id, block) else null
+        }
+        rows.forEach { (index, id, block) ->
             // v389 — the blocks are KEYED by their own id. The to-do page can
             // now reorder them, and without the key Compose would hand each
             // slot's remembered state to whichever block slid into it — the
@@ -2105,10 +2119,10 @@ internal fun PersonalCanvas(
                     //
                     // Two consecutive small or half photos share the row,
                     // splitting the text wrapper between them. The SECOND of
-                    // each pair was flagged by [pairSkips] and is skipped here;
-                    // the FIRST renders both photos in a Row. Two PAGE-size
-                    // photos never pair — each is the width of the page.
-                    if (pairSkips.contains(id)) return@key
+                    // each pair was flagged by [pairSkips] and never reached
+                    // this block at all; the FIRST renders both photos in a
+                    // Row. Two PAGE-size photos never pair — each is the width
+                    // of the page.
                     val nextIndex = index + 1
                     val nextId = state.blockIds.getOrNull(nextIndex)
                     val nextBlock = nextId?.let { state.block(it) }

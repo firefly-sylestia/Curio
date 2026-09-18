@@ -1,4 +1,5 @@
 FIX:
+- Releases: the release build builds again — a return out of a composable page block made the compiler emit a helper class the shrinker refuses to package, so the signed APK failed while debug builds were unaffected.
 - Writing: a page READ back now draws the small print with the writing beside it exactly as the page that was written does — the read view ran its own copy of the renderer, so the pair only existed while editing.
 - Writing: a small print keeps room for the writing — the print takes a narrow column and the line under it moves in beside it, like a picture set in a printed column, instead of pushing every word down the page (a half or page print, and a second photo, still pair as they did).
 - Books: a chapter list is read from more places — Open Library's own work record as well as its editions' (and the richest table wins, instead of the first one with three rows), Google Books, and Crossref, whose chapter records are the only source that answers for an academic or edited volume and carries the pages each chapter spans.
