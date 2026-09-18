@@ -51,12 +51,18 @@ object AnimePosterFetch {
             val key = "$title|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
-            val resolved = runCatching {
+            // v389f — the keyless pair first (Jikan is MyAnimeList's own data and
+            // is the specialist here), with TMDB behind it when the key is set and
+            // both keyless providers came up empty. The TMDB call sits AFTER the
+            // `runCatching`, not inside it: that lambda is not suspend, so a
+            // suspend call in there would not compile.
+            val viaKeyless = runCatching {
                 when (provider) {
                     1 -> itunesPoster(title)
                     else -> jikanPoster(title)
                 }
             }.getOrNull()
+            val resolved = viaKeyless ?: TmdbFetch.posterUrl(title)
 
             cache[key] = resolved.orEmpty()
             resolved

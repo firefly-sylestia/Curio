@@ -90,6 +90,17 @@ jobs:
           # and password reset email carries. Optional: unset (empty) leaves
           # Supabase's own Site URL in charge and hides the recovery row.
           CURIO_AUTH_SITE_URL: ${{ secrets.CURIO_AUTH_SITE_URL }}
+          # Optional keyed providers. These were exported by android.yml only,
+          # so a TAGGED release shipped without them while a CI build carried
+          # them — the published APK is the one that matters, so they are here
+          # too. Every one of them is optional: unset keeps the keyless path.
+          GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
+          LIBRARY_THING_API_KEY: ${{ secrets.LIBRARY_THING_API_KEY }}
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          # v389f — free TMDB key (film/anime artwork, a film's facts, and the
+          # episode list of a title that is really a show).
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || { [ -z "$SUPABASE_PUBLISHABLE_KEY" ] && [ -z "$SUPABASE_ANON_KEY" ]; }; then
             echo "::warning::Supabase URL/key secrets not provided — this release APK will ship with Online Mode reporting unconfigured."

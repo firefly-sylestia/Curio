@@ -80,6 +80,12 @@ jobs:
           # search links.
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          # v389f — optional: free TMDB API key. When present it is baked into
+          # BuildConfig.TMDB_API_KEY and the film / anime sheets resolve their
+          # artwork (and a film's facts, and the episodes of a title that is
+          # really a show) from TMDB first; unset stays on the keyless
+          # providers (iTunes, TVMaze, Jikan).
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
           # Supabase (account sign-in + Online Mode backend). The project URL
           # and the publishable/anon key are PUBLIC client credentials and are
           # baked into BuildConfig; the service-role key must NEVER be added

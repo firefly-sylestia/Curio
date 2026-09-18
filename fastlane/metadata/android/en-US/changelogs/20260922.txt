@@ -1,4 +1,5 @@
 FIX:
+- Releases: a tagged release carries the same keyed providers a CI build does — the optional keys were exported by the pull-request workflow only, so the APK that actually shipped went out without them.
 - Books: an author's written works are kept on the device — the list the sheet showed last time is on screen in its first frame, offline included, and a lookup that failed is not remembered as "wrote nothing" for someone with a shelf full of books.
 - Releases: the writing page compiles again — the drag's auto-scroll imports the two things it calls and takes the pixel travel as a float.
 - Cabinet: the Notes shelf is your own notes now — the pages you wrote about a topic and your to-do lists, each opening the page it belongs to. The captures you saved under "notes" keep their own shelf, the Cupboard and search; they no longer share a shelf with your writing.
@@ -59,6 +60,9 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Reading: anime opens the series sheet — its own episode list from MyAnimeList's data, with the watched marks, the likes and the shelf toggles a series has, and the reveal card previews those episodes under its poster.
+- Reading: a "movie" that is really a show lists its episodes — the sheet asks a source that can actually tell a film from a series, a film keeps the film sheet it had, and the two can never show at once.
+- Setup: a free TMDB key is now read from `TMDB_API_KEY` — with it the film and anime sheets resolve posters from TMDB, and a film's facts and a show's episode list come from there too; without it the keyless providers answer exactly as before. `.github/AGENTS.md` walks the whole setup, secret included.
 - Books: a work in an author's sheet opens IN the app — its cover, its year, what Open Library says about it and its subject headings, with the work's own page a tap away in the corner and a pill that files it onto My shelf as a book you can read and write in.
 - Writing: a photo can be a Portrait — the tall frame a phone picture of a person or a doorway actually is, for the vertical photos the other three sizes had to crop.
 - Art: the artwork, artist, painter and author cards on the reveal wear their own picture — an artwork shows itself (the Met's public-domain image, then Wikipedia's), an artist or a painter shows a work the Met attributes to them, and an author shows their portrait (Wikipedia's lead image for the name, or the cover of the first of their books when there is no photograph). The resolved picture is remembered per topic, so the sheet that opens on a tap is painted from the same one.

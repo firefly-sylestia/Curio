@@ -74,6 +74,22 @@ val spotifySecretEscaped: String = envSpotifyClientSecret
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// v389f — OPTIONAL TMDB (The Movie Database) API key (free for personal use):
+// the keyed upgrade for FILM and ANIME/TV artwork, the extra facts a film sheet
+// can show (year, runtime, rating, genres, director, cast) and the episode list
+// of a title that is really a show rather than a film. Unset = the keyless
+// providers keep doing the work exactly as before (iTunes → TVMaze for films,
+// Jikan → iTunes for anime), so nothing here is required for a lookup to
+// succeed.  https://developer.themoviedb.org/docs/getting-started
+// Setup: copy .env.example and set TMDB_API_KEY in your environment, or add it
+// as a repo secret (Settings > Secrets and variables > Actions) — see
+// .github/AGENTS.md for the full GitHub Actions guide.
+val envTmdbApiKey: String? = System.getenv("TMDB_API_KEY")?.trim()?.takeIf { it.isNotEmpty() }
+val tmdbEscaped: String = envTmdbApiKey
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Supabase Android client configuration. The URL and publishable/anon key are
 // safe for a public client; the service-role key must never be shipped here.
 val envSupabaseUrl: String? = System.getenv("SUPABASE_URL")?.trim()?.takeIf { it.isNotEmpty() }
@@ -142,6 +158,10 @@ android {
         // flow); empty strings keep the search links.
         buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"$spotifyIdEscaped\"")
         buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"$spotifySecretEscaped\"")
+
+        // v389f — optional TMDB key: film/anime artwork and facts, and the
+        // episode list of a title that maps to a show. Empty string otherwise.
+        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbEscaped\"")
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrlEscaped\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKeyEscaped\"")
 

@@ -1092,6 +1092,12 @@ fun TopicRevealScreen(
                             cat = cat,
                             topic = animeTopic,
                             onOpenSheet = { showAnimeSheet = true },
+                            // v389f — a chip jumps the sheet straight to that
+                            // episode, exactly as the series card's chips do.
+                            onEpisodeClick = { episode ->
+                                selectedSeriesEpisode = episode
+                                showAnimeSheet = true
+                            },
                             modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
                         )
                     }
@@ -1432,19 +1438,78 @@ fun TopicRevealScreen(
     }
 
     val posterSheetTopic = resolved
+    // v389f — ANIME IS A SERIES NOW. The member asked for exactly this
+    // ("consider anime bottom sheet of topic reveal as series ... it fetches the
+    // cover and episode details similar to series"), so an anime opens the SHARED
+    // episode sheet — poster header, watched rail, the synopsis accordion, the
+    // shelf toggles — with the anime lane's own episode source (Jikan). Songs
+    // keep the poster sheet; a film keeps it too, UNLESS the title turns out to
+    // be a show (see below).
     val posterSheetKind = when (posterSheetTopic?.categoryId) {
         CategoryId.FILMS, CategoryId.ANIMATED_MOVIES -> if (showFilmSheet) "Movie" else null
-        CategoryId.ANIME -> if (showAnimeSheet) "Anime" else null
         CategoryId.SONGS -> if (showSongSheet) "Song" else null
         else -> null
     }
-    if (posterSheetTopic != null && posterSheetKind != null) {
-        // v389d — THE MOVIE / ANIME / SONG SHEET IS THE SHEET THE OTHER THREE
-        // LANES ALREADY HAVE (user request: "for animes, movies and songs etc
-        // the button sheet they are opening they are so bad. remove them and use
-        // the same style as book button sheet album button sheet series button
-        // sheet style"). The old "Similar Movie" panel — a heading, a teaser and
-        // a tag row with no way to keep the topic — is gone.
+    val animeSheetTopic = posterSheetTopic?.takeIf {
+        it.categoryId == CategoryId.ANIME && showAnimeSheet
+    }
+    if (animeSheetTopic != null) {
+        EpisodeNotesSheet(
+            cat = cat,
+            topic = animeSheetTopic,
+            episode = selectedSeriesEpisode,
+            onSelectEpisode = { selectedSeriesEpisode = it },
+            variant = EpisodeSheetVariant.ANIME,
+            onDismiss = {
+                showAnimeSheet = false
+                selectedSeriesEpisode = null
+            }
+        )
+    }
+
+    // ── IS THIS "MOVIE" ACTUALLY A SHOW? (v389f) ──────────────────────────
+    //
+    // The member's answer, verbatim: "episodes when it is really a show". An
+    // animated-movies lane holds series as often as it holds films, and a film
+    // lane has no way to know which from the topic's name. The check runs once
+    // per open and comes out of the providers' own caches (TMDB when a key is
+    // set, then TVMaze), so a reopen asks nothing new.
+    //
+    // While it is being answered the FILM sheet is what shows — a film stays a
+    // film — and it is replaced by the episode sheet only when the source says
+    // this title really is a show. Only one of the two is ever mounted, so the
+    // two sheets can never stack on top of each other.
+    val filmShowTopic = posterSheetTopic?.takeIf {
+        (it.categoryId == CategoryId.FILMS || it.categoryId == CategoryId.ANIMATED_MOVIES) &&
+            showFilmSheet
+    }
+    var filmShowEpisodes by remember(filmShowTopic?.name) {
+        mutableStateOf<List<com.curio.app.data.SeriesEpisode>?>(null)
+    }
+    LaunchedEffect(filmShowTopic?.name) {
+        val name = filmShowTopic?.name
+        filmShowEpisodes = if (name == null) null else SeriesEpisodeFetcher.fetchForAny(name)
+    }
+    // `takeIf` rather than a boolean flag beside it: it is what lets the sheet
+    // below take a NON-NULL topic, so the compiler needs no smart cast.
+    val filmShow = filmShowTopic?.takeIf { !filmShowEpisodes.isNullOrEmpty() }
+    if (filmShow != null) {
+        EpisodeNotesSheet(
+            cat = cat,
+            topic = filmShow,
+            variant = EpisodeSheetVariant.FILM,
+            onDismiss = {
+                showFilmSheet = false
+                selectedSeriesEpisode = null
+            }
+        )
+    } else if (posterSheetTopic != null && posterSheetKind != null) {
+        // v389d — THE MOVIE / SONG SHEET IS THE SHEET THE OTHER LANES ALREADY
+        // HAVE (user request: "for animes, movies and songs etc the button sheet
+        // they are opening they are so bad. remove them and use the same style as
+        // book button sheet album button sheet series button sheet style"). The
+        // old "Similar Movie" panel — a heading, a teaser and a tag row with no
+        // way to keep the topic — is gone.
         PosterNotesSheet(
             cat = cat,
             topic = posterSheetTopic,
@@ -5664,12 +5729,36 @@ private fun SeriesPoster(
  * series cover-fetch toggle is on; otherwise the category tint.
  */
 @Composable
+/**
+ * WHICH LANE THE SHARED EPISODE SHEET IS SPEAKING FOR (v389f).
+ *
+ * The member's ask: "consider anime bottom sheet of topic reveal as series",
+ * and "same for movies too" — with the answer that a movie lane lists episodes
+ * only "when it is really a show". A series sheet is a poster, a watched rail
+ * and a real episode list, and this enum is the whole difference between the
+ * three lanes that now share it: the words, the source its episode list comes
+ * from, and the key its artwork is remembered under.
+ */
+private enum class EpisodeSheetVariant(
+    val label: String,
+    val aboutLabel: String
+) {
+    SERIES("SERIES NOTES", "ABOUT THIS SERIES"),
+    ANIME("ANIME NOTES", "ABOUT THIS ANIME"),
+    /** A title that turned out to be a show, opened from a film lane. */
+    FILM("EPISODES", "ABOUT THIS SHOW")
+}
+
+@Composable
 private fun EpisodeNotesSheet(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
     episode: com.curio.app.data.SeriesEpisode? = null,
     onSelectEpisode: (com.curio.app.data.SeriesEpisode) -> Unit = {},
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    // v389f — the lane. Defaults to the series sheet, so every existing call
+    // site is unchanged.
+    variant: EpisodeSheetVariant = EpisodeSheetVariant.SERIES
 ) {
   var episodes by remember { mutableStateOf(topic.episodes.orEmpty()) }
   val fetchConsent = AppPreferences.seriesFetchEnabledState
@@ -5685,7 +5774,17 @@ private fun EpisodeNotesSheet(
   if (episodes.isNotEmpty()) {
   episodes = SeriesEpisodeFetcher.enrich(topic.name, episodes)
   } else if (fetchConsent) {
-  episodes = SeriesEpisodeFetcher.fetchAll(topic.name)
+  // v389f — the open lane's own source. Anime reads Jikan (MyAnimeList's own
+  // data, keyless) and only falls back to the show search; a film lane asks the
+  // source that can say whether the title is a film or a show at all, and gets
+  // an empty list when it is a film, which is the signal that closes this sheet
+  // entirely (see the reveal's routing).
+  episodes = when (variant) {
+  EpisodeSheetVariant.ANIME -> AnimeEpisodeFetcher.fetchAll(topic.name)
+  .ifEmpty { SeriesEpisodeFetcher.fetchForAny(topic.name) }
+  EpisodeSheetVariant.FILM -> SeriesEpisodeFetcher.fetchForAny(topic.name)
+  EpisodeSheetVariant.SERIES -> SeriesEpisodeFetcher.fetchAll(topic.name)
+  }
   }
   }
     // v371 — same resolved-poster fix as the album sheet: the palette must
@@ -5696,7 +5795,15 @@ private fun EpisodeNotesSheet(
     // resolved poster URL is persisted per show and the extracted swatches
     // cache per URL, so reopens and restarts wear the poster palette on the
     // very first frame instead of the category tint.
-    val seriesArtKey = "series|${topic.name}"
+    // v389f — the key and the resolver follow the lane, so a sheet opened from an
+    // anime or film card reads the SAME stored poster the card already resolved
+    // (both are remembered as "anime|<name>" / "film|<name>") instead of asking
+    // a series endpoint about an anime.
+    val seriesArtKey = when (variant) {
+        EpisodeSheetVariant.ANIME -> "anime|${topic.name}"
+        EpisodeSheetVariant.FILM -> "film|${topic.name}"
+        EpisodeSheetVariant.SERIES -> "series|${topic.name}"
+    }
     var paletteUrl by remember(topic.imageUrl) {
         mutableStateOf(
             AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
@@ -5705,7 +5812,11 @@ private fun EpisodeNotesSheet(
     LaunchedEffect(topic.imageUrl, fetchConsent) {
         val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
         val resolved = if (stored != null) stored
-        else if (fetchConsent) SeriesPosterFetch.resolvePosterUrl(topic.name)
+        else if (fetchConsent) when (variant) {
+            EpisodeSheetVariant.ANIME -> AnimePosterFetch.resolvePosterUrl(topic.name)
+            EpisodeSheetVariant.FILM -> FilmPosterFetch.resolvePosterUrl(topic.name)
+            EpisodeSheetVariant.SERIES -> SeriesPosterFetch.resolvePosterUrl(topic.name)
+        }
         else null
         paletteUrl = resolved ?: topic.imageUrl
         if (resolved != null && stored == null) {
@@ -5822,7 +5933,7 @@ private fun EpisodeNotesSheet(
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "SERIES NOTES",
+                        variant.label,
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.4.sp
@@ -5961,7 +6072,7 @@ private fun EpisodeNotesSheet(
                             onSurface = onSurface,
                             synopsis = topic.synopsis.orEmpty(),
                             initiallyExpanded = !hasSynopsis || episodes.isEmpty(),
-                            label = "ABOUT THIS SERIES",
+                            label = variant.aboutLabel,
                             // v3xx — the series sheet's accordion wears the
                             // TV/clapperboard glyph, never the book icon.
                             icon = CurioIcons.Movie
@@ -6583,10 +6694,26 @@ private fun AnimeInfoSection(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
     onOpenSheet: () -> Unit,
+    onEpisodeClick: (com.curio.app.data.SeriesEpisode) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val fetchConsent = AppPreferences.bookFetchEnabledState
+    // v389f — THE EPISODE PREVIEW, which is what made this card a series card. The
+    // member asked for the anime card to be "similar to" the series one, and the
+    // series card's whole character is the chip row of its episodes under the
+    // poster. Jikan supplies them, keyless, once per topic; the fetch is skipped
+    // with the series toggle off, and the row simply does not appear when there
+    // is nothing to list.
+    val seriesConsent = AppPreferences.seriesFetchEnabledState
+    var previewEpisodes by remember(topic.name) {
+        mutableStateOf(topic.episodes.orEmpty())
+    }
+    LaunchedEffect(topic.name, seriesConsent) {
+        if (previewEpisodes.isEmpty() && seriesConsent) {
+            previewEpisodes = AnimeEpisodeFetcher.fetchAll(topic.name)
+        }
+    }
     val seriesArtKey = "anime|${topic.name}"
     var paletteUrl by remember(topic.imageUrl) {
         mutableStateOf(
@@ -6613,6 +6740,13 @@ private fun AnimeInfoSection(
             posterUrl = paletteUrl,
             onClick = onOpenSheet
         )
+        if (previewEpisodes.isNotEmpty()) {
+            SeriesEpisodeChips(
+                cat = cat,
+                episodes = previewEpisodes,
+                onEpisodeClick = onEpisodeClick
+            )
+        }
     }
 }
 

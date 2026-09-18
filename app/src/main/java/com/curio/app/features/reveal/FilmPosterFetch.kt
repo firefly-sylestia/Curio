@@ -51,12 +51,21 @@ object FilmPosterFetch {
             val key = "$title|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
-            val resolved = runCatching {
+            // v389f — the keyless source first (the project's rule: a free source
+            // answers first), with TMDB behind it only when the keyless pair found
+            // nothing. iTunes indexes films well but serves a SQUARE artwork, and
+            // the older or non-English films it does not carry at all are exactly
+            // where a real poster comes from. No key = nothing changes.
+            //
+            // The TMDB call sits AFTER the `runCatching`, not inside it: that
+            // lambda is not suspend, so a `posterUrl` inside it would not compile.
+            val viaKeyless = runCatching {
                 when (provider) {
                     1 -> tvmazePoster(title)
                     else -> itunesPoster(title)
                 }
             }.getOrNull()
+            val resolved = viaKeyless ?: TmdbFetch.posterUrl(title)
 
             cache[key] = resolved.orEmpty()
             resolved

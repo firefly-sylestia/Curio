@@ -133,6 +133,24 @@ object SeriesEpisodeFetcher {
         }
     }
 
+    /**
+     * The episodes of a title that MIGHT be a show at all (v389f).
+     *
+     * This is the film and anime lanes' entry point, and it exists because a
+     * title's shape is not something a lane knows: an "animated movie" topic is
+     * as often a series (the member's own words: "episodes when it is really a
+     * show"). TMDB answers WHEN A KEY IS SET, because it is the only source that
+     * states outright whether a title is a film or a show; TVMaze — keyless, and
+     * already trusted by the series sheet — is the fallback. An empty list is the
+     * answer that means "no show here", which is what tells the caller to show a
+     * film's own facts instead.
+     */
+    suspend fun fetchForAny(title: String): List<SeriesEpisode> = withContext(Dispatchers.IO) {
+        val viaTmdb = TmdbFetch.showEpisodes(title)
+        if (viaTmdb != null && viaTmdb.isNotEmpty()) return@withContext viaTmdb
+        fetchAll(title)
+    }
+
     /** Look up the TVMaze show ID by name. Returns null on miss. */
     private fun lookupShowId(title: String): Int? {
         val json = httpGet(

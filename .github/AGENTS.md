@@ -158,6 +158,20 @@ Optional build-config secrets are exported to the Gradle build and baked into `B
 - `CURIO_AUTH_SITE_URL` — the Curio account site (`auth-web/`, deployed on Vercel). It is the `redirect_to` every confirmation and password reset email carries and the URL behind the sign-in form's "Forgot your password?" row. **Optional and empty by default**: unset leaves Supabase's own Site URL in charge of email links (which is what sent members to `http://localhost:3000`) and hides the recovery row, so a build from before the site exists is unchanged. Both `android.yml` and `release.yml` export it.
 - `GOOGLE_BOOKS_API_KEY`, `LIBRARY_THING_API_KEY` — keyed cover providers (unset keeps the keyless paths).
 - `SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET` — Spotify client-credentials flow for music topics (unset keeps the search links).
+- `TMDB_API_KEY` — TMDB (The Movie Database) key for film/anime artwork, a film's own facts and a show's episode list. **Exported by BOTH `android.yml` and `release.yml`** (before v389f only `android.yml` had the optional provider keys, so a tagged release shipped without them while CI builds carried them — the published APK is the one that matters).
+
+### Adding a keyed provider (worked guide: TMDB)
+
+The optional keys above are not magic: each one is an explicit fetcher reading a `BuildConfig` field. Adding a new provider is four edits, and TMDB (`v389f`) is the reference for all four:
+
+1. **`app/build.gradle.kts`** — read the env var at the top of the file next to `envGoogleBooksApiKey`, escape it for the generated string literal (the `replace("\\", …)` / `replace("\"", …)` pair every other key uses), then declare it in `defaultConfig` with `buildConfigField("String", "TMDB_API_KEY", "\"$tmdbEscaped\"")`. An unset key must become an EMPTY STRING, never the literal text `null` — every fetcher checks `isNotBlank()` before it builds a URL.
+2. **Both workflows** — add the secret to the build step's `env:` block in `android.yml` AND `release.yml`. A key in only one of them means the published release and the CI build disagree about what the app can do, which is exactly the bug v389f fixed for the older provider keys. Do NOT add a workflow-level `env:`; it belongs on the build step so the secret's reach is visible in the log.
+3. **`app/src/main/java/com/curio/app/features/reveal/…Fetch.kt`** — the fetcher itself. Read the key through `BuildConfig.TMDB_API_KEY`, keep it keyless-first where a free source already answers (the project's rule is FREE SOURCE FIRST, keyed source as the upgrade), memoise the answer per query in a `ConcurrentHashMap` so a reopen never re-asks, and wrap every call in `runCatching` — a keyed provider that fails must degrade to the keyless one, never to an empty screen.
+4. **`.env.example`** — add the source to the map at the top (what it feeds, the free tier it actually enforces, and its `→` env var) and a blank `TMDB_API_KEY=` line under the optional keys. A provider with no row in that map is invisible to the next person setting a build up.
+
+**Setting the secret in GitHub:** repo **Settings > Secrets and variables > Actions > Secrets tab > New repository secret**, name it exactly `TMDB_API_KEY`, paste the vendor's key, save. Fork pull requests never receive secrets — GitHub strips them — so a fork PR builds keyless and must still pass; that is why every fetcher degrades instead of failing. To rotate a key, update the secret in place (no workflow edit needed) and re-run the workflow.
+
+**Never commit a key.** `.env.example` ships with every key blank on purpose, and no workflow ever echoes a key value.
 
 ## Work Guidance
 
