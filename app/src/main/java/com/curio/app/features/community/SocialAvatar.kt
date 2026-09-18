@@ -2783,7 +2783,7 @@ private fun heartClipPath(center: Offset, half: Float): Path = Path().apply {
  * other selected chips (RoundedCornerShape(50) = a circle here), so the picker
  * speaks the same language as the rails and filter pills.
  */
-@Composabl
+@Composable
 internal fun AvatarPickerIcon(
     style: Int,
     selected: Boolean,
