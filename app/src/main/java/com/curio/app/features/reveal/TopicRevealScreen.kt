@@ -370,10 +370,15 @@ fun TopicRevealScreen(
     // surfaces a pill whose action opens the collection picker; the topic
     // is pinned into the chosen collection.
     var showFileToPill by remember { mutableStateOf(false) }
-    // v389d — the AUTHOR sheet: the name under a book's title opens their other
-    // works (Open Library, keyless). Its own state, so the book sheet underneath
-    // keeps its place and dismissing the author's shelf comes back to it.
+    // v389d — the AUTHOR sheet: a name opens the works written under it (Open
+    // Library, keyless). Its own state, so the book sheet underneath keeps its
+    // place and dismissing the author's shelf comes back to it. The AUTHORS lane
+    // opens the same sheet from its own section card.
     var authorSheetName by remember { mutableStateOf<String?>(null) }
+    // v389d — the ART lanes' sheet: an artwork opens its own record (the Met +
+    // Wikipedia), an artist or a painter opens the works the Met attributes to
+    // them. Null = closed.
+    var artSheetMode by remember { mutableStateOf<ArtworkSheetMode?>(null) }
     // v388 — the file-to-collection flow (see the sheet at the foot of this file)
     var showFileToSheet by remember { mutableStateOf(false) }
     // v371 — the topic SHARE sheet + chapter-note sharing live at FUNCTION
@@ -1100,6 +1105,60 @@ fun TopicRevealScreen(
                     }
                 }
 
+                // ── 2.605 An author's own works (authors only) ───────────────
+                // v389d — the AUTHORS lane's door: the person's name is the
+                // topic here, so the card opens the works written under it
+                // (Open Library's authors index, keyless), the same sheet the
+                // name under a book's title opens.
+                val authorLaneTopic = resolved
+                if (authorLaneTopic != null && contentUiReady &&
+                    authorLaneTopic.categoryId == CategoryId.AUTHORS) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        ArtworkInfoSection(
+                            cat = cat,
+                            topic = authorLaneTopic,
+                            label = "AUTHOR",
+                            glyph = CurioIcons.MenuBook,
+                            hint = "THEIR WRITTEN WORKS",
+                            onOpenSheet = { authorSheetName = authorLaneTopic.name },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
+                // ── 2.61 The art lanes' own door ─────────────────────────
+                // v389d — an artwork, an artist and a painter each open
+                // something: the work's own record (the Met's open-access API
+                // and Wikipedia's words, both keyless), or the works the Met
+                // attributes to the maker.
+                val artLaneTopic = resolved
+                val artLaneLabel = when (artLaneTopic?.categoryId) {
+                    CategoryId.ARTWORKS -> "ARTWORK"
+                    CategoryId.ARTISTS -> "ARTIST"
+                    CategoryId.PAINTERS -> "PAINTER"
+                    else -> null
+                }
+                if (artLaneTopic != null && contentUiReady && artLaneLabel != null) {
+                    val artworkLane = artLaneTopic.categoryId == CategoryId.ARTWORKS
+                    RevealContentEntrance(delayMillis = 60) {
+                        ArtworkInfoSection(
+                            cat = cat,
+                            topic = artLaneTopic,
+                            label = artLaneLabel,
+                            glyph = if (artworkLane) CurioIcons.Image else CurioIcons.Palette,
+                            hint = if (artworkLane) "OPEN THE RECORD" else "THEIR WORKS",
+                            onOpenSheet = {
+                                artSheetMode = if (artworkLane) {
+                                    ArtworkSheetMode.WORK
+                                } else {
+                                    ArtworkSheetMode.MAKER
+                                }
+                            },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
                 // ── 2.6 Action row — Express yourself / Explore ──────────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
@@ -1297,14 +1356,6 @@ fun TopicRevealScreen(
             }
         )
 
-        // The author's own shelf, over the book's — dismissing it comes back.
-        authorSheetName?.let { name ->
-            AuthorWorksSheet(
-                cat = cat,
-                author = name,
-                onDismiss = { authorSheetName = null }
-            )
-        }
     }
 
     // v332 — the album track-list UI mirrors the book notes sheet: one
@@ -1325,6 +1376,29 @@ fun TopicRevealScreen(
                 showAlbumSheet = false
                 selectedAlbumTrack = null
             }
+        )
+    }
+
+    // ── THE ART LANES' SHEET, over whatever opened it ────────────────────
+    //
+    // Opened from the art section card (ARTWORK / ARTIST / PAINTER), and from
+    // the AUTHOR card on an authors topic's own sheet over it.
+    val artSheetTopic = resolved
+    artSheetMode?.let { mode ->
+        if (artSheetTopic != null) {
+            ArtworkSheet(
+                cat = cat,
+                topic = artSheetTopic,
+                mode = mode,
+                onDismiss = { artSheetMode = null }
+            )
+        }
+    }
+    authorSheetName?.let { name ->
+        AuthorWorksSheet(
+            cat = cat,
+            author = name,
+            onDismiss = { authorSheetName = null }
         )
     }
 

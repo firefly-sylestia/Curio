@@ -1,4 +1,5 @@
 FIX:
+- Books: a chapter list is read from more places — Open Library's own work record as well as its editions' (and the richest table wins, instead of the first one with three rows), Google Books, and Crossref, whose chapter records are the only source that answers for an academic or edited volume and carries the pages each chapter spans.
 - Reading: a PDF selection takes the words under your finger — the press settles on the line it landed on, measured in the page's own crop box, instead of reaching for whichever word was nearest anywhere on the page, which is what made a hold wash the whole page.
 - Reading: a paragraph of an image with no caption can no longer break a selection sweep.
 - Reading: a movie, an anime and a song open the same sheet the books, albums and series do — artwork beside its own title and byline, the shelf toggles, the synopsis in a folding card — instead of a "Similar …" panel that said nothing and could not keep the topic.
@@ -21,6 +22,8 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Art: an artwork, an artist and a painter open a sheet of their own — the work's record (its title, maker, date, medium, museum and a public-domain image from the Metropolitan Museum's open-access API, with Wikipedia's own words and its article as the words half), or, for an artist or a painter, the works the Met attributes to them. Both sources are keyless and free.
+- Books: an authors topic opens their written works straight from the reveal, the same sheet the author's name opens from a book.
 - Books: the author under a book's title is a door now — tap it and their written works open in their own sheet (every other book Open Library knows them for, with covers and first publication years), on the same keyless source the rest of the app already reads.
 - Setup: every artwork, chapter and author source the sheets read now has its free tier written down in `.env.example` — which ones need no key at all (Open Library, iTunes, TVMaze, Jikan, MusicBrainz, Cover Art Archive) and which three buy more when set (Google Books, LibraryThing, Spotify).
 - Reading: tap links in journal pages — URLs are detected and underlined in the read-only view, and tap them to open in the browser.

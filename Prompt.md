@@ -62,15 +62,35 @@ select text is bad it selects the whole page instead of just the text i wnt to s
 - `NotesSheetTopHairline` became `internal` so the new sheet can wear the same hairline
   instead of a copy of it.
 
-### Still open (from the pending prompt, unchanged)
+### Batch J (same session) — the user's answers, built
 
-- The ARTWORK sheet — the ask ("add artwork button sheet too") does not say what it
-  should show or from which source, and the app has no artwork provider at all today
-  (the ARTWORKS lane reads no API). Asked rather than guessed.
-- More browsed-book chapter numbers/titles beyond the Open Library + Google Books pair.
-- The voice/photo carry's remaining placement glitches.
-- The small-print photo with text beside it (the side-by-side pairing shipped; the
-  "text in the space remaining" half did not).
+The ask_user came back: **"do the both"** (artwork sheet sources), **"in Authors category
+of its own buttom sheet and also for artists painting etc"** (where the author/artist door
+lives), and a work order — **chapters, then text beside small photos, then the drag**.
+
+- **Chapters first, as asked — three sources, not two.** `BookEnrichment` now reads Open
+  Library's own WORK record as well as its editions' tables (and takes the RICHEST table
+  instead of the first with three rows — an edition's ToC is often a bare stub), Google
+  Books, and **Crossref**: `type:book-chapter` items scoped to the book's own container
+  title, sorted by the page each chapter starts on. Crossref is the only one of the three
+  that answers for an academic or edited volume, and it brings page ranges with it. All
+  keyless; the Crossref pass runs only when the other two found nothing.
+- **The artwork sheet, both sources** (`ArtworkSheet.kt`): the Metropolitan Museum's
+  open-access API for the FACTS (title, maker, date, medium, department, public-domain
+  image, record URL) and Wikipedia's page summary for the WORDS (with its own guard: a
+  disambiguation page or a page that never names the maker is refused). Wrapped in
+  `ArtworkInfo`; either half may be missing and the sheet draws what arrived.
+- **The art lanes get a door** — an ARTWORK opens its record, an ARTIST or a PAINTER opens
+  the works the Met attributes to them (`artistOrCulture=true`, capped at eight), and an
+  AUTHORS topic opens the written-works sheet.
+
+### Still open
+
+- Text beside a small/half photo (the side-by-side pairing shipped; the "text in the
+  space remaining" half did not).
+- The voice/photo carry's remaining placement glitches — next in the order the user gave.
+- The topic-lane card the art/author sections use is a teaser card; whether an artwork's
+  cover art should be fetched for it (as films/anime/songs do) is unasked.
 
 ## Request (2026-09-17, batch H — the reader's last gaps closed)
 

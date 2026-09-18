@@ -27,10 +27,18 @@ import java.util.concurrent.TimeUnit
  *     punctuation-insensitive title match binds the shelf row to the catalog
  *     book (its `catalogId`), which is also what lets the topic page's book
  *     sheet and the shelf share one set of chapter notes.
- *  2. OPEN LIBRARY, for a book the catalog does not have: the edition's real
- *     TABLE OF CONTENTS (chapter names, and the page range each one spans when
- *     the edition gives it) and the median page count — but only while the
- *     member's book-fetch consent is on.
+ *  2. OPEN LIBRARY, for a book the catalog does not have: a real TABLE OF
+ *     CONTENTS (chapter names, and the page range each one spans when the
+ *     edition gives it) and the median page count — but only while the
+ *     member's book-fetch consent is on. Both places Open Library keeps one
+ *     are read: the editions' own, richest table first, and the work's.
+ *  3. GOOGLE BOOKS, then CROSSREF, when Open Library has no table at all.
+ *     Google Books carries a volume's `tableOfContents` for a good many titles;
+ *     Crossref registers every chapter of an academic or edited book as its own
+ *     DOI with the pages it spans, which is the only one of the three that
+ *     answers for a volume compiled from contributions. All three are keyless,
+ *     and all three are held to the same floor: fewer than three titled rows is
+ *     not a chapter list.
  *
  * Everything here is best-effort: a failure leaves the book exactly as it was,
  * and nothing is fetched at all without consent.
@@ -72,6 +80,7 @@ internal object BookEnrichment {
             // v392 — Open Library first, then Google Books as fallback.
             val chapters = openLibraryChapters(updated.title, updated.author)
                 ?: googleBooksChapters(updated.title, updated.author)
+                ?: crossrefChapters(updated.title, updated.author)
             chapters?.let { list ->
                 updated = updated.copy(
                     chaptersJson = PersonalChapterCodec.encode(list),
@@ -193,14 +202,114 @@ internal object BookEnrichment {
                     .firstOrNull { normalise(it.str("title")) == wanted && it.str("key").isNotBlank() }
                     ?: return@runCatching null
                 val editions = getJson(
-                    "https://openlibrary.org${match.str("key")}/editions.json?limit=25"
+                    "https://openlibrary.org${match.str("key")}/editions.json?limit=50"
                 )?.let { runCatching { it.asJsonObject }.getOrNull() }?.array("entries").orEmpty()
-                editions
+                // v389d — THE RICHEST TABLE WINS. This used to take the FIRST
+                // edition whose table had three rows or more, and an edition's
+                // table is often a bare "Contents" stub while a sibling edition
+                // carries the book's real chapter list. Every candidate is kept
+                // and the fullest one is used, with a table that has page ranges
+                // preferred over one that has only names.
+                val tables = editions
                     .mapNotNull { entry -> (entry as? JsonObject)?.tableOfContents() }
-                    .firstOrNull { it.size >= MIN_CHAPTERS }
+                    .filter { it.size >= MIN_CHAPTERS }
+                val best = tables.maxByOrNull { table ->
+                    table.count { it.pageStart > 0 } * 100 + table.size
+                }
+                // v389d — AND THE WORK ITSELF. Open Library keeps a table of
+                // contents on the WORK as well as on its editions, and for a
+                // good many records that is the only one anyone entered. Asked
+                // for only when the editions had nothing, so the common case
+                // costs no extra request.
+                val fromWork = if (best == null) {
+                    getJson("https://openlibrary.org${match.str("key")}.json")
+                        ?.let { runCatching { it.asJsonObject }.getOrNull() }
+                        ?.tableOfContents()
+                        ?.takeIf { it.size >= MIN_CHAPTERS }
+                } else {
+                    null
+                }
+                (best ?: fromWork)
                     ?.mapIndexed { index, chapter -> chapter.copy(number = index + 1) }
             }.getOrNull()
         }
+    }
+
+    /**
+     * v389d — THE THIRD SOURCE: CROSSREF, for the books that keep their chapters
+     * in an academic record rather than in a table of contents page.
+     *
+     * Crossref registers every chapter of an edited or academic book as its own
+     * DOI, with the pages it spans, which is a chapter list nobody had to type
+     * into a table of contents. Two keyless calls, both in Crossref's free public
+     * pool:
+     *
+     *  1. the BOOK, so the chapter query can be scoped to it — a bare
+     *     `type:book-chapter` search would mix every other book's chapters in;
+     *  2. its chapters, as `type:book-chapter,container-title:<the book>`,
+     *     ordered by the page each one starts on.
+     *
+     * Null unless a book matches by title AND returns at least [MIN_CHAPTERS]
+     * chapters that actually have titles — the same floor the other two sources
+     * are held to.
+     */
+    private suspend fun crossrefChapters(
+        title: String,
+        author: String
+    ): List<PersonalChapter>? = withContext(Dispatchers.IO) {
+        if (title.isBlank()) return@withContext null
+        runCatching {
+            val wanted = normalise(title)
+            val bookQuery = buildString {
+                append("https://api.crossref.org/works?rows=3&filter=type:book")
+                append("&select=title,container-title")
+                append("&query.bibliographic=")
+                append(java.net.URLEncoder.encode("$title $author".trim(), "UTF-8"))
+            }
+            val bookJson = getJson(bookQuery)?.let { runCatching { it.asJsonObject }.getOrNull() }
+                ?: return@runCatching null
+            val items = bookJson.getAsJsonObject("message")?.array("items").orEmpty()
+            // The container the chapters are registered under — the book's own
+            // title AS CROSSREF HAS IT, because that exact string is what the
+            // filter has to match. Only a title that normalises to the one being
+            // looked up may stand in for it, or the chapters of a different book
+            // would be read as this one's.
+            val container = items
+                .mapNotNull { it as? JsonObject }
+                .mapNotNull { doc ->
+                    doc.array("title").firstOrNull()
+                        ?.let { value -> runCatching { value.asString }.getOrNull() }
+                        ?.trim()
+                        ?.takeIf { it.isNotBlank() }
+                }
+                .firstOrNull { normalise(it) == wanted }
+                ?: return@runCatching null
+
+            val chaptersUrl = buildString {
+                append("https://api.crossref.org/works?rows=100&select=title,page")
+                append("&filter=type:book-chapter,container-title:")
+                append(java.net.URLEncoder.encode(container, "UTF-8"))
+            }
+            val chaptersJson = getJson(chaptersUrl)
+                ?.let { runCatching { it.asJsonObject }.getOrNull() }
+                ?: return@runCatching null
+            val rows = chaptersJson.getAsJsonObject("message")?.array("items").orEmpty()
+            rows.mapNotNull { row ->
+                val entry = row as? JsonObject ?: return@mapNotNull null
+                val name = entry.array("title").firstOrNull()
+                    ?.let { runCatching { it.asString }.getOrNull() }
+                    ?.trim()
+                    .orEmpty()
+                if (name.isBlank()) return@mapNotNull null
+                val (start, end) = pagesOf(entry.str("page"))
+                PersonalChapter(number = 0, title = name, pageStart = start, pageEnd = end)
+            }
+                .takeIf { it.size >= MIN_CHAPTERS }
+                // Registration order is not reading order: the page each
+                // chapter starts on is.
+                ?.sortedBy { if (it.pageStart > 0) it.pageStart else Int.MAX_VALUE }
+                ?.mapIndexed { index, chapter -> chapter.copy(number = index + 1) }
+        }.getOrNull()
     }
 
     /** One edition's table of contents as chapters (numbers assigned later). */
