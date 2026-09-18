@@ -85,6 +85,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PAGE_KIND_JOURNAL
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalNoteEntity
