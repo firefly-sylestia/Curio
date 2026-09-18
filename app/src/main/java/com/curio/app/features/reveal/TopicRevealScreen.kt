@@ -1117,6 +1117,7 @@ fun TopicRevealScreen(
                         ArtworkInfoSection(
                             cat = cat,
                             topic = authorLaneTopic,
+                            lane = ArtworkLane.AUTHOR,
                             label = "AUTHOR",
                             glyph = CurioIcons.MenuBook,
                             hint = "THEIR WRITTEN WORKS",
@@ -1144,6 +1145,11 @@ fun TopicRevealScreen(
                         ArtworkInfoSection(
                             cat = cat,
                             topic = artLaneTopic,
+                            lane = if (artworkLane) {
+                                ArtworkLane.WORK
+                            } else {
+                                ArtworkLane.MAKER
+                            },
                             label = artLaneLabel,
                             glyph = if (artworkLane) CurioIcons.Image else CurioIcons.Palette,
                             hint = if (artworkLane) "OPEN THE RECORD" else "THEIR WORKS",

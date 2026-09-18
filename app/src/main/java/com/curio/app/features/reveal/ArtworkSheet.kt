@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.openSearchUrl
@@ -130,14 +131,18 @@ object ArtworkFetch {
      * THE MAKER'S OTHER WORKS, for an artist or a painter's own topic: the Met's
      * own `artistOrCulture` search, whose hits are already attributed, so no
      * false positives are dragged in by a name that is also a place or a word.
-     * Capped — a sheet is not a catalogue, and each row costs one lookup.
+     * Capped — a sheet is not a catalogue, and each row costs one lookup. [limit]
+     * is how many records to open, so the reveal card can ask for one and the
+     * sheet can ask for eight.
      */
-    suspend fun worksBy(maker: String): List<AuthorWork> = withContext(Dispatchers.IO) {
+    suspend fun worksBy(maker: String, limit: Int = MAKER_LIMIT): List<AuthorWork> =
+        withContext(Dispatchers.IO) {
         val name = maker.trim()
         if (name.isBlank()) return@withContext emptyList()
-        makerCache[name]?.let { return@withContext it }
+        // Only the FULL list is kept: a one-row answer belongs to its caller.
+        if (limit >= MAKER_LIMIT) makerCache[name]?.let { return@withContext it }
         val resolved = runCatching {
-            val ids = metIds(name, artistScoped = true).take(MAKER_LIMIT)
+            val ids = metIds(name, artistScoped = true).take(limit)
             ids.mapNotNull { id ->
                 val objectJson = getJson("$MET/objects/$id") ?: return@mapNotNull null
                 val row = runCatching { JSONObject(objectJson) }.getOrNull() ?: return@mapNotNull null
@@ -152,11 +157,54 @@ object ArtworkFetch {
                 )
             }
         }.getOrDefault(emptyList())
-        makerCache[name] = resolved
+        if (limit >= MAKER_LIMIT) makerCache[name] = resolved
         resolved
     }
 
     private val makerCache = ConcurrentHashMap<String, List<AuthorWork>>()
+
+    /**
+     * A WORK THE MAKER MADE, for an artist's or a painter's own card: the first
+     * of their attributed Met works that actually has a picture. One search and
+     * a couple of lookups, taken from the same cached list the sheet reads, so
+     * opening the maker's sheet afterwards costs nothing.
+     */
+    suspend fun makerArtwork(maker: String): String? {
+        val name = maker.trim()
+        if (name.isBlank()) return null
+        return worksBy(name, limit = CARD_LOOKUPS)
+            .firstOrNull { it.coverUrl.isNotBlank() }
+            ?.coverUrl
+    }
+
+    /**
+     * A PERSON'S OWN PICTURE, for an author's card: Wikipedia's lead image for
+     * their name is the portrait a reader recognizes. When there is none — many
+     * authors have no photograph — the cover of the first of their books that
+     * Open Library has one for stands in, because an author with no face still
+     * has a shelf.
+     */
+    suspend fun portraitOrCover(name: String): String? {
+        val person = name.trim()
+        if (person.isBlank()) return null
+        val portrait = runCatching { wikiLeadImage(person) }.getOrNull()
+        if (!portrait.isNullOrBlank()) return portrait
+        return AuthorWorksFetch.works(person).firstOrNull { it.coverUrl.isNotBlank() }?.coverUrl
+    }
+
+    /** The page's own lead image for a NAME (a person, here) — or null. */
+    private fun wikiLeadImage(name: String): String? {
+        val slug = Uri.encode(name.replace(' ', '_'))
+        val body = getJson("https://en.wikipedia.org/api/rest_v1/page/summary/$slug")
+            ?: return null
+        val row = runCatching { JSONObject(body) }.getOrNull() ?: return null
+        // A disambiguation page is not a person, and a page with no image has
+        // nothing to draw — both answer null rather than a wrong face.
+        if (row.optString("type") != "standard") return null
+        return row.optJSONObject("originalimage")?.optString("source")
+            ?.takeIf { it.isNotBlank() }
+            ?: row.optJSONObject("thumbnail")?.optString("source")?.takeIf { it.isNotBlank() }
+    }
 
     /** The Met's search ids for a query, best-effort. */
     private fun metIds(query: String, artistScoped: Boolean): List<Int> {
@@ -263,6 +311,9 @@ object ArtworkFetch {
 
     /** A sheet is not a catalogue: eight rows is more than fits without scrolling. */
     private const val MAKER_LIMIT = 8
+
+    /** A CARD needs one picture, so it opens this many records and no more. */
+    private const val CARD_LOOKUPS = 3
 
     /** Below this many characters Wikipedia has said nothing worth quoting. */
     private const val MIN_SUMMARY = 80
@@ -637,20 +688,66 @@ private fun MakerHeader(
 }
 
 /**
+ * WHICH ART LANE'S CARD this is — which also decides what its cover art IS and
+ * where it is fetched from: an artwork shows ITSELF (the Met's public-domain
+ * image, then Wikipedia's), an artist or a painter shows a work the Met
+ * attributes to them, and an author is a person, so the only real cover they
+ * have is their own portrait — Wikipedia's lead image for their name, and the
+ * cover of the first book of theirs with one when even that is missing.
+ */
+internal enum class ArtworkLane { WORK, MAKER, AUTHOR }
+
+/**
  * THE ART LANE'S DOOR on the reveal — the same card the book, album, series,
- * film, anime and song sections wear, so an artwork, an artist and a painter
- * each open something instead of standing still.
+ * film, anime and song sections wear, so an artwork, an artist, a painter and an
+ * author each open something instead of standing still.
+ *
+ * v389d — AND THE CARD WEARS THEIR PICTURE, the way the film, anime and song
+ * cards already do (user request: "fetch real cover art for the art and author
+ * section cards on the reveal"). The resolved URL is PERSISTED per topic and
+ * lane, so the reveal never asks twice and the sheet that opens on a tap is
+ * painted from the very same image.
  */
 @Composable
 internal fun ArtworkInfoSection(
     cat: CurioCategory,
     topic: CurioTopic,
+    lane: ArtworkLane,
     label: String,
     glyph: String,
     hint: String,
     onOpenSheet: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val fetchConsent = AppPreferences.bookFetchEnabledState
+    val artKey = when (lane) {
+        ArtworkLane.WORK -> "artwork|${topic.name}"
+        ArtworkLane.MAKER -> "artist|${topic.name}"
+        ArtworkLane.AUTHOR -> "author|${topic.name}"
+    }
+    var artUrl by remember(topic.imageUrl) {
+        mutableStateOf(
+            AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+                ?: topic.imageUrl?.takeIf { it.isNotBlank() }
+        )
+    }
+    LaunchedEffect(topic.imageUrl, fetchConsent) {
+        val stored = AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+        val resolved = stored ?: if (fetchConsent) {
+            when (lane) {
+                ArtworkLane.WORK -> ArtworkFetch.artwork(topic.name, topic.byline)?.imageUrl
+                ArtworkLane.MAKER -> ArtworkFetch.makerArtwork(topic.name)
+                ArtworkLane.AUTHOR -> ArtworkFetch.portraitOrCover(topic.name)
+            }
+        } else {
+            null
+        }
+        artUrl = resolved ?: topic.imageUrl?.takeIf { it.isNotBlank() }
+        if (resolved != null && stored == null) {
+            AppPreferences.setSheetArtUrl(context, artKey, resolved)
+        }
+    }
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surface),
@@ -690,6 +787,29 @@ internal fun ArtworkInfoSection(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
+            if (!artUrl.isNullOrBlank()) {
+                Spacer(Modifier.height(8.dp))
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(artUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "${topic.name} artwork",
+                    // A painting is a shape and cropping it changes what it is,
+                    // so an artwork FITS inside the card's band. A maker's work
+                    // and a portrait are pictures of a person's work or face and
+                    // fill it, exactly as the film and song cards do.
+                    contentScale = if (lane == ArtworkLane.WORK) {
+                        ContentScale.Fit
+                    } else {
+                        ContentScale.Crop
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
             }
             if (topic.teaser.isNotBlank()) {
                 Spacer(Modifier.height(8.dp))
