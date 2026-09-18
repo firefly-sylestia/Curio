@@ -7,10 +7,13 @@ FIX:
 - Social: a hat, a beret or a crown no longer swallows the face — the front hair on those rows stops above the brows.
 
 ADD:
+- Writing: a run of photos lays itself out the way a page does — two side by side, three as one upright frame with the two others stacked beside it, four as a square — and the size menu gains a small portrait frame for a picture that belongs in a row rather than on a page of its own.
 - Reading: the bookmarks, the reading progress and the contents are ONE sheet on ONE page behind ONE button — the progress card first (the figure, a filled rail, the chapter or page it belongs to, "Continue reading" and "Mark my place"), then your marks, then the book's own contents, with no chips hiding two of the three. The figure follows you as you read instead of naming the place the book happened to open at.
 - Social: eight cozy icon avatars — a moon, a sun, a star, a cloud, a leaf, a mountain, a cup and a heart — drawn on the same disc with the same palette and the same ink as the portraits, so the picker is one set of 28.
 
 FIX:
+- Writing: a dragged photo or voice note shows WHERE it will land, at the size of the thing in hand — a ghost band over the words it is about to push, on the side it is travelling towards — instead of a bare line that only said "around here".
+- Writing: a photo lifts and tilts a little as it comes up, the way a hand holds a photograph, and a voice note rises evenly as a card; both settle back down as they land, and a dropped block slides the last few pixels into place while the rows it passed glide closed behind it instead of snapping.
 - Reading: a PDF highlight sits ON the letters again — the box was measured from the baseline down, so every wash ran a little under its words.
 - Reading: a zoomed PDF page moves with one finger — the drag was being left to the page turn — and a swipe at the edge still changes pages without zooming out first.
 - Reading: pinch zoom works in Pages mode too, and the pages sit flush — a turn is a slide of the paper, not a gap between cards.

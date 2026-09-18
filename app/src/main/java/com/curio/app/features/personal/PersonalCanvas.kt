@@ -2341,44 +2341,65 @@ internal fun PersonalCanvas(
         modifier = modifier.clickable(enabled = enabled) { state.focusLastLine() },
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // v389d — TWO SMALL OR HALF PHOTOS SHARE A ROW.
+        // v389d — CONSECUTIVE PRINTS SHARE A ROW.
         //
-        // Two consecutive non-PAGE photos that sit next to each other split
-        // the text wrapper's width between them, like the "side by side" the
-        // member asked for. The SECOND of each pair is flagged so the loop
-        // skips it as a standalone block.
+        // Every run of consecutive non-PAGE prints is ONE ROW, up to four
+        // prints long, and the ROW's shape is chosen by how many arrived — a
+        // pair's two even halves, a three's upright frame with two stacked
+        // beside it, a four's square (v396; user request: "a grid 2*2 but for 3
+        // dont make it one big and all … portraight and then 2 small can be fit
+        // to the other side"). The run's FIRST print draws the whole row, so
+        // every other member is SKIPPED by the drawing loop below.
         //
         // v389d — NOT REMEMBERED, deliberately. Both answers are read straight
         // from the page every time it composes (a photo's size and the words
         // under it are exactly the things the member changes while looking at
         // them), which is also what keeps the two passes from disagreeing: a
         // remembered pair set flipped a resized print out of the page for good.
-        val pairSkips = mutableSetOf<String>()
+        val groupSkips = mutableSetOf<String>()
+        val printRows = mutableMapOf<String, List<String>>()
         val besideSkips = mutableSetOf<String>()
         run {
             val ids = state.blockIds
             var i = 0
-            while (i < ids.size - 1) {
-                val a = state.block(ids[i])
-                val b = state.block(ids[i + 1])
-                val paired = a?.isPhoto == true && b?.isPhoto == true &&
-                    state.photoSize(ids[i]) != PersonalPhotoSize.PAGE &&
-                    state.photoSize(ids[i + 1]) != PersonalPhotoSize.PAGE
-                val beside = !paired && a?.isPhoto == true &&
-                    state.photoSize(ids[i]) == PersonalPhotoSize.SMALL &&
-                    b != null && !b.isPhoto && !b.isAudio &&
-                    b.text.isNotBlank() && b.photo.isNullOrBlank()
-                when {
-                    paired -> {
-                        pairSkips.add(ids[i + 1])
-                        i += 2
+            while (i < ids.size) {
+                val first = state.block(ids[i])
+                if (first?.isPhoto == true &&
+                    state.photoSize(ids[i]) != PersonalPhotoSize.PAGE
+                ) {
+                    val run = ArrayList<String>()
+                    var j = i
+                    while (j < ids.size && run.size < PRINT_ROW_LIMIT) {
+                        val member = state.block(ids[j])
+                        if (member?.isPhoto == true &&
+                            state.photoSize(ids[j]) != PersonalPhotoSize.PAGE
+                        ) {
+                            run.add(ids[j])
+                            j += 1
+                        } else {
+                            break
+                        }
                     }
-                    beside -> {
-                        besideSkips.add(ids[i + 1])
-                        i += 2
+                    if (run.size > 1) {
+                        printRows[run.first()] = run
+                        run.drop(1).forEach { groupSkips.add(it) }
+                        i = j
+                        continue
                     }
-                    else -> i += 1
+                    // A LONE SMALL PRINT still keeps room for the writing under
+                    // it — the beside pair, unchanged.
+                    val nextId = ids.getOrNull(i + 1)
+                    val next = nextId?.let { state.block(it) }
+                    if (nextId != null && next != null &&
+                        state.photoSize(ids[i]) == PersonalPhotoSize.SMALL &&
+                        !next.isPhoto && !next.isAudio && next.text.isNotBlank()
+                    ) {
+                        besideSkips.add(nextId)
+                        i += 2
+                        continue
+                    }
                 }
+                i += 1
             }
         }
         // v389e — THE ROWS THAT DRAW, CHOSEN OUTSIDE THE COMPOSABLE LAMBDAS.
@@ -2390,11 +2411,11 @@ internal fun PersonalCanvas(
         // '$$$$$NON_LOCAL_RETURN$$$$$' cannot be represented in dex format" —
         // which killed the RELEASE build while debug builds were perfectly
         // happy. So nothing is stepped over INSIDE a composable lambda here:
-        // the second photo of a pair (see [pairSkips]) and an id the page no
+        // a later cell of a print row (see [printRows]) and an id the page no
         // longer holds are left out of the list instead of returned past.
         val rows = state.blockIds.mapIndexedNotNull { index, id ->
             val block = state.block(id)
-            if (block != null && !pairSkips.contains(id)) Triple(index, id, block) else null
+            if (block != null && !groupSkips.contains(id)) Triple(index, id, block) else null
         }
         rows.forEach { (index, id, block) ->
             // v389 — the blocks are KEYED by their own id. The to-do page can
@@ -2432,9 +2453,9 @@ internal fun PersonalCanvas(
                     else spring(dampingRatio = 0.82f, stiffness = 700f),
                     label = "canvasBlockShift-$index"
                 )
-                // The DROP-LINE: a thin accent bar at the top of the block
-                // that will be right after the drop, so the carried voice note
-                // says where it is going to land.
+                // The LANDING GHOST: a bar of the carried block's own height at
+                // the edge it will land on, so the page says where — and WHAT —
+                // is about to arrive (v397).
                 val targetIdx = rowDrag.targetIndex(state.blockIds.lastIndex)
                 val showDropLine = rowDrag.isDragging && !isDragged &&
                     !block.isAudio && !state.keepsChecklistRows &&
@@ -2462,79 +2483,95 @@ internal fun PersonalCanvas(
                         .graphicsLayer { translationY = blockShift }
                         .then(
                             if (showDropLine) Modifier.drawWithContent {
-                                // A thin accent bar at the top of the target
-                                // block — this is where the voice note will land.
+                                // v397 — THE LANDING GHOST.
+                                //
+                                // A bare 2dp bar said "somewhere around here"; a
+                                // ghost of the carried block's OWN height says what
+                                // is landing and exactly how much room it takes —
+                                // the hover preview a page needs when the thing in
+                                // hand is a print being stacked among other prints,
+                                // or a voice note between paragraphs (user request:
+                                // "proper hover preview same pass for voice
+                                // recorder in animation, and proper preview of
+                                // photo stacing with snap"). The band sits at the
+                                // TOP of the target on the way down and at its
+                                // BOTTOM on the way up, so the preview is always on
+                                // the side the block is travelling towards.
+                                //
                                 // drawWithContent so it sits ON TOP of the text,
                                 // not behind it.
                                 drawContent()
+                                val band = rowDrag.carriedHeight.coerceIn(0f, size.height)
+                                val lead = if (rowDrag.goingDown) 0f else size.height - band
+                                if (band > 0f) {
+                                    drawRoundRect(
+                                        color = accent.copy(alpha = 0.13f),
+                                        topLeft = Offset(0f, lead),
+                                        size = Size(size.width, band),
+                                        cornerRadius = CornerRadius(10.dp.toPx())
+                                    )
+                                }
+                                // The edge it lands on, drawn solid so the eye
+                                // finds the exact line rather than the band.
+                                val ruleY = if (rowDrag.goingDown) 0f else size.height
                                 drawLine(
                                     color = accent,
-                                    start = Offset(0f, 0f),
-                                    end = Offset(size.width, 0f),
+                                    start = Offset(0f, ruleY),
+                                    end = Offset(size.width, ruleY),
                                     strokeWidth = 2.dp.toPx()
                                 )
                             } else Modifier
                         )
                 ) {
                 if (block.isPhoto) {
-                    // v389d — SIDE-BY-SIDE PHOTOS.
+                    // ── THE ROW OF PRINTS (v389d, v396) ───────────────────
                     //
-                    // Two consecutive small or half photos share the row,
-                    // splitting the text wrapper between them. The SECOND of
-                    // each pair was flagged by [pairSkips] and never reached
-                    // this block at all; the FIRST renders both photos in a
-                    // Row. Two PAGE-size photos never pair — each is the width
-                    // of the page.
+                    // The FIRST print of a run draws the whole row (see
+                    // [PersonalPrintArrangement]); every other member was left
+                    // out of `rows` entirely, so it is never drawn twice. Each
+                    // CELL is still its own movable block, so one print can be
+                    // picked up out of a row of four and dropped somewhere else
+                    // — the row's other members simply re-flow when it leaves.
+                    val row = printRows[id]
                     val nextIndex = index + 1
                     val nextId = state.blockIds.getOrNull(nextIndex)
                     val nextBlock = nextId?.let { state.block(it) }
-                    val isPaired = nextBlock?.isPhoto == true &&
-                        state.photoSize(id) != PersonalPhotoSize.PAGE &&
-                        state.photoSize(nextId) != PersonalPhotoSize.PAGE
-                    if (isPaired && nextBlock != null && nextId != null) {
-                        // The two photos share the text measure. Each keeps
-                        // its own carry — a held photo lifts out of the pair
-                        // and the other stays — and the Row's spacing keeps
-                        // them from touching.
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Box(Modifier.weight(1f)) {
+                    if (row != null) {
+                        PersonalPrintArrangement(
+                            ids = row,
+                            sizeOf = { member -> state.photoSize(member) }
+                        ) { memberId, slotHeight, cellModifier ->
+                            val member = state.block(memberId)
+                            if (member != null) {
                                 PersonalMovableBlock(
-                                    id = id, index = index, state = state,
-                                    drag = rowDrag, enabled = enabled
+                                    id = memberId,
+                                    index = state.blockIds.indexOf(memberId),
+                                    state = state,
+                                    drag = rowDrag,
+                                    enabled = enabled,
+                                    // v397 — a print lifts as a photograph does:
+                                    // a touch bigger, tilted, with a deeper shadow.
+                                    heldScale = 1.08f,
+                                    heldTilt = -2.5f,
+                                    heldLift = 16.dp,
+                                    modifier = cellModifier
                                 ) {
                                     PersonalPhotoBlock(
-                                        uri = block.photo.orEmpty(),
-                                        caption = state.caption(id),
-                                        size = state.photoSize(id),
+                                        uri = member.photo.orEmpty(),
+                                        caption = state.caption(memberId),
+                                        size = state.photoSize(memberId),
+                                        // The row's cell fills the share it was
+                                        // given, at the height the row chose.
                                         paired = true,
+                                        slotHeight = slotHeight,
                                         ink = ink, accent = accent,
                                         enabled = enabled,
-                                        onCaption = { state.setCaption(id, it) },
-                                        onSize = { state.setPhotoSize(id, it) },
-                                        onRemove = { state.removeBlock(id) },
-                                        onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
-                                    )
-                                }
-                            }
-                            Box(Modifier.weight(1f)) {
-                                PersonalMovableBlock(
-                                    id = nextId, index = nextIndex, state = state,
-                                    drag = rowDrag, enabled = enabled
-                                ) {
-                                    PersonalPhotoBlock(
-                                        uri = nextBlock.photo.orEmpty(),
-                                        caption = state.caption(nextId),
-                                        size = state.photoSize(nextId),
-                                        paired = true,
-                                        ink = ink, accent = accent,
-                                        enabled = enabled,
-                                        onCaption = { state.setCaption(nextId, it) },
-                                        onSize = { state.setPhotoSize(nextId, it) },
-                                        onRemove = { state.removeBlock(nextId) },
-                                        onOpen = { bounds -> onOpenPhoto(nextBlock.photo.orEmpty(), bounds) }
+                                        onCaption = { state.setCaption(memberId, it) },
+                                        onSize = { state.setPhotoSize(memberId, it) },
+                                        onRemove = { state.removeBlock(memberId) },
+                                        onOpen = { bounds ->
+                                            onOpenPhoto(member.photo.orEmpty(), bounds)
+                                        }
                                     )
                                 }
                             }
@@ -2555,7 +2592,11 @@ internal fun PersonalCanvas(
                             Box(Modifier.weight(0.42f)) {
                                 PersonalMovableBlock(
                                     id = id, index = index, state = state,
-                                    drag = rowDrag, enabled = enabled
+                                    drag = rowDrag, enabled = enabled,
+                                    // v397 — see the row's cells.
+                                    heldScale = 1.08f,
+                                    heldTilt = -2.5f,
+                                    heldLift = 16.dp
                                 ) {
                                     PersonalPhotoBlock(
                                         uri = block.photo.orEmpty(),
@@ -2614,7 +2655,11 @@ internal fun PersonalCanvas(
                         // LocalPersonalBlockCarried).
                         PersonalMovableBlock(
                             id = id, index = index, state = state,
-                            drag = rowDrag, enabled = enabled
+                            drag = rowDrag, enabled = enabled,
+                            // v397 — see the row's cells.
+                            heldScale = 1.08f,
+                            heldTilt = -2.5f,
+                            heldLift = 16.dp
                         ) {
                             PersonalPhotoBlock(
                                 uri = block.photo.orEmpty(),
@@ -2641,7 +2686,12 @@ internal fun PersonalCanvas(
                         index = index,
                         state = state,
                         drag = rowDrag,
-                        enabled = enabled
+                        enabled = enabled,
+                        // v397 — a voice note is a CARD, not a photograph: it
+                        // rises evenly with no tilt (a strip has no top or bottom
+                        // to tilt about) and a shade less shadow than a print.
+                        heldScale = 1.03f,
+                        heldLift = 12.dp
                     ) {
                         PersonalVoicePageBlock(
                             path = block.audio.orEmpty(),
@@ -3070,11 +3120,147 @@ internal enum class PersonalPhotoSize(
     PAGE("page", "Page", 1f),
     HALF("half", "Half", 0.62f),
     PORTRAIT("portrait", "Portrait", 0.54f),
-    SMALL("small", "Small", 0.44f);
+    SMALL("small", "Small", 0.44f),
+    /**
+     * v396 — THE SMALL PRINT THAT STANDS UP.
+     *
+     * A portrait frame at the small print's own width, for the picture that
+     * belongs in a row (a face beside two lines, a doorway beside a paragraph)
+     * rather than on a page of its own (user request: "for portraight add one
+     * more small portraight view too"). [PORTRAIT] is the page-height version;
+     * this one is the size a print takes when the writing keeps its room.
+     */
+    SMALL_PORTRAIT("small_portrait", "Small portrait", 0.36f);
 
     companion object {
         fun fromKey(key: String?): PersonalPhotoSize =
             entries.firstOrNull { it.key == key } ?: PAGE
+
+        /** True for a size that stands UP — see the print rows in PersonalCanvas. */
+        fun isUpright(size: PersonalPhotoSize): Boolean =
+            size == PORTRAIT || size == SMALL_PORTRAIT
+    }
+}
+
+/** The height a print takes when it is the only thing in its measure. */
+internal fun personalPrintHeight(size: PersonalPhotoSize): Dp = when (size) {
+    PersonalPhotoSize.PAGE -> 168.dp
+    PersonalPhotoSize.HALF -> 128.dp
+    // The two that stand up: a portrait print is a page-height picture on a
+    // narrow column, and the small one is the same shape at the width a row of
+    // prints gives it (see [PersonalPhotoSize]).
+    PersonalPhotoSize.PORTRAIT -> 232.dp
+    PersonalPhotoSize.SMALL_PORTRAIT -> 156.dp
+    PersonalPhotoSize.SMALL -> 100.dp
+}
+
+// ── ONE ROW OF PRINTS (v396) ──────────────────────────────────────────────
+//
+// Consecutive prints used to pair up — two at a time, and only ever two. The
+// member asked for the rest of the shapes a run of photographs actually takes:
+// FOUR as a square, and THREE as one upright frame with the other two stacked
+// beside it (user request: "a grid 2*2 but for 3 dont make it one big and all
+// see how we can do portraight and then 2 small can be fit to the other side
+// kinda stylish, but this should be auto adjust, but user can do any size
+// chnages etc manually").
+//
+// The shape is AUTO, by how many prints arrived — it is what a page does when
+// the member simply adds pictures one after another. Their own size keys still
+// decide the things that are theirs to decide: PAGE takes a print out of a row
+// entirely (a page-wide picture is its own row), and an UPRIGHT size claims the
+// tall slot of a three. Everything else about a print is untouched.
+
+/** How many prints one row holds before the next row starts. */
+private const val PRINT_ROW_LIMIT = 4
+
+/** The row's own gap — the pair's gap, shared by every shape. */
+private val PRINT_ROW_GAP = 8.dp
+
+/** A pair: two even halves of the measure. */
+private val PRINT_PAIR_HEIGHT = 128.dp
+
+/** A three: the upright frame, which is exactly the two stacked cells + the gap. */
+private val PRINT_TALL_HEIGHT = 232.dp
+
+/** A three: each of the two cells stacked beside the upright frame. */
+private val PRINT_STACKED_HEIGHT = 112.dp
+
+/** Four: a square's own cell. */
+private val PRINT_QUAD_HEIGHT = 124.dp
+
+/**
+ * ONE ROW OF PRINTS, laid out by how many there are.
+ *
+ * The caller supplies the CELL — the editor draws a print it can caption, carry
+ * and resize, the read view draws the print it always drew — so the two pages
+ * cannot drift apart about where a picture sits. (A pair already cost one round
+ * of exactly that: the read view drew each print on its own line while the
+ * editor drew a row, so a pair came apart the moment the member stopped
+ * writing.)
+ */
+@Composable
+private fun PersonalPrintArrangement(
+    ids: List<String>,
+    sizeOf: (String) -> PersonalPhotoSize,
+    cell: @Composable (id: String, slotHeight: Dp, modifier: Modifier) -> Unit
+) {
+    if (ids.size < 2) return
+    if (ids.size == 2) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
+        ) {
+            ids.forEach { id ->
+                Box(Modifier.weight(1f)) {
+                    cell(id, PRINT_PAIR_HEIGHT, Modifier.fillMaxWidth())
+                }
+            }
+        }
+        return
+    }
+    // A THREE. Whichever member asked to stand up — its own size said so —
+    // takes the tall frame; with none asking, the first print does, so the shape
+    // is the same shape either way and nothing has to be explained.
+    if (ids.size == 3) {
+        val tall = ids.firstOrNull { PersonalPhotoSize.isUpright(sizeOf(it)) } ?: ids[0]
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP),
+            verticalAlignment = Alignment.Top
+        ) {
+            Box(Modifier.weight(1f)) {
+                cell(tall, PRINT_TALL_HEIGHT, Modifier.fillMaxWidth())
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
+            ) {
+                ids.filterNot { it == tall }.forEach { id ->
+                    cell(id, PRINT_STACKED_HEIGHT, Modifier.fillMaxWidth())
+                }
+            }
+        }
+        return
+    }
+    // FOUR — a square. (The row's limit is four, so nothing longer arrives; a
+    // page with more prints simply starts the next row.)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
+    ) {
+        ids.chunked(2).forEach { line ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
+            ) {
+                line.forEach { id ->
+                    Box(Modifier.weight(1f)) {
+                        cell(id, PRINT_QUAD_HEIGHT, Modifier.fillMaxWidth())
+                    }
+                }
+                if (line.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
     }
 }
 
@@ -3100,6 +3286,17 @@ private fun PersonalPhotoBlock(
      * rather than taking the full text measure at the size's usual fraction.
      */
     paired: Boolean = false,
+    /**
+     * v396 — THE HEIGHT THIS PRINT'S OWN ROW DECIDED FOR IT.
+     *
+     * A print on its own takes the height its size table gives it, which is
+     * right: it is the only thing in its measure. A print in a ROW of two,
+     * three or four is a CELL of a shape the row chose (see
+     * [PersonalPrintArrangement]) — a pair's even halves, a tall frame that is
+     * exactly the two stacked beside it, a quad's four squares — so the row
+     * hands the cell its height instead of each print guessing at its own.
+     */
+    slotHeight: Dp? = null,
     ink: Color,
     accent: Color,
     enabled: Boolean,
@@ -3118,18 +3315,12 @@ private fun PersonalPhotoBlock(
     val carried = LocalPersonalBlockCarried.current
     val actionable = enabled && !carried
     val sizeMenu = remember(uri) { CurioMenuToggle() }
-    val imageHeight = when (size) {
-        PersonalPhotoSize.PAGE -> 168.dp
-        PersonalPhotoSize.HALF -> 128.dp
-        // The tall one: a portrait print is a page-height picture on a narrow
-        // column, so its frame stands up (see the sizes' own note).
-        PersonalPhotoSize.PORTRAIT -> 232.dp
-        PersonalPhotoSize.SMALL -> 100.dp
-    }
+    val imageHeight = slotHeight ?: personalPrintHeight(size)
     val captionSize = when (size) {
         PersonalPhotoSize.PAGE -> 13.sp
         PersonalPhotoSize.HALF -> 12.sp
         PersonalPhotoSize.PORTRAIT -> 12.sp
+        PersonalPhotoSize.SMALL_PORTRAIT -> 11.sp
         PersonalPhotoSize.SMALL -> 10.sp
     }
     Column(
@@ -3378,35 +3569,53 @@ internal fun PersonalDocView(
     // v389g — and the pair is MARKED here, the way the editor marks it, so the
     // drawing pass draws one row of two instead of two lines of one.
     val besideSkips = mutableSetOf<String>()
-    val pairSkips = mutableSetOf<String>()
+    // v389g — every print after the first of a row is MARKED here, so the
+    // drawing pass knows it has already been drawn as a cell of the row above it
+    // (the editor's pass does the same; the read view's used to just step over a
+    // pair, which is why it came apart when the page was read back).
+    //
+    // v396 — AND A ROW IS TWO, THREE OR FOUR PRINTS now, the same shapes the
+    // editor builds, chosen by how many arrived.
+    val groupSkips = mutableSetOf<String>()
+    val printRows = mutableMapOf<String, List<String>>()
     run {
         val blocks = doc.blocks
         var i = 0
-        while (i < blocks.size - 1) {
-            val photo = blocks[i]
-            val next = blocks[i + 1]
-            val paired = photo.isPhoto && next.isPhoto &&
-                PersonalPhotoSize.fromKey(photo.photoSize) != PersonalPhotoSize.PAGE &&
-                PersonalPhotoSize.fromKey(next.photoSize) != PersonalPhotoSize.PAGE
-            val beside = !paired && photo.isPhoto &&
-                PersonalPhotoSize.fromKey(photo.photoSize) == PersonalPhotoSize.SMALL &&
-                !next.isPhoto && !next.isAudio && next.text.isNotBlank()
-            when {
-                // v389g — the right-hand print of a pair is MARKED here, so the
-                // drawing pass knows it has already been drawn as half of the row
-                // above it (the editor's pass does the same; the read view's used
-                // to just step over it, which is why a pair came apart when the
-                // page was read back).
-                paired -> {
-                    pairSkips.add(next.id)
-                    i += 2
+        while (i < blocks.size) {
+            val first = blocks[i]
+            if (first.isPhoto &&
+                PersonalPhotoSize.fromKey(first.photoSize) != PersonalPhotoSize.PAGE
+            ) {
+                val run = ArrayList<String>()
+                var j = i
+                while (j < blocks.size && run.size < PRINT_ROW_LIMIT) {
+                    val member = blocks[j]
+                    if (member.isPhoto &&
+                        PersonalPhotoSize.fromKey(member.photoSize) != PersonalPhotoSize.PAGE
+                    ) {
+                        run.add(member.id)
+                        j += 1
+                    } else {
+                        break
+                    }
                 }
-                beside -> {
+                if (run.size > 1) {
+                    printRows[run.first()] = run
+                    run.drop(1).forEach { groupSkips.add(it) }
+                    i = j
+                    continue
+                }
+                val next = blocks.getOrNull(i + 1)
+                if (next != null &&
+                    PersonalPhotoSize.fromKey(first.photoSize) == PersonalPhotoSize.SMALL &&
+                    !next.isPhoto && !next.isAudio && next.text.isNotBlank()
+                ) {
                     besideSkips.add(next.id)
                     i += 2
+                    continue
                 }
-                else -> i += 1
             }
+            i += 1
         }
     }
 
@@ -3605,7 +3814,7 @@ internal fun PersonalDocView(
      * its wide bottom border and the bounds the overlay grows out of are all
      * exactly as they were.
      */
-    val renderPrint: @Composable (PersonalBlock, Modifier) -> Unit = { block, width ->
+    val renderPrint: @Composable (PersonalBlock, Dp?, Modifier) -> Unit = { block, slot, width ->
         var bounds by remember(block.photo) { mutableStateOf<Rect?>(null) }
         val printSize = PersonalPhotoSize.fromKey(block.photoSize)
         Column(
@@ -3619,12 +3828,9 @@ internal fun PersonalDocView(
         ) {
             PersonalPagePhoto(
                 uri = block.photo.orEmpty(),
-                height = when (printSize) {
-                    PersonalPhotoSize.PAGE -> 168.dp
-                    PersonalPhotoSize.HALF -> 128.dp
-                    PersonalPhotoSize.PORTRAIT -> 232.dp
-                    PersonalPhotoSize.SMALL -> 100.dp
-                }
+                // The row's cell height when this print is part of a row (see
+                // [PersonalPrintArrangement]), otherwise its own size's.
+                height = slot ?: personalPrintHeight(printSize)
             )
             if (block.caption.isNotBlank()) {
                 Text(
@@ -3678,25 +3884,23 @@ internal fun PersonalDocView(
                 // two sides of the switch agree again.
                 val nextPhoto = doc.blocks.getOrNull(index + 1)
                 val nextPhotoId = nextPhoto?.id
-                val pairPartner = nextPhoto?.takeIf {
-                    nextPhotoId != null && pairSkips.contains(it.id)
-                }
+                val printRow = printRows[block.id]
                 val besideLine = nextPhoto?.takeIf {
                     nextPhotoId != null && besideSkips.contains(it.id)
                 }
                 when {
-                    // The right half of a pair the print before it already drew.
-                    pairSkips.contains(block.id) -> Unit
-                    pairPartner != null -> Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Box(Modifier.weight(1f)) {
-                            renderPrint(block, Modifier.fillMaxWidth())
+                    // A cell of a row the print before it already drew.
+                    groupSkips.contains(block.id) -> Unit
+                    printRow != null -> PersonalPrintArrangement(
+                        ids = printRow,
+                        sizeOf = { id ->
+                            PersonalPhotoSize.fromKey(
+                                doc.blocks.firstOrNull { it.id == id }?.photoSize
+                            )
                         }
-                        Box(Modifier.weight(1f)) {
-                            renderPrint(pairPartner, Modifier.fillMaxWidth())
-                        }
+                    ) { id, slotHeight, cellModifier ->
+                        val member = doc.blocks.firstOrNull { it.id == id }
+                        if (member != null) renderPrint(member, slotHeight, cellModifier)
                     }
                     besideLine != null -> Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -3704,7 +3908,7 @@ internal fun PersonalDocView(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(Modifier.weight(0.42f)) {
-                            renderPrint(block, Modifier.fillMaxWidth())
+                            renderPrint(block, null, Modifier.fillMaxWidth())
                         }
                         Box(Modifier.weight(0.58f)) {
                             // A quote's panels reach into the gap above and below
@@ -3716,7 +3920,7 @@ internal fun PersonalDocView(
                     }
                     else -> {
                         val printSize = PersonalPhotoSize.fromKey(block.photoSize)
-                        renderPrint(block, Modifier.fillMaxWidth(printSize.fraction))
+                        renderPrint(block, null, Modifier.fillMaxWidth(printSize.fraction))
                     }
                 }
             } else if (block.isAudio) {

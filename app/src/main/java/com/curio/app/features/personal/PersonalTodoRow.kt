@@ -1,6 +1,7 @@
 package com.curio.app.features.personal
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
@@ -43,6 +44,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.curio.app.ui.theme.CurioIcon
@@ -143,6 +145,64 @@ internal class PersonalRowDragState {
     val isDragging: Boolean get() = draggedId != null
 
     /**
+     * v397 — THE CARRIED BLOCK'S OWN MEASURED HEIGHT, for the landing ghost.
+     *
+     * The page draws a GHOST where the block will land, and the ghost is the size
+     * of the thing being carried (a voice note is a strip, a paragraph is a
+     * paragraph) — so the preview says what is coming, not merely that something
+     * is (user request: "proper hover preview same pass for voice recorder in
+     * animation, and proper preview of photo stacing with snap"). Zero for an
+     * id the page does not measure, which is how the ghost knows to stand down.
+     */
+    val carriedHeight: Float get() = draggedId?.let { heightOf(it) } ?: 0f
+
+    /**
+     * v397 — IS THE FINGER BELOW WHERE IT PICKED THE BLOCK UP?
+     *
+     * The landing ghost sits at the TOP of the target block on the way down and
+     * at its BOTTOM on the way up, so the preview is always on the side the
+     * block is travelling towards rather than a bar the eye has to interpret.
+     */
+    val goingDown: Boolean get() = travel.floatValue >= 0f
+
+    /**
+     * v397 — THE COMMIT, BEFORE THE BLOCK HAS FINISHED LANDING.
+     *
+     * A drop used to end with [reset], which zeroed the travel in the same frame
+     * — so the carried block teleported the last few pixels into its new slot
+     * while every row it had pushed aside snapped back at once. Now the order is
+     * committed ([commit] clears the range the rows were shifted for, so their
+     * own shift target is 0 and a spring carries them home) and the carried
+     * block alone keeps its id until it has slid the rest of the way ([settle]).
+     * The finger sees one continuous movement: the thing under it lands, and the
+     * list closes behind it.
+     */
+    fun commit() {
+        fromIndex = -1
+        steps = 0
+    }
+
+    /**
+     * v397 — THE SLIDE HOME. Animates whatever travel is left to zero with a
+     * stiff spring (a snap the eye can follow), then lets go of the block — but
+     * only if this is still the block that was carried, so a second pick-up
+     * during the settle is never clobbered by the first one's animation.
+     */
+    suspend fun settle(id: String) {
+        val from = travel.floatValue
+        if (from != 0f) {
+            animate(
+                initialValue = from,
+                targetValue = 0f,
+                animationSpec = spring(dampingRatio = 0.7f, stiffness = 900f)
+            ) { value, _ ->
+                if (draggedId == id) travel.floatValue = value
+            }
+        }
+        if (draggedId == id) reset()
+    }
+
+    /**
      * v389e — WHERE THE FINGER IS, in the window's own pixels.
      *
      * A page is taller than its window, and a block can be carried to the end of
@@ -223,7 +283,11 @@ internal class PersonalRowDragState {
      * every row outside the travelled range and for the carried row itself.
      */
     fun shiftFor(index: Int, lastIndex: Int): Float {
-        if (!isDragging || index == fromIndex) return 0f
+        // v397 — a COMMITTED carry shifts nothing (fromIndex is -1 and the order
+        // is already the new one — see [commit]), so this must come first: were
+        // it to fall through, targetIndex would read 0 and the first row would
+        // take one more step in the direction the block just came from.
+        if (!isDragging || fromIndex < 0 || index == fromIndex) return 0f
         val target = targetIndex(lastIndex)
         return when {
             fromIndex < target && index in (fromIndex + 1)..target -> -stride
@@ -292,10 +356,24 @@ internal fun PersonalMovableBlock(
     state: PersonalEditorState,
     drag: PersonalRowDragState,
     enabled: Boolean,
+    /**
+     * v397 — THE SHAPE THE CARRIED THING TAKES IN THE AIR.
+     *
+     * A print lifts as a PHOTOGRAPH does: a touch bigger than its slot, tilted a
+     * little, with a deeper shadow — the same trick a hand does when it holds a
+     * picture up (user request: "make the animation of it good"). A voice note
+     * lifts as a card (a small even rise, no tilt), because a strip has no top or
+     * bottom to tilt about. Told, rather than guessed, because only the caller
+     * knows what it wrapped.
+     */
+    heldScale: Float = 1.02f,
+    heldTilt: Float = 0f,
+    heldLift: Dp = 6.dp,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     val gapPx = with(LocalDensity.current) { 6.dp.toPx() }
+    val scope = rememberCoroutineScope()
     var blockHeight by remember(id) { mutableFloatStateOf(0f) }
     // v389e — where the block sits in the window, so the press that picks it up
     // can say where the FINGER is (see PersonalRowDragState.pointerRootY).
@@ -304,19 +382,33 @@ internal fun PersonalMovableBlock(
     val isDragged = drag.draggedId == id
     val lastIndex = state.blockIds.lastIndex
     // The rows it passes slide out of the way; the commit at the drop is what
-    // makes that shift permanent, so it SNAPS when the gesture ends.
+    // makes that shift permanent. v397 — the shift SPRINGS home on the commit
+    // instead of snapping (see PersonalRowDragState.commit): the rows closing
+    // behind a landed block is the last half of the animation.
     val shift by animateFloatAsState(
         targetValue = if (isDragged) 0f else drag.shiftFor(index, lastIndex),
-        animationSpec = if (!drag.isDragging || isDragged) snap()
-        else spring(dampingRatio = 0.82f, stiffness = 700f),
+        animationSpec = if (isDragged) snap()
+        else spring(dampingRatio = 0.72f, stiffness = 900f),
         label = "movableBlockShift"
     )
+
+    // v397 — THE LIFT IS ANIMATED, so the block RISES into the hand and settles
+    // back down as it lands instead of popping between two sizes (the tilt rides
+    // the same 0..1, so a print comes up level and leans over as it arrives at
+    // full size — which is what a hand holding a photograph looks like).
+    val raise by animateFloatAsState(
+        targetValue = if (isDragged) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.62f, stiffness = 700f),
+        label = "movableBlockRaise"
+    )
+    val heldSize = 1f + (heldScale - 1f) * raise
+    val heldAngle = heldTilt * raise
 
     // The lifted look, the project's own rule: shadow BEFORE the fill, and an
     // OPAQUE fill (a translucent one lets the shadow bleed through).
     val lifted = if (isDragged) {
         Modifier
-            .shadow(6.dp, RoundedCornerShape(12.dp))
+            .shadow(heldLift, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(
                 if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest
@@ -343,10 +435,9 @@ internal fun PersonalMovableBlock(
             .zIndex(if (isDragged) 1f else 0f)
             .graphicsLayer {
                 translationY = shift + (if (drag.draggedId == id) drag.travelY else 0f)
-                if (drag.draggedId == id) {
-                    scaleX = 1.02f
-                    scaleY = 1.02f
-                }
+                scaleX = heldSize
+                scaleY = heldSize
+                rotationZ = heldAngle
             }
             .then(lifted)
             .then(
@@ -371,7 +462,10 @@ internal fun PersonalMovableBlock(
                             if (from in 0..state.blockIds.lastIndex && from != to) {
                                 state.moveBlock(from, to)
                             }
-                            drag.reset()
+                            // v397 — commit, then slide the last few pixels home
+                            // (see PersonalRowDragState.settle).
+                            drag.commit()
+                            scope.launch { drag.settle(id) }
                         },
                         onDragCancel = { drag.reset() }
                     )
@@ -428,8 +522,11 @@ internal fun PersonalTodoRow(
     val lastIndex = state.blockIds.lastIndex
     val shift by animateFloatAsState(
         targetValue = if (isDragged) 0f else drag.shiftFor(index, lastIndex),
-        animationSpec = if (!drag.isDragging || isDragged) snap()
-        else spring(dampingRatio = 0.82f, stiffness = 700f),
+        // v397 — a row the carried one passed GLIDES back into the order when
+        // the drop commits, instead of teleporting the instant the finger lifts
+        // (see PersonalRowDragState.commit).
+        animationSpec = if (isDragged) snap()
+        else spring(dampingRatio = 0.72f, stiffness = 900f),
         label = "todoRowShift"
     )
 
@@ -497,7 +594,10 @@ internal fun PersonalTodoRow(
                             if (from in 0..state.blockIds.lastIndex && from != to) {
                                 state.moveBlock(from, to)
                             }
-                            drag.reset()
+                            // v397 — commit, then slide the last few pixels home
+                            // (see PersonalRowDragState.settle).
+                            drag.commit()
+                            scope.launch { drag.settle(id) }
                         },
                         onDragCancel = { drag.reset() }
                     )
@@ -591,7 +691,10 @@ internal fun PersonalTodoRow(
                             if (from in 0..state.blockIds.lastIndex && from != to) {
                                 state.moveBlock(from, to)
                             }
-                            drag.reset()
+                            // v397 — commit, then slide the last few pixels home
+                            // (see PersonalRowDragState.settle).
+                            drag.commit()
+                            scope.launch { drag.settle(id) }
                         },
                         onDragCancel = { drag.reset() }
                     )
