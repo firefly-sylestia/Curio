@@ -1,5 +1,43 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch X — the dock's lit state, the menu tap, and the paragraph face)
+
+Verbatim: "theres a bug with selected tool, when im writing and i wrote something then i
+select a tool such as highlight or font chnage its not showing as active but when i type
+then it shows active, and also tapping it again when the drop down is open it keeps opening
+it instead oof closing it next time. same for font, also the font chnage should act for the
+whole paragraph not word based. fix it please"
+
+### What changed (all in `PersonalCanvas.kt`)
+
+1. **The armed tool lights at once.** `fontOfFocused()` and `highlightOfFocused()` only read
+   the caret's neighbours, so a pen or a face armed with the caret standing in plain text
+   stayed dark until a keystroke moved the mask. Both now read the armed value FIRST —
+   the same rule `activeFlags()` already gave bold/italic/underline — and the page's own
+   face (""), chosen on purpose through the menu, still reads back dark correctly.
+2. **A tap on an open menu closes it.** The menus are non-focusable popups (they keep the
+   keyboard), so the tap that dismisses one ALSO lands on the tool button that opened it —
+   and an unconditional `= true` re-opened it in the same breath. New `PersonalMenuToggle`
+   holds the open state plus the dismissal time: a click within 400 ms of a dismissal IS
+   the closing tap and does not re-open. All four dock menus (font, marker pen, bullet
+   style, print size) go through it; the Save-your-take side was already fine because its
+   menus go through `CurioDropdownMenu`'s own dismissal path.
+3. **The face is the paragraph's.** `applyFont` applied to the selection or armed for the
+   next word. It now sweeps every character of the focused block — a block IS the
+   paragraph, wrapped lines included — the territory the align tool already treats as the
+   page's own. An empty line arms the face instead, so the first words typed arrive in it
+   (the same manner the title tool uses when "Add chapter" opens a chapter name). A
+   selection no longer narrows the tool; the paragraph is the unit, as asked.
+
+### Honest limits
+
+The three state getters/readers are unchanged in shape, so the reads that drive the dock's
+recomposition are the same ones as before — no new per-frame work. The 400 ms dismissal
+window is a heuristic; a slower finger that taps twice well apart still toggles correctly
+because the second tap finds the menu already closed and opens it, which is the desired
+behaviour of a fresh tap.
+
+---
 ## Request (2026-09-18, batch W — the dock's menus keep the keyboard)
 
 Landed and pushed as `dbac568f`. The root cause was not the dock at all: Material's

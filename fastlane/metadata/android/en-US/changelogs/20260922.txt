@@ -1,4 +1,7 @@
 FIX:
+- Writing: a pen or a face chosen for the words you type next lights its tool the moment it is armed, instead of waiting for the next keystroke to prove it.
+- Writing: tapping a tool whose menu is open closes it — the outside tap used to dismiss the menu AND re-open it in the same breath, so the menu never went away.
+- Writing: the font tool sets the paragraph it is in — every character of the line you are writing wears the chosen face at once, instead of only the words after the caret.
 - Releases: a tagged release carries the same keyed providers a CI build does — the optional keys were exported by the pull-request workflow only, so the APK that actually shipped went out without them.
 - Books: an author's written works are kept on the device — the list the sheet showed last time is on screen in its first frame, offline included, and a lookup that failed is not remembered as "wrote nothing" for someone with a shelf full of books.
 - Releases: the writing page compiles again — the drag's auto-scroll imports the two things it calls and takes the pixel travel as a float.

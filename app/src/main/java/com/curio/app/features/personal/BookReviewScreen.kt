@@ -416,11 +416,18 @@ fun BookReviewScreen(
                             .widthIn(max = 680.dp)
                     ) {
                         // v389d — THE CANVAS' PLACE IN THE SCROLL.
+                        // v389h — AND THE NUMBER IS STORED. The book review had the
+                        // journal page's exact defect: the head's height was measured
+                        // into a local nothing else could see and `canvasTop` stayed
+                        // 0, so the pin judged every marker against a coordinate
+                        // that stopped at the canvas' own top (wrong chapter,
+                        // early arrival, a tap that jumped to the top).
                         var aboveContentHeight by remember { mutableFloatStateOf(0f) }
                         val density = LocalDensity.current
                         Box(
                             Modifier.onSizeChanged {
                                 aboveContentHeight = it.height.toFloat() + with(density) { 4.dp.toPx() }
+                                canvasTop = aboveContentHeight
                             }
                         ) { Spacer(Modifier.height(0.dp)) }
                         PersonalCanvas(

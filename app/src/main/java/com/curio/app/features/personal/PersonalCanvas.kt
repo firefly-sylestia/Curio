@@ -877,22 +877,27 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** The face the caret sits in — "" for the page's own. What the dock's font
      *  menu ticks. */
     fun fontOfFocused(): String {
-        val id = focusedId ?: return fontKeyOf(armedFont ?: 0)
-        val blockMask = mask(id)
-        val selection = selections[id]
-        val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
-        return fontKeyOf(caretFlags(id)).ifEmpty {
-            if (selection?.collapsed != false && at == 0) fontKeyOf(armedFont ?: 0) else ""
-        }
+        // v393 — THE ARMED FACE LIT AT ONCE. The button reads this to decide
+        // whether it is lit, and the old version only read the caret's
+        // neighbours — so a face chosen with the caret standing in plain text
+        // stayed dark until the next keystroke moved the mask (user report:
+        // "i select a tool such as highlight or font change its not showing as
+        // active but when i type then it shows active"). The armed face wins,
+        // exactly as [activeFlags] lets the armed tools win — and the page's
+        // own face, chosen on purpose, reads back as "" so the button correctly
+        // goes dark again.
+        armedFont?.let { return fontKeyOf(it) }
+        val id = focusedId ?: return ""
+        return fontKeyOf(caretFlags(id))
     }
 
     /**
-     * v389 — THE FONT MENU.
-     *
-     * Exactly the marker's manner: a selection is re-set outright, and with the
-     * caret alone the face becomes the style of the next words typed — except
-     * when they are already set in that face, which chooses the page's own
-     * again, so the menu is a toggle and not a one-way door.
+     * v393 — THE FACE IS THE PARAGRAPH'S, NOT WORD-BASED (user report: "the
+     * font chnage should act for the whole paragraph not word based"). A block
+     * is the page's unit of writing — a paragraph and its wrapped lines are
+     * one — so the chosen face goes over every character of it in one sweep.
+     * An empty line arms the face instead, so the first words typed arrive in
+     * it. A selection no longer narrows the tool: the paragraph is the unit.
      */
     fun applyFont(key: String) {
         // v389d — NO LAMBDA, AND SO NO NON-LOCAL RETURN. `focusedId ?: run { …
@@ -909,31 +914,31 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         val id = focused
         val block = blocks[id] ?: return
-        val selection = selections[id]
-        if (selection != null && !selection.collapsed) {
-            val start = selection.min.coerceIn(0, block.text.length)
-            val end = selection.max.coerceIn(0, block.text.length)
-            masks[id] = maskApplyFont(mask(id), start, end, key)
-            armedFont = null
-            onDocChanged(doc())
+        // v393 — THE FACE IS THE PARAGRAPH'S (user report: "the font chnage
+        // should act for the whole paragraph not word based"). A block is the
+        // page's unit of writing — a paragraph and its wrapped lines are one —
+        // so the chosen face goes over every character of it in one sweep, the
+        // same territory the align tool already treats as the page's own.
+        if (block.text.isEmpty()) {
+            // An empty line has nothing to set: the face arms, and the first
+            // words typed arrive in it — the manner the title tool uses when
+            // "Add chapter" opens a chapter name to be written into.
+            armedFont = fontMaskFor(key)
             return
         }
-        val current = fontOfFocused()
-        armedFont = if (current == key) fontMaskFor("") else fontMaskFor(key)
+        masks[id] = maskApplyFont(mask(id), 0, block.text.length, key)
+        armedFont = null
+        onDocChanged(doc())
     }
 
     /** The pen the caret sits in right now — what the dock's marker button
      *  lights from and names. "" for none. */
     fun highlightOfFocused(): String {
-        val id = focusedId ?: return highlightKeyOf(armedHighlight ?: 0)
-        val blockMask = mask(id)
-        val selection = selections[id]
-        val at = (selection?.start ?: blockMask.size).coerceIn(0, blockMask.size)
-        return highlightKeyOf(caretFlags(id)) .ifEmpty {
-            // A caret at the very start of the block has nothing to its left or
-            // right to inherit from, so it wears the standing pen.
-            if (selection?.collapsed != false && at == 0) highlightKeyOf(armedHighlight ?: 0) else ""
-        }
+        // v393 — same rule as the face above: the standing pen lights the
+        // marker the moment it is armed, not after the next keystroke.
+        armedHighlight?.let { return highlightKeyOf(it) }
+        val id = focusedId ?: return ""
+        return highlightKeyOf(caretFlags(id))
     }
 
     /**
@@ -3071,7 +3076,7 @@ private fun PersonalPhotoBlock(
     // mid-flight. The block underneath is passive until it lands.
     val carried = LocalPersonalBlockCarried.current
     val actionable = enabled && !carried
-    var sizeMenu by remember(uri) { mutableStateOf(false) }
+    val sizeMenu = remember(uri) { PersonalMenuToggle() }
     val imageHeight = when (size) {
         PersonalPhotoSize.PAGE -> 168.dp
         PersonalPhotoSize.HALF -> 128.dp
@@ -3192,7 +3197,7 @@ private fun PersonalPhotoBlock(
                 // a print's own mark would be.
                 Box {
                     Surface(
-                        onClick = { sizeMenu = true },
+                        onClick = { sizeMenu.buttonClick() },
                         shape = CircleShape,
                         color = Color.Transparent,
                         modifier = Modifier.size(26.dp)
@@ -3203,7 +3208,7 @@ private fun PersonalPhotoBlock(
                     }
                     DropdownMenu(
                         expanded = sizeMenu,
-                        onDismissRequest = { sizeMenu = false },
+                        onDismissRequest = { sizeMenu.dismissed() },
                         // v389h — a print's size menu sits over a page being
                         // written in; it must not close the keyboard the way the
                         // dock's menus used to (see MenuKeepKeyboardProperties).
@@ -3232,7 +3237,7 @@ private fun PersonalPhotoBlock(
                                 },
                                 onClick = {
                                     onSize(option)
-                                    sizeMenu = false
+                                    sizeMenu.close()
                                 }
                             )
                         }
@@ -3712,6 +3717,38 @@ internal fun PersonalDocView(
 private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
 
 /**
+ * v393 — MENU STATE THAT CLOSES ON THE TAP THAT DISMISSED IT.
+ *
+ * The dock's menus are non-focusable popups (they keep the keyboard), so a tap
+ * outside them reaches the app underneath: the popup dismisses first AND the
+ * same tap lands on the tool button that opened it. An unconditional open on
+ * click re-opened the menu on the very tap meant to close it (user report:
+ * "tapping it again when the drop down is open it keeps opening it instead of
+ * closing it next time"). A tap within a breath of the dismissal IS the
+ * closing tap; only an independent tap opens.
+ */
+private class PersonalMenuToggle {
+    var open by mutableStateOf(false)
+    private var dismissedAt = 0L
+
+    /** The popup's [onDismissRequest] — outside tap, back press. */
+    fun dismissed() {
+        open = false
+        dismissedAt = System.currentTimeMillis()
+    }
+
+    /** The tool button's click. */
+    fun buttonClick() {
+        open = if (System.currentTimeMillis() - dismissedAt < 400L) false else !open
+    }
+
+    /** A menu item's own close. */
+    fun close() {
+        open = false
+    }
+}
+
+/**
  * The tool dock — it rides ABOVE the keyboard (the caller pins it to the
  * bottom of an `imePadding()` column), so the tools are always under the
  * writer's thumb while the words stay above the keys.
@@ -3815,7 +3852,7 @@ internal fun PersonalToolDock(
             // written in one font is a list of words (user request: "the font
             // chnage … add in the universal tool bar").
             Box {
-                var fontMenuOpen by remember { mutableStateOf(false) }
+                val fontMenu = remember { PersonalMenuToggle() }
                 val face = state.fontOfFocused()
                 PersonalToolButton(
                     label = "Font: ${personalFontLabel(face)}",
@@ -3823,13 +3860,13 @@ internal fun PersonalToolDock(
                     // serif is not a setting, it is where a line starts.
                     active = face.isNotEmpty(),
                     accent = accentInk, ink = ink,
-                    onClick = { fontMenuOpen = true }
+                    onClick = { fontMenu.buttonClick() }
                 ) {
                     FontGlyph(face)
                 }
                 DropdownMenu(
-                    expanded = fontMenuOpen,
-                    onDismissRequest = { fontMenuOpen = false },
+                    expanded = fontMenu.open,
+                    onDismissRequest = { fontMenu.dismissed() },
                     properties = MenuKeepKeyboardProperties
                 ) {
                     PERSONAL_FONT_KEYS.forEach { key ->
@@ -3852,7 +3889,7 @@ internal fun PersonalToolDock(
                             },
                             onClick = {
                                 state.applyFont(key)
-                                fontMenuOpen = false
+                                fontMenu.close()
                             }
                         )
                     }
@@ -3867,7 +3904,7 @@ internal fun PersonalToolDock(
             // highlighter colr of the word"). The button WEARS the pen it is
             // about to use, so the dock says which colour before the tap does.
             Box {
-                var penMenuOpen by remember { mutableStateOf(false) }
+                val penMenu = remember { PersonalMenuToggle() }
                 val pen = state.highlightOfFocused()
                 val penOn = pen.isNotEmpty()
                 PersonalToolButton(
@@ -3880,15 +3917,15 @@ internal fun PersonalToolDock(
                     accent = if (penOn) personalHighlightInk(pen) else accentInk,
                     ink = ink,
                     onClick = {
-                        if (penOn) penMenuOpen = true
+                        if (penOn) penMenu.buttonClick()
                         else state.applyHighlight(PERSONAL_HIGHLIGHT_KEYS.first())
                     }
                 ) {
                     MarkerPenGlyph(pen = if (penOn) personalHighlightInk(pen) else null)
                 }
                 DropdownMenu(
-                    expanded = penMenuOpen,
-                    onDismissRequest = { penMenuOpen = false },
+                    expanded = penMenu.open,
+                    onDismissRequest = { penMenu.dismissed() },
                     properties = MenuKeepKeyboardProperties
                 ) {
                     DropdownMenuItem(
@@ -3905,7 +3942,7 @@ internal fun PersonalToolDock(
                             // only way to write plain text inside a marked
                             // sentence. With a selection it clears it outright.
                             state.applyHighlight("")
-                            penMenuOpen = false
+                            penMenu.close()
                         }
                     )
                     PERSONAL_HIGHLIGHT_KEYS.forEach { key ->
@@ -3919,7 +3956,7 @@ internal fun PersonalToolDock(
                             },
                             onClick = {
                                 state.applyHighlight(key)
-                                penMenuOpen = false
+                                penMenu.close()
                             }
                         )
                     }
@@ -3958,7 +3995,7 @@ internal fun PersonalToolDock(
             // wears the focused line's own marker, so the dock always echoes
             // what the line is wearing.
             Box {
-                var markerMenuOpen by remember { mutableStateOf(false) }
+                val markerMenu = remember { PersonalMenuToggle() }
                 val focusedMarker = state.markerOfFocused()
                 val bulletOn = active and FLAG_BULLET != 0
                 PersonalToolButton(
@@ -3966,15 +4003,15 @@ internal fun PersonalToolDock(
                     active = bulletOn,
                     accent = accentInk, ink = ink,
                     onClick = {
-                        if (bulletOn) markerMenuOpen = true
+                        if (bulletOn) markerMenu.buttonClick()
                         else state.applyMarker(PersonalMarker.entries.first())
                     }
                 ) {
                     MarkerGlyph(focusedMarker)
                 }
                 DropdownMenu(
-                    expanded = markerMenuOpen,
-                    onDismissRequest = { markerMenuOpen = false },
+                    expanded = markerMenu.open,
+                    onDismissRequest = { markerMenu.dismissed() },
                     properties = MenuKeepKeyboardProperties
                 ) {
                     DropdownMenuItem(
@@ -3989,7 +4026,7 @@ internal fun PersonalToolDock(
                         },
                         onClick = {
                             state.applyMarker(null)
-                            markerMenuOpen = false
+                            markerMenu.close()
                         }
                     )
                     PersonalMarker.entries.forEach { marker ->
@@ -4006,7 +4043,7 @@ internal fun PersonalToolDock(
                             },
                             onClick = {
                                 state.applyMarker(marker)
-                                markerMenuOpen = false
+                                markerMenu.close()
                             }
                         )
                     }
