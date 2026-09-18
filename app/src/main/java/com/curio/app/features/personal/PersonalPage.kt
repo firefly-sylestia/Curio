@@ -662,22 +662,38 @@ internal fun PersonalWritingPage(
                     // reading is the door. The detector sits UNDER the view, so a
                     // child that consumes its own tap (a checklist box, a photo)
                     // keeps it — only the page's own blank space answers.
+                    // v389g — ONE door, TWO detectors.
+                    //
+                    // The detector under the page answers a double tap on BLANK
+                    // space, and the read view's own text detector answers it on
+                    // WORDS (it has to own its taps — a URL in a page opens the
+                    // browser — which is exactly why taps on text never reached
+                    // this one). Both are handed the same action through
+                    // [LocalPersonalTapToEdit] (user request: "double tap on the
+                    // whole page too not just blank area, but also over the text
+                    // works too").
+                    //
+                    // `remember`ed on the editor so the local's value is stable:
+                    // a fresh lambda every recomposition would invalidate every
+                    // reader of the local, which is the whole read subtree.
+                    val tapToEdit = remember(editor) {
+                        {
+                            editing = true
+                            editor.focusLastLine()
+                        }
+                    }
                     CompositionLocalProvider(
                         LocalPersonalCheckToggle provides { index ->
                             val block = doc.blocks.getOrNull(index)
                             if (block != null) editor.setChecked(block.id, !block.checked)
-                        }
+                        },
+                        LocalPersonalTapToEdit provides tapToEdit
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onDoubleTap = {
-                                            editing = true
-                                            editor.focusLastLine()
-                                        }
-                                    )
+                                    detectTapGestures(onDoubleTap = { tapToEdit() })
                                 }
                         ) { readView(doc) }
                     }

@@ -34,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -706,6 +707,23 @@ internal data class PersonalRemovedRow(val block: PersonalBlock, val index: Int)
  * to it when their own parameter is null — which is what lets the journal's
  * pinned section work on the reading side as well as the writing one.
  */
+/**
+ * v389g — A DOUBLE TAP ON A PAGE BEING READ PUTS THE PEN BACK, ANYWHERE ON IT.
+ *
+ * The host page already answers a double tap with the pen (see the read side of
+ * `PersonalWritingPage`), but it answers it from a detector UNDER the reading
+ * view — and a tap that lands on WORDS never reaches it: the read view's text
+ * consumes its own taps, because it has to (a URL in a page opens the browser).
+ * So the one place a reader most wants the pen — on the writing they are looking
+ * at — was the one place the gesture did nothing (user report: "double tap on the
+ * whole page too not just blank area, but also over the text works too").
+ *
+ * The host provides the action here; the read view's own text detector consults
+ * it on a double tap. A host that provides nothing keeps today's behaviour, and a
+ * surface that is not a writing page (a share preview, an export) is unaffected.
+ */
+internal val LocalPersonalTapToEdit = compositionLocalOf<(() -> Unit)?> { null }
+
 internal val LocalPersonalTitleReport =
     staticCompositionLocalOf<
         ((id: String, label: String, top: Float, bottom: Float) -> Unit)?
@@ -3480,7 +3498,13 @@ internal fun PersonalDocView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .pointerInput(linkText) {
-                            detectTapGestures { offset ->
+                            // v389g — the detector that owns the words also owns the
+                            // double tap, so the pen answers over text exactly as it
+                            // does over blank space (see [LocalPersonalTapToEdit]).
+                            val tapToEdit = { LocalPersonalTapToEdit.current?.invoke() }
+                            detectTapGestures(
+                                onDoubleTap = { tapToEdit() }
+                            ) { offset ->
                                 val layout = linkLayout ?: return@detectTapGestures
                                 val pos = layout.getOffsetForPosition(offset)
                                 linkText.getStringAnnotations(
