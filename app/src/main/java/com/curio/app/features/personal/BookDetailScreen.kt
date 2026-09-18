@@ -419,25 +419,23 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                             // again (the first pass runs by itself), or go looking
                             // for a copy to download.
                             Spacer(Modifier.height(8.dp))
-                            // The app's own doors belong to the WRITING side: a
-                            // reader does not need "look it up" or a download
-                            // search sitting over the words they came back for.
-                            // They FOLD with the switch instead of appearing the
-                            // instant the pen is pressed, so the eye/pen flip is
-                            // one move rather than a page that snaps (user
-                            // report: the family's switch "looks clanky").
-                            AnimatedVisibility(
-                                visible = editing,
-                                enter = fadeIn(tween(180)) + expandVertically(tween(220)),
-                                exit = fadeOut(tween(120)) + shrinkVertically(tween(170))
+                            // ── BOTH DOORS STAY (v389e) ──────────────────
+                            //
+                            // These two used to fold away with the pen, on the
+                            // reasoning that a reader does not need them. The
+                            // member's own answer is the other way: finding the
+                            // book and finding a copy of it are things a reader
+                            // does, and a door that vanishes when the eye is
+                            // taken is a door they have to flip back for (user
+                            // request: "keep the look it up and download help
+                            // button in eye view too for books"). So they stay
+                            // put, in both modes, with no fold to sit through.
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
-                                    DownloadPill(enabled = true) { downloadSheet = true }
-                                }
+                                LookUpPill(lookingUp = lookingUp) { lookupTick += 1 }
+                                DownloadPill(enabled = true) { downloadSheet = true }
                             }
                             if (lookingUp || lookupNote != null) {
                                 Spacer(Modifier.height(6.dp))

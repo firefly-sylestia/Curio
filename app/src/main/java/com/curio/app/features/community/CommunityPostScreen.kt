@@ -151,8 +151,20 @@ internal fun CommunityPostScreen(
      * Posts the draft. [repostOf] is the id of a locally-kept deleted post when
      * the writer is putting one back on the wall — the caller drops it from the
      * archive once the server has accepted it.
+     *
+     * v389e — AND IT IS TOLD WHICH DRAFT THIS WAS. [draftKey] is the kind the
+     * COMPOSER was writing as, which is the key its unfinished words are kept
+     * under (see [SocialPostArchive]) — and the key the caller must forget once
+     * the post is on the wall. It is NOT `draft.kind`: a topic presented as a
+     * NOTE posts as a note while the composer is still a card, so the entry the
+     * writer's words actually live in was never the one being cleared, and the
+     * note and its topic came back the next time the composer opened (user
+     * report: "in the post topic section the your note stays and it keeps the
+     * previous topic even after posting it"). Empty for a re-post, which puts
+     * back a post the member deleted rather than the words they are writing —
+     * their own draft is not the thing that just went up, so it stays.
      */
-    onPost: (CommunityCardDraft, repostOf: String?) -> Unit
+    onPost: (CommunityCardDraft, repostOf: String?, draftKey: String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val haptics = LocalHapticFeedback.current
@@ -162,6 +174,20 @@ internal fun CommunityPostScreen(
 
     var kind by remember { mutableStateOf(KIND_NOTE) }
     var text by remember { mutableStateOf("") }
+    /**
+     * v389e — THE QUICK FACT THAT WAS PUT IN THE FIELD.
+     *
+     * Picking a topic offers its own line as the first words (a topic post is a
+     * thought ABOUT something, and the topic's line is what it is about), but
+     * only into an empty field — so a member who has written their own words
+     * never has them overwritten. The hole in that rule: once a topic HAD filled
+     * the field, the field was no longer empty, so choosing a different topic
+     * left the PREVIOUS topic's line sitting under the new topic's name — the
+     * post preview said one thing and the topic was another (user report:
+     * "changing topic doesnt changes the quick fact note"). This remembers what
+     * was offered, so a new pick replaces its own line and nothing else.
+     */
+    var offeredFact by remember { mutableStateOf("") }
     var caption by remember { mutableStateOf("") }
     var credit by remember { mutableStateOf("") }
     var query by remember { mutableStateOf("") }
@@ -223,7 +249,12 @@ internal fun CommunityPostScreen(
     }
 
     // Kept as you type — 800ms after the last keystroke, never per character.
-    LaunchedEffect(kind, text, caption, credit, topic) {
+    //
+    // v389e — AND NEVER WHILE THE POST IS IN FLIGHT. The save is on a delay, and
+    // the post's own success clears the draft: a save that landed a moment late
+    // put the finished words back into the file the post had just emptied.
+    LaunchedEffect(kind, text, caption, credit, topic, posting) {
+        if (posting) return@LaunchedEffect
         val pending = SocialPostArchive.Draft(
             kind = kind,
             text = text,
@@ -310,7 +341,7 @@ internal fun CommunityPostScreen(
                             focusManager.clearFocus(force = true)
                             haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                             scope.launch {
-                                onPost(draft, repostOf)
+                                onPost(draft, repostOf, kind)
                                 posting = false
                             }
                         }
@@ -358,7 +389,14 @@ internal fun CommunityPostScreen(
                                     // the topic itself comes out of its own lane
                                     // pool. A resident lane answers immediately;
                                     // a cold one parses once, off the UI thread.
-                                    if (text.isBlank()) text = picked.teaser
+                                    //
+                                    // v389e — the offered line FOLLOWS the topic:
+                                    // an empty field takes it, and so does a field
+                                    // still holding the line the LAST pick offered.
+                                    if (text.isBlank() || text == offeredFact) {
+                                        text = picked.teaser
+                                        offeredFact = picked.teaser
+                                    }
                                     query = ""
                                     topicPickerOpen = false
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -481,7 +519,9 @@ internal fun CommunityPostScreen(
                 posting = true
                 focusManager.clearFocus(force = true)
                 scope.launch {
-                    onPost(kept.draft, kept.id)
+                    // Nothing of the member's OWN words is going up here, so no
+                    // draft is finished with (see the `draftKey` contract).
+                    onPost(kept.draft, kept.id, "")
                     posting = false
                 }
             },

@@ -175,16 +175,24 @@ fun TopicNoteScreen(
         // with it: the subject of a note is not a field on it, and a scrolled
         // head is what hid the "choose the topic" door under the fold (user
         // report). It stays put while the words move under it.
-        pinnedHead = {
-            TopicHead(
-                topicName = topicName,
-                categoryName = category?.displayName.orEmpty(),
-                glyph = category?.iconGlyph ?: CurioIcons.TravelExplore,
-                accent = accent,
-                ink = ink,
-                onChoose = { pickerOpen = true }
-            )
-            Spacer(Modifier.height(12.dp))
+        //
+        // v389e — AND IT IS THE WRITING SIDE'S. The read view opens with the
+        // topic's own name and lane, so the card would be the subject said twice
+        // over the writing being read back (user request: "remove the card of
+        // topic for note in eye view"). The eye gets the leaf, the pen gets the
+        // card.
+        pinnedHead = { editing ->
+            if (editing) {
+                TopicHead(
+                    topicName = topicName,
+                    categoryName = category?.displayName.orEmpty(),
+                    glyph = category?.iconGlyph ?: CurioIcons.TravelExplore,
+                    accent = accent,
+                    ink = ink,
+                    onChoose = { pickerOpen = true }
+                )
+                Spacer(Modifier.height(12.dp))
+            }
         }
     )
 

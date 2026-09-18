@@ -768,7 +768,7 @@ fun CommunityScreen(navController: NavController) {
     if (composing && token != null) {
         CommunityPostScreen(
             onDismiss = { composing = false },
-            onPost = { draft, repostOf ->
+            onPost = { draft, repostOf, draftKey ->
                 scope.launch {
                     CommunityApi.post(
                         token,
@@ -784,8 +784,18 @@ fun CommunityScreen(navController: NavController) {
                             // gone back up leaves the local archive (it is on
                             // the wall again — keeping it would be a duplicate
                             // waiting to happen).
+                            //
+                            // v389e — CLEARED BY THE COMPOSER'S OWN KIND, which
+                            // is the key those words were kept under. Clearing by
+                            // the POSTED kind instead missed the entry whenever a
+                            // topic was presented as a note (a note post written
+                            // in the card composer), so the note and its topic
+                            // were still there on the next open. A re-post passes
+                            // no key: the member's own draft was not what went up.
                             withContext(Dispatchers.IO) {
-                                SocialPostArchive.clearDraft(context, draft.kind)
+                                if (draftKey.isNotBlank()) {
+                                    SocialPostArchive.clearDraft(context, draftKey)
+                                }
                                 repostOf?.let { SocialPostArchive.forgetDeleted(context, it) }
                             }
                             // On the wall before the sheet is even gone, in

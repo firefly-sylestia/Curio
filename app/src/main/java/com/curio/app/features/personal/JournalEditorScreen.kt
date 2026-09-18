@@ -43,8 +43,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,8 +57,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
@@ -134,25 +130,20 @@ fun JournalEditorScreen(
     /** Whether this page has already been introduced (see `aboveCanvas`). */
     var greetedNewPage by remember { mutableStateOf(false) }
 
-    // ── THE DAY'S TITLE, ROLLED UP INTO THE BAR ────────────────────────
+    // ── v389e — THE DAY'S TITLE IS NOT PUT IN THE BAR ──────────────────
     //
-    // The title is written ON the page, so once it has scrolled away the page
-    // has stopped saying which day this is (user request: "similar to title add
-    // in journal too the toolbar title"). The bar takes it over at exactly that
-    // moment: the title field reports its own place in the writing (an offset
-    // inside the scrolling column, which does not change as it scrolls) and the
-    // page's scroll offset says where the writing has got to. Both are needed
-    // because a position in the WINDOW is only re-reported on layout, not on
-    // scroll — this asks a question the scroll itself answers.
-    var pageScrollY by remember { mutableIntStateOf(0) }
-    var titleTop by remember { mutableFloatStateOf(0f) }
-    var titleHeight by remember { mutableFloatStateOf(0f) }
-    val titleRolled = titleHeight > 0f && (titleTop + titleHeight) - pageScrollY <= 0f
+    // The bar used to take the day's own title over once the title had scrolled
+    // away (v389's "toolbar title"). The member's own answer is that it is not
+    // wanted there: the page's head already says which day this is, and the bar
+    // is the day and the eye / pen switch (user request: "dont show the journal
+    // title in the header"). So the title lives on the page and nowhere else —
+    // and the measurement that fed the bar (the title's own position in the
+    // writing, plus the scroll offset it was judged against) goes with it,
+    // rather than being left behind as plumbing nothing reads.
 
     PersonalWritingPage(
         entryIdArg = entryIdArg,
         photos = photos,
-        onScroll = { pageScrollY = it },
         // The page's own way out (the core guards it: a live voice recording is
         // asked about before a back gesture can drop it — see PersonalVoice).
         onExit = { navController.popBackStack() },
@@ -178,7 +169,6 @@ fun JournalEditorScreen(
                 dateMillis = dateMillis,
                 saving = saving,
                 editing = editing,
-                rolledTitle = if (titleRolled) title else "",
                 onToggleMode = onEditing,
                 onShiftDate = { days -> dateMillis = shiftDay(dateMillis, days) },
                 onPickDate = {
@@ -299,14 +289,7 @@ fun JournalEditorScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(titleFocusRequester)
-                    // Where the title sits in the WRITING (not in the window):
-                    // the column's own scroll turns this into "scrolled past".
-                    .onGloballyPositioned { coordinates ->
-                        val bounds = coordinates.boundsInParent()
-                        titleTop = bounds.top
-                        titleHeight = bounds.height
-                    },
+                    .focusRequester(titleFocusRequester),
                 decorationBox = { inner ->
                     Box {
                         if (title.isEmpty()) {
@@ -335,9 +318,6 @@ private fun JournalTopBar(
     dateMillis: Long,
     saving: Boolean,
     editing: Boolean,
-    /** The day's title once its own line has left the page — empty while the
-     *  title is still on screen (see the caller). */
-    rolledTitle: String,
     onToggleMode: (Boolean) -> Unit,
     onShiftDate: (Long) -> Unit,
     onPickDate: () -> Unit
@@ -419,31 +399,10 @@ private fun JournalTopBar(
             }
         }
 
-        Spacer(Modifier.weight(1f))
-
-        // THE TITLE, once the page's own has gone up. It fades into the bar's
-        // empty middle, so the bar never changes height and never pushes a line
-        // of the page (the weight is `fill = false`: the title takes only what
-        // it needs and the spacer either side keeps the date and the switch in
-        // their corners).
-        AnimatedVisibility(
-            visible = rolledTitle.isNotBlank(),
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(140)),
-            modifier = Modifier.weight(1f, fill = false)
-        ) {
-            Text(
-                rolledTitle,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontFamily = FrauncesFontFamily,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = ink.copy(alpha = 0.8f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
+        // v389e — the bar's empty middle is the DAY's room to breathe, not the
+        // title's (the day's title stays on the page: "dont show the journal
+        // title in the header"). One weight takes that middle, and the date and
+        // the eye / pen switch keep their own corners.
         Spacer(Modifier.weight(1f))
 
         // EYE or PEN: the eye hides the tools and stops the page being typed

@@ -705,6 +705,19 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** Called with the whole document after every change (auto-save). */
     var onDocChanged: (PersonalDoc) -> Unit = {}
 
+    /**
+     * v389e — THE PAGE'S ONE DRAG.
+     *
+     * Which block is being carried, which rows have made room and where the
+     * finger is. It belongs to the EDITOR because two things need it and they
+     * live on either side of the writing surface: the canvas runs the gesture,
+     * and the PAGE (which owns the scroll) follows a carried block to the fold
+     * and scrolls it along (see PersonalWritingPage). One per page either way, so
+     * a to-do list and a voice note on the same page still share a single
+     * gesture.
+     */
+    val rowDrag = PersonalRowDragState()
+
     /** The block the keyboard is in — the target of every tool. */
     var focusedId by mutableStateOf<String?>(null)
         private set
@@ -2189,7 +2202,12 @@ internal fun PersonalCanvas(
     val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
     // v389 — one drag for the whole list: the to-do page's rows share it, so
     // the row under the finger and the rows it passes agree about one gesture.
-    val rowDrag = remember { PersonalRowDragState() }
+    //
+    // v389e — AND IT LIVES ON THE EDITOR, not on this canvas. The page that
+    // HOSTS the canvas is the thing that owns the scroll, so a drag that needs
+    // the page to follow it (the auto-scroll at the fold) has to be visible from
+    // outside the writing surface. One state per page, reachable by both.
+    val rowDrag = state.rowDrag
     val selectionWash = LocalTextSelectionColors.current.backgroundColor
     // v389 — SELECT ALL MEANS THE PAGE (see [PersonalEditorState.selectPage]).
     // The platform's toolbar keeps its own look and every one of its actions;
@@ -2349,6 +2367,18 @@ internal fun PersonalCanvas(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // v389e — EVERY ROW REPORTS ITS OWN HEIGHT, whether it can
+                        // be carried or not. The order's arithmetic is measured
+                        // against the rows the finger passes (see
+                        // PersonalRowDragState.dragBy), and until now only the
+                        // blocks that carry themselves (a print, a voice note, a
+                        // to-do row) reported one — so on a journal page every
+                        // paragraph was charged the carried note's own height,
+                        // and the drop-line ran ahead of the finger. A row that is
+                        // drawn is a row that is measured.
+                        .onSizeChanged { measured ->
+                            rowDrag.measure(id, measured.height.toFloat())
+                        }
                         .graphicsLayer { translationY = blockShift }
                         .then(
                             if (showDropLine) Modifier.drawWithContent {
@@ -2451,6 +2481,18 @@ internal fun PersonalCanvas(
                                         uri = block.photo.orEmpty(),
                                         caption = state.caption(id),
                                         size = state.photoSize(id),
+                                        // v389e — THE PRINT FILLS ITS OWN COLUMN.
+                                        // A print takes a FRACTION of the measure it
+                                        // is given (see [PersonalPhotoSize]), which
+                                        // is right on the page and wrong here: the
+                                        // column is already the narrow share of the
+                                        // row, so a 44 % print inside a 42 % column
+                                        // was a sliver of a picture — a squeezed
+                                        // frame with a cropped image and a caption
+                                        // with no room to be read (user report: "the
+                                        // photo in journal and the text along side it
+                                        // its kind of glitchy sometimes").
+                                        paired = true,
                                         ink = ink, accent = accent,
                                         enabled = enabled,
                                         onCaption = { state.setCaption(id, it) },

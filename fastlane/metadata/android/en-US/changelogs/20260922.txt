@@ -1,4 +1,11 @@
 FIX:
+- Journals: the day's mood chips and the title no longer sit on top of each other — the page's head lays itself out as a column again, with the space between them back.
+- Writing: the day's title stays on the page and out of the top bar.
+- Writing: a print set beside the writing fills its own column, so the picture is a picture instead of a sliver with a squeezed caption.
+- Writing: a carried voice note's drop line follows the finger — the page measures every row it passes, so the line lands where the note will actually go instead of running ahead of the hover.
+- Writing: a page follows a carried block — hold a note at the foot of the screen and the page scrolls with it, so it can be taken past the last line that fits.
+- Social: the quick fact follows the topic — choosing a different topic replaces the line the last one offered instead of leaving it under the new topic's name.
+- Social: posting finishes with the composer, note and topic alike — the entry the writer's words were kept in is the one cleared now, so a topic note no longer comes back with its old topic on the next open.
 - Save your take: typing is smooth again — the page was re-reading every take's data as it drew itself, so one character typed anywhere re-ran the whole page (the topic strip, the chips, the take rail and every card of the format body), and the draft autosave sat on the same per-character clock. Each take's contribution is now a derived value only the parts that need it read, published from a snapshot instead of on every frame — the same fix covers the take studio.
 - Social: every portrait is its own character now — its own pose (the head turned and the whole figure off centre, each of the 28 leaning its own way), its own silhouette (the two bobs are no longer the same shape, nor the goggles' crop, the pixie and the braided crown the same box, nor the four waves the same mass), an ink line along every shoulder, mask, plait, hood and tail, and a prop that breaks that outline — a headband over the bob, a bloom behind a curl, sunglasses pushed up onto the crop, a pin past the straight sheet of a hime cut.
 - Save your take: a note's tools come up with the keyboard — the floating dock rides the keyboard while you write in the box and folds away the moment it is dismissed, instead of a formatting row standing under a note nobody is writing in.
@@ -74,7 +81,6 @@ ADD:
 - Books: the book page's head names your shelf until the book's own title and author have scrolled up, then wears both.
 - Books: hold the "Read" pill to say which file Curio opens — pick the PDF or the EPUB, or swap the one it already has.
 - Books: a book review pins the chapter you are in to the top of the page as its markers scroll by, so a long review always says where you are.
-- Journals: the day's title comes into the top bar once the title you wrote has scrolled away.
 - Writing: the book review and the chapter review wear the same eye / pen switch as every other page, and the switch itself now slides between the two instead of swapping.
 - Writing: tap the blank part of a page to start writing even when the caret was already sitting there, and double-tap a page you are reading to put the pen back.
 - Writing: press and hold a voice note to carry it to a new place on the page, the way a to-do row already moves.
@@ -124,7 +130,7 @@ FIX:
 - Books: the book page stops repeating itself — its title comes into the head only as the page's own title scrolls under it, instead of sitting there twice.
 - Writing: the eye / pen flip is one move now — the two sides cross-fade upward into the keyboard instead of sliding past each other, so it no longer looks clunky while the keyboard comes up.
 - Social: no portrait reads as a black blob — the darkest hair and hood tones came off near-black, and the hooded face is a face rather than paper.
-- Writing: a note's topic stays pinned above the writing instead of scrolling out of view, so "choose the topic" can never hide under the fold.
+- Writing: a note's topic stays pinned above the writing WHILE WRITING it instead of scrolling out of view, so "choose the topic" can never hide under the fold — reading the note back opens on its own words, with the topic's card out of the way.
 - Writing: going to a topic from a note's header and coming back keeps the note and the topic it was about — it no longer saves one page and then asks you to pick the topic again on a second one.
 - Writing: select all selects the PAGE now — the whole row set wears the selection and Copy puts all of it on the clipboard, instead of grabbing only the line the caret was in.
 - Writing: a to-do box can be ticked while READING a page, not only while writing it — and the tick saves itself like any other change.

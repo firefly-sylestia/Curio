@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -119,17 +120,52 @@ internal class PersonalRowDragState {
         if (height > 0f) rowHeights[id] = height
     }
 
-    /** [id]'s measured height, or the carried row's own slot before it is known. */
-    private fun heightOf(id: String): Float = rowHeights[id] ?: stride
+    /**
+     * [id]'s measured height — 0 for a block the page does NOT draw as its own
+     * row (the second print of a pair, the writing beside one).
+     *
+     * v389e — THIS IS NO LONGER THE CARRIED ROW'S SLOT.
+     *
+     * It used to fall back to `stride`, which is the CARRIED row's own height +
+     * gap — so on a to-do list of similar rows it was harmless, and on a JOURNAL
+     * page (where the carried thing is a voice note and everything it passes is a
+     * paragraph) every step was charged the voice note's own height instead of
+     * the paragraph's. The finger then crossed a whole tall paragraph without the
+     * list noticing, and the drop-line jumped a place past where the member was
+     * actually holding the note (user report: "when dragging the voice note the
+     * place where the line indicates the voice note will go is inaccurate to the
+     * position of the hover"). Every drawn row reports its own height now (see
+     * PersonalCanvas), so an unmeasured id means "not a row" and costs nothing.
+     */
+    private fun heightOf(id: String): Float = rowHeights[id] ?: 0f
 
     val isDragging: Boolean get() = draggedId != null
 
-    fun begin(id: String, index: Int, slotStride: Float) {
+    /**
+     * v389e — WHERE THE FINGER IS, in the window's own pixels.
+     *
+     * A page is taller than its window, and a block can be carried to the end of
+     * a long day — which used to stop dead at the fold, because nothing told the
+     * page that the finger was sitting near the foot of the screen (user report:
+     * "the journal page doesnt auto scroll when i go to the bottom of the page
+     * while holding the vooce note box"). The gesture records where the finger is
+     * as the press LANDS — while the block is still at rest, so the number is the
+     * true one — and from then on the finger's own travel carries it. A page tall
+     * enough to need scrolling reads it and follows (see PersonalWritingPage).
+     *
+     * It is deliberately NOT moved by [advanceBy]: when the page scrolls under a
+     * HELD finger the finger itself has not moved an inch.
+     */
+    var pointerRootY by mutableFloatStateOf(0f)
+        private set
+
+    fun begin(id: String, index: Int, slotStride: Float, fingerRootY: Float) {
         draggedId = id
         fromIndex = index
         steps = 0
         travel.floatValue = 0f
         stride = slotStride.coerceAtLeast(1f)
+        pointerRootY = fingerRootY
     }
 
     /**
@@ -143,14 +179,33 @@ internal class PersonalRowDragState {
      * put it.
      */
     fun dragBy(amountY: Float, ids: List<String>, lastIndex: Int) {
-        travel.floatValue += amountY
+        pointerRootY += amountY
+        advanceBy(amountY, ids, lastIndex)
+    }
+
+    /**
+     * v389e — THE PAGE MOVED UNDER A PARKED FINGER.
+     *
+     * Auto-scrolling happens while the member HOLDS the note still at the foot of
+     * the screen, so the finger reports no travel at all — but the page has moved,
+     * and the carried block has to keep up with it and keep stepping through the
+     * rows it is passing. [scrolledBy] is exactly the distance the page moved, so
+     * the travel grows by that much and the finger's own place is left alone (it
+     * really has not moved).
+     */
+    fun advanceBy(scrolledBy: Float, ids: List<String>, lastIndex: Int) {
+        travel.floatValue += scrolledBy
         val travel = travel.floatValue
         val down = travel > 0f
         var index = fromIndex
         var spent = 0f
         while ((down && index < lastIndex) || (!down && travel < 0f && index > 0)) {
             val neighbour = ids.getOrElse(if (down) index + 1 else index - 1) { "" }
-            val cost = heightOf(neighbour).coerceAtLeast(stride)
+            // Half of the row being PASSED is the crossing point: the carried
+            // block has to have travelled past that row's own middle before the
+            // list steps it, which is what makes the drop-line agree with the
+            // finger (a block the page does not draw as a row costs nothing).
+            val cost = heightOf(neighbour).coerceAtLeast(1f)
             val remaining = if (down) travel - spent else -travel - spent
             if (remaining < cost / 2f) break
             spent += cost
@@ -241,6 +296,9 @@ internal fun PersonalMovableBlock(
 ) {
     val gapPx = with(LocalDensity.current) { 6.dp.toPx() }
     var blockHeight by remember(id) { mutableFloatStateOf(0f) }
+    // v389e — where the block sits in the window, so the press that picks it up
+    // can say where the FINGER is (see PersonalRowDragState.pointerRootY).
+    var blockRootTop by remember(id) { mutableFloatStateOf(0f) }
 
     val isDragged = drag.draggedId == id
     val lastIndex = state.blockIds.lastIndex
@@ -276,6 +334,11 @@ internal fun PersonalMovableBlock(
                     drag.measure(id, it.height.toFloat())
                 }
             }
+            // At rest until it is picked up, so this is the block's true place;
+            // read only as the press lands (see `onDragStart`).
+            .onGloballyPositioned { coordinates ->
+                if (drag.draggedId != id) blockRootTop = coordinates.positionInRoot().y
+            }
             .zIndex(if (isDragged) 1f else 0f)
             .graphicsLayer {
                 translationY = shift + (if (drag.draggedId == id) drag.travelY else 0f)
@@ -289,8 +352,13 @@ internal fun PersonalMovableBlock(
                 if (!enabled) Modifier
                 else Modifier.pointerInput(id, enabled) {
                     detectDragGesturesAfterLongPress(
-                        onDragStart = {
-                            if (blockHeight > 0f) drag.begin(id, index, blockHeight + gapPx)
+                        onDragStart = { offset ->
+                            if (blockHeight > 0f) {
+                                drag.begin(
+                                    id, index, blockHeight + gapPx,
+                                    blockRootTop + offset.y
+                                )
+                            }
                         },
                         onDrag = { change, amount ->
                             change.consume()
@@ -339,6 +407,13 @@ internal fun PersonalTodoRow(
 
     var rowHeight by remember(id) { mutableFloatStateOf(0f) }
     var rowWidth by remember(id) { mutableFloatStateOf(0f) }
+    // v389e — where the row sits in the window, so a press that lands on it can
+    // say where the FINGER is (the page's auto-scroll reads that; see
+    // PersonalRowDragState.pointerRootY). The grip is measured too: it is the
+    // row's OTHER way of being picked up, and it sits at the row's trailing
+    // edge, so the row's own top is not where its finger is.
+    var rowRootTop by remember(id) { mutableFloatStateOf(0f) }
+    var gripRootTop by remember(id) { mutableFloatStateOf(0f) }
 
     // The swipe, in two pieces: while the finger is down the raw travel is what
     // the layer draws (no recomposition); on release the small Animatable takes
@@ -383,6 +458,10 @@ internal fun PersonalTodoRow(
                 // (see PersonalRowDragState.dragBy).
                 drag.measure(id, it.height.toFloat())
             }
+            .onGloballyPositioned { coordinates ->
+                // Before the press the row is at rest, so this is its true place.
+                if (drag.draggedId != id) rowRootTop = coordinates.positionInRoot().y
+            }
             .zIndex(if (isDragged) 1f else 0f)
             .graphicsLayer {
                 translationY = shift + (if (drag.draggedId == id) drag.travelY else 0f)
@@ -402,8 +481,10 @@ internal fun PersonalTodoRow(
                 if (!enabled) Modifier
                 else Modifier.pointerInput(id, enabled) {
                     detectDragGesturesAfterLongPress(
-                        onDragStart = {
-                            if (rowHeight > 0f) drag.begin(id, index, rowHeight + gapPx)
+                        onDragStart = { offset ->
+                            if (rowHeight > 0f) {
+                                drag.begin(id, index, rowHeight + gapPx, rowRootTop + offset.y)
+                            }
                         },
                         onDrag = { change, amount ->
                             change.consume()
@@ -487,12 +568,17 @@ internal fun PersonalTodoRow(
                 .align(Alignment.CenterEnd)
                 .width(TODO_GRIP_WIDTH)
                 .height(with(density) { rowHeight.toDp().coerceAtLeast(1.dp) })
+                .onGloballyPositioned { coordinates ->
+                    if (drag.draggedId != id) gripRootTop = coordinates.positionInRoot().y
+                }
                 .zIndex(if (isDragged) 1f else 0f)
                 .pointerInput(id, enabled) {
                     if (!enabled) return@pointerInput
                     detectDragGestures(
-                        onDragStart = {
-                            if (rowHeight > 0f) drag.begin(id, index, rowHeight + gapPx)
+                        onDragStart = { offset ->
+                            if (rowHeight > 0f) {
+                                drag.begin(id, index, rowHeight + gapPx, gripRootTop + offset.y)
+                            }
                         },
                         onDrag = { change, amount ->
                             change.consume()

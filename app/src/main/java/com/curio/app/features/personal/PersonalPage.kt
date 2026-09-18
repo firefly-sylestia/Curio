@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,6 +61,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -95,6 +97,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -182,8 +185,15 @@ internal fun PersonalWritingPage(
      * area gets hidden as it's not on top the page. it's little scrolled down so
      * fix it"). This slot sits UNDER the page's top bar and outside the scroll,
      * so the subject of the page stays on the page.
+     *
+     * v389e — IT IS TOLD THE MODE. A pinned head is a CARD, and a card of the
+     * page's subject standing over the READING is the subject said twice: the
+     * note page's read view already opens with the topic's own name and its
+     * lane (user request: "remove the card of topic for note in eye view"). So
+     * the slot receives `editing` and a page that only wants its head while
+     * writing can say so (see TopicNoteScreen).
      */
-    pinnedHead: @Composable () -> Unit = {},
+    pinnedHead: @Composable (editing: Boolean) -> Unit = {},
     /**
      * v389 — HOW FAR THE PAGE HAS BEEN SCROLLED, for a head that ROLLS UP.
      *
@@ -489,6 +499,55 @@ internal fun PersonalWritingPage(
             else if (travel < -threshold) dockScrolledAway = false
         }
     }
+
+    // ── v389e — THE PAGE FOLLOWS A CARRIED BLOCK ─────────────────────────
+    //
+    // A block can be carried anywhere on the page, and a page is taller than its
+    // window: a note dragged past the last line that fits on screen used to stop
+    // dead at the fold, because nothing told the page that the finger was sitting
+    // at the foot of the screen holding it (user report: "the journal page doesnt
+    // auto scroll when i go to the bottom of the page while holding the vooce note
+    // box"). While a drag is live, the finger's own place decides: inside the top
+    // or bottom margin of the writing area, the page scrolls that way — a step per
+    // frame, in the same direction as the finger — and the carried block keeps up
+    // with the page (see PersonalRowDragState.advanceBy), so it stays under the
+    // thumb and keeps stepping through the rows it passes.
+    //
+    // The loop is driven by snapshotFlow so merely STARTING a drag never
+    // subscribes the page's own composition to the gesture, and the viewport is
+    // held in a plain array: a scrolling page lays out every frame, and writing
+    // Compose state there would recompose the whole page on a flick.
+    val writingViewport = remember { floatArrayOf(0f, 0f) } // [top, height]
+    LaunchedEffect(editor) {
+        val margin = with(densityNow) { 96.dp.toPx() }
+        val step = with(densityNow) { 9.dp.toPx() }
+        snapshotFlow { editor.rowDrag.draggedId }.collectLatest { carried ->
+            if (carried == null) return@collectLatest
+            while (true) {
+                // One step per frame, so the scroll reads as travel rather than
+                // as a jump, and the finger's own reports stay in charge.
+                withFrameNanos { }
+                val finger = editor.rowDrag.pointerRootY
+                if (finger <= 0f) continue
+                val ceiling = writingViewport[0] + margin
+                val floor = writingViewport[0] + writingViewport[1] - margin
+                val towards = when {
+                    finger > floor -> step
+                    finger < ceiling -> -step
+                    else -> 0f
+                }
+                if (towards == 0f) continue
+                if (towards > 0f && !pageScroll.canScrollForward) continue
+                if (towards < 0f && !pageScroll.canScrollBackward) continue
+                val before = pageScroll.value
+                pageScroll.scrollBy(towards)
+                val moved = pageScroll.value - before
+                if (moved != 0f) {
+                    editor.rowDrag.advanceBy(moved, editor.blockIds, editor.blockIds.lastIndex)
+                }
+            }
+        }
+    }
     // Writing again is what asks for the tools back.
     LaunchedEffect(editor.focusedId, keyboardUp) {
         if (keyboardUp) dockScrolledAway = false
@@ -545,8 +604,9 @@ internal fun PersonalWritingPage(
     ) {
         header(editing, saving, { mode -> editing = mode }, { leave() })
 
-        // The page's subject, held still above the writing.
-        pinnedHead()
+        // The page's subject, held still above the writing (the page decides
+        // whether the reading side wants it too).
+        pinnedHead(editing)
 
         CompositionLocalProvider(LocalPersonalTitleReport provides reportSectionLine) {
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -621,6 +681,12 @@ internal fun PersonalWritingPage(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(pageScroll)
+                            // Where the writing area sits in the window, for the
+                            // drag's auto-scroll (see writingViewport).
+                            .onGloballyPositioned { coordinates ->
+                                writingViewport[0] = coordinates.positionInRoot().y
+                                writingViewport[1] = coordinates.size.height.toFloat()
+                            }
                             // v389 — the blank part of a page is writing space too: a
                             // tap anywhere in the gaps (under the last line, between
                             // the title and the words) hands the caret to the last
@@ -639,7 +705,18 @@ internal fun PersonalWritingPage(
                         // (which also houses [aboveCanvas]) gives that offset.
                         var aboveContentHeight by remember { mutableFloatStateOf(0f) }
                         val density = LocalDensity.current
-                        Box(
+                        // ── v389e — A COLUMN, NOT A BOX ─────────────────────
+                        //
+                        // This wrapper exists only to MEASURE where the canvas
+                        // begins inside the scroll (see the pin maths above), but
+                        // a Box STACKS its children: the day's mood pill and the
+                        // title written under it were drawn on top of each other
+                        // (user report: "the mood select and the journal title
+                        // the space between them is bad now, and they are
+                        // overlapping, which wasnt the case before"). A Column
+                        // measures exactly the same and lays the page's head out
+                        // the way the page means it.
+                        Column(
                             Modifier.onSizeChanged {
                                 aboveContentHeight = it.height.toFloat() + with(density) { 6.dp.toPx() }
                             }

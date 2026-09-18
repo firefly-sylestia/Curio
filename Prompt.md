@@ -1,5 +1,64 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch T — six fixes: the head, the print, the drag, the eye views, the composer)
+
+Live instruction: "fix 1, the mood select and the journal title the space between them is bad now,
+and they are overlapping, which wasnt the case before fix it, fix 2, the photo in journal and the
+text along side it its kind of glitchy sometimes so fix that too. and mainly when dragging the
+voice note the place where the line indicates the voice note will go is inaccurate to the position
+of the hover, also the journal page doesnt auto scroll when i go to the bottom of the page while
+holding the vooce note box, fix it too, fix 3, dont show the journal title in the header, fix 4,
+keep the look it up and download help button in eye view too for books, fix 5, remove the card of
+topic for note in eye view. fix 6 in the post topic section the your note stays and it keeps the
+previous topic even after posting it and also changing topic doesnt changes the quick fact note
+fix 7 cl fix" — plus the CI log for `14d3b36b` (the `ime` import, fixed in `a4ca7b04`, whose run is
+**green**).
+
+### What changed
+
+1. **The head (fix 1).** `cf281f9f` wrapped the above-canvas head in a `Box`, and a Box STACKS its
+   children — the mood chips and the title written under them drew on top of each other. It is a
+   `Column` again (the measurement it exists for is unchanged: the sum of the head's height).
+2. **The print beside the writing (fix 2a).** The beside row gives the print a 42 % column, and
+   the print then took *its own fraction of that* (44 % for Small) — a sliver of a picture with a
+   caption band it could not be read in. It now passes `paired = true`, the flag that means "fill
+   the column I was given".
+3. **The drop line (fix 2b).** `PersonalRowDragState.heightOf` fell back to `stride` — the
+   CARRIED row's own height — and on a journal page every other row was never measured at all
+   (only the self-carrying blocks reported a height). So each step was charged the voice note's
+   own height instead of the paragraph's, and the line ran a place ahead of the finger. Every
+   drawn row now reports its own height (the canvas wrapper measures it), the fallback is gone,
+   and an unmeasured id means "not a row" (the second print of a pair, the writing beside one)
+   and costs nothing.
+4. **The page follows (fix 2c).** The drag state carries the FINGER's place in the window
+   (captured as the press lands, carried by its travel — not by a scroll), and `PersonalWritingPage`
+   runs a per-frame loop while a drag is live: inside the 96 dp margins of the writing area the page
+   scrolls that way, and the carried block advances through the rows it passes by exactly the
+   distance the page moved (`advanceBy`), so it stays under the thumb.
+5. **The title out of the bar (fix 3).** v389's rolled-up title is removed together with the
+   measurement that fed it (the title's place in the writing and the scroll offset judged against
+   it) — the title lives on the page and nowhere else.
+6. **Both book doors (fix 4).** "Look it up" and "Download help" no longer fold away with the pen;
+   they stand in both modes.
+7. **The note's card (fix 5).** `pinnedHead` is handed the mode, and the topic note asks for its
+   head only while WRITING — the read view already opens with the topic's name and lane.
+8. **The composer (fix 6).** Two separate bugs. (a) The quick fact: picking a topic filled an
+   empty field, so a second pick found it non-empty and left the PREVIOUS topic's line sitting
+   under the new name — `offeredFact` remembers what was offered, and a new pick replaces its own
+   line and nothing else. (b) After posting, the note and its topic came back: the draft is kept
+   under the COMPOSER's kind, but the post cleared by the POSTED kind, and a topic presented as a
+   note posts as a note while the composer is still a card — so the entry holding the words was
+   never the one cleared. `onPost` now carries the composer's own kind (empty for a re-post, whose
+   upload is not the member's own draft), and the autosave stands down while a post is in flight.
+
+### Honest limits
+
+Gradle cannot run here, so verification is the project's brace checker (clean across all eight
+touched files) plus an import/usage sweep: three `drag.begin` call sites, the `paired` flags, both
+`onPost` call sites, the removed journal-bar plumbing and the new `withFrameNanos`/`collectLatest`/
+`onGloballyPositioned` imports. The auto-scroll's speed (9 dp a frame, a 96 dp margin) is a
+judgement, not a measurement — it is meant to read as travel, and it is one constant to change.
+
 ## Request (2026-09-18, batch S — why Select all only takes one line, and the line tools)
 
 Live instruction: "now for the journal page text writings and all tell me how it works and why
@@ -3613,3 +3672,5 @@ recomposition count, not a stopwatch: the page's aggregate over every take's dat
 the screen's own body, so a keystroke in any note invalidated the whole page, and the draft
 autosave's keys put the page on the same per-character clock. Both now live where only they
 are invalidated.
+
+## next prompt
