@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.openSearchUrl
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
@@ -200,8 +201,25 @@ internal fun AuthorWorksSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     var works by remember(author) { mutableStateOf<List<AuthorWork>?>(null) }
+    // v389d — THE PERSON'S OWN PICTURE, in the header (user request: "show the
+    // author's portrait in the author sheet header, not just on the reveal
+    // card"). The reveal card already resolved one and stored it under
+    // "author|<name>", so this reads that first and only goes looking when the
+    // card has not been seen in this install.
+    var portrait by remember(author) {
+        mutableStateOf(
+            AppPreferences.sheetArtUrlsState["author|$author"]?.takeIf { it.isNotBlank() }
+        )
+    }
     LaunchedEffect(author) {
         works = AuthorWorksFetch.works(author)
+        if (portrait == null) {
+            val found = ArtworkFetch.portraitOrCover(author)
+            if (!found.isNullOrBlank()) {
+                portrait = found
+                AppPreferences.setSheetArtUrl(context, "author|$author", found)
+            }
+        }
     }
     val listed = works
 
@@ -228,14 +246,33 @@ internal fun AuthorWorksSheet(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             ) {
-                Surface(shape = CircleShape, color = accent.copy(alpha = 0.16f)) {
-                    CurioIcon(
-                        CurioIcons.Person,
-                        null,
-                        tint = ink,
-                        size = 20.dp,
-                        modifier = Modifier.padding(9.dp)
-                    )
+                Surface(
+                    shape = CircleShape,
+                    color = accent.copy(alpha = 0.16f),
+                    modifier = Modifier
+                        .size(44.dp)
+                        .shadow(3.dp, CircleShape)
+                ) {
+                    if (!portrait.isNullOrBlank()) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(portrait)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = author,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Box(
+                            Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(CurioIcons.Person, null, tint = ink, size = 20.dp)
+                        }
+                    }
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
