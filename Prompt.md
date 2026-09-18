@@ -1,5 +1,73 @@
 # Prompt Log — current request
 
+## Request (2026-09-18, batch P — the flip stops shifting, Portrait prints, and a quieter voice note)
+
+Live instruction: "the journal etc shifts when switichin gbetween edit and view due to the
+keyboard, can u fix it properly and also make the keyboard appears automatically only for the
+first time creating jounral or etc for new page only… also for the photos in journal and all
+add portraight one too. also for voice note dont give the play button backgroud just keep
+solid filled icon, and also fix the total time shifting during play and dont show like
+0:00/0/xx just show x:xx during play so less shifting. work this in a new branch while the
+previous run is runnig."
+
+**Status: DONE on branch `fix/journal-edit-view-and-voice`.**
+
+### The two keyboard asks are one cause
+
+`JournalEditorScreen`'s `aboveCanvas` (the block that holds the day's title) ran
+`titleFocusRequester.requestFocus()` + `keyboardController?.show()` on EVERY compose of the
+writing side — so every flip from the eye to the pen raised the IME while the two sides were
+still trading places, which is the shift the member reported (and the earlier session's
+"ducking" note was the same thing seen through the animated offset). It is now introduced
+ONCE, and only for a day being MADE:
+
+```kotlin
+LaunchedEffect(Unit) {
+    val introduceThePage = isNewPage && !greetedNewPage
+    if (introduceThePage) { greetedNewPage = true; focus; delay(260); keyboardController?.show() }
+}
+```
+`isNewPage` is `entryIdArg == CurioRoutes.PERSONAL_NEW` (imported), and `greetedNewPage` is a
+plain `remember` so it survives the flips but not a page that is actually re-opened. An
+already-written day now opens with the pen down and NO inset: the caret waits for a finger,
+and tapping the page, the title or a field is what asks for the keyboard — the same rule every
+other field in the app follows. The other pages of the family needed nothing here: a grep over
+the personal package showed the journal was the only screen that raised the keyboard by
+itself.
+
+The second half is `PersonalWritingPage`: taking the eye now calls
+`keyboard?.hide()` (`LaunchedEffect(editing)`), so a page being READ is never covered by an
+inset and the box it is drawn in stops changing height when the flip happens.
+
+### Portrait prints
+
+`PersonalPhotoSize` gained `PORTRAIT("portrait", "Portrait", 0.54f)` — the one frame that is
+taller than it is wide (the other three are all wider than tall, so a vertical photo had to be
+cropped into one of them). All three size tables were updated — the editor's frame height
+(232dp) and caption size, and the read view's own height table — and nothing else had to
+change: the size menu iterates `PersonalPhotoSize.entries`, the pairing rule is "not PAGE",
+and "writing beside a print" is still SMALL-only, so a portrait print takes its own narrow
+column and never sits beside prose.
+
+### The voice note
+
+`PersonalVoiceBar`'s play control was a filled accent DISC with the glyph inside it; the disc
+is gone (a transparent Surface keeps the tap target and the press ripple) and the glyph is
+drawn in the note's own accent at 26dp — `play_arrow` and `pause` are both solid shapes, so
+it reads as the filled icon the member asked for. Its clock showed `position / length` the
+moment playback started, which changed the figure's width and moved the waveform beside it; it
+is ONE figure now (the position while it sounds, the recording's length while it stands) with
+`fontFeatureSettings = "tnum"`, so every digit is the same width and counting up does not
+twitch.
+
+Verified with the project's brace checker across all four files (clean) plus a grep sweep for
+every `PersonalPhotoSize` use and every `when` over it.
+
+One honest note: the two sides keep their OWN scroll — the reading column starts at the top of
+the page, the writing column stays where it was — so a long page still lands at the top when
+the eye is taken. That is a scroll-position question, not the keyboard, and it is left as it
+was (it would need the read view to accept the writing column's offset).
+
 ## Request (2026-09-18, batch O — the release build's non-local return, NAMED and removed)
 
 Live instruction: the PR link — "https://github.com/firefly-sylestia/Curio/pull/153 check this

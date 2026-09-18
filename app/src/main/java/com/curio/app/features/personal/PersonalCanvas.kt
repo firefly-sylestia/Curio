@@ -2641,6 +2641,12 @@ internal fun PersonalPagePhoto(
  * never end up underneath it (user request: "make sure it follows the text
  * wrapper style so texts doesnt overlap"). PAGE is the default and is what every
  * photo placed before this existed already is.
+ *
+ * v390 — and PORTRAIT is the one for a photograph that stands UP: the frame is
+ * taller than it is wide, which is the shape a phone picture of a person or a
+ * doorway actually is (user request: "for the photos in journal and all add
+ * portrait one too"). The other three are all wider than they are tall, so a
+ * vertical picture had to be cropped to fit one of them.
  */
 internal enum class PersonalPhotoSize(
     val key: String,
@@ -2649,6 +2655,7 @@ internal enum class PersonalPhotoSize(
 ) {
     PAGE("page", "Page", 1f),
     HALF("half", "Half", 0.62f),
+    PORTRAIT("portrait", "Portrait", 0.54f),
     SMALL("small", "Small", 0.44f);
 
     companion object {
@@ -2700,11 +2707,15 @@ private fun PersonalPhotoBlock(
     val imageHeight = when (size) {
         PersonalPhotoSize.PAGE -> 168.dp
         PersonalPhotoSize.HALF -> 128.dp
+        // The tall one: a portrait print is a page-height picture on a narrow
+        // column, so its frame stands up (see the sizes' own note).
+        PersonalPhotoSize.PORTRAIT -> 232.dp
         PersonalPhotoSize.SMALL -> 100.dp
     }
     val captionSize = when (size) {
         PersonalPhotoSize.PAGE -> 13.sp
         PersonalPhotoSize.HALF -> 12.sp
+        PersonalPhotoSize.PORTRAIT -> 12.sp
         PersonalPhotoSize.SMALL -> 10.sp
     }
     Column(
@@ -3147,6 +3158,7 @@ internal fun PersonalDocView(
                 height = when (printSize) {
                     PersonalPhotoSize.PAGE -> 168.dp
                     PersonalPhotoSize.HALF -> 128.dp
+                    PersonalPhotoSize.PORTRAIT -> 232.dp
                     PersonalPhotoSize.SMALL -> 100.dp
                 }
             )

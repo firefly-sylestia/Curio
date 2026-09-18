@@ -573,18 +573,27 @@ internal fun PersonalVoiceBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        // v390 — THE GLYPH ITSELF, WITH NO DISC UNDER IT.
+        //
+        // The control wore a filled accent circle, which put a solid mark on the
+        // page where a voice note is meant to read as part of the writing (user
+        // request: "for voice note dont give the play button backgroud just keep
+        // solid filled icon"). What is left is the filled glyph — `play_arrow`
+        // and `pause` are both solid shapes, so nothing else has to be drawn —
+        // in the note's own accent, and the target is still the 38dp it was (the
+        // surface stays for the press ripple, with no colour of its own).
         Surface(
             onClick = { toggle() },
             shape = CircleShape,
-            color = accent,
+            color = Color.Transparent,
             modifier = Modifier.size(38.dp)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CurioIcon(
                     if (isPlaying) CurioIcons.Pause else CurioIcons.PlayArrow,
                     if (isPlaying) "Pause the voice note" else "Play the voice note",
-                    tint = personalOnAccent(),
-                    size = 20.dp
+                    tint = accent,
+                    size = 26.dp
                 )
             }
         }
@@ -643,14 +652,29 @@ internal fun PersonalVoiceBar(
                 }
             }
         }
+        // v390 — ONE FIGURE, NEVER TWO.
+        //
+        // The clock used to swap between the note's LENGTH and "position /
+        // length", so the figure changed width the moment playback started and
+        // the strip beside it moved with it (user request: "fix the total time
+        // shifting during play and dont show like 0:00/0/xx just show x:xx during
+        // play so less shifting"). It is one figure now: the position while the
+        // note is sounding, the note's own length while it stands still. Tabular
+        // figures make every digit the same width, so counting up does not
+        // twitch either — a recording of a minute or less reads as `m:ss` in
+        // both states, which is the same width digit for digit.
         Text(
             if (isPlaying || position > 0L) {
-                "${formatRecordingTime((position / 1000L).toInt())} / ${formatRecordingTime(seconds)}"
+                formatRecordingTime((position / 1000L).toInt())
             } else {
                 formatRecordingTime(seconds)
             },
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = ink.copy(alpha = 0.7f)
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontFeatureSettings = "tnum"
+            ),
+            color = ink.copy(alpha = 0.7f),
+            maxLines = 1
         )
         if (onRemove != null) {
             Surface(

@@ -1,4 +1,7 @@
 FIX:
+- Journals: the keyboard no longer comes up by itself when a saved day is flipped from the eye to the pen — the page stops shifting at the switch — and a day being made still opens with the caret in its title and the keyboard up.
+- Writing: taking the eye puts the keyboard away, so a page being read is not sitting under an inset.
+- Writing: a voice note's play control is the filled glyph on the page itself, with no disc behind it, and its clock shows one figure — the position while it sounds, the recording's own length while it stands — so nothing shifts as it counts.
 - Releases: the release build builds again — a return out of a composable page block made the compiler emit a helper class the shrinker refuses to package, so the signed APK failed while debug builds were unaffected.
 - Writing: a page READ back now draws the small print with the writing beside it exactly as the page that was written does — the read view ran its own copy of the renderer, so the pair only existed while editing.
 - Writing: a small print keeps room for the writing — the print takes a narrow column and the line under it moves in beside it, like a picture set in a printed column, instead of pushing every word down the page (a half or page print, and a second photo, still pair as they did).
@@ -29,6 +32,7 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Writing: a photo can be a Portrait — the tall frame a phone picture of a person or a doorway actually is, for the vertical photos the other three sizes had to crop.
 - Art: the artwork, artist, painter and author cards on the reveal wear their own picture — an artwork shows itself (the Met's public-domain image, then Wikipedia's), an artist or a painter shows a work the Met attributes to them, and an author shows their portrait (Wikipedia's lead image for the name, or the cover of the first of their books when there is no photograph). The resolved picture is remembered per topic, so the sheet that opens on a tap is painted from the same one.
 - Art: an artwork, an artist and a painter open a sheet of their own — the work's record (its title, maker, date, medium, museum and a public-domain image from the Metropolitan Museum's open-access API, with Wikipedia's own words and its article as the words half), or, for an artist or a painter, the works the Met attributes to them. Both sources are keyless and free.
 - Books: the author's own sheet leads with their face — the portrait the reveal card resolved sits in the header, read from the same stored picture instead of being looked up again, and it falls back to the person's silhouette when there is none to draw.

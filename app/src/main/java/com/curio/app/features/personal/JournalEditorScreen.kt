@@ -72,6 +72,7 @@ import com.curio.app.data.PAGE_KIND_JOURNAL
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMood
 import com.curio.app.data.wordCount
+import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -120,6 +121,18 @@ fun JournalEditorScreen(
     val titleFocusRequester = remember { FocusRequester() }
     val keyboardController =
         androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    /**
+     * v390 — IS THIS PAGE BEING MADE, or is it one that already exists?
+     *
+     * [CurioRoutes.PERSONAL_NEW] is the route a page is opened with when there is
+     * nothing yet — the same fact [PersonalWritingPage] reads to start the pen
+     * down — and it is what decides whether the keyboard comes up by itself (see
+     * `aboveCanvas`). The route stays "new" for the life of this composition, so
+     * the greeting happens once and never again on the flips that follow.
+     */
+    val isNewPage = entryIdArg == CurioRoutes.PERSONAL_NEW
+    /** Whether this page has already been introduced (see `aboveCanvas`). */
+    var greetedNewPage by remember { mutableStateOf(false) }
 
     // ── THE DAY'S TITLE, ROLLED UP INTO THE BAR ────────────────────────
     //
@@ -239,19 +252,31 @@ fun JournalEditorScreen(
             // The caret lands in the title the moment the page opens for
             // writing, so the first thing to do is type (this block is only
             // composed in the writing mode, which is what makes that true).
+            //
+            // v390 — AND THE KEYBOARD ARRIVES ONLY FOR A DAY BEING MADE.
+            //
+            // This ran on EVERY compose of the writing side, so every flip from
+            // the eye to the pen raised the inset while the two sides were still
+            // trading places — which is the page shifting the member reported
+            // ("the journal etc shifts when switching between edit and view due
+            // to the keyboard"). A day that was already written is a day to
+            // READ: the pen opens the page and its tools, and the caret waits
+            // for a finger — tapping the page, the title or any field is what
+            // asks for the keyboard, which is also what every other field in the
+            // app does. The one moment that is unambiguously "write now" is a
+            // page being MADE (a fresh day, whose whole point is the first word),
+            // and that is the only moment the inset rises on its own — once.
             LaunchedEffect(Unit) {
-                // FOCUS first — that is instant and silent — and let the page's
-                // own turn finish before the keyboard's inset starts to rise.
-                // The two used to happen at once, so the cross-fade was lifted
-                // mid-flight and read as a jump (user report: "when i switch to
-                // edit the keyboard automatically opens up and that makes the
-                // crossfading animation looks bad and it also shifts so fix it
-                // properly without disabling the keyboard"). The keyboard is
-                // still opened by the page itself: it just arrives AFTER the
-                // turn, which is the order the eye expects.
-                titleFocusRequester.requestFocus()
-                delay(260)
-                keyboardController?.show()
+                val introduceThePage = isNewPage && !greetedNewPage
+                if (introduceThePage) {
+                    greetedNewPage = true
+                    // FOCUS first — that is instant and silent — and let the
+                    // page's own turn finish before the keyboard's inset starts
+                    // to rise, so the cross-fade is never lifted mid-flight.
+                    titleFocusRequester.requestFocus()
+                    delay(260)
+                    keyboardController?.show()
+                }
             }
             MoodSelector(selected = mood, onSelect = { mood = it }, ink = ink)
             Spacer(Modifier.height(18.dp))

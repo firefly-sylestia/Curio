@@ -300,6 +300,22 @@ internal fun PersonalWritingPage(
         }
     }
 
+    /**
+     * v390 — THE EYE PUTS THE KEYBOARD AWAY.
+     *
+     * The whole page is laid out under the keyboard's inset, so a keyboard left
+     * standing over the READ side both covers the page being read and holds the
+     * box short, which is half of the shift the member reported while switching
+     * ("the journal etc shifts when switching between edit and view due to the
+     * keyboard" — the other half was the keyboard being raised by the switch
+     * itself, which no longer happens: see the journal's own `aboveCanvas`). The
+     * reading side is a page, not a field, so nothing there wants an inset.
+     */
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    LaunchedEffect(editing) {
+        if (!editing) keyboard?.hide()
+    }
+
     // The page's own view of the document (the to-do page's progress line).
     LaunchedEffect(doc) { onDoc(doc) }
 
