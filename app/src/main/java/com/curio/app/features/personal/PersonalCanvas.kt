@@ -156,8 +156,16 @@ private val QUOTE_VIEW_SIZE = 15.sp
 private val TITLE_BODY_SIZE = 24.sp
 private val TITLE_VIEW_SIZE = 22.sp
 
-/** The read size of a page whose ROWS are the content — the to-do list. */
-internal val ROW_VIEW_SIZE = 19.sp
+/**
+ * THE SIZE OF A PAGE WHOSE ROWS ARE THE CONTENT — the to-do list (v389e).
+ *
+ * A to-do row is not prose: it is a line you act on with a thumb, and it read as
+ * one more paragraph (user request: "make the todo list fonts overall page font
+ * and checkboxsize fonts etc they should be larger"). Both sides of the page —
+ * the pen and the eye — take this size, and the row's box grows with it (see
+ * [ROW_MARKER_SIZE]), so the box stays level with the words it labels.
+ */
+internal val ROW_VIEW_SIZE = 22.sp
 private val SMALL_BODY_SIZE = 13.5.sp
 private val SMALL_VIEW_SIZE = 12.5.sp
 
@@ -391,6 +399,18 @@ internal val PERSONAL_MARKER_GAP = 10.dp
 internal val PERSONAL_MARKER_LEAD = PERSONAL_MARKER_SIZE + PERSONAL_MARKER_GAP
 
 /**
+ * v389e — THE TO-DO BOX: a bigger mark for a bigger row.
+ *
+ * The box has always been [PERSONAL_MARKER_SIZE] whatever the line height around
+ * it — which was right while every page wrote at one size, and too small once the
+ * to-do list's rows grew (a tick a thumb is aiming at). A row page draws this one
+ * instead, and indents its words by [ROW_MARKER_LEAD] so the writing still lines
+ * up under the first word.
+ */
+internal val ROW_MARKER_SIZE = 22.dp
+internal val ROW_MARKER_LEAD = ROW_MARKER_SIZE + PERSONAL_MARKER_GAP
+
+/**
  * v389 — A CHECKLIST ROW CAN BE TICKED WHILE THE PAGE IS BEING READ.
  *
  * The tick lived in the editor alone, so a to-do list had to be opened with the
@@ -552,9 +572,12 @@ internal fun DrawScope.drawPersonalCheckbox(
     outline: Color,
     fill: Color,
     onFill: Color,
-    lineHeight: Float
+    lineHeight: Float,
+    /** v389e — the box's own width. A to-do row asks for the bigger mark
+     *  ([ROW_MARKER_SIZE]); every other page keeps the shared one. */
+    box: Dp = PERSONAL_MARKER_SIZE
 ) {
-    val size = PERSONAL_MARKER_SIZE.toPx()
+    val size = box.toPx()
     val top = ((lineHeight - size) / 2f).coerceAtLeast(0f)
     val corner = CornerRadius(size * 0.30f)
     if (!checked) {
@@ -2592,7 +2615,10 @@ internal fun PersonalCanvas(
                             enabled = enabled,
                             quoteJoinAbove = quoteAbove,
                             quoteJoinBelow = quoteBelow,
-                            onTitlePosition = titleReport
+                            onTitlePosition = titleReport,
+                            // A list's rows are the page: they wear its own size,
+                            // so the pen and the eye read the same list.
+                            rowSize = ROW_VIEW_SIZE
                         )
                     }
                 } else if (besideSkips.contains(id)) {
@@ -2631,11 +2657,25 @@ private fun PersonalTextBlock(
     quoteJoinAbove: Boolean = false,
     quoteJoinBelow: Boolean = false,
     /** See [PersonalCanvas.onTitlePosition]. */
-    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
+    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null,
+    /**
+     * v389e — THE ROW SIZE OF A PAGE WHOSE ROWS ARE ITS CONTENT (a to-do list).
+     *
+     * The pen used to write a to-do row at the page's own body size while the
+     * eye read it back at [ROW_VIEW_SIZE] — so a list changed size when it was
+     * switched, and the box a thumb aims at was the prose-sized one on the side
+     * that is actually used (user request: "make the todo list fonts overall page
+     * font and checkboxsize fonts etc they should be larger"). Unspecified keeps
+     * every other page exactly as it was.
+     */
+    rowSize: TextUnit = TextUnit.Unspecified
 ) {
     val text = state.text(id)
     val mask = state.mask(id)
     val align = state.align(id)
+    val rowPage = rowSize.isSpecified
+    val rowBody = if (rowPage) rowSize.value * 1.7f else 29f
+    val rowMark = if (rowPage) ROW_MARKER_SIZE else PERSONAL_MARKER_SIZE
     val quoteRule = personalQuoteRule()
     val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
@@ -2649,7 +2689,7 @@ private fun PersonalTextBlock(
     val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
     // v389 — the list furniture's own metrics: the marker centres on the FIRST
     // line's height, which is what puts a box level with the words it labels.
-    val lineHeight = if (isTitle) 34.sp else if (isSmall) 22.sp else 29.sp
+    val lineHeight = if (isTitle) 34.sp else if (isSmall) 22.sp else rowBody.sp
     // The tick the writer actually made is on the BLOCK now, not in this row's
     // widget state, so a reload cannot lose it.
     val checked = state.checked(id)
@@ -2702,8 +2742,8 @@ private fun PersonalTextBlock(
         )
         else -> TextStyle(
             fontFamily = WritingFontFamily,
-            fontSize = 17.sp,
-            lineHeight = 29.sp,
+            fontSize = if (rowPage) rowSize else 17.sp,
+            lineHeight = rowBody.sp,
             color = ink,
             textAlign = alignOf
         )
@@ -2771,11 +2811,12 @@ private fun PersonalTextBlock(
                                 outline = markerOutline,
                                 fill = markerFill,
                                 onFill = markerOnFill,
-                                lineHeight = lineHeight.toPx()
+                                lineHeight = lineHeight.toPx(),
+                                box = rowMark
                             )
                         }
                         .clickable(enabled = enabled) { state.setChecked(id, !checked) }
-                        .padding(start = PERSONAL_MARKER_LEAD)
+                        .padding(start = if (rowPage) ROW_MARKER_LEAD else PERSONAL_MARKER_LEAD)
                     isBullet -> Modifier
                         .drawBehind {
                             drawPersonalMarker(
@@ -3302,7 +3343,18 @@ internal fun PersonalDocView(
             val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
             // v389 — the same metrics and the same renderers as the editor
             // (this view draws a checklist row that the editor ticked).
-            val lineHeight = if (isTitle) 31.sp else if (isSmall) 21.sp else 27.sp
+            //
+            // v389e — a ROW page ([rowSize]) puts its own size under the marker
+            // too, so the eye's box is the pen's box (see ROW_MARKER_SIZE).
+            val rowPage = rowSize.isSpecified
+            val rowMark = if (rowPage) ROW_MARKER_SIZE else PERSONAL_MARKER_SIZE
+            val rowLead = if (rowPage) ROW_MARKER_LEAD else PERSONAL_MARKER_LEAD
+            val lineHeight = when {
+                isTitle -> 31.sp
+                isSmall -> 21.sp
+                rowPage -> (rowSize.value * 1.7f).sp
+                else -> 27.sp
+            }
             val markerFill = personalAccentInk()
             val markerOnFill = MaterialTheme.colorScheme.surface
             val markerOutline = ink.copy(alpha = 0.42f)
@@ -3340,7 +3392,8 @@ internal fun PersonalDocView(
                                         outline = markerOutline,
                                         fill = markerFill,
                                         onFill = markerOnFill,
-                                        lineHeight = lineHeight.toPx()
+                                        lineHeight = lineHeight.toPx(),
+                                        box = rowMark
                                     )
                                 }
                                 // The BOX is the target: a tap on the mark
@@ -3353,7 +3406,7 @@ internal fun PersonalDocView(
                                     } else {
                                         Modifier.pointerInput(index, block.checked) {
                                             detectTapGestures { at ->
-                                                if (at.x <= PERSONAL_MARKER_LEAD.toPx() &&
+                                                if (at.x <= rowLead.toPx() &&
                                                     at.y <= lineHeight.toPx()
                                                 ) {
                                                     toggle(index)
@@ -3362,7 +3415,7 @@ internal fun PersonalDocView(
                                         }
                                     }
                                 )
-                                .padding(start = PERSONAL_MARKER_LEAD)
+                                .padding(start = rowLead)
                             isBullet -> Modifier
                                 .drawBehind {
                                     drawPersonalMarker(

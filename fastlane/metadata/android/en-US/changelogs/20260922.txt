@@ -1,4 +1,7 @@
 FIX:
+- Home: the Pages and My shelf doors ARE your accent now — the whole card is filled with it and the words wear the app's own ink for a filled card, instead of an accent hairline around a pale tile.
+- Journals: the day's number is dark ink instead of the accent's lightest shade, so the one figure a journal row exists to say reads first.
+- To-do: a list reads bigger — its rows, its boxes and the list's own name are a size up, on both the writing and the reading side.
 - Journals: the day's mood chips and the title no longer sit on top of each other — the page's head lays itself out as a column again, with the space between them back.
 - Writing: the day's title stays on the page and out of the top bar.
 - Writing: a print set beside the writing fills its own column, so the picture is a picture instead of a sliver with a squeezed caption.

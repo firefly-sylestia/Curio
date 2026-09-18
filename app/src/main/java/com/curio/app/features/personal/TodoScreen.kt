@@ -132,14 +132,18 @@ fun TodoScreen(
         // opens ready to type a ROW (the core arms the first empty line), which
         // is what the member came to do.
         aboveCanvas = {
+            // v389e — the list's name is the page's own title size, not a step
+            // below it: a list's rows grew to [ROW_VIEW_SIZE], and a name set
+            // smaller than its own rows reads as a label on them (user request:
+            // "make the todo list fonts overall page font ... larger").
             BasicTextField(
                 value = title,
                 onValueChange = { title = it },
                 singleLine = true,
                 textStyle = TextStyle(
                     fontFamily = FrauncesFontFamily,
-                    fontSize = 24.sp,
-                    lineHeight = 30.sp,
+                    fontSize = 27.sp,
+                    lineHeight = 34.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = ink
                 ),
@@ -152,8 +156,8 @@ fun TodoScreen(
                                 "Name this list",
                                 style = TextStyle(
                                     fontFamily = FrauncesFontFamily,
-                                    fontSize = 24.sp,
-                                    lineHeight = 30.sp,
+                                    fontSize = 27.sp,
+                                    lineHeight = 34.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = ink.copy(alpha = 0.32f)
                                 )
@@ -262,10 +266,11 @@ internal fun ChecklistPreview(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                TodoGlyph(active = row.checked, iconSize = 14.dp)
+                // The preview's own mark grows with the rows it stands for.
+                TodoGlyph(active = row.checked, iconSize = 18.dp)
                 Text(
                     row.text,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = if (row.checked) ink.copy(alpha = 0.45f) else ink.copy(alpha = 0.8f),
                     textDecoration = if (row.checked) TextDecoration.LineThrough else null,
                     maxLines = 1,

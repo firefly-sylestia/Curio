@@ -3674,3 +3674,17 @@ autosave's keys put the page on the same per-character clock. Both now live wher
 are invalidated.
 
 ## next prompt
+
+**Status: IN PROGRESS (batch U).** The prompt below was found cleared from this section (the
+heading was left empty); it is restored verbatim from the working tree it was dropped from, so
+the contract holds and nothing in it is silently lost. Blocking questions were asked before any
+code was touched — the notes-collection move is a REMOVAL (the Cabinet's Notes shelf loses its
+saved entries), which the project rules require confirming first.
+
+feature additon and refinements,
+make the todo list fonts overall page font and checkboxsize fonts etc they should be larger. 
+the book chapters still doesnt fetch i am sure googlebooks api doesnt work and library thing api isnt working. it fails. consider anime buttom sheet of topic reavel as series and also its preview in topic reveal, similair to that it ftecthes the cover and episode details similiar to seires.
+and same for movies too
+for artowkrs and the authors artists singers etc the review in topic reveal is bad with the text colro for the buttom sheet, and for many it doesnt properly fetches proper details too. arworks doesnt fetch properly and if it doesnt i cant expand it too. also authors written work should save as cache and opening them should open them in the app with the fetched details. 
+and for the door in home screen pages and my shelf dont give it accent border but make the whole card accent color and proper text color as well so its readable too. and for journal number date its too accent color and very light colored so fix it by making it dark. 
+for topic notes dont add them in personal but add them in the notes collection, no more saved entires in notes, also todo goes inside notes too, no more in journa, the journal in personal keep sthe journals only. 

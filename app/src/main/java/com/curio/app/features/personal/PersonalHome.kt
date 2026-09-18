@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +51,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,7 +63,6 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
-import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * v387 — THE PERSONAL FAMILY ON HOME.
@@ -464,7 +461,6 @@ private fun JournalChip(
     onClick: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = personalAccent()
     val mood = journal.moodEnum
     Surface(
         onClick = onClick,
@@ -476,13 +472,22 @@ private fun JournalChip(
     ) {
         Column(Modifier.fillMaxWidth().padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // v389e — THE DAY IS INK, NOT ACCENT.
+                //
+                // The numeral wore the accent, which on a pale card is the
+                // lightest thing on it — the day, the one figure a journal chip
+                // exists to say, was the hardest word on the tile to read (user
+                // report: "for journal number date its too accent color and very
+                // light colored so fix it by making it dark"). It is the page's
+                // own ink now, with the month beside it held back — so the day
+                // leads and the month follows.
                 Text(
                     journal.dateMillis.toLocalDate().dayOfMonth.toString(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontFamily = FrauncesFontFamily,
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = accent
+                    color = ink
                 )
                 Spacer(Modifier.width(5.dp))
                 Text(
@@ -605,18 +610,23 @@ private fun DoorChip(
     onClick: () -> Unit
 ) {
     val accent = personalAccent()
-    val accentInk = personalAccentInk()
-    val fill = lerp(
-        MaterialTheme.colorScheme.surfaceContainer,
-        accent,
-        if (isCurioDarkTheme()) 0.28f else 0.16f
-    )
+    // ── THE DOOR IS THE ACCENT (v389e) ──────────────────────────────────
+    //
+    // It used to be a mostly-surface card with an accent hairline around it and
+    // the words in the accent's darker ink — a tinted outline on a pale fill
+    // (user request: "for the door in home screen pages and my shelf dont give it
+    // accent border but make the whole card accent color and proper text color as
+    // well so its readable too"). So the whole face is the accent, with no
+    // border, and the words wear the app's own ink for text ON an accent fill —
+    // which is what makes a label read on a filled card instead of glowing on
+    // it. The fill is opaque on purpose: a translucent one lets the shadow bleed
+    // through (see the shadow rule).
+    val onAccent = personalOnAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
-        color = fill,
+        color = accent,
         shadowElevation = 6.dp,
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.42f)),
         modifier = Modifier
             .width(CHIP_WIDTH)
             .height(CHIP_HEIGHT)
@@ -626,17 +636,17 @@ private fun DoorChip(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CurioIcon(glyph, null, tint = accentInk, size = 22.dp)
+            CurioIcon(glyph, null, tint = onAccent, size = 22.dp)
             Spacer(Modifier.height(8.dp))
             Text(
                 label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = accentInk
+                color = onAccent
             )
             Text(
                 caption,
                 style = MaterialTheme.typography.labelSmall,
-                color = accentInk.copy(alpha = 0.62f)
+                color = onAccent.copy(alpha = 0.78f)
             )
         }
     }

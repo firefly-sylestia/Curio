@@ -274,13 +274,17 @@ private fun JournalRow(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.widthIn(min = 54.dp)
             ) {
+                // v389e — the day is the page's own ink, not the accent's lighter
+                // shade: it is the one figure a row exists to say (user report:
+                // "for journal number date its too accent color and very light
+                // colored so fix it by making it dark").
                 Text(
                     journal.dateMillis.toLocalDate().dayOfMonth.toString(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontFamily = FrauncesFontFamily,
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = personalAccentInk()
+                    color = ink
                 )
                 Text(
                     journal.dateMillis.toLocalDate()
