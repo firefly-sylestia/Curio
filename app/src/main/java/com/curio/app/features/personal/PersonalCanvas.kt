@@ -2906,6 +2906,242 @@ internal fun PersonalDocView(
     fun isQuoteRun(block: PersonalBlock): Boolean =
         !block.isPhoto && !block.isAudio && block.text.isNotBlank() &&
             personalBlockIsQuote(block.text, runsToMask(block.text.length, block.runs))
+
+    // v389d — A SMALL PRINT KEEPS ROOM FOR THE WRITING, IN THE READ VIEW TOO.
+    //
+    // The editor does this (see PersonalCanvas); a page READ back has to look
+    // like the page that was written (user request: "make the read view draw the
+    // print with the writing beside it, the same as the editor"), so the same
+    // rule runs here: a SMALL print takes a narrow column and the ONE line under
+    // it moves in beside it. Two non-PAGE photos still pair as they did.
+    val besideSkips = mutableSetOf<String>()
+    run {
+        val blocks = doc.blocks
+        var i = 0
+        while (i < blocks.size - 1) {
+            val photo = blocks[i]
+            val next = blocks[i + 1]
+            val paired = photo.isPhoto && next.isPhoto &&
+                PersonalPhotoSize.fromKey(photo.photoSize) != PersonalPhotoSize.PAGE &&
+                PersonalPhotoSize.fromKey(next.photoSize) != PersonalPhotoSize.PAGE
+            val beside = !paired && photo.isPhoto &&
+                PersonalPhotoSize.fromKey(photo.photoSize) == PersonalPhotoSize.SMALL &&
+                !next.isPhoto && !next.isAudio && next.text.isNotBlank()
+            when {
+                paired -> i += 2
+                beside -> {
+                    besideSkips.add(next.id)
+                    i += 2
+                }
+                else -> i += 1
+            }
+        }
+    }
+
+    /**
+     * ONE LINE, DRAWN — the read view's own renderer as a lambda, so the print's
+     * pair can put the writing beside the picture with EXACTLY the rendering the
+     * rest of the page gets: the same spans, markers, ticks, links, sizes,
+     * alignment and chapter fold. Nothing about the drawing changes; it is the
+     * same body of code, reachable from one more place.
+     */
+    val renderLine: @Composable (Int, PersonalBlock, Boolean, Boolean) -> Unit =
+        { index, block, quoteAbove, quoteBelow ->
+            val text = block.text
+            val mask = runsToMask(text.length, block.runs)
+            val isQuote = personalBlockIsQuote(text, mask)
+            val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+            val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
+            val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+            val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
+            // v389 — the same metrics and the same renderers as the editor
+            // (this view draws a checklist row that the editor ticked).
+            val lineHeight = if (isTitle) 31.sp else if (isSmall) 21.sp else 27.sp
+            val markerFill = personalAccentInk()
+            val markerOnFill = MaterialTheme.colorScheme.surface
+            val markerOutline = ink.copy(alpha = 0.42f)
+            val alignOf = block.align.toTextAlign()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        when {
+                            isQuote -> Modifier
+                                .drawBehind {
+                                    val barWidth = 3.dp.toPx()
+                                    val join = QUOTE_JOIN_VIEW.toPx()
+                                    val top = if (quoteAbove) -join else 0f
+                                    val bottom = if (quoteBelow) join else 0f
+                                    val panelHeight = size.height + (bottom - top)
+                                    drawRoundRect(
+                                        color = quoteWash,
+                                        topLeft = Offset(0f, top),
+                                        size = Size(size.width, panelHeight),
+                                        cornerRadius = CornerRadius(9.dp.toPx())
+                                    )
+                                    drawRoundRect(
+                                        color = quoteRule,
+                                        topLeft = Offset(0f, top),
+                                        size = Size(barWidth, panelHeight),
+                                        cornerRadius = CornerRadius(barWidth / 2f)
+                                    )
+                                }
+                                .padding(start = 13.dp)
+                            isCheckbox -> Modifier
+                                .drawBehind {
+                                    drawPersonalCheckbox(
+                                        checked = block.checked,
+                                        outline = markerOutline,
+                                        fill = markerFill,
+                                        onFill = markerOnFill,
+                                        lineHeight = lineHeight.toPx()
+                                    )
+                                }
+                                // The BOX is the target: a tap on the mark
+                                // ticks the row, a tap on the words stays a
+                                // read (this view has no editing of its
+                                // own, so nothing else here answers a tap).
+                                .then(
+                                    if (toggle == null) {
+                                        Modifier
+                                    } else {
+                                        Modifier.pointerInput(index, block.checked) {
+                                            detectTapGestures { at ->
+                                                if (at.x <= PERSONAL_MARKER_LEAD.toPx() &&
+                                                    at.y <= lineHeight.toPx()
+                                                ) {
+                                                    toggle(index)
+                                                }
+                                            }
+                                        }
+                                    }
+                                )
+                                .padding(start = PERSONAL_MARKER_LEAD)
+                            isBullet -> Modifier
+                                .drawBehind {
+                                    drawPersonalMarker(
+                                        marker = block.markerStyle,
+                                        ink = bulletInk,
+                                        lineHeight = lineHeight.toPx()
+                                    )
+                                }
+                                .padding(start = PERSONAL_MARKER_LEAD)
+                            else -> Modifier
+                        }
+                    )
+                    // A TITLE line is a chapter marker on the book review's
+                    // page: it reports its own place so the head can say
+                    // which chapter is being read (see onTitlePosition).
+                    .then(
+                        if (isTitle && titleReport != null) {
+                            Modifier.onGloballyPositioned { coordinates ->
+                                val bounds = coordinates.boundsInParent()
+                                titleReport(block.id, text, bounds.top, bounds.bottom)
+                            }
+                        } else Modifier
+                    )
+            ) {
+                val baseText = personalAnnotated(
+                    text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
+                    titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
+                    smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
+                )
+                // v392 — CLICKABLE LINKS: URLs in the read-only view
+                // open in the browser with a coffee-dark underline so they
+                // read as ink, not as the app's accent.
+                val linkText = personalAnnotateLinks(baseText)
+                var linkLayout by remember(linkText) {
+                    mutableStateOf<TextLayoutResult?>(null)
+                }
+                val linkContext = LocalContext.current
+                Text(
+                    text = linkText,
+                    onTextLayout = { linkLayout = it },
+                    style = when {
+                        isTitle -> TextStyle(
+                            fontFamily = FrauncesFontFamily,
+                            fontSize = TITLE_VIEW_SIZE,
+                            lineHeight = 31.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = alignOf
+                        )
+                        isSmall -> TextStyle(
+                            fontFamily = WritingFontFamily,
+                            fontSize = SMALL_VIEW_SIZE,
+                            lineHeight = 21.sp,
+                            textAlign = alignOf
+                        )
+                        else -> TextStyle(
+                            fontFamily = WritingFontFamily,
+                            fontSize = if (rowSize.isSpecified) rowSize else 16.sp,
+                            lineHeight = if (rowSize.isSpecified) rowSize * 1.7f else 27.sp,
+                            textAlign = alignOf
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .pointerInput(linkText) {
+                            detectTapGestures { offset ->
+                                val layout = linkLayout ?: return@detectTapGestures
+                                val pos = layout.getOffsetForPosition(offset)
+                                linkText.getStringAnnotations(
+                                    PERSONAL_LINK_TAG, pos, pos
+                                ).firstOrNull()?.let { ann ->
+                                    openSearchUrl(linkContext, ann.item)
+                                }
+                            }
+                        }
+                )
+            }
+            if (isTitle) afterTitle?.invoke(text)
+        }
+
+    /**
+     * ONE PICTURE, DRAWN — the print the editor draws, at the width the caller
+     * has room for: the page's own fraction when it stands alone, or the narrow
+     * column beside the writing. The size chips, the paper frame, the caption in
+     * its wide bottom border and the bounds the overlay grows out of are all
+     * exactly as they were.
+     */
+    val renderPrint: @Composable (PersonalBlock, Modifier) -> Unit = { block, width ->
+        var bounds by remember(block.photo) { mutableStateOf<Rect?>(null) }
+        val printSize = PersonalPhotoSize.fromKey(block.photoSize)
+        Column(
+            modifier = width
+                .onGloballyPositioned { bounds = it.boundsInWindow() }
+                .shadow(5.dp, RoundedCornerShape(6.dp))
+                .clip(RoundedCornerShape(6.dp))
+                .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
+                .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
+                .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
+        ) {
+            PersonalPagePhoto(
+                uri = block.photo.orEmpty(),
+                height = when (printSize) {
+                    PersonalPhotoSize.PAGE -> 168.dp
+                    PersonalPhotoSize.HALF -> 128.dp
+                    PersonalPhotoSize.SMALL -> 100.dp
+                }
+            )
+            if (block.caption.isNotBlank()) {
+                Text(
+                    block.caption,
+                    style = TextStyle(
+                        fontFamily = WritingFontFamily,
+                        fontSize = 13.sp,
+                        color = ink.copy(alpha = 0.62f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 5.dp, bottom = 5.dp),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         doc.blocks.forEachIndexed { index, block ->
             val quoteAbove = index > 0 && isQuoteRun(doc.blocks[index - 1])
@@ -2921,42 +3157,33 @@ internal fun PersonalDocView(
                 // caption in the frame's wide bottom border. Reading a page back
                 // has to look like the page that was written (see
                 // PersonalPhotoBlock, which owns the shape).
-                var bounds by remember(block.photo) { mutableStateOf<Rect?>(null) }
-                val printSize = PersonalPhotoSize.fromKey(block.photoSize)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(printSize.fraction)
-                        .onGloballyPositioned { bounds = it.boundsInWindow() }
-                        .shadow(5.dp, RoundedCornerShape(6.dp))
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
-                        .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
-                        .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
-                ) {
-                    PersonalPagePhoto(
-                        uri = block.photo.orEmpty(),
-                        height = when (printSize) {
-                            PersonalPhotoSize.PAGE -> 168.dp
-                            PersonalPhotoSize.HALF -> 128.dp
-                            PersonalPhotoSize.SMALL -> 100.dp
+                // v389d — THE PRINT AND THE WRITING SIDE BY SIDE, as the editor
+                // draws it: the print keeps a narrow column, the one line under
+                // it takes the rest, and the pair is shown with the same gap the
+                // editor leaves so a finger can still reach the print's frame.
+                val besideId = doc.blocks.getOrNull(index + 1)?.id
+                val besideLine = doc.blocks.getOrNull(index + 1)
+                    ?.takeIf { besideId != null && besideSkips.contains(it.id) }
+                if (besideLine != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(Modifier.weight(0.42f)) {
+                            renderPrint(block, Modifier.fillMaxWidth())
                         }
-                    )
-                    if (block.caption.isNotBlank()) {
-                        Text(
-                            block.caption,
-                            style = TextStyle(
-                                fontFamily = WritingFontFamily,
-                                fontSize = 13.sp,
-                                color = ink.copy(alpha = 0.62f)
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 5.dp, bottom = 5.dp),
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Box(Modifier.weight(0.58f)) {
+                            // A quote's panels reach into the gap above and below
+                            // to meet their quoted neighbour, which is the column's
+                            // business, not a pair's — the line beside a print
+                            // draws with its own edges square.
+                            renderLine(index + 1, besideLine, false, false)
+                        }
                     }
+                } else {
+                    val printSize = PersonalPhotoSize.fromKey(block.photoSize)
+                    renderPrint(block, Modifier.fillMaxWidth(printSize.fraction))
                 }
             } else if (block.isAudio) {
                 // v389 — a saved voice note reads as the waveform it was
@@ -2968,154 +3195,12 @@ internal fun PersonalDocView(
                     ink = ink,
                     accent = accent
                 )
+            } else if (besideSkips.contains(block.id)) {
+                // v389d — this line is drawn INSIDE the print above it (see the
+                // beside pair in the photo branch), so the column draws nothing
+                // for it and the page does not say it twice.
             } else if (block.text.isNotBlank()) {
-                val text = block.text
-                val mask = runsToMask(text.length, block.runs)
-                val isQuote = personalBlockIsQuote(text, mask)
-                val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
-                val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
-                val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
-                val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX)
-                // v389 — the same metrics and the same renderers as the editor
-                // (this view draws a checklist row that the editor ticked).
-                val lineHeight = if (isTitle) 31.sp else if (isSmall) 21.sp else 27.sp
-                val markerFill = personalAccentInk()
-                val markerOnFill = MaterialTheme.colorScheme.surface
-                val markerOutline = ink.copy(alpha = 0.42f)
-                val alignOf = block.align.toTextAlign()
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            when {
-                                isQuote -> Modifier
-                                    .drawBehind {
-                                        val barWidth = 3.dp.toPx()
-                                        val join = QUOTE_JOIN_VIEW.toPx()
-                                        val top = if (quoteAbove) -join else 0f
-                                        val bottom = if (quoteBelow) join else 0f
-                                        val panelHeight = size.height + (bottom - top)
-                                        drawRoundRect(
-                                            color = quoteWash,
-                                            topLeft = Offset(0f, top),
-                                            size = Size(size.width, panelHeight),
-                                            cornerRadius = CornerRadius(9.dp.toPx())
-                                        )
-                                        drawRoundRect(
-                                            color = quoteRule,
-                                            topLeft = Offset(0f, top),
-                                            size = Size(barWidth, panelHeight),
-                                            cornerRadius = CornerRadius(barWidth / 2f)
-                                        )
-                                    }
-                                    .padding(start = 13.dp)
-                                isCheckbox -> Modifier
-                                    .drawBehind {
-                                        drawPersonalCheckbox(
-                                            checked = block.checked,
-                                            outline = markerOutline,
-                                            fill = markerFill,
-                                            onFill = markerOnFill,
-                                            lineHeight = lineHeight.toPx()
-                                        )
-                                    }
-                                    // The BOX is the target: a tap on the mark
-                                    // ticks the row, a tap on the words stays a
-                                    // read (this view has no editing of its
-                                    // own, so nothing else here answers a tap).
-                                    .then(
-                                        if (toggle == null) {
-                                            Modifier
-                                        } else {
-                                            Modifier.pointerInput(index, block.checked) {
-                                                detectTapGestures { at ->
-                                                    if (at.x <= PERSONAL_MARKER_LEAD.toPx() &&
-                                                        at.y <= lineHeight.toPx()
-                                                    ) {
-                                                        toggle(index)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    )
-                                    .padding(start = PERSONAL_MARKER_LEAD)
-                                isBullet -> Modifier
-                                    .drawBehind {
-                                        drawPersonalMarker(
-                                            marker = block.markerStyle,
-                                            ink = bulletInk,
-                                            lineHeight = lineHeight.toPx()
-                                        )
-                                    }
-                                    .padding(start = PERSONAL_MARKER_LEAD)
-                                else -> Modifier
-                            }
-                        )
-                        // A TITLE line is a chapter marker on the book review's
-                        // page: it reports its own place so the head can say
-                        // which chapter is being read (see onTitlePosition).
-                        .then(
-                            if (isTitle && titleReport != null) {
-                                Modifier.onGloballyPositioned { coordinates ->
-                                    val bounds = coordinates.boundsInParent()
-                                    titleReport(block.id, text, bounds.top, bounds.bottom)
-                                }
-                            } else Modifier
-                        )
-                ) {
-                    val baseText = personalAnnotated(
-                        text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
-                        titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
-                        smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
-                    )
-                    // v392 — CLICKABLE LINKS: URLs in the read-only view
-                    // open in the browser with a coffee-dark underline so they
-                    // read as ink, not as the app's accent.
-                    val linkText = personalAnnotateLinks(baseText)
-                    var linkLayout by remember(linkText) {
-                        mutableStateOf<TextLayoutResult?>(null)
-                    }
-                    val linkContext = LocalContext.current
-                    Text(
-                        text = linkText,
-                        onTextLayout = { linkLayout = it },
-                        style = when {
-                            isTitle -> TextStyle(
-                                fontFamily = FrauncesFontFamily,
-                                fontSize = TITLE_VIEW_SIZE,
-                                lineHeight = 31.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                textAlign = alignOf
-                            )
-                            isSmall -> TextStyle(
-                                fontFamily = WritingFontFamily,
-                                fontSize = SMALL_VIEW_SIZE,
-                                lineHeight = 21.sp,
-                                textAlign = alignOf
-                            )
-                            else -> TextStyle(
-                                fontFamily = WritingFontFamily,
-                                fontSize = if (rowSize.isSpecified) rowSize else 16.sp,
-                                lineHeight = if (rowSize.isSpecified) rowSize * 1.7f else 27.sp,
-                                textAlign = alignOf
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pointerInput(linkText) {
-                                detectTapGestures { offset ->
-                                    val layout = linkLayout ?: return@detectTapGestures
-                                    val pos = layout.getOffsetForPosition(offset)
-                                    linkText.getStringAnnotations(
-                                        PERSONAL_LINK_TAG, pos, pos
-                                    ).firstOrNull()?.let { ann ->
-                                        openSearchUrl(linkContext, ann.item)
-                                    }
-                                }
-                            }
-                    )
-                }
-                if (isTitle) afterTitle?.invoke(text)
+                renderLine(index, block, quoteAbove, quoteBelow)
             }
         }
     }
