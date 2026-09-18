@@ -126,7 +126,17 @@ fun CommunityScreen(navController: NavController) {
     // late every time Social opened. [OnlineAccount.restore] is idempotent and
     // only touches storage when it has no session yet, so the effect that used
     // to sit further down is gone with it.
-    remember { OnlineAccount.restore(context) }
+    //
+    // v390 — AND A `remember` MAY NOT RETURN Unit (lint's RememberReturnType
+    // check, which fails the release lint job outright: "remember calls must not
+    // return Unit"). The call still has to happen exactly here — during the first
+    // composition and BEFORE the account is read on the next line, which is what
+    // puts the signed-in wall on the first frame — so it is wrapped so the
+    // composition has a value to hold instead of a bare side effect.
+    remember(context) {
+        OnlineAccount.restore(context)
+        true
+    }
     val account = OnlineAccount.state
     val token = account.session?.accessToken
     val wide = windowWidthSizeClass().isWide
