@@ -1276,6 +1276,7 @@ private fun PdfScrollReader(
         }
     }
 }
+}
 
 /**
  * v389 — PAGES FOR A BOOK THAT HAS NONE OF ITS OWN.
