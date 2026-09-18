@@ -1363,14 +1363,31 @@ private fun openDownloadSearch(
     author: String,
     extension: String
 ) {
-    val query = buildString {
+    val name = buildString {
         append(title.trim())
         if (author.isNotBlank()) {
             append(' ')
             append(author.trim())
         }
-        if (extension == "gutenberg") append(" free public domain epub download")
-        else append(" free ").append(extension).append(" download")
+    }
+    // v389g — THE PDF DOOR ASKS THE ENGINE FOR PDFs; THE OTHER TWO ASK IN WORDS.
+    //
+    // "… free pdf download" is words on a page, and an engine reads them as
+    // words: the results were articles ABOUT the book, pages with no file on
+    // them, and the odd scraper. `filetype:pdf` is an OPERATOR — it narrows the
+    // answer to documents the engine has actually indexed as PDFs, which is the
+    // whole question the member is asking (user request: "for the download help
+    // only for the pdf use filetype:pdf not the text search only").
+    //
+    // EPUB and the public-domain door KEEP the words ("text search of free epub
+    // download like that is for epub and the bottom last also"). A
+    // `filetype:epub` there would pin the answer to one extension, while what
+    // actually helps is a page that LISTS a free edition — the words are the
+    // right tool for that, and the bottom door names the library outright.
+    val query = when (extension) {
+        "pdf" -> "$name filetype:pdf"
+        "gutenberg" -> "$name free public domain epub download"
+        else -> "$name free $extension download"
     }
     val url = "https://www.google.com/search?q=" +
         java.net.URLEncoder.encode(query, "UTF-8")

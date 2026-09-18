@@ -3319,7 +3319,11 @@ internal fun PersonalDocView(
     // print with the writing beside it, the same as the editor"), so the same
     // rule runs here: a SMALL print takes a narrow column and the ONE line under
     // it moves in beside it. Two non-PAGE photos still pair as they did.
+    //
+    // v389g — and the pair is MARKED here, the way the editor marks it, so the
+    // drawing pass draws one row of two instead of two lines of one.
     val besideSkips = mutableSetOf<String>()
+    val pairSkips = mutableSetOf<String>()
     run {
         val blocks = doc.blocks
         var i = 0
@@ -3333,7 +3337,15 @@ internal fun PersonalDocView(
                 PersonalPhotoSize.fromKey(photo.photoSize) == PersonalPhotoSize.SMALL &&
                 !next.isPhoto && !next.isAudio && next.text.isNotBlank()
             when {
-                paired -> i += 2
+                // v389g — the right-hand print of a pair is MARKED here, so the
+                // drawing pass knows it has already been drawn as half of the row
+                // above it (the editor's pass does the same; the read view's used
+                // to just step over it, which is why a pair came apart when the
+                // page was read back).
+                paired -> {
+                    pairSkips.add(next.id)
+                    i += 2
+                }
                 beside -> {
                     besideSkips.add(next.id)
                     i += 2
@@ -3585,11 +3597,41 @@ internal fun PersonalDocView(
                 // draws it: the print keeps a narrow column, the one line under
                 // it takes the rest, and the pair is shown with the same gap the
                 // editor leaves so a finger can still reach the print's frame.
-                val besideId = doc.blocks.getOrNull(index + 1)?.id
-                val besideLine = doc.blocks.getOrNull(index + 1)
-                    ?.takeIf { besideId != null && besideSkips.contains(it.id) }
-                if (besideLine != null) {
-                    Row(
+                //
+                // v389g — AND TWO PRINTS PAIR IN THE READ VIEW TOO.
+                //
+                // The editor pairs two non-PAGE photographs into one row of two
+                // halves. The read view only knew about the print-with-writing
+                // pair, so a page read back drew each photograph on its own line
+                // at its own fraction — the pair came apart at exactly the moment
+                // the member stopped writing (user report: "the photo staying side
+                // by side in editing they stay but when i switch to view mode they
+                // separate"). The pairing pass above now marks the right-hand print
+                // of a pair, and this branch draws the row the editor draws, so the
+                // two sides of the switch agree again.
+                val nextPhoto = doc.blocks.getOrNull(index + 1)
+                val nextPhotoId = nextPhoto?.id
+                val pairPartner = nextPhoto?.takeIf {
+                    nextPhotoId != null && pairSkips.contains(it.id)
+                }
+                val besideLine = nextPhoto?.takeIf {
+                    nextPhotoId != null && besideSkips.contains(it.id)
+                }
+                when {
+                    // The right half of a pair the print before it already drew.
+                    pairSkips.contains(block.id) -> Unit
+                    pairPartner != null -> Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(Modifier.weight(1f)) {
+                            renderPrint(block, Modifier.fillMaxWidth())
+                        }
+                        Box(Modifier.weight(1f)) {
+                            renderPrint(pairPartner, Modifier.fillMaxWidth())
+                        }
+                    }
+                    besideLine != null -> Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.Top,
                         modifier = Modifier.fillMaxWidth()
@@ -3605,9 +3647,10 @@ internal fun PersonalDocView(
                             renderLine(index + 1, besideLine, false, false)
                         }
                     }
-                } else {
-                    val printSize = PersonalPhotoSize.fromKey(block.photoSize)
-                    renderPrint(block, Modifier.fillMaxWidth(printSize.fraction))
+                    else -> {
+                        val printSize = PersonalPhotoSize.fromKey(block.photoSize)
+                        renderPrint(block, Modifier.fillMaxWidth(printSize.fraction))
+                    }
                 }
             } else if (block.isAudio) {
                 // v389 — a saved voice note reads as the waveform it was
