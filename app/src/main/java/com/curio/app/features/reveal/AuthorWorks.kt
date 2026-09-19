@@ -395,12 +395,14 @@ internal fun AuthorWorksSheet(
     // card"). The reveal card already resolved one and stored it under
     // "author|<name>", so this reads that first and only goes looking when the
     // card has not been seen in this install.
-    var portrait by remember(author) {
-        mutableStateOf(
-            AppPreferences.sheetArtUrlsState["author|$author"]?.takeIf { it.isNotBlank() }
-        )
+    // v406 — the cached portrait keys the seed and the effect alike: keyed on
+    // the author alone, a picture the reveal card cached after this sheet
+    // composed was never noticed (see ArtworkSheet for the full note).
+    val storedPortrait = AppPreferences.sheetArtUrlsState["author|$author"]?.takeIf { it.isNotBlank() }
+    var portrait by remember(author, storedPortrait) {
+        mutableStateOf(storedPortrait)
     }
-    LaunchedEffect(author, fetchConsent) {
+    LaunchedEffect(author, fetchConsent, storedPortrait) {
         // `works()` itself falls back to the stored list when the lookup finds
         // nothing, so this assignment can never blank a list already on screen.
         works = AuthorWorksFetch.works(context, author)

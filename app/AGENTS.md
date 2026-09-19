@@ -8705,6 +8705,37 @@ only ever catches taps that mean "not in any of these".
 ### Per-frame blur is a GPU sink
 - `Modifier.blur(N.dp)` over a **flat color or smooth gradient** is a visual no-op — the unblurred result looks identical — but the RenderEffect pass runs on every frame during scroll. Replace with a static gradient (`Brush.verticalGradient` with slightly different alphas or stops) for the same "frosted glow" look at zero per-frame cost. (This was the root cause of "laggy scrolling" on the detail page.)
 
+### The reader's zoom owns its whole gesture (v406)
+- `BookReaderScreen.kt` — `pinchToZoom` decides **one owner per gesture**. Two
+  fingers consume from the FIRST event: the changes used to be consumed only
+  once the pinch had something to report, so the column took the opening frame
+  and the page moved before the pinch did. A one-finger pan on a magnified page
+  claims the gesture on its first move and keeps it until the finger lifts — the
+  old mid-gesture hand-back let the pager start with the finger's whole
+  accumulated travel and jump a page in a flash (the "glitched preview"). A page
+  ALREADY at its edge takes nothing, so the surface owns the entire swipe and
+  the page turns on ANOTHER swipe.
+- `readerZoomThisPage` gives a page up only at 1×. At 1× the pan is zero by
+  construction (`readerZoomedPan` clamps the travel to the page's own room, which
+  is nothing at 1×), so there is nothing left to jump. Resetting at 1.02 threw
+  away a live pan and snapped the page back to its centre.
+- Never gate the drawn translation on a zoom threshold (`if (z > 1.02f) pan
+  else 0f`) — that drops the pan in a single frame while the page is still
+  scaled, which is a visible shift.
+- Reading progress is LIVE: every surface reports the block/page it is showing as
+  it moves (`onBlockShown`, `onPageShown`, `listState.firstVisibleItemIndex`,
+  `pagerState.currentPage`) and `ReaderPlacesSheet` takes a `ReaderLivePlace`. The
+  stored auto-bookmark is a 700–900ms-debounced WRITE, not a read model, so it is
+  only the fallback.
+- A jump is always ASKED FOR (`pendingBlock` / `pendingPage`), never performed on
+  the hoisted list — performing it moves an off-screen surface in the other flow.
+- The chrome's auto-hide must not run while the chrome is being USED: a turn from
+  the page bar sets `askedByReader`, and the countdown waits for it to settle.
+- Art caches: `AppPreferences.sheetArtUrlsState` is filled in `initThemeMode`
+  (called from `onCreate`, before `setContent`), but a write from ANOTHER surface
+  lands after a card composes — so the cached URL must key BOTH the `remember`
+  seed and the `LaunchedEffect`, or the card re-fetches art the app already has.
+
 ### Bottom-anchoring with weight spacers
 - To anchor controls to the bottom edge regardless of screen height: replace fixed `Spacer(26.dp)` (which floats on tall screens) with `Spacer(Modifier.weight(1f))` inside a `fillMaxSize` `Column`. The weight spacer absorbs all free space above the controls.
 

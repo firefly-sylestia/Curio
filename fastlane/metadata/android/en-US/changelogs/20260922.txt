@@ -1,4 +1,16 @@
 ADD:
+- Reading: a type-size slider for a reflowable book — the size the pinch already sets, said out loud as a percentage with a thumb that can be dragged to it exactly, in the page's ink sheet. A PDF is a picture of a page, so its own size stays the pinch's.
+
+FIX:
+- Reading: a page no longer shifts as it is zoomed or unzoomed — the pan was thrown away while the page was still 2% magnified, so it snapped back to its centre; the page is now left at exactly 1× (where the pan is already nothing, because a page at 1× has no room) before the zoom is given up, and the translation is no longer dropped while the page is still magnified.
+- Reading: the first frame of a pinch belongs to the zoom — a two-finger gesture consumed its changes only once it had something to report, so the scroll underneath took the opening frame and the page moved before the pinch did.
+- Reading: a zoomed page keeps the whole gesture — the drag was handed back mid-gesture the moment the page reached its edge, so the pager took over with the finger's whole accumulated travel and jumped to the next page in a flash; a gesture now belongs to the page from its first move, and a page ALREADY at its edge gives the entire swipe to the page turn.
+- Reading: the reading progress is live — the places sheet read the stored auto-bookmark, which is written only once a scroll settles (up to 900ms behind), so it could name a place you had already left; each surface now reports the page or passage it is showing as it moves, so the figure, the percentage, the "Page 7 of 300" line and the "Continue reading" door all name the place you are actually in.
+- Reading: the tools stay while the page bar is used — the chrome's auto-hide countdown now waits for a turn asked for at the bar to settle and then starts again from full, instead of running out from under the hand that is holding the bar.
+- Reading: a text jump is asked for like every other — a mark, the progress card's "Continue reading" and the bookmarks list moved the scroll list directly, so in the Pages flow nothing appeared to happen; the block is handed to whichever surface is showing, exactly as a chapter already was.
+- Reveal: fetched posters and covers stay put — each art card seeded itself from the cache but keyed only on the topic, so a URL another surface resolved AFTER it composed was never noticed and the art was fetched again on the next visit; the cached URL now keys the seed and the effect alike, across the artwork, artist, author, album, film, anime, series and song sheets.
+
+ADD:
 - Moderation: the queue has a Clear button for its finished half — every report already dismissed or resolved leaves the list in one tap, open reports stay exactly where they are, and what was decided stays in the history.
 - Support: a feedback form from the team, when one is open. It greets you on Home and stays in Support to take later, with the questions as they were written, a Not now, and a Never show me another one. Answers arrive with no name, no account and no device attached to them.
 - Updates: a What's New page says what each version shipped, one line per thing with a "Take me there" door straight to it. It opens itself once per version, on a fresh install and on an update alike, and waits under Settings, in Updates, any time after.

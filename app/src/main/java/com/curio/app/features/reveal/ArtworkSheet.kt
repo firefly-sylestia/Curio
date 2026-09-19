@@ -736,14 +736,17 @@ internal fun ArtworkInfoSection(
         ArtworkLane.MAKER -> "artist|${topic.name}"
         ArtworkLane.AUTHOR -> "author|${topic.name}"
     }
-    var artUrl by remember(topic.imageUrl) {
-        mutableStateOf(
-            AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
-                ?: topic.imageUrl?.takeIf { it.isNotBlank() }
-        )
+    // v406 — THE CACHE IS A KEY, NOT A SNAPSHOT. Read once and used by both the
+    // seed and the effect, so a URL another surface resolved after this card
+    // composed is picked up instead of missed — keyed on the topic alone, this
+    // card re-fetched art the app already had (member's report: "it loses its
+    // fetched poster and it reloads after restart").
+    val storedArt = AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+    var artUrl by remember(topic.imageUrl, storedArt) {
+        mutableStateOf(storedArt ?: topic.imageUrl?.takeIf { it.isNotBlank() })
     }
-    LaunchedEffect(topic.imageUrl, fetchConsent) {
-        val stored = AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+    LaunchedEffect(topic.imageUrl, fetchConsent, storedArt) {
+        val stored = storedArt
         val resolved = stored ?: if (fetchConsent) {
             when (lane) {
                 ArtworkLane.WORK -> ArtworkFetch.artwork(topic.name, topic.byline)?.imageUrl

@@ -4964,13 +4964,15 @@ private fun AlbumNotesSheet(
     // category tint. Matching the poster's URL means the wash, cards and
     // accent all come from the real cover the user actually sees.
     val authoredArt = topic.imageUrl?.takeIf { it.isNotBlank() }
-    var paletteUrl by remember(topic.imageUrl) {
-        mutableStateOf(
-            authoredArt ?: AppPreferences.sheetArtUrlsState[albumArtKey]?.takeIf { it.isNotBlank() }
-        )
+    // v406 — the cached URL is part of the seed AND the effect's keys, so a
+    // write that lands after this composed is noticed instead of missed (see
+    // the series sheets below for the full note).
+    val cachedAlbumArt = AppPreferences.sheetArtUrlsState[albumArtKey]?.takeIf { it.isNotBlank() }
+    var paletteUrl by remember(topic.imageUrl, cachedAlbumArt) {
+        mutableStateOf(authoredArt ?: cachedAlbumArt)
     }
-    LaunchedEffect(topic.imageUrl, AppPreferences.albumFetchEnabledState) {
-        val stored = AppPreferences.sheetArtUrlsState[albumArtKey]?.takeIf { it.isNotBlank() }
+    LaunchedEffect(topic.imageUrl, AppPreferences.albumFetchEnabledState, cachedAlbumArt) {
+        val stored = cachedAlbumArt
         val resolved = authoredArt
             ?: stored
             ?: if (AppPreferences.albumFetchEnabledState)
@@ -5806,13 +5808,19 @@ private fun EpisodeNotesSheet(
         EpisodeSheetVariant.FILM -> "film|${topic.name}"
         EpisodeSheetVariant.SERIES -> "series|${topic.name}"
     }
-    var paletteUrl by remember(topic.imageUrl) {
-        mutableStateOf(
-            AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
-        )
+    // ── THE CACHE IS A KEY, NOT A SNAPSHOT (v406) ──
+    // Read once and used by BOTH the seed and the effect's keys. The map is
+    // filled at app start, but a write from ANOTHER surface (the reveal card
+    // resolving the same poster) lands after this composed — and keyed on the
+    // topic alone, neither the seed nor the effect ever noticed it, so the
+    // sheet re-fetched art the app already had (member's report: "it loses its
+    // fetched poster and it reloads after restart").
+    val storedArt = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    var paletteUrl by remember(topic.imageUrl, storedArt) {
+        mutableStateOf(storedArt ?: topic.imageUrl)
     }
-    LaunchedEffect(topic.imageUrl, fetchConsent) {
-        val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    LaunchedEffect(topic.imageUrl, fetchConsent, storedArt) {
+        val stored = storedArt
         val resolved = if (stored != null) stored
         else if (fetchConsent) when (variant) {
             EpisodeSheetVariant.ANIME -> AnimePosterFetch.resolvePosterUrl(topic.name)
@@ -6393,14 +6401,14 @@ private fun PosterNotesSheet(
         "Song" -> "song|${topic.name}"
         else -> "film|${topic.name}"
     }
-    var artUrl by remember(topic.imageUrl) {
-        mutableStateOf(
-            AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
-                ?: topic.imageUrl?.takeIf { it.isNotBlank() }
-        )
+    // v406 — the cached URL keys the seed and the effect alike (see the series
+    // sheets for the full note).
+    val storedArt = AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+    var artUrl by remember(topic.imageUrl, storedArt) {
+        mutableStateOf(storedArt ?: topic.imageUrl?.takeIf { it.isNotBlank() })
     }
-    LaunchedEffect(topic.imageUrl, fetchConsent) {
-        val stored = AppPreferences.sheetArtUrlsState[artKey]?.takeIf { it.isNotBlank() }
+    LaunchedEffect(topic.imageUrl, fetchConsent, storedArt) {
+        val stored = storedArt
         val resolved = stored ?: if (fetchConsent) {
             when (kind) {
                 "Anime" -> AnimePosterFetch.resolvePosterUrl(topic.name)
@@ -6589,13 +6597,19 @@ private fun FilmInfoSection(
     val context = LocalContext.current
     val fetchConsent = AppPreferences.bookFetchEnabledState
     val seriesArtKey = "film|${topic.name}"
-    var paletteUrl by remember(topic.imageUrl) {
-        mutableStateOf(
-            AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
-        )
+    // ── THE CACHE IS A KEY, NOT A SNAPSHOT (v406) ──
+    // Read once and used by BOTH the seed and the effect's keys. The map is
+    // filled at app start, but a write from ANOTHER surface (the reveal card
+    // resolving the same poster) lands after this composed — and keyed on the
+    // topic alone, neither the seed nor the effect ever noticed it, so the
+    // sheet re-fetched art the app already had (member's report: "it loses its
+    // fetched poster and it reloads after restart").
+    val storedArt = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    var paletteUrl by remember(topic.imageUrl, storedArt) {
+        mutableStateOf(storedArt ?: topic.imageUrl)
     }
-    LaunchedEffect(topic.imageUrl, fetchConsent) {
-        val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    LaunchedEffect(topic.imageUrl, fetchConsent, storedArt) {
+        val stored = storedArt
         val resolved = if (stored != null) stored
         else if (fetchConsent) FilmPosterFetch.resolvePosterUrl(topic.name)
         else null
@@ -6721,13 +6735,19 @@ private fun AnimeInfoSection(
         }
     }
     val seriesArtKey = "anime|${topic.name}"
-    var paletteUrl by remember(topic.imageUrl) {
-        mutableStateOf(
-            AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
-        )
+    // ── THE CACHE IS A KEY, NOT A SNAPSHOT (v406) ──
+    // Read once and used by BOTH the seed and the effect's keys. The map is
+    // filled at app start, but a write from ANOTHER surface (the reveal card
+    // resolving the same poster) lands after this composed — and keyed on the
+    // topic alone, neither the seed nor the effect ever noticed it, so the
+    // sheet re-fetched art the app already had (member's report: "it loses its
+    // fetched poster and it reloads after restart").
+    val storedArt = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    var paletteUrl by remember(topic.imageUrl, storedArt) {
+        mutableStateOf(storedArt ?: topic.imageUrl)
     }
-    LaunchedEffect(topic.imageUrl, fetchConsent) {
-        val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    LaunchedEffect(topic.imageUrl, fetchConsent, storedArt) {
+        val stored = storedArt
         val resolved = if (stored != null) stored
         else if (fetchConsent) AnimePosterFetch.resolvePosterUrl(topic.name)
         else null
@@ -6840,13 +6860,19 @@ private fun SongInfoSection(
     val context = LocalContext.current
     val fetchConsent = AppPreferences.bookFetchEnabledState
     val seriesArtKey = "song|${topic.name}"
-    var paletteUrl by remember(topic.imageUrl) {
-        mutableStateOf(
-            AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
-        )
+    // ── THE CACHE IS A KEY, NOT A SNAPSHOT (v406) ──
+    // Read once and used by BOTH the seed and the effect's keys. The map is
+    // filled at app start, but a write from ANOTHER surface (the reveal card
+    // resolving the same poster) lands after this composed — and keyed on the
+    // topic alone, neither the seed nor the effect ever noticed it, so the
+    // sheet re-fetched art the app already had (member's report: "it loses its
+    // fetched poster and it reloads after restart").
+    val storedArt = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    var paletteUrl by remember(topic.imageUrl, storedArt) {
+        mutableStateOf(storedArt ?: topic.imageUrl)
     }
-    LaunchedEffect(topic.imageUrl, fetchConsent) {
-        val stored = AppPreferences.sheetArtUrlsState[seriesArtKey]?.takeIf { it.isNotBlank() }
+    LaunchedEffect(topic.imageUrl, fetchConsent, storedArt) {
+        val stored = storedArt
         val resolved = if (stored != null) stored
         else if (fetchConsent) SongArtFetch.resolveArtworkUrl(topic.name, topic.byline)
         else null
