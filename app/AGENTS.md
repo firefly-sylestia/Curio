@@ -9068,6 +9068,92 @@ only ever catches taps that mean "not in any of these".
   through `enrich` — that merge is for the authored list, and re-merging by
   season/number would let another show's air dates land on its rows.
 
+## One color-theme door, one home hero, a star map, and the reader's page (v411)
+
+### The color theme is ONE choice, and the Pantone palettes have their own rules
+
+- **`AppPreferences.colorThemeState` is the one fact** (`COLOR_THEME_CURIO` /
+  `_AZURE` / `_MATERIAL` / `_LANE` / `_PANTONE_CREAM` / `_PANTONE_TERRACOTTA` /
+  `_PANTONE_LIME`). `setColorTheme` writes it AND keeps the three legacy
+  switches (`materialThemeState`, `heroBlueState`, `heroFollowLaneState`) in
+  step, because every other surface still reads those — the legacy keys are not
+  dead, they are one choice expressed the way the rest of the app already asks
+  for it. `getColorTheme` DERIVES the value from them when nothing has been
+  stored, so an existing member keeps the look they had.
+- **The Appearance page shows ONE row** (`ColorThemeRow` → `ColorThemeSheet`,
+  in `SettingsSectionScreen.kt`): each theme is a row with a three-swatch
+  preview and its Pantone reference. The Material / Hero / Adaptive Hero
+  switches are GONE from the page, and their deep-search keys now point at
+  `appearance-color-theme`. Pastel colors and Category tint stay on the page.
+- **`PantoneTheme` (`ui/theme/PantoneThemes.kt`) owns the three Pantone
+  palettes** — page, hero/cards, ink — each with a LIGHT scheme and a DARK twin
+  built from the same three numbers (`schemeFor(dark)`), plus the ink ladder
+  (`inkOn`, `pageInkFor`, `cardInkFor`, `accentFor`, `onHeroFor`) because two of
+  the three Pantone inks cannot carry body text on their own page.
+- **TWO RULES THAT MUST NOT REGRESS in these themes.** (1) **No transparency:**
+  every colour in the scheme is opaque — a faded role is a `lerp` mix, never
+  `copy(alpha = …)` — and any app code that tints by alpha asks `curioTintOn(base,
+  tint, alpha)`, which resolves SOLIDLY under a Pantone theme. (2) **No card
+  borders:** cards ask `curioCardEdgeColor(fill)`, which answers `fill` itself
+  under a Pantone theme (an edge painted in the card's own colour — no border to
+  see, no border code path to branch) and the theme's `outlineVariant`
+  everywhere else. `outlineVariant` in a Pantone scheme is therefore the DIVIDER
+  hairline on a hero-filled card, not the card edge.
+- The shared heroes read the Pantone palette first (`settingsRoseAccent`,
+  `settingsReadableInk`, `settingsCardAccentInk` in `SettingsHubScreen.kt`), so
+  a Pantone theme paints the torn heroes, the option cards and their icons in
+  its own three colours.
+
+### Home: one hero, with the greeting and the quest inside it
+
+- **The daily quest is INSIDE the torn banner** — `QuestShuffleCard` is called
+  from inside the hero's own Column in `HomeScreen.kt`; the below-hero block and
+  its 26dp spacer are gone. `HomeQuestHeroHeightPortrait` is 380dp (was 300) and
+  landscape 296dp, which is what holds it. `QuestShuffleCard(plate, ink,
+  copyInk, …)` takes every colour as a parameter now: the plate is a paper-white
+  disc (`lerp(heroFill, Color.White, 0.88f)`) wearing the banner's own ink,
+  because a pastel-rose disc would vanish into its own hero.
+- **The greeting is one fixed line.** `homeGreeting()` returns "Welcome back"
+  (the time-of-day word is gone), and the name under it is the star — 40sp
+  ExtraBold against a 26sp SemiBold greeting, so the pair reads as one sentence.
+  The hero and the glass header use the same string, so the two header styles
+  can never greet differently.
+- The "A fresh mix of ideas, picked for you" line under Today's quest is gone,
+  and the eyebrow/title pair is `labelLarge` over `headlineMedium`.
+
+### The drawer's lanes are a star map (the grid is gone)
+
+- `DrawerLaneStarMap` replaces the lane grid in the drawer: one star per lane,
+  phyllotaxis-scattered by lane COUNT (`starScatter`) so a star never moves when
+  knowledge changes, sized and brightened by knowledge, coloured by the lane's
+  own accent, and joined to its two nearest neighbours (`starLinks`). Stars are
+  TAPPABLE (a 30dp halo, nearest star wins) and the selected one wears an orbit;
+  the readout under the map is `CurioLaneDetailStrip`. `CurioLaneGrid` still
+  serves the Stats page — only the drawer changed.
+- Nothing on that canvas is transparent (every colour is an opaque `lerp` of the
+  panel toward the ink), and the light-up is a ONE-SHOT `Animatable`, never an
+  infinite transition: the drawer is composed while it is closed, so an idle
+  twinkle would spend the battery on a surface nobody is looking at.
+
+### The reader owns the page it is showing
+
+- **`BookReaderScreen` writes its live page back onto the book row** —
+  `repo.setPage(bookId, livePlace.index + 1)`, debounced by
+  `ReaderPageMarkDebounceMs`, for `ReaderContent.Pages` only (a reflowable
+  book's position is a block index, not a page of anything). The book page's
+  progress card picks between the row's `currentPage` and the reader's position
+  by "the most recent write wins", and that rule broke whenever anything ELSE
+  wrote the row (a cover, a blurb, the document): writing the page from the
+  reader keeps the two answers identical, so reading always wins.
+- **A chapter move carries the page with it** — `chapterStartPage(chapter,
+  chapters)` in `BookDetailScreen.kt` is the reverse of `chapterForPage`, so the
+  two steppers agree in BOTH directions; a chapter with no `pageStart` leaves
+  the page alone rather than inventing one.
+- **`ReaderHoldButton` is the page bar's arrow**: a tap turns one page, holding
+  past `PageTurnHoldDelayMs` repeats every `PageTurnHoldRepeatMs` until the
+  finger lifts. One `detectTapGestures` owns both gestures, so a hold can never
+  also fire the tap that ended it.
+
 ## Child DOX Index
 
 - [`CURIO_DATA_PLAN.md`](CURIO_DATA_PLAN.md) — Canonical **data layer** spec. Owns: category taxonomy expansion (6 → 10), `CurioTopic` + `ExploreAction` schema, JSON-on-disk canonical format, Room DB seed flow, image strategy (URL + Coil, no bundling), authoring pipeline (LLM-draft + human-review + smoke test), per-category rollout cadence (one category per PR, Music first). Read this BEFORE adding any topic data, category entry, or capture-format prompt.

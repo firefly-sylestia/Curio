@@ -665,10 +665,25 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                 }
                             }
                         } else null,
+                        // v411 — THE MOVE GOES BOTH WAYS NOW.
+                        // A page move already carried the chapter with it (see
+                        // the page's own write above), but a CHAPTER move left
+                        // the page where it was — so the two steppers disagreed
+                        // in one direction (member: "just like how when
+                        // changing pages the chapter also updates, do the same
+                        // for pages too"). A chapter move now lands the page on
+                        // the page that chapter opens at, when the file's own
+                        // outline knows it, and leaves the page alone when it
+                        // does not (a fabricated page is worse than none).
                         onChapter = { chapter ->
                             scope.launch {
                                 withContext(Dispatchers.IO) {
-                                    runCatching { PersonalRepositoryHolder.repo.setProgress(bookId, chapter) }
+                                    runCatching {
+                                        PersonalRepositoryHolder.repo.setProgress(bookId, chapter)
+                                        chapterStartPage(chapter, chapters)?.let { start ->
+                                            PersonalRepositoryHolder.repo.setPage(bookId, start)
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -971,6 +986,23 @@ private fun chapterForPage(page: Int, chapters: List<com.curio.app.data.Personal
     chapters.firstOrNull { ch ->
         ch.pageStart > 0 && ch.pageEnd >= ch.pageStart && page in ch.pageStart..ch.pageEnd
     }?.number
+
+/**
+ * v411 — THE PAGE A CHAPTER OPENS AT (1-based), or null when the file's own
+ * outline never said where it starts.
+ *
+ * The reverse of [chapterForPage], and the other half of the two steppers
+ * agreeing: a page move names the chapter the page falls in, and a chapter
+ * move names the page the chapter begins at. A chapter with no `pageStart`
+ * (an EPUB from the catalog carries names, not ranges) answers null and the
+ * page is left untouched rather than invented.
+ */
+private fun chapterStartPage(
+    chapter: Int,
+    chapters: List<com.curio.app.data.PersonalChapter>
+): Int? = chapters.firstOrNull { it.number == chapter }
+    ?.takeIf { it.pageStart > 0 }
+    ?.pageStart
 
 /**
  * v408 — THE PAGE THE MEMBER LAST READ, in file terms.

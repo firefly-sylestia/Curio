@@ -467,6 +467,36 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         null -> null
     }
 
+    // ── THE BOOK'S PAGE MARK FOLLOWS THE READING (v411) ─────────────────
+    //
+    // The member: "the progress overriden based on the user pdf progress if
+    // they open again and read some it will be updated to that".
+    //
+    // The book row carries its own page mark ([PersonalBookEntity.currentPage],
+    // the one the book page's stepper writes) and the reader carries its own
+    // position row; the progress card picks between them by "the most recent
+    // write wins". That rule quietly broke the moment anything ELSE touched the
+    // row — resolving a cover, saving a blurb, attaching the file — because
+    // those bump the ROW's stamp without moving the page, so a stale hand-set
+    // page outlived the page the member was really reading.
+    //
+    // So the reader now writes the page it is actually showing back onto the
+    // row: the two answers can no longer disagree, the shelf and the book page
+    // agree with the file, and reading simply takes the card back over.
+    //
+    // One column, one write, and DEBOUNCED — flicking through thirty pages is
+    // one write on the page they settled on, never thirty on the way past.
+    // The +1 is the file's own 1-based numbering (the card's `lastPage`), and
+    // only a book of real PAGES has one: a reflowable book's position is a
+    // block index, which is not a page of anything (see [lastPageOf]).
+    val livePageMark = (content as? ReaderContent.Pages)
+        ?.let { livePlace?.index?.plus(1) }
+    LaunchedEffect(bookId, document, livePageMark) {
+        if (livePageMark == null || document.isBlank()) return@LaunchedEffect
+        delay(ReaderPageMarkDebounceMs)
+        runCatching { PersonalRepositoryHolder.repo.setPage(bookId, livePageMark) }
+    }
+
     // ── THE PAGE FOLLOWS THE PHONE, UNLESS IT IS ASKED NOT TO (v406) ────
     //
     // The reader has no orientation of its own: the window turns and the page
@@ -1897,6 +1927,26 @@ private val PAGE_SIDE_PADDING = 44.dp
 private val PAGE_VERTICAL_PADDING = 60.dp
 
 /**
+ * v411 — how long the reader waits before it writes the page it is showing back
+ * onto the book's own row (see the page-mark effect in the reader body). Long
+ * enough that a flick through a dozen pages is a single write, short enough that
+ * leaving the reader right after a page turn has already recorded it.
+ */
+private const val ReaderPageMarkDebounceMs = 450L
+
+/**
+ * v411 — HOLD AN ARROW TO KEEP TURNING.
+ *
+ * How long the page bar's arrow waits before a press becomes a repeat, and the
+ * cadence it repeats at. The wait is just past the long-press threshold so a
+ * deliberate single tap never turns two pages; the cadence is fast enough to
+ * cross a chapter, slow enough to stop on the page you meant (the pager is
+ * asked for ONE more page each tick, and each ask retargets its own animation).
+ */
+private const val PageTurnHoldDelayMs = 320L
+private const val PageTurnHoldRepeatMs = 150L
+
+/**
  * A PAGE READER for a PDF: one page at a time, which is what a PDF page IS.
  *
  * Each page is rendered when it becomes visible (`produceState` keyed on the
@@ -2587,11 +2637,16 @@ private fun ReaderChrome(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(1.dp)
                         ) {
-                            ReaderChromeButton(
-                                CurioIcons.ChevronLeft,
-                                "The page before",
-                                palette
-                            ) { pageBar.onPrev() }
+                            // v411 — HOLD TO KEEP GOING (member: "add holding
+                            // the arrow for faster page forward"). A tap still
+                            // turns exactly one page; holding the arrow turns
+                            // them on a cadence until the finger lifts.
+                            ReaderHoldButton(
+                                glyph = CurioIcons.ChevronLeft,
+                                label = "The page before",
+                                palette = palette,
+                                step = pageBar.onPrev
+                            )
                             Text(
                                 pageBar.label,
                                 style = MaterialTheme.typography.labelMedium.copy(
@@ -2599,11 +2654,12 @@ private fun ReaderChrome(
                                 ),
                                 color = palette.ink.copy(alpha = 0.8f)
                             )
-                            ReaderChromeButton(
-                                CurioIcons.ChevronRight,
-                                "The next page",
-                                palette
-                            ) { pageBar.onNext() }
+                            ReaderHoldButton(
+                                glyph = CurioIcons.ChevronRight,
+                                label = "The next page",
+                                palette = palette,
+                                step = pageBar.onNext
+                            )
                         }
                     }
                 }
@@ -2696,6 +2752,63 @@ private fun ReaderChromeButton(
         shape = CircleShape,
         color = Color.Transparent,
         modifier = Modifier.size(38.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.75f), size = 19.dp)
+        }
+    }
+}
+
+/**
+ * v411 — A PAGE-BAR ARROW THAT KEEPS GOING WHILE IT IS HELD.
+ *
+ * A plain tap turns one page (exactly like [ReaderChromeButton]); pressing and
+ * holding past [PageTurnHoldDelayMs] starts a repeat on
+ * [PageTurnHoldRepeatMs] until the finger lifts, which is the difference
+ * between flipping to the next page and getting through a chapter.
+ *
+ * The press gesture owns the whole thing rather than sitting beside a
+ * `Surface(onClick)`: one detector means one code path for "was this a tap or
+ * a hold", so a hold can never ALSO fire the tap that ended it. The repeat
+ * runs in the composition's own scope, so it dies with the bar.
+ */
+@Composable
+private fun ReaderHoldButton(
+    glyph: String,
+    label: String,
+    palette: ReaderPalette,
+    step: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val repeater = rememberCoroutineScope()
+    // Plain flag (not Compose state): nothing in composition reads it, it only
+    // tells the trailing tap whether the hold already did the work.
+    val held = remember { booleanArrayOf(false) }
+    Surface(
+        shape = CircleShape,
+        color = Color.Transparent,
+        modifier = modifier
+            .size(38.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        held[0] = false
+                        val job = repeater.launch {
+                            delay(PageTurnHoldDelayMs)
+                            held[0] = true
+                            while (true) {
+                                step()
+                                delay(PageTurnHoldRepeatMs)
+                            }
+                        }
+                        // Suspends until the finger lifts (or the gesture is
+                        // cancelled) — which is what stops the metronome.
+                        tryAwaitRelease()
+                        job.cancel()
+                    },
+                    onTap = { if (!held[0]) step() }
+                )
+            }
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.75f), size = 19.dp)

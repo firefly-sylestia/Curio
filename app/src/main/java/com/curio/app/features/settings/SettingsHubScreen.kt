@@ -118,6 +118,8 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.activePantoneTheme
+import com.curio.app.ui.theme.curioCardEdgeColor
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -802,6 +804,10 @@ fun materialHeroTearsOn(): Boolean = AppPreferences.materialThemeState
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
+    // v411 — a PANTONE theme's hero is one of the three colours the member
+    // specified (P 109-10 U / 2350 U / P 163-8 C), light twin by day and its
+    // own dark twin at night — the theme IS the hero, so it answers first.
+    activePantoneTheme()?.let { return it.heroFor(isCurioDarkTheme()) }
     // v223 — "Material hero tears": when the Material theme AND this
     // option are both on, the torn hero wears the scheme's
     // primaryContainer instead of the app-default rose/azure (or a lane).
@@ -884,6 +890,9 @@ fun settingsAccentInk(): Color {
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable
 fun settingsReadableInk(fill: Color): Color {
+    // v411 — the ink on a Pantone hero: the theme's own readable pair (the
+    // Pantone ink where it reads on the fill, a tint of it where it does not).
+    activePantoneTheme()?.let { return it.onHeroFor(isCurioDarkTheme()) }
     // v223 — Material hero tears: readable ink on primaryContainer.
     if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
@@ -910,6 +919,10 @@ fun settingsReadableInk(fill: Color): Color {
  */
 @Composable
 fun settingsCardAccentInk(): Color {
+    // v411 — a Pantone theme's option cards wear ITS ink (icons and headings
+    // in the Pantone colour, deepened where that colour cannot read on the
+    // page), never the app's coral identity.
+    activePantoneTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
     // v78 — light Curio only (the Material/AMOLED rose fallback is gone
     // with those styles).
     heroLaneCategory()?.let { return it.categoryInk() }
@@ -1573,7 +1586,12 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
     SettingsDeepRow(CurioIcons.Wallpaper, "Glyph backdrop", "Subtle or deep background glyphs", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-glyph-backdrop"),
     SettingsDeepRow(CurioIcons.Contrast, "Paper", "White page with cream cards, or the reverse", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-paper"),
-    SettingsDeepRow(CurioIcons.AutoAwesome, "Adaptive Hero", "Shared hero + page take the category you last picked on Spin", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane"),
+    // v411 — the three old rows (Material theme / Hero / Adaptive Hero) are
+    // ONE door now: the Color theme sheet. The deep search points at that
+    // row, so "material", "azure", "pantone" and "hero" all still land in
+    // Appearance — see the sheet's own keywords below.
+    SettingsDeepRow(CurioIcons.Palette, "Color theme", "Curio, Azure, Material, Adaptive or one of the Pantone themes", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-color-theme"),
+    SettingsDeepRow(CurioIcons.Palette, "Pantone theme", "Cream, Terracotta or Lime — real Pantone colours", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-color-theme"),
     // ── Preferences (v26) — search engine, explore behavior, pet personality ──
     // v19 — which search engine the "Explore in browser" button opens.
     SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
@@ -1923,10 +1941,18 @@ internal fun SettingsNavRail(
                         // survives (see the card-edge rule) and an unselected
                         // tab still has an outline even where the wash behind
                         // it is pale.
+                        // v411 — the selected tab's edge is its OWN pill colour
+                        // (it was `Color.Transparent`, which is both a see-
+                        // through value and a wasted layer), and an unselected
+                        // tab asks the theme for its card edge — NO edge under
+                        // a Pantone theme.
                         .border(
                             width = 1.dp,
-                            color = if (selected) Color.Transparent
-                            else MaterialTheme.colorScheme.outlineVariant,
+                            color = if (selected) SettingsRailAccent
+                            else curioCardEdgeColor(
+                                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                                else Color.White
+                            ),
                             shape = RoundedCornerShape(17.dp)
                         )
                         .clickable(enabled = entryEnabled) { onSelect(entry) }
@@ -2051,9 +2077,13 @@ private fun SettingsQuickTools(
                             if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
                             else MaterialTheme.colorScheme.surfaceContainerLow
                         )
+                        // v411 — no card border under a Pantone theme.
                         .border(
                             1.dp,
-                            MaterialTheme.colorScheme.outlineVariant,
+                            curioCardEdgeColor(
+                                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                                else MaterialTheme.colorScheme.surfaceContainerLow
+                            ),
                             RoundedCornerShape(50)
                         )
                         // v3xx46 — the quick-tool chips squish + tick too.
@@ -2114,9 +2144,13 @@ private fun SettingsJsxSearchField(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
                 else MaterialTheme.colorScheme.surfaceContainerLow
             )
+            // v411 — no card border under a Pantone theme.
             .border(
                 1.dp,
-                MaterialTheme.colorScheme.outlineVariant,
+                curioCardEdgeColor(
+                    if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                    else MaterialTheme.colorScheme.surfaceContainerLow
+                ),
                 RoundedCornerShape(19.dp)
             )
             .padding(horizontal = 15.dp)

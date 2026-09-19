@@ -145,6 +145,11 @@ fun SettingsOptionCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val dark = isCurioDarkTheme()
+    // v411 — the card's fill, named so the edge can be asked for it: under a
+    // Pantone theme a card wears NO border ([curioCardEdgeColor]).
+    val cardFill =
+        if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+        else MaterialTheme.colorScheme.surfaceContainerLow
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -156,17 +161,16 @@ fun SettingsOptionCard(
             // wash behind them. It is real white now, with a hairline edge
             // (below) so it also reads as a card and not as a hole in the
             // page. Dark keeps its raised step.
-            .background(
-                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else MaterialTheme.colorScheme.surfaceContainerLow
-            )
+            .background(cardFill)
             // The card edge — drawn AFTER the fill so the hairline is not
             // painted over (a border before a background is invisible), and
             // SOFT (v409): the theme's own `outlineVariant` is a whisper of
             // plum now, so the border is an edge and not a drawn box.
+            // v411 — under a Pantone theme it is the fill itself: those
+            // themes want NO card border.
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
+                color = curioCardEdgeColor(cardFill),
                 shape = RoundedCornerShape(20.dp)
             )
             .padding(horizontal = 17.dp, vertical = 8.dp),
@@ -175,9 +179,12 @@ fun SettingsOptionCard(
 }
 
 /** The frosted icon tile every settings row wears (the hub's secondary-card
- *  tile). Null [icon] → no tile, the row reads as plain text + control. */
+ *  tile). Null [icon] → no tile, the row reads as plain text + control.
+ *  v411 — shared with the section file's own rows (the Theme toggle and the
+ *  Color theme door), so it is no longer file-private: it is the same piece of
+ *  row furniture as [SettingsOptionDivider] and [SettingsOptionCard]. */
 @Composable
-private fun SettingsOptionIconTile(icon: String?, dark: Boolean) {
+fun SettingsOptionIconTile(icon: String?, dark: Boolean) {
     if (icon == null) return
     Box(
         modifier = Modifier

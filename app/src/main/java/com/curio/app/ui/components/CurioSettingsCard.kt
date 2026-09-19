@@ -26,6 +26,7 @@ import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.features.settings.settingsCardChipTint
 import com.curio.app.features.settings.settingsCardTintLift
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioCardEdgeColor
 
 /**
  * Shared paper-card primitives for Profile + Settings — one visual language
@@ -45,6 +46,14 @@ fun CurioSettingsCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    // v411 — the card's own fill, named so the edge colour can be asked for
+    // it: [curioCardEdgeColor] answers "no border" under a Pantone theme, and
+    // the edge is then painted in exactly this colour (see the helper).
+    val cardFill = lerp(
+        MaterialTheme.colorScheme.surfaceContainerLow,
+        settingsCardTintLift(),
+        0.30f
+    )
     Surface(
         shape = RoundedCornerShape(28.dp),
         // v27n — every theme wears the faint container step as its elevation
@@ -65,11 +74,7 @@ fun CurioSettingsCard(
         // the rose otherwise — same strength as before, matching hue.
         // v78 — light Curio only (the AMOLED grey-glass step + tonal-lift
         // drop are gone with dark mode).
-        color = lerp(
-            MaterialTheme.colorScheme.surfaceContainerLow,
-            settingsCardTintLift(),
-            0.30f
-        ),
+        color = cardFill,
         // v131 — explicit content ink. The card fill is a CUSTOM lerp (not a
         // scheme token), and the row titles inside rely on LocalContentColor:
         // the default contentColorFor(customFill) resolved BLACK in dark mode,
@@ -92,7 +97,7 @@ fun CurioSettingsCard(
         // v409 — the hairline is SOFT now (a whisper of plum: see the
         // theme's paper flip), so a Profile/Settings card reads as a cream
         // plate with a quiet edge rather than as a drawn box.
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(1.dp, curioCardEdgeColor(cardFill)),
         modifier = modifier
             .fillMaxWidth()
             // v28 — dark mode: soft light glow + faint hairline so the

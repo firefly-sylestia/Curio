@@ -10,17 +10,26 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -29,6 +38,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
@@ -47,6 +57,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
@@ -71,6 +83,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -88,6 +101,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioCardHeader
@@ -95,6 +109,12 @@ import com.curio.app.ui.components.formatHour
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.LocalCurioThemeTransition
+import com.curio.app.ui.theme.PantoneTheme
+import com.curio.app.ui.theme.curioTintOn
+import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.headerAccent
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.theme.switchVisualThemeWithReveal
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -247,6 +267,9 @@ val glassBackdrop = rememberLayerBackdrop()
 @Composable
 private fun AppearanceSection(highlightKey: String? = null) {
     val context = LocalContext.current
+    // v411 — the Color theme sheet (Material / hero / Adaptive Hero folded
+    // into ONE picker with previews).
+    var colorThemeSheet by remember { mutableStateOf(false) }
     // v81 — the Theme picker (Light / Dark / System) is back: dark mode is
     // the reimagined pitch-black + glow design (no AMOLED/Material styles).
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -262,11 +285,8 @@ private fun AppearanceSection(highlightKey: String? = null) {
                     .fillMaxWidth()
                     .onGloballyPositioned { themeRowBounds = it.boundsInWindow() }
             ) {
-                CompactSegmentedRow(
-                    CurioIcons.DarkMode,
-                    "Theme",
-                    listOf("Light", "Dark", "System"),
-                    when (AppPreferences.themeModeState) {
+                ThemeModeSwitch(
+                    selected = when (AppPreferences.themeModeState) {
                         AppPreferences.THEME_DARK -> 1
                         AppPreferences.THEME_SYSTEM -> 2
                         else -> 0
@@ -277,6 +297,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
                         2 -> AppPreferences.THEME_SYSTEM
                         else -> AppPreferences.THEME_LIGHT
                     }
+                    if (mode == AppPreferences.themeModeState) return@ThemeModeSwitch
                     val center = if (themeRowBounds == Rect.Zero) Offset.Zero
                         else Offset(
                             themeRowBounds.left + (index + 0.5f) * themeRowBounds.width / 3f,
@@ -285,6 +306,14 @@ private fun AppearanceSection(highlightKey: String? = null) {
                     switchThemeWithReveal(themeTransition, transitionScope, context, center, mode)
                 }
             }
+        }
+        SettingsOptionDivider()
+        // v411 — ONE COLOR THEME DOOR. The Material theme, the rose/azure
+        // hero and Adaptive Hero used to be three separate switches on this
+        // page (three halves of one question: what colour is the app). They
+        // are one row now, and tapping it opens the sheet of previews.
+        SettingsRowPulse(highlightKey == "appearance-color-theme") {
+            ColorThemeRow(onClick = { colorThemeSheet = true })
         }
         SettingsOptionDivider()
         SettingsRowPulse(highlightKey == "appearance-tint") {
@@ -330,79 +359,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         SettingsOptionDivider()
-        // v185 — the proper M3 Material theme system (opt-in, default OFF —
-        // the current app look is untouched). The v185 "Material guidelines"
-        // + "Material chrome" options were removed (user verdict: not good).
-        // v(theme reveal) — toggling Material repaints the whole scheme even
-        // at the same light/dark state, so the reveal is FORCED (not gated on
-        // a dark/light flip) so the user sees the circular animation.
-        SettingsRowPulse(highlightKey == "appearance-material-theme") {
-            val materialTransition = LocalCurioThemeTransition.current
-            val materialScope = rememberCoroutineScope()
-            var materialRowBounds by remember { mutableStateOf(Rect.Zero) }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned { materialRowBounds = it.boundsInWindow() }
-            ) {
-                CompactSwitchRow(
-                    CurioIcons.Layers,
-                    "Material theme",
-                    "Proper Material 3 colors: one primary, neutral surfaces, muted category families",
-                    AppPreferences.materialThemeState
-                ) {
-                    val center = if (materialRowBounds == Rect.Zero) Offset.Zero
-                        else Offset(materialRowBounds.right, materialRowBounds.center.y)
-                    switchVisualThemeWithReveal(
-                        materialTransition, materialScope, center
-                    ) {
-                        AppPreferences.setMaterialThemeEnabled(context, it)
-                    }
-                }
-            }
-        }
-        SettingsOptionDivider()
-        // v3xx51 — the "Material hero tears" option was REMOVED per request:
-        // torn heroes now ALWAYS wear the theme's container colour while
-        // Material theme is on (see [materialHeroTearsOn], which just reads
-        // the Material theme now) — the row and its toggle are gone (the
-        // dormant `materialHeroTearsState` pref API stays for compatibility).
-        // v42 — the hero picker is a two-option control (Rose hero / Azure
-        // hero), both fully selectable — azure is back and now the DEFAULT.
-        // The whole control greys out while Adaptive Hero (below) is active,
-        // since the lane then owns the hero color — AND while Material theme
-        // is on, because the hero then always wears the Material container
-        // colour (the pick has nothing left to change).
-        SettingsRowPulse(highlightKey == "appearance-hero") {
-            CompactSegmentedRow(
-                CurioIcons.Image,
-                "Hero",
-                listOf("Rose hero", "Azure hero"),
-                if (AppPreferences.heroBlueState) 1 else 0,
-                enabled = !AppPreferences.heroFollowLaneState && !AppPreferences.materialThemeState
-            ) { index ->
-                AppPreferences.setHeroBlueEnabled(context, index == 1)
-            }
-        }
-        SettingsOptionDivider()
-        // v30 — the shared hero AND its page background follow the category
-        // last picked on Spin (the Cabinet's language) instead of the
-        // rose/azure. Off by default — rose stays. v31 — renamed
-        // "Adaptive Hero". v3xx51 — also greys out under Material theme:
-        // the lane no longer owns the hero colour there, so the switch had
-        // nothing to act on while still looking live.
-        SettingsRowPulse(highlightKey == "appearance-hero-lane") {
-            CompactSwitchRow(
-                CurioIcons.Refresh,
-                "Adaptive Hero",
-                "Shared hero and page take the category you last picked on Spin",
-                AppPreferences.heroFollowLaneState,
-                enabled = !AppPreferences.materialThemeState
-            ) {
-                AppPreferences.setHeroFollowLaneEnabled(context, it)
-            }
-        }
-        SettingsOptionDivider()
         // v8.5 — the Curio pet companion (spec §10): pixel pet + rule-based
         // dialogue + passport/discovery on Quests and Home. Default ON.
         SettingsRowPulse(highlightKey == "appearance-pet") {
@@ -415,6 +371,456 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // v23 — auto-open landed topic is always on now (its toggle was
         // removed) and custom reaction lines are permanently off (their
         // editor is no longer reachable, so the toggle was removed too).
+    }
+    if (colorThemeSheet) {
+        ColorThemeSheet(onDismiss = { colorThemeSheet = false })
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// v411 — THE THEME CONTROLS
+// ════════════════════════════════════════════════════════════════════════
+
+/**
+ * LIGHT · DARK · SYSTEM as ONE moving toggle (v411).
+ *
+ * The member's direction: "they became one row, light gets sun icon, night
+ * gets moon icon, system gets half moon half sun style icon. no tick and make
+ * it proper toggle style which moves smoothly on switching". So: three icon
+ * segments in one capsule, a filled thumb that SLIDES under the chosen one
+ * (spring, no snap), no checkmarks, and the glyphs carry the labels (the sun
+ * for Light, the crescent for Dark, and a drawn half-sun/half-moon for
+ * System — the bundled icon subset has no such glyph, so [HalfCelestialGlyph]
+ * draws it exactly like the two it sits between).
+ */
+@Composable
+private fun ThemeModeSwitch(
+    selected: Int,
+    modifier: Modifier = Modifier,
+    onSelected: (Int) -> Unit
+) {
+    val accent = settingsAccentInk()
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val dark = isCurioDarkTheme()
+    val trackFill = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                    else MaterialTheme.colorScheme.surfaceContainer
+    val thumbFill = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, if (dark) 0.30f else 0.16f)
+    Column(
+        modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(13.dp)
+        ) {
+            SettingsOptionIconTile(CurioIcons.DarkMode, dark)
+            Text(
+                text = "Theme",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.weight(1f))
+            // The current mode said in words, so the icons never have to be
+            // guessed at (“no tick” → the words carry the confirmation).
+            Text(
+                text = listOf("Light", "Dark", "System")[selected.coerceIn(0, 2)],
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = accent
+            )
+        }
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .clip(CircleShape)
+                .background(trackFill)
+        ) {
+            val segment = maxWidth / 3
+            val offset by animateDpAsState(
+                targetValue = segment * selected.coerceIn(0, 2),
+                animationSpec = spring(dampingRatio = 0.78f, stiffness = 320f),
+                label = "theme-thumb"
+            )
+            // The thumb — one filled pill that MOVES to the picked segment.
+            Box(
+                modifier = Modifier
+                    .offset(x = offset)
+                    .padding(4.dp)
+                    .width(segment - 8.dp)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(thumbFill)
+            )
+            Row(modifier = Modifier.fillMaxSize()) {
+                ThemeModeSegment(
+                    selected = selected == 0,
+                    accent = accent,
+                    muted = muted,
+                    base = trackFill,
+                    label = "Light",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onSelected(0) }
+                ) { tint -> CurioIcon(CurioIcons.LightMode, null, tint = tint, size = 20.dp) }
+                ThemeModeSegment(
+                    selected = selected == 1,
+                    accent = accent,
+                    muted = muted,
+                    base = trackFill,
+                    label = "Dark",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onSelected(1) }
+                ) { tint -> CurioIcon(CurioIcons.DarkMode, null, tint = tint, size = 20.dp) }
+                ThemeModeSegment(
+                    selected = selected == 2,
+                    accent = accent,
+                    muted = muted,
+                    base = trackFill,
+                    label = "System",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onSelected(2) }
+                ) { tint -> HalfCelestialGlyph(tint = tint, iconSize = 20.dp) }
+            }
+        }
+    }
+}
+
+/** One segment of [ThemeModeSwitch] — the glyph, centred, in the accent ink
+ *  when it is the live one and the muted ink otherwise. */
+@Composable
+private fun ThemeModeSegment(
+    selected: Boolean,
+    accent: Color,
+    muted: Color,
+    /** The capsule's own fill — the colour the muted ink is resolved against
+     *  when a Pantone theme wants it solid ([curioTintOn]). */
+    base: Color,
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    glyph: @Composable (Color) -> Unit
+) {
+    val ink by animateColorAsState(
+        targetValue = if (selected) accent else curioTintOn(base, muted, 0.85f),
+        animationSpec = tween(220),
+        label = "theme-segment-ink"
+    )
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .fillMaxHeight()
+            .clip(CircleShape)
+            .clickable(onClickLabel = label, onClick = onClick)
+    ) {
+        glyph(ink)
+    }
+}
+
+/**
+ * The half-sun / half-moon glyph for System (v411).
+ *
+ * Drawn rather than bundled: the icon subset carries a sun and a crescent and
+ * nothing between them, and a “system follows your phone” choice deserves its
+ * own mark. The left half is the sun (a quarter-disc with three short rays),
+ * the right half the moon (a crescent cut from the same disc), so the glyph
+ * reads as one circle made of both halves — the exact idea the member asked
+ * for: "system gets half moon half sun style icon".
+ */
+@Composable
+private fun HalfCelestialGlyph(
+    tint: Color,
+    /** Named [iconSize], never `size`: this function draws on a Canvas, where
+     *  `size` is DrawScope's own (see the compile-safety rules). */
+    iconSize: androidx.compose.ui.unit.Dp
+) {
+    Canvas(modifier = Modifier.size(iconSize)) {
+        val r = size.minDimension / 2f
+        val c = size.center
+        val stroke = r * 0.15f
+        // ── The sun half (left): a filled half disc plus three rays out of it.
+        val disc = androidx.compose.ui.geometry.Size(r * 1.30f, r * 1.30f)
+        val discTopLeft = Offset(c.x - r * 0.65f, c.y - r * 0.65f)
+        drawArc(
+            color = tint,
+            startAngle = 90f,
+            sweepAngle = 180f,
+            useCenter = true,
+            topLeft = discTopLeft,
+            size = disc
+        )
+        listOf(180f, 135f, 225f).forEach { angle ->
+            val rad = Math.toRadians(angle.toDouble())
+            val dx = kotlin.math.cos(rad).toFloat()
+            val dy = kotlin.math.sin(rad).toFloat()
+            drawLine(
+                color = tint,
+                start = Offset(c.x + dx * r * 0.76f, c.y + dy * r * 0.76f),
+                end = Offset(c.x + dx * r, c.y + dy * r),
+                strokeWidth = stroke,
+                cap = StrokeCap.Round
+            )
+        }
+        // ── The moon half (right): an OUTLINED half disc, a size down from the
+        // sun, so the two halves are told apart by more than their side. Drawn
+        // hollow (not punched out of a filled disc) on purpose: nothing here
+        // uses a blend mode or a transparent ink — the mark is pure stroke.
+        val moonR = r * 0.80f
+        drawArc(
+            color = tint,
+            startAngle = -90f,
+            sweepAngle = 180f,
+            useCenter = true,
+            topLeft = Offset(c.x - moonR * 0.72f, c.y - moonR * 0.72f),
+            size = androidx.compose.ui.geometry.Size(moonR * 1.44f, moonR * 1.44f),
+            style = Stroke(width = stroke)
+        )
+    }
+}
+
+/** One color-theme entry as the sheet shows it: the id the pref stores, the
+ *  name, the Pantone reference (or a plain hint), and the three colours the
+ *  row previews — page, hero/cards, ink. */
+private data class ColorThemeChoice(
+    val id: String,
+    val label: String,
+    val hint: String,
+    val page: Color,
+    val hero: Color,
+    val ink: Color
+)
+
+/** The label of a stored color-theme id (for the row's subtitle). */
+private fun colorThemeLabel(id: String): String = when (id) {
+    AppPreferences.COLOR_THEME_CURIO -> "Curio rose"
+    AppPreferences.COLOR_THEME_AZURE -> "Azure hero"
+    AppPreferences.COLOR_THEME_MATERIAL -> "Material"
+    AppPreferences.COLOR_THEME_LANE -> "Adaptive Hero"
+    AppPreferences.COLOR_THEME_PANTONE_CREAM -> "Pantone Cream"
+    AppPreferences.COLOR_THEME_PANTONE_TERRACOTTA -> "Pantone Terracotta"
+    AppPreferences.COLOR_THEME_PANTONE_LIME -> "Pantone Lime"
+    else -> "Curio"
+}
+
+/** The Color theme row: the name of the live theme, a three-swatch hint of
+ *  its colours and the door into the sheet. */
+@Composable
+private fun ColorThemeRow(onClick: () -> Unit) {
+    val current = AppPreferences.colorThemeState
+    val accent = settingsCardAccentInk()
+    val swatch = colorThemeChoices().firstOrNull { it.id == current }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(13.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .curioPressClickable(pressedScale = 0.985f, onClick = onClick)
+            .padding(vertical = 8.dp)
+    ) {
+        SettingsOptionIconTile(CurioIcons.Palette, isCurioDarkTheme())
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Color theme",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = colorThemeLabel(current),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        swatch?.let { ColorThemeSwatch(it) }
+        CurioIcon(
+            CurioIcons.ChevronRight,
+            null,
+            tint = curioTintOn(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.70f),
+            size = 18.dp
+        )
+    }
+}
+
+/** Three overlapping swatches — the page, the hero and the ink of one theme. */
+@Composable
+private fun ColorThemeSwatch(choice: ColorThemeChoice) {
+    Box(modifier = Modifier.size(width = 46.dp, height = 24.dp)) {
+        listOf(choice.page, choice.hero, choice.ink).forEachIndexed { index, color ->
+            Box(
+                modifier = Modifier
+                    .offset(x = (index * 11).dp)
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+            )
+        }
+    }
+}
+
+/**
+ * THE COLOR THEME SHEET (v411).
+ *
+ * One row per theme, each with its own colours shown before it is picked —
+ * the member's ask ("it shows its preview with a hint of colors and each theme
+ * gets a row"). The four app themes preview the accent they would paint the
+ * hero with; the three Pantone themes preview their own page/hero/ink triple.
+ * Picking one writes the pref (and the legacy switches in step) and closes.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ColorThemeSheet(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val current = AppPreferences.colorThemeState
+    val accent = settingsCardAccentInk()
+    val choices = colorThemeChoices()
+    val themeTransition = LocalCurioThemeTransition.current
+    val transitionScope = rememberCoroutineScope()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                "Color theme",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFamily = FrauncesFontFamily
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                "The app's page, hero and ink — Pantone themes included. Pastel colors and Category tint stay on the Appearance page.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(10.dp))
+            choices.forEach { choice ->
+                val live = choice.id == current
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            if (live) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f)
+                            else Color.Transparent
+                        )
+                        .curioPressClickable(pressedScale = 0.985f, onClick = {
+                            if (!live) {
+                                // The whole scheme repaints, so the transition is
+                                // FORCED (like the Material toggle's used to be):
+                                // the circular reveal plays from the row itself.
+                                switchVisualThemeWithReveal(themeTransition, transitionScope, Offset.Zero) {
+                                    AppPreferences.setColorTheme(context, choice.id)
+                                }
+                            }
+                            onDismiss()
+                        })
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
+                ) {
+                    ColorThemeSwatch(choice)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            choice.label,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            choice.hint,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (live) {
+                        CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Every color theme the sheet offers, with the three colours each one paints.
+ *
+ * The Pantone entries read their own palette from [PantoneTheme]; the four app
+ * entries preview the accent that theme would give the shared hero (the rose
+ * or azure twin, the Material container, the lane accent), so a row's swatches
+ * are a real hint of what picking it does rather than a decoration.
+ */
+@Composable
+private fun colorThemeChoices(): List<ColorThemeChoice> {
+    val page = MaterialTheme.colorScheme.background
+    val ink = MaterialTheme.colorScheme.onSurface
+    val dark = isCurioDarkTheme()
+    val lane = heroLaneCategory()
+    val roseHero = remember(dark) {
+        val base = toHsl(CurioColors.HomeRosewood)
+        val pinkHue = (base.h - 15f + 360f) % 360f
+        if (dark) fromHsl(pinkHue, 0.55f, 0.40f)
+        else fromHsl(pinkHue, 0.74f, 0.82f)
+    }
+    return buildList {
+        add(
+            ColorThemeChoice(
+                id = AppPreferences.COLOR_THEME_CURIO,
+                label = "Curio rose",
+                hint = "The brand rose hero on the app's own page",
+                page = page, hero = roseHero, ink = ink
+            )
+        )
+        add(
+            ColorThemeChoice(
+                id = AppPreferences.COLOR_THEME_AZURE,
+                label = "Azure hero",
+                hint = "The airy sky-azure hero",
+                page = page, hero = CurioColors.HomeAzure, ink = ink
+            )
+        )
+        add(
+            ColorThemeChoice(
+                id = AppPreferences.COLOR_THEME_MATERIAL,
+                label = "Material",
+                hint = "Proper Material 3 colours — one primary, neutral surfaces, muted categories",
+                page = page,
+                hero = MaterialTheme.colorScheme.primaryContainer,
+                ink = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        )
+        add(
+            ColorThemeChoice(
+                id = AppPreferences.COLOR_THEME_LANE,
+                label = "Adaptive Hero",
+                hint = "The hero and the page take the category you last picked on Spin",
+                page = page,
+                hero = lane?.headerAccent() ?: roseHero,
+                ink = ink
+            )
+        )
+        PantoneTheme.entries.forEach { theme ->
+            add(
+                ColorThemeChoice(
+                    id = theme.id,
+                    label = theme.label,
+                    hint = "Pantone " + theme.reference,
+                    page = theme.pageFor(dark),
+                    hero = theme.heroFor(dark),
+                    ink = theme.accentFor(dark)
+                )
+            )
+        }
     }
 }
 

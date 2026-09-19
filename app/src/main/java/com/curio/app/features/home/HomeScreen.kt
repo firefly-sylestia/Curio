@@ -2,6 +2,7 @@ package com.curio.app.features.home
 
 import android.content.Context
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -41,6 +42,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +73,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -149,7 +155,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioLaneDetailStrip
-import com.curio.app.ui.components.CurioLaneGrid
+import com.curio.app.ui.components.LaneGridItem
 import com.curio.app.ui.components.laneGridItems
 import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioGlassToolbarMorph
@@ -178,6 +184,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.curioPillTintLift
+import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -191,10 +198,12 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.onAccent
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 /**
  * Home — clean, minimal, personalized.
@@ -233,10 +242,15 @@ import java.util.Calendar
  */
 /** The quest hero's solid body height — the torn banner. Tall enough for
  *  the greeting + the Streak · Cabinet · Recent bar (pinned just above the
- *  tear) and generous at large font scales. */
-private val HomeQuestHeroHeightPortrait = 300.dp
-/** Landscape hero — shorter to leave room for content below. */
-private val HomeQuestHeroHeightLandscape = 230.dp
+ *  tear) and generous at large font scales.
+ *  v411 — +80dp, because the DAILY QUEST now lives inside the banner too (the
+ *  member: "extend the home screen tear more and put the todays quest shuffle
+ *  the deck inside it"): greeting, stat bar and the Shuffle CTA are one hero
+ *  now, instead of a banner with a CTA parked below the seam. */
+private val HomeQuestHeroHeightPortrait = 380.dp
+/** Landscape hero — shorter to leave room for content below (+66, the same
+ *  growth read against a shorter window). */
+private val HomeQuestHeroHeightLandscape = 296.dp
 /** Extra layout space reserved for the white sheet below the torn banner. */
 private val HomeQuestSheetExtent = 24.dp
 /** Scroll distance (dp) before the menu + profile pills fully pin as
@@ -528,6 +542,45 @@ fun HomeScreen(navController: NavController) {
             // v7.37 — bold = the rougher Home tear personality (deeper,
             // toothier seam); the under-sheet passes the SAME flag so both
             // edges stay pixel-aligned.
+            // v411 — THE SHUFFLE ACTION, hoisted out of the old below-hero
+            // call site so the quest can live INSIDE the banner. One lambda,
+            // one behaviour: the tour's quest step first, else a genuinely
+            // fresh random deck (single lane or a mix) that bypasses the
+            // generic Spin tab restore.
+            val onQuestShuffle: () -> Unit = {
+                if (TourController.consumeTap("quest")) {
+                    TourController.routeForCurrentStep()?.let { nextRoute ->
+                        // v123 — the tour's tab steps navigate via
+                        // navigateToQuestRoute so HOME stays in the
+                        // NavController's saved-state map; a plain push made
+                        // the later Home-tab tap restore the popped Spin stack
+                        // ("Home dead" after skipping the tour on Spin).
+                        navController.navigateToQuestRoute(nextRoute)
+                    }
+                } else {
+                    // v7.94 — shuffle only VISIBLE lanes: hidden categories
+                    // (Manage Categories) never get dealt.
+                    val all = CurioCategories.visible
+                    val pickMix = Random.nextBoolean()
+                    val chosen =
+                        if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
+                        else listOf(all.random())
+                    AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
+                    // Keep the random single/mix selection intact, but bypass
+                    // the generic tab restore here. Restoring a previous Spin
+                    // composition can hide this newly chosen deck and make
+                    // every tap look like the same category.
+                    navController.navigate(
+                        CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
+                    ) {
+                        popUpTo(CurioRoutes.HOME) { saveState = true }
+                        // This is an explicit fresh shuffle, so even an
+                        // identical random draw must create a new deck.
+                        launchSingleTop = false
+                        restoreState = false
+                    }
+                }
+            }
             val heroTornShape = remember(HOME_TEAR_SEED) { SoftTornBottomShape(HOME_TEAR_SEED, bold = true) }
             val sheetShape = remember(HOME_TEAR_SEED) {
                 SoftTornSheetShape(HOME_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
@@ -640,24 +693,31 @@ fun HomeScreen(navController: NavController) {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Greeting — one line, left-aligned, with the
-                            // name beneath it (the quest CTA moved below the
-                            // hero). Proper hierarchy: the greeting reads as a
-                            // compact kicker, and the NAME is the star —
-                            // bigger and bolder than the greeting above it.
+                            // name beneath it. Proper hierarchy (v411, the
+                            // member: "make the home screen welcome back
+                            // curiours explorer ... font hirarcy more better
+                            // bigger cleaner"): the greeting and the NAME are
+                            // two halves of ONE sentence, so the greeting is a
+                            // light 26sp line (not a heavy kicker competing
+                            // with the name) and the name under it is the
+                            // heavy 40sp star. The commas and the weight gap
+                            // are what make the pair read as a sentence.
                             // v8.16 — the greeting is a CURIOUS pet landmark:
                             // the pet sometimes tiptoes over and reads it
                             // (the text itself just pulses — no layout move).
+                            val greeting = homeGreeting()
                             PetLandmark(
                                 id = "greeting",
                                 kind = PetLandmarks.Kind.CURIOUS,
                                 screen = "home"
                             ) { m ->
                                 Text(
-                                    text = greetingWordForNow(),
+                                    text = "$greeting,",
                                     style = MaterialTheme.typography.headlineSmall.copy(
-                                        fontWeight = FontWeight.ExtraBold
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 26.sp
                                     ),
-                                    color = questInk.copy(alpha = 0.92f),
+                                    color = curioTintOn(heroFill, questInk, 0.86f),
                                     textAlign = TextAlign.Start,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -679,11 +739,14 @@ fun HomeScreen(navController: NavController) {
                                 text = displayName,
                                 style = MaterialTheme.typography.headlineLarge.copy(
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 36.sp,
-                                    // Fixed ~48sp leading box held against font scaling (min 44sp).
+                                    // v411 — 36sp → 40sp: the name is the
+                                    // hero's star and the taller banner has the
+                                    // room for it.
+                                    fontSize = 40.sp,
+                                    // Fixed ~50sp leading box held against font scaling (min 42sp).
                                     // Plain Float math: TextUnit has no coerceAtLeast (it only
                                     // exposes an operator compareTo, not the Comparable bound).
-                                    lineHeight = (48f / nameFontScale.coerceAtLeast(1f)).coerceAtLeast(44f).sp
+                                    lineHeight = (50f / nameFontScale.coerceAtLeast(1f)).coerceAtLeast(42f).sp
                                 ),
                                 color = questInk,
                                 textAlign = TextAlign.Start,
@@ -836,6 +899,37 @@ fun HomeScreen(navController: NavController) {
                                         )
                                     }
                                 }
+                                // ── v411 — THE DAILY QUEST, INSIDE THE TEAR ──
+                                // The member: "extend the home screen tear more
+                                // and put the todays quest shuffle the deck
+                                // inside it". The banner is 80dp taller and the
+                                // quest now sits ON it, under the stat bar — so
+                                // Home's whole top is ONE hero instead of a
+                                // banner with a CTA parked below the seam.
+                                Spacer(Modifier.height(16.dp))
+                                // v8.25 — the quest block is the tour's HOME
+                                // landmark: the First Journey's welcome step
+                                // highlights the real TODAY'S QUEST card
+                                // instead of a guessed bottom zone.
+                                PetLandmark(
+                                    id = "quest",
+                                    kind = PetLandmarks.Kind.FUN,
+                                    screen = "home"
+                                ) { m ->
+                                    QuestShuffleCard(
+                                        // A paper-white disc ON the rose banner:
+                                        // the pastel accent would vanish into
+                                        // its own hero, so the plate is the
+                                        // banner lifted toward white and the
+                                        // glyph keeps the banner's own ink.
+                                        plate = lerp(heroFill, Color.White, 0.88f),
+                                        ink = questInk,
+                                        copyInk = questInk,
+                                        pet = homePetSprite,
+                                        onShuffle = onQuestShuffle,
+                                        modifier = m
+                                    )
+                                }
                         }
                     }
                 }
@@ -845,75 +939,11 @@ fun HomeScreen(navController: NavController) {
             }
             } // v3xx — end of the torn-hero branch (glass toolbar else)
 
-            // Give the quest block a deliberate breathing room below the
-            // hero's white sheet so the shuffle deck never feels pinned to
-            // the torn edge.
-            Spacer(Modifier.height(26.dp))
-
-            // ── Quest block — below the hero tear, above the content ────
-            // "TODAY'S QUEST" eyebrow (no indicator) + the big solid Shuffle
-            // button. The button picks a random category — or a random mix —
-            // persists it (the plain Shuffle tab is authoritative from
-            // prefs) and opens the deck.
-            Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        // Wide windows: keep the section in the comfortable
-                        // centered column so rows never stretch into
-                        // disconnected plates (phone layout untouched).
-                        .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                // v8.25 — the quest block is the tour's HOME landmark: the
-                // First Journey's welcome step highlights the real
-                // TODAY'S QUEST card instead of a guessed bottom zone.
-                PetLandmark(
-                    id = "quest",
-                    kind = PetLandmarks.Kind.FUN,
-                    screen = "home"
-                ) { m ->
-                    QuestShuffleCard(
-                        accent = homeRoseAccent(),
-                        pet = homePetSprite,
-                        onShuffle = {
-                            if (TourController.consumeTap("quest")) {
-                                TourController.routeForCurrentStep()?.let { nextRoute ->
-                                    // v123 — the tour's tab steps navigate via
-                                    // navigateToQuestRoute so HOME stays in the
-                                    // NavController's saved-state map; a plain
-                                    // push made the later Home-tab tap restore
-                                    // the popped Spin stack ("Home dead" after
-                                    // skipping the tour on Spin).
-                                    navController.navigateToQuestRoute(nextRoute)
-                                }
-                            } else {
-                                // v7.94 — shuffle only VISIBLE lanes: hidden
-                                // categories (Manage Categories) never get dealt.
-                                val all = CurioCategories.visible
-                                val pickMix = Random.nextBoolean()
-                                val chosen =
-                                    if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
-                                    else listOf(all.random())
-                                AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
-                                // Keep the random single/mix selection intact, but
-                                // bypass the generic tab restore here. Restoring a
-                                // previous Spin composition can hide this newly chosen
-                                // deck and make every tap look like the same category.
-                                navController.navigate(
-                                    CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
-                                ) {
-                                    popUpTo(CurioRoutes.HOME) { saveState = true }
-                                    // This is an explicit fresh shuffle, so even an
-                                    // identical random draw must create a new deck.
-                                    launchSingleTop = false
-                                    restoreState = false
-                                }
-                            }
-                        },
-                        modifier = m
-                    )
-                }
-            }
+            // v411 — THE DAILY QUEST IS NOT HERE ANY MORE: it moved up INTO
+            // the torn banner (see the hero's own QuestShuffleCard call), so
+            // the space it parked in — the 26dp breathing room and its
+            // centered column — went with it. The banner's under-sheet extent
+            // is what separates the hero from the content now.
             // v49 — one consistent 12dp section rhythm below the shuffle
             // deck: the old 20dp ends stacked with the 20dp spacer before
             // Saved (40dp of dead space when no session/queue is live).
@@ -1460,9 +1490,9 @@ fun HomeScreen(navController: NavController) {
                 CurioGlassToolbarMorph(
                     progress = homeStickyProgress,
                     compactHeight = HomeCompactHeaderHeight,
-                    title = greetingWordForNow(),
+                    title = homeGreeting(),
                     subtitle = displayName,
-                    compactTitle = "${greetingWordForNow()} $displayName",
+                    compactTitle = "${homeGreeting()} $displayName",
                     onMenuClick = { CurioDrawerState.requestOpen() },
                     trailing = morphAvatar,
                     compactAvatar = { morphAvatar(questInk) },
@@ -1889,19 +1919,25 @@ private fun TopBarPill(
 
 @Composable
 private fun QuestShuffleCard(
-    accent: Color,
+    /** The Shuffle disc's fill — a paper-white plate on the rose banner. */
+    plate: Color,
+    /** The glyph ink ON that disc (the banner's own readable ink). */
+    ink: Color,
+    /** The eyebrow's and the title's ink. */
+    copyInk: Color,
     pet: (@Composable () -> Unit)? = null,
     onShuffle: () -> Unit,
     // v8.25 — the tour's home landmark modifier (bounds tracking only).
     modifier: Modifier = Modifier
 ) {
-    // Deep ink twin for the eyebrow — the airy pastel accent reads too
-    // light against the page, so the eyebrow wears the darker ink instead
-    // (the button keeps the solid accent fill).
-    val ink = homeReadableInk(accent)
     // v7.32 — the quest is backgroundless: bare text + the shuffle button
     // sitting on the page (no card fill, no leading icon). The whole row
     // stays tappable so a tap on the copy shuffles too.
+    // v411 — the quest moved INSIDE the torn banner, so every colour is
+    // passed in: the caller owns the surface, and nothing here reaches for
+    // `onSurface` any more (a dark plum title read as a stain on the rose
+    // banner). The plate/ink pair is the one thing that had to invert — a
+    // pastel-rose disc would vanish into its own hero.
     Surface(
         onClick = onShuffle,
         shape = RoundedCornerShape(24.dp),
@@ -1912,7 +1948,10 @@ private fun QuestShuffleCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                // v411 — no horizontal padding of its own: the row is inside
+                // the banner column, which already insets 20dp, so the quest
+                // copy lines up with the greeting and the name above it.
+                .padding(vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
@@ -1928,41 +1967,45 @@ private fun QuestShuffleCard(
                 }
             }
             Column(modifier = Modifier.weight(1f)) {
+                // v411 — a bigger, cleaner hierarchy ("todays quest etc font
+                // hirarcy more better bigger cleaner"): the eyebrow is a quiet
+                // letterspaced label and the title carries the weight —
+                // labelLarge + headlineMedium. Both lines wear the FULL copy
+                // ink (no transparency); the size gap is what separates them.
                 Text(
                     text = "TODAY'S QUEST",
-                    style = MaterialTheme.typography.labelMedium.copy(
+                    style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.6.sp
+                        letterSpacing = 1.5.sp
                     ),
-                    color = ink
+                    color = copyInk
                 )
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(3.dp))
                 Text(
                     text = "Shuffle the deck",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        lineHeight = 32.sp
+                    ),
+                    color = copyInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = "A fresh mix of ideas, picked for you",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                // v411 — "A fresh mix of ideas, picked for you" is GONE (the
+                // member's call). The title already says what the button does;
+                // the line was a label explaining a label.
             }
             Surface(
                 shape = CircleShape,
-                color = accent,
-                modifier = Modifier.size(54.dp)
+                color = plate,
+                modifier = Modifier.size(56.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     CurioIcon(
                         CurioIcons.Casino,
                         "Shuffle a random deck",
                         tint = ink,
-                        size = 25.dp,
+                        size = 26.dp,
                         // The shared icon renderer already applies the
                         // standard 1dp optical lift; this extra half-dp is
                         // only for the casino glyph's heavier visible base.
@@ -2832,6 +2875,10 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
     // Derived in composition (NOT remembered) so hiding a lane in Manage
     // Categories, reordering the lanes, or a theme flip re-reads the grid.
     val lanes = laneGridItems(knowledge)
+    // v411 — the map's own order: the member's CATALOG order, not the grid's
+    // explored-first one. A star must never move because a different lane's
+    // knowledge changed.
+    val mapLanes = lanes.sortedBy { it.id }
     val exploredCount = lanes.count { it.explored }
     val totalKnowledge = lanes.sumOf { it.knowledge }
     var selected by remember { mutableStateOf<CategoryId?>(null) }
@@ -2909,31 +2956,201 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
                 )
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // ── v411 — THE CURIOSITY MAP ─────────────────────────────────────
+        // The lane GRID is gone from the drawer (the member's call: "why did u
+        // add your lanes in drawer burh, remove it and do something else, with
+        // the graph or something"). The lanes are a CONSTELLATION now — one
+        // star per lane, its size and brightness its knowledge, its colour its
+        // own accent. Nothing here is a progress chart.
+        DrawerLaneStarMap(
+            lanes = mapLanes,
+            selected = selected,
+            onSelect = { selected = it }
+        )
+        val picked = lanes.firstOrNull { it.id == selected }
+        if (picked != null) {
+            // The readout NAMES the star that was tapped (the same strip the
+            // Stats grid shows), so the map itself never has to shout 36
+            // labels over the sky.
+            CurioLaneDetailStrip(picked)
+        } else {
             Text(
-                "YOUR LANES",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.5.sp
-                ),
-                color = muted,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                "$exploredCount of ${lanes.size} explored",
+                "$exploredCount of ${lanes.size} lanes explored",
                 style = MaterialTheme.typography.labelSmall,
                 color = muted
             )
         }
-        CurioLaneGrid(
-            lanes = lanes,
-            selected = selected,
-            onSelect = { selected = it },
-            columns = 4,
-            tileHeight = 82.dp,
-            detail = { item -> CurioLaneDetailStrip(item) }
+    }
+}
+
+/** How tall the drawer's constellation stands. */
+private val DrawerStarMapHeight = 188.dp
+
+/**
+ * v411 — THE DRAWER'S CURIOSITY MAP: the lanes as a sky.
+ *
+ * The member on the drawer's lane grid: "remove it and do something else, with
+ * the graph or something" — and, on what that graph should be, "a unique graph
+ * look with star style something, but not progress style graph". So the drawer
+ * no longer lists lanes as tiles; it DRAWS them.
+ *
+ * Every lane is one star:
+ *  * **Position** — fixed for a given lane count ([starScatter]: phyllotaxis,
+ *    the sunflower scatter, deterministic, evenly spread and identical at
+ *    every knowledge level, so the map is a landmark the member learns).
+ *  * **Size + brightness** — the lane's knowledge against the strongest lane.
+ *    An explored lane is a big lit star; an untouched one is a dim hollow
+ *    point, so the map shows the member what is left without being a meter.
+ *  * **Colour** — the lane's own accent, glowing through two halo steps.
+ *  * **Hairlines** — each star joined to its two nearest neighbours, which is
+ *    what turns a scatter into constellations ([starLinks]).
+ *
+ * It is TAPPABLE: the star nearest a touch within a 30dp halo is picked (the
+ * tap target is the finger, not the dot) and the readout under the map names
+ * the pick. Nothing on this canvas is transparent — every colour is an OPAQUE
+ * mix between the panel and the ink ([lerp]), which is the member's rule for
+ * the new themes ("dont use transparent colors") applied to the one surface in
+ * the app that is nothing but paint.
+ *
+ * The sky lights up ONCE, star by star ([Animatable], not an infinite
+ * transition): the drawer is composed even while it is closed, so an idle
+ * twinkle would spend the battery on a surface nobody is looking at.
+ */
+@Composable
+private fun DrawerLaneStarMap(
+    lanes: List<LaneGridItem>,
+    selected: CategoryId?,
+    onSelect: (CategoryId?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (lanes.isEmpty()) return
+    val panel = MaterialTheme.colorScheme.surfaceContainerHigh
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val stars = remember(lanes.size) { starScatter(lanes.size) }
+    val links = remember(stars) { starLinks(stars) }
+    val strongest = lanes.maxOf { it.knowledge }.coerceAtLeast(1)
+    val lit = remember { Animatable(0f) }
+    LaunchedEffect(lanes.size) {
+        lit.snapTo(0f)
+        lit.animateTo(1f, tween(900, easing = FastOutSlowInEasing))
+    }
+    var sizePx by remember { mutableStateOf(IntSize.Zero) }
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .onSizeChanged { sizePx = it }
+            .height(DrawerStarMapHeight)
+            .clip(RoundedCornerShape(18.dp))
+            .background(panel)
+            .pointerInput(lanes, selected, sizePx) {
+                detectTapGestures { tap ->
+                    if (sizePx.width <= 0 || sizePx.height <= 0) return@detectTapGestures
+                    val unit = Offset(x = tap.x / sizePx.width, y = tap.y / sizePx.height)
+                    val reach = 30.dp.toPx() / minOf(sizePx.width, sizePx.height)
+                    val hit = stars.indices
+                        .filter { (stars[it] - unit).getDistance() <= reach }
+                        .minByOrNull { (stars[it] - unit).getDistance() }
+                    if (hit != null) {
+                        onSelect(if (lanes[hit].id == selected) null else lanes[hit].id)
+                    }
+                }
+            }
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            fun at(index: Int) = Offset(
+                x = stars[index].x * size.width,
+                y = stars[index].y * size.height
+            )
+            // ── The hairlines, under the stars. ──
+            links.forEach { link ->
+                drawLine(
+                    color = lerp(panel, muted, 0.20f),
+                    start = at(link.first),
+                    end = at(link.second),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+            // ── The stars. ──
+            lanes.forEachIndexed { index, lane ->
+                val centre = at(index)
+                // The staggered light-up: each star waits its own turn, so the
+                // sky fills in as a sweep rather than blinking on.
+                val wait = (index * 0.012f).coerceAtMost(0.55f)
+                val born = ((lit.value - wait) / (1f - wait)).coerceIn(0f, 1f)
+                if (born <= 0f) return@forEachIndexed
+                val fraction = (lane.knowledge.toFloat() / strongest).coerceIn(0f, 1f)
+                val core = if (lane.explored) (2.2f + 3.4f * fraction) * born else 0f
+                if (lane.explored) {
+                    val corePx = core.dp.toPx()
+                    // Halo, mid ring, core — three OPAQUE steps of the panel
+                    // mixed toward the lane's accent (no alpha anywhere).
+                    drawCircle(lerp(panel, lane.accent, 0.16f), corePx * 2.6f, centre)
+                    drawCircle(lerp(panel, lane.accent, 0.40f), corePx * 1.5f, centre)
+                    drawCircle(lerp(panel, lane.accent, 0.94f), corePx, centre)
+                } else {
+                    // Unexplored: a dim hollow point — present, but plainly
+                    // not lit yet.
+                    drawCircle(
+                        color = lerp(panel, muted, 0.06f + 0.28f * born),
+                        radius = 2.4f.dp.toPx(),
+                        center = centre,
+                        style = Stroke(width = 1.dp.toPx())
+                    )
+                }
+                // The picked star wears an orbit — the one piece of chrome the
+                // map adds, so a tap is unambiguous without a single label.
+                if (lane.id == selected) {
+                    drawCircle(
+                        color = lerp(panel, lane.accent, 0.85f),
+                        radius = (if (lane.explored) core + 5.5f else 7f).dp.toPx(),
+                        center = centre,
+                        style = Stroke(width = 1.4f.dp.toPx())
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Star positions for [count] lanes in unit space (0..1): a phyllotaxis
+ * (sunflower) scatter. The golden angle places each point as far from every
+ * point already placed as it can, which is the one cheap layout that stays
+ * evenly spread at any count, needs no random seed, and can never reshuffle —
+ * the same lane is always the same star.
+ */
+private fun starScatter(count: Int): List<Offset> {
+    if (count <= 0) return emptyList()
+    val goldenAngle = 2.399963f   // radians
+    val inner = 0.09f
+    val outer = 0.42f
+    return List(count) { index ->
+        val t = (index + 0.5f) / count
+        val radius = (inner + (outer - inner) * sqrt(t)) * 0.94f
+        val angle = index * goldenAngle
+        Offset(
+            x = 0.5f + cos(angle) * radius,
+            y = 0.5f + sin(angle) * radius
         )
     }
+}
+
+/**
+ * The sky's hairlines: every star joined to its two nearest stars of a higher
+ * index (the reverse pairs come from the other side), so the map reads as
+ * constellations instead of a mesh. O(n²) over ~36 points, computed once per
+ * lane count.
+ */
+private fun starLinks(stars: List<Offset>): List<Pair<Int, Int>> {
+    val links = mutableListOf<Pair<Int, Int>>()
+    for (i in stars.indices) {
+        stars.indices
+            .filter { it > i }
+            .sortedBy { (stars[it] - stars[i]).getDistance() }
+            .take(2)
+            .forEach { links.add(i to it) }
+    }
+    return links
 }
 
 /** One pane of the drawer's brain strip: accent glyph, big value, quiet
@@ -3070,15 +3287,18 @@ private fun DrawerFooter() {
 // Greeting helpers
 // ═══════════════════════════════════════════════════════════════════════
 
-private fun greetingWordForNow(): String {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    return when (hour) {
-        in 5..11 -> "Good morning"
-        in 12..16 -> "Good afternoon"
-        in 17..21 -> "Good evening"
-        else -> "Welcome back"
-    }
-}
+/**
+ * v411 — HOME'S GREETING IS ONE FIXED LINE NOW.
+ *
+ * It used to be a time-of-day word (Good morning / afternoon / evening, and
+ * "Welcome back" after hours). The member named the copy they want — "make the
+ * home screen welcome back curiours explorer" — so the greeting no longer
+ * depends on the clock: Home always says the same warm line, and the NAME under
+ * it (which defaults to "Curious Explorer") completes the sentence. The hero
+ * and the glass header read the same string, so the two header styles can
+ * never greet differently.
+ */
+private fun homeGreeting(): String = "Welcome back"
 
 // ═══════════════════════════════════════════════════════════════════════
 // Explore-session topic row (recently explored / recently unexplored)

@@ -70,6 +70,8 @@ import com.curio.app.ui.components.laneGridItems
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCardEdgeColor
+import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /** v409 — the Curiosity Stats page, rebuilt around progress instead of prose.
@@ -541,12 +543,15 @@ private fun StatsDoorChip(
     accent: Color? = null
 ) {
     val tint = accent ?: MaterialTheme.colorScheme.primary
+    val base = MaterialTheme.colorScheme.surfaceContainerHighest
+    // v411 — a Pantone theme's chip is SOLID (the accent mixed into the
+    // surface) and wears NO card border; every other theme is unchanged.
+    val fill = if (accent != null) curioTintOn(base, tint, 0.16f) else base
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = if (accent != null) tint.copy(alpha = 0.16f)
-        else MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        color = fill,
+        border = BorderStroke(1.dp, curioCardEdgeColor(fill))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -641,7 +646,8 @@ private fun StatsCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        // v411 — no card border under a Pantone theme.
+        border = BorderStroke(1.dp, curioCardEdgeColor(MaterialTheme.colorScheme.surfaceContainerLowest)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(

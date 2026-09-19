@@ -43,6 +43,8 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.LaneKnowledge
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioCardEdgeColor
+import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.themedAccent
 
 /**
@@ -171,9 +173,13 @@ private fun LaneTile(
         animationSpec = tween(180),
         label = "laneTileFill"
     )
+    // v411 — the tile's edge: the selected one wears its accent (resolved
+    // solidly under a Pantone theme, see [curioTintOn]) and an UNSELECTED tile
+    // wears whatever the theme says a card edge is — which under a Pantone
+    // theme is NO edge at all ([curioCardEdgeColor]).
     val ring by animateColorAsState(
-        targetValue = if (selected) item.accent.copy(alpha = 0.75f)
-        else MaterialTheme.colorScheme.outlineVariant,
+        targetValue = if (selected) curioTintOn(fill, item.accent, 0.75f)
+        else curioCardEdgeColor(fill),
         animationSpec = tween(180),
         label = "laneTileRing"
     )

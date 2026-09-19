@@ -318,11 +318,61 @@ fun isCurioDarkThemeForContext(context: Context): Boolean = when (AppPreferences
 @Composable
 fun curioColorScheme(): ColorScheme =
     if (materialThemeOn) materialColorScheme()
+    // v411 — a PANTONE theme brings its own palette (and its own dark twin),
+    // so it answers before the Curio schemes: the paper flip below only ever
+    // describes Curio's own cream/white page pair.
+    else activePantoneTheme()?.let { it.schemeFor(isCurioDarkTheme()) }
     else if (isCurioDarkTheme()) CurioDarkColorScheme
     // v409 — the paper flip: white page with cream cards (the shipped look),
     // or the reverse. Read reactively, so the switch repaints immediately.
     else if (AppPreferences.paperCreamCardsState) CurioWhitePageLightScheme
     else CurioCreamPageLightScheme
+
+/**
+ * v411 — the ACTIVE Pantone theme, or null when the color theme is one of the
+ * app's own (Curio rose, azure, Material, Adaptive Hero). Everything that has
+ * to paint a Pantone — the scheme above, the shared torn heroes, the sheet's
+ * previews — asks this one question instead of re-reading the pref.
+ */
+@Composable
+fun activePantoneTheme(): PantoneTheme? =
+    AppPreferences.pantoneThemeId()?.let { id -> PantoneTheme.fromId(id) }
+
+/**
+ * v411 — THE CARD EDGE, as the theme wants it.
+ *
+ * Curio's cards separate by lightness AND a hairline edge (`outlineVariant`).
+ * The member's rule for the new Pantone accents is the opposite: "dont use any
+ * border for cards" — those themes want the card to be a solid plate with no
+ * drawn box. So every card component asks this helper for its edge colour and
+ * passes the fill it is painting ([fill]); under a Pantone theme the answer IS
+ * that fill, which paints an edge of exactly the card's own colour (no border
+ * to see, and no change to a single border/layout code path), and everywhere
+ * else it is the theme's `outlineVariant` as before.
+ *
+ * Passing [fill] — rather than returning null and making callers branch — is
+ * deliberate: `Surface(border = …)` and `Modifier.border(…)` sites keep their
+ * exact shape and ordering, so this can never reorder a border under a fill.
+ */
+@Composable
+fun curioCardEdgeColor(fill: Color): Color =
+    if (activePantoneTheme() != null) fill else MaterialTheme.colorScheme.outlineVariant
+
+/**
+ * v411 — A TINT, RESOLVED SOLIDLY UNDER A PANTONE THEME.
+ *
+ * The member's second rule for the new accents ("dont use transparent
+ * colors"): nothing in those themes may be a see-through layer. Most of the
+ * app tints by alpha (`accent.copy(alpha = 0.16f)`) because it composites over
+ * an opaque surface and reads fine — but on a Pantone page a translucent chip
+ * lets the page colour through, which is exactly the muddiness the rule is
+ * about. So callers ask for the tint through here: a Pantone theme gets the
+ * tint MIXED INTO [base] with [lerp] (opaque, no bleed-through), and every
+ * other theme keeps the alpha it has always used.
+ */
+@Composable
+fun curioTintOn(base: Color, tint: Color, alpha: Float): Color =
+    if (activePantoneTheme() != null) lerp(base, tint, alpha) else tint.copy(alpha = alpha)
 
 @Composable
 fun CurioTheme(

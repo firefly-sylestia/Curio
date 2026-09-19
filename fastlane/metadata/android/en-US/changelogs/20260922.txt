@@ -1,4 +1,21 @@
 ADD:
+- Appearance: one Color theme door — Curio rose, Azure, Material, Adaptive Hero and three Pantone themes (Cream, Terracotta, Lime), each its own row with a preview of the page, the hero and the ink it would paint. Pastel colors and Category tint stay on the page.
+- Appearance: Light, Dark and System are one sliding switch with a sun, a moon and a half-and-half mark — no checkmarks.
+- Home: one hero — the torn banner is taller and "Today's quest / Shuffle the deck" lives inside it now, under your figures, instead of a button parked below the seam.
+- Home: the drawer's lanes are a star map — a star per lane, its size and brightness its knowledge, its colour its own accent, joined into constellations; tap one and its own figures open below the map.
+- Reading: hold a page arrow to keep turning — a tap still turns one page, holding turns them until you let go.
+
+FIX:
+- Theme: a Pantone theme is solid — never a see-through fill and never a border on a card — and each one has a dark twin built from its own three colours.
+- Home: the greeting is one line and the type is bigger — "Welcome back" over your name, the name at 40sp — and the "A fresh mix of ideas, picked for you" line under Today's quest is gone.
+- Books: a chapter move takes the page with it — picking a chapter lands the page on the page that chapter opens at, so the two steppers agree in both directions.
+- Books: the book's progress follows your reading — the reader writes the page it is showing back onto the book, so a PDF reopens where you actually stopped; a hand-set page can no longer outlive it by being written to the book later.
+
+REMOVE:
+- Appearance: the Material theme, Hero and Adaptive Hero switches — they were three halves of one question (what colour is the app) and are the Color theme sheet now.
+- Home: the drawer's lane grid — the star map replaces it.
+
+ADD:
 - Books: a book shelved from a topic reveal keeps its own cover and its own length — the shelf, the book page and the Cabinet used to draw a plain placeholder for a book the app knows everything about.
 - Books: a book that came in without artwork has a cover fetched for it — the app's own catalog first, then iTunes and Open Library — and the cover that actually arrived is kept on the book, so the shelf, the book page and the Cabinet's shelf all show it.
 

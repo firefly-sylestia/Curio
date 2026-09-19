@@ -48,6 +48,34 @@ object AppPreferences {
     const val THEME_DARK = "dark"
     const val THEME_SYSTEM = "system"
 
+    /**
+     * v411 — THE COLOR THEME. One choice instead of the three old switches
+     * (Material theme, hero rose/azure, Adaptive Hero), which is what the
+     * Appearance page shows as a single "Color theme" row opening a sheet of
+     * previews. The three Pantone themes are light palettes with their own
+     * dark twins (see `PantoneTheme`).
+     */
+    const val COLOR_THEME_CURIO = "curio"
+    const val COLOR_THEME_AZURE = "azure"
+    const val COLOR_THEME_MATERIAL = "material"
+    const val COLOR_THEME_LANE = "lane"
+    /** Every Pantone theme id carries this prefix (see `PantoneTheme`). */
+    const val PANTONE_ID_PREFIX = "pantone-"
+    const val COLOR_THEME_PANTONE_CREAM = "pantone-cream"
+    const val COLOR_THEME_PANTONE_TERRACOTTA = "pantone-terracotta"
+    const val COLOR_THEME_PANTONE_LIME = "pantone-lime"
+
+    /** Every stored color-theme id, in the order the sheet lists them. */
+    val COLOR_THEMES = listOf(
+        COLOR_THEME_CURIO,
+        COLOR_THEME_AZURE,
+        COLOR_THEME_MATERIAL,
+        COLOR_THEME_LANE,
+        COLOR_THEME_PANTONE_CREAM,
+        COLOR_THEME_PANTONE_TERRACOTTA,
+        COLOR_THEME_PANTONE_LIME
+    )
+
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
     private const val KEY_USERNAME = "username"
@@ -97,6 +125,9 @@ object AppPreferences {
     // color system re-does per M3 guidelines (single primary, neutral
     // surfaces, 36 lane accents collapsed to ~6 muted families).
     private const val KEY_MATERIAL_THEME = "material_theme"
+    // v411 — the ONE color-theme choice (the Appearance sheet); the three
+    // legacy switches above stay in step with it (see [setColorTheme]).
+    private const val KEY_COLOR_THEME = "color_theme"
     private const val KEY_MATERIAL_HERO_TEARS = "material_hero_tears"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     private const val KEY_HERO_FOLLOW_LANE = "hero_follow_lane"  // shared hero + page follow the Spin lane (v30)
@@ -1163,6 +1194,14 @@ object AppPreferences {
     var materialThemeState by mutableStateOf(false)
         private set
 
+    // v411 — THE COLOR THEME (see [COLOR_THEME_CURIO] … [COLOR_THEME_PANTONE_LIME]).
+    // A DERIVED read: the three legacy switches below stay the source of
+    // truth for every other surface in the app, and this is the one value the
+    // Appearance page's "Color theme" sheet writes (through
+    // [setColorTheme], which sets them in step). Seeded in [initThemeMode].
+    var colorThemeState by mutableStateOf(COLOR_THEME_AZURE)
+        private set
+
     // v223 — "Material hero tears" (Appearance, default OFF): when the
     // Material theme is on AND this option is on, the shared torn heroes
     // (Home / Profile / Settings / Cabinet-All / drawer / onboarding) wear
@@ -1831,6 +1870,7 @@ object AppPreferences {
 
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
+        colorThemeState = getColorTheme(context)
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         materialThemeState = isMaterialThemeEnabled(context)
@@ -1978,6 +2018,56 @@ object AppPreferences {
     /** Whether the app renders dark right now — resolves "system" via the
      *  device night flag (non-composable twin of [isCurioDarkTheme]). */
     fun isDarkTheme(context: Context): Boolean = isDarkMode(context, getThemeMode(context))
+
+    // ── v411 — THE COLOR THEME ────────────────────────────────────────
+    /**
+     * The stored color theme, DERIVED from the legacy switches when no
+     * explicit choice has ever been made — so an existing member keeps the
+     * look they chose (Material, Adaptive Hero, azure or rose) instead of
+     * being reset to a default, and every later read is the stored id.
+     */
+    fun getColorTheme(context: Context): String {
+        val stored = prefs(context).getString(KEY_COLOR_THEME, null)
+        if (stored != null && stored in COLOR_THEMES) return stored
+        return when {
+            isMaterialThemeEnabled(context) -> COLOR_THEME_MATERIAL
+            isHeroFollowLaneEnabled(context) -> COLOR_THEME_LANE
+            isHeroBlueEnabled(context) -> COLOR_THEME_AZURE
+            else -> COLOR_THEME_CURIO
+        }
+    }
+
+    /**
+     * Picks the app's color theme. The legacy switches are written IN STEP
+     * because the rest of the app still reads them (the hero fill, the
+     * category palettes, the card accents) — this does not duplicate state,
+     * it keeps one choice expressed through the three facts those surfaces
+     * already agree on. A Pantone theme is "neither Material, nor a lane, nor
+     * the rose/azure heroes": it brings its own palette, so the hero falls
+     * back to the theme's own hero colour (see `settingsRoseAccent`).
+     */
+    fun setColorTheme(context: Context, style: String) {
+        val next = if (style in COLOR_THEMES) style else COLOR_THEME_CURIO
+        prefs(context).edit().putString(KEY_COLOR_THEME, next).apply()
+        val material = next == COLOR_THEME_MATERIAL
+        val lane = next == COLOR_THEME_LANE
+        val azure = next == COLOR_THEME_AZURE
+        prefs(context).edit().putBoolean(KEY_MATERIAL_THEME, material).apply()
+        materialThemeState = material
+        if (material) {
+            prefs(context).edit().putBoolean(KEY_MATERIAL_HERO_TEARS, true).apply()
+            materialHeroTearsState = true
+        }
+        prefs(context).edit().putBoolean(KEY_HERO_FOLLOW_LANE, lane).apply()
+        heroFollowLaneState = lane
+        prefs(context).edit().putBoolean(KEY_HERO_BLUE, azure).apply()
+        heroBlueState = azure
+        colorThemeState = next
+    }
+
+    /** The active Pantone theme's id, or null when the color theme is not one. */
+    fun pantoneThemeId(): String? =
+        colorThemeState.takeIf { it.startsWith(PANTONE_ID_PREFIX) }
 
     /** Whether a *given* [mode] (not the currently stored one) resolves dark —
      *  used by the theme-switch reveal to detect a real light/dark change. */
