@@ -99,6 +99,22 @@ data class PersonalRun(
  */
 enum class PersonalAlign { START, CENTER, END, JUSTIFY }
 
+/**
+ * v398 — THE ONE CHARACTER THAT MEANS "AN ATTACHMENT SITS HERE".
+ *
+ * A paragraph is ONE text field, so the only way an attachment can live INSIDE it
+ * is as a character of its own text: the OBJECT REPLACEMENT character is exactly
+ * that mark (it is what a text system uses for "something untypable stands at
+ * this offset"), and nothing else in the writing family can produce it — the
+ * keyboard cannot type it and the tools never write it. The member's own words
+ * around it are ordinary text, so Enter, backspace, marks, alignment, undo and
+ * saving all keep working on the paragraph they always worked on.
+ *
+ * The Nth mark in a block's text belongs to the Nth entry of
+ * [PersonalBlock.inlineRefs].
+ */
+const val PERSONAL_INLINE_MARK = '\uFFFC'
+
 /** One block of the writing canvas: text, or an attached photo. */
 data class PersonalBlock(
     val id: String,
@@ -144,9 +160,34 @@ data class PersonalBlock(
      * star list and a crystal list, and a re-opened note keeps what it wore.
      * Only meaningful on a line that carries the bullet flag.
      */
-    val marker: String = ""
+    val marker: String = "",
+    /**
+     * v398 — THE ATTACHMENTS THAT LIVE INSIDE THIS PARAGRAPH'S OWN WORDS.
+     *
+     * Each entry is the id of a photo or voice block that sits BETWEEN the words
+     * rather than on a line of its own, in the order its mark appears in [text]
+     * (a print between two sentences really is a mark in a sentence). The block
+     * it names is still an ordinary block of the page — saved with it, undoable
+     * with it — and the page simply draws it inside the paragraph instead of on
+     * its own (see the canvas's inline skip), which is also the recovery when the
+     * writer deletes the mark: the attachment stands on its own line again rather
+     * than vanishing.
+     */
+    val inlineRefs: List<String> = emptyList()
 ) {
     val isPhoto: Boolean get() = photo != null
+
+    /** v398 — how many attachments this paragraph holds. */
+    val inlineCount: Int get() = text.count { it == PERSONAL_INLINE_MARK }
+
+    /**
+     * v398 — WHERE the marks are, in order: `inlineOffsets[n]` is the offset of
+     * the character whose [inlineRefs] entry is the nth. The two are read
+     * together everywhere (the editor paints one and the page draws the other),
+     * so they live next to each other.
+     */
+    val inlineOffsets: List<Int>
+        get() = text.indices.filter { text[it] == PERSONAL_INLINE_MARK }
 
     /** True for a voice-note block (a recording, no text of its own). */
     val isAudio: Boolean get() = audio != null
@@ -300,6 +341,14 @@ object PersonalDocCodec {
             // version encodes byte-for-byte as it did.
             if (block.checked) b.addProperty("ck", true)
             if (block.marker.isNotBlank()) b.addProperty("mk", block.marker)
+            // v398 — the attachments that sit INSIDE this paragraph's words, in
+            // mark order. Omitted for every paragraph that has none, so every
+            // page written before this version encodes byte-for-byte as it did.
+            if (block.inlineRefs.isNotEmpty()) {
+                val refs = JsonArray()
+                block.inlineRefs.forEach { refs.add(it) }
+                b.add("inr", refs)
+            }
             // v389 — a voice note (its file, its length, its waveform). None of
             // the three is written for any other kind of block, so a text or
             // photo page encodes exactly as it did before.
@@ -392,7 +441,12 @@ object PersonalDocCodec {
                 // so it decodes as an ordinary text block, exactly as before.
                 audio = b.str("aud").ifBlank { null },
                 audioSeconds = b.int("aus"),
-                audioBars = b.str("aub")
+                audioBars = b.str("aub"),
+                // v398 — an older note has no "inr" key at all: it decodes as a
+                // paragraph with nothing inside it, exactly as it was written.
+                inlineRefs = b.getAsJsonArray("inr")?.mapNotNull { element ->
+                    runCatching { element.asString }.getOrNull()?.ifBlank { null }
+                }.orEmpty()
             )
         }
         // A note whose body decoded to nothing still needs ONE writable block,

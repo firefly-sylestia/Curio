@@ -1,137 +1,103 @@
 # Prompt Log — current request
 
-## Request (2026-09-18, batch Z5 — prints in rows, and the carry that says where)
+## Request (2026-09-19, batch Z6 — the attachment inside a paragraph, and the asks queued behind it)
 
 Verbatim: "do the attachment inside a paragraph, aand more than one photo pair, also make the
 animation of it good, with proper hover preview same pass for voice recorder in animation, and proper
-preview of photo stacing with snap."
+preview of photo stacing with snap." — followed by "epub emphasis now, also in redrawn avatars why
+theres a line above shoulder also the poses are wierd fix it, and for th eleaf icon it sbad chnage it
+also why the mon is C how about chnage the leaf to crecent moon also some avatars are weird looking
+with the eyes, some are fine but some are weird and also that smile in each of them, also still in the
+todo the chekcbox cyive state is glitchy when i deselct it i mesn its not selected it stil l makes the
+next line in enter automatic reselect, it should keep the active state when its selected not when i
+desecelt it. fix this glchy behavior. also for series the buttom sheet ui is beautifu and the text
+colro is right too, and its look up is also so fast, can u make the anime use the same api as the
+first same as series, and also make the anime ui similair to series".
 
-Context: the user's earlier answer to the layout question was "truly inline: a thumbnail sitting
-between the words, with the text wrapping around it; a grid 2*2 but for 3 dont make it one big and
-all see how we can do portraight and then 2 small can be fit to the other side kinda stylish, but this
-should be auto adjust, but user can do any size chnages etc manually, also for portraight add one more
-small portraight view too", and for the drag: "same, plus a magnified thumbnail of the photo under the
-finger".
+**Status: the paragraph attachment shipped (see §3). The queued asks below it are NOT started.**
 
-**Status: three of the four landed in this batch; the fourth is BLOCKED ON A DECISION (see below).**
+### 1. More than one photo pair — the row of prints (v396, shipped earlier)
 
-### 1. More than one photo pair — the row of prints (v396, done)
+Consecutive prints group into a RUN of up to four and the run lays itself out by how many arrived
+(`PersonalPrintArrangement`): two as even halves, three as one upright frame with the other two
+stacked beside it, four as a square. A `PAGE` print leaves a row entirely, and the size menu has
+`SMALL_PORTRAIT` for the picture that belongs in a row. Editor and read view share the arrangement.
 
-Consecutive prints used to pair two-at-a-time, one pair only. They now group into a RUN of up to four
-consecutive prints and the run lays itself out by how many arrived (`PersonalPrintArrangement`):
+### 2. The carry animation, and the hover preview (v397, shipped earlier)
 
-- two — even halves of the measure (a pair);
-- three — one upright frame with the other two stacked beside it (whatever size ASKED to stand up
-  takes the tall slot; with none asking, the first does, so the shape is never explained away);
-- four — a square.
+In `features/personal/PersonalTodoRow.kt` plus the canvas's block wrapper: a landing GHOST measured
+from the carried block (the height of what is in hand, at the top of the target going down and at its
+bottom going up); a held shape (a print lifts at 1.08 with a −2.5° lean and a deeper shadow, a voice
+note rises evenly as a card) animated in and out rather than popping; and a snap that commits the
+order, glides the rows home on a spring and slides the carried block's remaining travel to zero before
+it lets go.
 
-A `PAGE` print leaves a row entirely (a page-wide picture is its own row), and the size menu gained
-`SMALL_PORTRAIT` — the small print that stands up — for the picture that belongs in a row rather than
-on a page of its own. Editor and read view share the arrangement, so a pair cannot come apart when the
-member stops writing.
+### 3. The attachment inside a paragraph — SHIPPED (v398, route B)
 
-### 2. The carry animation, and the hover preview (v397, done)
+**The member's answer, after being shown both routes:** take the **VisualTransformation** route — the
+one that leaves typing alone — and the attachment takes **its own print size** (the same five sizes a
+standalone print has), so a `PAGE`-sized attachment inside a paragraph takes the measure and the words
+carry on below it.
 
-Both in `features/personal/PersonalTodoRow.kt` (the drag state + the shells) and the canvas's block
-wrapper:
+The first written draft used `SpanStyle(lineHeight = …)` to make the line grow. **That does not compile**:
+`SpanStyle` carries no line height (verified against the AndroidX source — "to set paragraph level
+styling such as line height, see `ParagraphStyle`"). The reservation therefore asks for its room
+through its own FONT SIZE, converted by a MEASURED ratio (one probe line at 100sp in the paragraph's
+own face), with the space count taken at that same size because a bigger font makes a wider space too.
+A tenth again as tall on purpose: a picture lapping over the line above it reads worse than a line with
+a little air in it.
 
-- **The landing ghost.** The drop indicator was a 2dp accent line, which said "somewhere around
-  here". It is now a band of the CARRIED BLOCK'S OWN MEASURED HEIGHT (`PersonalRowDragState
-  .carriedHeight`), translucent accent with the rule drawn solid on the edge it lands on — at the TOP
-  of the target on the way down and at its BOTTOM on the way up (`goingDown`), so the preview is always
-  on the side the block is travelling towards. This is ONE pass for both kinds of block: a print being
-  stacked among prints and a voice note between paragraphs show the same preview, sized to what is in
-  hand.
-- **The held shape.** `PersonalMovableBlock` takes `heldScale` / `heldTilt` / `heldLift` from its
-  caller: a print lifts at 1.08 with a −2.5° lean and a 16dp shadow (a photograph in a hand), a voice
-  note at 1.03 with no tilt and 12dp (a card). The lift is ANIMATED through a 0..1 `raise`, so the
-  block rises into the hand and settles back down instead of popping between two sizes — the tilt
-  rides the same value.
-- **The snap.** A drop used to call `reset()` in the same frame, which zeroed the travel: the block
-  teleported the last few pixels into its new slot while every row it had pushed aside snapped back at
-  once. Now `commit()` clears the travelled range (so the rows' own shift target is 0 and a spring
-  carries them home — `shiftFor` returns early for `fromIndex < 0`, which is what stops the first row
-  taking one more step in the direction the block came from) and `settle(id)` animates whatever travel
-  is left to zero with a stiff spring before letting go of the block. Only if it is still the same
-  block, so a second pick-up during a settle is never clobbered.
+What landed (`features/personal/PersonalCanvas.kt`, `data/PersonalDoc.kt`, `ChapterNoteBridge.kt`):
 
-### 3. The attachment inside a paragraph — NOT DONE, and why
+- **The model.** `PERSONAL_INLINE_MARK` (`\uFFFC`) is the one character that means "an attachment sits
+  here", and `PersonalBlock.inlineRefs: List<String>` names the blocks in mark order. Serialized as
+  `"inr"`, omitted when empty, so every page written before this version encodes byte-for-byte as it
+  did and an older note decodes with nothing inside it.
+- **The editor.** One `VisualTransformation` + `OffsetMapping` per attachment-bearing paragraph (every
+  other paragraph gets `VisualTransformation.None`): each mark becomes a run of non-breaking spaces at
+  the size the line needs, with the caret, selection, composition, Enter, backspace and undo all mapped
+  back into the paragraph's own coordinates. The print itself is drawn over the run from the
+  `TextLayoutResult` — the reservation's REAL room, read back off the bounding box, centred in the line.
+  A tap opens the picture; the ✕ (or deleting the mark) takes it out of the sentence and puts it back on
+  a line of its own, which is also the recovery: nothing is ever lost.
+- **Where a drop goes.** `landsInsideParagraph()` = there is a caret, the line has words, and the caret
+  is not at offset 0. A picture or a finished recording dropped there lands in the sentence; on a blank
+  line (or at the very start of one) it keeps the line-of-its-own behaviour it always had.
+- **The read view.** `BasicText(inlineContent = …)` fed by `personalInlineAnnotated`, which adds the
+  string annotation Foundation's inline content is read through
+  (`androidx.compose.foundation.text.inlineContent`) on each mark's own range — nothing moves, so every
+  span, link and tap lands where it did. One key per picture (`"$PERSONAL_INLINE_MARK$n"`).
+- **Both passes** (editor and read view) skip a held attachment when they lay out blocks and when they
+  group prints, so a picture inside a sentence is never drawn twice and never opens a row of prints.
+- **The chapter note** (`ChapterNoteBridge`) is words only: the mark is taken out of the text it stands
+  in and the block that carries it is left out of the join, so a note gains no stray character and no
+  blank line.
 
-The visual the user wants is a thumbnail BETWEEN THE WORDS with the text wrapping around it. In this
-editor the prose row is a `BasicTextField(value: TextFieldValue, onValueChange = …)` — the LEGACY
-string API — and that API has no inline content: Compose's `addInlineContent` (which is what makes a
-composable sit in a text flow and the text wrap around it) lives on the NEW `TextFieldState` API
-(`TextFieldBuffer.addInlineContent`). The read-only side is easy (`BasicText(inlineContent = …)` with
-a `Placeholder`), but the editor is where the member types, and there the only routes are:
+### 4. Queued but NOT started (the member's next asks, in their own order)
 
-- **A — migrate the prose field to `TextFieldState`** (the supported route). The prose block becomes
-  a real text field with inline placeholders. Cost: `PersonalEditorState` holding the writing as a
-  plain `String` + a per-character mask `IntArray`, with split/merge/Enter/backspace/select-all/undo
-  all indexed against that string. Every one of those touches has to be re-expressed against a
-  `TextFieldBuffer`. Largest single change to the writing page since it was written.
-- **B — the display transform**: keep the stored text, and show the field a mapped string (the marker
-  character replaced by a run of spaces the width of the thumbnail, so the field's own layout wraps
-  around it), with a real↔display index map on every edit, selection and composition range, and the
-  thumbnail drawn over the reserved run from the field's `TextLayoutResult`. Contained to blocks that
-  actually hold an attachment, but it sits on the typing path — and a wrong index there corrupts
-  someone's words, which no CI run can catch.
+Their own answer to the API question has not been asked yet — the anime ask below is the one that wants
+a decision, so ask before writing it.
 
-Everything else on this page is already in place for it (the block model splits a paragraph around an
-attachment dropped at the caret, and the two views share one renderer), so the work is the typing
-path, not the model. Asking before writing it.
-
-### 3a. The member's answer (recorded, so the next session starts from it)
-
-**Route A — rebuild the prose field on Compose's new `TextFieldState` API.** And the inline
-attachment takes ITS OWN PRINT SIZE: the same five sizes a standalone print has (`PAGE`, `HALF`,
-`PORTRAIT`, `SMALL`, `SMALL_PORTRAIT`), so a `PAGE`-sized attachment inside a paragraph takes the
-given measure and the words carry on below it. That is the member's own choice of consequence, and
-the flow must simply grow to hold it.
-
-### 3b. What the API actually offers (verified against the docs, not memory)
-
-This project is on Compose BOM `2026.05.01` (foundation `1.11.2`), well past the 1.8 release that
-introduced inline content in a text FIELD, so the pieces exist:
-
-- `TextFieldBuffer.addStyle(spanStyle, start, end)` — **only permitted inside an `OutputTransformation`**
-  unless `ComposeFoundationFlags.isBasicTextFieldStyledTextEnabled` is on; it is the supported way to
-  paint per-character marks in the new field, and the tracked-range form
-  (`addStyle(spanStyle, range, ExpandPolicy) -> TrackedRange<SpanStyle>`, with `spanStyle`,
-  `textRange`, `expandPolicy` as mutable properties and `getSpanStyles(range)` to read back)
-  REPLACES the per-character `IntArray` mask this page has used for marks.
-- `InlineTextContent(placeholder: Placeholder, children: @Composable (String) -> Unit)` — the placeholder
-  is what reserves the room in the text line ("different from a regular composable, a Placeholder is
-  also needed for text layout to reserve space"), which is exactly the printing-frame-shaped hole an
-  attached print needs, at whatever size the print's own key says.
-- `TextFieldState` + `TextFieldBuffer` (replace/insert/delete/placeCursor*/selectAll,
-  `originalText`/`originalSelection`/`revertAllChanges`, `ChangeList`) is the editing model the field is
-  driven by now.
-
-### 3c. The migration, in the order it should be done
-
-1. **The state, not the view.** One `TextFieldState` per prose block id, created from the block's
-   stored text; the DOC stays the source of truth and the existing plumbing (`onFieldChange`,
-   `mask`, `selection`, split/merge, undo, save) is fed from a snapshot sync, so nothing outside this
-   field has to change in the same step. Marks move to an `OutputTransformation` `.addStyle(…)` pass
-   built from the block's mask runs — the mask itself can stay the stored shape until step 4.
-2. **The inline content.** `inlineRefs: List<String>` on `PersonalBlock` (serialized with the rest),
-   the attachment inserted at the caret as its placeholder, and the placeholder's `children` drawing
-   the print at its own size — the same `PersonalPhotoBlock`/voice strip the standalone row draws, so
-   a print looks like itself inline or not.
-3. **The read view.** `BasicText(inlineContent = …)` with one `InlineTextContent` per placeholder, so
-   the page reads back exactly what was written (the read view and the editor must share the
-   placeholder's size rule or an inline print will jump on switch).
-4. **Then the marks.** Fold the mask into the field's own tracked spans (step 1's output pass becomes
-   the real store), which is what makes a mark survive inside an attachment-bearing paragraph without
-   a parallel index table.
-
-Each step is a CI cycle of its own: the new-API opt-ins, the flag name and the placeholder-measure
-rule cannot be confirmed from here, only by the compiler.
+1. **EPUB emphasis.** Inline `<b>`/`<i>`/`<em>`/`<strong>` inside an EPUB paragraph: `stripMarkup`
+   drops every tag, so emphasis never survives. Needs the current chapter's paragraphs to carry their
+   runs into the reader's spans (the reader already draws bold/italic spans from `mustRead`/marks).
+2. **The redrawn avatars** (`features/community/SocialAvatar.kt`): a line above the shoulders in some
+   portraits, poses that read oddly, the EYES and the SMILE on some of them, the **leaf** icon being
+   bad and the **moon** reading as a "C" — the member wants the leaf changed, and the moon redrawn as
+   a crescent. (The 20 portraits + 8 icons are the v397-era redraw; this is a correction pass.)
+3. **The to-do checkbox cycle.** When a row is NOT selected the next Enter re-selects the box, so the
+   armed state lingers instead of ending with the selection. The box's own rule lives in
+   `PersonalEditorState.setChecked` / `lineStartsNewRow` / the v393e blank-row rule — the carry-over of
+   `armed` across Enter is the suspect.
+4. **Anime on the series rail.** The member wants anime to use the SAME API the series sheet uses
+   (which they say is fast and correct) and the same UI as the series sheet. The series sheet reads
+   TVMaze + Jikan through the shared sheet; anime currently goes through its own path. **Ask which one
+   the series sheet actually reads from** before rewriting the anime path, and whether the anime
+   episode list should keep the watched marks/likes it has now.
 
 ## Follow-ups from earlier batches (still open, unchanged)
 
-- Inline bold/italic inside an EPUB paragraph (`stripMarkup` drops every tag).
 - Series/anime episode data is mostly fetched rather than authored.
-- More than one photo pair is now supported in a row; a page with more than four consecutive prints
-  starts a second row.
-- The to-do page's own tick box, the reader's sheet and the avatars shipped in earlier batches.
+- A page with more than four consecutive prints starts a second row (by design).
+- The reader's places sheet, the to-do tick box and the avatar redraw shipped in earlier batches; the
+  avatar correction pass is queued above.

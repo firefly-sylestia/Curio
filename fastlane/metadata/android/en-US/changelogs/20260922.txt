@@ -1,4 +1,6 @@
 FIX:
+- Writing: taking a picture out of a sentence closes the words up — deleting the space it stood in (or its ✕ on the thumbnail) hands the picture back to a line of its own instead of leaving a hole in the paragraph.
+- Writing: a chapter note is words only — a picture sitting inside a paragraph puts no stray mark in the middle of the note's text, and no blank line under it.
 - Reading: panning a zoomed PDF page no longer turns it — the drag the page could take is claimed from the first movement (before it reached Android's own tap-slop) instead of from the second event, which is what let the pager read the rest as a page turn; a drag the page has no room for is still handed back, so an edge swipe still changes pages while zoomed.
 - Reading: a zoomed PDF page cannot be dragged off the screen — the pan stops at the page's own edge, measured from the page as it is actually drawn at that zoom rather than from the box around it.
 - Reading: a zoomed page in the continuous vertical reader no longer paints over the pages above and below it — the page's own box grows with the zoom, so a magnified page is a bigger page in the flow and the layout always keeps them one after the other. Scrolling down a magnified page is the scroll itself, and a sideways drag still reaches the page's left and right edges.
@@ -86,6 +88,8 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Writing: a picture or a voice note lands INSIDE the sentence you are writing — drop it with the caret in a line that already has words and it sits between them as a thumbnail with the text wrapping around it, at the size its own frame says, and the caret stays in the same paragraph. On a blank line, or at the start of one, it still takes a line of its own as before.
+- Reading: an attachment inside a paragraph reads back the way it was written — the thumbnail sits between the words on the page you read as well, so a picture dropped into a sentence is still in that sentence when the page is opened again.
 - Reading: anime opens the series sheet — its own episode list from MyAnimeList's data, with the watched marks, the likes and the shelf toggles a series has, and the reveal card previews those episodes under its poster.
 - Reading: a "movie" that is really a show lists its episodes — the sheet asks a source that can actually tell a film from a series, a film keeps the film sheet it had, and the two can never show at once.
 - Setup: a free TMDB key is now read from `TMDB_API_KEY` — with it the film and anime sheets resolve posters from TMDB, and a film's facts and a show's episode list come from there too; without it the keyless providers answer exactly as before. `.github/AGENTS.md` walks the whole setup, secret included.

@@ -1,5 +1,6 @@
 package com.curio.app.features.personal
 
+import com.curio.app.data.PERSONAL_INLINE_MARK
 import com.curio.app.data.PersonalBlock
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.TextSpan
@@ -28,27 +29,65 @@ import com.curio.app.data.newBlockId
  * in the text is a block on the way back — so a note written in the sheet
  * arrives on the shelf as paragraphs, and a review written on the canvas
  * arrives in the sheet as lines.
+ *
+ * v398 — AND AN ATTACHMENT INSIDE A PARAGRAPH IS NOT A LINE OF THE NOTE. A note
+ * holds text, so a picture that sits between the words cannot be carried: its
+ * mark is taken out of the text it stands in (or the note would read with a
+ * stray character in the middle of a sentence), and the block that carries the
+ * picture is left out of the join entirely (or the note would gain a blank line
+ * for a picture that is not on one).
  */
+
+/** A document's blocks as a chapter note sees them: text only, no marks. */
+private fun PersonalDoc.noteLines(): List<Pair<String, IntArray>> {
+    val held = blocks.flatMap { it.inlineRefs }.toSet()
+    return blocks
+        .filterNot { it.isPhoto || it.id in held }
+        .map { block ->
+            val text = block.text
+            val mask = runsToMask(text.length, block.runs)
+            val marks = text.indices.filter { text[it] == PERSONAL_INLINE_MARK }
+            if (marks.isEmpty()) {
+                text to mask
+            } else {
+                val out = StringBuilder(text.length - marks.size)
+                val outMask = ArrayList<Int>(text.length - marks.size)
+                var cursor = 0
+                marks.forEach { at ->
+                    while (cursor < at) {
+                        out.append(text[cursor])
+                        outMask.add(mask.getOrElse(cursor) { 0 })
+                        cursor++
+                    }
+                    cursor = at + 1
+                }
+                while (cursor < text.length) {
+                    out.append(text[cursor])
+                    outMask.add(mask.getOrElse(cursor) { 0 })
+                    cursor++
+                }
+                out.toString() to outMask.toIntArray()
+            }
+        }
+}
 
 /** The note's plain text for a stored chapter review. */
 internal fun chapterNoteText(doc: PersonalDoc): String =
-    doc.blocks.filterNot { it.isPhoto }.joinToString("\n") { it.text }
+    doc.noteLines().joinToString("\n") { it.first }
 
 /** The note's rich runs for a stored chapter review. */
 internal fun chapterNoteSpans(doc: PersonalDoc): List<TextSpan> {
     val spans = ArrayList<TextSpan>()
     var offset = 0
     var first = true
-    doc.blocks.forEach { block ->
-        if (block.isPhoto) return@forEach
+    doc.noteLines().forEach { (text, mask) ->
         if (!first) offset += 1 // the newline that joined the blocks
         first = false
-        val mask = runsToMask(block.text.length, block.runs)
         var i = 0
-        while (i < block.text.length) {
+        while (i < text.length) {
             val flags = mask[i]
             var j = i + 1
-            while (j < block.text.length && mask[j] == flags) j++
+            while (j < text.length && mask[j] == flags) j++
             if (flags != 0) {
                 spans.add(
                     TextSpan(
@@ -63,7 +102,7 @@ internal fun chapterNoteSpans(doc: PersonalDoc): List<TextSpan> {
             }
             i = j
         }
-        offset += block.text.length
+        offset += text.length
     }
     return spans
 }
