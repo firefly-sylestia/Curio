@@ -268,8 +268,10 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 // "You" opens, without a detour through Settings.
                 navController.navigate(CurioRoutes.PROFILE) { launchSingleTop = true }
             },
-            onReport = { reporting = true },
-            onBan = { banSheet = true },
+            onReport = { reporting = true },                            onBan = {
+                                error = null
+                                banSheet = true
+                            },
             onLiftBan = { liftingBan = true },
             onBlock = { confirmBlock = true }
         )
@@ -441,6 +443,10 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 memberName = person?.label ?: "this member",
                 currentKind = targetKind,
                 busy = moderationBusy,
+                // What the server said, INSIDE the sheet. A refusal used to be
+                // written on the page behind it, where nobody reads it while a
+                // dialog is up.
+                error = error,
                 onDismiss = { if (!moderationBusy) banSheet = false },
                 onConfirm = { kind, reason, hours ->
                     moderationBusy = true
@@ -457,7 +463,12 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                     }
                 },
                 onLift = if (targetKind.isNotBlank()) {
-                    { liftingBan = true }
+                    {
+                        // The ban sheet steps aside for the lift: two dialogs on
+                        // the same subject stacked on each other is one too many.
+                        banSheet = false
+                        liftingBan = true
+                    }
                 } else null
             )
         }
@@ -474,6 +485,7 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 confirmLabel = "Lift ban",
                 destructive = false,
                 busy = moderationBusy,
+                error = error,
                 onDismiss = { if (!moderationBusy) liftingBan = false },
                 onConfirm = { reason, _ ->
                     moderationBusy = true

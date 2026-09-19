@@ -2091,6 +2091,47 @@ begin
     values (actor, 'remove_admin', 'user', p_user_id, p_user_id);
 end $$;
 
+/**
+ * Deletes every report the team has already decided on.
+ *
+ * The queue is a work list, not an archive: once a report has been dismissed or
+ * resolved, its row is finished business, and the queue keeps nothing but the
+ * audit trail in `moderation_actions` (which is where "what happened to this
+ * report" is answered from anyway). Open reports are NEVER touched — the action
+ * takes them out of the count it deletes, so a sweep can never throw away a
+ * report nobody has read yet.
+ *
+ * Returns how many rows went, so the app can say what it did.
+ */
+create or replace function public.curio_moderate_delete_reports()
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    actor uuid := auth.uid();
+    v_deleted integer := 0;
+begin
+    if actor is null then
+        raise exception 'curio: sign in first';
+    end if;
+    if not public.curio_admin_can('reports') then
+        raise exception 'curio: you do not have permission to handle reports';
+    end if;
+    delete from public.community_reports where status <> 'open';
+    get diagnostics v_deleted = row_count;
+    if v_deleted > 0 then
+        insert into public.moderation_actions (actor, action, target_kind, reason)
+        values (actor, 'delete_handled_reports', 'report',
+                v_deleted || ' handled reports deleted from the queue');
+    end if;
+    return v_deleted;
+end $$;
+
+revoke all on function public.curio_moderate_delete_reports() from public, anon;
+grant execute on function public.curio_moderate_delete_reports() to authenticated;
+
 revoke all on function public.curio_file_report(text, uuid, text, text) from public, anon;
 grant execute on function public.curio_file_report(text, uuid, text, text) to authenticated;
 revoke all on function public.curio_handle_report(uuid, text, text, text) from public, anon;

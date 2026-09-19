@@ -114,9 +114,15 @@ fun ModerationScreen(navController: NavController) {
     // The member whose ban sheet is open: id, the name to show, and the tier
     // already in force (blank when there is none).
     var banTarget by remember { mutableStateOf<Triple<String, String, String>?>(null) }
-    var lifting by remember { mutableStateOf<CommunityBan?>(null) }
+    // The member whose ban is being lifted: their id and the name to show. It is
+    // held as the pair rather than as a row of the ban list, because the lift is
+    // reachable from the QUEUE too (see the ban sheet), where the list has never
+    // been read — a lift that needed the list was a lift that did nothing.
+    var lifting by remember { mutableStateOf<Pair<String, String>?>(null) }
     // Open reports lead; "everything" is one tap away.
     var openOnly by remember { mutableStateOf(true) }
+    // The clear-the-queue confirm (handled reports only; see applyDeleteHandled).
+    var clearingHandled by remember { mutableStateOf(false) }
     // The report + action a reason sheet is open for.
     var acting by remember { mutableStateOf<Pair<CommunityReport, String>?>(null) }
     // The admin whose permissions are being edited (null row = a new admin).
@@ -124,6 +130,71 @@ fun ModerationScreen(navController: NavController) {
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
     var loaded by remember { mutableStateOf(false) }
+
+    /**
+     * Takes a queue read and pulls in everything a row needs to show it: the
+     * posts, the replies and the people the reports name. The first load and
+     * every refresh after a decision share this, so the two can never fill the
+     * page with different things.
+     */
+    suspend fun absorbQueue(active: String, me: String, rows: List<CommunityReport>) {
+        reports = rows
+        error = null
+        val cardIds = rows.mapNotNull { it.cardId }
+        val commentIds = rows.mapNotNull { it.commentId }
+        val peopleIds = (rows.mapNotNull { it.targetUserId } + rows.map { it.reporterId })
+            .filter { it.isNotBlank() }
+            .distinct()
+        if (cardIds.isNotEmpty()) {
+            CommunityApi.cardsByIds(active, cardIds, me)
+                .onSuccess { list -> cardsById = list.associateBy { it.id } }
+        }
+        if (commentIds.isNotEmpty()) {
+            CommunityApi.commentsByIds(active, commentIds, me)
+                .onSuccess { list -> repliesById = list.associateBy { it.id } }
+        }
+        if (peopleIds.isNotEmpty()) {
+            SocialApi.people(active, peopleIds)
+                .onSuccess { map -> peopleById = peopleById + map }
+        }
+    }
+
+    /**
+     * Re-reads the queue after a decision.
+     *
+     * The FIRST read is guarded (it also verifies the team row and reads the
+     * roster), so every action used to call it and get nothing back: a report
+     * that had just been dismissed or resolved stayed in the list until the
+     * screen was reopened, which is a queue that answers a tap by looking
+     * untouched.
+     */
+    suspend fun refreshQueue(active: String, me: String) {
+        CommunityApi.reported(active).fold(
+            onSuccess = { rows -> absorbQueue(active, me, rows) },
+            onFailure = { failure -> error = communityMessage(failure) }
+        )
+    }
+
+    /**
+     * Re-reads the roster. The first read is quiet about a failure (the queue
+     * works without the roster, and a moderator looking at reports should not be
+     * shown an error about a list they are not reading), while a change the
+     * moderator just made reports what went wrong.
+     */
+    suspend fun refreshTeam(active: String, quiet: Boolean) {
+        CommunityApi.admins(active).fold(
+            onSuccess = { rows ->
+                team = rows
+                val ids = rows.map { it.userId }
+                if (ids.isNotEmpty()) {
+                    SocialApi.people(active, ids).onSuccess { map ->
+                        peopleById = peopleById + map
+                    }
+                }
+            },
+            onFailure = { failure -> if (!quiet) error = communityMessage(failure) }
+        )
+    }
 
     suspend fun load(active: String, me: String) {
         if (loaded) return@load
@@ -136,44 +207,8 @@ fun ModerationScreen(navController: NavController) {
                     loading = false
                     return@fold
                 }
-                CommunityApi.reported(active).fold(
-                    onSuccess = { rows ->
-                        reports = rows
-                        error = null
-                        val cardIds = rows.mapNotNull { it.cardId }
-                        val commentIds = rows.mapNotNull { it.commentId }
-                        val peopleIds = (rows.mapNotNull { it.targetUserId } + rows.map { it.reporterId })
-                            .filter { it.isNotBlank() }
-                            .distinct()
-                        if (cardIds.isNotEmpty()) {
-                            CommunityApi.cardsByIds(active, cardIds, me)
-                                .onSuccess { list -> cardsById = list.associateBy { it.id } }
-                        }
-                        if (commentIds.isNotEmpty()) {
-                            CommunityApi.commentsByIds(active, commentIds, me)
-                                .onSuccess { list -> repliesById = list.associateBy { it.id } }
-                        }
-                        if (peopleIds.isNotEmpty()) {
-                            SocialApi.people(active, peopleIds)
-                                .onSuccess { map -> peopleById = peopleById + map }
-                        }
-                    },
-                    onFailure = { error = it.message }
-                )
-                if (row.allows("admins")) {
-                    CommunityApi.admins(active).fold(
-                        onSuccess = { rows ->
-                            team = rows
-                            val ids = rows.map { it.userId }
-                            if (ids.isNotEmpty()) {
-                                SocialApi.people(active, ids).onSuccess { map ->
-                                    peopleById = peopleById + map
-                                }
-                            }
-                        },
-                        onFailure = { /* the queue still works without the roster */ }
-                    )
-                }
+                refreshQueue(active, me)
+                if (row.allows("admins")) refreshTeam(active, quiet = true)
             },
             onFailure = { error = it.message ?: "Couldn't verify moderation access." }
         )
@@ -224,7 +259,7 @@ fun ModerationScreen(navController: NavController) {
                         if (hours == null) " until it is lifted." else " for a while."
                     banTarget = null
                     loadBans()
-                    load(active, myUserId.orEmpty())
+                    refreshQueue(active, myUserId.orEmpty())
                 },
                 onFailure = { failure -> error = communityMessage(failure) }
             )
@@ -243,7 +278,7 @@ fun ModerationScreen(navController: NavController) {
                     lifting = null
                     banTarget = null
                     loadBans()
-                    load(active, myUserId.orEmpty())
+                    refreshQueue(active, myUserId.orEmpty())
                 },
                 onFailure = { failure -> error = communityMessage(failure) }
             )
@@ -270,7 +305,7 @@ fun ModerationScreen(navController: NavController) {
                         else -> "Report reopened."
                     }
                     acting = null
-                    load(active, myUserId.orEmpty())
+                    refreshQueue(active, myUserId.orEmpty())
                 },
                 onFailure = { error = it.message }
             )
@@ -278,8 +313,41 @@ fun ModerationScreen(navController: NavController) {
         }
     }
 
+    /**
+     * Clears the finished half of the queue.
+     *
+     * The queue is a work list, not an archive: a report that has been dismissed
+     * or resolved is finished business, and the record of what was decided lives
+     * in the moderation history either way. OPEN reports are never touched (the
+     * server takes them out of the delete itself), so a sweep can never throw
+     * away a report nobody has read.
+     */
+    fun applyDeleteHandled() {
+        val active = token ?: return
+        busy = true
+        scope.launch {
+            CommunityApi.deleteHandledReports(active).fold(
+                onSuccess = { count ->
+                    notice = when (count) {
+                        0 -> "There was nothing handled left to clear."
+                        1 -> "1 handled report cleared."
+                        else -> "$count handled reports cleared."
+                    }
+                    clearingHandled = false
+                    refreshQueue(active, myUserId.orEmpty())
+                },
+                onFailure = { failure ->
+                    error = communityMessage(failure)
+                    clearingHandled = false
+                }
+            )
+            busy = false
+        }
+    }
+
     val visible = reports.filter { if (openOnly) it.open else true }
     val openCount = reports.count { it.open }
+    val handledCount = reports.count { !it.open }
 
     Box(
         modifier = Modifier
@@ -369,7 +437,36 @@ fun ModerationScreen(navController: NavController) {
                 }
 
                 if (tab == 0) {
-                    item(key = "queue-heading") { SettingsSectionHeading("Reports") }
+                    item(key = "queue-heading") {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            SettingsSectionHeading(
+                                if (openCount > 0) "Reports · $openCount waiting" else "Reports",
+                                // The heading's own default fills the width, which
+                                // would push the Clear pill off the row.
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            Spacer(Modifier.weight(1f))
+                            // ── THE HOUSEKEEPING, WHERE IT IS WANTED ────────────
+                            // Clearing is the one action that is about the LIST
+                            // rather than about a report, so it sits on the
+                            // list's own head and nowhere else, and it only
+                            // appears once there is something to clear (a
+                            // button that would do nothing is not a button).
+                            if (handledCount > 0) {
+                                SocialPill(
+                                    label = if (handledCount == 1) "Clear 1 handled"
+                                            else "Clear $handledCount handled",
+                                    icon = CurioIcons.Delete,
+                                    tone = SocialPillTone.NEUTRAL,
+                                    enabled = !busy,
+                                    onClick = { clearingHandled = true }
+                                )
+                            }
+                        }
+                    }
 
                     notice?.let { line ->
                         item(key = "notice") { SocialNote(line, false) }
@@ -385,7 +482,8 @@ fun ModerationScreen(navController: NavController) {
                                     CurioIcons.TaskAlt,
                                     if (openOnly) "Nothing waiting" else "No reports yet",
                                     if (openOnly) {
-                                        "Every report has been handled. Switch to All to look back."
+                                        "Every report has been handled. Switch to All to look back, " +
+                                            "and clear the handled ones from the list's own head."
                                     } else {
                                         "Reports members file on posts, replies and members land here."
                                     }
@@ -408,9 +506,21 @@ fun ModerationScreen(navController: NavController) {
                             },
                             canHide = canBans,
                             busy = busy,
-                            onRemove = { acting = report to "remove_content" },
-                            onHide = { acting = report to "hide_author" },
-                            onDismiss = { acting = report to "dismiss" },
+                            // Every sheet opens on a clean slate: an old refusal
+                            // belongs to the decision that is over, not to the one
+                            // about to be made.
+                            onRemove = {
+                                error = null
+                                acting = report to "remove_content"
+                            },
+                            onHide = {
+                                error = null
+                                acting = report to "hide_author"
+                            },
+                            onDismiss = {
+                                error = null
+                                acting = report to "dismiss"
+                            },
                             onReopen = { applyReportAction("reopen", report, null, null) }
                         )
                     }
@@ -449,7 +559,7 @@ fun ModerationScreen(navController: NavController) {
                                     CommunityApi.removeAdmin(active, row.userId).fold(
                                         onSuccess = {
                                             notice = "Removed from the team."
-                                            load(active, myUserId.orEmpty())
+                                            refreshTeam(active, quiet = false)
                                         },
                                         onFailure = { error = it.message }
                                     )
@@ -497,13 +607,28 @@ fun ModerationScreen(navController: NavController) {
                         ModerationBanRow(
                             ban = ban,
                             busy = busy,
+                            // ── ONE OPEN, AND THE DECISIONS INSIDE IT ──────────
+                            // The row used to carry its own "Change tier" and
+                            // "Lift ban" buttons as well as a profile link, which
+                            // made the list a control panel before it was a
+                            // record. Open is the door; changing the tier and
+                            // lifting the ban are both in the sheet behind it.
                             onOpen = {
+                                error = null
+                                banTarget = Triple(
+                                    ban.userId,
+                                    ban.label,
+                                    // A lapsed or lifted ban is not in force, so the
+                                    // sheet opens ready to set one again — not on
+                                    // "change" a ban nobody is under.
+                                    if (ban.active) ban.kind else ""
+                                )
+                            },
+                            onProfile = {
                                 navController.navigate(CurioRoutes.socialProfile(ban.userId)) {
                                     launchSingleTop = true
                                 }
-                            },
-                            onChange = { banTarget = Triple(ban.userId, ban.label, ban.kind) },
-                            onLift = { lifting = ban }
+                            }
                         )
                     }
                 }
@@ -531,6 +656,7 @@ fun ModerationScreen(navController: NavController) {
                 reasons = ModerationReasons.REMOVAL,
                 confirmLabel = "Remove",
                 busy = busy,
+                error = error,
                 onDismiss = { if (!busy) acting = null },
                 onConfirm = { reason, note -> applyReportAction(action, report, reason, note) }
             )
@@ -540,6 +666,7 @@ fun ModerationScreen(navController: NavController) {
             "hide_author" -> ModerationBanDialog(
                 memberName = author ?: "this member",
                 busy = busy,
+                error = error,
                 onDismiss = { if (!busy) acting = null },
                 onConfirm = { kind, reason, hours ->
                     val active = token ?: return@ModerationBanDialog
@@ -564,7 +691,7 @@ fun ModerationScreen(navController: NavController) {
                                     notice = "Banned: ${banTierLabel(kind)}."
                                     acting = null
                                     loadBans()
-                                    load(active, myUserId.orEmpty())
+                                    refreshQueue(active, myUserId.orEmpty())
                                 },
                                 onFailure = { error = communityMessage(it) }
                             )
@@ -580,7 +707,7 @@ fun ModerationScreen(navController: NavController) {
                                     notice = "Banned: ${banTierLabel(kind)}."
                                     acting = null
                                     loadBans()
-                                    load(active, myUserId.orEmpty())
+                                    refreshQueue(active, myUserId.orEmpty())
                                 },
                                 onFailure = { error = communityMessage(it) }
                             )
@@ -603,6 +730,7 @@ fun ModerationScreen(navController: NavController) {
                 destructive = false,
                 reasonRequired = false,
                 busy = busy,
+                error = error,
                 onDismiss = { if (!busy) acting = null },
                 onConfirm = { reason, note -> applyReportAction("dismiss", report, reason, note) }
             )
@@ -615,27 +743,48 @@ fun ModerationScreen(navController: NavController) {
             memberName = name,
             currentKind = currentKind,
             busy = busy,
+            error = error,
             onDismiss = { if (!busy) banTarget = null },
             onConfirm = { kind, reason, hours -> applyBan(userId, kind, reason, hours) },
             // Only while a tier is actually in force: “lift the ban instead”
-            // makes no sense on a member who is not banned.
+            // makes no sense on a member who is not banned. The lift carries the
+            // name with it, so it needs nothing from the ban list.
             onLift = if (currentKind.isNotBlank()) {
-                { lifting = bans.firstOrNull { it.userId == userId } }
+                {
+                    lifting = userId to name
+                    banTarget = null
+                }
             } else null
         )
     }
 
-    lifting?.let { ban ->
+    lifting?.let { (userId, name) ->
         ModerationReasonDialog(
-            title = "Lift the ban on ${ban.label}?",
+            title = "Lift the ban on $name?",
             subtitle = "Nothing stays paused for them. The record of the ban remains in their " +
                 "moderation history, which is what stops a lift from erasing what happened.",
             reasons = ModerationReasons.LIFT,
             confirmLabel = "Lift ban",
             destructive = false,
             busy = busy,
+            error = error,
             onDismiss = { if (!busy) lifting = null },
-            onConfirm = { reason, _ -> applyLift(ban.userId, reason) }
+            onConfirm = { reason, _ -> applyLift(userId, reason) }
+        )
+    }
+
+    // ── Clearing the finished half of the queue ───────────────────────
+    if (clearingHandled) {
+        SocialConfirmDialog(
+            title = if (handledCount == 1) "Clear 1 handled report?"
+                    else "Clear $handledCount handled reports?",
+            body = "Reports that were already dismissed or resolved leave the list. Open " +
+                "reports stay exactly where they are, the content they were filed on is " +
+                "untouched, and what was decided remains in the moderation history.",
+            confirmLabel = "Clear",
+            busy = busy,
+            onDismiss = { if (!busy) clearingHandled = false },
+            onConfirm = { applyDeleteHandled() }
         )
     }
 
@@ -664,7 +813,7 @@ fun ModerationScreen(navController: NavController) {
                         onSuccess = {
                             notice = "${person.label} ${if (existing == null) "joined the team" else "was updated"}."
                             permissionTarget = null
-                            load(active, myUserId.orEmpty())
+                            refreshTeam(active, quiet = false)
                         },
                         onFailure = { error = it.message }
                     )
@@ -685,20 +834,24 @@ private fun banNote(kind: String, hours: Int?): String =
     }
 
 /**
- * One row of the BAN LIST: who, at which tier, why, by whom — and the two
- * moves a moderator can make from here (change the tier, lift it).
+ * One row of the BAN LIST: who, at which tier, why, by whom — and ONE door into
+ * everything a moderator can do about it.
  *
- * A lapsed or lifted ban keeps its row, drawn quiet and without actions: the
- * list is a record as much as a control panel, and a member who was banned for
- * a week should still be findable the day after it expired.
+ * The row used to carry its own "Change tier" and "Lift ban" buttons next to a
+ * profile link, which made the list read as a wall of controls rather than the
+ * record it also is. Open is the door: the ladder, the clock and the way out
+ * are all inside the sheet it opens, and the avatar (with the name beside it)
+ * is the profile. A lapsed or lifted ban keeps its row — a member who was banned
+ * for a week should still be findable the day after it expired — and opens the
+ * same sheet ready to set a tier again, outlined rather than filled because
+ * nothing is in force.
  */
 @Composable
 private fun ModerationBanRow(
     ban: CommunityBan,
     busy: Boolean,
     onOpen: () -> Unit,
-    onChange: () -> Unit,
-    onLift: () -> Unit
+    onProfile: () -> Unit
 ) {
     val accent = if (ban.active) settingsRoseAccent()
                  else MaterialTheme.colorScheme.onSurfaceVariant
@@ -718,9 +871,14 @@ private fun ModerationBanRow(
                 SocialAvatar(
                     style = ban.avatarStyle,
                     avatarSize = 40.dp,
-                    onClick = onOpen
+                    onClick = onProfile
                 )
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable(onClick = onProfile)
+                ) {
                     Text(
                         text = ban.label.ifBlank { "A member" },
                         style = MaterialTheme.typography.bodyMedium.copy(
@@ -774,36 +932,22 @@ private fun ModerationBanRow(
                 )
             }
 
-            if (ban.active) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ModerationRowAction(
-                        label = "Change tier",
-                        primary = false,
-                        enabled = !busy,
-                        onClick = onChange
-                    )
-                    ModerationRowAction(
-                        label = "Lift ban",
-                        primary = true,
-                        enabled = !busy,
-                        onClick = onLift
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        text = "Open profile",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = curioDialogActionColor(),
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .clickable(onClick = onOpen)
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    )
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ModerationRowAction(
+                    label = "Open",
+                    primary = ban.active,
+                    enabled = !busy,
+                    onClick = onOpen
+                )
+                Spacer(Modifier.weight(1f))
+                ModerationQuietAction(
+                    label = "Profile",
+                    enabled = true,
+                    onClick = onProfile
+                )
             }
         }
     }
@@ -838,6 +982,30 @@ private fun relativeStamp(millis: Long, future: Boolean = false): String {
         future -> "in $text"
         else -> "$text ago"
     }
+}
+
+/**
+ * A quiet action: a plain label, no fill and no border.
+ *
+ * The moderation rows have a primary pair at most, and everything that reaches
+ * past the row's own subject is asked for here instead of as another button.
+ */
+@Composable
+private fun ModerationQuietAction(
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+        color = if (enabled) curioDialogActionColor()
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+    )
 }
 
 /** One small action in a ban row: filled = the main move, outlined = the other. */
@@ -892,7 +1060,10 @@ private fun ModerationTabPill(label: String, selected: Boolean, onClick: () -> U
 }
 
 /**
- * One queue row: what was reported, why, by whom, and the three decisions.
+ * One queue row: what was reported, why, by whom, and the two decisions.
+ *
+ * Remove and Dismiss are the pair (each opens the reason sheet that writes the
+ * record); acting on the author is the quiet line beside them.
  */
 @Composable
 private fun ModerationReportRow(
@@ -972,32 +1143,44 @@ private fun ModerationReportRow(
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // ── THE TWO DECISIONS, AND THE DOOR THAT REACHES FURTHER ─────────
+            //
+            // A report is answered one of two ways: it was worth acting on
+            // (Remove) or it was not (Dismiss). Those are the row's pair, and
+            // the reason sheet behind each of them is where the record gets
+            // written. Acting on the AUTHOR reaches past this report to the
+            // person, so it is a quiet line rather than a third button of the
+            // same weight — a row where every action shouts is a row where none
+            // of them is read (member decision: "keep the sheet for both" and
+            // let Remove and Dismiss be the two primary buttons).
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 if (report.open) {
-                    if (canRemove) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (canRemove) {
+                            SocialPill(
+                                label = "Remove",
+                                icon = CurioIcons.Delete,
+                                tone = SocialPillTone.DESTRUCTIVE,
+                                enabled = !busy,
+                                onClick = onRemove
+                            )
+                        }
                         SocialPill(
-                            label = "Remove",
-                            icon = CurioIcons.Delete,
-                            tone = SocialPillTone.DESTRUCTIVE,
+                            label = "Dismiss",
+                            icon = CurioIcons.Check,
+                            tone = SocialPillTone.ACCENT,
                             enabled = !busy,
-                            onClick = onRemove
+                            onClick = onDismiss
                         )
                     }
+                    Spacer(Modifier.weight(1f))
                     if (canHide) {
-                        SocialPill(
-                            label = "Hide author",
-                            icon = CurioIcons.VisibilityOff,
-                            tone = SocialPillTone.DESTRUCTIVE,
+                        ModerationQuietAction(
+                            label = "Hide the author",
                             enabled = !busy,
                             onClick = onHide
                         )
                     }
-                    SocialPill(
-                        label = "Dismiss",
-                        icon = CurioIcons.Check,
-                        enabled = !busy,
-                        onClick = onDismiss
-                    )
                 } else {
                     SocialPill(
                         label = "Reopen",

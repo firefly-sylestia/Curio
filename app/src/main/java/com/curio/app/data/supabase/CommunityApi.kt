@@ -470,6 +470,7 @@ object CommunityApi {
     private const val RPC_LIFT_BAN = "/rest/v1/rpc/curio_moderate_lift_ban"
     private const val RPC_LIST_BANS = "/rest/v1/rpc/curio_moderate_list_bans"
     private const val RPC_MEMBER_HISTORY = "/rest/v1/rpc/curio_moderate_member_history"
+    private const val RPC_DELETE_HANDLED_REPORTS = "/rest/v1/rpc/curio_moderate_delete_reports"
     private const val RPC_SET_ADMIN = "/rest/v1/rpc/curio_set_community_admin"
     private const val RPC_REMOVE_ADMIN = "/rest/v1/rpc/curio_remove_community_admin"
 
@@ -1091,6 +1092,21 @@ object CommunityApi {
      * self-ban and refuses the community's owner — the client's own copy of
      * those rules only decides what to SHOW.
      */
+    /**
+     * The queue's own housekeeping: every report already decided on goes, open
+     * ones stay. The server counts the rows and answers with the number, so the
+     * app can say what it did rather than guess.
+     */
+    suspend fun deleteHandledReports(accessToken: String): Result<Int> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val request = SupabaseClient.requestBuilder(RPC_DELETE_HANDLED_REPORTS, accessToken)
+                    .post("{}".toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request).trim().toIntOrNull() ?: 0
+            }
+        }
+
     suspend fun banMember(
         accessToken: String,
         userId: String,

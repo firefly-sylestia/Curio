@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -23,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -237,12 +240,18 @@ internal fun ReportTargetDialog(
  * ban can be softened or hardened without being lifted first) and offers the
  * way out at the foot of it.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ModerationBanDialog(
     memberName: String,
     /** The tier already in force, blank when the member is not banned. */
     currentKind: String = "",
     busy: Boolean = false,
+    /**
+     * What the server said when the last attempt failed, shown inside the sheet
+     * (see the title slot). Blank while nothing has gone wrong.
+     */
+    error: String? = null,
     onDismiss: () -> Unit,
     onConfirm: (kind: String, reason: String, hours: Int?) -> Unit,
     /** Offered only while a ban is in force. */
@@ -262,11 +271,26 @@ internal fun ModerationBanDialog(
         containerColor = curioDialogContainerColor(),
         shape = CurioDialogShape,
         title = {
-            Text(
-                text = if (alreadyBanned) "Change the ban on $memberName" else "Ban $memberName?",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    text = if (alreadyBanned) "Change the ban on $memberName" else "Ban $memberName?",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                // ── WHAT THE SERVER SAID, WHERE IT CAN BE SEEN ──────────────
+                // A refusal used to land on the page BEHIND this sheet, so a ban
+                // the database turned down looked like a button that did nothing
+                // (user report: "i am not able to ban any members the ban button
+                // isnt working"). The line sits under the title, which is the one
+                // part of this sheet nothing can scroll away.
+                error?.takeIf { it.isNotBlank() }?.let { line ->
+                    Text(
+                        text = line,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         },
         text = {
             Column(
@@ -318,17 +342,30 @@ internal fun ModerationBanDialog(
                 )
 
                 Text(
-                    text = "Why (required)",
+                    text = if (chosen == null) "Why (required — pick one)" else "Why (required)",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = if (chosen == null) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(top = 4.dp)
                 )
-                ModerationReasons.BAN.forEach { reason ->
-                    ReasonChoiceRow(
-                        label = reason,
-                        selected = chosen == reason,
-                        onClick = { chosen = reason }
-                    )
+                // ── THE REASONS FIT ON THE SHEET ────────────────────────────
+                // Eight full-width rows pushed the list below the fold, so a
+                // moderator could open this sheet, choose a tier and a clock,
+                // and then find a Ban button that never lit up (the reason is
+                // required, and the reason was off-screen). As wrapping chips
+                // the whole decision is on one screen.
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    ModerationReasons.BAN.forEach { reason ->
+                        BanReasonChip(
+                            label = reason,
+                            selected = chosen == reason,
+                            onClick = { chosen = reason }
+                        )
+                    }
                 }
                 ModerationNoteField(
                     value = note,
@@ -352,20 +389,32 @@ internal fun ModerationBanDialog(
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = {
-                    val reason = chosen ?: return@TextButton
-                    onConfirm(kind, reason, hours)
-                },
-                enabled = chosen != null && !busy,
-                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text(
-                    text = if (busy) "Working…" else if (alreadyBanned) "Update ban" else "Ban",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // A dimmed button that does not say what it is waiting for reads
+                // as a broken button, so it says it.
+                if (chosen == null) {
+                    Text(
+                        text = "Pick a reason",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+                TextButton(
+                    onClick = {
+                        val reason = chosen ?: return@TextButton
+                        onConfirm(kind, reason, hours)
+                    },
+                    enabled = chosen != null && !busy,
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(
+                        text = if (busy) "Working…" else if (alreadyBanned) "Update ban" else "Ban",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
             }
         },
         dismissButton = {
@@ -374,6 +423,41 @@ internal fun ModerationBanDialog(
             }
         }
     )
+}
+
+/**
+ * One ban reason as a chip, so the eight of them wrap into a few lines instead
+ * of a column that runs off the bottom of the sheet.
+ */
+@Composable
+private fun BanReasonChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val accent = curioDialogActionColor()
+    val shape = RoundedCornerShape(50)
+    Surface(
+        shape = shape,
+        color = if (selected) accent.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier
+            .clip(shape)
+            .border(
+                width = if (selected) 1.5.dp else 1.dp,
+                color = if (selected) accent else MaterialTheme.colorScheme.outlineVariant,
+                shape = shape
+            )
+            .clickable(onClick = onClick)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+            ),
+            color = if (selected) accent else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp)
+        )
+    }
 }
 
 /** The clocks a ban can be set to. `null` hours = until lifted. */
@@ -481,7 +565,13 @@ internal fun ModerationReasonDialog(
     destructive: Boolean = true,
     /** Dismissals can go through without a written reason. */
     reasonRequired: Boolean = true,
-    busy: Boolean = false
+    busy: Boolean = false,
+    /**
+     * What the server said when the last attempt failed, shown inside the sheet.
+     * Every decision a moderator makes is a server function, and a refusal that
+     * lands on the page behind the dialog is a refusal nobody reads.
+     */
+    error: String? = null
 ) {
     var chosen by remember { mutableStateOf<String?>(null) }
     var note by remember { mutableStateOf("") }
@@ -490,11 +580,20 @@ internal fun ModerationReasonDialog(
         containerColor = curioDialogContainerColor(),
         shape = CurioDialogShape,
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                error?.takeIf { it.isNotBlank() }?.let { line ->
+                    Text(
+                        text = line,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         },
         text = {
             ReasonPickerBody(
