@@ -235,19 +235,49 @@ internal object PersonalVoiceRecording {
         return withContext(Dispatchers.Default) {
             val bars = WaveformExtractor.extract(cachePath, PersonalAudioBars.BAR_COUNT)
                 ?: FloatArray(PersonalAudioBars.BAR_COUNT) { 0.08f }
+            // The moment the recording was MADE, captured once: it is both the
+            // file's name in the device folder and the note's date, so the two
+            // can never disagree about when it happened.
+            val madeAt = System.currentTimeMillis()
             val persisted = runCatching {
                 AudioStorageManager.persistAudio(
                     context.applicationContext,
                     cachePath,
-                    "note_${noteId}_${System.currentTimeMillis()}"
+                    "note_${noteId}_$madeAt"
                 )
             }.getOrNull()
+
+            // ── AND THE RECORDING LEAVES THE APP (v405) ──────────────────
+            //
+            // A copy goes into the device's own music library, under
+            // `Your Journal Voices`, named by the day it was made — so an
+            // accidental uninstall cannot take the member's recordings with it,
+            // and the folder reads as a diary in date order (member's ask:
+            // "those voice recording saves in the device too … so it doesnt
+            // delete even after deleing the app by mistake… name the voice note
+            // based on date"). The app's own copy is then removed, because two
+            // copies of one recording is one copy too many; it is kept only when
+            // the publish was refused, so the note never depends on it.
+            val published = persisted?.let { result ->
+                runCatching {
+                    AudioStorageManager.publishVoice(
+                        context.applicationContext,
+                        result.persistentPath,
+                        madeAt
+                    )
+                }.getOrNull()
+            }
             val stored = persisted != null
             if (stored) runCatching { File(cachePath).delete() }
+            if (published != null && persisted != null) {
+                runCatching {
+                    AudioStorageManager.deleteAudio(context.applicationContext, persisted.persistentPath)
+                }
+            }
             RecordedVoice(
                 // A failed copy keeps the cache file (it plays until the OS
                 // clears the cache) rather than throwing the note away.
-                path = persisted?.persistentPath ?: cachePath,
+                path = published ?: persisted?.persistentPath ?: cachePath,
                 seconds = secondsNow,
                 bars = PersonalAudioBars.encode(bars)
             )
