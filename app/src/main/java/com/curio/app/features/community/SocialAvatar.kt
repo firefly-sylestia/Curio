@@ -576,13 +576,21 @@ private fun DrawScope.drawBust(art: AvatarArt, u: Float) {
         close()
     }
     fill(shoulders.scaled(u), garment, u, ink = 0f)
-    // The collar: a soft band from the shoulder line down, so the bust has a
-    // front and a back rather than reading as a wedge of colour.
-    slab(38f, 65f, 62f, 75f, 7f, lighten(garment, 0.16f), u)
-    // The neckline's own shadow just under the chin, and one fold from the
-    // shoulder — both well below the collar so neither reads as a rule.
-    arc(41f, 70f, 10f, 200f, 140f, 1.4f, darken(garment, 0.24f), u)
-    arc(30f, 86f, 13f, 205f, 60f, 1.4f, darken(garment, 0.20f), u)
+    // v403 — THE COLLAR BAND WAS THE HAIRLINE ABOVE THE SHOULDER.
+    //
+    // The band started one unit ABOVE the shoulder edge (y 65 against a shoulder
+    // top of 66) and was drawn in a LIGHTER tone than the garment, so a pale
+    // strip crossed the chest with its own top edge sitting just over the
+    // shoulder line — which is what the member kept seeing on every avatar ("i
+    // still see that line hair above shoulder in each avatar"). It now starts
+    // BELOW the shoulder line and is DARKENED like every other seam: a neckline
+    // is a fold in the garment, not a bright band laid on top of it, and nothing
+    // in the bust has an edge above the shoulder any more.
+    slab(40f, 70f, 60f, 77f, 6f, darken(garment, 0.12f), u)
+    // The neckline's own shadow and one fold from the shoulder — both well below
+    // the collar so neither can read as a rule.
+    arc(44f, 78f, 8f, 200f, 140f, 1.2f, darken(garment, 0.20f), u)
+    arc(30f, 90f, 13f, 205f, 55f, 1.2f, darken(garment, 0.16f), u)
 }
 
 /** The neck, with the jaw's own shadow across its top. */

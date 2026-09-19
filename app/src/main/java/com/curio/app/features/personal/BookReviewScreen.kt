@@ -214,7 +214,7 @@ fun BookReviewScreen(
                 .maxByOrNull { it.liveBottom(scrollNow) }
         }
     }
-    val pinnedChapter = pinnedMarker?.value?.label.orEmpty()
+    val pinnedChapter = pinnedMarker?.label.orEmpty()
     // A line the member deleted (or renamed away) stops being a place to pin,
     // whichever side of the switch last reported it.
     LaunchedEffect(draft, review) {
@@ -555,7 +555,7 @@ fun BookReviewScreen(
                     // the way to the top instead of going to that chapter").
                     val marker = pinnedMarker ?: return@PersonalPinnedLine
                     val scroll = if (editing) writeScroll else readScroll
-                    val delta = marker.value.liveTop(scroll.value.toFloat()) - areaTop
+                    val delta = marker.liveTop(scroll.value.toFloat()) - areaTop
                     scope.launch {
                         scroll.animateScrollTo(
                             (scroll.value + delta).toInt().coerceIn(0, scroll.maxValue)

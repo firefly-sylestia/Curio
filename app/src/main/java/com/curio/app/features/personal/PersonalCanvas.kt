@@ -779,17 +779,16 @@ internal val LocalPersonalTapToEdit = compositionLocalOf<(() -> Unit)?> { null }
  */
 internal val LocalPersonalTitleReport =
     staticCompositionLocalOf<
-        (
+        ((
             id: String,
             label: String,
             top: Float,
             bottom: Float,
             writing: Boolean,
             scroll: Float
-        ) -> Unit
+        ) -> Unit)?
         > { null }
 
-/**
 /**
  * v402 — THE SCROLL THAT HOLDS A READ VIEW'S TITLES.
  *

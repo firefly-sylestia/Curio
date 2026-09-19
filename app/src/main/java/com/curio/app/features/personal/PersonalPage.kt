@@ -84,6 +84,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -844,7 +845,7 @@ internal fun PersonalWritingPage(
             // wears for its chapters, and a door rather than a label: tapping it
             // goes back to the heading it names.
             if (AppPreferences.pinnedTitleViewState) PersonalPinnedLine(
-                label = pinnedSection?.value?.label.orEmpty(),
+                label = pinnedSection?.label.orEmpty(),
                 caption = "Heading",
                 accent = personalAccent(),
                 onClick = {
@@ -857,7 +858,7 @@ internal fun PersonalWritingPage(
                     val section = pinnedSection ?: return@PersonalPinnedLine
                     val scroll = (if (editing) pageScroll else pinHolder.scroll)
                         ?: return@PersonalPinnedLine
-                    val delta = section.value.liveTop(scroll.value.toFloat()) - areaTop
+                    val delta = section.liveTop(scroll.value.toFloat()) - areaTop
                     scope.launch {
                         scroll.animateScrollTo(
                             (scroll.value + delta).toInt().coerceIn(0, scroll.maxValue)

@@ -89,6 +89,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -3395,6 +3396,12 @@ private fun ReaderMarkRow(
     onJump: () -> Unit,
     onDelete: (() -> Unit)?
 ) {
+    // Lint's own rule: a composable must not read `Locale.getDefault()` — it is
+    // not observable, so a member who changes their language would keep seeing
+    // the old one's casing here until the page was rebuilt. The configuration IS
+    // observable, and its first locale is the one the rest of the app formats
+    // with (this is what the lint check asks for instead).
+    val markLocale = LocalConfiguration.current.locales[0]
     val kind = mark.markKind
     val tone = if (kind == ReaderMarkKind.HIGHLIGHT) {
         readerHighlighter(mark.colorKey).ink
@@ -3431,7 +3438,7 @@ private fun ReaderMarkRow(
                 }
                 Column(Modifier.weight(1f)) {
                     Text(
-                        place.uppercase(Locale.getDefault()),
+                        place.uppercase(markLocale),
                         style = MaterialTheme.typography.labelSmall.copy(
                             letterSpacing = 1.sp,
                             fontWeight = FontWeight.SemiBold
