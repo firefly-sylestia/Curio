@@ -1,116 +1,55 @@
-# Prompt Log — current request
+# Prompt.md — current request
 
-## Request (2026-09-19, batch Z7 — the PDF reader's zoom, its pages and its marks)
+## The ask
 
-Verbatim: "book reader pdf vertical pages zoom are still inaccurate when i pinch zoom in the middle
-the top part of the previous page zooms in, and theyre not marked as page numbers are they? and still
-in the scrolling the page chnages when im swiping arounnd while zooming fix it please. it should page
-chnage only when it reaches the page end and then on anomather sipe it does or maybe something better
-and some more book reading features, also the places in this book progress is beautiful, now the your
-marks are kind of really bad vie can u chnage its look, push it all"
+1. **The caption's own tools and a date — the full feature.** A print's caption
+   stops being a string under a picture and becomes the LABEL the print wears:
+   its own face, its own size, and a date.
+2. **"fix this"** — the CI failure pasted with the request
+   (`PersonalTodoRow.kt:438:33 @Composable invocations can only happen from the
+   context of a @Composable function`).
 
-Status: IMPLEMENTED (this log covers what shipped; CI is the compile check).
+## The member's answers (asked before writing, per the root rail)
 
-### 1. The pinch that magnified the wrong page (v399)
+| Question | Answer |
+| --- | --- |
+| How should the date live in a caption? | **Its own line**, always formatted live (never words inside the caption) |
+| Where does the date's order live? | **Both** — an app-wide preference AND a per-caption override |
+| Which faces may a caption wear? | A print's own typography, plus new ones complimenting the polaroid style |
+| What does the dock show while a caption has the caret? | **Face + date + size**, and the date tool is always on |
 
-`PdfScrollReader` grew EVERY page's box with the zoom (the v395 fix for two pages overlapping), so a
-pinch in the middle of the column also pushed the page above down the flow — the page the member's
-fingers were holding slid out of the window and they were left looking at the page above it.
+## What shipped
 
-Now the box never changes size. Only the page you PINCHED is magnified, inside its own clipped frame
-(`clipToBounds` on the item), so the layout is identical at 1× and at 4× and no neighbour can move.
-Rule-shaped in the code: `ReaderLook.pdfZoomPage` (`-1` = every page, which is what the paged reader
-wants — its frame is the screen).
+- `PersonalDoc.kt` — `PersonalBlock` gains `captionDateMillis` / `captionFace` /
+  `captionSize` / `captionOrder` (codec keys `cdt` / `cfc` / `csz` / `cor`, each
+  omitted at its default, plus a `JsonObject.long` reader). A date is a DATE, not
+  text, so the order stays re-writable.
+- `PersonalCaptionLabel.kt` (new) — `PersonalCaptionFace` (7 bundled faces, `""`
+  = the print's own), `PersonalCaptionLabelSize` (small / standard / large as a
+  multiplier on the frame's own size), `PersonalCaptionDateOrder` (day / month /
+  year first) and `PersonalCaptionDates` (the app-wide order in snapshot state,
+  persisted to `curio_personal_writing`), with the formatter and the today /
+  yesterday stamps.
+- `PersonalCanvas.kt` — the editor state's caption accessors + `captionFocusedId`;
+  `PersonalPhotoBlock` draws the label (face, size, the date on its own line) and
+  reports its focus, wired at all three call sites; the read view draws the same
+  label from the same formatter; `PersonalToolDock` crossfades to the new
+  `PersonalCaptionTools` (date · face · size · back to the writing tools) while a
+  caption has the caret.
+- The CI failure was already fixed by `8ef16daf` (the paper is read in the
+  composition, not inside the `drawBehind` lambda) — the run pasted with this
+  request was `6d293e1b`'s, before that fix.
 
-### 2. The zoom is anchored at the fingers
+## Open questions for the member
 
-`pinchToZoom` now reports the gesture's focal point (`event.calculateCentroid(useCurrent = false)` —
-where the fingers HELD, not where they are), and the new `readerZoomedPan(box, drawn, from, to,
-focus, pan)` solves the page's own transform for the new pan: the point under the fingers stays under
-them. A plain drag is the same call at a constant zoom (the focus cancels out), so a pinch and a pan
-can no longer disagree about where the page sits. `readerDrawnPage(box, aspect)` is the letterboxed
-page inside its frame — the thing room for a pan is measured against, so a drag the page cannot take
-is handed back to the scroll/pager (`Offset.Zero` = not consumed). `pinchToZoom` also gained a `key`
-because a gesture handler outlives the composition that armed it: a page whose aspect arrives with its
-render would otherwise keep measuring against nothing.
+1. **"The date is always on"** — read here as *the date tool is always in the
+   dock*. The alternative reading is *every new caption is stamped with today by
+   itself*; say the word and it is a one-line change.
+2. **The separator** — the request said `dd:mm:yyyy`; the labels write
+   `14/03/2026` because a colon reads as a clock time. Easy to switch.
+3. **The faces** — the seven offered are the app's own bundled ones. If a tenth
+   face should exist just for labels, that is a font file plus one enum entry.
 
-### 3. A page turn only after the page's own end
+## Still queued (from the same request, not yet written)
 
-In the column the page now takes a vertical drag while it has room in that direction and gives it
-back at its edge, so the next swipe scrolls on — the rule the member asked for. The drag claim reads
-the live `pdfZoomPage` (never a captured composition value).
-
-### 4. Page numbers, and a page bar that turns pages
-
-- Every page in the scrolling reader wears its own number in the corner, drawn OUTSIDE the zoom (it
-  cannot be carried off the screen by a magnify).
-- The scrolling flow now HAS the page bar (it had none): the column reports the page it is showing
-  (`onPageShown` → `shownPage`) and the bar names it and asks for the next one.
-- Double tap zooms a PDF page at the point that was tapped (`readerDoubleTapZoom`), in both flows.
-
-### 5. Jumps actually move a PDF (the quiet big one)
-
-`jumpToMark` called `pagerState.scrollToPage` — the PAGED reader's pager. In the scrolling flow (what
-a PDF opens in) "Continue reading", every mark and every contents row moved an OFF-SCREEN pager, so
-nothing appeared to happen. A PDF jump is now ASKED FOR (`pendingPage`, the page-`pendingBlock`
-already was for text) and whichever surface is showing takes it and clears it.
-
-### 6. The marks sheet redrawn
-
-`ReaderMarksSection` derives a mark's place from the CONTENT: a PDF's mark says "Page N" — it used to
-fall back to "Section N", the reader's own block numbering, which is a fact about how the file was
-split (this is what "theyre not marked as page numbers are they?" was) — with the outline entry it
-sits under, and a reflowed book's says the chapter when the file numbers one. The list is sorted by
-position (it reads in the book's order), each kind wears its own glyph on a wash of its own colour (a
-highlight in the ink it was made with), the passage is set as a quotation in the book's serif and the
-note as an aside, with the date in the corner (`readerMarkWhen`: Today / Yesterday / "3 Sep").
-
-### Files
-
-- `app/src/main/java/com/curio/app/features/personal/BookReaderScreen.kt` — all of the above.
-- `app/AGENTS.md` — the reader's zoom/jump/mark contracts as rules for the next agent.
-- `fastlane/metadata/android/en-US/changelogs/20260922.txt` — the release notes for this batch.
-
-## Queued next (the member's follow-up, not started)
-
-Verbatim: "now for the photo side by side 3 grid 4 grid, so in side by side now i cant chnge its sizes
-like yes page size isnt possible but i cant chnage between small portraifght etc in side by side now
-als same for 3 together, let the flixibility to pick differnt size of that photo, also in 3 grid they
-look great in  while editing but when i chnage to eye view they get collaped so something the 2 which
-are over each other also ykw keep the buttom strip here i write caption for them even if theres no
-captaion keep it in preview and also show dates in dd:mm:yyyy or user can switch also give its own
-differnt font choices in tools when im editing caption, only show those tools hen ive caption opened
-and hide other tools which the caption doesnt support, and make the tools appear back when i go back
-to writin gin canvas smoothly, fix them also make the animation preview while holding them better with
-stack preview too, also still the voice note drag and move is kinda off the previe guide shows way to
-the top when the voice note im holding is below so fix its accuracy and also instead of that color line
-use propere preview and smooth animations."
-
-Broken into the things to do (PersonalCanvas.kt, PersonalTodoRow.kt, PersonalPrintArrangement):
-
-1. **DONE (v400)** — *A print in a row keeps its own size.* `PersonalPrintArrangement` hands every
-   cell its OWN size now: height from `personalPrintHeight(sizeOf(id))`, width from
-   `sizeOf(id).fraction` (the two fixed slot constants — pair/tall/stacked/quad — are gone). The
-   SHAPES are unchanged (two, the upright frame + two stacked, four as a square); only the slot each
-   print takes is the print's own answer. A `PAGE` print still leaves a row entirely.
-2. **DONE (v400)** — *Three in a row collapsed in the READ view.* The read view's cell drew its paper
-   band only when a caption had been written, so a cell without a caption was a line SHORTER on the
-   reading side than on the writing side and the row measured differently across the switch. The band
-   is always drawn now (`ifBlank { "\u00A0" }`, so it always takes its line's height).
-3. **DONE** — *The caption strip stays* — the same change as (2), on both sides.
-4. **PENDING — the caption's own tools and a date.** Needs a decision before it is written (see
-   below): the block model has ONE caption string, so a caption's own face, its date and the date's
-   order are new stored fields, and the dock has to swap tool sets while a caption has the caret.
-5. **DONE (v400)** — *The carry gesture's preview* — `PersonalRowDragState.advanceBy` charges a step
-   half of the block IN HAND plus half of the row being crossed (it used to charge only the row being
-   passed, so the guide accumulated an error of half the carried block per row and ran ahead of the
-   thumb). `PersonalMovableBlock` lifts with two sheets of paper peeking out behind it, and the
-   landing ghost is a dashed sketch of the carried block's own shape instead of a flat colour line.
-
-### The open question (asked, not answered yet)
-
-The caption's tools and its date are a NEW feature (a stored caption face + a date + a date order, and
-per-caption tool visibility in the dock). Per the root AGENTS rules a new measure is asked about
-before it is built, so the member was asked: whether the date is INSERTED into the caption's own words
-or kept as its own small line under it, whether the date order is a global preference or per caption,
-and whether the caption's face is one of the app's four bundled faces.
+- Nothing from this request — it is complete pending the three answers above.

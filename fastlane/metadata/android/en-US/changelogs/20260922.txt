@@ -1,3 +1,8 @@
+ADD:
+- Writing: a caption is the print's own LABEL now — its own face (seven faces, each menu row set in the face it offers and the button an "Aa" in the one chosen), its own size (small, standard or large, riding the print's frame), and a date on its own line under the words instead of a word typed into them.
+- Writing: the caption's own dock — while a caption has the caret the dock swaps to the tools a label can use (the date, the face, the size, and one tap back to the writing tools), and the writing tools step aside in a crossfade until the words are tapped again. Bold, the marker and the bullet list do nothing to a caption, so they are not offered where they cannot act.
+- Writing: a caption's date is written in the order YOU read dates — day first (14/03/2026), month first (03/14/2026) or year first (2026/03/14), set for every caption at once, with a per-caption override that wins where it is set. First tap stamps today, the tap after opens the menu (today, yesterday, remove, and the order).
+
 FIX:
 - Writing: a print's size is its OWN inside a row — in a pair, a three or a four, the size you pick is the size it takes (a portrait print stands taller and narrower than the one beside it), instead of every cell being forced into the same slot so the size menu changed nothing you could see.
 - Writing: a page read back is as tall as the page you wrote — the caption band under a print is drawn even with nothing written in it, so a row of prints no longer measures differently on the two sides of the eye / pen switch.

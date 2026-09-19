@@ -1,8 +1,10 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -1969,6 +1971,63 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         onDocChanged(doc())
     }
 
+    // ── v401 — THE CAPTION'S OWN LABEL ─────────────────────────────────
+    //
+    // A caption stopped being a string under a picture and became a LABEL the
+    // print wears: its own words, its own face, its own size, and a date that is
+    // its own line (see PersonalBlock.captionDateMillis). The dock swaps to the
+    // caption's tools while one of these fields has the caret, which is what
+    // `captionFocusedId` records — it is not "which field has focus" (the page
+    // answers that), it is "is the member writing a label right now".
+
+    /** The print whose caption has the caret, or null while the prose does. */
+    var captionFocusedId by mutableStateOf<String?>(null)
+        private set
+
+    /** The caption field's focus, reported by the field itself (see
+     *  PersonalPhotoBlock). A focused field claims the dock; losing focus
+     *  releases it — including when the words are tapped, which is the way back
+     *  to the writing tools. */
+    fun setCaptionFocus(id: String?) {
+        if (captionFocusedId != id) captionFocusedId = id
+    }
+
+    fun captionDate(id: String): Long = blocks[id]?.captionDateMillis ?: 0L
+
+    fun captionFace(id: String): String = blocks[id]?.captionFace.orEmpty()
+
+    fun captionSizeKey(id: String): String = blocks[id]?.captionSize.orEmpty()
+
+    fun captionOrder(id: String): String = blocks[id]?.captionOrder.orEmpty()
+
+    fun setCaptionDate(id: String, millis: Long) {
+        val block = blocks[id] ?: return
+        if (block.captionDateMillis == millis) return
+        blocks[id] = block.copy(captionDateMillis = millis)
+        onDocChanged(doc())
+    }
+
+    fun setCaptionFace(id: String, key: String) {
+        val block = blocks[id] ?: return
+        if (block.captionFace == key) return
+        blocks[id] = block.copy(captionFace = key)
+        onDocChanged(doc())
+    }
+
+    fun setCaptionSize(id: String, key: String) {
+        val block = blocks[id] ?: return
+        if (block.captionSize == key) return
+        blocks[id] = block.copy(captionSize = key)
+        onDocChanged(doc())
+    }
+
+    fun setCaptionOrder(id: String, key: String) {
+        val block = blocks[id] ?: return
+        if (block.captionOrder == key) return
+        blocks[id] = block.copy(captionOrder = key)
+        onDocChanged(doc())
+    }
+
     /** Removes a photo block (and its caption). */
     fun removeBlock(id: String) {
         val index = order.indexOf(id)
@@ -2883,6 +2942,20 @@ internal fun PersonalCanvas(
                                         onCaption = { state.setCaption(memberId, it) },
                                         onSize = { state.setPhotoSize(memberId, it) },
                                         onRemove = { state.removeBlock(memberId) },
+                                        // v401 — the label this print wears, and
+                                        // the way the member changes it (the
+                                        // caption's own dock, see PersonalToolDock).
+                                        captionDate = state.captionDate(memberId),
+                                        captionFace = state.captionFace(memberId),
+                                        captionSizeKey = state.captionSizeKey(memberId),
+                                        captionOrder = state.captionOrder(memberId),
+                                        onCaptionFocus = { focused ->
+                                            state.setCaptionFocus(if (focused) memberId else null)
+                                        },
+                                        onCaptionDate = { state.setCaptionDate(memberId, it) },
+                                        onCaptionFace = { state.setCaptionFace(memberId, it) },
+                                        onCaptionSize = { state.setCaptionSize(memberId, it) },
+                                        onCaptionOrder = { state.setCaptionOrder(memberId, it) },
                                         onOpen = { bounds ->
                                             onOpenPhoto(member.photo.orEmpty(), bounds)
                                         }
@@ -2933,6 +3006,18 @@ internal fun PersonalCanvas(
                                         onCaption = { state.setCaption(id, it) },
                                         onSize = { state.setPhotoSize(id, it) },
                                         onRemove = { state.removeBlock(id) },
+                                        // v401 — see the row's cells.
+                                        captionDate = state.captionDate(id),
+                                        captionFace = state.captionFace(id),
+                                        captionSizeKey = state.captionSizeKey(id),
+                                        captionOrder = state.captionOrder(id),
+                                        onCaptionFocus = { focused ->
+                                            state.setCaptionFocus(if (focused) id else null)
+                                        },
+                                        onCaptionDate = { state.setCaptionDate(id, it) },
+                                        onCaptionFace = { state.setCaptionFace(id, it) },
+                                        onCaptionSize = { state.setCaptionSize(id, it) },
+                                        onCaptionOrder = { state.setCaptionOrder(id, it) },
                                         onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
                                     )
                                 }
@@ -2985,6 +3070,18 @@ internal fun PersonalCanvas(
                                 onCaption = { state.setCaption(id, it) },
                                 onSize = { state.setPhotoSize(id, it) },
                                 onRemove = { state.removeBlock(id) },
+                                // v401 — see the row's cells.
+                                captionDate = state.captionDate(id),
+                                captionFace = state.captionFace(id),
+                                captionSizeKey = state.captionSizeKey(id),
+                                captionOrder = state.captionOrder(id),
+                                onCaptionFocus = { focused ->
+                                    state.setCaptionFocus(if (focused) id else null)
+                                },
+                                onCaptionDate = { state.setCaptionDate(id, it) },
+                                onCaptionFace = { state.setCaptionFace(id, it) },
+                                onCaptionSize = { state.setCaptionSize(id, it) },
+                                onCaptionOrder = { state.setCaptionOrder(id, it) },
                                 onOpen = { bounds -> onOpenPhoto(block.photo.orEmpty(), bounds) }
                             )
                         }
@@ -4072,7 +4169,27 @@ private fun PersonalPhotoBlock(
     onCaption: (String) -> Unit,
     onSize: (PersonalPhotoSize) -> Unit,
     onRemove: () -> Unit,
-    onOpen: (Rect?) -> Unit
+    onOpen: (Rect?) -> Unit,
+
+    // ── v401 — THE LABEL'S OWN SETTINGS ────────────────────────────────
+    //
+    // A caption is drawn where it is written, so the print is handed the label
+    // it wears and reports back what the member picks in the caption's own dock.
+    // Every one of these has a default (the print's own face, the print's own
+    // size, no date, the app's order), which is exactly how a caption read
+    // before this version — so a caller that knows nothing about labels, and
+    // every note written before today, draws the same print it always did.
+    captionDate: Long = 0L,
+    captionFace: String = "",
+    captionSizeKey: String = "",
+    captionOrder: String = "",
+    /** The field is being written in (or has just been left) — the page uses
+     *  this to swap the dock to the caption's own tools. */
+    onCaptionFocus: (Boolean) -> Unit = {},
+    onCaptionDate: (Long) -> Unit = {},
+    onCaptionFace: (String) -> Unit = {},
+    onCaptionSize: (String) -> Unit = {},
+    onCaptionOrder: (String) -> Unit = {}
 ) {
     // The preview is deliberately SMALL (it is a note in a page, not a
     // gallery) and its bounds are what the page's overlay grows out of.
@@ -4092,6 +4209,19 @@ private fun PersonalPhotoBlock(
         PersonalPhotoSize.SMALL_PORTRAIT -> 11.sp
         PersonalPhotoSize.SMALL -> 10.sp
     }
+    // v401 — the label's own face, its own size, and its date.
+    //
+    // The order is asked for the caption (its own override, else the app's) and
+    // read HERE in the composition: `PersonalCaptionDates` holds the app-wide
+    // order in snapshot state, so re-ordering the app re-writes every label that
+    // did not override it while this print sits on screen.
+    val labelContext = LocalContext.current
+    val labelFace = personalCaptionFace(captionFace)
+    val labelSize = personalCaptionSizeSp(captionSize, captionSizeKey)
+    val labelDate = personalCaptionDateText(
+        captionDate,
+        PersonalCaptionDates.order(labelContext, captionOrder)
+    )
     Column(
         modifier = Modifier
             // A FRACTION of the wrapper's width, so the print can never be
@@ -4146,52 +4276,86 @@ private fun PersonalPhotoBlock(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            if (enabled) {
-                BasicTextField(
-                    value = caption,
-                    onValueChange = onCaption,
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        textAlign = TextAlign.Center,
-                        fontFamily = WritingFontFamily,
-                        fontSize = captionSize,
-                        color = ink.copy(alpha = 0.72f)
-                    ),
-                    cursorBrush = SolidColor(personalAccentInk()),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 3.dp),
-                    decorationBox = { inner ->
-                        Box(contentAlignment = Alignment.Center) {
-                            if (caption.isEmpty()) {
-                                Text(
-                                    "Add a caption",
-                                    style = TextStyle(
-                                        fontFamily = WritingFontFamily,
-                                        fontSize = captionSize,
-                                        color = ink.copy(alpha = 0.34f)
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+            // v401 — THE LABEL: the caption's words, then the date on a line of
+            // its own under them (asked and answered: "its own line, always
+            // formatted live"). The date is a LINE and not a word in the caption
+            // because the caption is the member's sentence and the date is the
+            // print's stamp — and a stamp the app writes is the only kind that
+            // can be re-ordered when the app-wide order changes.
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (enabled) {
+                    BasicTextField(
+                        value = caption,
+                        onValueChange = onCaption,
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontFamily = labelFace.family,
+                            fontSize = labelSize,
+                            color = ink.copy(alpha = 0.72f)
+                        ),
+                        cursorBrush = SolidColor(personalAccentInk()),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 3.dp)
+                            // The field says when it is being written in, which
+                            // is what swaps the dock to the caption's own tools
+                            // (see PersonalToolDock and captionFocusedId).
+                            .onFocusChanged { onCaptionFocus(it.isFocused) },
+                        decorationBox = { inner ->
+                            Box(contentAlignment = Alignment.Center) {
+                                if (caption.isEmpty()) {
+                                    Text(
+                                        "Add a caption",
+                                        style = TextStyle(
+                                            fontFamily = labelFace.family,
+                                            fontSize = labelSize,
+                                            color = ink.copy(alpha = 0.34f)
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                inner()
                             }
-                            inner()
                         }
-                    }
-                )
-            } else if (caption.isNotBlank()) {
-                Text(
-                    caption,
-                    modifier = Modifier.weight(1f),
-                    style = TextStyle(
-                        fontFamily = WritingFontFamily,
-                        fontSize = captionSize,
-                        color = ink.copy(alpha = 0.72f)
-                    ),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                    )
+                } else if (caption.isNotBlank()) {
+                    Text(
+                        caption,
+                        modifier = Modifier.fillMaxWidth(),
+                        style = TextStyle(
+                            fontFamily = labelFace.family,
+                            fontSize = labelSize,
+                            color = ink.copy(alpha = 0.72f)
+                        ),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (labelDate.isNotEmpty()) {
+                    Text(
+                        labelDate,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 1.dp, bottom = 2.dp),
+                        style = TextStyle(
+                            fontFamily = labelFace.family,
+                            // The stamp is the label's small print, so it rides
+                            // the label's own size instead of a size of its own.
+                            fontSize = (labelSize.value * 0.76f).sp,
+                            color = ink.copy(alpha = 0.44f),
+                            letterSpacing = 0.6.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             if (actionable) {
                 // The size the print sits at — in the frame's own border, where
@@ -4711,20 +4875,49 @@ internal fun PersonalDocView(
             //
             // The empty band carries a non-breaking space rather than nothing, so
             // it always takes its own line's height.
-            Text(
-                block.caption.ifBlank { "\u00A0" },
-                style = TextStyle(
-                    fontFamily = WritingFontFamily,
-                    fontSize = 13.sp,
-                    color = ink.copy(alpha = 0.62f)
-                ),
+            // v401 — the label, read back exactly as it was written: its own
+            // face, its own size, and its date on its own line under the words.
+            val readContext = LocalContext.current
+            val readFace = personalCaptionFace(block.captionFace)
+            val readSize = personalCaptionSizeSp(13.sp, block.captionSize)
+            val readDate = personalCaptionDateText(
+                block.captionDateMillis,
+                PersonalCaptionDates.order(readContext, block.captionOrder)
+            )
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 5.dp, bottom = 5.dp),
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    block.caption.ifBlank { "\u00A0" },
+                    style = TextStyle(
+                        fontFamily = readFace.family,
+                        fontSize = readSize,
+                        color = ink.copy(alpha = 0.62f)
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (readDate.isNotEmpty()) {
+                    Text(
+                        readDate,
+                        style = TextStyle(
+                            fontFamily = readFace.family,
+                            fontSize = (readSize.value * 0.76f).sp,
+                            color = ink.copy(alpha = 0.40f),
+                            letterSpacing = 0.6.sp
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
 
@@ -4898,6 +5091,36 @@ internal fun PersonalToolDock(
         shadowElevation = 6.dp,
         modifier = modifier
     ) {
+        // ── v401 — WHOSE DOCK IS THIS? ──────────────────────────────────
+        //
+        // The dock follows whatever is being written in. While a PRINT'S
+        // CAPTION has the caret the tools below are the ones that caption can
+        // use — its words, its face, its size and its date — and the writing
+        // tools (bold, marker, bullet, alignment…) are put away, because not one
+        // of them can act on a caption and a row of buttons that do nothing is
+        // worse than no row at all (user request: "only show those tools hen ive
+        // caption opened and hide other tools which the caption doesnt support,
+        // and make the tools appear back when i go back to writin gin canvas
+        // smoothly"). The swap is a CROSSFADE, not a cut, so the dock does not
+        // blink between two toolbars — it changes its mind in place.
+        //
+        // The caption owns a print, and a print can own a caption in any of the
+        // page's shapes (its own, beside the words, or a cell of a row), so this
+        // is keyed on the caption field itself (see captionFocusedId), not on
+        // where on the page the print happens to sit.
+        Crossfade(
+            targetState = state.captionFocusedId,
+            animationSpec = tween(durationMillis = 180),
+            label = "personalDockTools"
+        ) { writingCaptionId ->
+        if (writingCaptionId != null) {
+            PersonalCaptionTools(
+                state = state,
+                captionId = writingCaptionId,
+                accent = accentInk,
+                ink = ink
+            )
+        } else {
         Row(
             modifier = Modifier
                 // Nine tools in a fixed row overflowed a narrow phone and cut
@@ -5203,6 +5426,8 @@ internal fun PersonalToolDock(
                 CurioIcon(CurioIcons.Image, null, size = 18.dp)
             }
         }
+        }
+        }
     }
     // The browser rides OUTSIDE the surface: it is a sheet of its own, and
     // nesting it in the dock's rounded pill would clip it to the pill.
@@ -5225,6 +5450,293 @@ internal fun PersonalToolDock(
             onDismiss = { historyOpen = false }
         )
     }
+}
+
+/**
+ * v401 — THE CAPTION'S OWN DOCK.
+ *
+ * The tools a label can use, and nothing else: the date it stamps, the face it
+ * is written in and the size it is written at. It rides in the same pill as the
+ * writing dock (see PersonalToolDock's Crossfade), so the member never leaves
+ * the page to change the paper — the strip under the photograph is edited from
+ * the strip they are already typing in.
+ *
+ * The BUTTONS wear what the label wears: the face button shows "Aa" set in the
+ * face that is chosen, and the size button an "A" at that size, which is the
+ * same trick the writing dock's own font menu uses (a menu written in one font
+ * is a list of words).
+ */
+@Composable
+private fun PersonalCaptionTools(
+    state: PersonalEditorState,
+    captionId: String,
+    accent: Color,
+    ink: Color
+) {
+    val context = LocalContext.current
+    val date = state.captionDate(captionId)
+    val face = state.captionFace(captionId)
+    val sizeKey = state.captionSizeKey(captionId)
+    val orderKey = state.captionOrder(captionId)
+    val appOrder = PersonalCaptionDates.order(context)
+
+    Row(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 8.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(1.dp)
+    ) {
+        // ── THE DATE ────────────────────────────────────────────────────
+        //
+        // First tap stamps TODAY — the common case, one tap, the same manner as
+        // the marker and the bullet tool. The tap after that opens the menu,
+        // which is where the day is changed and where the ORDER lives
+        // (asked and answered: the order is set BOTH ways — this print's own,
+        // and the one every caption follows).
+        Box {
+            val dateMenu = remember { CurioMenuToggle() }
+            val dateSet = date > 0L
+            PersonalToolButton(
+                label = if (dateSet) "Date: ${personalCaptionDateText(date, appOrder)}"
+                else "Add the date",
+                active = dateSet,
+                accent = accent, ink = ink,
+                onClick = {
+                    if (dateSet) dateMenu.buttonClick()
+                    else state.setCaptionDate(captionId, personalCaptionToday())
+                }
+            ) {
+                CurioIcon(CurioIcons.CalendarToday, null, size = 19.dp)
+            }
+            DropdownMenu(
+                expanded = dateMenu.open,
+                onDismissRequest = { dateMenu.dismissed() },
+                properties = MenuKeepKeyboardProperties
+            ) {
+                val today = personalCaptionToday()
+                DropdownMenuItem(
+                    text = { CaptionMenuItem("Today") },
+                    trailingIcon = {
+                        if (date == today) {
+                            CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                        }
+                    },
+                    onClick = {
+                        state.setCaptionDate(captionId, today)
+                        dateMenu.close()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { CaptionMenuItem("Yesterday") },
+                    onClick = {
+                        state.setCaptionDate(captionId, personalCaptionDaysAgo(1))
+                        dateMenu.close()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { CaptionMenuItem("Remove the date") },
+                    leadingIcon = { CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp) },
+                    trailingIcon = {
+                        if (!dateSet) CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                    },
+                    onClick = {
+                        state.setCaptionDate(captionId, 0L)
+                        dateMenu.close()
+                    }
+                )
+                CurioMenuItemCaption("This print's order")
+                DropdownMenuItem(
+                    text = { CaptionMenuItem("Follow the app's order") },
+                    trailingIcon = {
+                        if (orderKey.isEmpty()) {
+                            CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                        }
+                    },
+                    onClick = {
+                        state.setCaptionOrder(captionId, "")
+                        dateMenu.close()
+                    }
+                )
+                PersonalCaptionDateOrder.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = { CaptionMenuItem("${option.label}  ${option.hint}") },
+                        trailingIcon = {
+                            if (orderKey == option.key) {
+                                CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                            }
+                        },
+                        onClick = {
+                            state.setCaptionOrder(captionId, option.key)
+                            dateMenu.close()
+                        }
+                    )
+                }
+                CurioMenuItemCaption("Every caption")
+                PersonalCaptionDateOrder.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = { CaptionMenuItem(option.label) },
+                        trailingIcon = {
+                            if (orderKey.isEmpty() && appOrder == option) {
+                                CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                            }
+                        },
+                        onClick = {
+                            // The app-wide order is what every caption that has
+                            // not spoken for itself reads — so this one line
+                            // re-writes the whole album's labels, live.
+                            PersonalCaptionDates.setOrder(context, option)
+                            dateMenu.close()
+                        }
+                    )
+                }
+            }
+        }
+        // ── THE FACE ────────────────────────────────────────────────────
+        Box {
+            val faceMenu = remember { CurioMenuToggle() }
+            PersonalToolButton(
+                label = "Caption face: ${personalCaptionFace(face).label}",
+                active = face.isNotEmpty(),
+                accent = accent, ink = ink,
+                onClick = { faceMenu.buttonClick() }
+            ) {
+                CaptionFaceGlyph(personalCaptionFace(face))
+            }
+            DropdownMenu(
+                expanded = faceMenu.open,
+                onDismissRequest = { faceMenu.dismissed() },
+                properties = MenuKeepKeyboardProperties
+            ) {
+                PersonalCaptionFace.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            // Set in the face it offers — the menu and the label
+                            // are the same bytes.
+                            Text(
+                                option.label,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = option.family
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        trailingIcon = {
+                            if (personalCaptionFace(face) == option) {
+                                CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                            }
+                        },
+                        onClick = {
+                            state.setCaptionFace(captionId, option.key)
+                            faceMenu.close()
+                        }
+                    )
+                }
+            }
+        }
+        // ── THE SIZE ────────────────────────────────────────────────────
+        Box {
+            val sizeMenu = remember { CurioMenuToggle() }
+            PersonalToolButton(
+                label = "Caption size: ${personalCaptionLabelSize(sizeKey).label}",
+                active = sizeKey.isNotEmpty(),
+                accent = accent, ink = ink,
+                onClick = { sizeMenu.buttonClick() }
+            ) {
+                CaptionSizeGlyph(personalCaptionLabelSize(sizeKey))
+            }
+            DropdownMenu(
+                expanded = sizeMenu.open,
+                onDismissRequest = { sizeMenu.dismissed() },
+                properties = MenuKeepKeyboardProperties
+            ) {
+                PersonalCaptionLabelSize.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                option.label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        trailingIcon = {
+                            if (personalCaptionLabelSize(sizeKey) == option) {
+                                CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                            }
+                        },
+                        onClick = {
+                            state.setCaptionSize(captionId, option.key)
+                            sizeMenu.close()
+                        }
+                    )
+                }
+            }
+        }
+        // ── BACK TO THE WORDS ───────────────────────────────────────────
+        //
+        // A caption is a page's smallest thing, and the way out of it is not
+        // obvious (tap the prose, in the right place, and the keyboard follows).
+        // This puts the writing tools back in the member's hand in one tap, so
+        // nothing about the label is a trap.
+        PersonalToolButton(
+            label = "Writing tools",
+            active = false,
+            accent = accent, ink = ink,
+            onClick = { state.setCaptionFocus(null) }
+        ) {
+            CurioIcon(CurioIcons.Edit, null, size = 18.dp)
+        }
+    }
+}
+
+/** A caption-tool menu row: one line of the label's own vocabulary. */
+@Composable
+private fun CaptionMenuItem(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = WritingFontFamily),
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+/** A menu's own heading — the caption tool menus carry two groups (this print,
+ *  and every caption), and a heading is what keeps them apart. */
+@Composable
+private fun CurioMenuItemCaption(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelSmall.copy(fontFamily = WritingFontFamily),
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        modifier = Modifier.padding(start = 14.dp, top = 8.dp, bottom = 2.dp)
+    )
+}
+
+/** The face button's own glyph: "Aa", set in the face it is offering. */
+@Composable
+private fun CaptionFaceGlyph(face: PersonalCaptionFace) {
+    Text(
+        "Aa",
+        style = TextStyle(
+            fontFamily = face.family,
+            fontSize = 15.sp,
+            color = LocalContentColor.current
+        ),
+        maxLines = 1
+    )
+}
+
+/** The size button's glyph: an "A" at the size the label is written. */
+@Composable
+private fun CaptionSizeGlyph(size: PersonalCaptionLabelSize) {
+    Text(
+        "A",
+        style = TextStyle(
+            fontFamily = WritingFontFamily,
+            fontSize = (12f * size.factor).sp,
+            color = LocalContentColor.current
+        ),
+        maxLines = 1
+    )
 }
 
 /**

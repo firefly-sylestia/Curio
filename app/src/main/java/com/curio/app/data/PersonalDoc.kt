@@ -173,7 +173,26 @@ data class PersonalBlock(
      * writer deletes the mark: the attachment stands on its own line again rather
      * than vanishing.
      */
-    val inlineRefs: List<String> = emptyList()
+    val inlineRefs: List<String> = emptyList(),
+    /**
+     * v401 — A PRINT'S CAPTION IS ITS OWN LITTLE LABEL, and these four are what
+     * a label can carry besides its words.
+     *
+     * [captionDateMillis] is the date the caption STANDS FOR (local midnight,
+     * 0 = this print carries no date). It is a DATE, not text: the whole point of
+     * storing it is that switching the order re-writes it wherever it is drawn,
+     * which is what a typed-in date can never do. It is drawn as its own small
+     * line under the caption, never inside the member's own words.
+     *
+     * [captionFace] is the print's own typography (a `PersonalCaptionFace` key),
+     * [captionSize] its own type size (blank = whatever the print's frame gives
+     * it), and [captionOrder] the ORDER its date is written in (blank = follow
+     * the app-wide preference, see `PersonalCaptionDates`).
+     */
+    val captionDateMillis: Long = 0L,
+    val captionFace: String = "",
+    val captionSize: String = "",
+    val captionOrder: String = ""
 ) {
     val isPhoto: Boolean get() = photo != null
 
@@ -335,6 +354,13 @@ object PersonalDocCodec {
             b.addProperty("photo", block.photo)
             b.addProperty("caption", block.caption)
             if (block.photoSize.isNotEmpty()) b.addProperty("ps", block.photoSize)
+            // v401 — the print's own little label. Every key is omitted at its
+            // default, so every page written before this version encodes
+            // byte-for-byte as it did.
+            if (block.captionDateMillis > 0L) b.addProperty("cdt", block.captionDateMillis)
+            if (block.captionFace.isNotEmpty()) b.addProperty("cfc", block.captionFace)
+            if (block.captionSize.isNotEmpty()) b.addProperty("csz", block.captionSize)
+            if (block.captionOrder.isNotEmpty()) b.addProperty("cor", block.captionOrder)
             b.addProperty("align", block.align.name)
             // v389 — a ticked checklist line and a line's bullet marker. Both
             // are omitted at their defaults, so every page written before this
@@ -430,6 +456,13 @@ object PersonalDocCodec {
                 // v389 — absent on an older note, which reads as a page-wide
                 // print: exactly how that note already looked.
                 photoSize = b.str("ps"),
+                // v401 — the print's own label. Absent on an older note: no
+                // date, the print's own face, its own size and the app's order,
+                // which is exactly how that note's caption already read.
+                captionDateMillis = b.long("cdt"),
+                captionFace = b.str("cfc"),
+                captionSize = b.str("csz"),
+                captionOrder = b.str("cor"),
                 align = runCatching {
                     PersonalAlign.valueOf(b.str("align").ifBlank { PersonalAlign.START.name })
                 }.getOrDefault(PersonalAlign.START),
@@ -465,6 +498,9 @@ object PersonalDocCodec {
 
     private fun JsonObject.int(key: String): Int =
         runCatching { get(key)?.asInt ?: 0 }.getOrDefault(0)
+
+    private fun JsonObject.long(key: String): Long =
+        runCatching { get(key)?.asLong ?: 0L }.getOrDefault(0L)
 
     /** A fresh empty text block with a stable id (focus keys ride these). */
     fun newBlock(): PersonalBlock = PersonalBlock(id = newBlockId())
