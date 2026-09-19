@@ -3,6 +3,7 @@ ADD:
 - Updates: a What's New page says what each version shipped, one line per thing with a "Take me there" door straight to it. It opens itself once per version, on a fresh install and on an update alike, and waits under Settings, in Updates, any time after.
 
 FIX:
+- Writing: two photos added one after another group on their own — the picture tool splits the line it was used on, so the second picture used to arrive with an empty line holding the two apart; a piece with no words of yours is no longer kept, and the two pictures land edge to edge as a pair at a cell's size, with no dragging.
 - Writing: two prints brought together really become a row — a dropped photo snaps against the photo it was dropped on (the row's first cell travelling down, its last travelling up) instead of landing inside the run, so a pair, a three and a four are built by dropping a picture onto another one, and a print already in the row stays where it is when you press on it again.
 - Writing: a page-sized photo that joins a row takes a cell's size as it lands — Page is where a new photo arrives and a row cannot hold a page, so the two you put together are two halves you can see, while a photo that is alone keeps the size it has and a size you picked yourself is never changed for you.
 - Writing: a voice note still blends with the paper and now sits a little proud of it — the strip casts its own soft shadow instead of wearing a card around itself.

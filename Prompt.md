@@ -69,6 +69,19 @@ The member's report, in their words:
 Pushed all together with the reverted work (one push), per the member's "push
 the before commits all together".
 
+### Follow-up in the same area — DONE
+
+**Two photos added one after another now group on their own.** The picture tool
+SPLITS the line under the caret, so the second picture arrived with an empty
+piece of that split standing between it and the first: two prints with no shared
+edge, which is why they had to be dragged together. `insertAtCaret` now drops
+that piece when it is EMPTY (no words of the member's) and the line above it is
+already a picture (`keepHead`), and it calls `normaliseRowSizesAt` before its
+own `onDocChanged`, so the pair lands at a cell's size in the same frame. A
+piece with words on it, a picture added at the top of the page and every voice
+note keep the empty line they always got (a voice note never groups, so nothing
+about it changed).
+
 ## 4. Open work (after this batch)
 
 1. Series and anime episode data is fetched, not authored.

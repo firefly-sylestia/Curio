@@ -1793,25 +1793,58 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val photoBlock = makeBlock()
         val index = order.indexOf(id)
         if (index < 0) return
+        // ── v403 — A SEAM WITH NOTHING ON IT IS NOT A LINE BETWEEN PICTURES ──
+        //
+        // The tool SPLITS the line under the caret, so a picture added under
+        // another picture used to arrive with an empty line between them: the
+        // leading piece of the split, with no words of its own, standing where
+        // the member never put one. Two pictures added one after another then
+        // shared no edge and never grouped, which is why adding them meant
+        // dragging them together afterwards (user request: "make two photos
+        // added one after another group on their own, without a drag").
+        //
+        // So when the piece being left behind is EMPTY (no words of the
+        // member's) and the line above it is already a picture, it is not kept:
+        // the arriving picture takes that place and lands against the one above
+        // it, and the two become a row by themselves. Everything else about the
+        // split is untouched — a piece with words on it, a picture added at the
+        // top of the page, and every voice note (which never groups) keep the
+        // empty line they were always given.
+        val keepHead = !(
+            photoBlock.isPhoto && head.text.isBlank() && index > 0 &&
+                blocks[order[index - 1]]?.isPhoto == true
+            )
         // The old block is replaced in place, so the page never jumps.
-        order[index] = head.id
         blocks.remove(id)
         masks.remove(id)
         selections.remove(id)
         compositions.remove(id)
-        blocks[head.id] = head
-        masks[head.id] = runsToMask(head.text.length, head.runs)
-        order.add(index + 1, photoBlock.id)
+        val arrivedAt = if (keepHead) {
+            order[index] = head.id
+            blocks[head.id] = head
+            masks[head.id] = runsToMask(head.text.length, head.runs)
+            index + 1
+        } else {
+            // The empty seam goes, so the picture takes its place on the page.
+            order.removeAt(index)
+            index
+        }
+        order.add(arrivedAt, photoBlock.id)
         blocks[photoBlock.id] = photoBlock
         masks[photoBlock.id] = emptyMask(0)
+        // v403 — and a picture that lands against a picture wears a cell's size
+        // (see normaliseRowSizesAt), so the row it just took part in is a row the
+        // member can see in the same frame.
+        normaliseRowSizesAt(arrivedAt)
+        val tailAt = arrivedAt + 1
         if (tailText.isNotEmpty()) {
-            order.add(index + 2, tail.id)
+            order.add(tailAt, tail.id)
             blocks[tail.id] = tail
             masks[tail.id] = runsToMask(tail.text.length, tail.runs)
             caret = PersonalCaret(tail.id, 0)
         } else {
             val empty = PersonalBlock(id = newBlockId())
-            order.add(index + 2, empty.id)
+            order.add(tailAt, empty.id)
             blocks[empty.id] = empty
             masks[empty.id] = emptyMask(0)
             caret = PersonalCaret(empty.id, 0)
