@@ -4020,7 +4020,7 @@ object AppPreferences {
         private set
 
     fun isUpdateCheckerEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_UPDATE_CHECKER_ENABLED, false)
+        prefs(context).getBoolean(KEY_UPDATE_CHECKER_ENABLED, true)
 
     fun setUpdateCheckerEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_UPDATE_CHECKER_ENABLED, enabled).apply()
