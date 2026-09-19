@@ -96,6 +96,7 @@ import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioFillInk
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.Dispatchers
@@ -573,7 +574,11 @@ fun CommunityScreen(navController: NavController) {
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.SemiBold
                                     ),
-                                    color = if (followingOnly) MaterialTheme.colorScheme.onPrimary
+                                    // v412 — the ink ASKS the chip fill (see
+                                    // [curioFillInk]): the active filter wears the
+                                    // accent, which in dark mode is the bright pale
+                                    // primary white vanished on.
+                                    color = if (followingOnly) curioFillInk(settingsRoseAccent())
                                     else MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                                 )

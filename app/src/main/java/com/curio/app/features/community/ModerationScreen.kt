@@ -65,6 +65,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioFillInk
 import kotlinx.coroutines.launch
 
 /**
@@ -1033,7 +1034,10 @@ private fun ModerationRowAction(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = if (primary) androidx.compose.ui.graphics.Color.White
+            // v412 — the ink ASKS the accent fill (see [curioFillInk]):
+            // dark mode's accent is the bright pale primary, where white
+            // vanished.
+            color = if (primary) curioFillInk(accent)
                     else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
         )
@@ -1053,7 +1057,8 @@ private fun ModerationTabPill(label: String, selected: Boolean, onClick: () -> U
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = if (selected) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurface,
+            // v412 — the ink ASKS the accent fill (see [curioFillInk]).
+            color = if (selected) curioFillInk(accent) else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
         )
     }

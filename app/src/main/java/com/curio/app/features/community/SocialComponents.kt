@@ -67,6 +67,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import org.json.JSONArray
 import org.json.JSONObject
@@ -123,7 +124,10 @@ internal fun SocialPill(
         }
     }
     val ink = when (tone) {
-        SocialPillTone.ACCENT -> Color.White
+        // v412 — the ink ASKS the fill (see [curioFillInk]): dark mode's
+        // accent is the bright pale primary, and a hard-coded white vanished
+        // on it. Light mode still resolves white, pixel-identical.
+        SocialPillTone.ACCENT -> curioFillInk(curioDialogActionColor())
         SocialPillTone.DESTRUCTIVE -> MaterialTheme.colorScheme.error
         SocialPillTone.NEUTRAL -> MaterialTheme.colorScheme.onSurface
     }
@@ -266,7 +270,8 @@ internal fun SocialIconPill(
         }
     }
     val ink = when (tone) {
-        SocialPillTone.ACCENT -> Color.White
+        // v412 — the ink ASKS the fill (see [curioFillInk]).
+        SocialPillTone.ACCENT -> curioFillInk(curioDialogActionColor())
         SocialPillTone.DESTRUCTIVE -> MaterialTheme.colorScheme.error
         SocialPillTone.NEUTRAL -> MaterialTheme.colorScheme.onSurfaceVariant
     }
@@ -697,7 +702,8 @@ internal fun SocialSidebarRow(
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = Color.White
+                        // v412 — asks the badge fill, not a fixed white.
+                        color = curioFillInk(curioDialogActionColor())
                     )
                 }
             }

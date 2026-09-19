@@ -1,4 +1,5 @@
 FIX:
+- Social: dark mode's filled accents are readable again — the active filter chip, the accent pills, the unread badge, your own chat bubbles, the send button and every moderation tab kept hard-coded white ink on what is a bright pale accent at night, so their words and icons vanished only in the dark; the ink now asks the fill it sits on and reads on the rose, azure and Pantone accents alike.
 - Cards: no more outlines anywhere — a card is its fill, its radius and a soft shadow now, so nothing reads as a drawn box (the cream is subtler with it, and the chapter and page controls on a book step in the same language).
 - Journal: its own paper — a warm page carrying a whisper of your theme instead of the app's flat cream — and its pages, cards and mood chips lift with the same soft shadow.
 - Journal: a voice note is ONE drawn wave — it was drawn twice, a mirror pair, which read as two waves folded together; the single pulse now sits on the page with a soft under-stroke behind it.

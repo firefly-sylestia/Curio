@@ -71,6 +71,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioFillInk
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.delay
@@ -422,7 +423,9 @@ fun ChatsScreen(navController: NavController) {
                 CurioIcon(
                     name = CurioIcons.Edit,
                     contentDescription = "New chat",
-                    tint = Color.White,
+                    // v412 — asks the compose disc's fill (see [curioFillInk]):
+                    // dark mode's accent is the bright pale primary.
+                    tint = curioFillInk(curioDialogActionColor()),
                     size = 22.dp,
                     modifier = Modifier.padding(15.dp)
                 )

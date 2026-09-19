@@ -81,6 +81,7 @@ import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -707,7 +708,9 @@ private fun SocialProfileHeroBlock(
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = if (following) ink else Color.White,
+                        // v412 — the ink ASKS the pill fill (see [curioFillInk]):
+                        // the accent pill is the bright pale primary at night.
+                        color = if (following) ink else curioFillInk(settingsRoseAccent().copy(alpha = 0.85f)),
                         maxLines = 1,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                     )

@@ -42,6 +42,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioFillInk
 
 /**
  * The moderation dialogs, in one place.
@@ -542,7 +543,8 @@ private fun BanDurationChip(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface,
+            // v412 — the ink ASKS the accent fill (see [curioFillInk]).
+            color = if (selected) curioFillInk(accent) else MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp)
         )

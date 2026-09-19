@@ -106,6 +106,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -1469,7 +1470,10 @@ private fun MessageBubble(
                         Text(
                             text = message.body,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (mine) Color.White
+                            // v412 — the ink ASKS the bubble fill (see
+                            // [curioFillInk]): dark mode's rose bubble is the
+                            // bright pale primary, where white text vanished.
+                            color = if (mine) curioFillInk(curioDialogActionColor())
                             else MaterialTheme.colorScheme.onSurface
                         )
                         if (message.editedAtMillis != null) {
@@ -1492,7 +1496,7 @@ private fun MessageBubble(
                                         fontSize = 8.sp,
                                         lineHeight = 8.sp
                                     ),
-                                    color = if (mine) Color.White.copy(alpha = 0.68f)
+                                    color = if (mine) curioFillInk(curioDialogActionColor()).copy(alpha = 0.68f)
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
                                 )
                                 if (mine) {
@@ -1503,8 +1507,9 @@ private fun MessageBubble(
                                             lineHeight = 8.sp,
                                             fontWeight = FontWeight.Bold
                                         ),
-                                        color = if (receipt != null) Color.White.copy(alpha = 0.86f)
-                                        else Color.White.copy(alpha = 0.62f)
+                                        // v412 — asks the bubble fill (deep-ink path).
+                                        color = if (receipt != null) curioFillInk(curioDialogActionColor()).copy(alpha = 0.86f)
+                                        else curioFillInk(curioDialogActionColor()).copy(alpha = 0.62f)
                                     )
                                 }
                             }
@@ -1603,7 +1608,7 @@ private fun ReplyQuoteRow(quoted: String, mine: Boolean) {
                 .height(18.dp)
                 .clip(RoundedCornerShape(2.dp))
                 .background(
-                    if (mine) Color.White.copy(alpha = 0.55f)
+                    if (mine) curioFillInk(curioDialogActionColor()).copy(alpha = 0.55f)
                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
                 )
         )
@@ -1611,7 +1616,7 @@ private fun ReplyQuoteRow(quoted: String, mine: Boolean) {
         Text(
             text = quoted,
             style = MaterialTheme.typography.labelMedium,
-            color = if (mine) Color.White.copy(alpha = 0.85f)
+            color = if (mine) curioFillInk(curioDialogActionColor()).copy(alpha = 0.85f)
             else MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -1988,7 +1993,8 @@ private fun MessageComposer(
                         // same button, a different verb.
                         name = if (editTarget != null) CurioIcons.Check else CurioIcons.ArrowForward,
                         contentDescription = if (editTarget != null) "Save edit" else "Send",
-                        tint = if (armed) androidx.compose.ui.graphics.Color.White
+                        // v412 — asks the send disc's fill (see [curioFillInk]).
+                        tint = if (armed) curioFillInk(curioDialogActionColor())
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         size = 20.dp
                     )

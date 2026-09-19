@@ -238,6 +238,40 @@ fun pastelFillInk(fill: Color): Color = when {
 }
 
 /**
+ * v412 — THE INK THAT ACTUALLY READS ON A FILLED ACCENT.
+ *
+ * The social surfaces pair a filled accent (a pill, a tab indicator, a badge,
+ * the composer's send disc, your own chat bubble) with a hard-coded
+ * `Color.White`. That is right in LIGHT mode — the Curio accents are deep
+ * there — and WRONG at night: dark mode's accent IS the bright pale
+ * `primary` (`CurioColors.CoralBlush`, whose paired ink is `onPrimary`
+ * DeepPlum), so white text and a white icon on it vanish. That is exactly the
+ * reported bug: "the social page highlight active indicator … the texts and
+ * its icon isn't visible only in dark mode".
+ *
+ * Ask this instead of assuming white. It hands back white whenever white
+ * really reads (so every light-mode surface stays pixel-identical to before),
+ * and otherwise walks a deep ink of the FILL'S OWN hue down until it clears
+ * 4.5:1 on that fill — the same idea as [pastelFillInk] generalized, so a
+ * Pantone page, an azure hero, the rose and a category accent all stay
+ * legible without a per-screen special case.
+ */
+fun curioFillInk(fill: Color): Color {
+    if (contrast(fill, Color.White) >= 4.5f) return Color.White
+    val hsl = toHsl(fill)
+    val saturation = hsl.s.coerceIn(0.12f, 0.62f)
+    var lightness = 0.26f
+    var ink = fromHsl(hsl.h, saturation, lightness)
+    // A mid-tone fill needs a deeper ink than a pale one; 0.10 is the floor
+    // (a same-hue near-black, which is as far as an ink can go).
+    while (lightness > 0.10f && contrast(fill, ink) < 4.5f) {
+        lightness -= 0.03f
+        ink = fromHsl(hsl.h, saturation, lightness)
+    }
+    return ink
+}
+
+/**
  * Non-composable twin of [CurioCategory.categoryInk] — the exact same
  * resolution, parameterized by the two states that drive it (pastel mode +
  * dark theme). The watermark backdrops use these inside `remember` blocks

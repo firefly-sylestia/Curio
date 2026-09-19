@@ -7,7 +7,7 @@
 # correct when a step is re-ordered, and it never fails the run: it is a reader.
 #
 # Contract:
-#   build-summary.sh [signing-story]
+#   build-summary.sh [signing-story] [build-outcome]
 #   → markdown on $GITHUB_STEP_SUMMARY
 #
 # What it reports, and why each line earns its place:
@@ -26,9 +26,16 @@
 #   Providers    — which optional keyed providers were configured, since a
 #                  keyless build behaves differently from a keyed one and the
 #                  only other place that is visible is a `--info` log.
+#
+# v412 — ON FAILURE the summary is the postmortem, not a shrug: the failed
+# Gradle tasks and the first compiler errors are lifted out of the log into
+# the table and a block below it, so a red run answers "what broke" on the
+# page everyone already reads (the Checks tab still carries every error as
+# an annotation; the log is still uploaded).
 set -uo pipefail
 
 signing="${1:-unknown}"
+outcome="${2:-unknown}"
 summary="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
 
 # ── the version the APK carries ─────────────────────────────────────────────
@@ -99,6 +106,13 @@ done
   echo ""
   echo "| | |"
   echo "| --- | --- |"
+  if [ "$outcome" = "failure" ]; then
+    echo "| Build | ❌ failed |"
+  elif [ "$outcome" = "success" ]; then
+    echo "| Build | ✅ passed |"
+  else
+    echo "| Build | ${outcome} |"
+  fi
   echo "| Version | ${version_name:-1.1.1} (${version_code:-unknown}) |"
   echo "| Variant | release · universal APK (ABI splits off) |"
   echo "| Topic catalogs | ${catalogs} file(s) · ${topics} topics |"
@@ -111,5 +125,36 @@ done
   echo "The per-file Kotlin diagnostics, the full Gradle log and the lint reports"
   echo "are on the **verify** job — the diagnostics are annotations, not log lines."
 } >> "$summary"
+
+# ── the postmortem, only when the build failed ───────────────────────────────
+# The Gradle log names the failing tasks (`> Task :x:y FAILED`) and the
+# compiler names its errors (`e: file://…`) — both buried in thousands of
+# lines. Lift the failed tasks and the first distinct errors onto the summary
+# so a red run is readable without opening anything.
+if [ "$outcome" = "failure" ] && [ -f gradle-build.log ]; then
+  failed_tasks=$(grep -oE '^> Task [^ ]+ FAILED' gradle-build.log | sort -u | sed 's/^> Task //; s/ FAILED$//')
+  if [ -n "$failed_tasks" ]; then
+    {
+      echo ""
+      echo "### Failed tasks"
+      echo ""
+      while IFS= read -r task; do
+        echo "- \`${task}\`"
+      done <<< "$failed_tasks"
+    } >> "$summary"
+  fi
+  errors_block=$(grep '^e: file://' gradle-build.log | sed -E 's#^e: file://.*/app/src/#app/src/#' | sort -u | head -15)
+  error_count=$(grep -c '^e: file://' gradle-build.log || true)
+  if [ -n "$errors_block" ]; then
+    {
+      echo ""
+      echo "### First compiler errors ($error_count total — every one is an annotation in the Checks tab)"
+      echo ""
+      echo "```"
+      printf '%s\n' "$errors_block"
+      echo "```"
+    } >> "$summary"
+  fi
+fi
 
 exit 0

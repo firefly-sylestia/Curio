@@ -22,8 +22,10 @@ concurrency:
 # read by a different person at a different moment:
 #
 #   1. THE SUMMARY (this page, bottom) — "what did this build actually do?" A
-#      table of the version, the catalogs bundled, the warning/error counts, the
-#      signing story and the APK's size and SHA-256. Written by
+#      table of the verdict, the version, the catalogs bundled, the
+#      warning/error counts, the signing story and the APK's size and SHA-256
+#      — and, when the build FAILED, the failed Gradle tasks and the first
+#      compiler errors lifted out of the log (v412). Written by
 #      `.github/scripts/build-summary.sh`, rendered by GitHub from
 #      `$GITHUB_STEP_SUMMARY`.
 #   2. THE CHECKS TAB — the Kotlin compiler's own `e:`/`w:` lines re-emitted as
@@ -124,8 +126,13 @@ jobs:
           echo "Bundled ${catalogs} catalog files carrying ${topics} topics."
 
       # PR/push CI builds ONE universal release APK (curioAbiSplits=false
-      # disables the per-ABI split packaging in app/build.gradle.kts). The tag
-      # release workflow builds the full universal + per-ABI set.
+      # disables the per-ABI split packaging in app/build.gradle.kts).
+      # The tag release workflow builds the full universal + per-ABI set.
+      #
+      # v412 — the job compiles ONE variant, not two: `assembleRelease` is
+      # the build, and lint now runs `lintRelease` so it REUSES the release
+      # compilation `assembleRelease` just did instead of compiling the
+      # debug variant a second time (~half the Kotlin work per run).
       #
       # `continue-on-error` so the annotation and summary steps below still run
       # on a FAILED build — the compiler's own errors are exactly what the
@@ -183,7 +190,7 @@ jobs:
           else
             echo "Supabase project URL + publishable key were provided to the build."
           fi
-          ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace 2>&1 \
+          ./gradlew lintRelease validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace 2>&1 \
             | tee gradle-build.log
 
       # ── SURFACE 2: THE CHECKS TAB ──────────────────────────────────────────
@@ -236,6 +243,8 @@ jobs:
         if: always()
         run: |
           set -uo pipefail
+          # v412 — lint runs the RELEASE variant now (see the build step), so
+          # the report name moved with it; keep the old glob as a fallback.
           report=$(ls app/build/reports/lint-results*.txt 2>/dev/null | head -1 || true)
           if [ -z "$report" ]; then
             echo "errors=0" >> "$GITHUB_OUTPUT"
@@ -254,6 +263,7 @@ jobs:
         env:
           DECODED: ${{ steps.keystore.outputs.decoded }}
           APK_SIGNATURE: ${{ steps.apk.outputs.signature }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
         run: |
           set -uo pipefail
           version_code=$(grep -oE 'versionCode[[:space:]]*=[[:space:]]*[0-9]+' app/build.gradle.kts | grep -oE '[0-9]+' | head -1)
@@ -265,7 +275,10 @@ jobs:
           else
             signature="debug-key fallback (no keystore secrets)"
           fi
-          .github/scripts/build-summary.sh "$signature"
+          # v412 — the outcome rides along so the summary can open with the
+          # verdict and, on a failure, carry the failed tasks and the first
+          # compiler errors (see build-summary.sh's postmortem block).
+          .github/scripts/build-summary.sh "$signature" "$BUILD_OUTCOME"
           echo "version=${version_name:-1.1.1} (${version_code:-20260922})" >> "$GITHUB_OUTPUT"
           echo "signature=${signature}" >> "$GITHUB_OUTPUT"
 
