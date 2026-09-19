@@ -636,6 +636,10 @@ alter table public.community_admins add column if not exists can_delete_replies 
 alter table public.community_admins add column if not exists can_handle_reports boolean not null default true;
 alter table public.community_admins add column if not exists can_manage_admins boolean not null default false;
 alter table public.community_admins add column if not exists can_ban_members boolean not null default false;
+-- v403 — the feedback forms belong to the owner, and can be handed to an
+-- admin: without it a moderator can run the report queue but cannot open the
+-- form builder, read a form's answers or publish one.
+alter table public.community_admins add column if not exists can_manage_forms boolean not null default false;
 
 do $$
 begin
@@ -659,8 +663,8 @@ as $$
 $$;
 
 -- …and every ACTION asks for its own permission: one of
--- 'posts' | 'replies' | 'reports' | 'admins' | 'bans'. Anything unrecognised
--- is a NO, and the owner is always a yes.
+-- 'posts' | 'replies' | 'reports' | 'admins' | 'bans' | 'forms'. Anything
+-- unrecognised is a NO, and the owner is always a yes.
 create or replace function public.curio_admin_can(p_permission text, subject uuid default auth.uid())
 returns boolean
 language sql
@@ -676,6 +680,7 @@ as $$
             when p_permission = 'reports' then a.can_handle_reports
             when p_permission = 'admins' then a.can_manage_admins
             when p_permission = 'bans' then a.can_ban_members
+            when p_permission = 'forms' then a.can_manage_forms
             else false
         end
         from public.community_admins a
@@ -1998,6 +2003,14 @@ end $$;
  * Grants or edits one admin. The owner row can never be touched from here, and
  * only someone with the 'admins' permission may call this at all.
  */
+-- The eight-argument signature (v403 added the forms switch). The seven-
+-- argument one is dropped first: `create or replace` with a different
+-- signature only ADDS an overload, which would leave a version of this
+-- function behind that silently forgot every form permission.
+drop function if exists public.curio_set_community_admin(
+    uuid, text, boolean, boolean, boolean, boolean, boolean
+);
+
 create or replace function public.curio_set_community_admin(
     p_user_id uuid,
     p_role text,
@@ -2005,7 +2018,8 @@ create or replace function public.curio_set_community_admin(
     p_can_delete_replies boolean,
     p_can_handle_reports boolean,
     p_can_manage_admins boolean,
-    p_can_ban_members boolean
+    p_can_ban_members boolean,
+    p_can_manage_forms boolean default false
 )
 returns void
 language plpgsql
@@ -2030,7 +2044,7 @@ begin
     end if;
     insert into public.community_admins (
         user_id, added_by, role, can_delete_posts, can_delete_replies,
-        can_handle_reports, can_manage_admins, can_ban_members
+        can_handle_reports, can_manage_admins, can_ban_members, can_manage_forms
     )
     values (
         p_user_id, actor, v_role,
@@ -2038,7 +2052,8 @@ begin
         coalesce(p_can_delete_replies, true),
         coalesce(p_can_handle_reports, true),
         coalesce(p_can_manage_admins, false),
-        coalesce(p_can_ban_members, false)
+        coalesce(p_can_ban_members, false),
+        coalesce(p_can_manage_forms, false)
     )
     on conflict (user_id) do update set
         role = excluded.role,
@@ -2046,7 +2061,8 @@ begin
         can_delete_replies = excluded.can_delete_replies,
         can_handle_reports = excluded.can_handle_reports,
         can_manage_admins = excluded.can_manage_admins,
-        can_ban_members = excluded.can_ban_members;
+        can_ban_members = excluded.can_ban_members,
+        can_manage_forms = excluded.can_manage_forms;
     insert into public.moderation_actions (actor, action, target_kind, target_id, target_owner)
     values (actor, 'set_admin', 'user', p_user_id, p_user_id);
 end $$;
@@ -2085,8 +2101,8 @@ revoke all on function public.curio_moderate_remove_comment(uuid, text, text) fr
 grant execute on function public.curio_moderate_remove_comment(uuid, text, text) to authenticated;
 revoke all on function public.curio_moderate_hide_member(uuid, boolean, text) from public, anon;
 grant execute on function public.curio_moderate_hide_member(uuid, boolean, text) to authenticated;
-revoke all on function public.curio_set_community_admin(uuid, text, boolean, boolean, boolean, boolean, boolean) from public, anon;
-grant execute on function public.curio_set_community_admin(uuid, text, boolean, boolean, boolean, boolean, boolean) to authenticated;
+revoke all on function public.curio_set_community_admin(uuid, text, boolean, boolean, boolean, boolean, boolean, boolean) from public, anon;
+grant execute on function public.curio_set_community_admin(uuid, text, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 revoke all on function public.curio_remove_community_admin(uuid) from public, anon;
 grant execute on function public.curio_remove_community_admin(uuid) to authenticated;
 
@@ -2141,6 +2157,330 @@ alter table public.dm_messages drop column if exists ciphertext;
 alter table public.dm_messages drop column if exists nonce;
 alter table public.dm_messages drop column if exists encryption_version;
 alter table public.dm_messages drop column if exists migration_state;
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 6f. FEEDBACK FORMS — the team asks the members, and the members answer
+-- ───────────────────────────────────────────────────────────────────────────
+-- What this is: one question sheet (up to 5 questions, up to 4 options each),
+-- written in the app's moderation room, TESTED as many times as the team
+-- likes, then PUBLISHED. A published form is live to every member who has
+-- Online Mode on: it shows on Home and lives in Support for later.
+--
+-- SECURITY / PRIVACY RULES (read before changing anything here):
+--  • ANONYMOUS. `feedback_answers` carries NO user id, no device id and no
+--    session of any kind — there is deliberately nothing here that could link
+--    an answer to an account, and nothing may ever be added. The app keeps a
+--    local "already answered" flag per form; the server cannot (and must not)
+--    enforce one-answer-per-member, because enforcing it is exactly what would
+--    make the answers traceable.
+--  • WRITE-ONLY FOR MEMBERS: a member with a signed-in token may INSERT an
+--    answer or a skip while the form is LIVE, and may never SELECT either
+--    table. Reading is the team's (`curio_admin_can('forms')`).
+--  • WHO MAY WRITE A FORM: `curio_admin_can('forms')` — the owner always, and
+--    any admin the owner gave the forms switch. The database is the guard; the
+--    client's copy of the rule only decides what to draw.
+--  • CADENCE: one publication per 14 days. Testing never counts (a test form
+--    is `is_test` and touches neither the clock nor the live form). The owner
+--    may OVERRIDE the clock, and publishing closes whichever form was live —
+--    only the newest form is ever live at once.
+--
+-- The shape of one row of `questions` (an array, 1..5 of these):
+--   {"id":"q1","prompt":"What should Curio do next?","kind":"SINGLE",
+--    "options":["Reading","Writing","Social","Something else"]}
+-- kind is SINGLE (one option), MULTI (any of them) or TEXT (one short written
+-- answer). The same `id` keys the answer:
+--   {"id":"q1","option":2} | {"id":"q2","options":[0,3]} | {"id":"q3","text":"…"}
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.feedback_forms (
+    id           uuid primary key default gen_random_uuid(),
+    title        text not null check (char_length(btrim(title)) between 3 and 120),
+    -- The line above the questions ("Two minutes, and it shapes what we build").
+    intro        text not null default '' check (char_length(intro) <= 400),
+    -- 1..5 question objects, see the shape above.
+    questions    jsonb not null,
+    -- draft  = being written (only the team sees it)
+    -- live   = published (every member sees it)
+    -- closed = it was live and is not any more
+    status       text not null default 'draft' check (status in ('draft', 'live', 'closed')),
+    -- A test never counts toward the 14-day clock and is never the live form.
+    is_test      boolean not null default false,
+    created_by   uuid references auth.users (id) on delete set null,
+    created_at   timestamptz not null default now(),
+    published_at timestamptz,
+    closed_at    timestamptz,
+    check (jsonb_typeof(questions) = 'array'),
+    check (jsonb_array_length(questions) between 1 and 5)
+);
+
+create index if not exists feedback_forms_live_idx
+    on public.feedback_forms (published_at desc)
+    where status = 'live';
+
+-- One member's answers to one form. NO identity columns, by design.
+create table if not exists public.feedback_answers (
+    id         uuid primary key default gen_random_uuid(),
+    form_id    uuid not null references public.feedback_forms (id) on delete cascade,
+    answers    jsonb not null,
+    created_at timestamptz not null default now(),
+    check (jsonb_typeof(answers) = 'array'),
+    check (jsonb_array_length(answers) between 1 and 5)
+);
+
+create index if not exists feedback_answers_form_idx
+    on public.feedback_answers (form_id, created_at desc);
+
+-- "Not now" and "never show me this again", counted, not attributed.
+create table if not exists public.feedback_skips (
+    id         uuid primary key default gen_random_uuid(),
+    form_id    uuid not null references public.feedback_forms (id) on delete cascade,
+    kind       text not null check (kind in ('skip', 'never')),
+    created_at timestamptz not null default now()
+);
+
+create index if not exists feedback_skips_form_idx
+    on public.feedback_skips (form_id, kind);
+
+alter table public.feedback_forms enable row level security;
+alter table public.feedback_answers enable row level security;
+alter table public.feedback_skips enable row level security;
+
+-- ── who may read a form ────────────────────────────────────────────────────
+-- A PUBLISHED form (live and not a test) is readable by every signed-in
+-- member, which is the whole point; a test is readable by the team only, even
+-- while it is "live" so they can walk it exactly as a member would, so the
+-- walkthrough can never reach the members themselves.
+drop policy if exists ff_select_live_or_team on public.feedback_forms;
+create policy ff_select_live_or_team on public.feedback_forms
+    for select to authenticated
+    using (
+        (status = 'live' and is_test = false)
+        or public.curio_admin_can('forms')
+    );
+
+drop policy if exists ff_insert_team on public.feedback_forms;
+create policy ff_insert_team on public.feedback_forms
+    for insert to authenticated
+    with check (public.curio_admin_can('forms'));
+
+drop policy if exists ff_update_team on public.feedback_forms;
+create policy ff_update_team on public.feedback_forms
+    for update to authenticated
+    using (public.curio_admin_can('forms'))
+    with check (public.curio_admin_can('forms'));
+
+drop policy if exists ff_delete_team on public.feedback_forms;
+create policy ff_delete_team on public.feedback_forms
+    for delete to authenticated
+    using (public.curio_admin_can('forms'));
+
+-- ── answers: insert while live, read only as the team ──────────────────────
+drop policy if exists fa_insert_while_live on public.feedback_answers;
+create policy fa_insert_while_live on public.feedback_answers
+    for insert to authenticated
+    with check (
+        exists (
+            select 1 from public.feedback_forms f
+             where f.id = form_id
+               and (
+                    (f.status = 'live' and f.is_test = false)
+                    or public.curio_admin_can('forms')
+               )
+        )
+    );
+
+drop policy if exists fa_select_team on public.feedback_answers;
+create policy fa_select_team on public.feedback_answers
+    for select to authenticated
+    using (public.curio_admin_can('forms'));
+
+drop policy if exists fs_insert_while_live on public.feedback_skips;
+create policy fs_insert_while_live on public.feedback_skips
+    for insert to authenticated
+    with check (
+        exists (
+            select 1 from public.feedback_forms f
+             where f.id = form_id
+               and f.status = 'live'
+               and f.is_test = false
+        )
+    );
+
+drop policy if exists fs_select_team on public.feedback_skips;
+create policy fs_select_team on public.feedback_skips
+    for select to authenticated
+    using (public.curio_admin_can('forms'));
+
+-- ── publishing ────────────────────────────────────────────────────────────
+-- The ONE door a form goes live through: it checks the team's forms switch,
+-- enforces the 14-day clock (unless the caller OVERRIDES and is allowed to),
+-- closes whatever was live, and stamps `published_at`. `p_force` is the
+-- owner's override; it is re-checked here rather than trusted from the client.
+create or replace function public.curio_publish_feedback_form(
+    p_form_id uuid,
+    p_force boolean default false
+)
+returns timestamptz
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_test    boolean;
+    v_last    timestamptz;
+    v_days    int;
+    v_at      timestamptz;
+begin
+    if not public.curio_admin_can('forms') then
+        raise exception 'curio: the forms belong to the owner';
+    end if;
+    select is_test into v_test from public.feedback_forms where id = p_form_id;
+    if v_test is null then
+        raise exception 'curio: no such form';
+    end if;
+
+    if v_test then
+        -- A test is published as a test: it never becomes the live form and
+        -- never touches the clock, so the team can walk through it as often
+        -- as they like.
+        update public.feedback_forms
+           set status = 'live', published_at = now(), closed_at = null
+         where id = p_form_id
+        returning published_at into v_at;
+        return v_at;
+    end if;
+
+    if not p_force then
+        select max(published_at) into v_last
+          from public.feedback_forms
+         where is_test = false and published_at is not null and id <> p_form_id;
+        if v_last is not null and v_last > now() - interval '14 days' then
+            v_days := ceil(extract(epoch from (now() - v_last)) / 86400.0)::int;
+            raise exception 'curio: a form went out % days ago, so the next one can go out in % days',
+                v_days, greatest(14 - v_days, 1);
+        end if;
+    end if;
+
+    -- Only the newest form is ever live: this one replaces the last.
+    update public.feedback_forms
+       set status = 'closed', closed_at = now()
+     where status = 'live' and is_test = false and id <> p_form_id;
+
+    update public.feedback_forms
+       set status = 'live', published_at = now(), closed_at = null
+     where id = p_form_id
+    returning published_at into v_at;
+    return v_at;
+end $$;
+
+create or replace function public.curio_close_feedback_form(p_form_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if not public.curio_admin_can('forms') then
+        raise exception 'curio: the forms belong to the owner';
+    end if;
+    update public.feedback_forms
+       set status = 'closed', closed_at = now()
+     where id = p_form_id and status = 'live';
+end $$;
+
+-- ── the tally ─────────────────────────────────────────────────────────────
+-- One row per question per option, plus one row (`option_index = -1`) for the
+-- written answers and for the skips, so the results page needs ONE call and
+-- never downloads the answers themselves. Team only.
+create or replace function public.curio_feedback_tally(p_form_id uuid)
+returns table (
+    question_id  text,
+    kind         text,
+    option_index int,
+    total        int
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+    q      jsonb;
+    v_kind text;
+    v_id   text;
+    i      int;
+    opts   int;
+    n      int;
+begin
+    if not public.curio_admin_can('forms') then
+        raise exception 'curio: the answers are the team''s';
+    end if;
+
+    for q in
+        select jsonb_array_elements(questions)
+          from public.feedback_forms
+         where id = p_form_id
+    loop
+        v_id := q->>'id';
+        v_kind := upper(coalesce(q->>'kind', 'SINGLE'));
+        if v_kind = 'TEXT' then
+            select count(*) into n
+              from public.feedback_answers a
+             where a.form_id = p_form_id
+               and exists (
+                    select 1 from jsonb_array_elements(a.answers) e
+                     where e->>'id' = v_id
+                       and btrim(coalesce(e->>'text', '')) <> ''
+               );
+            question_id  := v_id;
+            kind         := v_kind;
+            option_index := -1;
+            total        := n;
+            return next;
+        else
+            opts := coalesce(jsonb_array_length(q->'options'), 0);
+            for i in 0 .. (opts - 1) loop
+                select count(*) into n
+                  from public.feedback_answers a
+                 where a.form_id = p_form_id
+                   and exists (
+                        select 1 from jsonb_array_elements(a.answers) e
+                         where e->>'id' = v_id
+                           and (
+                                (e ? 'option' and coalesce(e->>'option', '') ~ '^[0-9]+$'
+                                     and (e->>'option')::int = i)
+                             or (e ? 'options' and e->'options' @> jsonb_build_array(i))
+                           )
+                   );
+                question_id  := v_id;
+                kind         := v_kind;
+                option_index := i;
+                total        := n;
+                return next;
+            end loop;
+        end if;
+    end loop;
+
+    -- How many members chose not to take it: shown beside the form.
+    for v_kind, n in
+        select sk.kind, count(*)::int
+          from public.feedback_skips sk
+         where sk.form_id = p_form_id
+         group by sk.kind
+    loop
+        question_id  := '__' || v_kind;
+        kind         := upper(v_kind);
+        option_index := -1;
+        total        := n;
+        return next;
+    end loop;
+end $$;
+
+revoke all on function public.curio_publish_feedback_form(uuid, boolean) from public, anon;
+grant execute on function public.curio_publish_feedback_form(uuid, boolean) to authenticated;
+revoke all on function public.curio_close_feedback_form(uuid) from public, anon;
+grant execute on function public.curio_close_feedback_form(uuid) to authenticated;
+revoke all on function public.curio_feedback_tally(uuid) from public, anon;
+grant execute on function public.curio_feedback_tally(uuid) to authenticated;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 7. Grants
@@ -2921,7 +3261,8 @@ begin
                          'community_reactions','community_comments',
                          'community_comment_reactions',
                          'community_reports','friend_requests','dm_messages',
-                         'dm_typing','dm_reactions','dm_conversation_hidden')
+                         'dm_typing','dm_reactions','dm_conversation_hidden',
+                         'feedback_forms','feedback_answers','feedback_skips')
        and c.relrowsecurity = false;
     if rls_off is null then
         raise notice 'PASS  RLS enabled on every Curio table';
@@ -2939,7 +3280,8 @@ begin
                          'community_comment_reactions',
                          'community_reports','friend_requests','dm_messages',
                          'dm_typing','dm_reactions','member_blocks',
-                         'dm_conversation_hidden');
+                         'dm_conversation_hidden','feedback_forms',
+                         'feedback_answers','feedback_skips');
     if anon_open is null then
         raise notice 'PASS  no anon policies on Curio tables';
     else
@@ -2953,7 +3295,8 @@ begin
                         'community_comment_reactions',
                         'community_reports','friend_requests','dm_messages',
                         'dm_typing','dm_reactions','member_blocks',
-                        'dm_conversation_hidden']) as t
+                        'dm_conversation_hidden','feedback_forms',
+                        'feedback_answers','feedback_skips']) as t
      where not exists (
         select 1 from pg_class c
           join pg_namespace n on n.oid = c.relnamespace
@@ -2963,5 +3306,25 @@ begin
         raise notice 'PASS  every Curio table exists';
     else
         raise warning 'FAIL  missing tables: %', missing;
+    end if;
+
+    -- ── the forms are anonymous, and stay that way ────────────────────────
+    -- The whole promise of the feedback form is that an answer cannot be
+    -- traced to the account that gave it. A future column named for a user
+    -- (id, owner, author, device, session…) on either answer table would
+    -- break that promise silently, so it breaks the paste instead.
+    select string_agg(c.relname || '.' || a.attname, ', ')
+      into anon_open
+      from pg_attribute a
+      join pg_class c on c.oid = a.attrelid
+      join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public'
+       and c.relname in ('feedback_answers', 'feedback_skips')
+       and a.attnum > 0 and not a.attisdropped
+       and a.attname ~* '(user|owner|author|device|session|account|profile)';
+    if anon_open is null then
+        raise notice 'PASS  the form answers carry no identity';
+    else
+        raise warning 'FAIL  identity columns on form answers: %', anon_open;
     end if;
 end $$;

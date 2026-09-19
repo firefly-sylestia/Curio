@@ -133,7 +133,7 @@ data class CommunityReport(
 /**
  * One moderator's row in `community_admins`.
  *
- * [role] is 'owner' (everything, protected) or 'admin' (the five switches). The
+ * [role] is 'owner' (everything, protected) or 'admin' (the six switches). The
  * client reads this to decide what to OFFER; the database asks
  * `curio_admin_can` again for every action, so a hidden button is never the
  * guard.
@@ -145,11 +145,13 @@ data class CommunityAdminRow(
     val canDeleteReplies: Boolean,
     val canHandleReports: Boolean,
     val canManageAdmins: Boolean,
-    val canBanMembers: Boolean
+    val canBanMembers: Boolean,
+    /** v403 — build, publish and read the feedback forms. */
+    val canManageForms: Boolean = false
 ) {
     val owner: Boolean get() = role == "owner"
 
-    /** 'posts' | 'replies' | 'reports' | 'admins' | 'bans'. */
+    /** 'posts' | 'replies' | 'reports' | 'admins' | 'bans' | 'forms'. */
     fun allows(permission: String): Boolean = when {
         owner -> true
         permission == "posts" -> canDeletePosts
@@ -157,6 +159,7 @@ data class CommunityAdminRow(
         permission == "reports" -> canHandleReports
         permission == "admins" -> canManageAdmins
         permission == "bans" -> canBanMembers
+        permission == "forms" -> canManageForms
         else -> false
     }
 }
@@ -433,7 +436,7 @@ object CommunityApi {
     /** The moderator row's columns, in one place. */
     private const val ADMIN_COLUMNS =
         "user_id,role,can_delete_posts,can_delete_replies,can_handle_reports," +
-            "can_manage_admins,can_ban_members"
+            "can_manage_admins,can_ban_members,can_manage_forms"
 
     /**
      * The reply SELECT the sheet and the moderation queue share.
@@ -989,7 +992,8 @@ object CommunityApi {
         canDeleteReplies: Boolean,
         canHandleReports: Boolean,
         canManageAdmins: Boolean,
-        canBanMembers: Boolean
+        canBanMembers: Boolean,
+        canManageForms: Boolean = false
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             val payload = JSONObject()
@@ -1000,6 +1004,7 @@ object CommunityApi {
                 .put("p_can_handle_reports", canHandleReports)
                 .put("p_can_manage_admins", canManageAdmins)
                 .put("p_can_ban_members", canBanMembers)
+                .put("p_can_manage_forms", canManageForms)
             val request = SupabaseClient.requestBuilder(RPC_SET_ADMIN, accessToken)
                 .post(payload.toString().toRequestBody(jsonMediaType))
                 .build()
@@ -1357,7 +1362,8 @@ object CommunityApi {
                         canDeleteReplies = row.optBoolean("can_delete_replies", true),
                         canHandleReports = row.optBoolean("can_handle_reports", true),
                         canManageAdmins = row.optBoolean("can_manage_admins", false),
-                        canBanMembers = row.optBoolean("can_ban_members", false)
+                        canBanMembers = row.optBoolean("can_ban_members", false),
+                        canManageForms = row.optBoolean("can_manage_forms", false)
                     )
                 )
             }
