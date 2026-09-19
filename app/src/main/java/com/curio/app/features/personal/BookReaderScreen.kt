@@ -17,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -100,6 +101,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -126,7 +128,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
+import java.util.Locale
 import java.util.zip.ZipFile
 
 /**
@@ -297,6 +301,22 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     val pagerState = rememberPagerState {
         (content as? ReaderContent.Pages)?.pageCount ?: 0
     }
+    // ── A PAGE ASKED FOR, INSTEAD OF A PAGE CHANGED (v399) ──────────────
+    //
+    // A PDF has TWO reading surfaces — a pager of pages and a column of them —
+    // and they hold two different scroll states. Every jump used to be performed
+    // on the PAGER's state directly, so in the scrolling flow (which is what a
+    // PDF opens in when the member has never switched) "Continue reading", every
+    // mark in the places sheet and every contents row moved an off-screen pager
+    // and the member saw nothing happen at all. The number is now ASKED FOR and
+    // whichever surface is showing takes it and clears it, exactly like a text
+    // jump already did (see [pendingBlock]).
+    var pendingPage by remember { mutableStateOf<Int?>(null) }
+    fun jumpToPage(page: Int) {
+        pendingPage = page
+        hideChrome()
+    }
+
     /**
      * Jump to a MARK's own place — a block index in a reflowable book, a page in
      * a PDF. It lands on the passage ITSELF: a highlight belongs to the words it
@@ -307,9 +327,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             is ReaderContent.Text -> listState.scrollToItem(
                 index.coerceIn(0, (loaded.blocks.size - 1).coerceAtLeast(0))
             )
-            is ReaderContent.Pages -> pagerState.scrollToPage(
-                index.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
-            )
+            // v399 — A PAGE JUMP IS ASKED FOR, NOT PERFORMED. This used to call
+            // `pagerState.scrollToPage` directly, which is the PAGED reader's
+            // pager — so in the scrolling flow (the default for a PDF nobody has
+            // switched) "Continue reading" and every mark in the places sheet
+            // moved an off-screen pager and the member saw nothing happen. The
+            // number is handed to whichever surface is showing, exactly like a
+            // text jump is (see [pendingPage]).
+            is ReaderContent.Pages -> pendingPage = index.coerceAtLeast(0)
             null -> Unit
         }
     }
@@ -327,6 +352,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // Two pagers, one bar: the PDF's own, and the text pager the PAGED flow
     // lays a reflowable book out into. A book that prints its own page numbers
     // is the exception — Curio does not number it a second time.
+    // v399 — THE PAGE THE SCROLLING COLUMN IS SHOWING.
+    //
+    // The column is one long strip and has no "page" of its own, so it reports
+    // the one under the reader's eye; the bookmarks, the contents and the page
+    // bar then have a number to work with.
+    var shownPage by remember(bookId, document) { mutableStateOf(0) }
+
     val pageBar: ReaderPageBar? = when (val loaded = content) {
         is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
             ReaderPageBar(
@@ -347,7 +379,16 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 }
             )
         } else {
-            null
+            // The scrolling flow used to have NO bar at all, so the one surface
+            // that shows a single page at a time was the one that could not turn
+            // one: the bar names the page the column is showing and asks the
+            // column to go to the next (v399).
+            val at = shownPage.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
+            ReaderPageBar(
+                label = "Page ${at + 1} of ${loaded.pageCount}",
+                onPrev = { jumpToPage((at - 1).coerceAtLeast(0)) },
+                onNext = { jumpToPage((at + 1).coerceAtMost(loaded.pageCount - 1)) }
+            )
         }
 
         is ReaderContent.Text -> if (
@@ -530,6 +571,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 is ReaderContent.Pages -> PageReader(
                     pageCount = loaded.pageCount,
                     pagerState = pagerState,
+                    pendingPage = pendingPage,
+                    onPendingPageConsumed = { pendingPage = null },
+                    onPageShown = { shownPage = it },
                     document = document,
                     marks = marks,
                     palette = palette,
@@ -743,12 +787,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             },
             onPickPage = { page ->
                 sheet = null
-                chrome = false
-                scope.launch {
-                    pagerState.scrollToPage(
-                        (page - 1).coerceIn(0, (pagerState.pageCount - 1).coerceAtLeast(0))
-                    )
-                }
+                jumpToPage((page - 1).coerceAtLeast(0))
             },
             onBookmarkHere = { paragraph ->
                 scope.launch {
@@ -776,11 +815,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     // A block index for a reflowed book: the surface showing it
                     // decides which page that block is on.
                     is ReaderContent.Text -> jumpToBlock(index)
-                    is ReaderContent.Pages -> scope.launch {
-                        pagerState.scrollToPage(
-                            index.coerceIn(0, (pagerState.pageCount - 1).coerceAtLeast(0))
-                        )
-                    }
+                    is ReaderContent.Pages -> jumpToPage(index)
 
                     null -> Unit
                 }
@@ -950,7 +985,7 @@ private fun TextReader(
     // PINCH makes the TYPE bigger, not the pixels: a reflowed book that is
     // magnified like a photograph is a worse book, and every reader on earth
     // re-lays the page out instead (v389).
-    val zoomModifier = Modifier.pinchToZoom { zoom, _ ->
+    val zoomModifier = Modifier.pinchToZoom { zoom, _, _ ->
         ReaderLook.textScale = (ReaderLook.textScale * zoom).coerceIn(0.8f, 2.6f)
         // The type IS the zoom here, so there is no pan for the page to take —
         // one finger keeps scrolling the book, which is the whole point of a
@@ -1123,7 +1158,12 @@ private fun PdfScrollReader(
     onLongPress: (Int) -> Unit,
     /** v389c — the live sweep, when it belongs to this page of the file. */
     selection: ReaderSelection?,
-    onSelect: (ReaderSelection) -> Unit
+    onSelect: (ReaderSelection) -> Unit,
+    /** A page asked for from outside — a mark, a chapter, the page bar (v399). */
+    pendingPage: Int?,
+    onPendingPageConsumed: () -> Unit,
+    /** Which page the column is showing, so the bar and the marks can name it. */
+    onPageShown: (Int) -> Unit
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
@@ -1150,6 +1190,10 @@ private fun PdfScrollReader(
         if (!restored) return@LaunchedEffect
         snapshotFlow { listState.firstVisibleItemIndex }
             .collectLatest { index ->
+                // The bar and the marks read this the moment it changes; the
+                // WRITE waits for the reader to settle, so a flick through ten
+                // pages saves the page the finger stopped on, once.
+                onPageShown(index)
                 delay(800)
                 withContext(Dispatchers.IO) {
                     runCatching {
@@ -1162,6 +1206,17 @@ private fun PdfScrollReader(
                     }
                 }
             }
+    }
+
+    // A PAGE ASKED FOR FROM OUTSIDE: a mark in the places sheet, a chapter, the
+    // page bar's own arrows. The column takes the number itself and clears it,
+    // so the same jump never fires twice.
+    LaunchedEffect(pendingPage, pageCount) {
+        val at = pendingPage ?: return@LaunchedEffect
+        val target = at.coerceIn(0, (pageCount - 1).coerceAtLeast(0))
+        listState.scrollToItem(target)
+        onPageShown(target)
+        onPendingPageConsumed()
     }
 
     // ── ONE PAGE PER SCREEN, IN A COLUMN (v389c) ──────────────────────
@@ -1178,46 +1233,86 @@ private fun PdfScrollReader(
         // The width a page has at rest — the viewport minus the column's own
         // side air. A magnified page is this multiplied by the zoom.
         val pageWidth = (maxWidth - 28.dp).coerceAtLeast(1.dp)
-        val pageWidthPx = remember { mutableStateOf(0f) }
-        val density = LocalDensity.current
-        LaunchedEffect(pageWidth, density) {
-            pageWidthPx.value = with(density) { pageWidth.toPx() }
+        // ── ONE PAGE, ONE FRAME, AND THE PAGE YOU PINCHED IS THE ONE THAT GROWS (v399) ──
+        //
+        // Three passes have gone into this column, and each was taught by the last:
+        //
+        //   v389c  every page was sized by its WIDTH, so a phone showed two page
+        //          images stacked ("for pdf it was showing double pages view").
+        //          Each page now fits INSIDE the viewport: one page at a time.
+        //   v395   the zoom grew each page's own BOX, so a magnified page could
+        //          never overlap its neighbours — but EVERY page in the column
+        //          grew with it, which pushed the page above out from under the
+        //          member's fingers ("when i pinch zoom in the middle the top part
+        //          of the previous page zooms in").
+        //   v399   the box NEVER changes size. Only the page you pinched is
+        //          magnified, inside its own frame (`clipToBounds`), and the zoom
+        //          is anchored at the fingers ([readerZoomedPan]). Nothing around
+        //          it moves, so there is nothing to compensate for.
+        //
+        // A magnified page is therefore a WINDOW onto that one page: drag to move
+        // around it, and when it runs out of room in the direction you are
+        // dragging the drag is handed back and the column scrolls on — the rule
+        // the member asked for ("it should page change only when it reaches the
+        // page end and then on another swipe it does").
+        //
+        // A zoom belongs to a FRAME, and this reader's frames are its page items,
+        // so a zoom left over from the paged flow (whose frame is the screen)
+        // starts again at nothing here.
+        LaunchedEffect(bookId, document) {
+            if (ReaderLook.pdfZoomPage == -1) {
+                ReaderLook.pdfZoom = 1f
+                ReaderLook.pdfPanX = 0f
+                ReaderLook.pdfPanY = 0f
+            }
         }
-        // ── THE ZOOM IS THE PAGE'S SIZE, NOT A DRAWING ON TOP OF IT (v395) ──
-        //
-        // The column used to magnify each page with a `graphicsLayer` scale INSIDE
-        // its own slot, which is a drawing that grows about its centre — so a
-        // zoomed page painted straight over the page above and the page below it
-        // (user report: "in vertical connected page, when i pinch zoom it the
-        // pages overlap with each other really buggy fix it"). Scale-and-pan is
-        // the right answer for ONE page on a screen (the paged flow, below); a
-        // column has no room for it, because the neighbours are IN the flow.
-        //
-        // So here the page's own BOX grows with the zoom: the column gets taller,
-        // a magnified page is simply a bigger page in the flow, and no two pages
-        // can ever overlap — the layout decides where they are, and it always
-        // says "one after the other". Reading down a magnified page IS the
-        // scroll, which is why a ONE-FINGER drag is never taken: only a sideways
-        // drag is the page's (a zoomed page is wider than the screen, and the
-        // sideways part is what the scroll cannot reach on its own).
-        val zoomModifier = Modifier.pinchToZoom(zoomed = { ReaderLook.pdfZoom > 1.02f }) { grabbed, drag ->
-            val next = (ReaderLook.pdfZoom * grabbed).coerceIn(1f, 4f)
-            ReaderLook.pdfZoom = next
+
+        /**
+         * THE PINCH AND THE PAN FOR ONE PAGE, in that page's own frame: the zoom
+         * is anchored under the fingers, the travel is clamped to the page's
+         * edges, and the answer says how much of the drag the page took — zero
+         * hands it back to the column underneath, which is how a page turn at the
+         * end of a magnified page still feels like a page turn.
+         */
+        fun zoomThisPage(
+            page: Int,
+            box: IntSize,
+            aspect: Float,
+            zoom: Float,
+            drag: Offset,
+            focus: Offset
+        ): Offset {
+            val was = ReaderLook.pdfZoom
+            val next = (was * zoom).coerceIn(1f, 4f)
+            val wasPan = Offset(ReaderLook.pdfPanX, ReaderLook.pdfPanY)
             if (next <= 1.02f) {
                 ReaderLook.pdfZoom = 1f
                 ReaderLook.pdfPanX = 0f
                 ReaderLook.pdfPanY = 0f
-                Offset.Zero
-            } else {
-                // Half the page's growth, each way: the travel that brings
-                // either edge of the magnified page to the screen's edge.
-                val room = (pageWidthPx.value * (next - 1f)) / 2f
-                val was = ReaderLook.pdfPanX
-                ReaderLook.pdfPanX = (was + drag.x).coerceIn(-room, room)
-                ReaderLook.pdfPanY = 0f
-                Offset(ReaderLook.pdfPanX - was, 0f)
+                ReaderLook.pdfZoomPage = -1
+                return Offset.Zero
             }
+            val moved = readerZoomedPan(
+                box = box,
+                drawn = readerDrawnPage(box, aspect),
+                from = was,
+                to = next,
+                focus = focus + drag,
+                pan = wasPan
+            )
+            ReaderLook.pdfZoom = next
+            ReaderLook.pdfZoomPage = page
+            ReaderLook.pdfPanX = moved.x
+            ReaderLook.pdfPanY = moved.y
+            // What the page TOOK, in the drag's own direction: a page out of
+            // room sideways must not claim a sideways drag, or the scroll would
+            // need a perfectly straight swipe to win one back.
+            val sideways = (if (drag.x < 0f) -drag.x else drag.x) >=
+                (if (drag.y < 0f) -drag.y else drag.y)
+            val took = if (sideways) moved.x != wasPan.x else moved.y != wasPan.y
+            return if (took) Offset(moved.x - wasPan.x, moved.y - wasPan.y) else Offset.Zero
         }
+
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -1225,7 +1320,6 @@ private fun PdfScrollReader(
                 // A page wider than the screen is cut at the screen — never
                 // drawn over its neighbours, and never asked to scroll sideways.
                 .clipToBounds()
-                .then(zoomModifier)
                 .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
             contentPadding = PaddingValues(start = 14.dp, end = 14.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -1249,31 +1343,53 @@ private fun PdfScrollReader(
                     runCatching { extractPdfPageText(context, document, page) }.getOrNull()
                 }
             }
+            // ── THE FRAME, AND WHAT IS MAGNIFIED INSIDE IT (v399) ──────
+            //
+            // The page is laid out at its OWN size and never changes it: a zoom
+            // is drawn inside this frame, so the column's layout is the same at
+            // 1× and at 4×, and the pages above and below stay exactly where the
+            // finger left them. (`requiredWidth` because these ARE the page's
+            // measurements — the column's constraints describe the page at rest.)
+            val aspect = bitmap?.let { it.width.toFloat() / it.height.toFloat() } ?: 0f
+            var pageBox by remember { mutableStateOf(IntSize.Zero) }
+            // WHOSE ZOOM THIS IS. Read in the composition — it changes only when
+            // a pinch starts or ends on a page, so this costs one recomposition
+            // per pinch — and used by the DRAW lambda below, where the scale and
+            // pan are read live, so a pinch redraws a page instead of
+            // recomposing the column. The GESTURE asks the same question live
+            // instead, because a handler outlives the composition that armed it.
+            val mine = ReaderLook.pdfZoomPage == page
             Box(
                 modifier = Modifier
+                    .requiredWidth(pageWidth)
                     .then(
-                        bitmap?.let { rendered ->
-                            val aspect = rendered.width.toFloat() / rendered.height.toFloat()
-                            val zoom = ReaderLook.pdfZoom
-                            Modifier
-                                // `requiredWidth` because these ARE the page's
-                                // own measurements — the column's constraints
-                                // describe the page at rest, not this one.
-                                .requiredWidth(pageWidth * zoom)
-                                .requiredHeight((pageWidth / aspect) * zoom)
-                                .graphicsLayer {
-                                    // Growing about its centre keeps the page
-                                    // where it was in the column; the sideways
-                                    // drag rides on top of that.
-                                    translationX = -(pageWidthPx.value * (zoom - 1f)) / 2f +
-                                        ReaderLook.pdfPanX
-                                }
-                        } ?: Modifier.fillMaxWidth().height(pageHeight)
+                        if (aspect > 0f) Modifier.requiredHeight(pageWidth / aspect)
+                        else Modifier.height(pageHeight)
                     )
-                    .onSizeChanged { container = it }
-                    .pointerInput(page) {
+                    // THE PAGE'S OWN EDGE IS THE END OF ITS ZOOM: clipped at its
+                    // frame, a magnified page can never reach a neighbour — which
+                    // is what the v395 growth was for, without the growth.
+                    .clip(RoundedCornerShape(6.dp))
+                    .onSizeChanged {
+                        container = it
+                        pageBox = it
+                    }
+                    .pinchToZoom(
+                        // The page's shape, once the render lands: the gesture is
+                        // re-armed with it, so its room and its zoom come from the
+                        // page itself and not from a page that had not been drawn.
+                        key = aspect,
+                        zoomed = { ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f }
+                    ) { zoom, drag, focus ->
+                        zoomThisPage(page, pageBox, aspect, zoom, drag, focus)
+                    }
+                    // Keyed on the page's SHAPE as well as its number: the tap
+                    // handler outlives the composition that armed it, and a
+                    // double tap has to measure the page it actually sees (v399).
+                    .pointerInput(page, aspect) {
                         detectTapGestures(
                             onTap = { onTap() },
+                            onDoubleTap = { at -> readerDoubleTapZoom(page, pageBox, aspect, at) },
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
                     },
@@ -1284,9 +1400,17 @@ private fun PdfScrollReader(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            // The magnified page IS this box now (see the zoom
-                            // above), so it only needs its own corners.
-                            .clip(RoundedCornerShape(6.dp))
+                            // THE MAGNIFIED PAGE LIVES INSIDE ITS FRAME: scaled
+                            // about its centre and moved by the pan, both read
+                            // here (in the draw phase) so a pinch does not
+                            // recompose the page it is magnifying.
+                            .graphicsLayer {
+                                val z = if (mine) ReaderLook.pdfZoom else 1f
+                                scaleX = z
+                                scaleY = z
+                                translationX = if (z > 1.02f) ReaderLook.pdfPanX else 0f
+                                translationY = if (z > 1.02f) ReaderLook.pdfPanY else 0f
+                            }
                     ) {
                         Image(
                             bitmap = drawn.asImageBitmap(),
@@ -1331,6 +1455,28 @@ private fun PdfScrollReader(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         )
                     }
+                }
+                // v399 — AND THE PAGE SAYS ITS OWN NUMBER.
+                //
+                // A PDF page is a picture of a page, and whatever number is
+                // printed on it belongs to the scan: it can be missing, or a
+                // roman numeral, or set at a size nobody can read on a phone.
+                // The reader's own number sits in the corner, on the paper, out
+                // of the way of the words — so "which page am I on" has an
+                // answer in the scrolling flow too, where there is no page bar.
+                // It is drawn OUTSIDE the zoom, so a magnified page cannot carry
+                // its own number off the screen.
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = palette.paper.copy(alpha = 0.88f),
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(10.dp)
+                ) {
+                    Text(
+                        "${page + 1}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.ink.copy(alpha = 0.62f),
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                    )
                 }
             }
         }
@@ -1419,7 +1565,7 @@ private fun TextPagedReader(
     // v394 — PAGES PINCH TOO (user report: "when im in pages i cant pinch to
     // zoom"): the same re-lay-the-type zoom the scroll carries, so a book read
     // as pages answers the two fingers like the same book read as a scroll.
-    val pagerZoom = Modifier.pinchToZoom { zoom, _ ->
+    val pagerZoom = Modifier.pinchToZoom { zoom, _, _ ->
         val next = (ReaderLook.textScale * zoom).coerceIn(0.8f, 2.6f)
         if (next != ReaderLook.textScale) ReaderLook.textScale = next
         Offset.Zero
@@ -1591,6 +1737,11 @@ private val PAGE_VERTICAL_PADDING = 60.dp
 private fun PageReader(
     pageCount: Int,
     pagerState: PagerState,
+    /** A page asked for from outside — a mark, a chapter, a search find (v399). */
+    pendingPage: Int?,
+    onPendingPageConsumed: () -> Unit,
+    /** Which page the pager settled on, so the bar and the marks can name it. */
+    onPageShown: (Int) -> Unit,
     document: String,
     marks: List<ReaderMarkEntity>,
     palette: ReaderPalette,
@@ -1624,7 +1775,10 @@ private fun PageReader(
             onScrolled = onScrolled,
             onLongPress = onLongPress,
             selection = selection,
-            onSelect = onSelect
+            onSelect = onSelect,
+            pendingPage = pendingPage,
+            onPendingPageConsumed = onPendingPageConsumed,
+            onPageShown = onPageShown
         )
         return
     }
@@ -1650,8 +1804,10 @@ private fun PageReader(
         if (!restored) return@LaunchedEffect
         snapshotFlow { pagerState.currentPage }
             .collectLatest { index ->
-                // Settled, not passed through: a swipe across ten pages writes
-                // the page the finger stopped on, once.
+                // The chrome names this page at once; the WRITE waits for the
+                // swipe to settle, so ten pages passed in one flick save the
+                // one the finger stopped on, once.
+                onPageShown(index)
                 delay(700)
                 withContext(Dispatchers.IO) {
                     runCatching {
@@ -1664,6 +1820,15 @@ private fun PageReader(
                     }
                 }
             }
+    }
+
+    // A PAGE ASKED FOR FROM OUTSIDE — a mark in the places sheet, a chapter, a
+    // search find, the bar's own arrows. The pager is showing, so it takes the
+    // number and clears it (v399).
+    LaunchedEffect(pendingPage, pageCount) {
+        val at = pendingPage ?: return@LaunchedEffect
+        pagerState.scrollToPage(at.coerceIn(0, (pageCount - 1).coerceAtLeast(0)))
+        onPendingPageConsumed()
     }
 
     // A page turned is the member moving through the book: the chrome goes.
@@ -1697,9 +1862,13 @@ private fun PageReader(
     // that needs them.
     val viewport = remember { mutableStateOf(IntSize.Zero) }
     val shownAspect = remember { mutableStateOf(0f) }
-    val zoomModifier = Modifier.pinchToZoom(zoomed = { ReaderLook.pdfZoom > 1.02f }) { zoom, pan ->
-        val next = (ReaderLook.pdfZoom * zoom).coerceIn(1f, 4f)
-        ReaderLook.pdfZoom = next
+    // v399 — ONE RULE FOR THE WHOLE GESTURE. The zoom is anchored at the fingers
+    // (see [readerZoomedPan]) and the drag is the same call at a constant zoom,
+    // so a pinch and a pan can no longer disagree about where the page sits.
+    val zoomModifier = Modifier.pinchToZoom(zoomed = { ReaderLook.pdfZoom > 1.02f }) { zoom, drag, focus ->
+        val was = ReaderLook.pdfZoom
+        val next = (was * zoom).coerceIn(1f, 4f)
+        val wasPan = Offset(ReaderLook.pdfPanX, ReaderLook.pdfPanY)
         if (next <= 1.02f) {
             ReaderLook.pdfZoom = 1f
             ReaderLook.pdfPanX = 0f
@@ -1707,37 +1876,27 @@ private fun PageReader(
             Offset.Zero
         } else {
             val box = viewport.value
-            val aspect = shownAspect.value
-            val boxAspect = if (box.height > 0) box.width.toFloat() / box.height else 0f
-            val drawnW: Float
-            val drawnH: Float
-            when {
-                aspect <= 0f || boxAspect == 0f -> {
-                    drawnW = box.width.toFloat()
-                    drawnH = box.height.toFloat()
-                }
-                aspect >= boxAspect -> {
-                    drawnW = box.width.toFloat()
-                    drawnH = box.width / aspect
-                }
-                else -> {
-                    drawnW = box.height * aspect
-                    drawnH = box.height.toFloat()
-                }
-            }
-            val roomX = ((drawnW * next - box.width) / 2f).coerceAtLeast(0f)
-            val roomY = ((drawnH * next - box.height) / 2f).coerceAtLeast(0f)
-            val wasX = ReaderLook.pdfPanX
-            val wasY = ReaderLook.pdfPanY
-            ReaderLook.pdfPanX = (wasX + pan.x).coerceIn(-roomX, roomX)
-            ReaderLook.pdfPanY = (wasY + pan.y).coerceIn(-roomY, roomY)
+            val moved = readerZoomedPan(
+                box = box,
+                drawn = readerDrawnPage(box, shownAspect.value),
+                from = was,
+                to = next,
+                // The fingers' own drift too, so a pinch that slides while it
+                // opens keeps its grip. At a constant zoom the focus cancels
+                // out and this is a plain pan.
+                focus = focus + drag,
+                pan = wasPan
+            )
+            ReaderLook.pdfZoom = next
+            ReaderLook.pdfPanX = moved.x
+            ReaderLook.pdfPanY = moved.y
             // WHAT THE PAGE TOOK, in the drag's own direction: a page that is
             // out of room sideways must not claim a sideways drag, or the page
             // turn would need a perfectly straight swipe.
-            val sideways = (if (pan.x < 0f) -pan.x else pan.x) >=
-                (if (pan.y < 0f) -pan.y else pan.y)
-            val took = if (sideways) ReaderLook.pdfPanX != wasX else ReaderLook.pdfPanY != wasY
-            if (took) Offset(ReaderLook.pdfPanX - wasX, ReaderLook.pdfPanY - wasY)
+            val sideways = (if (drag.x < 0f) -drag.x else drag.x) >=
+                (if (drag.y < 0f) -drag.y else drag.y)
+            val took = if (sideways) moved.x != wasPan.x else moved.y != wasPan.y
+            if (took) Offset(moved.x - wasPan.x, moved.y - wasPan.y)
             else Offset.Zero
         }
     }
@@ -1794,6 +1953,14 @@ private fun PageReader(
                 .pointerInput(page) {
                     detectTapGestures(
                         onTap = { onTap() },
+                        // v399 — A DOUBLE TAP IS THE PINCH, AT ONE POINT: in to
+                        // read a line closely, out to see the page whole again.
+                        // It is anchored where it was tapped, like the pinch is,
+                        // and it uses the same rule — so the page grows about
+                        // the word the finger asked about.
+                        onDoubleTap = { at ->
+                            readerDoubleTapZoom(pagerState.currentPage, viewport.value, shownAspect.value, at)
+                        },
                         // Held words are the sweep's: the layer below answers
                         // the press, and this one only stands in where the page
                         // has nothing to select (see PdfPageTextLayer).
@@ -2612,7 +2779,10 @@ private fun ReaderPlacesSheet(
     // them in that order and scrolls: the progress card, then the marks, then
     // the book's own contents. Nothing is behind a chip, and every chapter row
     // carries its own bookmark (see [ReaderContentsSection]).
-    val kept = marks.filter { !it.isPosition }
+    // IN THE BOOK'S OWN ORDER: a reader's marks are an index to the book, so
+    // they read the way the book reads — from where it starts to where it ends —
+    // and not in whatever order the table happens to hand them over (v399).
+    val kept = marks.filter { !it.isPosition }.sortedBy { it.positionIndex }
     val through = position?.positionFraction?.coerceIn(0f, 1f) ?: 0f
     val placeTitle = readerPlaceTitle(content, chapters, position)
     val countLabel = when (val loaded = content) {
@@ -2672,6 +2842,8 @@ private fun ReaderPlacesSheet(
             )
             ReaderMarksSection(
                 marks = kept,
+                content = content,
+                chapters = chapters,
                 palette = palette,
                 onJump = onJump,
                 onDelete = onDelete
@@ -2928,6 +3100,8 @@ private fun ReaderPlaceAction(
 @Composable
 private fun ReaderMarksSection(
     marks: List<ReaderMarkEntity>,
+    content: ReaderContent?,
+    chapters: List<ReaderOutlineEntry>,
     palette: ReaderPalette,
     onJump: (ReaderMarkEntity) -> Unit,
     onDelete: (ReaderMarkEntity) -> Unit
@@ -2939,16 +3113,74 @@ private fun ReaderMarksSection(
             color = palette.ink.copy(alpha = 0.55f)
         )
     }
+    val paged = content is ReaderContent.Pages
     marks.forEach { mark ->
         ReaderMarkRow(
-            label = if (mark.isNote) "Note" else mark.markKind.label,
-            body = mark.text.ifBlank { "Section ${mark.positionIndex + 1}" },
+            mark = mark,
+            place = readerMarkPlace(content, mark),
+            where = readerMarkChapter(content, chapters, mark),
+            made = readerMarkWhen(mark.createdAtMillis),
+            // A PDF bookmark's own text IS its page ("Page 42"), which the line
+            // above already says — quoting it back would be the sheet talking to
+            // itself. A highlight or a note always has words of its own.
+            snippet = if (paged && mark.markKind == ReaderMarkKind.BOOKMARK) "" else mark.text,
             palette = palette,
-            note = mark.note,
             onJump = { onJump(mark) },
             onDelete = { onDelete(mark) }
         )
     }
+}
+
+/**
+ * WHERE A MARK IS, in the book's own terms.
+ *
+ * v399 — IT SAYS PAGE, NOT SECTION. The row used to fall back to
+ * "Section ${'$'}{index + 1}" — the reader's own block numbering, which is a
+ * fact about how the FILE was split and not about the book (user report:
+ * "theyre not marked as page numbers are they?"). A PDF's places are PAGES, a
+ * reflowed book's are chapters when the file numbers them and sections when it
+ * does not.
+ */
+private fun readerMarkPlace(content: ReaderContent?, mark: ReaderMarkEntity): String {
+    val at = mark.positionIndex.coerceAtLeast(0)
+    return when (content) {
+        is ReaderContent.Pages -> "Page ${(at + 1).coerceAtMost(content.pageCount)}"
+        is ReaderContent.Text -> if (mark.chapter > 0) "Chapter ${mark.chapter}"
+        else "Section ${(at + 1).coerceAtMost(content.blocks.size.coerceAtLeast(1))}"
+
+        null -> if (mark.chapter > 0) "Chapter ${mark.chapter}" else "Section ${at + 1}"
+    }
+}
+
+/** The chapter or outline entry a mark sits under — the book's own words for
+ *  the place, blank when the file says nothing about it. */
+private fun readerMarkChapter(
+    content: ReaderContent?,
+    chapters: List<ReaderOutlineEntry>,
+    mark: ReaderMarkEntity
+): String = when (content) {
+    is ReaderContent.Pages -> chapters
+        .lastOrNull { it.isPage && it.page <= mark.positionIndex + 1 }
+        ?.title
+        .orEmpty()
+
+    is ReaderContent.Text -> content.blocks.getOrNull(mark.positionIndex)?.sectionTitle.orEmpty()
+    null -> ""
+}
+
+/** WHEN a mark was made, in the reader's own shorthand: today, yesterday, or a
+ *  date small enough to sit in the corner of the row. */
+private fun readerMarkWhen(millis: Long): String {
+    if (millis <= 0L) return ""
+    return runCatching {
+        val day = millis.toLocalDate()
+        val today = System.currentTimeMillis().toLocalDate()
+        when (day) {
+            today -> "Today"
+            today.minusDays(1) -> "Yesterday"
+            else -> day.format(DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()))
+        }
+    }.getOrDefault("")
 }
 
 /**
@@ -3137,62 +3369,151 @@ private fun ReaderContentsSection(
     }
 }
 
+/**
+ * ONE MARK, AS A READER WOULD WRITE IT DOWN.
+ *
+ * v399 — IT SAYS WHAT IT IS, WHERE IT IS, AND WHAT IT SAID (user report: "the
+ * your marks are kind of really bad view can u chnage its look").
+ *
+ * Every mark used to be the same grey card: a kind in the accent, a line of
+ * words, an X. The three kinds are three different acts — a place kept, a
+ * passage kept, a thought of your own — so each now wears its own glyph on a wash
+ * of its own colour (a highlight in the ink it was actually made with), the row
+ * is headed by the PAGE it belongs to with the chapter beside it, the passage is
+ * set as a quotation in the book's own serif, and the note reads as an aside. The
+ * date sits in the corner, and only the remove button carries a container.
+ */
 @Composable
 private fun ReaderMarkRow(
-    label: String,
-    body: String,
+    mark: ReaderMarkEntity,
+    place: String,
+    where: String,
+    /** When it was made — `made` and not `when`, which is a keyword. */
+    made: String,
+    snippet: String,
     palette: ReaderPalette,
     onJump: () -> Unit,
-    onDelete: (() -> Unit)?,
-    note: String = ""
+    onDelete: (() -> Unit)?
 ) {
+    val kind = mark.markKind
+    val tone = if (kind == ReaderMarkKind.HIGHLIGHT) {
+        readerHighlighter(mark.colorKey).ink
+    } else {
+        palette.accent
+    }
+    val glyph = when (kind) {
+        ReaderMarkKind.HIGHLIGHT -> CurioIcons.FormatHighlight
+        ReaderMarkKind.NOTE -> CurioIcons.Note
+        else -> CurioIcons.Bookmark
+    }
     Surface(
         onClick = onJump,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         color = palette.surface,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.accent
-                )
-                Text(
-                    body,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = palette.ink,
-                    maxLines = 2
-                )
-                if (note.isNotBlank()) {
-                    Text(
-                        note,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = palette.ink.copy(alpha = 0.7f),
-                        maxLines = 2
-                    )
-                }
-            }
-            if (onDelete != null) {
-                Surface(
-                    onClick = onDelete,
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    modifier = Modifier.size(30.dp)
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(tone.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CurioIcon(
-                            CurioIcons.Close,
-                            "Remove this mark",
-                            tint = palette.ink.copy(alpha = 0.45f),
-                            size = 15.dp
+                    CurioIcon(glyph, kind.label, tint = tone, size = 16.dp)
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        place.uppercase(Locale.getDefault()),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = tone
+                    )
+                    if (where.isNotBlank()) {
+                        Text(
+                            where,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.ink.copy(alpha = 0.55f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
+                }
+                if (made.isNotBlank()) {
+                    Text(
+                        made,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.ink.copy(alpha = 0.4f)
+                    )
+                }
+                if (onDelete != null) {
+                    Surface(
+                        onClick = onDelete,
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        modifier = Modifier.size(26.dp)
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                CurioIcons.Close,
+                                "Remove this mark",
+                                tint = palette.ink.copy(alpha = 0.4f),
+                                size = 14.dp
+                            )
+                        }
+                    }
+                }
+            }
+            if (snippet.isNotBlank()) {
+                // A passage, set as one: the book's own serif, indented under the
+                // kind it was marked with, in the ink the reader chose to read
+                // it in — a maximum of three lines, because a mark is a reminder
+                // and not the page itself.
+                Text(
+                    "\u201C${snippet.trim()}\u201D",
+                    style = TextStyle(
+                        fontFamily = LoraFontFamily,
+                        fontSize = 13.5.sp,
+                        lineHeight = 20.sp,
+                        fontStyle = FontStyle.Italic
+                    ),
+                    color = palette.ink.copy(alpha = 0.92f),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 40.dp)
+                )
+            }
+            if (mark.note.isNotBlank()) {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 40.dp)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(palette.accent.copy(alpha = 0.10f))
+                        .padding(horizontal = 9.dp, vertical = 7.dp),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    CurioIcon(
+                        CurioIcons.Notes,
+                        null,
+                        tint = palette.accent.copy(alpha = 0.8f),
+                        size = 13.dp
+                    )
+                    Text(
+                        mark.note,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = palette.ink.copy(alpha = 0.78f),
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
@@ -3903,6 +4224,21 @@ private object ReaderLook {
     var pdfPanY by mutableStateOf(0f)
 
     /**
+     * v399 — WHICH PAGE THE SCROLLING READER'S ZOOM BELONGS TO.
+     *
+     * The column magnifies THE PAGE YOU PINCHED, not the whole file. Growing
+     * every page at once moved the page above out from under the member's
+     * fingers, because a column's neighbours are in the flow (user report: "in
+     * vertical pages … when i pinch zoom in the middle the top part of the
+     * previous page zooms in"). A magnified page is now a framed window onto
+     * one page — nothing else in the column changes size, so nothing shifts.
+     *
+     * -1 means EVERY page, which is what the paged reader wants: the page it
+     * shows is the only page there is.
+     */
+    var pdfZoomPage by mutableStateOf(-1)
+
+    /**
      * v389 — HOW THE BOOK FLOWS.
      *
      * One column you scroll, or pages you turn — a choice every reader on earth
@@ -4015,14 +4351,28 @@ private fun pdfTint(
  *    chrome is raised by a tap, and a tap must not be eaten by its own jitter).
  */
 private fun Modifier.pinchToZoom(
+    /**
+     * What the gesture is bound to. A page whose SHAPE arrives after it was
+     * first composed has to re-arm the handler, or the pinch would keep
+     * measuring against the page as it was — nothing, when the render had not
+     * landed yet (v399).
+     */
+    key: Any? = Unit,
     zoomed: () -> Boolean = { false },
     /**
+     * @param zoom  the scale this event asks for.
+     * @param pan   the drag this event carries, in the view's own pixels.
+     * @param focus WHERE THE FINGERS ARE — the gesture's centroid at the
+     *              position it held when this event's delta was measured. It is
+     *              the point a magnified page has to KEEP under them, which is
+     *              why the zoom is anchored here and not at the view's centre
+     *              (see [readerZoomedPan]).
      * @return the part of [pan] the zoomed view actually took. [Offset.Zero]
      *         means "no room this way" — the drag is not consumed, and the
      *         caller's own scrolling or paging gets it.
      */
-    onZoom: (zoom: Float, pan: Offset) -> Offset
-): Modifier = pointerInput(Unit) {
+    onZoom: (zoom: Float, pan: Offset, focus: Offset) -> Offset
+): Modifier = pointerInput(key) {
     val slop = viewConfiguration.touchSlop * 0.6f
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false)
@@ -4038,8 +4388,11 @@ private fun Modifier.pinchToZoom(
                 ownsTheDrag = true
                 val zoom = event.calculateZoom()
                 val pan = event.calculatePan()
+                // The centroid the fingers HELD during this delta (not where
+                // they are now): the page grows about the point they grabbed.
+                val focus = event.calculateCentroid(useCurrent = false)
                 if (zoom != 1f || pan != Offset.Zero) {
-                    onZoom(zoom, pan)
+                    onZoom(zoom, pan, focus)
                     event.changes.forEach { it.consume() }
                 }
                 last = null
@@ -4055,7 +4408,7 @@ private fun Modifier.pinchToZoom(
                 }
                 if (ownsTheDrag) {
                     val delta = if (previous != null) position - previous else Offset.Zero
-                    val taken = if (delta == Offset.Zero) Offset.Zero else onZoom(1f, delta)
+                    val taken = if (delta == Offset.Zero) Offset.Zero else onZoom(1f, delta, position)
                     if (taken != Offset.Zero) pressed.forEach { it.consume() }
                 }
             } else {
@@ -4065,6 +4418,89 @@ private fun Modifier.pinchToZoom(
             }
         } while (event.changes.any { it.pressed })
     }
+}
+
+/**
+ * THE PAGE INSIDE ITS FRAME, from the page's own [aspect].
+ *
+ * A page is drawn with `ContentScale.Fit`, so the thing a zoom magnifies and a
+ * pan has room in is the LETTERBOXED page and not the box around it — the two
+ * are the same shape only when the page and the screen happen to agree.
+ */
+private fun readerDrawnPage(box: IntSize, aspect: Float): Size {
+    val width = box.width.toFloat()
+    val height = box.height.toFloat()
+    if (aspect <= 0f || width <= 0f || height <= 0f) return Size(width, height)
+    return if (aspect >= width / height) Size(width, width / aspect)
+    else Size(height * aspect, height)
+}
+
+/**
+ * WHERE A MAGNIFIED PAGE HAS TO SIT so the point under the fingers stays there.
+ *
+ * A magnified page is a scale about its box's centre plus a translation (the
+ * readers' own `graphicsLayer`), so the page point under the fingers is
+ * `centre + (focus - centre - pan) / zoom`. Growing to [to] with the fingers
+ * where they are means solving that same equation for the new translation — the
+ * difference between "the page grew under my fingers" and "the page grew and my
+ * place slid out from under them" (user report: "when i pinch zoom in the middle
+ * the top part of the previous page zooms in").
+ *
+ * The travel is then clamped to what the page actually HAS: [drawn] is the page
+ * inside [box], so half of the growth is how far either edge can travel before
+ * it reaches its frame — and a page with no room says so by what it returns
+ * ([pinchToZoom] leaves the drag to the scrolling or paging underneath). The
+ * formula folds in a plain drag too: at a constant zoom the answer is exactly
+ * `pan + drag`, which is what a one-finger pan is.
+ */
+/**
+ * DOUBLE TAP: the same zoom as a pinch, asked for with one finger.
+ *
+ * In to read a line closely, out to see the whole page again — the gesture every
+ * PDF reader has, and the one that shows what the pinch's anchoring is for: the
+ * page grows about the point that was TAPPED, so the word the finger asked about
+ * is still under it afterwards (v399).
+ */
+private fun readerDoubleTapZoom(page: Int, box: IntSize, aspect: Float, at: Offset) {
+    if (ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f) {
+        ReaderLook.pdfZoom = 1f
+        ReaderLook.pdfPanX = 0f
+        ReaderLook.pdfPanY = 0f
+        ReaderLook.pdfZoomPage = -1
+        return
+    }
+    val next = 2.2f
+    val pan = readerZoomedPan(
+        box = box,
+        drawn = readerDrawnPage(box, aspect),
+        from = 1f,
+        to = next,
+        focus = at,
+        pan = Offset.Zero
+    )
+    ReaderLook.pdfZoom = next
+    ReaderLook.pdfZoomPage = page
+    ReaderLook.pdfPanX = pan.x
+    ReaderLook.pdfPanY = pan.y
+}
+
+private fun readerZoomedPan(
+    box: IntSize,
+    drawn: Size,
+    from: Float,
+    to: Float,
+    focus: Offset,
+    pan: Offset
+): Offset {
+    if (box.width <= 0 || box.height <= 0) return Offset.Zero
+    val centre = Offset(box.width / 2f, box.height / 2f)
+    val ratio = if (from <= 0.001f) 1f else to / from
+    val at = if (focus.isSpecified) focus else centre
+    val nextX = at.x - centre.x - (at.x - centre.x - pan.x) * ratio
+    val nextY = at.y - centre.y - (at.y - centre.y - pan.y) * ratio
+    val roomX = ((drawn.width * to - box.width) / 2f).coerceAtLeast(0f)
+    val roomY = ((drawn.height * to - box.height) / 2f).coerceAtLeast(0f)
+    return Offset(nextX.coerceIn(-roomX, roomX), nextY.coerceIn(-roomY, roomY))
 }
 
 // @Composable because the default ink asks [isCurioDarkTheme] what the app is

@@ -1,98 +1,107 @@
 # Prompt Log — current request
 
-## Request (2026-09-19, batch Z6 — attachments inside a paragraph, then four corrections)
+## Request (2026-09-19, batch Z7 — the PDF reader's zoom, its pages and its marks)
 
-Verbatim (first ask): "do the attachment inside a paragraph, aand more than one photo pair, also make the
-animation of it good, with proper hover preview same pass for voice recorder in animation, and proper
-preview of photo stacing with snap."
+Verbatim: "book reader pdf vertical pages zoom are still inaccurate when i pinch zoom in the middle
+the top part of the previous page zooms in, and theyre not marked as page numbers are they? and still
+in the scrolling the page chnages when im swiping arounnd while zooming fix it please. it should page
+chnage only when it reaches the page end and then on anomather sipe it does or maybe something better
+and some more book reading features, also the places in this book progress is beautiful, now the your
+marks are kind of really bad vie can u chnage its look, push it all"
 
-Verbatim (the asks queued behind it): "epub emphasis now, also in redrawn avatars why theres a line
-above shoulder also the poses are wierd fix it, and for th eleaf icon it sbad chnage it also why the mon
-is C how about chnage the leaf to crecent moon also some avatars are weird looking with the eyes, some
-are fine but some are weird and also that smile in each of them, also still in the todo the chekcbox
-cyive state is glitchy when i deselect it i me sn its not selected it stil l makes the next line in
-enter automatic reselect, it should keep the active state when its selected not when i desecelt it. fix
-this glchy behavior. also for series the buttom sheet ui is beautifu and the text colro is right too,
-and its look up is also so fast, can u make the anime use the same api as the first same as series, and
-also make the anime ui similair to series, do this after finishing previous work use ask user after
-pushing previous task for your answers i need the attachment inside a parapgh done do it all please then
-this"
+Status: IMPLEMENTED (this log covers what shipped; CI is the compile check).
 
-**Status: EVERYTHING IN THIS BATCH IS IMPLEMENTED AND PUSHED** (the four answers were asked, answered
-and followed — see §4 for the answers and where each landed).
+### 1. The pinch that magnified the wrong page (v399)
 
-### 1. The attachment inside a paragraph (v398, SHIPPED — route B)
+`PdfScrollReader` grew EVERY page's box with the zoom (the v395 fix for two pages overlapping), so a
+pinch in the middle of the column also pushed the page above down the flow — the page the member's
+fingers were holding slid out of the window and they were left looking at the page above it.
 
-The member's answer, after being shown both routes: take the **VisualTransformation** route (the one
-that leaves typing alone), and the attachment takes **its own print size** — the same five sizes a
-standalone print has, so a `PAGE`-sized attachment inside a paragraph takes the measure and the words
-carry on below it.
+Now the box never changes size. Only the page you PINCHED is magnified, inside its own clipped frame
+(`clipToBounds` on the item), so the layout is identical at 1× and at 4× and no neighbour can move.
+Rule-shaped in the code: `ReaderLook.pdfZoomPage` (`-1` = every page, which is what the paged reader
+wants — its frame is the screen).
 
-The first written draft used `SpanStyle(lineHeight = …)` to make the line grow. **That does not compile**
-(verified against the AndroidX source — `SpanStyle` carries no line height, it is a `ParagraphStyle`
-property), and the CI run proved two more API facts: `Placeholder(width, height)` takes **TextUnit in
-sp**, not Dp, and a `var` map slot cannot be assigned a nullable. All three are now rule-shaped in the
-code and the comments.
+### 2. The zoom is anchored at the fingers
 
-What shipped (`PersonalCanvas.kt`, `PersonalDoc.kt`, `ChapterNoteBridge.kt`):
+`pinchToZoom` now reports the gesture's focal point (`event.calculateCentroid(useCurrent = false)` —
+where the fingers HELD, not where they are), and the new `readerZoomedPan(box, drawn, from, to,
+focus, pan)` solves the page's own transform for the new pan: the point under the fingers stays under
+them. A plain drag is the same call at a constant zoom (the focus cancels out), so a pinch and a pan
+can no longer disagree about where the page sits. `readerDrawnPage(box, aspect)` is the letterboxed
+page inside its frame — the thing room for a pan is measured against, so a drag the page cannot take
+is handed back to the scroll/pager (`Offset.Zero` = not consumed). `pinchToZoom` also gained a `key`
+because a gesture handler outlives the composition that armed it: a page whose aspect arrives with its
+render would otherwise keep measuring against nothing.
 
-- `PERSONAL_INLINE_MARK` (`\uFFFC`) is the one character that means "an attachment sits here", and
-  `PersonalBlock.inlineRefs: List<String>` names the blocks in mark order (serialized as `"inr"`,
-  omitted when empty, so every older page encodes byte-for-byte as it did).
-- The editor shows a mapped copy of the paragraph through `VisualTransformation` + `OffsetMapping`:
-  each mark becomes a run of non-breaking spaces at the font size the line needs (the size is
-  calculated from a MEASURED px-per-sp probe of the paragraph's own face, and the space count is taken
-  at that same size because a bigger font makes a wider space). The print is drawn over the room the
-  layout really gave the run, read back off the bounding box and centred in the line.
-- A drop lands in the sentence when the caret is inside a line that has words; on a blank line, or at
-  the start of one, it keeps the line-of-its-own behaviour. Deleting the mark (or the thumbnail's ✕)
-  hands the picture back to a line of its own, so nothing is ever lost.
-- The read view keys each mark through Foundation's own inline-content string annotation
-  (`androidx.compose.foundation.text.inlineContent`), one key per picture, with the placeholder's room
-  in sp; both drawing passes skip a held attachment so it is never drawn twice and never opens a row of
-  prints; a chapter note takes the mark out of its text and the attachment out of its join, so a note
-  gains no stray character and no blank line.
+### 3. A page turn only after the page's own end
 
-### 2. More than one photo pair, the carry animation and the snap (v396/v397, shipped in the batch before)
+In the column the page now takes a vertical drag while it has room in that direction and gives it
+back at its edge, so the next swipe scrolls on — the rule the member asked for. The drag claim reads
+the live `pdfZoomPage` (never a captured composition value).
 
-A run of up to four consecutive prints lays itself out by how many arrived (two as halves, three as one
-upright frame with two stacked beside it, four as a square); the size menu has `SMALL_PORTRAIT`; the
-drop indicator is a ghost band the height of the thing in hand; a print lifts with a tilt and a voice
-note as a card, animated in and out; and a drop commits the order, springs the rows home and slides the
-carried block's remaining travel to zero before letting go.
+### 4. Page numbers, and a page bar that turns pages
 
-### 3. The four corrections (all shipped)
+- Every page in the scrolling reader wears its own number in the corner, drawn OUTSIDE the zoom (it
+  cannot be carried off the screen by a magnify).
+- The scrolling flow now HAS the page bar (it had none): the column reports the page it is showing
+  (`onPageShown` → `shownPage`) and the bar names it and asks for the next one.
+- Double tap zooms a PDF page at the point that was tapped (`readerDoubleTapZoom`), in both flows.
 
-1. **The to-do checkbox (their answer: "box only while the tool is on").** The page's rows were
-   unconditional, so a box the writer had just turned off came back on the next Enter. A blank row is
-   now a box only while the box tool is armed (the page arms it when it opens), turning the box off on
-   the row or in the dock takes the arm with it, and emptying a row's words ends the list there
-   (`listEnded`) instead of arming another box over it.
-2. **The avatars (their answer: "the leaf's tile becomes a crescent moon").** The bust lost its ink
-   contour and its collar now sits from the shoulder line down (the "line above shoulder"); every tilt
-   is within four degrees (the "weird poses"); every gaze is a readable shape with a catch-light, and
-   the four mouths are four different shapes (the "weird eyes" and "that smile in each of them"); the
-   moon is a real crescent (one oval subtracted from another — the old 280° stroked arc was a broken
-   ring that read as the letter C) and the LEAF tile holds a RAINBOW, so the set keeps one moon and no
-   leaf.
-3. **EPUB emphasis.** `<b>`/`<strong>` and `<i>`/`<em>` are marked with four characters no book text
-   can hold before the tag-stripping pass, so they cross the strip, the whitespace collapse and the
-   paragraph split, and `splitEmphasis` reads them back into ranges in the paragraph's own
-   coordinates — which the reader draws through the span layer its highlights and selections already
-   use, so a wash still paints over them.
-4. **Anime (their answers: "TVMaze, like series" + "match series exactly").** `AnimeEpisodeFetcher`
-   asks `SeriesEpisodeFetcher` first (one request, and the per-episode air date, runtime, rating and
-   still Jikan never stated — which is why the series sheet read richer), with Jikan's own sweep as the
-   fallback; `AnimePosterFetch`'s keyless cascade leads with the series lane's resolver too. Both lanes
-   already share ONE sheet (`EpisodeNotesSheet` has no variant branch in its UI), so "match series
-   exactly" was already true by construction and nothing anime had was removed.
+### 5. Jumps actually move a PDF (the quiet big one)
 
-### 4. Still open (unchanged)
+`jumpToMark` called `pagerState.scrollToPage` — the PAGED reader's pager. In the scrolling flow (what
+a PDF opens in) "Continue reading", every mark and every contents row moved an OFF-SCREEN pager, so
+nothing appeared to happen. A PDF jump is now ASKED FOR (`pendingPage`, the page-`pendingBlock`
+already was for text) and whichever surface is showing takes it and clears it.
 
-- Series/anime episode data is mostly fetched rather than authored (the authored lists are the richer
-  ones).
-- A page with more than four consecutive prints starts a second row (by design).
-- The reader's places sheet, the personal-print rows and the avatar set all shipped in this batch.
-- Flagged for the member: the leaf's slot now holds a RAINBOW (my choice, since two crescent moons in
-  one set would read as a duplicate) — say the word and it becomes anything else, or the set drops to
-  seven icons.
+### 6. The marks sheet redrawn
+
+`ReaderMarksSection` derives a mark's place from the CONTENT: a PDF's mark says "Page N" — it used to
+fall back to "Section N", the reader's own block numbering, which is a fact about how the file was
+split (this is what "theyre not marked as page numbers are they?" was) — with the outline entry it
+sits under, and a reflowed book's says the chapter when the file numbers one. The list is sorted by
+position (it reads in the book's order), each kind wears its own glyph on a wash of its own colour (a
+highlight in the ink it was made with), the passage is set as a quotation in the book's serif and the
+note as an aside, with the date in the corner (`readerMarkWhen`: Today / Yesterday / "3 Sep").
+
+### Files
+
+- `app/src/main/java/com/curio/app/features/personal/BookReaderScreen.kt` — all of the above.
+- `app/AGENTS.md` — the reader's zoom/jump/mark contracts as rules for the next agent.
+- `fastlane/metadata/android/en-US/changelogs/20260922.txt` — the release notes for this batch.
+
+## Queued next (the member's follow-up, not started)
+
+Verbatim: "now for the photo side by side 3 grid 4 grid, so in side by side now i cant chnge its sizes
+like yes page size isnt possible but i cant chnage between small portraifght etc in side by side now
+als same for 3 together, let the flixibility to pick differnt size of that photo, also in 3 grid they
+look great in  while editing but when i chnage to eye view they get collaped so something the 2 which
+are over each other also ykw keep the buttom strip here i write caption for them even if theres no
+captaion keep it in preview and also show dates in dd:mm:yyyy or user can switch also give its own
+differnt font choices in tools when im editing caption, only show those tools hen ive caption opened
+and hide other tools which the caption doesnt support, and make the tools appear back when i go back
+to writin gin canvas smoothly, fix them also make the animation preview while holding them better with
+stack preview too, also still the voice note drag and move is kinda off the previe guide shows way to
+the top when the voice note im holding is below so fix its accuracy and also instead of that color line
+use propere preview and smooth animations."
+
+Broken into the things to do (PersonalCanvas.kt, PersonalTodoRow.kt, PersonalPrintArrangement):
+
+1. **A print in a row keeps its own size.** Side by side, three-in-a-row and four-in-a-row currently
+   pin the size (a row is laid out from the run's own shape), so `Small portrait`/`Portrait` are not
+   reachable from the size menu once a print is in a row — let a print pick any size and have the row
+   re-arrange around it instead of refusing.
+2. **Three in a row collapses in the READ view.** The editor lays a 3-run out as one upright frame
+   with the other two stacked beside it; the eye then draws them collated instead. Editor and read
+   view must share the same arrangement rule (the v394 pair already does).
+3. **The caption strip stays.** Keep the wide bottom border on a print in a row — and show it in the
+   preview even when no caption has been written yet, so it can be tapped and filled.
+4. **Dates** (dd:mm:yyyy, with a switch to another order) and the print's own hand-written caption.
+5. **The dock changes with the caption.** While a caption is opened, show only the tools a caption
+   supports (its own font choices, the date) and hide the rest; put the writing tools back smoothly
+   when the canvas has the caret again.
+6. **The carry gesture's preview.** A better held-block animation with a stack preview of what is
+   landing; the voice note's drop guide currently reports a place far above the note being held (the
+   row measurement is off) — fix the accuracy and replace the flat colour line with a proper preview
+   of the block, smoothly animated.
