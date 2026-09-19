@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -560,15 +561,23 @@ internal fun PersonalVoiceBar(
     // NO CONTAINER (v389): the note used to sit in a rounded surfaceContainerLow
     // box, which made a recording look like a card parked in the writing rather
     // than part of it (user request: "it shows on the page as a box, but i want
-    // it with the graph only and the play and cross button no backgroud"). What
-    // is left is the three things the note actually is — a play button, the
+    // it with the graph only the play and cross button no backgroud"). What is
+    // left is the three things the note actually is — a play button, the
     // waveform, and the clock — sitting on the page itself, starting where the
     // paragraph starts. The LIFT while it is being carried still comes from
     // PersonalMovableBlock, which is the only state that had any business
     // drawing a surface here.
+    //
+    // v403 — AND A SOFT SHADOW UNDER THE STRIP. The member asked for the note to
+    // keep BLENDING with the canvas but to be lifted off it a little ("we can
+    // add shadow to the voice note bar but it was better previously blending
+    // with the canvas"), so there is still no box: the strip wears only the
+    // shadow its own outline casts, which reads as a piece of the page standing
+    // just proud of it rather than a card parked on the writing.
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(1.5.dp, RoundedCornerShape(14.dp))
             .padding(end = 8.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)

@@ -503,8 +503,12 @@ internal fun PersonalMovableBlock(
                         onDragEnd = {
                             val from = drag.fromIndex
                             val to = drag.targetIndex(state.blockIds.lastIndex)
-                            if (from in 0..state.blockIds.lastIndex && from != to) {
-                                state.moveBlock(from, to)
+                            // v403 — a PRINT snaps to the row it was dropped
+                            // against, so bringing two prints together really
+                            // groups them (see PersonalEditorState.printDropIndex).
+                            val landing = state.printDropIndex(from, to, drag.goingDown)
+                            if (from in 0..state.blockIds.lastIndex && from != landing) {
+                                state.moveBlock(from, landing)
                             }
                             // v397 — commit, then slide the last few pixels home
                             // (see PersonalRowDragState.settle).
@@ -635,8 +639,12 @@ internal fun PersonalTodoRow(
                         onDragEnd = {
                             val from = drag.fromIndex
                             val to = drag.targetIndex(state.blockIds.lastIndex)
-                            if (from in 0..state.blockIds.lastIndex && from != to) {
-                                state.moveBlock(from, to)
+                            // v403 — a PRINT snaps to the row it was dropped
+                            // against, so bringing two prints together really
+                            // groups them (see PersonalEditorState.printDropIndex).
+                            val landing = state.printDropIndex(from, to, drag.goingDown)
+                            if (from in 0..state.blockIds.lastIndex && from != landing) {
+                                state.moveBlock(from, landing)
                             }
                             // v397 — commit, then slide the last few pixels home
                             // (see PersonalRowDragState.settle).
@@ -732,8 +740,12 @@ internal fun PersonalTodoRow(
                         onDragEnd = {
                             val from = drag.fromIndex
                             val to = drag.targetIndex(state.blockIds.lastIndex)
-                            if (from in 0..state.blockIds.lastIndex && from != to) {
-                                state.moveBlock(from, to)
+                            // v403 — a PRINT snaps to the row it was dropped
+                            // against, so bringing two prints together really
+                            // groups them (see PersonalEditorState.printDropIndex).
+                            val landing = state.printDropIndex(from, to, drag.goingDown)
+                            if (from in 0..state.blockIds.lastIndex && from != landing) {
+                                state.moveBlock(from, landing)
                             }
                             // v397 — commit, then slide the last few pixels home
                             // (see PersonalRowDragState.settle).

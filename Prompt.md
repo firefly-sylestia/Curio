@@ -1,6 +1,6 @@
 # Prompt.md — current request
 
-## 1. What's New screen — DONE (this commit)
+## 1. What's New screen — DONE (pushed with the batch)
 
 A release-highlights page that opens itself **once per version** (fresh install
 and update alike), with a "Take me there" door on every card.
@@ -10,58 +10,70 @@ and update alike), with a "Take me there" door on every card.
 | `features/updates/WhatsNewScreen.kt` (new) | `WHATS_NEW_RELEASES` (hand-authored, ships in the APK, offline), `WhatsNewRelease` / `WhatsNewItem`, the settings-family page. |
 | `data/AppPreferences.kt` | `get/setWhatsNewSeenVersion` (key `whats_new_seen_version`). |
 | `navigation/CurioRoutes.kt` | `WHATS_NEW = "whats-new"`. |
-| `navigation/CurioNavHost.kt` | Route + `SettingsSharedScope`, membership in `settingsFamilyRoutePrefixes`, and the once-per-version auto-open (quiet starts only: splash / onboarding / home). |
+| `navigation/CurioNavHost.kt` | Route + `SettingsSharedScope`, membership in `settingsFamilyRoutePrefixes`, the once-per-version auto-open (quiet starts only). |
 | `features/settings/SettingsHubScreen.kt` | "What's New" row in the Updates group + the deep row. |
 | `app/AGENTS.md` | The v403 contract (how a release adds its entry). |
-| changelog `20260922.txt` | One ADD bullet. |
 
-**The member chose the content** — big screen-level updates only, not the small
-fixes (their words: *"recent ones, the big screen updates like the journal page
-the new cabinet, the online mode, the book screen the new one and the bottom
-sheet to access them only"*). The five cards are:
-
-1. The journal page → `JOURNALS`
-2. The Cabinet, rebuilt → `CABINET`
-3. The book screen → `CABINET`
-4. Online mode → `SETTINGS_ONLINE`
-5. One sheet opens them all (Home's `+`) → `HOME`
+Content chosen by the member: the journal page, the rebuilt Cabinet, the book
+screen, Online mode, and the one sheet on Home that opens them all.
 
 **House rule the member set:** no em dashes in user-visible copy.
 
-## 2. Form feedback — the full system (NEXT)
+## 2. Form feedback — BUILT (in the same batch)
 
-Decisions already given (this session):
+- Server: `supabase/schema.sql` §6f (tables, policies, publish/close/tally
+  functions, the new `forms` team switch, a self-check that fails the paste if
+  an identity column is ever added to an answer table).
+- App: `data/supabase/FeedbackApi.kt`, `features/feedback/FeedbackFormScreen.kt`
+  (state holder, the standout card, the answering sheet), and
+  `features/community/ModerationForms.kt` (builder, test runs, publish with the
+  owner override, results with percentages, post-the-result-to-the-wall).
+- Where it shows: Home's card under the deck, Support's card at the top plus a
+  row in the Feedback card, and the moderation room's Forms tab.
 
-- **Where the door lives:** Support. **A filled accent card at the top while a
-  form is live, with the row below it.** The member also wants *that form row
-  card* to be the page's standout filled element.
-- A member can take the form **later** if they do not want it now.
-- **Answers:** on the server (Supabase), anonymous to the device; the device
-  keeps only a local "already answered" flag.
-- **Results:** owner + approved admins, as percentages; the owner can post a
-  result to the wall from the moderation screen.
-- **Questions:** single choice, multi-select and a short written answer — chosen
-  per question by the form maker. Max 5 questions, max 4 options each.
-- **Cadence:** one publish per 14 days, tests do not count, the owner can
-  override, and publishing a new form cancels the previous one.
-- **Skip** and **Never show** buttons on the form itself; both outcomes are
-  visible in moderation.
-- Only the **owner** creates forms; the owner can grant other admins the
-  permission.
+## 3. THIS BATCH — the writing page's drag/drop, grouping and previews — DONE
 
-## 3. The moderation room (after the forms)
+The member's report, in their words:
 
-Queue redesigned, team bans as open-only buttons, and each report carrying
-**Dismiss** (clear the report, keep the post) and **Remove** (take the post down
-and clear every report on it).
+1. **The inline attachment is gone.** "Remove the inline photo and keep what it
+   was before (e4c95278 or before)" — reverts `72ca6663` and its follow-up
+   `3695d043`, so a photo or a voice note is a BLOCK again: it takes a line of
+   its own, drags, resizes, and carries its own caption. `PERSONAL_INLINE_MARK`,
+   `PersonalBlock.inlineRefs` / `inlineCount` / `inlineOffsets`, the `"inr"`
+   codec key, the editor's inline skip and `ChapterNoteBridge`'s mark surgery
+   are all gone; `chapterNoteText` / `chapterNoteSpans` join blocks with a plain
+   newline again. Verified: no reference to any of those names survives in
+   `app/src/main/java/` or `app/src/test/`.
+2. **The voice note goes back to blending with the canvas** (the look at
+   `f14745ec`), with a shadow added to the bar (`PersonalVoiceBar`:
+   `.shadow(1.5.dp, RoundedCornerShape(14.dp))`, no container).
+3. **Grouping is predictable**, and the reasons were found rather than guessed:
+   - a run's members after the first are SKIPPED by the drawing pass and never
+     measured, so a drop "on" a pair landed BETWEEN its members and made a
+     three (`printDropIndex`, v403: snap to the run — first cell coming down,
+     last going up);
+   - a print already in (or already touching) the run used to be thrown to the
+     run's head on the next press, so it now stays exactly where it is, and only
+     a print arriving from elsewhere is brought against the run;
+   - PAGE is the size a print ARRIVES with, and a PAGE cell of a row was the
+     "they won't group" the member felt, so `normaliseRowSizesAt` turns PAGE
+     into HALF once a print stands beside another — called from `moveBlock`
+     BEFORE its single `onDocChanged`, so a grouping drop is one move to undo
+     (not a move plus a resize), and a size the member picked is never touched.
+4. **No more line previews**: the flat rule on the landing edge is gone; the
+   hover is the block's own dashed room, drawn as a half-width CELL when a print
+   is coming down on a print (same change as 3's "auto adjust while holding").
+5. Kept: per-cell sizes inside a group, the caption's face / size / date, and
+   the caption dock.
 
-## 4. Open work from earlier sessions (after that)
+Pushed all together with the reverted work (one push), per the member's "push
+the before commits all together".
 
-1. Series and anime episode data is fetched, not authored: every series has a
-   synopsis, only two carry a hand-written episode list, and anime has no
-   per-episode synopses.
-2. "Save your take" still rebuilds the whole `AnnotatedString` per keystroke
-   (found by inspection, never profiled).
-3. The date questions from the caption work (separator, "always on" reading).
-4. GitHub workflow redesign (the member deferred it: "skip the workflow change
-   for later").
+## 4. Open work (after this batch)
+
+1. Series and anime episode data is fetched, not authored.
+2. "Save your take" rebuilds the whole `AnnotatedString` per keystroke.
+3. The caption questions (date separator, "always on" reading).
+4. The moderation queue redesign (Dismiss / Remove per report, bans as
+   open-only buttons) — the member's earlier words, not yet built.
+5. GitHub workflow redesign (deferred by the member).

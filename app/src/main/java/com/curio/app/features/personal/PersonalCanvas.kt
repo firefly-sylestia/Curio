@@ -15,7 +15,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,9 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.DropdownMenu
@@ -46,7 +43,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -89,7 +85,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
@@ -98,7 +93,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import com.curio.app.ui.components.CurioMenuToggle
 import com.curio.app.ui.components.TextHistoryBrowser
 import com.curio.app.ui.components.TextHistoryRestoreMode
@@ -109,10 +103,7 @@ import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -120,10 +111,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
@@ -133,13 +121,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Scale
 import com.curio.app.data.PersonalAlign
-import com.curio.app.data.PERSONAL_INLINE_MARK
 import com.curio.app.data.PersonalBlock
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMarker
@@ -1222,16 +1207,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun photoSize(id: String): PersonalPhotoSize =
         PersonalPhotoSize.fromKey(blocks[id]?.photoSize)
 
-    /**
-     * v398 — THE ATTACHMENTS A PARAGRAPH HOLDS, in mark order.
-     *
-     * The page draws these inside the paragraph's own flow (see the canvas's
-     * inline skip), and it reads them through the STATE rather than the stored
-     * block, so an attachment added a moment ago is drawn in the same frame it
-     * was dropped.
-     */
-    fun inlineRefs(id: String): List<String> = blocks[id]?.inlineRefs.orEmpty()
-
     /** v389 — how big that photo sits. The block is the unit, so this is a
      *  property of the block, saved with the rest of the page. */
     fun setPhotoSize(id: String, size: PersonalPhotoSize) {
@@ -1351,7 +1326,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 compositions[id] = value.composition
                 caret = PersonalCaret(id, value.selection.start.coerceIn(0, newText.length))
                 pendingSplit = caret
-                reapInlineRefs(id, old.text, newText)
                 onDocChanged(doc())
                 return
             }
@@ -1359,9 +1333,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 old.text, newText, mask(id), armed, armedOff, armedHighlight, armedFont
             )
             blocks[id] = old.copy(text = newText)
-            // v398 — a mark the writer deleted takes its attachment with it (see
-            // reapInlineRefs); the picture stands on its own line again.
-            reapInlineRefs(id, old.text, newText)
             // A pending tool has now been used: what follows continues in the
             // style just typed, so the buttons stop being "pending".
             if (armed != 0) armed = 0
@@ -1777,33 +1748,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * the picture sits exactly where the writer was standing.
      */
     fun insertPhoto(uri: String) {
-        if (landsInsideParagraph()) {
-            insertInlinePhoto(uri)
-            return
-        }
         insertAtCaret { PersonalBlock(id = newBlockId(), photo = uri) }
-    }
-
-    /**
-     * v398 — WHERE A DROPPED PICTURE GOES: IN THE SENTENCE, OR ON A LINE OF ITS
-     * OWN.
-     *
-     * The rule is the CARET'S OWN CONTEXT, and it needs no new button: a picture
-     * dropped while the member is writing a paragraph — the line has words in it
-     * and the caret is somewhere in them — is an attachment IN that sentence (a
-     * thumbnail between the words, with the text wrapping around it), which is
-     * what they asked for. A picture dropped on a blank line keeps the behaviour
-     * it always had, because there is no sentence for it to sit inside; and one
-     * dropped at the very start of a paragraph is a line of its own too, since a
-     * picture that opens a paragraph is a picture ABOVE the writing.
-     */
-    private fun landsInsideParagraph(): Boolean {
-        val id = focusedId ?: return false
-        val block = blocks[id] ?: return false
-        if (block.isPhoto || block.isAudio) return false
-        if (block.text.isBlank()) return false
-        val caretAt = selections[id]?.start ?: block.text.length
-        return caretAt > 0
     }
 
     /**
@@ -1814,10 +1759,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * request: "below we can still add notes").
      */
     fun insertVoice(voice: RecordedVoice) {
-        if (landsInsideParagraph()) {
-            insertInlineVoice(voice)
-            return
-        }
         insertAtCaret {
             PersonalBlock(
                 id = newBlockId(),
@@ -1877,154 +1818,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         focusedId = caret?.blockId
         onDocChanged(doc())
-    }
-
-    // ── AN ATTACHMENT INSIDE A PARAGRAPH (v398) ────────────────────────
-
-    /**
-     * v398 — A PICTURE LANDS INSIDE THE PARAGRAPH, WHERE THE CARET STANDS.
-     *
-     * The member's own reading of "attachment inside a paragraph": a thumbnail
-     * between the words, with the text wrapping around it. Nothing about the
-     * paragraph's identity changes — it stays ONE field with ONE block id, so the
-     * caret never leaves the sentence being written and the picture is simply a
-     * mark in it (see [PersonalBlock.inlineRefs]).
-     */
-    fun insertInlinePhoto(uri: String) {
-        insertInlineAtCaret { PersonalBlock(id = newBlockId(), photo = uri) }
-    }
-
-    /** v398 — a finished voice note, inside the paragraph at the caret. */
-    fun insertInlineVoice(voice: RecordedVoice) {
-        insertInlineAtCaret {
-            PersonalBlock(
-                id = newBlockId(),
-                audio = voice.path,
-                audioSeconds = voice.seconds,
-                audioBars = voice.bars
-            )
-        }
-    }
-
-    /**
-     * v398 — THE ONE PLACE AN INLINE ATTACHMENT LANDS.
-     *
-     * Different from [insertAtCaret] in the one way that matters: the paragraph
-     * is NOT cut in three. The mark goes into its text at the caret, the block
-     * that carries the picture joins the page's order right behind it (so
-     * saving, undo and removal already know about it), and the CARET MOVES PAST
-     * THE MARK — the writer carries on typing in the same sentence, which is the
-     * whole point of an inline attachment.
-     */
-    private fun insertInlineAtCaret(makeBlock: () -> PersonalBlock) {
-        val id = focusedId ?: order.lastOrNull() ?: return
-        val block = blocks[id] ?: return
-        if (block.isPhoto || block.isAudio) return
-        val at = (selections[id]?.start ?: block.text.length)
-            .coerceIn(0, block.text.length)
-        val oldMask = mask(id)
-        val newText = block.text.substring(0, at) + PERSONAL_INLINE_MARK + block.text.drop(at)
-        // The mark wears what the CARET wears, so cutting into a quoted, listed
-        // or titled line does not break the line's own tool: the sentence keeps
-        // the style it was being written in.
-        val wear = caretFlags(id)
-        val newMask = IntArray(newText.length) { i ->
-            when {
-                i < at -> oldMask.getOrElse(i) { 0 }
-                i == at -> wear
-                else -> oldMask.getOrElse(i - 1) { 0 }
-            }
-        }
-        val attachment = makeBlock()
-        // Marks are counted, not remembered: the new entry belongs after every
-        // mark the caret has already passed.
-        val slot = block.text.take(at).count { it == PERSONAL_INLINE_MARK }
-        val refs = block.inlineRefs.toMutableList()
-        refs.add(slot.coerceIn(0, refs.size), attachment.id)
-        blocks[id] = block.copy(text = newText, inlineRefs = refs)
-        masks[id] = newMask
-        blocks[attachment.id] = attachment
-        masks[attachment.id] = emptyMask(0)
-        val index = order.indexOf(id)
-        if (index >= 0) order.add(index + 1, attachment.id)
-        selections[id] = TextRange(at + 1)
-        compositions[id] = null
-        caret = PersonalCaret(id, at + 1)
-        focusedId = id
-        onDocChanged(doc())
-    }
-
-    /**
-     * v398 — TAKING AN ATTACHMENT OUT TAKES ITS MARK WITH IT.
-     *
-     * Called from [removeBlock] and from [reapInlineRefs]: an attachment that is
-     * gone must not leave an invisible character in somebody's sentence, or the
-     * paragraph keeps a blank gap where a picture used to be and every later mark
-     * in the line belongs to the wrong entry.
-     */
-    private fun detachInlineMark(attachmentId: String) {
-        // Collected first: the loop writes back to the very map it is reading.
-        val hosts = blocks.keys.filter { it != attachmentId && attachmentId in blocks[it]!!.inlineRefs }
-        hosts.forEach { hostId ->
-            val host = blocks[hostId] ?: return@forEach
-            val slot = host.inlineRefs.indexOf(attachmentId)
-            val offsets = host.inlineOffsets
-            val refs = host.inlineRefs.toMutableList().also { it.remove(attachmentId) }
-            if (slot < 0 || slot >= offsets.size) {
-                blocks[hostId] = host.copy(inlineRefs = refs)
-                return@forEach
-            }
-            val at = offsets[slot]
-            val text = host.text.removeRange(at, at + 1)
-            val oldMask = masks[hostId] ?: emptyMask(host.text.length)
-            masks[hostId] = IntArray(text.length) { i ->
-                if (i < at) oldMask.getOrElse(i) { 0 } else oldMask.getOrElse(i + 1) { 0 }
-            }
-            blocks[hostId] = host.copy(text = text, inlineRefs = refs)
-            // A caret inside the sentence has one character fewer to count, so it is
-            // pulled back to the paragraph's own length (never removed — the writer
-            // is still in this line).
-            selections[hostId]?.let { range ->
-                selections[hostId] = TextRange(
-                    range.min.coerceAtMost(text.length),
-                    range.max.coerceAtMost(text.length)
-                )
-            }
-        }
-    }
-
-    /**
-     * v398 — A MARK THE WRITER DELETED LETS ITS ATTACHMENT OUT.
-     *
-     * The mark is an ordinary character, so backspace over it deletes it like any
-     * other — and the paragraph then holds one mark fewer. The reference goes
-     * with it (and the picture simply stands on its own line again, because it is
-     * still a block of the page), which is the honest reading of "I deleted the
-     * space it was standing in". The WHICH is worked out from the edit itself (a
-     * common prefix/suffix walk), not from a count, so removing the third mark of
-     * five takes the third attachment rather than the last one.
-     */
-    private fun reapInlineRefs(id: String, oldText: String, newText: String) {
-        val block = blocks[id] ?: return
-        if (block.inlineRefs.isEmpty()) return
-        if (newText.count { it == PERSONAL_INLINE_MARK } == block.inlineRefs.size) return
-        var prefix = 0
-        while (prefix < oldText.length && prefix < newText.length &&
-            oldText[prefix] == newText[prefix]
-        ) prefix++
-        var suffix = 0
-        while (suffix < oldText.length - prefix && suffix < newText.length - prefix &&
-            oldText[oldText.length - 1 - suffix] == newText[newText.length - 1 - suffix]
-        ) suffix++
-        val goneTo = oldText.length - suffix
-        val gone = (prefix until goneTo).count { oldText[it] == PERSONAL_INLINE_MARK }
-        if (gone <= 0) return
-        val firstSlot = oldText.take(prefix).count { it == PERSONAL_INLINE_MARK }
-        val lost = block.inlineRefs.drop(firstSlot).take(gone)
-        val kept = block.inlineRefs.toMutableList()
-        repeat(gone) { if (firstSlot in kept.indices) kept.removeAt(firstSlot) }
-        blocks[id] = block.copy(inlineRefs = kept)
-        lost.forEach { detachInlineMark(it) }
     }
 
     fun setCaption(id: String, caption: String) {
@@ -2094,9 +1887,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun removeBlock(id: String) {
         val index = order.indexOf(id)
         if (index < 0) return
-        // v398 — an attachment that sat INSIDE a paragraph takes its mark out of
-        // that paragraph on the way (see detachInlineMark).
-        detachInlineMark(id)
         order.remove(id)
         blocks.remove(id)
         masks.remove(id)
@@ -2136,7 +1926,108 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // "other items shuffle wrongly").
         val adjustedTo = if (from < to) to - 1 else to
         order.add(adjustedTo, id)
+        // v403 — and if that landing put a PRINT beside another print, it takes a
+        // cell's size on the way in (see normaliseRowSizesAt), so the row the
+        // member just built is a row they can see in the same frame.
+        normaliseRowSizesAt(adjustedTo)
         onDocChanged(doc())
+    }
+
+    /**
+     * v403 — WHERE A CARRIED PRINT REALLY LANDS.
+     *
+     * A run of consecutive prints is ONE ROW (see the drawing pass), and only
+     * the run's FIRST member is drawn and measured — every other member is a
+     * slot the finger's own step count glides straight through. So a print
+     * dropped "on" a pair landed BETWEEN the pair's two members: the pair the
+     * member was trying to build turned into a three, or came apart, which is
+     * the "something the photos wont group even when i try to place it above the
+     * photo … sometimes it ungroups" they reported.
+     *
+     * A carried print therefore SNAPS to the run it was dropped against: above
+     * the run when the finger was travelling down (so it takes the row's first
+     * cell), just below it when travelling up (the last cell), and nowhere near
+     * it when the block at the landing slot is not a print at all. A block that
+     * is not a print is left exactly where the finger put it — paragraphs,
+     * voice notes and to-do rows still land where they were dropped.
+     */
+    fun printDropIndex(from: Int, to: Int, goingDown: Boolean): Int {
+        val ids = order
+        if (from !in ids.indices) return to
+        if (blocks[ids[from]]?.isPhoto != true) return to
+        fun isPrint(index: Int): Boolean =
+            index in ids.indices && blocks[ids[index]]?.isPhoto == true
+        // The run the finger is pointing at: the print at the landing slot, or
+        // the one just above it when the finger has already crossed it.
+        val anchor = when {
+            isPrint(to) -> to
+            isPrint(to - 1) -> to - 1
+            else -> return to
+        }
+        var start = anchor
+        while (isPrint(start - 1)) start--
+        var end = anchor
+        while (isPrint(end + 1)) end++
+        val below = end + 1
+        // ── AND A PRINT THAT IS ALREADY IN THE ROW STAYS IN IT (v403) ────────
+        //
+        // The first cut snapped every drop to one of the run's two edges, so a
+        // print that already shared the row got thrown to the run's head when
+        // the member simply pressed on it again — "sometimes it upgroups" — and
+        // a print sitting against the run from above or below was "moved" to
+        // where it already stood, which is a drag with no answer.
+        //
+        // So: a cell of the run is re-ordered inside it, a print that already
+        // touches the run from either side is left exactly where it is, and
+        // only a print arriving from somewhere else is brought against the run
+        // — as the row's FIRST cell when the finger was travelling down (the
+        // member is dropping onto the row's head) and as its LAST cell when the
+        // finger was travelling up.
+        val landing = when {
+            from in start..end -> to
+            from == start - 1 || from == end + 1 -> from
+            goingDown -> start
+            below in ids.indices -> below
+            else -> start
+        }
+        return landing.coerceIn(0, ids.lastIndex)
+    }
+
+    /**
+     * v403 — A PRINT THAT HAS JUST JOINED A ROW WEARS A ROW'S SIZE.
+     *
+     * PAGE is the size a print ARRIVES with, and it means "the whole measure of
+     * the page" — which is the one thing a cell of a row cannot be. So when two
+     * or more prints stand together and one of them is still on its arrival
+     * size, that print takes [PersonalPhotoSize.HALF] and the row is a row the
+     * member can see (user request: "the page style should auto adjust when im
+     * holding and trying to put two images together").
+     *
+     * A print ALONE keeps exactly the size it has (nothing is normalised until
+     * two are together), and a size the member picked themselves is never
+     * touched — only the untouched arrival size is. The menu stays honest either
+     * way: what it says is what the picture wears.
+     *
+     * It is called from [moveBlock], BEFORE the page is handed over, so a drop
+     * that groups two prints is ONE change to undo (and one save), not a move
+     * followed by a resize the member never asked for.
+     */
+    private fun normaliseRowSizesAt(at: Int) {
+        val ids = order
+        val moved = blocks[ids.getOrNull(at) ?: return] ?: return
+        if (!moved.isPhoto) return
+        var start = at
+        while (start > 0 && blocks[ids[start - 1]]?.isPhoto == true) start--
+        var end = at
+        while (end < ids.lastIndex && blocks[ids[end + 1]]?.isPhoto == true) end++
+        // One print on its own line is still its own line.
+        if (end - start < 1) return
+        for (i in start..end) {
+            val id = ids[i]
+            val block = blocks[id] ?: continue
+            if (PersonalPhotoSize.fromKey(block.photoSize) != PersonalPhotoSize.PAGE) continue
+            blocks[id] = block.copy(photoSize = PersonalPhotoSize.HALF.key)
+        }
     }
 
     /**
@@ -2425,25 +2316,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         val tailMask = if (afterText.isEmpty()) after
         else IntArray(after.size) { after[it] and FLAG_TITLE.inv() }
-        // v398 — AN INLINE ATTACHMENT CROSSES THE BREAK BY ITS OWN SIDE. The marks
-        // in the head keep the head's own attachments and the marks in the tail
-        // take theirs; a mark belongs to the words it stands between, so the split
-        // is a split of the phrase, not of the page.
-        val headRefs = block.inlineRefs.take(
-            block.text.take(caretIndex).count { it == PERSONAL_INLINE_MARK }
-        )
-        val tailRefs = block.inlineRefs.drop(headRefs.size)
-        val head = block.copy(
-            text = block.text.take(caretIndex),
-            runs = maskToRuns(before),
-            inlineRefs = headRefs
-        )
+        val head = block.copy(text = block.text.take(caretIndex), runs = maskToRuns(before))
         val tail = PersonalBlock(
             id = newBlockId(),
             text = afterText,
             runs = maskToRuns(tailMask),
-            align = if (afterText.isEmpty()) block.align else PersonalAlign.START,
-            inlineRefs = tailRefs
+            align = if (afterText.isEmpty()) block.align else PersonalAlign.START
         )
         blocks[id] = head
         masks[id] = runsToMask(head.text.length, head.runs)
@@ -2748,41 +2626,29 @@ internal fun PersonalCanvas(
         val groupSkips = mutableSetOf<String>()
         val printRows = mutableMapOf<String, List<String>>()
         val besideSkips = mutableSetOf<String>()
-        // v398 — THE ATTACHMENTS A PARAGRAPH HOLDS ARE NOT DRAWN AS BLOCKS.
-        //
-        // An inline picture is still an ordinary block of the page (it is saved,
-        // moved and removed with the page), but the PARAGRAPH draws it, inside its
-        // own flow — so the drawing pass must leave it out here, or it would
-        // appear twice: once between the words and once on a line of its own.
-        // Read straight from the page every time, exactly like the row shapes
-        // above, so dropping an attachment in is visible in the same frame.
-        val inlineHeld = mutableSetOf<String>()
-        state.blockIds.forEach { hostId ->
-            val host = state.block(hostId)
-            if (host != null) inlineHeld.addAll(host.inlineRefs)
-        }
         run {
             val ids = state.blockIds
             var i = 0
             while (i < ids.size) {
                 val first = state.block(ids[i])
-                // A picture that lives INSIDE a paragraph is not a row of prints and
-                // never opens one — it belongs to the sentence it stands in.
-                if (inlineHeld.contains(ids[i])) {
-                    i += 1
-                    continue
-                }
-                if (first?.isPhoto == true &&
-                    state.photoSize(ids[i]) != PersonalPhotoSize.PAGE
-                ) {
+                // v403 — EVERY PRINT CAN JOIN A ROW, PAGE INCLUDED.
+                //
+                // The rule used to be "a PAGE print leaves a row entirely",
+                // and PAGE is the size a NEW print arrives with — so two
+                // pictures brought together never grouped until the member
+                // happened to resize one, which is the "the photos wont group
+                // even when i try to place it above the photo" they reported.
+                // Placing a print against another print is the member SAYING
+                // these two go together, so they become the row they were put
+                // into, and the sizes they each carry still decide each cell's
+                // own share of it. A print alone on its line is still a print
+                // alone: the run only forms when two or more stand together.
+                if (first?.isPhoto == true) {
                     val run = ArrayList<String>()
                     var j = i
                     while (j < ids.size && run.size < PRINT_ROW_LIMIT) {
                         val member = state.block(ids[j])
-                        if (member?.isPhoto == true &&
-                            !inlineHeld.contains(ids[j]) &&
-                            state.photoSize(ids[j]) != PersonalPhotoSize.PAGE
-                        ) {
+                        if (member?.isPhoto == true) {
                             run.add(ids[j])
                             j += 1
                         } else {
@@ -2824,11 +2690,7 @@ internal fun PersonalCanvas(
         // longer holds are left out of the list instead of returned past.
         val rows = state.blockIds.mapIndexedNotNull { index, id ->
             val block = state.block(id)
-            if (block != null && !groupSkips.contains(id) && !inlineHeld.contains(id)) {
-                Triple(index, id, block)
-            } else {
-                null
-            }
+            if (block != null && !groupSkips.contains(id)) Triple(index, id, block) else null
         }
         rows.forEach { (index, id, block) ->
             // v389 — the blocks are KEYED by their own id. The to-do page can
@@ -2953,15 +2815,50 @@ internal fun PersonalCanvas(
                                         )
                                     )
                                 }
-                                // The edge it lands on, drawn solid so the eye
-                                // finds the exact line rather than the band.
-                                val ruleY = if (rowDrag.goingDown) 0f else size.height
-                                drawLine(
-                                    color = accent.copy(alpha = 0.85f),
-                                    start = Offset(0f, ruleY),
-                                    end = Offset(size.width, ruleY),
-                                    strokeWidth = 1.5.dp.toPx()
-                                )
+                                // ── v403 — NO RULE, AND A PRINT'S OWN CELL ────
+                                //
+                                // The solid rule that sat on the landing edge is
+                                // gone: a line says "somewhere on this edge",
+                                // and the member asked for the THING instead
+                                // ("stop using lines for preview"). What is left
+                                // is the dashed room the block will take.
+                                //
+                                // And when a PRINT is being brought against
+                                // another print, the room drawn is the CELL it
+                                // will take in the row the two are about to
+                                // become — the leading half of the measure, on
+                                // the side the finger is travelling — so the
+                                // page answers "these two go together" while
+                                // the print is still in the air.
+                                val carriedRef = rowDrag.draggedId
+                                val carriedIsPrint =
+                                    carriedRef?.let { state.block(it)?.isPhoto } == true
+                                if (carriedIsPrint && carriedRef != id && block.isPhoto) {
+                                    val cellWidth = (size.width * 0.5f).coerceAtLeast(1f)
+                                    val cellLeft =
+                                        if (rowDrag.goingDown) size.width - cellWidth else 0f
+                                    drawRoundRect(
+                                        color = accent.copy(alpha = 0.10f),
+                                        topLeft = Offset(cellLeft, lead),
+                                        size = Size(cellWidth, band),
+                                        cornerRadius = radius
+                                    )
+                                    drawRoundRect(
+                                        color = accent.copy(alpha = 0.55f),
+                                        topLeft = Offset(cellLeft + hairline, lead + hairline),
+                                        size = Size(
+                                            (cellWidth - hairline * 2f).coerceAtLeast(0f),
+                                            (band - hairline * 2f).coerceAtLeast(0f)
+                                        ),
+                                        cornerRadius = radius,
+                                        style = Stroke(
+                                            width = hairline,
+                                            pathEffect = PathEffect.dashPathEffect(
+                                                floatArrayOf(7.dp.toPx(), 6.dp.toPx())
+                                            )
+                                        )
+                                    )
+                                }
                             } else Modifier
                         )
                 ) {
@@ -3109,8 +3006,7 @@ internal fun PersonalCanvas(
                                     ink = ink,
                                     accent = accent,
                                     enabled = enabled,
-                                    onTitlePosition = titleReport,
-                                    onOpenPhoto = onOpenPhoto
+                                    onTitlePosition = titleReport
                                 )
                             }
                         }
@@ -3204,7 +3100,6 @@ internal fun PersonalCanvas(
                             quoteJoinAbove = quoteAbove,
                             quoteJoinBelow = quoteBelow,
                             onTitlePosition = titleReport,
-                            onOpenPhoto = onOpenPhoto,
                             // A list's rows are the page: they wear its own size,
                             // so the pen and the eye read the same list.
                             rowSize = ROW_VIEW_SIZE
@@ -3222,7 +3117,6 @@ internal fun PersonalCanvas(
                         quoteJoinAbove = quoteAbove,
                         quoteJoinBelow = quoteBelow,
                         onTitlePosition = titleReport,
-                        onOpenPhoto = onOpenPhoto,
                         selectionWash = if (state.pageSelected) selectionWash else Color.Transparent
                     )
                 }
@@ -3230,245 +3124,6 @@ internal fun PersonalCanvas(
             }
         }
     }
-    }
-}
-
-/**
- * v398 — ONE ATTACHMENT'S ROOM INSIDE A PARAGRAPH.
- *
- * [spaces] is how many non-breaking spaces stand in for the mark, [height] is the
- * print's own size, and [reserveSize] is the FONT SIZE the reservation is written
- * at — a text run can only ask for vertical room through its own font (see
- * [PersonalInlineTransformation]), so that is how a line grows tall enough to hold
- * a picture. Set at a bigger size, a space is also WIDER, which is why the count
- * of them is taken at that size rather than at the paragraph's own.
- */
-private data class PersonalInlineSlot(
-    val id: String,
-    val spaces: Int,
-    val height: Dp,
-    val reserveSize: TextUnit
-)
-
-/**
- * v398 — THE PARAGRAPH, SHOWN WITH THE ROOM ITS ATTACHMENTS NEED.
- *
- * Compose's own [VisualTransformation] is the API for "one character in the
- * model, something else on screen": the paragraph keeps its marks and its text,
- * and this hands the FIELD a copy in which each mark is a run of non-breaking
- * spaces tall enough to hold its print. [OffsetMapping] carries the caret both
- * ways, so the pen, the selection, the IME's composing region and a backspace all
- * work in the paragraph's own coordinates — deleting the reservation deletes the
- * mark, which is exactly the member saying "take the picture out of the
- * sentence" (the attachment then stands on its own line again).
- */
-private class PersonalInlineTransformation(
-    private val plan: List<PersonalInlineSlot>
-) : VisualTransformation {
-
-    override fun filter(text: AnnotatedString): TransformedText {
-        val raw = text.text
-        val marks = raw.indices.filter { raw[it] == PERSONAL_INLINE_MARK }
-        if (marks.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
-        val spaces = IntArray(marks.size) { n -> (plan.getOrNull(n)?.spaces ?: 1).coerceAtLeast(1) }
-        val builder = AnnotatedString.Builder()
-        var cursor = 0
-        marks.forEachIndexed { n, at ->
-            builder.append(raw.substring(cursor, at))
-            // Transparent (the spaces must draw nothing) and written at the size
-            // the line has to be tall enough for. A span can only ask for room
-            // this way: [SpanStyle] carries no line height of its own — line
-            // height is a PARAGRAPH property — while its font size raises the
-            // line's own metrics, which is the same room by another door.
-            builder.pushStyle(
-                SpanStyle(
-                    color = Color.Transparent,
-                    fontSize = plan.getOrNull(n)?.reserveSize ?: TextUnit.Unspecified
-                )
-            )
-            builder.append("\u00A0".repeat(spaces[n]))
-            builder.pop()
-            cursor = at + 1
-        }
-        builder.append(raw.substring(cursor))
-        // The line's own marks — bold, a quote, a title, a pen — cross the
-        // reservation: every source range is shifted by the room the attachments
-        // before it added.
-        text.spanStyles.forEach { span ->
-            builder.addStyle(
-                span.item,
-                personalInlineModelToDisplay(marks, spaces, span.start),
-                personalInlineModelToDisplay(marks, spaces, span.end)
-            )
-        }
-        text.paragraphStyles.forEach { span ->
-            builder.addStyle(
-                span.item,
-                personalInlineModelToDisplay(marks, spaces, span.start),
-                personalInlineModelToDisplay(marks, spaces, span.end)
-            )
-        }
-        val displayAt = personalInlineDisplayOffsets(marks, spaces.toList())
-        val length = builder.length
-        val sourceLength = raw.length
-        val mapping = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int =
-                personalInlineModelToDisplay(marks, spaces, offset).coerceIn(0, length)
-
-            override fun transformedToOriginal(offset: Int): Int {
-                marks.forEachIndexed { n, markAt ->
-                    val start = displayAt[n]
-                    if (offset >= start && offset < start + spaces[n]) {
-                        // Inside the picture: the left half of it belongs BEFORE
-                        // the mark and the right half after it, so a tap on the
-                        // print's left edge puts the pen before the picture.
-                        val after = offset - start >= spaces[n] / 2 + 1
-                        return (markAt + if (after) 1 else 0).coerceIn(0, sourceLength)
-                    }
-                }
-                var result = offset
-                marks.forEachIndexed { n, _ ->
-                    if (offset >= displayAt[n] + spaces[n]) result -= spaces[n] - 1
-                }
-                return result.coerceIn(0, sourceLength)
-            }
-        }
-        return TransformedText(builder.toAnnotatedString(), mapping)
-    }
-}
-
-/** The display offset of each mark's reservation, given the room each one takes. */
-private fun personalInlineDisplayOffsets(marks: List<Int>, spaces: List<Int>): IntArray {
-    var shift = 0
-    return IntArray(marks.size) { n ->
-        val at = marks[n] + shift
-        shift += spaces.getOrElse(n) { 1 } - 1
-        at
-    }
-}
-
-/** An offset in the paragraph's own text, in the copy the field is shown. */
-private fun personalInlineModelToDisplay(marks: List<Int>, spaces: IntArray, offset: Int): Int {
-    var result = offset
-    marks.forEachIndexed { n, at ->
-        if (at < offset) result += spaces[n] - 1
-    }
-    return result
-}
-
-/**
- * v398 — THE TAG COMPOSE'S OWN `inlineContent` IS READ THROUGH.
- *
- * `BasicText(inlineContent = …)` replaces the text of a range that carries a
- * STRING ANNOTATION with this tag, whose value is the key of the map entry — the
- * characters themselves never name the composable. The public API that writes the
- * annotation ([androidx.compose.foundation.text.appendInlineContent]) appends at
- * the END of a builder, which is no use to a paragraph whose pictures stand in the
- * middle of a string it has already styled; the tag is therefore named here and
- * the annotation added where the mark stands. Foundation has used this exact
- * string since inline content was introduced.
- */
-private const val PERSONAL_INLINE_TAG = "androidx.compose.foundation.text.inlineContent"
-
-/**
- * v398 — ONE PARAGRAPH, ITS PICTURES KEYED.
- *
- * Nothing moves: the marks stay where they are and every span of the styled line is
- * left alone, so a mark keeps the quote, the title size or the pen it was written
- * in. Each mark simply gains the annotation the inline map looks up — one key per
- * picture, since the map shares one composable per key.
- */
-private fun personalInlineAnnotated(
-    text: AnnotatedString,
-    refs: List<String>,
-    markers: List<Int>
-): AnnotatedString {
-    if (refs.isEmpty() || markers.isEmpty()) return text
-    val builder = AnnotatedString.Builder(text)
-    for (n in markers.indices) {
-        if (n >= refs.size) break
-        val at = markers[n]
-        if (at < 0 || at >= text.length) continue
-        builder.addStringAnnotation(
-            PERSONAL_INLINE_TAG,
-            "$PERSONAL_INLINE_MARK$n",
-            at,
-            at + 1
-        )
-    }
-    return builder.toAnnotatedString()
-}
-
-/**
- * v398 — AN ATTACHMENT AS IT SITS IN A SENTENCE.
- *
- * A thumbnail, not a page: the print's own frame at the size its own key says,
- * tappable to open it properly, with a small ✕ in the corner (an attachment
- * inside a sentence is easy to put in and hard to find again otherwise). A voice
- * note draws as the strip it is, so it can be played and scrubbed from the line
- * it was recorded for.
- */
-@Composable
-private fun PersonalInlineAttachment(
-    block: PersonalBlock,
-    width: Dp,
-    height: Dp,
-    ink: Color,
-    accent: Color,
-    enabled: Boolean,
-    onOpen: (Rect?) -> Unit,
-    onRemove: () -> Unit
-) {
-    var bounds by remember(block.id) { mutableStateOf<Rect?>(null) }
-    Box(
-        modifier = Modifier
-            .width(width)
-            .height(height)
-            .onGloballyPositioned { coordinates -> bounds = coordinates.boundsInWindow() }
-            .shadow(3.dp, RoundedCornerShape(5.dp))
-            .clip(RoundedCornerShape(5.dp))
-            .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
-            .padding(2.dp)
-    ) {
-        if (block.isPhoto) {
-            PersonalPagePhoto(
-                uri = block.photo.orEmpty(),
-                height = (height - 4.dp).coerceAtLeast(1.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(enabled = enabled) { onOpen(bounds) }
-            )
-        } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                PersonalVoiceBar(
-                    path = block.audio.orEmpty(),
-                    seconds = block.audioSeconds,
-                    bars = block.audioBars,
-                    ink = ink,
-                    accent = accent,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-        if (enabled) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(3.dp)
-                    .size(19.dp)
-                    .clip(CircleShape)
-                    .background(ink.copy(alpha = 0.62f))
-                    .clickable { onRemove() },
-                contentAlignment = Alignment.Center
-            ) {
-                CurioIcon(
-                    CurioIcons.Close,
-                    "Remove from the paragraph",
-                    tint = MaterialTheme.colorScheme.surface,
-                    size = 12.dp
-                )
-            }
-        }
     }
 }
 
@@ -3494,14 +3149,6 @@ private fun PersonalTextBlock(
         writing: Boolean,
         scroll: Float
     ) -> Unit)? = null,
-    /**
-     * v398 — WHERE AN ATTACHMENT INSIDE THIS PARAGRAPH GOES WHEN IT IS TAPPED.
-     *
-     * An inline print is very small (it is a thumbnail in a sentence), so the one
-     * useful thing a tap can do is open it properly — and the overlay grows out of
-     * the print's own bounds, exactly like a block-sized print's does.
-     */
-    onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
     /**
      * v389e — THE ROW SIZE OF A PAGE WHOSE ROWS ARE ITS CONTENT (a to-do list).
      *
@@ -3621,133 +3268,6 @@ private fun PersonalTextBlock(
             textAlign = alignOf
         )
     }
-    // ── AN ATTACHMENT INSIDE THE PARAGRAPH (v398) ──────────────────────
-    //
-    // The member's reading of "attachment inside a paragraph": a thumbnail
-    // between the words, with the text wrapping around it. A paragraph is ONE
-    // text field, and the only thing a text flow can make room for is
-    // CHARACTERS — so the attachment is a MARK in the paragraph's own text (see
-    // PERSONAL_INLINE_MARK) and the FIELD IS SHOWN A MAPPED COPY of it: at each
-    // mark, a run of non-breaking spaces as wide as the print, written at a font
-    // size whose line is tall enough to hold it (a run can only ask for room
-    // through its font — SpanStyle has no line height), so the line GROWS to hold
-    // the picture and the words reflow around it.
-    //
-    // The mapping is Compose's own [VisualTransformation] + [OffsetMapping] — the
-    // API built for exactly this (one character in the model, something else on
-    // screen, the caret mapped both ways) — so the paragraph's text, its mask,
-    // its selection, its composition, Enter, backspace, undo and saving are all
-    // untouched: they never see the reservation, only the mark. And a paragraph
-    // with no attachment gets [VisualTransformation.None], which is every
-    // paragraph in the app except the ones the member has put a picture into.
-    val inlineRefs = state.inlineRefs(id)
-    var inlineFieldWidth by remember(id) { mutableFloatStateOf(0f) }
-    var inlineLayout by remember(id) { mutableStateOf<TextLayoutResult?>(null) }
-    val inlineDensity = LocalDensity.current
-    val inlineMeasurer = rememberTextMeasurer()
-    // The width of ONE space in this line's own face and size: the reservation is
-    // made of the only thing a text flow can hold that draws nothing.
-    val inlineSpacePx = remember(inlineMeasurer, bodyStyle) {
-        runCatching {
-            inlineMeasurer.measure(AnnotatedString("\u00A0"), bodyStyle).size.width
-        }.getOrDefault(8).coerceAtLeast(1).toFloat()
-    }
-    // v398 — HOW A LINE MAKES ROOM FOR A PICTURE. A text run can only ask for
-    // room through its own FONT (a span has no line height of its own), so the
-    // reservation is written at a bigger size and the line's own metrics do the
-    // rest. The conversion is MEASURED once, in this paragraph's own face, rather
-    // than assumed: one probe line at 100sp gives how many pixels one sp of this
-    // face is worth vertically.
-    val inlinePxPerSp = remember(inlineMeasurer, bodyStyle) {
-        runCatching {
-            inlineMeasurer.measure(
-                AnnotatedString("Hg"),
-                bodyStyle.copy(fontSize = 100.sp, lineHeight = TextUnit.Unspecified)
-            ).size.height / 100f
-        }.getOrDefault(1.2f).coerceIn(0.5f, 4f)
-    }
-    val inlineBodySp = bodyStyle.fontSize
-        .let { if (it.isSpecified && it.value > 0f) it.value else 17f }
-    val inlinePlan: List<PersonalInlineSlot> = if (
-        inlineRefs.isEmpty() || inlineFieldWidth <= 0f
-    ) {
-        emptyList()
-    } else {
-        inlineRefs.mapNotNull { refId ->
-            val attachment = state.block(refId) ?: return@mapNotNull null
-            val target = if (attachment.isPhoto) {
-                // "Whatever the print's own size says" — the member's own answer:
-                // the same five sizes a print on its own line has, so a PAGE-sized
-                // attachment inside a paragraph takes the whole measure and the
-                // words carry on below it.
-                inlineFieldWidth * state.photoSize(refId).fraction
-            } else {
-                // A voice note is a strip, not a photograph: it takes the width a
-                // sentence's worth of it needs, and no more than that.
-                (inlineFieldWidth * 0.62f)
-                    .coerceAtMost(with(inlineDensity) { 230.dp.toPx() })
-            }
-            val height = if (attachment.isPhoto) {
-                personalPrintHeight(state.photoSize(refId))
-            } else {
-                52.dp
-            }
-            // The size the reservation is written at for the line to be tall
-            // enough to hold the print — a tenth again as tall on purpose, since a
-            // picture that laps over the line above it reads worse than a line with
-            // a little air in it.
-            val heightPx = with(inlineDensity) { height.toPx() }
-            val reserveSp = (heightPx / inlinePxPerSp) * 1.1f
-            // Never smaller than the paragraph's own type: the line's floor is
-            // what the writer is already reading, not what a small print asks for.
-            val reserveSize = reserveSp.coerceAtLeast(inlineBodySp).sp
-            // A space at the reservation's size is wider than the body's own, by
-            // exactly the ratio the two sizes differ in.
-            val reserveSpacePx =
-                (inlineSpacePx * (reserveSize.value / inlineBodySp)).coerceAtLeast(1f)
-            // Never the FULL measure: a reservation that cannot fit beside a line
-            // break would push itself onto the next line and stick out of the
-            // paragraph's own column.
-            val widthPx = target
-                .coerceAtMost(inlineFieldWidth - reserveSpacePx * 2f)
-                .coerceAtLeast(reserveSpacePx * 2f)
-            val spaces = ceil(widthPx / reserveSpacePx).toInt().coerceIn(2, 400)
-            PersonalInlineSlot(
-                id = refId,
-                spaces = spaces,
-                height = height,
-                reserveSize = reserveSize
-            )
-        }
-    }
-    val inlineTransform = remember(inlinePlan) {
-        if (inlinePlan.isEmpty()) VisualTransformation.None
-        else PersonalInlineTransformation(inlinePlan)
-    }
-    val inlineDisplayOffsets = remember(text, inlinePlan) {
-        if (inlinePlan.isEmpty()) IntArray(0)
-        else personalInlineDisplayOffsets(
-            text.indices.filter { text[it] == PERSONAL_INLINE_MARK },
-            inlinePlan.map { it.spaces }
-        )
-    }
-    // The lead the line's own marker (a quote's rule, a bullet's dot, a to-do
-    // row's box) takes out of the field: the attachments are drawn in the FIELD's
-    // coordinates, so the reservation's own left edge has to be measured from the
-    // same place the text starts.
-    val leadPad = when {
-        isQuote -> 13.dp
-        isCheckbox -> if (rowPage) ROW_MARKER_LEAD else PERSONAL_MARKER_LEAD
-        isBullet -> PERSONAL_MARKER_LEAD
-        else -> 0.dp
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .onSizeChanged { measured ->
-                inlineFieldWidth = measured.width.toFloat()
-            }
-    ) {
     BasicTextField(
         value = value,
         onValueChange = { state.onFieldChange(id, it) },
@@ -3803,7 +3323,7 @@ private fun PersonalTextBlock(
                                 cornerRadius = CornerRadius(barWidth / 2f)
                             )
                         }
-                        .padding(start = leadPad)
+                        .padding(start = 13.dp)
                     // v389 — both list styles draw through the ONE shared
                     // renderer (see drawPersonalCheckbox / drawPersonalMarker)
                     // and indent by the same lead, so the editor and the
@@ -3821,7 +3341,7 @@ private fun PersonalTextBlock(
                             )
                         }
                         .clickable(enabled = enabled) { state.setChecked(id, !checked) }
-                        .padding(start = leadPad)
+                        .padding(start = if (rowPage) ROW_MARKER_LEAD else PERSONAL_MARKER_LEAD)
                     isBullet -> Modifier
                         .drawBehind {
                             drawPersonalMarker(
@@ -3830,7 +3350,7 @@ private fun PersonalTextBlock(
                                 lineHeight = lineHeight.toPx()
                             )
                         }
-                        .padding(start = leadPad)
+                        .padding(start = PERSONAL_MARKER_LEAD)
                     else -> Modifier
                 }
             )
@@ -3908,64 +3428,8 @@ private fun PersonalTextBlock(
                 }
                 inner()
             }
-        },
-        visualTransformation = inlineTransform,
-        onTextLayout = { result -> inlineLayout = result }
-    )
-    // ── THE ATTACHMENTS THEMSELVES ──────────────────────────────────────
-    //
-    // The reservation is the SPACE; this is the picture that stands in it. It is
-    // drawn in the FIELD's own coordinates — the line's own lead (a quote's rule,
-    // a bullet's dot, a to-do row's box) plus the reservation's box from the text
-    // layout — so the print lands exactly on the room that was reserved for it,
-    // whatever the words did around it.
-    val layout = inlineLayout
-    if (layout != null && inlinePlan.isNotEmpty()) {
-        val leadPx = with(inlineDensity) { leadPad.toPx() }
-        val roomLength = layout.layoutInput.text.length
-        inlinePlan.forEachIndexed { index, slot ->
-            val start = inlineDisplayOffsets.getOrNull(index) ?: return@forEachIndexed
-            if (start < 0 || start >= roomLength) return@forEachIndexed
-            val first = layout.getBoundingBox(start)
-            // The room the reservation REALLY took, read back off the layout: the
-            // spaces' own advance may differ from the arithmetic by a fraction of a
-            // pixel each, and the whole point of the exercise is that the frame and
-            // the room reserved for it agree.
-            val last = layout.getBoundingBox(
-                (start + slot.spaces - 1).coerceIn(start, roomLength - 1)
-            )
-            val attachment = state.block(slot.id) ?: return@forEachIndexed
-            val drawnWidth = with(inlineDensity) {
-                (last.right - first.left).coerceAtLeast(1f).toDp()
-            }
-            // Centred in the room the line gave it, so a line deliberately made
-            // taller than the print does not leave the picture hanging off its top.
-            val drawnHeightPx = with(inlineDensity) { slot.height.toPx() }
-            val topPx = first.top + (first.height - drawnHeightPx) / 2f
-            Box(
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            (leadPx + first.left).roundToInt(),
-                            topPx.roundToInt()
-                        )
-                    }
-                    .size(drawnWidth, slot.height)
-            ) {
-                PersonalInlineAttachment(
-                    block = attachment,
-                    width = drawnWidth,
-                    height = slot.height,
-                    ink = ink,
-                    accent = accent,
-                    enabled = enabled,
-                    onOpen = { bounds -> onOpenPhoto(attachment.photo.orEmpty(), bounds) },
-                    onRemove = { state.removeBlock(slot.id) }
-                )
-            }
         }
-    }
-    }
+    )
     // Structural edits (a photo dropped in, a paragraph split) hand the caret
     // to a block that did not exist a frame ago — the field has to ask for
     // focus itself, in its own composition scope.
@@ -4619,37 +4083,20 @@ internal fun PersonalDocView(
     // editor builds, chosen by how many arrived.
     val groupSkips = mutableSetOf<String>()
     val printRows = mutableMapOf<String, List<String>>()
-    // v398 — see the editor's pass: an attachment that sits inside a paragraph is
-    // drawn BY that paragraph, so the page must not draw it on its own as well.
-    val inlineHeld = mutableSetOf<String>()
-    doc.blocks.forEach { host -> inlineHeld.addAll(host.inlineRefs) }
-    // v398 — the width a line of this page actually has, which is what an inline
-    // print's own fraction of the measure is taken from (the SAME rule the editor
-    // uses, or a picture would jump size when the member stopped writing).
-    var inlineLineWidth by remember { mutableStateOf(0f) }
-    val inlineDensity = LocalDensity.current
     run {
         val blocks = doc.blocks
         var i = 0
         while (i < blocks.size) {
             val first = blocks[i]
-            // See the editor's pass: an attachment inside a paragraph is drawn by
-            // that paragraph, never as a print on a line of its own.
-            if (inlineHeld.contains(first.id)) {
-                i += 1
-                continue
-            }
-            if (first.isPhoto &&
-                PersonalPhotoSize.fromKey(first.photoSize) != PersonalPhotoSize.PAGE
-            ) {
+            // v403 — the read view runs the editor's own rule, PAGE prints
+            // included: the two passes must never disagree about which prints
+            // are one row (see the editor's pass for why the rule changed).
+            if (first.isPhoto) {
                 val run = ArrayList<String>()
                 var j = i
                 while (j < blocks.size && run.size < PRINT_ROW_LIMIT) {
                     val member = blocks[j]
-                    if (member.isPhoto &&
-                        !inlineHeld.contains(member.id) &&
-                        PersonalPhotoSize.fromKey(member.photoSize) != PersonalPhotoSize.PAGE
-                    ) {
+                    if (member.isPhoto) {
                         run.add(member.id)
                         j += 1
                     } else {
@@ -4815,22 +4262,6 @@ internal fun PersonalDocView(
                         } else Modifier
                     )
             ) {
-                // v398 — AN ATTACHMENT INSIDE THE SENTENCE, READ BACK.
-                //
-                // A read-only line holds real inline content ([InlineTextContent]),
-                // which is the one thing a TEXT FIELD cannot do and a Text CAN —
-                // and it reserves its own room, so the words wrap around the print
-                // exactly as they did while it was being written (the reservation
-                // the editor shows is the same width, from the same rule).
-                //
-                // The mark a picture stands on is ANNOTATED with a key of its own
-                // ("\uFFFC0", "\uFFFC1" …), because the inline map shares ONE
-                // composable per key — two pictures in one paragraph must not share
-                // a placeholder. [personalInlineAnnotated] does that without moving
-                // a single character, so every span, link and tap of the line lands
-                // exactly where it did before (the marks take one replacement
-                // character each in the editor's copy, and none here).
-                val markers = text.indices.filter { text[it] == PERSONAL_INLINE_MARK }
                 val baseText = personalAnnotated(
                     text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
                     titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
@@ -4840,78 +4271,13 @@ internal fun PersonalDocView(
                 // open in the browser with a coffee-dark underline so they
                 // read as ink, not as the app's accent.
                 val linkText = personalAnnotateLinks(baseText)
-                val styledText = if (markers.isEmpty()) linkText
-                else personalInlineAnnotated(linkText, block.inlineRefs, markers)
-                // The room each attachment takes, from the same table the editor
-                // reserves with: a print's own size, or a voice note's strip.
-                val inlineContent: Map<String, InlineTextContent> = if (markers.isEmpty()) {
-                    emptyMap()
-                } else {
-                    buildMap {
-                        block.inlineRefs.forEachIndexed { n, refId ->
-                            val attachment = doc.blocks.firstOrNull { it.id == refId }
-                                ?: return@forEachIndexed
-                            val measure = inlineLineWidth
-                            val width = if (attachment.isPhoto) {
-                                val size = PersonalPhotoSize.fromKey(attachment.photoSize)
-                                (measure * size.fraction).coerceAtLeast(1f)
-                            } else {
-                                (measure * 0.62f).coerceAtLeast(1f)
-                            }
-                            val height = if (attachment.isPhoto) {
-                                personalPrintHeight(
-                                    PersonalPhotoSize.fromKey(attachment.photoSize)
-                                )
-                            } else {
-                                52.dp
-                            }
-                            // The room is asked for in TEXT units — a Placeholder's
-                            // width and height are sp, because that is what a text
-                            // flow measures with — while the composable itself is
-                            // drawn at the same size in dp, so the frame and the room
-                            // reserved for it agree to the pixel.
-                            val drawnWidth = with(inlineDensity) { width.toDp() }
-                            put(
-                                "$PERSONAL_INLINE_MARK$n",
-                                InlineTextContent(
-                                    Placeholder(
-                                        width = with(inlineDensity) { width.toSp() },
-                                        height = with(inlineDensity) { height.toSp() },
-                                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-                                    )
-                                ) {
-                                    PersonalInlineAttachment(
-                                        block = attachment,
-                                        width = drawnWidth,
-                                        height = height,
-                                        ink = ink,
-                                        accent = ink,
-                                        enabled = false,
-                                        onOpen = { bounds ->
-                                            onOpenPhoto(attachment.photo.orEmpty(), bounds)
-                                        },
-                                        onRemove = { }
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
-                var linkLayout by remember(styledText) {
+                var linkLayout by remember(linkText) {
                     mutableStateOf<TextLayoutResult?>(null)
                 }
                 val linkContext = LocalContext.current
-                BasicText(
-                    text = styledText,
-                    inlineContent = inlineContent,
-                    onTextLayout = { layoutResult ->
-                        linkLayout = layoutResult
-                        // The line reports how wide it is, which is what an inline
-                        // print's own fraction is measured against.
-                        if (layoutResult.size.width > 0) {
-                            inlineLineWidth = layoutResult.size.width.toFloat()
-                        }
-                    },
+                Text(
+                    text = linkText,
+                    onTextLayout = { linkLayout = it },
                     style = when {
                         isTitle -> TextStyle(
                             fontFamily = FrauncesFontFamily,
@@ -5048,12 +4414,6 @@ internal fun PersonalDocView(
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         doc.blocks.forEachIndexed { index, block ->
-            // v398 — an attachment that sits INSIDE a paragraph is drawn BY that
-            // paragraph (its own line already holds it, through the inline map), so
-            // the column draws nothing for it. Without this the picture would
-            // appear twice on a page read back: once between the words and once on
-            // a line of its own, which is not what was written.
-            if (inlineHeld.contains(block.id)) return@forEachIndexed
             val quoteAbove = index > 0 && isQuoteRun(doc.blocks[index - 1])
             val quoteBelow = index < doc.blocks.lastIndex && isQuoteRun(doc.blocks[index + 1])
             if (block.isPhoto) {
