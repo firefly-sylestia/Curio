@@ -1,4 +1,12 @@
 ADD:
+- Updates: What's New arrives as a SHEET, and only once the welcome is over — it waits for the intro to be finished and for the tour offer to be answered, then rises over Home, with "See all" keeping the full page (which is still the door under Settings ▸ Updates).
+- Reveal: an anime with no episode guide says so, instead of ending at its poster in silence — only a couple of titles carry an authored list and the online one can come back empty.
+
+FIX:
+- Updates: What's New no longer opens DURING the intro — the splash and onboarding routes counted as a quiet start, so a fresh install could be handed the highlights before it had met the app, and the tour offer was pushed aside by it.
+- Moderation: the ban sheet folds its reasons away once one is picked — the chosen reason stays as a single chip with a Change beside it, so the note field and the Ban button are on screen the moment the decision is made, instead of eight wrapping chips standing in front of them.
+
+ADD:
 - Home: a door whose row has nothing in it says so — on a fresh install the Pages and My shelf strips were the door alone, which read as a part of the page that had failed to load; each door now offers its own first step as a chip the size of the ones that will follow.
 - Reading: the page can be held upright — the reader follows your phone's rotation by itself, which is how a wide PDF page is read; a switch in the page's ink sheet keeps a PDF's pages standing up instead, for reading with the phone lying on its side. A reflowable book has nothing to stand up, so it is not offered one.
 - Reading: a type-size slider for a reflowable book — the size the pinch already sets, said out loud as a percentage with a thumb that can be dragged to it exactly, in the page's ink sheet. A PDF is a picture of a page, so its own size stays the pinch's.

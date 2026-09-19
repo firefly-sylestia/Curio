@@ -119,6 +119,38 @@ three already worked through `printDropIndex` (a print arriving from elsewhere
 is snapped to the run and inserted at its head or just past its tail), and the
 side switch is what was actually missing.
 
+### Updates — What's New is GATED and arrives as a sheet
+
+The auto-open was a `LaunchedEffect(Unit)` that navigated to the `WHATS_NEW`
+route 700ms after the app settled, with SPLASH and ONBOARDING counted as a quiet
+start — so a fresh install could be handed the highlights DURING the intro, and
+the tour offer was pushed aside by it. The gate now lives at the top of
+`CurioNavHost`, keyed on `currentRoute`, `TourController.offerPending` and
+`TourController.active`: past SPLASH/ONBOARDING, intro complete
+(`CurioOnboardingState.isComplete`), and the tour offer ANSWERED. It then shows
+`WhatsNewSheet` (a `ModalBottomSheet` over Home, `release.items.take(3)`, "Got
+it" and "See all") and stamps `whatsNewSeenVersion` on the way out. The full
+`WhatsNewScreen` is untouched and remains the door under Settings ▸ Updates.
+The member's chosen order is intro → tour offer → What's New.
+
+### Moderation — the ban reasons collapse
+
+`ModerationBanDialog` gained `reasonsOpen`. While a reason is unchosen the eight
+wrapping chips stand (they are what a moderator needs BEFORE picking); once one
+is chosen the list folds to a single chip of the chosen reason with a "Change"
+beside it, so the note field and the Ban button are on screen. Picking again
+closes it.
+
+### Empty states — the audit
+
+The survey (every feature file with a `LazyColumn`/`LazyRow`, checked for
+`isEmpty()` guards and empty-state copy) found the lists already covered:
+Recents (`FirstTimeEmpty`), Cabinet and Cabinet V2 (`EmptyState`), the journal
+list, the book shelf, Chats, Friends, Community, Moderation and Quests. Two real
+gaps were fixed: Home's door strips (see `EmptyDoorChip` above) and the anime section, which hid its episode chips when the list was empty and so ended at its
+poster with no explanation — it now says "No episode guide yet.", the same words
+the series sheet already used.
+
 ### Reveal — the fetched art survives (`sheetArtUrlsState`)
 
 Nine art sites (ArtworkSheet, AuthorWorks, and the album / film-variant / anime

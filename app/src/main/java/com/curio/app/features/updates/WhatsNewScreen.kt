@@ -10,15 +10,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -29,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
@@ -377,6 +382,134 @@ private fun WhatsNewItemCard(item: WhatsNewItem, onOpen: (String) -> Unit) {
                 }
             }
             Spacer(Modifier.height(2.dp))
+        }
+    }
+}
+
+/**
+ * v406 — THE SAME HIGHLIGHTS, AS A SHEET, ON THE WAY IN.
+ *
+ * The page used to open ITSELF as a whole screen the moment the app settled,
+ * which put a settings-shaped page in front of a member who had just finished
+ * the intro and had not yet been asked about the tour — and it could even land
+ * DURING the intro, because the boot routes counted as a quiet start (member's
+ * report: "the whats new should be shown only after the intro and as a drop
+ * down"). The sheet is the on-the-way-in half now (see `CurioNavHost`): it waits
+ * for the intro to be complete AND for the tour offer to be answered, then rises
+ * over Home with the version's headline and its first few highlights. "See all"
+ * keeps the whole page, which is still the door under Settings ▸ Updates.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WhatsNewSheet(
+    versionCode: Int,
+    onOpenAll: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val release = whatsNewRelease(versionCode) ?: return
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val accent = curioRoseInk()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "WHAT'S NEW IN ${release.versionName}",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 1.2.sp,
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = accent
+            )
+            Text(
+                release.headline,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            // The first few, not all of them: a sheet is a doorway, and the
+            // whole list is one tap away through See all (the page).
+            release.items.take(3).forEach { item ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(accent.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CurioIcon(item.glyph, null, tint = accent, size = 18.dp)
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            item.title,
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        )
+                        Text(
+                            item.detail,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Surface(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Got it",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
+                }
+                Surface(
+                    onClick = onOpenAll,
+                    shape = RoundedCornerShape(50),
+                    color = accent,
+                    contentColor = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "See all",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 }

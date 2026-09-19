@@ -6772,6 +6772,17 @@ private fun AnimeInfoSection(
                 episodes = previewEpisodes,
                 onEpisodeClick = onEpisodeClick
             )
+        } else {
+            // v406 — AN ANIME WITH NO GUIDE SAYS SO, the way the series sheet
+            // already does ("No episode guide yet."). Only a couple of titles
+            // carry an authored episode list and Jikan's own list can be empty,
+            // so this card used to end at its poster with nothing to explain
+            // the silence.
+            Text(
+                "No episode guide yet.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

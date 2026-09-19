@@ -99,10 +99,12 @@ import com.curio.app.features.feedback.FeedbackFormSheet
 import com.curio.app.features.feedback.FeedbackFormState
 import com.curio.app.features.updates.UpdatesScreen
 import com.curio.app.features.updates.WhatsNewScreen
+import com.curio.app.features.updates.WhatsNewSheet
 import com.curio.app.features.updates.whatsNewRelease
 import com.curio.app.features.crash.CurioCrashScreen
 import com.curio.app.features.lightbox.LightboxScreen
 import com.curio.app.features.managecategories.ManageCategoriesScreen
+import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.onboarding.OnboardingScreen
 import com.curio.app.features.personal.BookDetailScreen
 import com.curio.app.features.personal.BookShelfScreen
@@ -488,6 +490,41 @@ fun CurioNavHost(
     // different session re-arms it naturally.
     var dialogDismissedFor by rememberSaveable { mutableStateOf(0L) }
 
+    // ── What's New waits for the INTRO and the TOUR (v406) ──────────────
+    //
+    // The highlights used to open themselves as a whole screen the moment the
+    // app settled, and the boot routes counted as a quiet start — so on a fresh
+    // install the page could land DURING the intro, before the member had even
+    // met the app (member's request: "the whats new should be shown only after
+    // the intro and as a drop down"). It is a SHEET over Home now, and it waits
+    // for both halves of the welcome: the intro complete, and the tour offer
+    // ANSWERED (taken and walked, or declined), so a member who has just been
+    // asked "take a tiny tour?" is never handed a second thing at once.
+    //
+    // The full page is untouched: Settings ▸ Updates still opens it, and "See
+    // all" on the sheet goes there. Whichever way the member leaves the sheet,
+    // the version is stamped, so it is offered once and once only.
+    var whatsNewSheet by remember { mutableStateOf(false) }
+    var whatsNewOffered by remember { mutableStateOf(false) }
+    LaunchedEffect(currentRoute, TourController.offerPending, TourController.active) {
+        if (whatsNewOffered) return@LaunchedEffect
+        val thisVersion = BuildConfig.VERSION_CODE
+        if (AppPreferences.getWhatsNewSeenVersion(context) == thisVersion) return@LaunchedEffect
+        if (whatsNewRelease(thisVersion) == null) return@LaunchedEffect
+        // PAST THE INTRO. The boot gates are no longer a quiet start: a deep
+        // link, a notification and a half-finished intro are all left alone.
+        val route = currentRoute ?: return@LaunchedEffect
+        if (route == CurioRoutes.SPLASH || route == CurioRoutes.ONBOARDING) return@LaunchedEffect
+        if (!CurioOnboardingState.isComplete(context)) return@LaunchedEffect
+        // AND PAST THE TOUR OFFER.
+        if (TourController.offerPending || TourController.active) return@LaunchedEffect
+        // Let the page settle, so the sheet reads as rising over Home rather
+        // than racing the splash hand-off.
+        delay(650)
+        whatsNewOffered = true
+        whatsNewSheet = true
+    }
+
     // Ask "are you done exploring?" whenever the app returns to the
     // foreground while an explore session is active — mid-session, after
     // the browser search, or after the app was killed in the background.
@@ -694,30 +731,11 @@ fun CurioNavHost(
                 .widthIn(max = CurioContentMaxWidth)
         ) {
             val sharedTransitionScope = this
-        // ── What's New opens ITSELF once per version (v403) ────────────────
-        // A fresh install and an update alike: the highlights for the version
-        // this build IS are shown one time, then the page waits under
-        // Settings ▸ Updates. The stamp is written by the page itself, so
-        // backing out of it still counts as seen.
-        LaunchedEffect(Unit) {
-            val thisVersion = BuildConfig.VERSION_CODE
-            if (AppPreferences.getWhatsNewSeenVersion(context) == thisVersion) return@LaunchedEffect
-            if (whatsNewRelease(thisVersion) == null) return@LaunchedEffect
-            // Let the start destination settle, so the page reads as opening
-            // over the app rather than racing the splash hand-off.
-            delay(700)
-            // Only from the app's own opening pages: a deep link, a first-run
-            // onboarding or a notification that already moved somewhere is
-            // left where the user asked to be.
-            val current = navController.currentBackStackEntry?.destination?.route
-            val quietStart = current == null ||
-                current == CurioRoutes.SPLASH ||
-                current == CurioRoutes.ONBOARDING ||
-                current == CurioRoutes.HOME
-            if (quietStart) {
-                navController.navigate(CurioRoutes.WHATS_NEW) { launchSingleTop = true }
-            }
-        }
+        // ── What's New is offered from the ROOT, not here (v406) ────────
+        // It used to open itself as a screen from inside this layout, which is
+        // also why it could arrive during the intro. The gate (intro complete,
+        // tour offer answered) and the sheet both live at the top of this
+        // composable; see `whatsNewSheet` above.
         NavHost(
             navController = navController,
             startDestination = CurioRoutes.SPLASH,
@@ -1536,6 +1554,24 @@ composable(CurioRoutes.COMMUNITY) {
             dismissButton = {
                 TextButton(onClick = { TourController.declineOffer() }, colors = curioDialogActionButtonColors()) { Text("Maybe later") }
             }
+        )
+    }
+
+    // ── The highlights themselves, once the welcome is over (v406) ────────
+    // Rises over Home, so it reads as the version saying hello rather than as
+    // a settings page opening on its own. "See all" keeps the full screen.
+    if (whatsNewSheet) {
+        val stampSeen = {
+            AppPreferences.setWhatsNewSeenVersion(context, BuildConfig.VERSION_CODE)
+            whatsNewSheet = false
+        }
+        WhatsNewSheet(
+            versionCode = BuildConfig.VERSION_CODE,
+            onOpenAll = {
+                stampSeen()
+                navController.navigate(CurioRoutes.WHATS_NEW) { launchSingleTop = true }
+            },
+            onDismiss = { stampSeen() }
         )
     }
 

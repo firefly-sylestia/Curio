@@ -264,6 +264,11 @@ internal fun ModerationBanDialog(
     // a moderator can walk away from (a week, not forever).
     var hours by remember(currentKind) { mutableStateOf<Int?>(if (alreadyBanned) null else WEEK_HOURS) }
     var chosen by remember { mutableStateOf<String?>(null) }
+    // v406 — the reason list is OPEN until it has answered. Once a reason is
+    // picked the eight chips fold away to the one that was chosen, so the note
+    // field and the Ban button are on the screen the moment the decision is made
+    // (member's request: "after piking a ban reason collape the reasons").
+    var reasonsOpen by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf("") }
 
     AlertDialog(
@@ -354,17 +359,56 @@ internal fun ModerationBanDialog(
                 // and then find a Ban button that never lit up (the reason is
                 // required, and the reason was off-screen). As wrapping chips
                 // the whole decision is on one screen.
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    ModerationReasons.BAN.forEach { reason ->
-                        BanReasonChip(
-                            label = reason,
-                            selected = chosen == reason,
-                            onClick = { chosen = reason }
-                        )
+                // ── AND THE LIST FOLDS AWAY ONCE IT HAS ANSWERED (v406) ──
+                //
+                // The eight chips are what a moderator needs BEFORE they pick,
+                // and eight chips of wrapping text are what stands between them
+                // and the note field AFTER. So the list collapses to the one
+                // reason that was chosen, with the way back to the full list
+                // beside it — the sheet gets shorter at exactly the moment the
+                // decision is made.
+                if (chosen != null && !reasonsOpen) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.12f)
+                        ) {
+                            Text(
+                                text = chosen.orEmpty(),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                        TextButton(
+                            onClick = { reasonsOpen = true },
+                            colors = curioDialogActionButtonColors()
+                        ) {
+                            Text("Change", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                } else {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        ModerationReasons.BAN.forEach { reason ->
+                            BanReasonChip(
+                                label = reason,
+                                selected = chosen == reason,
+                                onClick = {
+                                    chosen = reason
+                                    reasonsOpen = false
+                                }
+                            )
+                        }
                     }
                 }
                 ModerationNoteField(

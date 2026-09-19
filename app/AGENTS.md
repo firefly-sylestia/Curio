@@ -8750,6 +8750,23 @@ only ever catches taps that mean "not in any of these".
   is empty, so a first-time Home collapsed both door strips to the door alone.
   Each door emits an `EmptyDoorChip` at `CHIP_WIDTH` × `CHIP_HEIGHT` when its
   list is empty, so the strip keeps its shape and offers the first step.
+- **What's New is GATED, not scheduled (v406).** It used to be a
+  `LaunchedEffect(Unit)` that navigated to the `WHATS_NEW` route 700ms after the
+  app settled, and the boot routes (SPLASH, ONBOARDING) counted as a quiet start
+  — so a fresh install could be shown the highlights DURING the intro. The gate
+  lives at the top of `CurioNavHost` and is keyed on `currentRoute`,
+  `TourController.offerPending` and `TourController.active`: intro complete
+  (`CurioOnboardingState.isComplete`) AND tour offer answered AND past
+  SPLASH/ONBOARDING. It shows a `WhatsNewSheet` (a `ModalBottomSheet`) over
+  Home and stamps `whatsNewSeenVersion` whoever way it is left. The full screen
+  stays for Settings ▸ Updates and the sheet's "See all".
+- **The welcome order is intro → tour offer → What's New.** `TourController`
+  is offered by `finishOnboarding`; the sheet must never race it, hence the
+  `offerPending` / `active` guards.
+- **`ModerationBanDialog`'s reasons collapse.** `reasonsOpen` is false by
+  default and set true by the "Change" button; picking a reason closes it, so
+  eight wrapping chips become one chip plus "Change" the moment a decision is
+  made (the note field and the Ban button are below them).
 
 ### Bottom-anchoring with weight spacers
 - To anchor controls to the bottom edge regardless of screen height: replace fixed `Spacer(26.dp)` (which floats on tall screens) with `Spacer(Modifier.weight(1f))` inside a `fillMaxSize` `Column`. The weight spacer absorbs all free space above the controls.
