@@ -8,114 +8,80 @@ from the state rather than from memory.
 
 ## 1. The request
 
-> "check these [the CI failure + the post-job caching log], also tell me how can we make our
-> builds more faster. also turn on cover fetching and also the take studio on by default.
-> also the tool that shows under the notes in save your take its hiding behind the keyboard
-> when the note is too below, can u fix that and make it open as overlay which shows above
-> keyboard not belo the note. and then do the next tag release with no beta, proper release,
-> edit the release notes thats connected to release tag which gets added, update the notes
-> and make sure not to use erm dashes."
+> "lets do some chnages with theme, so the backgroud glyph watermark make it very very
+> subtle by default as its distracting, and in apperance option add an option to make it
+> look like current deep look. bu tby default it will be very subtle"
 
-Member's answers to the two questions asked before the release:
+Two clear halves, no ambiguity to ask about:
 
-- **Tag**: **v1.3.0** (typed as a custom answer; the offered v1.2.0 was not taken).
-- **Push**: "You push the commits and the tag."
+1. The page-wide category glyph collage behind every screen becomes **very very subtle by
+   default** (it reads as distracting at full strength).
+2. **Appearance** gains the option to bring back **today's deep look**. The default stays
+   subtle.
 
----
-
-## 2. The CI failure that was pasted
-
-```
-e: .../features/personal/BookReaderScreen.kt:390:17 Unresolved reference 'pendingBlock'.
-```
-
-Cause: v406 hoisted a `pendingBlock` state so `jumpToMark` could hand a block to whichever
-reading surface is showing, but the declaration was left **below** the local functions that
-read it, and a Kotlin local cannot see a local declared later in the same body.
-
-Fix (already in the working tree, and carried by this commit): the state is declared up with
-`pendingPage`, under a comment that says why. `node scripts/check_braces.js` is clean.
-
-The rest of the pasted log is the **post-job cleanup**, not a failure: the Gradle User Home
-cache was restored (8 entries, 825 MB), 1 entry (20 MB) saved, daemons stopped, and the job
-summary generated with a green outcome. No action needed there.
+The user asked for the settings option themselves, so the "new feature — toggleable?"
+question of the root AGENTS.md was already answered by the request: it ships as a
+user-facing Appearance choice with the subtle path as the default.
 
 ---
 
-## 3. Why the build was losing time, and what was done
+## 2. What was found
 
-What the log shows: Gradle 9.4.1, configuration cache on ("Configuration cache entry
-stored"), `gradle/actions/setup-gradle` carrying `/home/runner/.gradle/caches` between runs,
-and `56 actionable tasks executed` on a commit that touched three Kotlin files.
+- **Exactly ONE component draws the page-wide glyph backdrop:**
+  `app/src/main/java/com/curio/app/ui/components/CurioWatermarkBackdrop.kt` —
+  `CurioWatermarkBackdrop(activeCat, topClearance, alphaScale)` scatters the 11 category
+  glyphs, each tinted with its own category accent, and hands each glyph an alpha from a
+  private `watermarkAlpha(active, isDark, pastel)` (dark: 0.22 active / 0.11 inactive,
+  light: 0.30 / 0.15, pastel raised a step further). `alphaScale` is per-screen tuning —
+  40+ call sites pass 0.45, Spin 0.5, Stats 0.40, the wide-window NavHost collage 0.55.
+- **Not this backdrop, deliberately left alone:** `CurioMoodBoardBackdrop` (the seeded
+  mood-board collage — board ART), the hero banners' mirrored watermark pairs
+  (`heroWatermarkSymbols`), and the capture paper's `WATERMARK` paper style.
+- **The preference pattern in `data/AppPreferences.kt`** is a private `KEY_*` const, one
+  `var …State by mutableStateOf(default) private set` seeded in `initThemeMode(context)`,
+  and an `is…Enabled` / `set…Enabled` pair — that is the shape every Appearance switch
+  already uses (e.g. `darkGlowState`), so the new option follows it exactly.
+- **The Appearance page is `AppearanceSection` in
+  `features/settings/SettingsSectionScreen.kt`**, its rows are `CompactSwitchRow` /
+  `CompactSegmentedRow` / `SettingsOptionRow` wrapped in `SettingsRowPulse(highlightKey == …)`,
+  and the hub's deep-search index (`SettingsDeepIndex` in `SettingsHubScreen.kt`) carries
+  one `SettingsDeepRow` per searchable row key.
 
-Two cheap causes found by reading the repo, and both are fixed:
+---
 
-1. **The build cache was never turned on.** `org.gradle.caching` was absent from
-   `gradle.properties`, so every task re-ran even when its inputs were identical, and the
-   restored Gradle User Home could only help with dependency resolution. It is on now, and
-   `org.gradle.parallel=true` with it (the modules that exist are independent).
+## 3. What was decided
 
-2. **`validateTopics` could never be skipped.** It declared `inputs.dir(topicsDir)` and
-   **no output**, and Gradle can only mark a task UP-TO-DATE (or restore it from the cache)
-   when it has both. So the whole catalog, 20,877 topics across every JSON file, was parsed
-   and re-validated on every single build. It now writes a stamp under
-   `build/curio/validate-topics.stamp`, declared with `outputs.file(...)` and
-   `outputs.cacheIf { true }`, written LAST so a failing validation fails before the stamp
-   exists. Unchanged JSON means the parse is skipped; on CI it can be restored outright.
-
-Still on the table, **not done** (each changes what CI checks, so they are the member's call):
-
-- **`lintDebug` compiles the whole debug variant** (`kspDebugKotlin`, `compileDebugKotlin`,
-  debug resources) on top of the release variant the job actually packages. Roughly half the
-  compile work in that job exists to run a lint pass. Either `lintRelease` (one variant
-  instead of two) or a **separate parallel lint job** (wall clock becomes the slower of the
-  two, not the sum).
-- **The `cp data/topics/*.json` asset copy** rewrites the whole asset tree on each run
-  before the build. A Gradle `Sync`/copy task with declared inputs and outputs would let
-  Gradle skip the merge and packaging work when the catalog has not changed.
-- **A fast compile-only job** for feedback (`compileReleaseKotlin`), with packaging behind
-  it, so a red compile is reported in a fraction of the time.
-- **AJDK 21** (LTS) instead of 17: the Kotlin and R8 toolchains are faster on it, and AGP
-  supports it. The project pins 17 in both workflows.
+- **One multiplier, not new alphas.** `watermarkAlpha`'s current values ARE the deep look,
+  so they stay untouched and the depth is applied as a scale factor in the composable:
+  `depthScale = if (deep) 1f else GlyphBackdropSubtleScale` (0.32f), multiplied by the
+  call site's own `alphaScale`. Every one of the 40+ call sites therefore keeps its own
+  tuning and none has to know the toggle exists, and "Deep" is bit-for-bit today's look.
+- **Reactive state, not a one-shot read.** The composable reads
+  `AppPreferences.glyphBackdropDeepState` (a snapshot state seeded at startup), so flipping
+  the switch repaints every screen's collage immediately.
+- **A segmented row, not a switch.** "Subtle / Deep" shows which one is live and matches
+  the Theme / Hero rows beside it; a switch labelled "Deep" would hide the default.
 
 ---
 
 ## 4. What was changed
 
-### Turned on by default (both keep their Settings switch)
-
-- `AppPreferences.isCoverFetchEnabled` — the merged cover consent defaulted OFF, so a fresh
-  install opened on placeholder art. A stored choice still wins (someone who turned the old
-  per-kind switches off keeps them off); no stored choice at all, which means nobody has
-  ever answered, now means yes.
-- `AppPreferences.isCaptureStudioEnabled` — default `true`.
-
-### The note's tools no longer hide under the keyboard (`RichTextEditor.kt`)
-
-The `DOCK` toolbar used to be laid out **inside** the note, at the foot of its own field,
-which is the one place an IME can cover. It is a `Popup` now, `BottomCenter` aligned with
-`focusable = false`, lifted by `maxOf(ime insets, navigation bar insets)` so it sits just
-above the keys when one is up and just above the nav bar when none is. Content is capped at
-`560.dp` and centred so a wide window does not stretch a row of tools across the screen, and
-the enter/exit is a slide instead of a vertical expand. MainActivity calls
-`enableEdgeToEdge()`, which is what makes the ime inset real rather than consumed by
-`adjustResize`.
-
-### Build speed
-
-`gradle.properties` (build cache + parallel) and `validateTopics` (declared output) as above.
-
-### The release
-
-- `RELEASE_NOTES.md` is rewritten in full for **v1.3.0**, in the style the release body wants:
-  grouped sections, one line per thing, and **no em dashes or en dashes anywhere** (verified
-  with a grep for U+2014 and U+2013: 0 matches). `release.yml` embeds this file at the top of
-  the release body, above the generated install table, and appends GitHub's own commit list.
-- `versionName`'s local/PR default moves from `1.1.1` to `1.3.0`, so a build from main
-  reports the release it belongs to (a `v*` tag still overrides it through `RELEASE_VERSION`).
-  `versionCode` stays `20260922`, whose `fastlane` changelog is the one this release ships.
-- The tag itself is `v1.3.0` (no `beta`, no `rc`, so `release.yml`'s prerelease check
-  resolves to a full release).
+- **`data/AppPreferences.kt`** — `KEY_GLYPH_BACKDROP_DEEP` (`glyph_backdrop_deep`, default
+  OFF), `glyphBackdropDeepState` seeded in `initThemeMode`, and
+  `isGlyphBackdropDeepEnabled` / `setGlyphBackdropDeepEnabled`.
+- **`ui/components/CurioWatermarkBackdrop.kt`** — `internal const val
+  GlyphBackdropSubtleScale = 0.32f`, the `depthScale` / `glyphScale` pair in the
+  composable, and the scaled value handed to both the scattered and lower-band glyphs
+  (signatures unchanged).
+- **`features/settings/SettingsSectionScreen.kt`** — Appearance row `"Glyph backdrop"`
+  (`CurioIcons.Wallpaper`, Subtle / Deep) under Pastel colors, with the hub search key
+  `appearance-glyph-backdrop`.
+- **`features/settings/SettingsHubScreen.kt`** — the deep-search index entry for that row.
+- **`fastlane/metadata/android/en-US/changelogs/20260922.txt`** — one ADD line for the
+  subtle default and the option.
+- **`app/AGENTS.md`** — a durable "Background glyph backdrop" contract (one component, the
+  multiplier, the subtle default, and the warning not to raise `watermarkAlpha` to
+  compensate).
 
 ---
 
@@ -133,3 +99,17 @@ the enter/exit is a slide instead of a vertical expand. MainActivity calls
   is unstarted; each needs a compile to verify, and Material3 here is `1.5.0-alpha20`.
 - **The take editor's per-keystroke rebuild** was found by inspection only and never
   profiled.
+- **The subtle default is a judgement call on a number**: `GlyphBackdropSubtleScale =
+  0.32f`. It is one constant in `CurioWatermarkBackdrop.kt` if the member wants it quieter
+  or stronger after seeing it on a device.
+- **`web/` still carries its own `CurioWatermarkBackdrop`** (React mirror). Out of scope per
+  the root AGENTS.md scope rail (web/ is on hold) — it was NOT touched.
+
+---
+
+## User prompts
+
+Status: this request is complete and pushed. No pending prompt below.
+
+<!-- Next user prompt goes here. This section is never cleared — the pending prompt and
+its status stay at the top, and the empty slot below is where the next instruction lands. -->

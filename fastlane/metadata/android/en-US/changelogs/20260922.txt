@@ -1,4 +1,5 @@
 ADD:
+- Settings: the background glyph backdrop is very subtle by default — the category glyphs behind every page were tuned deep and read as a distracting scatter, so they now sit at a whisper; Appearance ▸ Glyph backdrop offers Subtle or Deep, where Deep restores the old look.
 - Settings: cover fetching and the Take studio start ON — both shipped opt-in, so a fresh install opened on placeholder art and a Save your take page without the studio the page is about; each keeps its switch, so turning either off still works.
 
 FIX:

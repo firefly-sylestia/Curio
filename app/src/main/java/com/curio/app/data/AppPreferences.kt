@@ -86,6 +86,12 @@ object AppPreferences {
     private const val KEY_SAVES_WEEK_COUNTS = "saves_week_counts"
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
+    // v407 — the background glyph backdrop's DEPTH (Appearance). The page-wide
+    // category glyph scatter shipped at alphas tuned for the deep look, which
+    // read as a busy scatter behind flat content on every screen; OFF (the
+    // default) draws the whole collage at a whisper, ON restores the old deep
+    // look. The multiplier lives in CurioWatermarkBackdrop.kt.
+    private const val KEY_GLYPH_BACKDROP_DEEP = "glyph_backdrop_deep"
     // v185 — proper M3 Material theme (opt-in, default OFF): the whole
     // color system re-does per M3 guidelines (single primary, neutral
     // surfaces, 36 lane accents collapsed to ~6 muted families).
@@ -1186,6 +1192,12 @@ object AppPreferences {
     var darkGlowState by mutableStateOf(false)
         private set
 
+    // v407 — the background glyph backdrop's depth (Appearance): OFF (the
+    // default) draws the page glyph collage very subtle, ON restores the
+    // pre-v407 deep look. Seeded from prefs in [initThemeMode].
+    var glyphBackdropDeepState by mutableStateOf(false)
+        private set
+
     // Pastel crown depth (v7.12, EXPERIMENTAL) — when pastel mode is ON
     // and this toggle is ON, the top of pastel card gradients gets a
     // subtle 5% black deepen so every card reads with a gentle darker
@@ -1826,6 +1838,7 @@ object AppPreferences {
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
+        glyphBackdropDeepState = isGlyphBackdropDeepEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
         peekHairlineState = isPeekHairlineEnabled(context)
         peekShadowsState = isPeekShadowsEnabled(context)
@@ -2051,6 +2064,17 @@ object AppPreferences {
     fun setDarkGlowEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_DARK_GLOW, enabled).apply()
         darkGlowState = enabled
+    }
+
+    // ── Background glyph backdrop depth (v407) ───────────────────────
+    /** Whether the page glyph backdrop wears the DEEP (pre-v407) alphas
+     *  instead of the very subtle default. */
+    fun isGlyphBackdropDeepEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLYPH_BACKDROP_DEEP, false)
+
+    fun setGlyphBackdropDeepEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLYPH_BACKDROP_DEEP, enabled).apply()
+        glyphBackdropDeepState = enabled
     }
 
     // ── Promo/demo-content mode (v7.107 hidden) ───────────────────────

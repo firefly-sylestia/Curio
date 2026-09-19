@@ -31,6 +31,15 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
+ * v407 — the default depth of the page glyph backdrop. The alphas in
+ * [watermarkAlpha] are the DEEP look (what the collage shipped with); the
+ * default multiplies them down to a whisper, because at full strength the
+ * scatter read as distracting behind flat content on every screen.
+ * Appearance → "Glyph backdrop" → Deep restores 1f exactly.
+ */
+internal const val GlyphBackdropSubtleScale = 0.32f
+
+/**
  * Decorative backdrop pinned behind screen content: all eleven category
  * glyphs scattered around the screen edges, each tinted with its own
  * category's accent — the exact color that drives that category's main-card
@@ -57,6 +66,13 @@ import kotlin.random.Random
  * the midnight surface (raised from the old near-invisible values so the
  * palette still reads); light mode stays a touch stronger over the warm
  * cream surface.
+ *
+ * v407 — DEPTH. Those alphas are the DEEP look and read as a busy scatter
+ * behind flat content, so a page draws them at [GlyphBackdropSubtleScale] of
+ * that unless Appearance → "Glyph backdrop" is set to Deep (see
+ * `AppPreferences.glyphBackdropDeepState`). The per-screen [alphaScale]
+ * rides on top of the depth either way, so every call site keeps its own
+ * tuning without knowing about the toggle.
  */
 @Composable
 fun CurioWatermarkBackdrop(
@@ -73,6 +89,12 @@ fun CurioWatermarkBackdrop(
 ) {
     val context = LocalContext.current
     val isDark = isCurioDarkThemeForContext(context)
+    // v407 — the backdrop's DEPTH: the shipped alphas were tuned for the deep
+    // look, so a page draws them at a whisper by default and the Appearance
+    // toggle restores them. Read from the reactive pref state, so flipping the
+    // switch repaints every screen's collage on the spot.
+    val depthScale = if (AppPreferences.glyphBackdropDeepState) 1f else GlyphBackdropSubtleScale
+    val glyphScale = alphaScale * depthScale
     // Every glyph maps to its category accent — the same colors that open
     // the main-card gradients — so the backdrop palette always matches the
     // deck. Wildcard's glyph picks up the brand coral automatically.
@@ -137,23 +159,23 @@ fun CurioWatermarkBackdrop(
                     activeCat = activeCat,
                     accentByGlyph = accentByGlyph,
                     isDark = isDark,
-                    alphaScale = alphaScale
+                    alphaScale = glyphScale
                 )
             }
         }
     } else {
         Box(modifier = modifier.fillMaxSize()) {
-            WatermarkGlyph("person", BiasAlignment(-0.92f, -0.88f), 92.dp, -12f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("album", BiasAlignment(0.62f, -0.92f), 64.dp, 10f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("videocam", BiasAlignment(0.95f, -0.55f), 108.dp, -8f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("movie", BiasAlignment(0.82f, -0.15f), 56.dp, 16f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("edit_note", BiasAlignment(0.9f, 0.38f), 80.dp, -14f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("menu_book", BiasAlignment(-0.88f, -0.38f), 72.dp, 8f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("brush", BiasAlignment(-0.92f, 0.15f), 96.dp, -6f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("palette", BiasAlignment(-0.78f, 0.68f), 88.dp, 12f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("science", BiasAlignment(0.75f, 0.62f), 104.dp, -12f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("lightbulb", BiasAlignment(0.05f, 0.92f), 76.dp, 6f, activeCat, accentByGlyph, isDark, alphaScale)
-            WatermarkGlyph("casino", BiasAlignment(0.3f, -0.2f), 92.dp, -4f, activeCat, accentByGlyph, isDark, alphaScale)
+            WatermarkGlyph("person", BiasAlignment(-0.92f, -0.88f), 92.dp, -12f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("album", BiasAlignment(0.62f, -0.92f), 64.dp, 10f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("videocam", BiasAlignment(0.95f, -0.55f), 108.dp, -8f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("movie", BiasAlignment(0.82f, -0.15f), 56.dp, 16f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("edit_note", BiasAlignment(0.9f, 0.38f), 80.dp, -14f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("menu_book", BiasAlignment(-0.88f, -0.38f), 72.dp, 8f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("brush", BiasAlignment(-0.92f, 0.15f), 96.dp, -6f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("palette", BiasAlignment(-0.78f, 0.68f), 88.dp, 12f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("science", BiasAlignment(0.75f, 0.62f), 104.dp, -12f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("lightbulb", BiasAlignment(0.05f, 0.92f), 76.dp, 6f, activeCat, accentByGlyph, isDark, glyphScale)
+            WatermarkGlyph("casino", BiasAlignment(0.3f, -0.2f), 92.dp, -4f, activeCat, accentByGlyph, isDark, glyphScale)
         }
     }
 }

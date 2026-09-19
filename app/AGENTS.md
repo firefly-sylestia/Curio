@@ -8509,6 +8509,11 @@ app/src/main/java/com/curio/app/
 - Icon rendering uses `CurioIcon(name = CurioIcons.X)` with the Material Symbols ligature font. Emoji-vs-icon policy is a design decision — confirm with the user (see the Purpose note above).
 - All glyph names used by `CurioIcon` are declared in `CurioIcons.kt` (single source of truth for icon names). Adding a glyph = adding a `const val` there first.
 
+### Background glyph backdrop — very subtle by default (v407)
+- **`ui/components/CurioWatermarkBackdrop.kt` is the ONE page-wide glyph collage** (the 11 category glyphs tinted with their own accents, plus the lower-band mode for pages with a hero and a per-screen `alphaScale`). Never add a second scatter component.
+- **Depth is a user choice, and the default is subtle.** `AppPreferences.glyphBackdropDeepState` (Appearance → "Glyph backdrop" → Subtle / Deep; `KEY_GLYPH_BACKDROP_DEEP`, default OFF) multiplies the collage's alphas: Subtle draws them at `GlyphBackdropSubtleScale = 0.32f`, Deep restores the pre-v407 look at 1f. The multiplier lands ON TOP of each call site's own `alphaScale`, so no call site needs to know the toggle exists — and do NOT raise the base alphas in `watermarkAlpha` to compensate: those alphas ARE the deep look that read as a distracting scatter behind flat content.
+- **The mood board and the hero banners are not this backdrop.** `CurioMoodBoardBackdrop` (mood-board art) keeps its own alphas, and a hero's mirrored watermark pairs are hero art.
+
 ### Adaptive layout (tablet & landscape) — ALWAYS-ON
 - **`ui/adaptive/CurioAdaptiveLayout.kt`** owns the window adaptation contract: `windowWidthSizeClass()` (material3-window-size-class, `calculateWindowSizeClass(activity)`) and `CurioContentMaxWidth = 720.dp`. No Settings toggle — the wide layout engages automatically on medium/expanded windows (>= 600dp wide; tablets, landscape, split-screen) and phones are untouched.
 - **Wide windows:** `CurioNavHost` renders `CurioNavigationRail` (left edge, full height) instead of the bottom bar and centers every route's content in the 720dp max-width column (`fillMaxHeight().widthIn(max = CurioContentMaxWidth)` inside a centered Box); the theme background fills the gutters. Screens keep drawing their own status-bar padding and full-bleed washes inside the NavHost.

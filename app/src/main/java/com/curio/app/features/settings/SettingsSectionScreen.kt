@@ -299,6 +299,20 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         SettingsOptionDivider()
+        // v407 — how loud the page's category glyph backdrop is. Subtle is the
+        // shipped default (the deep alphas read as a busy scatter behind flat
+        // content); Deep restores exactly the pre-v407 collage.
+        SettingsRowPulse(highlightKey == "appearance-glyph-backdrop") {
+            CompactSegmentedRow(
+                CurioIcons.Wallpaper,
+                "Glyph backdrop",
+                listOf("Subtle", "Deep"),
+                if (AppPreferences.glyphBackdropDeepState) 1 else 0
+            ) { index ->
+                AppPreferences.setGlyphBackdropDeepEnabled(context, index == 1)
+            }
+        }
+        SettingsOptionDivider()
         // v185 — the proper M3 Material theme system (opt-in, default OFF —
         // the current app look is untouched). The v185 "Material guidelines"
         // + "Material chrome" options were removed (user verdict: not good).
