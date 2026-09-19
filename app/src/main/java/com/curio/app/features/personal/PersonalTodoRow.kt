@@ -429,19 +429,26 @@ internal fun PersonalMovableBlock(
     // same layer, so it leans and rises with it (user request: "make the
     // animation preview while holding them better with stack preview too").
     //
+    // The two papers are read HERE, in the composition: a `drawBehind` lambda is
+    // not a @Composable context, so a theme lookup cannot happen inside it (the
+    // compiler's own rule — see the root AGENTS "NON-COMPOSABLE LAMBDAS").
+    val darkTheme = isCurioDarkTheme()
+    val stackPaper = if (darkTheme) Color(0xFF3A342E) else Color(0xFFEFE7DA)
+    val cardPaper =
+        if (darkTheme) MaterialTheme.colorScheme.surfaceContainerHighest else Color(0xFFF7F1E6)
+
     // The lifted look, the project's own rule: shadow BEFORE the fill, and an
     // OPAQUE fill (a translucent one lets the shadow bleed through).
     val lifted = if (isDragged) {
         Modifier
             .drawBehind {
                 val shape = CornerRadius(12.dp.toPx())
-                val paper = if (isCurioDarkTheme()) Color(0xFF3A342E) else Color(0xFFEFE7DA)
                 listOf(7.dp to 0.40f, 3.5.dp to 0.72f).forEach { (behind, alpha) ->
                     val step = behind.toPx()
                     val room = (size.height - step).coerceAtLeast(0f)
                     if (room <= 0f) return@forEach
                     drawRoundRect(
-                        color = paper.copy(alpha = alpha),
+                        color = stackPaper.copy(alpha = alpha),
                         topLeft = Offset(step, step),
                         size = Size((size.width - step * 2f).coerceAtLeast(0f), room),
                         cornerRadius = shape
@@ -450,10 +457,7 @@ internal fun PersonalMovableBlock(
             }
             .shadow(heldLift, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
-            .background(
-                if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest
-                else Color(0xFFF7F1E6)
-            )
+            .background(cardPaper)
     } else {
         Modifier
     }
