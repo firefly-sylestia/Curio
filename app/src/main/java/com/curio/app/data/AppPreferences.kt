@@ -1346,17 +1346,6 @@ object AppPreferences {
     var reminderEnabledState by mutableStateOf(false)
         private set
 
-    // v221 — constellation 3D star zoom: tapping a star shows a subtle
-    // perspective tilt + white glow halo. Default ON.
-    var starZoom3dState by mutableStateOf(true)
-        private set
-
-    // Drawer constellation experiment — the "Your Curiosity Map" star
-    // pattern at the top of the navigation drawer is OPT-IN (default OFF);
-    // the default drawer shows a small Material-style stat strip instead.
-    var drawerConstellationState by mutableStateOf(false)
-        private set
-
     // ── Reactive display name & avatar (v280) ──────────────────────
     // Read via these states in Compose so the drawer/profile recompose
     // when the user saves a new name or photo — the old getDisplayName()
@@ -1864,7 +1853,6 @@ object AppPreferences {
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
-        drawerConstellationState = isDrawerConstellationEnabled(context)
         displayNameState = getDisplayName(context)
         favoriteSongState = getFavoriteSong(context)
         bookFavoritesState = getBookFavorites(context)
@@ -2237,8 +2225,6 @@ object AppPreferences {
     private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
     private const val KEY_HEADER_DEEP = "header_deep"
     private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
-    private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
-    private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
     private const val KEY_PINNED_TITLE_VIEW = "pinned_title_view_experiment"
@@ -2502,24 +2488,6 @@ object AppPreferences {
     fun set3DButtonGradientEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_3D_BUTTON_GRADIENT, enabled).apply()
         threeDButtonState = enabled
-    }
-
-    // ── Constellation 3D star zoom (v220 experimental) ─────────────
-    fun isStarZoom3dEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_STAR_ZOOM_3D, false)
-
-    fun setStarZoom3dEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_STAR_ZOOM_3D, enabled).apply()
-        starZoom3dState = enabled
-    }
-
-    // ── Drawer constellation (experiment, default OFF) ───────────────
-    fun isDrawerConstellationEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_DRAWER_CONSTELLATION, false)
-
-    fun setDrawerConstellationEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_DRAWER_CONSTELLATION, enabled).apply()
-        drawerConstellationState = enabled
     }
 
     // ── Liquid-glass navigation pills (experiment, default OFF) ──────

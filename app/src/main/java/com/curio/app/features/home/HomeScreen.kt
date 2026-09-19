@@ -1,14 +1,9 @@
 package com.curio.app.features.home
 
 import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -67,7 +62,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
@@ -105,7 +99,6 @@ import com.curio.app.R
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioPassport
-import com.curio.app.data.LaneKnowledge
 import com.curio.app.data.laneKnowledge
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
@@ -137,7 +130,6 @@ import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
 import com.curio.app.data.openSearchUrl
-import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsRoseAccent
@@ -156,7 +148,9 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
-import com.curio.app.ui.components.CurioConstellation
+import com.curio.app.ui.components.CurioLaneDetailStrip
+import com.curio.app.ui.components.CurioLaneGrid
+import com.curio.app.ui.components.laneGridItems
 import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioGlassToolbarMorph
 import com.curio.app.ui.components.CurioDrawerState
@@ -191,9 +185,6 @@ import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
-import com.curio.app.ui.theme.curioGoldInk
-import com.curio.app.ui.theme.curioRoseInk
-import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.pastelAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -2403,7 +2394,7 @@ private val DrawerGlassHeroHeight = 140.dp
 
 // v147 — the drawer now renders from the NavHost root (above the floating
 // pill bar), so its content is called from CurioNavHost: internal instead
-// of private. Its row helpers below stay private.
+// of private. Its panel helpers below stay private.
 @Composable
 internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     val context = LocalContext.current
@@ -2421,17 +2412,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     val sheetShape = remember(HOME_DRAWER_TEAR_SEED) {
         SoftTornSheetShape(HOME_DRAWER_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
     }
-    // v118 — the drawer groups rows into collapsible sections, BOTH
-    // COLLAPSED by default (user request): "Your Curiosity" hides the
-    // topic-browsing rows, "About" hides Support & diagnostics + Replay
-    // intro. rememberSaveable keeps the state across rotation/recomposition.
-    var curiosityExpanded by rememberSaveable { mutableStateOf(false) }
-    var aboutExpanded by rememberSaveable { mutableStateOf(false) }
 
     ModalDrawerSheet(
-        // v190 — a little wider so the brain neural web has room to breathe
-        // (user: "if the brain neuron look feels squished extend the drawer
-        // a little more to the right").
+        // v409 — the width the lane grid is laid out for: four 70dp tiles
+        // with 8dp gutters inside the 16dp content padding, which is what
+        // keeps the grid readable without a horizontal scroll.
         modifier = Modifier.width(336.dp),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
@@ -2441,11 +2426,10 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
         windowInsets = WindowInsets(0, 0, 0, 0)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // -- Menu rows - drawn first so they scroll UNDER the tear ------
-            // v206 — the scrolling rows sit above the footer. The footer
-            // is inside the LazyColumn as the last item so it scrolls with
-            // content — expanded sections (About, Your Curiosity) never
-            // hide behind a pinned footer.
+            // -- The brain panel - drawn first so it scrolls UNDER the tear --
+            // v206 — the panel sits above the footer, and the footer is the
+            // LazyColumn's last item so it scrolls with the content instead
+            // of pinning over it.
             // v3xx22 — the glass style's drawer hero is the shorter rounded
             // glass bar, so the rows' top clearance is style-aware.
             val drawerGlassOn = AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
@@ -2460,146 +2444,13 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // v174 — the curiosity map: a constellation shaped like a
-                // brain with the user's REAL stats orbiting it ("Your
-                // Curiosity Map").
-                item("curiosityMap") {
-                    if (AppPreferences.drawerConstellationState) {
-                        // Experiment (Experiments → Constellation → "Drawer
-                        // constellation", default OFF) — the full curiosity-map
-                        // constellation: pattern only, no painted sky.
-                        DrawerCuriosityMap(onClick = { onNavigate(CurioRoutes.STATS) })
-                    } else {
-                        // Default — a small Material-style stat summary.
-                        DrawerMaterialStatStrip(onClick = { onNavigate(CurioRoutes.STATS) })
-                    }
+                // v409 — THE DRAWER IS THE BRAIN. One panel: the member's
+                // real numbers over the lane grid, built from real UI (see
+                // DrawerBrainPanel).
+                item("brain") {
+                    DrawerBrainPanel(onOpenStats = { onNavigate(CurioRoutes.STATS) })
                 }
-                item("quests") {
-                    DrawerNavRow(
-                        icon = CurioIcons.WorkspacePremium,
-                        label = "Quests & Levels",
-                        // v408 — the copy no longer overlaps the curiosity
-                        // group below: "track your journey" and "stats,
-                        // streaks & insights" were two ways of saying the same
-                        // thing about two different doors. This row is the
-                        // QUESTS screen, so it says quests.
-                        subtitle = "Levels, badges & the journey",
-                        iconTint = curioGoldInk(),
-                        onClick = { onNavigate(CurioRoutes.QUESTS) }
-                    )
-                }
-                // v118 — "Your Curiosity": Topic History + Manage Categories
-                // + Browse Topics fold under one collapsible header (collapsed
-                // by default per the user's request). v174 — restyled as a
-                // clean row with a subtitle + chevron.
-                item("curiosity") {
-                    DrawerNavRow(
-                        icon = CurioIcons.AutoAwesome,
-                        label = "Your Curiosity",
-                        // v408 — accurate, and it no longer claims to carry the
-                        // stats: the map card at the top of this drawer is the
-                        // one door to Stats & insights.
-                        subtitle = "History, lanes & browse",
-                        iconTint = CurioColors.DustyBlue,
-                        expanded = curiosityExpanded,
-                        onClick = { curiosityExpanded = !curiosityExpanded }
-                    )
-                }
-                // v135 — the expanded rows are ONE nested group that
-                // animates open (expandVertically) inside a soft card: the
-                // drawer visibly GROWS when a section opens instead of rows
-                // silently appearing in a same-size sheet, and the group
-                // card gives the rows their hierarchy background.
-                item("curiosityGroup") {
-                    // v137 — AnimatedVisibility is a ColumnScope extension,
-                    // and a LazyColumn item's scope has no Column receiver —
-                    // the collapsible group needs its own Column to host it.
-                    Column {
-                        AnimatedVisibility(
-                            visible = curiosityExpanded,
-                            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
-                            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(start = 4.dp, end = 4.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                    .padding(vertical = 2.dp)
-                            ) {
-                                // v408 — "Stats & insights" WAS HERE, and the
-                                // map card at the top of this drawer is the same
-                                // door: one destination, offered twice on one
-                                // screen (the audit's finding on Home). The
-                                // card keeps it — it is the thing you look at
-                                // before you tap it.
-                                DrawerNavItem(
-                                    icon = CurioIcons.History,
-                                    label = "Topic History",
-                                    iconTint = CurioColors.DustyBlue
-                                ) { onNavigate(CurioRoutes.TOPIC_HISTORY) }
-                                DrawerNavItem(
-                                    icon = CurioIcons.DragHandle,
-                                    label = "Manage Categories",
-                                    iconTint = curioSageInk()
-                                ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
-                                DrawerNavItem(
-                                    icon = CurioIcons.Database,
-                                    label = "Browse Topics",
-                                    iconTint = CurioColors.CategorySky
-                                ) { onNavigate(CurioRoutes.DATABASE) }
-                            }
-                        }
-                    }
-                }
-                // v118 — "About": Support & diagnostics + Replay intro
-                // (user picked the name; also collapsed by default). v174 —
-                // restyled as a clean row with a subtitle + chevron.
-                item("about") {
-                    DrawerNavRow(
-                        icon = CurioIcons.Info,
-                        label = "About",
-                        subtitle = "App info & more",
-                        iconTint = curioRoseInk(),
-                        expanded = aboutExpanded,
-                        onClick = { aboutExpanded = !aboutExpanded }
-                    )
-                }
-                item("aboutGroup") {
-                    Column {
-                        AnimatedVisibility(
-                            visible = aboutExpanded,
-                            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
-                            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(start = 4.dp, end = 4.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                    .padding(vertical = 2.dp)
-                            ) {
-                                DrawerNavItem(
-                                    icon = CurioIcons.SupportAgent,
-                                    label = "Support & diagnostics",
-                                    iconTint = curioRoseInk()
-                                ) { onNavigate(CurioRoutes.SUPPORT) }
-                                DrawerNavItem(
-                                    icon = CurioIcons.Replay,
-                                    label = "Replay intro",
-                                    iconTint = CurioColors.HomeRosewood
-                                ) {
-                                    // Re-show the welcome screens: reset the completed
-                                    // flag, then open onboarding like Settings' replay.
-                                    CurioOnboardingState.reset(context)
-                                    onNavigate(CurioRoutes.ONBOARDING)
-                                }
-                            }
-                        }
-                    }
-                }
-            // v206 — footer scrolls with the list as the last item, so
-            // expanded sections never hide behind it.
+            // v206 — the footer scrolls with the list as the last item.
             item("footer") {
                 DrawerFooter()
             }
@@ -2948,81 +2799,174 @@ private fun DrawerGlassHero(
     }
 }
 
-/** v174 — one of the drawer's three navigation rows: a soft tinted icon
- *  chip, a bold label with a quiet subtitle, and a chevron. `expanded`
- *  null → direct navigation (chevron-right, e.g. Quests & Levels);
- *  otherwise the row toggles its sub-group (chevron up/down), collapsed by
- *  default per the drawer redesign ("no accordion expansion by default").
- *  The wash is an OPAQUE blend (never translucent under the shadow). */
+/**
+ * v409 — THE DRAWER'S BRAIN PANEL.
+ *
+ * The drawer's row menu is gone (Quests & Levels, the collapsible "Your
+ * Curiosity" group, "About") — every one of those doors already exists one tap
+ * away, and the drawer was carrying three navigation trees underneath a stats
+ * map. What is left is what a drawer can only do here: the member's REAL
+ * numbers (streak, level, knowledge) and the lane grid, which is the same
+ * [CurioLaneGrid] the Stats page uses.
+ *
+ * Every element is real UI — cards, icons, meters, a ripple on tap, an
+ * animated ring on the selected lane. Nothing is drawn (the old painted
+ * constellation is gone; see CurioLaneGrid).
+ *
+ * The "YOUR BRAIN" row is the panel's ONE door to the full Stats page; the
+ * tiles below only select, and the selection shows its own line under the
+ * grid.
+ */
 @Composable
-private fun DrawerNavRow(
-    icon: String,
-    label: String,
-    subtitle: String,
-    iconTint: Color,
-    expanded: Boolean? = null,
-    onClick: () -> Unit
-) {
-    val surface = MaterialTheme.colorScheme.surface
-    val onSurface = MaterialTheme.colorScheme.onSurface
+private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
+    val context = LocalContext.current
+    val streak = remember(context) { StreakTracker.getStreak(context) }
+    val xp = CurioQuests.xpState
+    val level = CurioQuests.levelForXp(xp)
+    val (levelProgress, nextThreshold) = CurioQuests.xpProgress(xp)
+    val progress = remember(context) { CurioPassport.allProgress(context) }
+    val entries by produceState(initialValue = emptyList<CurioEntry>()) {
+        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
+    }
+    val knowledge = remember(progress, entries) { laneKnowledge(progress, entries) }
+    // Derived in composition (NOT remembered) so hiding a lane in Manage
+    // Categories, reordering the lanes, or a theme flip re-reads the grid.
+    val lanes = laneGridItems(knowledge)
+    val exploredCount = lanes.count { it.explored }
+    val totalKnowledge = lanes.sumOf { it.knowledge }
+    var selected by remember { mutableStateOf<CategoryId?>(null) }
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
-        color = lerp(
-            surface,
-            lerp(surface, iconTint, if (expanded == true) 0.16f else 0.10f),
-            0.55f
-        ),
-        shadowElevation = 1.dp,
-        modifier = Modifier.fillMaxWidth()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Surface(
+            onClick = onOpenStats,
+            shape = RoundedCornerShape(18.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Surface(
-                shape = RoundedCornerShape(13.dp),
-                color = iconTint.copy(alpha = 0.14f),
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(icon, null, tint = iconTint, size = 22.dp)
-                }
-            }
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(1.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "YOUR BRAIN",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp
+                        ),
+                        color = muted,
+                        modifier = Modifier.weight(1f)
+                    )
+                    CurioIcon(CurioIcons.ChevronRight, null, tint = muted, size = 18.dp)
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    DrawerBrainStat(
+                        glyph = CurioIcons.LocalFire,
+                        value = "$streak",
+                        label = "day streak",
+                        tint = Color(0xFFC96F4A),
+                        modifier = Modifier.weight(1f)
+                    )
+                    VerticalDivider(modifier = Modifier.height(36.dp))
+                    DrawerBrainStat(
+                        glyph = CurioIcons.WorkspacePremium,
+                        value = "Lv $level",
+                        label = "level",
+                        tint = Color(0xFFD9A85C),
+                        modifier = Modifier.weight(1f)
+                    )
+                    VerticalDivider(modifier = Modifier.height(36.dp))
+                    DrawerBrainStat(
+                        glyph = CurioIcons.AutoAwesome,
+                        value = "$totalKnowledge",
+                        label = "knowledge",
+                        tint = CurioColors.DustyBlue,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+                LinearProgressIndicator(
+                    progress = { levelProgress.coerceIn(0f, 1f) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .clip(CircleShape),
+                    color = Color(0xFFD9A85C),
+                    trackColor = MaterialTheme.colorScheme.outlineVariant
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted.copy(alpha = 0.85f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    if (level >= CurioQuests.maxLevel) "Top level reached"
+                    else "${nextThreshold - xp} XP to level ${level + 1}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = muted
                 )
             }
-            CurioIcon(
-                name = when {
-                    expanded == null -> CurioIcons.ChevronRight
-                    expanded == true -> CurioIcons.KeyboardArrowUp
-                    else -> CurioIcons.KeyboardArrowDown
-                },
-                contentDescription = null,
-                tint = muted,
-                size = 20.dp
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "YOUR LANES",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.5.sp
+                ),
+                color = muted,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                "$exploredCount of ${lanes.size} explored",
+                style = MaterialTheme.typography.labelSmall,
+                color = muted
             )
         }
+        CurioLaneGrid(
+            lanes = lanes,
+            selected = selected,
+            onSelect = { selected = it },
+            columns = 4,
+            tileHeight = 82.dp,
+            detail = { item -> CurioLaneDetailStrip(item) }
+        )
+    }
+}
+
+/** One pane of the drawer's brain strip: accent glyph, big value, quiet
+ *  label — the same construction the Stats page's progress card uses. */
+@Composable
+private fun DrawerBrainStat(
+    glyph: String,
+    value: String,
+    label: String,
+    tint: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(1.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            CurioIcon(glyph, null, tint = tint, size = 15.dp)
+            Text(
+                value,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -3036,220 +2980,6 @@ private fun drawerSkyColors(): Triple<Color, Color, Color> {
         Triple(Color(0xFF12313A), Color(0xFF1D4750), Color(0xFFF4F1E7))
     } else {
         Triple(Color(0xFFC2E8DE), Color(0xFFE9F6F0), Color(0xFF2C5A53))
-    }
-}
-
-/** v176 — the drawer's "Your Curiosity Map": a constellation of ALL lanes
- *  as stars on the PLAIN drawer surface — no card box, no title, no range
- *  selector (always all-time). Explored lanes glow with their icon; tap one
- *  to see that lane's real data (spins, reveals, explores, saves, last
- *  explored) straight from the passport. Inactive lanes are solid but
- *  smaller and muted; a few extra tiny stars fill the sky. */
-/** v223 — the drawer's DEFAULT top slot while the drawer-constellation
- *  experiment is OFF: a small pure-Material stat summary — one tonal M3
- *  card with three mini panes (day streak · level · saved) separated by
- *  hairline dividers, under a tiny "Your curiosity" caption. Tapping it
- *  opens the full stats page, exactly like the constellation map did. */
-@Composable
-private fun DrawerMaterialStatStrip(onClick: () -> Unit) {
-    val context = LocalContext.current
-    val streak = remember(context) { StreakTracker.getStreak(context) }
-    val level = CurioQuests.levelForXp(CurioQuests.xpState)
-    val saved by produceState(initialValue = 0) {
-        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull()?.size ?: 0
-    }
-
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = 1.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            // Tiny caption so the strip reads as a miniature stats screen.
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CurioIcon(
-                    name = CurioIcons.AutoAwesome,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    size = 14.dp
-                )
-                Text(
-                    "YOUR CURIOSITY",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                DrawerMaterialStatPane(
-                    glyph = CurioIcons.LocalFire,
-                    value = "$streak",
-                    label = "day streak",
-                    modifier = Modifier.weight(1f)
-                )
-                VerticalDivider(modifier = Modifier.height(38.dp))
-                DrawerMaterialStatPane(
-                    glyph = CurioIcons.WorkspacePremium,
-                    value = "$level",
-                    label = "level",
-                    modifier = Modifier.weight(1f)
-                )
-                VerticalDivider(modifier = Modifier.height(38.dp))
-                DrawerMaterialStatPane(
-                    glyph = CurioIcons.Inventory2,
-                    value = "$saved",
-                    label = "saved",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
-}
-
-/** One mini pane of [DrawerMaterialStatStrip]: accent glyph, big value,
- *  quiet label — all pure Material roles (primary / onSurface / muted). */
-@Composable
-private fun DrawerMaterialStatPane(
-    glyph: String,
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        CurioIcon(
-            name = glyph,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            size = 18.dp
-        )
-        Text(
-            value,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun DrawerCuriosityMap(onClick: () -> Unit) {
-    val context = LocalContext.current
-    // All-time per-lane counters from the passport (spins/reveals/explores/
-    // saves/lastAt) — the "more available data" behind the map.
-    val progress = remember(context) { CurioPassport.allProgress(context) }
-    // v208 — the constellation is fed by KNOWLEDGE (the same science-based
-    // stats as the Your Curiosity page): star size = the lane's knowledge
-    // score (explores + saves + words written there), glow = recency. Words
-    // come from the user's saved captures (the generation effect).
-    val allEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
-        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
-    }
-    val knowledge = remember(progress, allEntries) { laneKnowledge(progress, allEntries) }
-    val lanes = remember(progress) { progress.keys.sortedBy { it.ordinal } }
-    // Explored = real activity (started an explore or saved a capture).
-    val explored = remember(progress) {
-        progress.filterValues { it.explores > 0 || it.saves > 0 }.keys.toSet()
-    }
-    // v186 — the drawer now draws THE SAME constellation as the "Your
-    // Curiosity" page (the shared [CurioConstellation]): explored lanes in
-    // the brain layout, star size = knowledge score, all-time window
-    // (recentCutoff 0 → every explored lane glows recent), nearest-neighbour
-    // web. The grid-web "map" is gone.
-    val exploredList = remember(progress) { lanes.filter { it in explored } }
-    var selected by remember { mutableStateOf<CategoryId?>(null) }
-
-    // v220 — edge-to-edge constellation: negative offset bleeds outside
-    // the LazyColumn's 16dp horizontal content padding so the deep-space
-    // background fills the full drawer width.
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .offset(x = (-16).dp)
-    ) {
-        CurioConstellation(
-            explored = exploredList,
-            laneCounts = knowledge.mapValues { it.value.score },
-            laneRecent = knowledge.mapValues { it.value.lastAt },
-            recentCutoff = 0L,
-            selected = selected,
-            onSelect = { selected = it },
-            plainBackground = true,
-            // v224 — MATERIAL ink: theme-role lines/stars (visible in light
-            // mode at last), explored lanes in primary with glow, gentle
-            // twinkle + a pulse ring on the tapped star.
-            materialInk = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(320.dp),
-            popoverContent = { id ->
-                val cat = CurioCategories.byId(id)
-                val k = knowledge[id] ?: LaneKnowledge(0, 0, 0, 0, 0L)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-                ) {
-                    CurioIcon(cat.iconGlyph, null, tint = cat.themedAccent(), size = 18.dp)
-                    Text(
-                        cat.displayName,
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        "${k.score} knowledge",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        )
-        // Edge gradients — blend constellation into drawer surface on sides + bottom
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.horizontalGradient(
-                        colorStops = arrayOf(
-                            0f to surfaceColor,
-                            0.10f to Color.Transparent,
-                            0.90f to Color.Transparent,
-                            1f to surfaceColor
-                        )
-                    )
-                )
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(40.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, surfaceColor)
-                    )
-                )
-        )
     }
 }
 
@@ -3335,57 +3065,6 @@ private fun DrawerFooter() {
     }
 }
 
-@Composable
-private fun DrawerNavItem(
-    icon: String,
-    label: String,
-    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    onClick: () -> Unit
-) {
-    // Flat row (no card shell) - icon chip + label + chevron on the page.
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = Color.Transparent,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 11.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = iconTint.copy(alpha = 0.16f),
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(
-                        icon, null,
-                        tint = iconTint,
-                        size = 22.dp,
-                        // v115 — drawer menu glyphs read a hair low in the
-                        // 40dp chip (same optical-weight correction as the
-                        // Home top-bar pills).
-                    )
-                }
-            }
-            Text(
-                label,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-            CurioIcon(
-                CurioIcons.ChevronRight, null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                size = 20.dp
-            )
-        }
-    }
-}
 
 // ═══════════════════════════════════════════════════════════════════════
 // Greeting helpers

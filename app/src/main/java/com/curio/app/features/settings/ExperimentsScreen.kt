@@ -339,18 +339,16 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
-            item { SettingsSectionHeading("Constellation") }
+            // v409 — the "Constellation" section is gone with the painted
+            // constellation itself (see CurioLaneGrid): "3D star zoom" and
+            // "Drawer constellation" were switches for a canvas that no
+            // longer exists, since the drawer and the Stats page both draw
+            // their lane map as real UI now. The nav-bar row that shared this
+            // card stays, under an honest heading.
+            item { SettingsSectionHeading("Navigation") }
             item {
                 SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("3D star zoom", "Tap a constellation star for a perspective tilt + glow", AppPreferences.starZoom3dState) {
-                        AppPreferences.setStarZoom3dEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Drawer constellation", "The star map at the top of the navigation drawer. When off, a small stat strip shows instead.", AppPreferences.drawerConstellationState) {
-                        AppPreferences.setDrawerConstellationEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
                     ExperimentSwitchRow(
                         "Classic active indicator",
                         "The nav bar's blob renders as fully transparent refracting glass instead of the solid white/black pill (needs Liquid glass)",

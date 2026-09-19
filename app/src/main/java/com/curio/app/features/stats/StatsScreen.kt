@@ -1,13 +1,6 @@
 package com.curio.app.features.stats
 
-import com.curio.app.features.settings.settingsReadableInk
-import com.curio.app.features.settings.settingsAccentInk
-import com.curio.app.features.settings.settingsRoseAccent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,12 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -53,34 +45,56 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.curio.app.R
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.BrainDimension
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioEntry
-import com.curio.app.data.BrainDimension
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
+import com.curio.app.data.LaneKnowledge
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.brainProfile
 import com.curio.app.data.laneKnowledge
-import com.curio.app.data.wordCount
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.PendingCabinetFilter
+import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.components.CurioBadgeMedal
-import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioGlassToolbar
+import com.curio.app.ui.components.CurioLaneDetailStrip
+import com.curio.app.ui.components.CurioLaneGrid
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.components.LaneGridItem
+import com.curio.app.ui.components.laneGridItems
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.themedAccent
+import com.curio.app.ui.theme.isCurioDarkTheme
 
-/** v174c — the Curiosity Stats page: the drawer's observatory world, full
- *  page. A celestial sky header, an INTERACTIVE constellation brain where
- *  every star is one of YOUR lanes (tap a star for that category's stats),
- *  the streak + level hero, lifetime totals, journey badges and a
- *  per-lane breakdown — everything from real app data. */
+/** v409 — the Curiosity Stats page, rebuilt around progress instead of prose.
+ *
+ *  What changed and why: the page carried six cards and a wall of explanatory
+ *  sentences (a paragraph of science tip under each of six brain dimensions,
+ *  a subtitle on every card, a second per-lane breakdown under a constellation
+ *  that showed the same thing). The user's brief — "theres too much info. too
+ *  much texts … lets redesign it beautifully" — is now: four cards, each one
+ *  an instrument.
+ *
+ *   - PROGRESS   — streak, level + XP, journey stages and the medals, MERGED
+ *                  from the old streak card and journey card (they were two
+ *                  cards about the same number).
+ *   - YOUR BRAIN — the six cognitive dimensions as meters, plus the single
+ *                  tip that applies to the weakest one (it used to print six).
+ *   - LANE MAP   — the interactive lane grid ([CurioLaneGrid]): the same real
+ *                  UI the navigation drawer uses, so the drawer and this page
+ *                  can never show two different maps. "Your lanes" — the list
+ *                  that repeated the constellation — is gone.
+ *   - LIFETIME   — the counters, with their captions trimmed to the number
+ *                  itself.
+ *
+ *  The painted constellation is gone from both surfaces (see CurioLaneGrid).
+ */
 @Composable
 fun StatsScreen(navController: NavController) {
     val context = LocalContext.current
@@ -91,43 +105,31 @@ fun StatsScreen(navController: NavController) {
     val (levelProgress, nextThreshold) = CurioQuests.xpProgress(xp)
     val lifetime = CurioQuests.lifetimeState
 
-    // v174d — the active time window (set from the drawer map's selector or
-    // the pill on this card) filters the entry-based constellation stats.
+    // The time window (StatsRangeSelectorPill) filters the knowledge scores
+    // and the brain profile, so the whole page answers one question ("how am
+    // I doing lately") instead of mixing windows together.
     val range = StatsRangeState.selected
     var allEntries by remember { mutableStateOf<List<CurioEntry>>(emptyList()) }
     LaunchedEffect(Unit) {
         allEntries = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
     }
-    // Saved entries per lane INSIDE the window (drives the lanes breakdown).
     val filteredEntries = remember(allEntries, range) { allEntries.filterForRange(range) }
-    val laneCounts = remember(filteredEntries) {
-        filteredEntries.groupingBy { it.topic.categoryId }.eachCount()
-    }
 
-    // v208 — the constellation is fed by KNOWLEDGE (real science-based
-    // stats): star size = the lane's knowledge score (explores + saves +
-    // words written there), glow = recent activity. The passport supplies
-    // the all-time per-lane counters; words come from the window's entries.
     val progress = remember(context) { CurioPassport.allProgress(context) }
-    val knowledge = remember(progress, filteredEntries) {
-        laneKnowledge(progress, filteredEntries)
-    }
-    val knowledgeScores = remember(knowledge) { knowledge.mapValues { it.value.score } }
-    val knowledgeRecent = remember(knowledge) { knowledge.mapValues { it.value.lastAt } }
-
-    // Explored lanes = saved-entry lanes in the window ∪ knowledge lanes
-    // (all-time passport) ∪ (All Time only) quest lanes.
-    val knownNames = remember { CurioCategories.all.map { it.id.name }.toSet() }
-    val explored = remember(laneCounts, knowledge, range, CurioQuests.categoriesState) {
-        val fromQuests = if (range == StatsRange.ALL) {
-            CurioQuests.categoriesState
-                .filter { it in knownNames }
-                .mapNotNull { runCatching { CategoryId.valueOf(it) }.getOrNull() }
-        } else emptyList()
-        (laneCounts.keys + knowledge.filterValues { it.explored }.keys + fromQuests)
-            .distinct().sortedBy { it.ordinal }
-    }
-
+    val knowledge: Map<CategoryId, LaneKnowledge> =
+        remember(progress, filteredEntries) { laneKnowledge(progress, filteredEntries) }
+    // Derived in composition (not remembered) so hiding or reordering a lane
+    // in Manage Categories re-lays the grid immediately.
+    val lanes = laneGridItems(knowledge)
+    val exploredCount = lanes.count { it.explored }
+    val totalKnowledge = lanes.sumOf { it.knowledge }
+    val dimensions = brainProfile(
+        progress = progress,
+        entries = filteredEntries,
+        lifetime = lifetime,
+        bestStreak = bestStreak,
+        totalLanes = CurioCategories.visible.size
+    )
     var selected by remember { mutableStateOf<CategoryId?>(null) }
 
     val (skyTop, skyBottom, skyInk) = statsSkyColors()
@@ -152,46 +154,39 @@ fun StatsScreen(navController: NavController) {
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            item("streakLevel") { StreakLevelCard(streak, bestStreak, level, levelProgress, nextThreshold, xp) }
-            item("constellation") {
-                StatsConstellationCard(
-                    explored = explored,
-                    laneCounts = knowledgeScores,
-                    laneRecent = knowledgeRecent,
-                    selected = selected,
-                    onSelect = { selected = it }
+            item("progress") {
+                ProgressCard(
+                    streak = streak,
+                    bestStreak = bestStreak,
+                    level = level,
+                    levelProgress = levelProgress,
+                    nextThreshold = nextThreshold,
+                    xp = xp,
+                    onOpenQuests = {
+                        navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true }
+                    }
                 )
             }
-            // v208 — the BRAIN PROFILE: six real cognitive dimensions
-            // (knowledge, memory, expression, focus, consistency, curiosity)
-            // computed from actual activity, each with a science-based
-            // improvement tip.
-            item("brain") {
-                BrainProfileCard(
-                    dimensions = brainProfile(
-                        progress = progress,
-                        entries = filteredEntries,
-                        lifetime = lifetime,
-                        bestStreak = bestStreak,
-                        totalLanes = CurioCategories.visible.size
-                    ),
-                    totalWords = filteredEntries.sumOf { it.wordCount() }
+            item("brain") { BrainCard(dimensions) }
+            item("map") {
+                LaneMapCard(
+                    lanes = lanes,
+                    selected = selected,
+                    onSelect = { selected = it },
+                    exploredCount = exploredCount,
+                    totalKnowledge = totalKnowledge,
+                    spins = lifetime.spins,
+                    onOpenLane = { id ->
+                        // The Cabinet already knows how to open itself
+                        // pre-filtered to one lane; that handoff is exactly
+                        // what "where did I put the things from this lane"
+                        // needs, so a lane tile is a real door, not a label.
+                        PendingCabinetFilter.request(id)
+                        navController.navigateToTab(CurioRoutes.CABINET)
+                    }
                 )
             }
             item("lifetime") { LifetimeTotalsCard(lifetime) }
-            item("badges") {
-                JourneyCard(
-                    level = level,
-                    onOpenQuests = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
-                )
-            }
-            item("lanes") {
-                LanesBreakdownCard(
-                    explored = explored,
-                    laneCounts = laneCounts,
-                    onSelect = { selected = it }
-                )
-            }
             item { Spacer(Modifier.navigationBarsPadding().height(4.dp)) }
         }
 
@@ -208,11 +203,8 @@ fun StatsScreen(navController: NavController) {
                 skyInk = skyInk
             )
         }
-
     }
 }
-
-
 
 /** v174c — the stats page's celestial palette (mirrors the drawer's sky). */
 @Composable
@@ -291,40 +283,63 @@ private fun StatsSkyHeader(
     }
 }
 
-/** v174c — streak + level hero: current/best streak, and the level with its
- *  XP progress toward the next threshold. */
+/**
+ * v409 — PROGRESS: streak, level and the journey, in one card.
+ *
+ * The old streak/level card and the old "Journey stages" card were two
+ * separate cards reporting the same number (your level) with two paragraphs
+ * of course. Merged, the numbers sit together and the copy is down to the
+ * few words a meter cannot say itself.
+ */
 @Composable
-private fun StreakLevelCard(
+private fun ProgressCard(
     streak: Int,
     bestStreak: Int,
     level: Int,
     levelProgress: Float,
     nextThreshold: Int,
-    xp: Int
+    xp: Int,
+    onOpenQuests: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val ember = Color(0xFFC96F4A)
+    val gold = Color(0xFFD9A85C)
+    val violet = Color(0xFF9B7BB8)
+    val allStages = remember { CurioQuests.allStages() }
+    // NOT remembered: [CurioQuests.isStageDone] is read live (a stage completed
+    // on the Quests page must light its medal here without a reload).
+    val unlocked = allStages.filter { CurioQuests.isStageDone(it) }
+    val stageFraction = if (allStages.isEmpty()) 0f else unlocked.size.toFloat() / allStages.size
+
     StatsCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Streak pane
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                CurioIcon(CurioIcons.LocalFire, null, tint = Color(0xFFC96F4A), size = 30.dp)
+                CurioIcon(CurioIcons.LocalFire, null, tint = ember, size = 28.dp)
                 Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                    Text("$streak", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = ink)
+                    Text(
+                        "$streak",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = ink
+                    )
                     Text(
                         "day streak · best $bestStreak",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
+                        style = MaterialTheme.typography.labelSmall,
+                        color = muted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-            // Level pane
+            VerticalDivider(modifier = Modifier.height(40.dp))
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Row(
@@ -342,147 +357,70 @@ private fun StreakLevelCard(
                 LinearProgressIndicator(
                     progress = { levelProgress.coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                    color = Color(0xFFD9A85C),
-                    trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                    color = gold,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant
                 )
                 Text(
-                    if (level >= CurioQuests.maxLevel) "Max level reached"
-                    else "${nextThreshold - xp} XP to the next level",
+                    if (level >= CurioQuests.maxLevel) "Top level reached"
+                    else "${nextThreshold - xp} XP to level ${level + 1}",
                     style = MaterialTheme.typography.labelSmall,
                     color = muted
                 )
             }
         }
+        Spacer(Modifier.height(12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                LinearProgressIndicator(
+                    progress = { stageFraction },
+                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                    color = violet,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant
+                )
+                Text(
+                    "${unlocked.size} of ${allStages.size} stages",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = muted
+                )
+            }
+            Spacer(Modifier.size(10.dp))
+            StatsDoorChip(label = "Quests", onClick = onOpenQuests)
+        }
+        if (unlocked.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                unlocked.take(6).forEach { stage ->
+                    CurioBadgeMedal(stage = stage, medalSize = 38.dp)
+                }
+                if (unlocked.size > 6) {
+                    Text(
+                        "+${unlocked.size - 6}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = muted,
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
-/** v174c — the interactive constellation: every star is one of your lanes,
- *  sized by how much you've saved there (with a glow on recently active
- *  ones). Tap a star to see its stats. v220 — constellation is now
- *  edge-to-edge (no rounded card), the deep-space background fills
- *  the full width. Header + chips stay in a StatsCard above. */
+/**
+ * v409 — YOUR BRAIN: the six cognitive dimensions as meters.
+ *
+ * The old card printed a paragraph of science tip under each of the six. Six
+ * paragraphs is not a stats page, it is an essay — so the card now shows the
+ * meters and ONE tip, the one for the dimension that is actually behind.
+ */
 @Composable
-private fun StatsConstellationCard(
-    explored: List<CategoryId>,
-    laneCounts: Map<CategoryId, Int>,
-    laneRecent: Map<CategoryId, Long>,
-    selected: CategoryId?,
-    onSelect: (CategoryId?) -> Unit
-) {
-    val ink = MaterialTheme.colorScheme.onSurface
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val recentCutoff = remember { System.currentTimeMillis() - 7L * 24 * 3600 * 1000 }
-    val totalSaves = laneCounts.values.sum()
-    val selectedCat = selected?.let { CurioCategories.byId(it) }
-    val selectedCount = selected?.let { laneCounts[it] ?: 0 } ?: 0
-    val selectedRecent = selected?.let { laneRecent[it] ?: 0L } ?: 0L
-
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // Header + summary chips in a StatsCard.
-        StatsCard {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(verticalAlignment = Alignment.Top) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            "Your Constellation",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                            color = ink
-                        )
-                        Text(
-                            "Every star is a lane you've explored. Bigger means more knowledge built there.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = muted
-                        )
-                    }
-                    StatsRangeSelectorPill()
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    StatsSummaryChip("$totalSaves", "knowledge", Color(0xFFB98A5E))
-                    StatsSummaryChip("${explored.size}", "lanes", Color(0xFF7FA0C8))
-                    StatsSummaryChip(CurioQuests.lifetimeState.spins.toString(), "spins", Color(0xFF9B7BB8))
-                }
-            }
-        }
-        // v221 — constellation in a card box (no overflow)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(16.dp))
-        ) {
-            CurioConstellation(
-                explored = explored,
-                laneCounts = laneCounts,
-                laneRecent = laneRecent,
-                recentCutoff = recentCutoff,
-                selected = selected,
-                onSelect = onSelect,
-                modifier = Modifier.fillMaxWidth().height(260.dp)
-            )
-        }
-        // Selected lane info card — below the constellation.
-        AnimatedVisibility(
-                visible = selectedCat != null,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                selectedCat?.let { cat ->
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = cat.themedAccent().copy(alpha = 0.14f),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp)
-                        ) {
-                            CurioIcon(cat.iconGlyph, null, tint = cat.themedAccent(), size = 20.dp)
-                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                                Text(
-                                    cat.displayName,
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = ink
-                                )
-                                Text(
-                                    if (selectedCount > 0) "Knowledge score $selectedCount${if (selectedRecent >= recentCutoff) " · active this week" else ""}"
-                                    else "Explored, nothing saved yet",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = muted
-                                )
-                            }
-                            // Dismiss chip — clears the selection.
-                            Surface(
-                                onClick = { onSelect(null) },
-                                shape = CircleShape,
-                                color = muted.copy(alpha = 0.10f),
-                                modifier = Modifier.size(26.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                    CurioIcon(CurioIcons.Close, null, tint = muted, size = 16.dp)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-/** v208 — the BRAIN PROFILE card: six real cognitive dimensions scored
- *  from actual activity (knowledge, memory, expression, focus, consistency,
- *  curiosity), each with a science-based improvement tip. */
-@Composable
-private fun BrainProfileCard(
-    dimensions: List<BrainDimension>,
-    totalWords: Int
-) {
+private fun BrainCard(dimensions: List<BrainDimension>) {
     val ink = MaterialTheme.colorScheme.onSurface
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val dimensionColors = listOf(
@@ -493,95 +431,149 @@ private fun BrainProfileCard(
         Color(0xFFC96F4A), // consistency — ember
         Color(0xFF7F9B6E)  // curiosity — moss
     )
+    val weakest = dimensions.minByOrNull { it.score }
     StatsCard {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.Top) {
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            "Your brain",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+            color = ink
+        )
+        Spacer(Modifier.height(12.dp))
+        dimensions.forEachIndexed { i, d ->
+            val tint = dimensionColors[i % dimensionColors.size]
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CurioIcon(d.icon, null, tint = tint, size = 16.dp)
+                    Spacer(Modifier.size(7.dp))
                     Text(
-                        "Your Brain Profile",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = ink
+                        d.name,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = ink,
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
-                        "Six cognitive muscles, scored from your real activity. Each has a science-backed way to grow.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
+                        d.level,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = tint
                     )
                 }
+                LinearProgressIndicator(
+                    progress = { d.score / 100f },
+                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                    color = tint,
+                    trackColor = tint.copy(alpha = 0.14f)
+                )
             }
+            if (i != dimensions.lastIndex) Spacer(Modifier.height(11.dp))
+        }
+        if (weakest != null) {
+            Spacer(Modifier.height(13.dp))
             Text(
-                if (totalWords > 0) "$totalWords words written. The generation effect at work."
-                else "No words written yet. Journal after an explore to build expression.",
+                "${weakest.name}: ${weakest.tip}",
                 style = MaterialTheme.typography.labelSmall,
                 color = muted
             )
-            dimensions.forEachIndexed { i, d ->
-                val tint = dimensionColors[i % dimensionColors.size]
-                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        CurioIcon(d.icon, null, tint = tint, size = 16.dp)
-                        Spacer(Modifier.size(6.dp))
-                        Text(
-                            d.name,
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                            color = ink
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Text(
-                            d.level,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = tint
-                        )
-                    }
-                    LinearProgressIndicator(
-                        progress = { d.score / 100f },
-                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                        color = tint,
-                        trackColor = tint.copy(alpha = 0.14f)
-                    )
-                    Text(
-                        d.tip,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = muted
-                    )
-                }
-            }
         }
     }
 }
 
-/** v174c — one tiny summary chip above the constellation. */
+/**
+ * v409 — THE LANE MAP: the interactive lane grid, and the selected lane's own
+ * line under it. This replaces BOTH the painted constellation and the "Your
+ * lanes" list that sat under it repeating the same thing in a second shape.
+ */
 @Composable
-private fun StatsSummaryChip(value: String, label: String, tint: Color) {
+private fun LaneMapCard(
+    lanes: List<LaneGridItem>,
+    selected: CategoryId?,
+    onSelect: (CategoryId?) -> Unit,
+    exploredCount: Int,
+    totalKnowledge: Int,
+    spins: Int,
+    onOpenLane: (CategoryId) -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    StatsCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Lane map",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = ink,
+                modifier = Modifier.weight(1f)
+            )
+            StatsRangeSelectorPill()
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            "$totalKnowledge knowledge · $exploredCount of ${lanes.size} lanes · $spins spins",
+            style = MaterialTheme.typography.labelSmall,
+            color = muted
+        )
+        Spacer(Modifier.height(12.dp))
+        CurioLaneGrid(
+            lanes = lanes,
+            selected = selected,
+            onSelect = onSelect,
+            columns = 4,
+            tileHeight = 78.dp,
+            detail = { item ->
+                CurioLaneDetailStrip(
+                    item = item,
+                    action = {
+                        StatsDoorChip(
+                            label = "Cabinet",
+                            accent = item.accent,
+                            onClick = { onOpenLane(item.id) }
+                        )
+                    }
+                )
+            }
+        )
+    }
+}
+
+/** The small "Quests ›" / "Cabinet ›" pill: one destination, one door. */
+@Composable
+private fun StatsDoorChip(
+    label: String,
+    onClick: () -> Unit,
+    accent: Color? = null
+) {
+    val tint = accent ?: MaterialTheme.colorScheme.primary
     Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = tint.copy(alpha = 0.12f)
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = if (accent != null) tint.copy(alpha = 0.16f)
+        else MaterialTheme.colorScheme.surfaceContainerHighest,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
             Text(
-                value,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
                 label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = if (accent != null) accent else MaterialTheme.colorScheme.onSurface
+            )
+            CurioIcon(
+                CurioIcons.ChevronRight,
+                null,
+                tint = if (accent != null) accent.copy(alpha = 0.8f)
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 15.dp
             )
         }
     }
 }
 
-/** v174c — the interactive brain canvas: one glowing star per explored lane,
- *  arc-positioned into two hemisphere lobes (deterministic jitter per lane),
- *  sized by saved count, glowing when active this week. Tap a star to select
- *  it (tap empty space to clear). */
-/** v174c — the lifetime totals grid: spins, explores, saves, quotes, pins,
- *  likes, dislikes and daily quests, in compact paper panes. */
+/**
+ * v409 — the lifetime counters, compact: one pane per counter (icon, number,
+ * one-word label) on the card's own surface. The old grid nested seven tinted
+ * sub-cards inside the card and captioned the card twice.
+ */
 @Composable
 private fun LifetimeTotalsCard(lifetime: CurioQuests.LifetimeCounters) {
     val items = listOf(
@@ -594,55 +586,43 @@ private fun LifetimeTotalsCard(lifetime: CurioQuests.LifetimeCounters) {
         LifetimeStat("task_alt", "Daily quests", lifetime.dailyCompleted, Color(0xFF7F9B6E))
     )
     StatsCard {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                "Lifetime totals",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                "Everything your curiosity has collected",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Spacer(Modifier.height(10.dp))
-        items.chunked(2).forEach { pairRow ->
+        Text(
+            "Lifetime",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(12.dp))
+        items.chunked(4).forEachIndexed { rowIndex, rowItems ->
+            if (rowIndex > 0) Spacer(Modifier.height(12.dp))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                pairRow.forEach { (icon, label, value, tint) ->
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                rowItems.forEach { stat ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp)
-                        ) {
-                            CurioIcon(icon, null, tint = tint, size = 18.dp)
-                            Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                                Text(
-                                    "$value",
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    label,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
+                        CurioIcon(stat.icon, null, tint = stat.tint, size = 17.dp)
+                        Text(
+                            "${stat.value}",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            stat.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
+                repeat(4 - rowItems.size) { Spacer(Modifier.weight(1f)) }
             }
-            Spacer(Modifier.height(10.dp))
         }
     }
 }
@@ -650,180 +630,18 @@ private fun LifetimeTotalsCard(lifetime: CurioQuests.LifetimeCounters) {
 /** v174c — one lifetime counter for the totals grid. */
 private data class LifetimeStat(val icon: String, val label: String, val value: Int, val tint: Color)
 
-/** v174c — journey stages: level chain progress + a row of earned medals
- *  (tap-through to Quests for the full shelf). */
-@Composable
-private fun JourneyCard(
-    level: Int,
-    onOpenQuests: () -> Unit
-) {
-    val allStages = remember { CurioQuests.allStages() }
-    val unlocked = allStages.filter { CurioQuests.isStageDone(it) }
-    val fraction = if (allStages.isEmpty()) 0f else unlocked.size.toFloat() / allStages.size
-    val ink = MaterialTheme.colorScheme.onSurface
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    StatsCard {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        "Journey stages",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = ink
-                    )
-                    Text(
-                        "${unlocked.size} of ${allStages.size} stages · ${CurioQuests.levelTitle(level)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
-                    )
-                }
-                Surface(
-                    onClick = onOpenQuests,
-                    shape = RoundedCornerShape(12.dp),
-                    color = settingsRoseAccent().copy(alpha = 0.14f)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
-                    ) {
-                        Text(
-                            "Quests",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                            color = settingsAccentInk()
-                        )
-                        CurioIcon(CurioIcons.ChevronRight, null, tint = settingsAccentInk(), size = 16.dp)
-                    }
-                }
-            }
-            LinearProgressIndicator(
-                progress = { fraction },
-                modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                color = Color(0xFF9B7BB8),
-                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
-            )
-            if (unlocked.isNotEmpty()) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    unlocked.take(7).forEach { stage ->
-                        CurioBadgeMedal(stage = stage, medalSize = 40.dp)
-                    }
-                    if (unlocked.size > 7) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Text(
-                                "+${unlocked.size - 7}",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                color = muted
-                            )
-                        }
-                    }
-                }
-            } else {
-                Text(
-                    "Earn your first medal on the Quests page. Every stage you complete glows here.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-            }
-        }
-    }
-}
-
-/** v174c — per-lane breakdown: each explored lane as a row with its icon,
- *  name and saved count (tap selects it in the constellation above). */
-@Composable
-private fun LanesBreakdownCard(
-    explored: List<CategoryId>,
-    laneCounts: Map<CategoryId, Int>,
-    onSelect: (CategoryId?) -> Unit
-) {
-    val ink = MaterialTheme.colorScheme.onSurface
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    StatsCard {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                "Your lanes",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = ink
-            )
-            Text(
-                "Where your saved discoveries live",
-                style = MaterialTheme.typography.bodySmall,
-                color = muted
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-        if (explored.isEmpty()) {
-            Text(
-                "No lanes explored yet. Spin a deck and save something to light this up.",
-                style = MaterialTheme.typography.bodySmall,
-                color = muted
-            )
-        } else {
-            explored.forEach { id ->
-                val cat = CurioCategories.byId(id)
-                val accent = cat.themedAccent()
-                val count = laneCounts[id] ?: 0
-                Surface(
-                    onClick = { onSelect(id) },
-                    shape = RoundedCornerShape(13.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(9.dp),
-                            color = accent.copy(alpha = 0.14f),
-                            modifier = Modifier.size(28.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                CurioIcon(cat.iconGlyph, null, tint = accent, size = 15.dp)
-                            }
-                        }
-                        Text(
-                            cat.displayName,
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                            color = ink,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            "$count saved",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = muted
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-/** v174c — the shared pastel card shell for the stats page (opaque fill under
- *  the soft shadow — rule 11). */
+/**
+ * v409 — the shared stats card: a WHITE card on the cream page (the app-wide
+ * card ladder — see the theme's CARD LADDER note), with the hairline edge that
+ * separates it from the page. The old shell lerped the fill toward a seafoam
+ * tint, which on the tinted page background was one of the cards that blended.
+ */
 @Composable
 private fun StatsCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
-        shape = RoundedCornerShape(24.dp),
-        color = if (isCurioDarkTheme())
-            lerp(MaterialTheme.colorScheme.surface, Color(0xFF1B3A40), 0.55f)
-        else
-            lerp(MaterialTheme.colorScheme.surface, Color(0xFFCFE9E2), 0.45f),
-        shadowElevation = 2.dp,
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(

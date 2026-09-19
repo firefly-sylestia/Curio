@@ -8,205 +8,138 @@ from the state rather than from memory.
 
 ## 1. The request
 
-Three requests arrived back to back; the third is the live one.
+> "now in the drawer menu of home screen, the drawer constellation i want you to redesign it
+> remove the quests and levels button remove your curiotcity button, the stats insights manage
+> category etc, and remove the about from the drawer we will be reimagining the full drawer,
+> with new redesigned view with proper your brain stats view, also in your curioity page theres
+> too much info. too much texts also remove the your lanes from your curioity page, and lets
+> redesign it beautifully. also for the costellastion nremove the buttom 3 stars and make the
+> main constellaion bigger and it should not be a svg anymore or drawing, but proper ui
+> inetarctive style and make it clean. in a new branch, and do more screen aduits with duplicate
+> things and redundance thingies"
 
-**(a) Settings + licence** (owed from an earlier session):
+Branch: `feat/drawer-and-curiosity-redesign` (started before the edit; `git pull` ran first).
 
-> "…can we add this license [AGPL-3.0] for our curio in readme, also hide the rail in
-> settings the top rail, when im in all settings only show when inside, some settings, also
-> remove remove the all settings option from the rail, and about the info in the setting
-> cards, make their text be 2 or 3 lines for the end 4 settings card the online mode, recycle
-> bin, updates, and help and feedbacks see how the texts get cut how about remove the icons
-> for those 4, and then in appearance while keeping the rail system instead of the big cards
-> with design, add a simpler list based simpler all settings look the main settings page but
-> a simpler and list view."
+### Decisions taken with the member (ask_user, before any edit)
 
-**(b) Blending**:
+1. **Drawer content** → *brain panel only*. Hero + a redesigned "your brain" panel + footer.
+   No navigation rows survive.
+2. **Constellation shape** → *drop it, use an interactive lane grid* (both surfaces). No more
+   Canvas, no star tables, no painted sky.
+3. **The old experiment switch** → *remove it, hardcode the new drawer* (`Drawer constellation`,
+   and with it `3D star zoom` — both were switches for a canvas that no longer exists).
+4. **Stats page trims** → "remove unnecessary texts and make it beautiful to look the progress"
+   (free rein): cut the six tip paragraphs, cut the duplicated lane list, merge the two
+   level/stage cards, keep the meters.
 
-> "also the background and the cards and tabs some were blending too much, the journals in the
-> home screen the preview of them get the background color and blends, an u fix this issue.
-> properly adress this blending issue. and use white cards and white tabs backgroud for cards,
-> instead of cream, but keep the main app backgroud the current color, just the card colors
-> etc app wide, or card area such as in profile the quests settings etc where they are prsent
-> its card color is creamy and blends too much, add proper formula for hirarcy and proper
-> separations, per clicable elemets and all app wide"
+## 2. What the code actually looked like (findings)
 
-**(c) Books**:
+- **The drawer (`HomeDrawerContent`) was three navigation trees under a stats map**: a
+  `DrawerNavRow` for Quests & Levels, a collapsible "Your Curiosity" group (Topic History /
+  Manage Categories / Browse Topics), a collapsible "About" group (Support & diagnostics /
+  Replay intro), and a top slot that swapped between `DrawerCuriosityMap` (the Canvas star map)
+  and `DrawerMaterialStatStrip` (a three-pane stat strip) on `drawerConstellationState`.
+- **The constellation was a painted Canvas**: 11 stars of a Big Dipper + Polaris, its own
+  nebula/starfield painters, twinkle/pulse animations, pinch-zoom + parallax, and a floating
+  popover — 887 lines of `CurioConstellation.kt` plus two prefs. "Remove the bottom 3 stars"
+  = Polaris, Kochab, Pherkad (the three below the dipper, the ones joined by dashed lines).
+- **Every removed door still exists elsewhere** (verified by grep before deleting): Topic
+  history + Manage categories are `SettingsHubScreen` rows, Browse topics is Home's own door,
+  Quests is on Profile and on the Stats page, Support + Replay intro are Settings rows under
+  Safety & support. Nothing lost its only way in.
+- **`PendingCabinetFilter`** (the out-of-band handoff that opens the Cabinet pre-filtered to one
+  lane) had **no callers left** after the earlier Profile "Your lanes" removal — dead API in
+  `CurioRoutes.kt` with a live consumer in `CabinetScreen`. Revived as the lane map's door.
+- **The Stats page was six cards of prose**: streak card + journey card (two cards about the same
+  level number), a constellation card with a header + three chips + a range pill, a brain card
+  printing SIX science-tip paragraphs, a lifetime grid nesting seven sub-cards with its own
+  subtitle, and the "Your lanes" list repeating the constellation underneath it.
 
-> "for the book view replace the buttom sheet of the book from topic reveal screen with the new
-> book screen, also in the new book screen add reading progress with pages and chapter page
-> being the more noticable, in the place of chapter 0 im on and the book has that card area,
-> redesign it to have proper progress from the pdf or epub tracking, and also proper chapter
-> updates if the pdf had it with proper progress, and use can chnage the progress like before
-> but the pdf reading for pages will be usng from pdf, and for chapter too also if user updates
-> the chapter and progress in that edit it still shuld keep where the user had left reading, and
-> for books added directly from file please use the file name for proper detetction of book and
-> let the user edit the book name if it cant detect properly."
+## 3. What was done
 
-**(d) THE LIVE REQUEST — a full-app redundancy audit**:
+### The lane map — real UI (`ui/components/CurioLaneGrid.kt`, new)
+- `LaneGridItem` + `laneGridItems(knowledge)` derive the items from the member's real knowledge
+  (`LaneKnowledge.score`): explored lanes first by knowledge, then the rest in the member's own
+  lane order, hidden lanes excluded (reads `CurioCategories.visible` in composition so a
+  Manage-categories change re-lays the grid).
+- `CurioLaneGrid` lays them out as tiles (icon, name, a knowledge bar scaled to the member's
+  strongest lane) with a real ripple, an animated accent ring on the selected lane, and the
+  bar growing in on first paint. `columns`/`tileHeight` per caller (4 columns both places).
+- `CurioLaneDetailStrip` is the selected lane's own line. It is passed as `detail` and renders
+  **under the selected tile's own row**, so a tap near the foot of a long grid never drops the
+  readout off-screen.
+- **`CurioConstellation.kt` deleted** (887 lines), with `starZoom3dState` / `KEY_STAR_ZOOM_3D`,
+  `drawerConstellationState` / `KEY_DRAWER_CONSTELLATION` and their getters/setters.
 
-> "also many screen have redundancy alot of redundancy with the app, tabs etc, and and
-> unecessary texts duplicate tabs etc etc do a full app audit."
+### The drawer (HomeScreen)
+- `HomeDrawerContent`'s LazyColumn is now `item("brain")` + `item("footer")`.
+- Deleted: `DrawerNavRow`, `DrawerNavItem`, `DrawerCuriosityMap`, `DrawerMaterialStatStrip`,
+  `DrawerMaterialStatPane`, both expansion flags, and the now-orphaned imports.
+- `DrawerBrainPanel`: a "YOUR BRAIN" card (the panel's ONE door → `CurioRoutes.STATS`) holding
+  streak · level · total knowledge with the XP bar and "N XP to level N+1", then a
+  "YOUR LANES / N of M explored" line over the lane grid. Tiles only select.
 
----
+### The Stats page ("Your Curiosity")
+- Four instruments: `ProgressCard` (streak + level/XP + journey stages + medals + one Quests
+  door — it replaces `StreakLevelCard` AND `JourneyCard`), `BrainCard` (six meters, the tip
+  printed for the WEAKEST dimension only), `LaneMapCard` (the lane grid + the range pill + a
+  Cabinet door on the selected lane through `PendingCabinetFilter.request` + `navigateToTab`),
+  `LifetimeTotalsCard` (compact counter panes).
+- Deleted: `StatsConstellationCard`, `LanesBreakdownCard` ("Your lanes"), `StatsSummaryChip`,
+  `JourneyCard`/`StreakLevelCard` (merged). `StatsCard`'s shell is now the app-wide WHITE card
+  (`surfaceContainerLowest` + an `outlineVariant` hairline) instead of the old seafoam lerp.
+- `StatsRangeSelectorPill` stays (it is the page's window filter); its doc comments were
+  corrected — the drawer no longer shares that state.
 
-## 2. What was changed for (a), (b) and (c)
+### Settings
+- `ExperimentsScreen`: the "Constellation" section heading is now "Navigation" and holds only
+  the nav-bar "Classic active indicator" row; the two star-map switches are gone.
 
-### Licence
-- `LICENSE` committed with the byte-exact AGPL-3.0 text (fetched from
-  `https://www.gnu.org/licenses/agpl-3.0.txt`; 661 lines) — the README already linked a
-  `LICENSE` file that did not exist.
-- `README.md`'s Licence section: MIT → AGPL-3.0, with a short plain-language note about
-  §13 (a hosted fork has to offer its source too) and the copyright line.
+### The audit (requested again)
+- Re-ran the two automated passes over `features/` (repeated UI-copy literals per file; repeated
+  `CurioRoutes` destinations per file) and read every hit. Result: **no new co-visible
+  duplication.** The hits are (a) per-list-item navigations (`revealFor`/`socialProfile`/
+  `directMessage` once per row) and (b) the header/empty-state/phone-vs-wide BINARY branches —
+  one copy per branch, never two on one screen. Recorded in `app/AGENTS.md` so a later session
+  does not "fix" them.
+- Doors re-verified after removing the drawer menu: every destination it carried is still
+  reachable (list in §2).
 
-### Settings hub → a plain list
-- The hub's phone branch now renders `SettingsSections` as a heading per section plus ONE
-  white `SettingsOptionCard` of rows — `GridCells.Fixed(1)`, everything full-span.
-- The rail is gone from the hub, and its leading **"All Settings"** chip is gone from
-  `settingsNavRail`. The rail lives on the SECTION pages only (no `activeNav` state remains).
-- `SettingsRowEntry.plain = true` for **Online mode / Recycle bin / Updates / Support &
-  diagnostics**: no icon tile, taller row, subtitle wraps to three lines, divider flush
-  (`SettingsOptionDivider(startInset = 0.dp)`). Online mode's subtitle took the full sentence
-  the old secondary card carried.
-- `PetLandmark(id = "appearance")` moved from the deleted Appearance card onto the
-  Appearance ROW (the pet's poke and the tour's stop still land).
-- **~1,000 lines of designed-card machinery deleted** (`SettingsDesignTone/Visual/Card/Group`,
-  `settingsDesignGroups`, `settingsSecondaryCards`, `settingsToneGradient`, `settingsCardInk`,
-  `SettingsCardTexture`, `SettingsDesignCardView`, `SettingsSecondaryCardView`,
-  `SettingsCardVisual`). `settingsCardChipTint()` / `settingsCardTintLift()` stay — they are
-  the shared card-tint family.
-
-### The blending fix (the root cause, in the theme)
-- **Light scheme, new container ladder:** the page keeps `SoftCream`; `surfaceContainerLowest`
-  and `surfaceContainerLow` are now WHITE (cards), `surfaceContainer` a nested off-white,
-  `surfaceContainerHigh` the floating step, `surfaceContainerHighest` the anchor. Cards used
-  to be a DARKER cream than the page, which is why they vanished into a lane wash.
-- **Dark ladder lifted** (`#121212 → #161616 → #1C1C1C → #242424 → #2C2C2C`) so a dark card is
-  a plate on the black page instead of a `#101010` smudge.
-- `outline` / `outlineVariant` carry real alpha again (0.24 / 0.13 light, 0.26 / 0.14 dark).
-- `settingsCardTintLift()` (light) is white-with-hero-ink, not the page background;
-  `curioDialogContainerColor()` (light) is the white panel with the rose whisper.
-- **Every translucent "cream glass" card became opaque**: the `else Color.White.copy(alpha =
-  0.6x–0.72f)` family in `TextHistory`, `TopicHistoryScreen`, `RecycleBinScreen`,
-  `BookCoverHubScreen`, `BookBrowserScreen`, `CurioAccountComponents`,
-  `ManageCategoriesScreen`, `SocialComponents`, `SettingsPageComponents`; the settings rail
-  chips and the quick-tool chips and the search field (each with a hairline edge);
-  `CurioSettingsCard` gained the shared hairline `BorderStroke`.
-- Net effect on the journal preview rows on Home: they are white on the lane wash now.
-
-### Books
-- **The reveal's book sheet is gone.** Synopsising a book topic or tapping a chapter chip now
-  resolves (or additively shelves) the topic's shelf book by catalog id and navigates to
-  `BookDetailScreen`. `BookNotesSheet`, `BookNotesMode`, `ChapterNoteField` and the
-  `pendingChapterShare` share seed were deleted.
-- **`ProgressCard` rebuilt from the file:** a page bar + "page N of M" (only for a real PDF —
-  `pdfPageCount`), the chapter (the file's own `documentChapters` names), the chapter ticks,
-  and the manual steppers KEPT ("I'm on", "Page", "The book has").
-- **Two clocks, and who wins** (the member's "it still should keep where the user had left
-  reading"): a hand edit writes the book ROW only; the reader's POSITION row is never touched
-  by it, so the real reading place can never be yanked. `PersonalDao.observeReaderPosition`
-  was added because every mark query excludes `kind = 'position'`.
-- **File import:** `BookFiles.displayName` reads the provider's real DISPLAY_NAME (the old code
-  named books after `lastPathSegment`, i.e. `msf:1000000042`), `detectBookFromFileName` cleans
-  it (extension, download litter, brackets, ISBN prefixes, "Title - Author" / "by"), and
-  `BookImportConfirm` shows editable title/author fields before the book is created. `addBook`
-  now adopts the file's own pages and chapters on import.
-
----
-
-## 3. THE FULL-APP REDUNDANCY AUDIT (in progress)
-
-**Method used:** (1) inventory every chrome surface and which routes render each; (2) mine every
-screen for UI copy that repeats within the file; (3) count `CurioRoutes.X` uses per file to find
-two doors to one destination on one screen; (4) read each hit to separate *per-branch* copies
-(phone vs wide, full vs compact — legitimate) from *co-visible* duplicates (a real finding).
-
-### Findings — duplicate doors (same destination, one screen)
-1. **Home's drawer has two doors to Stats & insights.** The curiosity-map / stat-strip card
-   opens `STATS` (`HomeScreen.kt:2471`, `:2474`), and the "Your Curiosity" group holds a
-   second row, "Stats & insights", opening the same screen (`:2526`).
-2. **Profile has two doors to Settings.** The header's Settings pill (`glassSettingsPill` in the
-   glass branch; `ProfileSearchPill` in the classic branch, `:1004`) opens the hub, and the
-   list also carries a full `SettingsNavCard` (`:677`).
-3. **Profile offers Quests three times** — the bar's streak pill (`onStreakClick`, `:797`), the
-   `fullActions` streak pill (`:846`) and the achievements card's `onOpenQuests` (`:628`). The
-   first two are the same bar in its two states; the third is a separate card.
-4. **Cabinet: two "open the whole shelf" tails** — `onOpenShelf` → `BOOKS` from the
-   reading-now shelf (`CabinetV2Content.kt:864`) and from the personal shelf (`:985`).
-
-### Findings — copy that says the same thing twice
-5. **Home's drawer stacks three near-synonyms:** the "Your Curiosity" heading with the subtitle
-   "Stats, streaks & insights", its own child row "Stats & insights", and the "Quests & Levels"
-   row above it with "Track your journey" (`HomeScreen.kt:2483`, `:2504`, `:2526`).
-6. **Online mode's page names itself inside itself:** the hero reads "Online mode / Account and
-   sync" and a switch row below is titled "Online mode" (`OnlineModeScreen.kt:108`, `:213`).
-
-### Findings — chrome (checked, NOT redundant)
-- The **settings rail on 19 screens** is the design (the settings family's own nav); the user
-  asked to keep it. The hub no longer has one (v408).
-- **No tab screen prints its own name**, and the bar's tabs are distinct
-  (Home / Shuffle / Cabinet / Social-opt-in). The **wide-window rail** and the **bottom pill bar**
-  never render together (`CurioNavHost` picks one). `LiquidGlassPageNav` is an in-page *page
-  turner* (prev / "3 / 12" / next + a jump sheet), not a second tab strip, and it only appears
-  where the bottom bar does not.
-- The **"repeated" titles** in `RecentScreen`, `RecycleBinScreen`, `BookBrowserScreen`,
-  `OnlineModeScreen` are one copy per BRANCH (phone vs wide two-pane) — not visible at once.
-
-### Fixed now (no behaviour removed, so no confirmation needed)
-- The last **translucent card fills** in the v408 ladder world became opaque scheme steps:
-  `surfaceContainerHigh.copy(alpha = 0.45f)` in Home's drawer group (`HomeScreen.kt:2519`,
-  `:2570`), the Cabinet's empty rails (`CabinetV2Content.kt:2011`) and the Community replies
-  (`CommunityCommentsSheet.kt:661` — a branch that resolved to very nearly its parent card).
-  (Skeleton shimmer placeholder fills are deliberately faint and were left alone.)
-
-### Fixes APPLIED — the member's answer
-- **(a) done** — Home's drawer: the duplicate "Stats & insights" row is gone; the curiosity-map /
-  stat-strip card above keeps the door.
-- **(b) inverted by the member** — "for b remove the headers settings pill". So Profile's header
-  pills went instead of the card: `glassSettingsPill` (glass branch) and the whole
-  `ProfileSearchPill` composable (classic branch, ~38 lines) are deleted, `searchPillInteraction`
-  with them, and the now-unused `PendingCabinetFilter` import was dropped. The `SettingsNavCard`
-  stays as Profile's one door to Settings.
-- **(c) done** — Home's drawer subtitle trio re-cut ("Levels, badges & the journey" / "History,
-  lanes & browse") and Online mode's sync switch is titled "Keep my areas in sync" instead of
-  repeating the page's own name.
-- **(d) done** — the Cabinet's Curiying-now heading is a label, not a door: `v2ReadingNowItems`
-  lost its `onOpenShelf` parameter and `PersonalShelfHeading` takes a nullable `onClick` (no
-  click, no chevron when null). The personal shelf's own "Books" heading + "My shelf" door stay.
-- **Also, on the member's instruction: Profile's "Your lanes" card is deleted** (with its private
-  `LanesCard` composable, ~58 lines). The hero's stat strip still shows the lane COUNT — the
-  member said "your lanes" (the card's own title); if they meant that stat too, it is one line to
-  remove.
-- `app/AGENTS.md` gained a "Redundancy — one door per destination" contract recording all of the
-  above plus the chrome that was checked and is NOT redundant (so a later session does not
-  "fix" the settings rail or the per-branch literals).
-
-### Not audited in depth (honest scope note)
-The sweep covered the chrome inventory, every screen's UI-copy duplicates, every screen's repeated
-`CurioRoutes` destinations, and a read of each hit. It is strongest on the five tab screens and the
-settings/cabinet/profile families. The long-tail screens (social sheets, quests, stats, the
-composer family) were only checked by the two automated passes, not read line by line — a second
-pass on those is the natural next step if the member wants more.
-
----
+### Docs & release notes
+- `app/AGENTS.md`: new section "The drawer and the lane grid — no more painted constellation
+  (v409)" (the drawer contract, the lane-grid component contract, the deleted component, the
+  removed switches, the four Stats instruments, the audit result), and the v408 redundancy
+  section updated so it no longer points at rows that no longer exist.
+- `fastlane/metadata/android/en-US/changelogs/20260922.txt`: REMOVE/ADD/FIX block at the top.
 
 ## 4. Still open
 
 - **Nothing here is device-verified.** No Gradle in this environment: every change is
-  `node scripts/check_braces.js`-checked, diff-reviewed and CI-built only.
-- The gated rails: Home's recents hold (2s + haptic), the pet's home hold, the reader's
-  position write — all still want a real device pass.
-- The card ladder's white-on-cream values may want a taste pass on a device (one constant per
-  step, in `CurioTheme.kt`).
+  `node scripts/check_braces.js`-checked, import-swept and diff-reviewed; **CI is the compile
+  check**.
+- Worth a device pass: the drawer panel's rhythm (the "YOUR BRAIN" card and the lane tiles are
+  both the `surfaceContainerHigh` chip rung, separated by gaps and the grid's own borders), the
+  tile label ellipsis at ~70dp (4 columns), and the lane bar's grow-in.
+- `CurioColors.DustyBlue` is the knowledge stat's tint in the drawer; if the new panel wants a
+  single accent for all three stat panes, that is one constant.
 
 ---
 
 ## User prompts
 
-Status: everything above is built, pushed and recorded. No pending prompt below.
+Status: **done and pushed** on `feat/drawer-and-curiosity-redesign` (the branch's own commits;
+`main` is untouched). The prompt below is the one this file describes; the empty slot under it
+is where the next instruction lands.
 
-> "also many screen have redundancy alot of redundancy with the app, tabs etc, and and
-> unecessary texts duplicate tabs etc etc do a full app audit."
+> "now in the drawer menu of home screen, the drawer constellation i want you to redesign it
+> remove the quests and levels button remove your curiotcity button, the stats insights manage
+> category etc, and remove the about from the drawer we will be reimagining the full drawer,
+> with new redesigned view with proper your brain stats view, also in your curioity page theres
+> too much info. too much texts also remove the your lanes from your curioity page, and lets
+> redesign it beautifully. also for the costellastion nremove the buttom 3 stars and make the
+> main constellaion bigger and it should not be a svg anymore or drawing, but proper ui
+> inetarctive style and make it clean. in a new branch, and do more screen aduits with duplicate
+> things and redundance thingies"
 
 <!-- Next user prompt goes here. This section is never cleared — the pending prompt and its
 status stay at the top, and the empty slot below is where the next instruction lands. -->

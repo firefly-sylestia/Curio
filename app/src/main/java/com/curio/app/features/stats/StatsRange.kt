@@ -23,10 +23,11 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
-/** v174d — the curiosity-stats time window. The drawer map's "This Week"
- *  selector and the stats page share [StatsRangeState], so picking a window
- *  anywhere filters the stats constellation's entry-based stats to it.
- *  [days] is null for the unfiltered All-Time view. */
+/** v174d — the curiosity-stats time window: picks the window the stats
+ *  page's lane knowledge and brain profile are computed over. [days] is null
+ *  for the unfiltered All-Time view. (v409 — the navigation drawer used to
+ *  share this state for its own map; the drawer now shows all-time figures
+ *  only, so the page owns the window.) */
 enum class StatsRange(val label: String, val days: Long?) {
     WEEK("This Week", 7),
     MONTH("This Month", 30),
@@ -42,7 +43,7 @@ fun List<CurioEntry>.filterForRange(range: StatsRange): List<CurioEntry> {
 }
 
 /** Process-wide holder (same pattern as CurioNavTint) — survives navigation
- *  so the drawer's selector and the stats screen stay in sync. */
+ *  so the chosen window outlives a trip to another screen and back. */
 object StatsRangeState {
     var selected by mutableStateOf(StatsRange.WEEK)
         private set
@@ -52,9 +53,9 @@ object StatsRangeState {
     }
 }
 
-/** v174d — the shared "This Week ˅" selector pill: opens a small dropdown
- *  and writes the choice to [StatsRangeState]. Used on the drawer map AND
- *  the stats page's constellation card. */
+/** v174d — the "This Week ˅" selector pill: opens a small dropdown and
+ *  writes the choice to [StatsRangeState]. Lives in the stats page's Lane
+ *  map card header. */
 @Composable
 fun StatsRangeSelectorPill(modifier: Modifier = Modifier) {
     val range = StatsRangeState.selected

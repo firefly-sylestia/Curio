@@ -8549,7 +8549,8 @@ app/src/main/java/com/curio/app/
 - **A destination gets ONE door per screen.** The audit found and removed the duplicates: Home's
 drawer offered `STATS` from the curiosity-map card AND from a "Stats & insights" row inside the
 fold-out group (the row is gone — the card keeps it, because it is the thing you look at before
-you tap it); Profile offered `SETTINGS` from a header pill AND from its `SettingsNavCard` (the
+you tap it; v409 flattened the rest of that menu away, so the "YOUR BRAIN" row is now the panel's
+only door — see the lane-grid section below); Profile offered `SETTINGS` from a header pill AND from its `SettingsNavCard` (the
 member kept the card and the BOTH header pills were deleted — `glassSettingsPill` in the glass
 branch and the whole `ProfileSearchPill` composable in the classic one); the Cabinet's
 Curiying-now shelf opened `BOOKS` from its heading as well as the personal shelf's (its heading
@@ -8558,14 +8559,25 @@ heading never promises a door it does not have).
 - **Do not remove a HEADING's door by passing an empty lambda** — that leaves a chevron and a
 click that does nothing. Make the click nullable (the `PersonalShelfHeading` pattern).
 - **Copy states one idea once.** Profile's "Your lanes" card was deleted (the hero's stat strip
-already counts the lanes; arranging them is Settings ▸ Manage categories). Home's drawer subtitles
-were re-cut so "Quests & Levels" and "Your Curiosity" no longer both promise stats, and the
-Online mode page's sync switch is no longer titled with the page's own name.
+already counts the lanes; arranging them is Settings ▸ Manage categories) — and v409 deleted the
+Stats page's own "Your lanes" list for the same reason, since the lane map above it already showed
+that lane and its knowledge (the map's tiles ARE the breakdown now). Home's drawer subtitles were
+re-cut so "Quests & Levels" and "Your Curiosity" no longer both promised stats — and v409 removed
+that whole row menu, subtitles and all. The Online mode page's sync switch is no longer titled
+with the page's own name.
 - **Checked and NOT redundant (do not "fix" these):** the settings rail on its 19 settings-family
 screens (that IS the family's nav); the wide-window rail and the bottom pill bar never co-render
 (`CurioNavHost` picks one); `LiquidGlassPageNav` is an in-page page turner, not a tab strip; no tab
 screen prints its own name. Repeated title/subtitle literals across a screen's phone and
 two-pane branches are one copy per branch, not a duplicate on screen.
+
+### The drawer and the lane grid — no more painted constellation (v409)
+- **The navigation drawer is the BRAIN PANEL and nothing else.** `HomeDrawerContent`'s LazyColumn holds exactly two items: `DrawerBrainPanel` (the "YOUR BRAIN" card + the lane grid) and `DrawerFooter`. The row menu is gone for good: `DrawerNavRow`, `DrawerNavItem`, the collapsible "Your Curiosity" group (Topic History / Manage categories / Browse topics), the "Quests & Levels" row, the whole "About" group (Support & diagnostics / Replay intro) and both `rememberSaveable` expansion flags are DELETED. Nothing lost a door — Topic history and Manage categories are Settings rows, Browse topics is Home's own browse pill, Quests is Profile's progress card AND the Stats progress card, Support & Replay intro are Settings rows under Safety & support. **Do not re-add a navigation menu to the drawer**; a door belongs on the surface that owns it.
+- **The "YOUR BRAIN" row is the drawer panel's ONE door** (`onOpenStats` → `CurioRoutes.STATS`). The lane tiles only SELECT, so the drawer can never offer two doors to one destination again.
+- **`ui/components/CurioLaneGrid.kt` is THE lane map — real UI, never a drawing.** `LaneGridItem` + `laneGridItems(knowledge)` build the items (explored lanes first by knowledge, then the rest in the member's own lane order, hidden lanes excluded), and `CurioLaneGrid` lays them out as tiles with a ripple, an animated accent ring on the selected lane, and a knowledge bar scaled to the member's strongest lane. `CurioLaneDetailStrip` is the selected lane's own line: pass it as `detail` and it renders UNDER THE SELECTED TILE'S OWN ROW, so a tap near the bottom of a long grid never drops the readout off-screen. `CurioConstellation.kt` (the Canvas star map, its star tables, the nebula/starfield painters and the 3D zoom) is DELETED — the app draws no constellation. Do not reintroduce a Canvas map, an SVG star map or a second lane-grid component: the drawer and the Stats page must read the same one.
+- **The constellation's two Experiments switches are gone** (`starZoom3dState` / `KEY_STAR_ZOOM_3D`, `drawerConstellationState` / `KEY_DRAWER_CONSTELLATION`, and `AppPreferences.isStarZoom3dEnabled` / `setStarZoom3dEnabled` / `isDrawerConstellationEnabled` / `setDrawerConstellationEnabled`). The Experiments screen's old "Constellation" section is now **Navigation** and holds only the nav-bar "Classic active indicator" row. Those experiments concluded, so the winning path is hardcoded — do not re-gate them.
+- **The Stats page ("Your Curiosity") is four instruments in `features/stats/StatsScreen.kt`:** `ProgressCard` (streak + level/XP + journey stages + medals + the Quests door — it REPLACES the old separate `StreakLevelCard` and `JourneyCard`, which were two cards about the same number), `BrainCard` (the six `brainProfile` dimensions as meters, with the tip printed for the WEAKEST dimension only — it used to print six paragraphs), `LaneMapCard` (the lane grid + the `StatsRangeSelectorPill` window + a `Cabinet` door on the selected lane through `PendingCabinetFilter.request` + `navigateToTab`), and `LifetimeTotalsCard` (compact counter panes). `StatsConstellationCard`, `LanesBreakdownCard` ("Your lanes" — the list that repeated the map) and `StatsSummaryChip` are DELETED, and `StatsCard`'s shell is the app-wide WHITE card (`surfaceContainerLowest` + an `outlineVariant` hairline), not the old seafoam lerp.
+- **Audit follow-up (v409):** a fresh sweep for duplicate copy and duplicate doors found only the legitimate patterns — per-row navigations (`revealFor` / `socialProfile` / `directMessage` once per list item) and the phone/two-pane or empty/list BINARY branches, which are one copy per branch rather than two on screen. Nothing else was co-visible duplication.
 
 ### Adaptive layout (tablet & landscape) — ALWAYS-ON
 - **`ui/adaptive/CurioAdaptiveLayout.kt`** owns the window adaptation contract: `windowWidthSizeClass()` (material3-window-size-class, `calculateWindowSizeClass(activity)`) and `CurioContentMaxWidth = 720.dp`. No Settings toggle — the wide layout engages automatically on medium/expanded windows (>= 600dp wide; tablets, landscape, split-screen) and phones are untouched.

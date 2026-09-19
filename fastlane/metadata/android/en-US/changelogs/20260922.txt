@@ -1,4 +1,16 @@
 REMOVE:
+- Home: the drawer's menu is gone — Quests & Levels, Your Curiosity (Topic history, Manage categories, Browse topics) and About (Support & diagnostics, Replay intro). Settings keeps those rows, Home keeps Browse topics, Profile keeps Quests.
+- Your Curiosity: the "Your lanes" list is gone — the lane map above it already names every lane and its knowledge.
+- Settings: the star map's Experiments switches ("3D star zoom", "Drawer constellation") are gone with the star map.
+
+ADD:
+- Home: the drawer is your brain — your streak, your level with its XP bar and your total knowledge, over a grid of your lanes, one card per lane with a meter that fills as you build there; tap a lane and its own figures open under it.
+- Your Curiosity: the constellation drawing is replaced by that same lane map — real tiles, a meter per lane, and a Cabinet door onto the lane you tap that opens the Cabinet filtered to it.
+
+FIX:
+- Your Curiosity: four cards instead of six — streak with level, XP and journey stages on ONE card (one Quests door), the six brain dimensions as meters with only the weakest one's tip, the lane map, and the lifetime figures in one compact grid. The six tip paragraphs and the repeated lane list are gone.
+
+REMOVE:
 - Home: the drawer no longer offers Stats & insights twice — the curiosity map at the top of the drawer is the door, and the duplicate row inside the fold-out group is gone.
 - Profile: "Your lanes" is gone, and so is the Settings shortcut in the bar — the hero already says how many lanes there are, and Settings keeps the one door that says what it is. The lanes themselves are still arranged in Settings ▸ Manage categories and still browsed in the Cabinet.
 - Cabinet: the "Your books" heading on the Curiying-now shelf is a label, not a second way into My shelf.
