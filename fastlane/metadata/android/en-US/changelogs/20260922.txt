@@ -8,6 +8,7 @@ REMOVE:
 - Cabinet: the empty-Cabinet suggestions are gone — a fresh Cabinet opens straight onto its Cupboard card and shelves, with no "Your Cabinet is empty" block, no three shuffled picks and no Shuffle pill.
 
 FIX:
+- Home: holding a recent row waits its two seconds and ticks — those rows' options menu ran on the platform's own short hold and never announced itself, so a finger resting on a row during a slow scroll still popped the menu; the recents preview wears the patient hold now, and every hold that opens a menu plays its tap-weight haptic (the Spin picker's lane tiles included).
 - Cabinet: book covers find themselves — many books kept a blank plate because a cover URL that never loaded was remembered as the answer, and every provider handed that same one back; the search now really tries iTunes Search and then Open Library, the tiles cascade for books too, and only a cover whose image actually arrived is remembered.
 - Cabinet: the open book on the Curiying-now shelf is a book again — its pages bowed the wrong way and its ruled lines ran straight through the spine; the two pages now meet in a shadowed gutter, with a ribbon past the foot.
 - Art: an artist or a painter's page has words now — the Met only knows the works it holds, so a maker it holds nothing for opened an empty sheet; their own article and their face now come from Wikipedia beside the works list, and the reveal card falls back to that portrait.

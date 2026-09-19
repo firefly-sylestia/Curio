@@ -1173,6 +1173,20 @@ fun HomeScreen(navController: NavController) {
                         }
                     )
                 } else {
+                    // v407 — HOME'S RECENTS WEAR THE PATIENT HOLD.
+                    //
+                    // These rows open their options on a hold, and they do it
+                    // through the picker's anchored radial gesture — which
+                    // reads the timeout from THIS subtree's view configuration.
+                    // They were never wrapped, so they kept the platform's
+                    // ~500ms: a finger resting on a row while a slow scroll
+                    // began still armed the menu (the member's report: "the tap
+                    // and hold actions for the topics in home screen its still
+                    // buggy and not 1.5 sec something"), and the hand-rolled
+                    // timer fired no haptic either. Same fix as the pet's home
+                    // and the Recents page: one wrapper, and the gesture's own
+                    // slop-cancel covers the rest of the window.
+                    CurioPatientHold {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         // Home keeps this as a five-item preview; the full
                         // feed is available through View all → Recents.
@@ -1236,6 +1250,7 @@ fun HomeScreen(navController: NavController) {
                                 }
                             }
                         }
+                    }
                     }
                 }
 

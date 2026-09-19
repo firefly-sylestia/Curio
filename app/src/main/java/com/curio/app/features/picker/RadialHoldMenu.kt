@@ -118,8 +118,19 @@ class HoldSession(
 
 /**
  * Attaches the hold gesture. Place BEFORE any clickable in the chain so the
- * hold owns the pointer once it opens. The long-press uses the system's own
- * timeout ([LocalViewConfiguration.longPressTimeoutMillis]).
+ * hold owns the pointer once it opens. The long-press uses the timeout the
+ * row's OWN view configuration reports
+ * ([LocalViewConfiguration.longPressTimeoutMillis]) — wrap the list or page in
+ * `CurioPatientHold` and this gesture inherits the app's patient hold with no
+ * second timer (v407: Home's recents wore the platform's ~500ms and armed
+ * their menu on a resting finger mid-scroll).
+ *
+ * v407 — THE OPEN PLAYS THE HAPTIC ITSELF. A hold that opens a menu must
+ * announce itself, and a hand-rolled timer gets nothing from the platform: the
+ * caller used to be responsible for the tick and the Home recents (and the
+ * picker's tiles and browse rows) simply never fired one (member's report:
+ * "and also doesnt have haptics"). Call sites must not fire their own
+ * LongPress on open, or the row would tick twice.
  *
  * v325 — this Compose generation (BOM 2026.05) removed
  * `PointerInputChange.positionInRoot()` and made the gesture scope
@@ -134,6 +145,9 @@ class HoldSession(
 fun Modifier.radialHoldMenu(hold: HoldSession?): Modifier = composed {
     if (hold == null) return@composed this
     val viewConfig = LocalViewConfiguration.current
+    // Hoisted in composition (the app's haptic convention — never read inside
+    // a gesture/click lambda): the tick fires from the hold timer instead.
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
     // A REAL CoroutineScope for the hold timer — the awaitEachGesture scope
     // is restricted and cannot run delay()/launch().
     val scope = rememberCoroutineScope()
@@ -151,6 +165,9 @@ fun Modifier.radialHoldMenu(hold: HoldSession?): Modifier = composed {
                 val holdJob = scope.launch {
                     delay(viewConfig.longPressTimeoutMillis)
                     opened = true
+                    haptics.performHapticFeedback(
+                        androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress
+                    )
                     hold.onOpen(pressPos)
                 }
                 // v337 — SCROLL-CANCEL: while the menu hasn't opened yet, any
