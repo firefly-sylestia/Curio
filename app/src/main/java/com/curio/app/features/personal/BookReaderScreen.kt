@@ -314,9 +314,51 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // whichever surface is showing takes it and clears it, exactly like a text
     // jump already did (see [pendingBlock]).
     var pendingPage by remember { mutableStateOf<Int?>(null) }
+
+    /**
+     * v405 — A TURN THE READER ASKED FOR IS NOT THE MEMBER MOVING.
+     *
+     * Every reading surface puts the chrome away when it starts scrolling,
+     * because a scroll means the member is moving through the book. A page
+     * asked for by the reader ITSELF scrolls exactly the same way — so pressing
+     * the page bar's arrow put the bar away, and the member was HOLDING the
+     * chrome when the tools left from under their finger (member's report: "when
+     * i switch page though the that page switch pill why the tools hide fix that
+     * behaviour it should hide only when i touch the page"). This flag says "that
+     * scroll is ours", and it is cleared when the scroll settles.
+     */
+    var askedByReader by remember { mutableStateOf(false) }
+
+    /**
+     * A jump asked for from OUTSIDE the reading surface — a chapter, a mark,
+     * "Continue reading". The sheet closes and the member wants the page and not
+     * the tools, so the chrome goes.
+     */
     fun jumpToPage(page: Int) {
         pendingPage = page
+        askedByReader = true
         hideChrome()
+    }
+
+    /**
+     * THE PAGE BAR'S OWN TURN — the same ask WITHOUT putting the chrome away:
+     * the member is using the bar, so the bar stays (see [askedByReader]).
+     */
+    fun turnPageFromBar(page: Int) {
+        pendingPage = page
+        askedByReader = true
+    }
+
+    // THE FLAG CANNOT STICK. A turn asked for settles in a moment, and it is
+    // normally cleared by the scroll's own "finished" edge — but an instant jump
+    // (the column's own `scrollToItem`) may never report one, and a flag left
+    // standing would stop the chrome from ever hiding on a member's own scroll
+    // again. So it also expires on its own.
+    LaunchedEffect(askedByReader) {
+        if (askedByReader) {
+            delay(1200)
+            askedByReader = false
+        }
     }
 
     /**
@@ -366,6 +408,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             ReaderPageBar(
                 label = "Page ${pagerState.currentPage + 1} of ${loaded.pageCount}",
                 onPrev = {
+                    askedByReader = true
                     scope.launch {
                         pagerState.animateScrollToPage(
                             (pagerState.currentPage - 1).coerceAtLeast(0)
@@ -373,6 +416,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     }
                 },
                 onNext = {
+                    askedByReader = true
                     scope.launch {
                         pagerState.animateScrollToPage(
                             (pagerState.currentPage + 1).coerceAtMost(loaded.pageCount - 1)
@@ -388,8 +432,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             val at = shownPage.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
             ReaderPageBar(
                 label = "Page ${at + 1} of ${loaded.pageCount}",
-                onPrev = { jumpToPage((at - 1).coerceAtLeast(0)) },
-                onNext = { jumpToPage((at + 1).coerceAtMost(loaded.pageCount - 1)) }
+                onPrev = { turnPageFromBar((at - 1).coerceAtLeast(0)) },
+                onNext = { turnPageFromBar((at + 1).coerceAtMost(loaded.pageCount - 1)) }
             )
         }
 
@@ -399,11 +443,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             ReaderPageBar(
                 label = "Page ${textPager.currentPage + 1} of $textPageCount",
                 onPrev = {
+                    askedByReader = true
                     scope.launch {
                         textPager.animateScrollToPage((textPager.currentPage - 1).coerceAtLeast(0))
                     }
                 },
                 onNext = {
+                    askedByReader = true
                     scope.launch {
                         textPager.animateScrollToPage(
                             (textPager.currentPage + 1).coerceAtMost(textPageCount - 1)
@@ -552,7 +598,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     onLongPress = { marking = it },
                     chromeVisible = chrome,
                     onTap = { tapPage() },
-                    onScrolled = { hideChrome() },
+                    onScrolled = { scrolling ->
+                        // A scroll the READER asked for keeps the chrome (v405).
+                        if (scrolling) {
+                            if (!askedByReader) hideChrome()
+                        } else {
+                            askedByReader = false
+                        }
+                    },
                     selection = selection,
                     onSelect = { swept ->
                         // Selecting words is a deliberate act on the page: the
@@ -591,7 +644,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         )
                     },
                     onTap = { tapPage() },
-                    onScrolled = { hideChrome() },
+                    onScrolled = { scrolling ->
+                        // A scroll the READER asked for keeps the chrome (v405).
+                        if (scrolling) {
+                            if (!askedByReader) hideChrome()
+                        } else {
+                            askedByReader = false
+                        }
+                    },
                     flow = ReaderLook.pageFlow,
                     // The sweep on a PDF page is reported the same way the
                     // reflowable one is, because it is the same act: the words
@@ -951,7 +1011,7 @@ private fun TextReader(
     onLongPress: (ReaderParagraph) -> Unit,
     chromeVisible: Boolean,
     onTap: () -> Unit,
-    onScrolled: () -> Unit,
+    onScrolled: (Boolean) -> Unit,
     /** v389c — the live selection, when it belongs to this book's text. */
     selection: ReaderSelection?,
     onSelect: (ReaderSelection) -> Unit,
@@ -981,7 +1041,7 @@ private fun TextReader(
     // no business over the words while they do it (see [tapPage]).
     LaunchedEffect(state, onScrolled) {
         snapshotFlow { state.isScrollInProgress }
-            .collect { scrolling -> if (scrolling) onScrolled() }
+            .collect { scrolling -> onScrolled(scrolling) }
     }
 
     // PINCH makes the TYPE bigger, not the pixels: a reflowed book that is
@@ -1156,7 +1216,7 @@ private fun PdfScrollReader(
     bookId: String,
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onTap: () -> Unit,
-    onScrolled: () -> Unit,
+    onScrolled: (Boolean) -> Unit,
     onLongPress: (Int) -> Unit,
     /** v389c — the live sweep, when it belongs to this page of the file. */
     selection: ReaderSelection?,
@@ -1185,7 +1245,7 @@ private fun PdfScrollReader(
 
     LaunchedEffect(listState, onScrolled) {
         snapshotFlow { listState.isScrollInProgress }
-            .collect { scrolling -> if (scrolling) onScrolled() }
+            .collect { scrolling -> onScrolled(scrolling) }
     }
 
     LaunchedEffect(bookId, document, pageCount, restored) {
@@ -1729,7 +1789,7 @@ private fun PageReader(
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onLongPress: (Int) -> Unit,
     onTap: () -> Unit,
-    onScrolled: () -> Unit,
+    onScrolled: (Boolean) -> Unit,
     flow: ReaderFlow,
     /** v389c — the live sweep, when it belongs to this page of the file. */
     selection: ReaderSelection?,
@@ -1814,7 +1874,7 @@ private fun PageReader(
     // A page turned is the member moving through the book: the chrome goes.
     LaunchedEffect(pagerState, onScrolled) {
         snapshotFlow { pagerState.isScrollInProgress }
-            .collect { scrolling -> if (scrolling) onScrolled() }
+            .collect { scrolling -> onScrolled(scrolling) }
     }
 
     // PINCH ZOOMS THE PAGE ITSELF. A PDF page is not reflowable — zooming it has
