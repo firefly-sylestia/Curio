@@ -478,6 +478,82 @@ private data class BookHit(
 )
 
 /**
+ * v408 — A PICKED FILE, WAITING TO BE NAMED.
+ *
+ * Holds the picker's URI plus what its file name suggested, so the
+ * confirmation panel can be edited field by field before anything is written
+ * to the shelf.
+ */
+private data class PendingImport(
+    val uri: Uri,
+    val title: String,
+    val author: String
+)
+
+/**
+ * v408 — CONFIRM THE IMPORT.
+ *
+ * Two editable fields and one decision. [PendingImport.title] arrives as the
+ * guess taken from the file's name — often right, sometimes not — and the
+ * sentence above the fields says plainly which of the two this is, so a member
+ * who sees rubbish knows why and can fix it without wondering whether Curio
+ * read the wrong file.
+ */
+@Composable
+private fun BookImportConfirm(
+    pending: PendingImport,
+    ink: Color,
+    accent: Color,
+    onChange: (PendingImport) -> Unit,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    Text(
+        "Is this the book?",
+        style = MaterialTheme.typography.titleLarge.copy(
+            fontFamily = FrauncesFontFamily,
+            fontWeight = FontWeight.SemiBold
+        ),
+        color = ink
+    )
+    Text(
+        if (pending.title.isNotBlank()) {
+            "Read from the file's name — fix it if the guess is off."
+        } else {
+            "The file's name did not say — give it a title."
+        },
+        style = MaterialTheme.typography.bodySmall,
+        color = ink.copy(alpha = 0.6f)
+    )
+    BookField(
+        value = pending.title,
+        onValueChange = { onChange(pending.copy(title = it)) },
+        placeholder = "Title",
+        ink = ink,
+        accent = accent
+    )
+    BookField(
+        value = pending.author,
+        onValueChange = { onChange(pending.copy(author = it)) },
+        placeholder = "Author (optional)",
+        ink = ink,
+        accent = accent
+    )
+    Text(
+        "Its pages and chapters are read from the file itself.",
+        style = MaterialTheme.typography.labelSmall,
+        color = ink.copy(alpha = 0.5f)
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        TextButton(onClick = onCancel) { Text("Cancel") }
+        TextButton(
+            onClick = onConfirm,
+            enabled = pending.title.isNotBlank()
+        ) { Text("Add to shelf", color = personalAccentInk()) }
+    }
+}
+
+/**
  * The add-a-book sheet: a search field, the catalogue's answers, and a manual
  * door underneath. Picking a result creates the shelf row immediately and
  * opens it, so the member lands on the book they just chose (rather than
@@ -506,6 +582,9 @@ private fun AddBookSheet(
     var manualTitle by remember { mutableStateOf("") }
     var manualAuthor by remember { mutableStateOf("") }
     var manualChapters by remember { mutableIntStateOf(0) }
+    // A file that has been picked but NOT yet become a book — see the
+    // confirmation panel in the sheet below.
+    var pendingImport by remember { mutableStateOf<PendingImport?>(null) }
 
     fun addBook(
         title: String,
@@ -546,6 +625,28 @@ private fun AddBookSheet(
                             runCatching {
                                 PersonalRepositoryHolder.repo.setDocument(id, path)
                             }
+                            // v408 — AND THE FILE'S OWN FACTS.
+                            //
+                            // A book added from a file used to keep whatever
+                            // the guesswork left on it (no pages, no
+                            // chapters), so its page showed "Set how long the
+                            // book is" for a file that knows exactly how long
+                            // it is, and its reading progress had nothing to
+                            // count against. The same adoption the attach drop
+                            // does on an existing book runs here: the file's
+                            // page count and its own table of contents are
+                            // read out and written onto the row, so a book
+                            // added straight from a PDF is measured by that
+                            // PDF from the first frame.
+                            runCatching {
+                                val fromFile = documentChapters(context, path)
+                                val pages = if (path.lowercase().endsWith(".pdf")) {
+                                    pdfPageCount(context, path)
+                                } else {
+                                    0
+                                }
+                                PersonalRepositoryHolder.repo.adoptDocumentFacts(id, fromFile, pages)
+                            }
                         }
                     }
                 }
@@ -554,19 +655,25 @@ private fun AddBookSheet(
         }
     }
 
+    // v408 — THE FILE'S NAME, THEN THE MEMBER'S SAY-SO.
+    //
+    // Importing used to create the book outright from `lastPathSegment`, which
+    // for a document provider is an opaque id (`msf:1000000042`) — so a shelf
+    // of imported files arrived as a column of numbers, and the name the member
+    // could see in their own file manager was never read. Now the provider's
+    // DISPLAY_NAME is parsed ([detectBookFromFileName]) and the guess is put in
+    // FRONT of the member in editable fields: a book they can name is a book
+    // they can find again, and a wrong guess costs a tap instead of a rename.
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri ?: return@rememberLauncherForActivityResult
-        val name = uri.lastPathSegment?.substringAfterLast('/')
-            ?.substringBeforeLast('.')
-            ?.replace('_', ' ')
-            .orEmpty()
-            .ifBlank { "Imported book" }
-        // The picker's permission is no longer kept: the file is COPIED into
-        // the app's own storage by `addBook`, which is the only reason the
-        // book can still be read after the permission would have expired.
-        addBook(name, "", "", 0, document = uri)
+        val detected = detectBookFromFileName(BookFiles.displayName(context, uri))
+        pendingImport = PendingImport(
+            uri = uri,
+            title = detected.title,
+            author = detected.author
+        )
     }
 
 
@@ -584,6 +691,26 @@ private fun AddBookSheet(
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // A picked file takes the whole sheet: there is nothing else to
+            // decide until the member has said what the book is.
+            pendingImport?.let { pending ->
+                BookImportConfirm(
+                    pending = pending,
+                    ink = ink,
+                    accent = accent,
+                    onChange = { pendingImport = it },
+                    onCancel = { pendingImport = null },
+                    onConfirm = {
+                        val ready = pending
+                        pendingImport = null
+                        // The picker's permission is not kept: the file is
+                        // COPIED into the app's own storage by `addBook`, which
+                        // is why the book still reads after it would expire.
+                        addBook(ready.title, ready.author, "", 0, document = ready.uri)
+                    }
+                )
+                return@Column
+            }
             Text(
                 if (manual) "Add it yourself" else "Find a book",
                 style = MaterialTheme.typography.titleLarge.copy(

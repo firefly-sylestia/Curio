@@ -280,7 +280,11 @@ The 16,000+ curated topics are hand-picked. If you have topics to suggest for an
 
 ## 📜 License
 
-Curio is **free and open source** under the [MIT License](LICENSE). See LICENSE for details.
+Curio is **free and open source** under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.en.html) — see [LICENSE](LICENSE) for the full text.
+
+The AGPL is a strong copyleft licence: you may use, study, share and modify Curio freely, but any modified version you run — **including one offered to users over a network** — has to offer those users its complete source under the same licence (AGPL §13). That is deliberate: Curio's online side (accounts, sync, the community) is part of the app, so a hosted fork has to stay open too.
+
+Copyright (C) 2026 the Curio contributors.
 
 ---
 

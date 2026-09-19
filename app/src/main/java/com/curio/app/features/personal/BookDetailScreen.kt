@@ -127,6 +127,8 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             }
         }
     }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     // THE MARGINS: what the member marked while READING this book in Curio's
     // reader. A highlight carries the passage's own WORDS, so the page can hold
     // it as a quote without opening the file again.
@@ -135,6 +137,39 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             PersonalRepositoryHolder.repo.observeBookMarks(bookId).collect { value = it }
         }
     }
+    // ── v408 — THE READER'S OWN ANSWER TO "WHERE WAS I" ────────────────
+    // The reader keeps ONE position row per book + file (rewritten on every
+    // read, never appended), keyed by the FILE PATH as its sourceKey — the
+    // same resolution the Read pill makes below. The progress card observes
+    // that row so the card shows the page the file itself says the member is
+    // on — not just the chapter number typed by hand.
+    val attachedDocument = book?.let { BookFiles.documentOf(it.documentPath, it.coverUrl) }.orEmpty()
+    val isPdfDocument = remember(attachedDocument) {
+        attachedDocument.lowercase().endsWith(".pdf")
+    }
+    val lastPosition by produceState(
+        initialValue = ReaderMarkEntity(id = "", bookId = bookId, sourceKey = attachedDocument),
+        bookId, attachedDocument
+    ) {
+        if (attachedDocument.isBlank()) return@produceState
+        runCatching {
+            // The reactive position row (v408): it excludes itself from every
+            // mark query, so the card has its own flow — see the DAO.
+            PersonalRepositoryHolder.repo.observeReaderPosition(bookId, attachedDocument)
+                .collect { value = it ?: ReaderMarkEntity(id = "", bookId = bookId, sourceKey = attachedDocument) }
+        }
+    }
+    // The file's own length, read off the document ONCE per book (a PDF's page
+    // count is a fact of the file, not of the session).
+    val filePageCount by produceState(initialValue = 0, attachedDocument) {
+        if (attachedDocument.isBlank() || !isPdfDocument) return@produceState
+        withContext(Dispatchers.IO) {
+            value = runCatching { pdfPageCount(context, attachedDocument) }.getOrDefault(0)
+        }
+    }
+    // The page the member last read, in the file's own terms (0 when the book
+    // is not a PDF — no pretending a reflowable text has pages).
+    val lastReadPage = lastPageOf(lastPosition, isPdfDocument)
     // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
     // topic id, so its chapter rows can wear the book's REAL chapter names, page
     // ranges and summaries instead of "Chapter 7" — the catalog is the reason
@@ -148,9 +183,6 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     val catalogSynopsis by produceState(initialValue = "", catalogId) {
         value = BookCatalog.synopsis(catalogId)
     }
-
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     // ── Auto-fetch ─────────────────────────────────────────────────────
     // What Curio knows about this book is filled in FOR the member rather
@@ -573,6 +605,38 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         total = total,
                         current = current.currentChapter,
                         finished = current.isFinished,
+                        // v408 — THE FILE'S OWN MEASURES.
+                        pageCount = filePageCount,
+                        lastPage = lastReadPage,
+                        chapterNames = chapters.map { it.title },
+                        // A hand move of the page: recorded on the ROW, never
+                        // on the reader's position row — the reader keeps its
+                        // own place (see ProgressCard's note on the two
+                        // clocks). A hand-set page that lands inside a later
+                        // chapter's range moves the chapter with it when the
+                        // file's outline knows the ranges.
+                        onPage = if (filePageCount > 0) { page ->
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        PersonalRepositoryHolder.repo.saveBook(
+                                            current.copy(
+                                                pageCount = filePageCount,
+                                                // A hand-set page that lands in a
+                                                // later chapter MOVES the chapter
+                                                // with it when the file's outline
+                                                // knows the ranges — otherwise the
+                                                // two steppers disagree.
+                                                currentChapter = chapterForPage(
+                                                    page, chapters
+                                                ) ?: current.currentChapter,
+                                                updatedAtMillis = System.currentTimeMillis()
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        } else null,
                         onChapter = { chapter ->
                             scope.launch {
                                 withContext(Dispatchers.IO) {
@@ -856,14 +920,80 @@ private fun MarginsCard(
 /** How many margins the book page quotes: enough to read back, never a wall. */
 private const val MARGINS_SHOWN = 4
 
+/**
+ * v408 — WHICH CHAPTER A PAGE OF THE FILE LANDS IN.
+ *
+ * The file's own table of contents (an outline with page ranges, or an EPUB
+ * whose chapter rows carry pageStart/pageEnd) is the only authority consulted:
+ * the first chapter whose range contains the page. 0-range chapters are
+ * skipped — an outline that names chapters but not pages cannot answer. Null
+ * when no range claims the page, so the caller keeps what it had instead of
+ * guessing.
+ */
+private fun chapterForPage(page: Int, chapters: List<com.curio.app.data.PersonalChapter>): Int? =
+    chapters.firstOrNull { ch ->
+        ch.pageStart > 0 && ch.pageEnd >= ch.pageStart && page in ch.pageStart..ch.pageEnd
+    }?.number
+
+/**
+ * v408 — THE PAGE THE MEMBER LAST READ, in file terms.
+ *
+ * For a PDF the reader's position row IS a page ([ReaderMarkEntity.positionIndex]),
+ * so the answer is direct. For an EPUB (and a plain text) the position is a
+ * block/section index, which is not a page of anything — those books show
+ * chapter progress without a page bar rather than a bar pretending to count
+ * pages it never had.
+ */
+private fun lastPageOf(mark: com.curio.app.data.ReaderMarkEntity?, isPdf: Boolean): Int =
+    if (mark != null && isPdf) mark.positionIndex + 1 else 0
+
+/**
+ * v408 — THE PROGRESS CARD, REBUILT FROM THE FILE.
+ *
+ * What the old card knew was "chapter N of M" — a pair of steppers over a
+ * number the member typed, even when the book's own file was sitting right
+ * there knowing exactly which page they were on and which chapter that page
+ * opens (member: "add proper progress from the pdf or epub tracking, and
+ * also proper chapter updates if the pdf had it, with proper progress, and
+ * use can change the progress like before").
+ *
+ * So the card now reads the READER'S OWN MEMORY ([ReaderMarkKind.POSITION],
+ * one row per book + file, rewritten on every read): a PDF's position is a
+ * page and an EPUB's is the chapter block the reader restored — both arrive
+ * here as WHERE I AM, not as a second thing to keep in sync.
+ *
+ * ── The two clocks, and who wins ───────────────────────────────────
+ * The member can still move progress BY HAND ("i'm on chapter 4", "page
+ * 120"), exactly like before. The rule that keeps the two honest:
+ *
+ *  · A hand move writes the BOOK ROW (currentChapter / the page hint) and
+ *    leaves the reader's POSITION row alone.
+ *  · The READER writes only the POSITION row.
+ *  · The card SHOWS whichever is further along — never backwards. Opening
+ *    the reader after a hand move goes to the reader's own last position
+ *    (its restore logic is untouched), so the member's real reading place
+ *    can never be yanked by an edit here; a hand edit ahead of the reader
+ *    simply shows as ahead until reading catches up.
+ *
+ * Page/Chapter layout: PAGES are the prominent measure (a bar of the whole
+ * file with the page number on it), chapters the row beneath it (the file's
+ * own chapter names when it has an outline).
+ */
 @Composable
 private fun ProgressCard(
     total: Int,
     current: Int,
     finished: Boolean,
+    /** v408 — the file's own measures, when the book has one. */
+    pageCount: Int,
+    lastPage: Int,
+    chapterNames: List<String>,
     onChapter: (Int) -> Unit,
     onTotal: (Int) -> Unit,
-    onFinished: (Boolean) -> Unit
+    onFinished: (Boolean) -> Unit,
+    /** v408 — a hand move of the PAGE. Null when the book has no file to
+     *  count pages against (the page row then stays hidden). */
+    onPage: ((Int) -> Unit)? = null
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     val accent = personalAccent()
@@ -873,19 +1003,37 @@ private fun ProgressCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(15.dp)) {
+            // ── THE HEADLINE: WHERE I AM, IN THE FILE'S OWN WORDS ──
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
+                    // PAGES lead when the file has them (a PDF's page is the
+                    // most honest "where I am" there is); the chapter name is
+                    // the PROMINENT line when the file carries an outline
+                    // ("Chapter 4 · The Count of Monte Cristo"), because a
+                    // chapter is what a reader says when asked where they are.
+                    val chapterLabel = when {
+                        finished -> "Finished"
+                        current <= 0 -> "Not started"
+                        chapterNames.isNotEmpty() ->
+                            chapterNames.getOrNull(current - 1)?.takeIf { it.isNotBlank() }
+                                ?: "Chapter $current"
+                        else -> "Chapter $current"
+                    }
                     Text(
-                        when {
-                            finished -> "Finished"
-                            total <= 0 -> "Not started"
-                            else -> "Chapter $current"
-                        },
+                        chapterLabel,
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = ink
+                        color = ink,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        if (total > 0) "$total chapters" else "Set how long the book is",
+                        when {
+                            finished -> "Read again anytime"
+                            pageCount > 0 && lastPage > 0 ->
+                                "Page $lastPage of $pageCount \u00b7 chapter $current of $total"
+                            total > 0 -> "$total chapters"
+                            else -> "Set how long the book is"
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = ink.copy(alpha = 0.55f)
                     )
@@ -919,6 +1067,45 @@ private fun ProgressCard(
                 }
             }
             Spacer(Modifier.height(12.dp))
+            // ── THE PAGE BAR — the file measured end to end. ──
+            // Only when the book has a file to count: a 1px-tall full-width
+            // bar with the page number ON it, so "how far into this book am
+            // I" is answered by looking, not by arithmetic.
+            if (pageCount > 0) {
+                val pageFraction = if (pageCount > 0 && lastPage > 0) {
+                    (lastPage.toFloat() / pageCount.toFloat()).coerceIn(0f, 1f)
+                } else 0f
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(ink.copy(alpha = 0.10f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(pageFraction)
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(accent)
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Row {
+                    Text(
+                        if (lastPage > 0) "Page $lastPage" else "Not opened yet",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = personalAccentInk()
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        "$pageCount pages",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ink.copy(alpha = 0.55f)
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+            }
             // One tick per chapter, so the number is a PLACE and not a figure:
             // you can see the run you are in and how much is left at a glance.
             if (total in 1..MAX_TICKS) {
@@ -961,6 +1148,23 @@ private fun ProgressCard(
                     accent = accent,
                     ink = ink
                 )
+            }
+            if (onPage != null && pageCount > 0) {
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Page",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ink.copy(alpha = 0.7f),
+                        modifier = Modifier.weight(1f)
+                    )
+                    ChapterStepper(
+                        count = lastPage,
+                        onChange = { onPage(it.coerceIn(0, pageCount)) },
+                        accent = accent,
+                        ink = ink
+                    )
+                }
             }
             Spacer(Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {

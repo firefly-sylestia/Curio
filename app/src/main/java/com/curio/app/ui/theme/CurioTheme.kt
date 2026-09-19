@@ -48,24 +48,67 @@ private val CurioLightColorScheme = lightColorScheme(
     tertiaryContainer  = CurioColors.SkyMint.copy(alpha = 0.30f),
     onTertiaryContainer = CurioColors.DeepPlum,
 
+    // ── v408 — THE CARD LADDER (the "cards blend into the page" fix) ────
+    //
+    // THE PAGE IS CREAM, EVERYTHING THAT READS AS A CARD IS WHITE.
+    //
+    // Until v408 the ladder descended INTO the page: the light containers
+    // were a DARKER cream than `background` (Low #F0E8D6 on a #F7F0E4 page,
+    // High #E4D7BF), so a card sat one warmth-step below the page it was
+    // drawn on — and on a lane wash (Home/Profile/Cabinet wear the Spin
+    // lane's tint of that same cream) the two collapsed into one flat
+    // field. Member report: "the background and the cards and tabs some
+    // were blending too much … the journals in the home screen the preview
+    // of them get the background color and blends".
+    //
+    // The formula now: the PAGE keeps the member-preferred cream
+    // (`background` / `surfaceVariant` — untouched, it is the brand), and
+    // the CONTAINER ladder climbs ABOVE it into white instead of below it
+    // into tan:
+    //
+    //   surfaceContainerLowest / surfaceContainerLow   WHITE   — a card
+    //   surfaceContainer                           off-white — a nested
+    //                                       block inside a white card
+    //                                       (fields, wells, sub-rows)
+    //   surfaceContainerHigh                     warm white — the
+    //                                       floating pills / chips / dialogs
+    //                                       one step back toward the page
+    //   surfaceContainerHighest                 cream      — the anchor
+    //                                       step, where a control should
+    //                                       still read as "page family"
+    //
+    // So every card, sheet, tile and tab now separates from the page by
+    // LIGHTNESS (white on cream, one clean step) instead of by a hair of
+    // warmth nobody can see. Contrast for the onSurface ink only ever
+    // improves — the fill moved away from the ink, never toward it.
+    //
+    // Never "fix" a card by tinting it back toward the page: contrast
+    // against `background` is the whole separation.
     background = CurioColors.SoftCream,
     onBackground = CurioColors.DeepPlum,
 
-    surface                  = CurioColors.SoftCream,
+    surface                  = Color(0xFFFFFFFF),
     onSurface                = CurioColors.DeepPlum,
-    surfaceVariant           = Color(0xFFECE2CE),
+    surfaceVariant           = Color(0xFFEFE6D4),
     onSurfaceVariant         = CurioColors.DeepPlum.copy(alpha = 0.75f),
-    surfaceContainerLowest   = CurioColors.SoftCream,
-    surfaceContainerLow      = Color(0xFFF0E8D6),
-    surfaceContainer         = Color(0xFFECE2CE),
-    surfaceContainerHigh     = Color(0xFFE4D7BF),
-    surfaceContainerHighest  = Color(0xFFDCCDB2),
+    surfaceContainerLowest   = Color(0xFFFFFFFF),
+    surfaceContainerLow      = Color(0xFFFFFFFF),
+    surfaceContainer         = Color(0xFFFBF5EA),
+    surfaceContainerHigh     = Color(0xFFF5EDDE),
+    surfaceContainerHighest  = Color(0xFFEFE6D4),
 
     error             = CurioColors.WarmCoralRed,
     onError           = CurioColors.CreamWhite,
 
-    outline           = CurioColors.DeepPlum.copy(alpha = 0.15f),
-    outlineVariant    = CurioColors.DeepPlum.copy(alpha = 0.08f)
+    // v408 — the separators are readable now. At 0.15/0.08 alpha the plum
+    // hairlines were invisible on both the cream page and a white card, so
+    // every divider/inset rule in the app disappeared and the only thing
+    // left to tell two tap targets apart was whitespace (member report:
+    // "add proper formula for hierarchy and proper separations per
+    // clickable element"). These are the values [Modifier.curioCardEdge]
+    // and every divisor multiply from — dividers still halve them.
+    outline           = CurioColors.DeepPlum.copy(alpha = 0.24f),
+    outlineVariant    = CurioColors.DeepPlum.copy(alpha = 0.13f)
 )
 
 /**
@@ -94,21 +137,31 @@ private val CurioDarkColorScheme = darkColorScheme(
     background = Color.Black,
     onBackground = Color(0xFFEDE7DC),
 
+    // v408 — the dark twin of the light ladder shift (see the light scheme's
+    // "CARD LADDER" note). The page stays PITCH BLACK (the OLED promise is
+    // untouched); the container steps start one rung higher so a card is a
+    // visible plate on the black page instead of a #101010 slab that reads
+    // as a smudge — the dark half of "cards blend into the background".
+    // Separation is still by LIGHTNESS, just with a usable stride now:
+    // #161616 card → #1C1C1C nested → #242424 pill → #2C2C2C anchor.
     surface                  = Color(0xFF0D0D0D),
     onSurface                = Color(0xFFEDE7DC),
     surfaceVariant           = Color(0xFF1C1C1E),
     onSurfaceVariant         = Color(0xFFB8B2A8),
-    surfaceContainerLowest   = Color.Black,
-    surfaceContainerLow      = Color(0xFF101010),
-    surfaceContainer         = Color(0xFF161616),
-    surfaceContainerHigh     = Color(0xFF1D1D1D),
-    surfaceContainerHighest  = Color(0xFF252525),
+    surfaceContainerLowest   = Color(0xFF121212),
+    surfaceContainerLow      = Color(0xFF161616),
+    surfaceContainer         = Color(0xFF1C1C1C),
+    surfaceContainerHigh     = Color(0xFF242424),
+    surfaceContainerHighest  = Color(0xFF2C2C2C),
 
     error             = Color(0xFFE0706A),
     onError           = Color(0xFF2A0A08),
 
-    outline           = Color(0xFFEDE7DC).copy(alpha = 0.18f),
-    outlineVariant    = Color(0xFFEDE7DC).copy(alpha = 0.10f)
+    // v408 — separators match the light side's stride (see the light
+    // scheme). Real shadows cannot exist on black, so these hairlines and
+    // the container steps ARE the separation in dark.
+    outline           = Color(0xFFEDE7DC).copy(alpha = 0.26f),
+    outlineVariant    = Color(0xFFEDE7DC).copy(alpha = 0.14f)
 )
 
 /**
@@ -268,10 +321,17 @@ fun curioDialogContainerColor(): Color {
             0.30f
         )
     }
-    // v170 — light: the THEME-AWARE elevated container itself (the same
-    // surfaceContainerHigh the floating pills and chips wear) — the old
-    // 72% blend toward the cream background read as a cream-white panel.
-    return MaterialTheme.colorScheme.surfaceContainerHigh
+    // v408 — light: a WHITE panel (the same card the page's surfaces are
+    // now built from), with the brand rose breathed in at the same 6% as
+    // [curioProfileDialogColor]. It used to sit on surfaceContainerHigh,
+    // which was a cream step BELOW the page — a dialog therefore looked
+    // like a slightly dirtier patch of the page behind it. A dialog is the
+    // most elevated card in the app; it now reads as one.
+    return lerp(
+        MaterialTheme.colorScheme.surfaceContainerLowest,
+        curioRoseInk(),
+        0.05f
+    )
 }
 
 /**

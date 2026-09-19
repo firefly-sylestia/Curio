@@ -283,8 +283,8 @@ val glassBackdrop = rememberLayerBackdrop()
                         val lockDark = isCurioDarkTheme()
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = if (lockDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                            else Color.White.copy(alpha = 0.68f),
+                            color = if (lockDark) MaterialTheme.colorScheme.surfaceContainerHigh
+                            else Color.White,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp, vertical = 6.dp)

@@ -140,9 +140,7 @@ import com.curio.app.data.newPersonalBookId
 // Aliased: this file's own `chapterNoteSpans` / `chapterNotes` locals hold the
 // AppPreferences maps, and a local always shadows an import — the bridge's
 // converters have to be callable next to them.
-import com.curio.app.features.personal.chapterNoteDoc
-import com.curio.app.features.personal.chapterNoteSpans as docToSpans
-import com.curio.app.features.personal.chapterNoteText as docToText
+
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -184,7 +182,6 @@ import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.data.matchesSavedName
 import com.curio.app.data.matchesSavedNameStrict
 import com.curio.app.data.CoverSwatches
-import com.curio.app.data.TextSpan
 import com.curio.app.data.coverSwatchesFromArgbs
 import com.curio.app.data.coverSwatchesToArgbs
 import com.curio.app.data.fetchCoverSwatches
@@ -395,7 +392,7 @@ fun TopicRevealScreen(
     // The share action opens the original card editor sheet directly.
     // v375 — chapter → review text + its rich runs (spans) for the one-shot
     // share-card seed.
-    var pendingChapterShare by remember { mutableStateOf<Triple<Int, String, List<TextSpan>>?>(null) }
+
     // v315 — the book/album sections compose only AFTER the shared-element
     // morph settles (~380ms), so heavy content (poster Coil decode, chapter
     // LazyRow, album track list) never competes with the card expansion
@@ -1017,6 +1014,8 @@ fun TopicRevealScreen(
                             topic = bookTopic,
                             onSynopsisClick = { showSynopsisDialog = true },
                             onChapterClick = { selectedChapter = it },
+                            // v408 — both doors now open the shelf's book page
+                            // (see the bridge at the bottom of this screen).
                             modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
                         )
                     }
@@ -1316,15 +1315,7 @@ fun TopicRevealScreen(
                     bookImageUrl = if (cat.id == CategoryId.BOOKS) floatingTopic.imageUrl else "",
                     bookRating = AppPreferences.bookRatingsState[floatingTopic.name]?.takeIf { it > 0.0 },
                     bookRatingCount = AppPreferences.bookRatingsCountState[floatingTopic.name] ?: 0,
-                    // v371 — the chapter note shared from Book Notes opens the
-                    // card pre-seeded as a Chapter review (text + chapter);
-                    // the seed is one-shot, cleared after the sheet opens.
-                    // v375 — the note's rich runs ride the seed too.
-                    seedReviewText = pendingChapterShare?.second.orEmpty(),
-                    seedReviewChapter = pendingChapterShare?.first ?: 0,
-                    seedReviewSpans = pendingChapterShare?.third.orEmpty(),
                     onDismiss = {
-                        pendingChapterShare = null
                         showShareSheet = false
                     }
                 )
@@ -1341,38 +1332,58 @@ fun TopicRevealScreen(
         navController.popBackStack()
     }
 
-    // v315/v316b/v348 — the book notes UI is ONE ModalBottomSheet (album
-    // style): a collapsible "About this book" synopsis card at the top with
-    // the full chapter list below it as expandable rows, so nothing requires
-    // a tab switch. What you tapped seeds the sheet: the synopsis card opens
-    // with the synopsis pre-expanded, a chapter chip expands that chapter
-    // and scrolls to it.
+    // v408 — THE REVEAL'S BOOK SHEET IS THE SHELF'S BOOK PAGE NOW.
+    //
+    // Tapping the synopsis card or a chapter chip used to open the reveal's
+    // own ModalBottomSheet (BookNotesSheet): a stripped-down copy of the book
+    // — synopsis, chapter rows, a note field — that could not do any of the
+    // things the shelf's book page does, because it was not connected to the
+    // shelf at all until "Curiying now" linked it. The member asked for the
+    // real thing: "for the book view replace the bottom sheet of the book
+    // from topic reveal screen with the new book screen".
+    //
+    // So the taps route to [BookDetailScreen] instead. The book on the shelf
+    // IS this topic (the catalog id is the join — the shelf bridge below
+    // matches the same way), so the page opens with the real chapter list,
+    // the reading progress measured from the member's file, and every note
+    // they already wrote attached. A topic that somehow has no shelf row yet
+    // is shelved first — additive, never destructive — so the page has a book
+    // to open. One door, one book, one set of notes.
     val bookSheetTopic = resolved
     if (bookSheetTopic != null && bookSheetTopic.categoryId == CategoryId.BOOKS &&
         (showSynopsisDialog || selectedChapter != null) &&
         (!bookSheetTopic.synopsis.isNullOrBlank() || !bookSheetTopic.chapters.isNullOrEmpty())
     ) {
-        BookNotesSheet(
-            cat = cat,
-            topic = bookSheetTopic,
-            mode = if (showSynopsisDialog) BookNotesMode.SYNOPSIS else BookNotesMode.CHAPTERS,
-            chapter = selectedChapter,
-            onSelectChapter = { selectedChapter = it },
-            // v371 — "Share as review": the chapter note opens the topic
-            // share card pre-seeded with that note as the Chapter review
-            // text, tagged with its chapter. v375 — the note's rich runs
-            // travel so formatting stays on the card.
-            onShareNote = { chNum, noteText, spans ->
-                pendingChapterShare = Triple(chNum, noteText, spans)
-                showShareSheet = true
-            },
-            onOpenAuthor = { name -> authorSheetName = name },
-            onDismiss = {
-                showSynopsisDialog = false
-                selectedChapter = null
+        // Resolve the (possibly to-be-created) shelf book once per open, off
+        // the main thread; then navigate. The sheet state is never rendered —
+        // the flags are consumed here.
+        LaunchedEffect(bookSheetTopic.id, showSynopsisDialog, selectedChapter?.number) {
+            val shelfId = withContext(Dispatchers.IO) {
+                runCatching {
+                    PersonalRepositoryHolder.repo.books().firstOrNull { it.catalogId == bookSheetTopic.id }?.id
+                        ?: run {
+                            val now = System.currentTimeMillis()
+                            val newId = newPersonalBookId()
+                            PersonalRepositoryHolder.repo.saveBook(
+                                PersonalBookEntity(
+                                    id = newId,
+                                    title = bookSheetTopic.name,
+                                    author = bookSheetTopic.byline,
+                                    catalogId = bookSheetTopic.id,
+                                    createdAtMillis = now,
+                                    updatedAtMillis = now
+                                )
+                            )
+                            newId
+                        }
+                }.getOrNull()
             }
-        )
-
+            showSynopsisDialog = false
+            selectedChapter = null
+            if (shelfId != null) {
+                navController.navigate(CurioRoutes.bookDetail(shelfId)) { launchSingleTop = true }
+            }
+        }
     }
 
     // v332 — the album track-list UI mirrors the book notes sheet: one
@@ -3169,7 +3180,6 @@ private fun BookChapterChip(
  * scroll (synopsis accordion + chapter rows); the mode only seeds which
  * part is pre-expanded.
  */
-private enum class BookNotesMode { SYNOPSIS, CHAPTERS }
 
 /**
  * The book poster used on the reveal page AND inside the book-notes sheet —
@@ -3463,822 +3473,6 @@ private fun ShelfToggleChip(
     }
 }
 
-@Composable
-private fun BookNotesSheet(
-    cat: com.curio.app.data.CurioCategory,
-    topic: CurioTopic,
-    mode: BookNotesMode,
-    chapter: BookChapter?,
-    onSelectChapter: (BookChapter) -> Unit,
-    // v371 — "Share as review": opens the topic share card with this
-    // chapter's note pre-seeded as the Chapter review text. v375 — the
-    // note's rich runs (spans) ride along so formatting survives.
-    onShareNote: (chapterNumber: Int, noteText: String, spans: List<TextSpan>) -> Unit = { _, _, _ -> },
-    // v389d — the author's name in this sheet's header opens their written
-    // works (the author sheet). A no-op default keeps every other caller.
-    onOpenAuthor: (String) -> Unit = {},
-    onDismiss: () -> Unit
-) {
-    val context = LocalContext.current
-    val haptics = LocalHapticFeedback.current
-    // v339 — cover-art palette: the sheet derives its FULL colour set
-    // (background + cards + chips + text) from the BOOK cover's artwork
-    // (null swatches → per-element category fallback). Honors the
-    // book-fetch consent gate, so no network is touched when the toggle
-    // is OFF (cached covers only). v352 — when the topic has no authored
-    // cover, the hub's last RESOLVED cover URL drives the palette too.
-    val paletteUrl = topic.imageUrl.takeIf { it.isNotBlank() }
-        ?: AppPreferences.bookCoverUrlsState[topic.name]?.takeIf { it.isNotBlank() }
-    // v375 — the palette is INSTANT + remembered: the extracted swatches are
-    // cached per artwork URL, so this seeds the sheet's colors synchronously
-    // on first composition (no category-tint flash while the swatch fetch
-    // runs, and the palette survives restarts). The background fetch only
-    // refreshes the cache.
-    var coverSwatches by remember(paletteUrl) {
-        mutableStateOf(
-            paletteUrl?.let { url ->
-                AppPreferences.coverSwatchCacheState[url]?.let { coverSwatchesFromArgbs(it) }
-            }
-        )
-    }
-    LaunchedEffect(paletteUrl) {
-        val fetched = fetchCoverSwatches(
-            context,
-            paletteUrl,
-            networkAllowed = AppPreferences.bookFetchEnabledState
-        )
-        // Keep the cached palette when the refresh finds nothing (fetch
-        // consent off + art no longer Coil-cached, decode hiccup, …).
-        coverSwatches = fetched ?: coverSwatches
-        if (fetched != null && paletteUrl != null) {
-            AppPreferences.setCoverSwatchCache(context, paletteUrl, coverSwatchesToArgbs(fetched))
-        }
-    }
-    val coverPal = cat.notesSheetPalette(coverSwatches)
-    val accent = coverPal?.accent ?: cat.themedAccent()
-    val onAccent = coverPal?.onAccent ?: cat.onAccent()
-    val ink = coverPal?.ink ?: cat.categoryInk()
-    val surface = coverPal?.surface ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
-    val surfaceHigh = coverPal?.surfaceHigh ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-    val surfaceAlt = coverPal?.surfaceAlt ?: MaterialTheme.colorScheme.secondaryContainer
-    val onSurfaceAlt = coverPal?.onSurfaceAlt ?: MaterialTheme.colorScheme.onSecondaryContainer
-    val onSurface = coverPal?.onSurface ?: MaterialTheme.colorScheme.onSurface
-    val onSurfaceVariant = coverPal?.onSurfaceVariant ?: MaterialTheme.colorScheme.onSurfaceVariant
-    val chapters = topic.chapters.orEmpty()
-    val hasSynopsis = !topic.synopsis.isNullOrBlank()
-    val hasChapters = chapters.isNotEmpty()
-    // v348 — ALBUM-STYLE single sheet (no Synopsis | Chapters tabs): the
-    // synopsis is a collapsible "About this book" card pinned at the top of
-    // the chapter list (mirroring the album sheet's "About this album"), and
-    // every chapter is an expandable row below it. v352 — the synopsis
-    // starts COLLAPSED whatever opened the sheet; a chapter chip still
-    // expands + jumps straight to that chapter.
-    var expandedNumber by rememberSaveable(chapters.size) {
-        mutableStateOf<Int?>(null)
-    }
-    // v348 — favorite heart for the whole book (book-level, like the album
-    // hearts). Reactive: tapping toggles AppPreferences and this recomposes.
-    val bookName = topic.name
-    val isFavBook = bookName in AppPreferences.bookFavoritesState
-    // Reading progress (identical semantics to the old reader tab): the
-    // number of chapters marked read; chapter N is read when N <= chaptersDone.
-    val chaptersDone = AppPreferences.bookReadingProgressState[bookName] ?: 0
-    // v352 — per-chapter Like hearts (book name → liked chapter numbers).
-    val chapterLikes = AppPreferences.bookChapterLikesState[bookName].orEmpty()
-    // v362 — per-chapter personal notes (book name → chapter number → text).
-    val chapterNotes = AppPreferences.bookChapterNotesState[bookName].orEmpty()
-    // v375 — the notes' rich runs (bold/italic/highlight, written by the
-    // enlarged note editor) — read reactively so a share always carries the
-    // current formatting.
-    val chapterNoteSpans = AppPreferences.bookChapterNoteSpansState[bookName].orEmpty()
-
-    // ── THE SHELF BRIDGE ────────────────────────────────────────────────
-    // A book that came from Curio's own lane is the SAME book the member
-    // keeps on their shelf, so a chapter note written here IS that book's
-    // chapter review: one store (`personal_notes`, through the book's topic
-    // id), two screens — this sheet and the shelf's own chapter page. A book
-    // the catalog does not have keeps its notes in AppPreferences exactly as
-    // it always did.
-    var shelfBook by remember(topic.id) { mutableStateOf<PersonalBookEntity?>(null) }
-    var shelfNotes by remember(topic.id) {
-        mutableStateOf<Map<Int, PersonalNoteEntity>>(emptyMap())
-    }
-    // The member's in-flight edits. The store echoes a write back a frame or
-    // two later, and a controlled field that is fed its own stale value is
-    // how characters disappear while typing — so what they typed leads, and
-    // the store follows it.
-    var liveEdits by remember(topic.id) {
-        mutableStateOf<Map<Int, Pair<String, List<TextSpan>>>>(emptyMap())
-    }
-    var pendingWrite by remember(topic.id) {
-        mutableStateOf<Pair<Int, Pair<String, List<TextSpan>>>?>(null)
-    }
-    // v389 — REACTIVE, in two effects. The link can be BORN while this sheet is
-    // open — tapping "Curiying now" creates the shelf book (see
-    // CabinetShelfToggleChips) — and reading the link ONCE, on the way in, was
-    // how a book added from here stayed invisible to the sheet that added it
-    // (its chapter notes had nothing to attach to). The notes collector follows
-    // whichever book is linked, so it starts on its own the moment there is one.
-    LaunchedEffect(topic.id) {
-        runCatching {
-            PersonalRepositoryHolder.repo.observeBooks().collect { books ->
-                shelfBook = books.firstOrNull { it.catalogId == topic.id }
-            }
-        }
-    }
-    LaunchedEffect(shelfBook?.id) {
-        val linked = shelfBook ?: return@LaunchedEffect
-        runCatching {
-            PersonalRepositoryHolder.repo.observeBookNotes(linked.id).collect { list ->
-                shelfNotes = list.mapNotNull { note ->
-                    note.chapterIndex?.let { index -> index to note }
-                }.toMap()
-            }
-        }
-    }
-    // Writes are debounced (the note editor reports every keystroke) and
-    // flushed as one row per pause — never one row per letter.
-    LaunchedEffect(pendingWrite, shelfBook) {
-        val pending = pendingWrite ?: return@LaunchedEffect
-        val linked = shelfBook ?: return@LaunchedEffect
-        delay(400)
-        val (number, payload) = pending
-        withContext(Dispatchers.IO) {
-            runCatching {
-                PersonalRepositoryHolder.repo.saveChapterNote(
-                    bookId = linked.id,
-                    chapter = number,
-                    document = chapterNoteDoc(payload.first, payload.second)
-                )
-            }
-        }
-        pendingWrite = null
-    }
-
-    /** A chapter's note text — the shelf's review when the book is on the
-     *  shelf, else the sheet's own stored note. */
-    fun noteText(number: Int): String =
-        liveEdits[number]?.first
-            ?: shelfNotes[number]?.let { docToText(it.doc) }
-            ?: chapterNotes[number].orEmpty()
-
-    /** A chapter's note runs, from the same source as [noteText]. */
-    fun noteSpans(number: Int): List<TextSpan> =
-        liveEdits[number]?.second
-            ?: shelfNotes[number]?.let { docToSpans(it.doc) }
-            ?: chapterNoteSpans[number].orEmpty()
-
-    /** Writes a chapter note wherever this book keeps its notes. */
-    fun writeNote(number: Int, text: String, spans: List<TextSpan>) {
-        if (shelfBook != null) {
-            liveEdits = liveEdits + (number to (text to spans))
-            pendingWrite = number to (text to spans)
-            return
-        }
-        AppPreferences.setBookChapterNote(context, bookName, number, text)
-        AppPreferences.setBookChapterNoteSpans(context, bookName, number, spans)
-    }
-
-    // v371 — the ENLARGE note sheet: which chapter's note is being written
-    // in the full writing dialog (null = closed). The dialog edits the SAME
-    // slot as the compact field, so both stay in sync live.
-    var noteEditorChapter by remember { mutableStateOf<BookChapter?>(null) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val listState = rememberLazyListState()
-    // v352 — chapter switching no longer lags: the seed chapter drives an
-    // INSTANT scrollToItem (the old animated glide over a long list is what
-    // made chip-hopping jank), and tapping a row only toggles local expansion
-    // instead of round-tripping through the reveal's selectedChapter (which
-    // used to reset sheet state + re-scroll on every tap).
-    var opened by remember { mutableStateOf(false) }
-    LaunchedEffect(chapter?.number, chapters.size) {
-        if (chapter != null) {
-            expandedNumber = chapter.number
-        } else if (mode == BookNotesMode.CHAPTERS && !opened) {
-            expandedNumber = chapters.firstOrNull()?.number
-        }
-        opened = true
-        val idx = chapters.indexOfFirst { it.number == chapter?.number }
-        if (idx >= 0) {
-            listState.scrollToItem(idx + (if (hasSynopsis) 1 else 0))
-        }
-    }
-    fun toggleChapter(ch: BookChapter) {
-        expandedNumber = if (expandedNumber == ch.number) null else ch.number
-    }
-    fun toggleChapterRead(ch: BookChapter) {
-        val chDone = chaptersDone >= ch.number
-        AppPreferences.setBookReadingProgressExact(
-            context,
-            bookName,
-            if (chDone) ch.number - 1 else ch.number
-        )
-        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        // The notes sheets wear the CATEGORY-TINTED wash (same hue family as
-        // the reveal page + cards); when the cover's palette is available it
-        // replaces the category accent entirely (fallback stays when not).
-        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = CurioContentMaxWidth)
-                .fillMaxHeight(0.92f)
-                .padding(bottom = 20.dp)
-        ) {
-            // ── Header — cover + title/author + heart ───────────────────
-            Spacer(Modifier.height(8.dp))
-            Row(
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-            ) {
-                BookCoverPoster(
-                    bookTitle = topic.name,
-                    imageUrl = topic.imageUrl,
-                    modifier = Modifier
-                        .size(width = 76.dp, height = 114.dp)
-                        .shadow(3.dp, RoundedCornerShape(8.dp))
-                )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        "BOOK NOTES",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.4.sp
-                        ),
-                        color = ink
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        topic.name,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    topic.byline.takeIf { it.isNotBlank() }?.let { byline ->
-                        // v389d — THE AUTHOR IS A DOOR ("author button sheet with
-                        // authors written books"): the name under the title opens
-                        // their other books, wearing the small book glyph so the
-                        // tap is discoverable rather than hidden.
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .clickable { onOpenAuthor(byline) }
-                        ) {
-                            Text(
-                                byline,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = ink.copy(alpha = 0.85f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-                            CurioIcon(
-                                CurioIcons.MenuBook,
-                                "Their written works",
-                                tint = ink.copy(alpha = 0.7f),
-                                size = 13.dp
-                            )
-                        }
-                    }
-                    // v355 — the rating sits just below the author name: the
-                    // fetched Google Books average AND the user's own rating
-                    // together under the award-ribbon glyph (the old Reviews +
-                    // Your-rating card is gone).
-                    val fetchedRating = AppPreferences.bookRatingsState[topic.name]
-                    val myRating = AppPreferences.bookCustomRatingsState[topic.name] ?: 0.0
-                    if ((fetchedRating != null && fetchedRating > 0.0) || myRating > 0.0) {
-                        Spacer(Modifier.height(3.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.WorkspacePremium,
-                                contentDescription = null,
-                                tint = Color(0xFFF6B23B),
-                                size = 13.dp
-                            )
-                            Text(
-                                text = buildString {
-                                    if (fetchedRating != null && fetchedRating > 0.0) {
-                                        append(String.format("%.1f", fetchedRating))
-                                        if (myRating > 0.0) append(" · yours ${myRating.toInt()} / 5")
-                                    } else if (myRating > 0.0) {
-                                        append("yours ${myRating.toInt()} / 5")
-                                    }
-                                },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    // v348 — book-level favorite heart (mirrors the album
-                    // hearts in look and feel).
-                    Surface(
-                        onClick = {
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            AppPreferences.toggleBookFavorite(context, bookName)
-                        },
-                        shape = CircleShape,
-                        color = if (isFavBook) accent.copy(alpha = 0.2f) else surface.copy(alpha = 0.6f)
-                    ) {
-                        Box(
-                            modifier = Modifier.padding(8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            HeartGlyph(
-                                // v3xx — dark mode: the unselected header
-                                // heart wears the light ink twin too (the
-                                // 0.66-lightness variant vanished on the
-                                // cover-tinted chip).
-                                color = if (isFavBook) Color(0xFFE5484D)
-                                        else sheetActionIconTone(ink, onSurfaceVariant),
-                                iconSize = 19.dp,
-                                filled = isFavBook
-                            )
-                        }
-                    }
-                }
-            }
-
-            // v3xx33 — Cabinet shelf toggles: Curiying now / Want to read.
-            Spacer(Modifier.height(14.dp))
-            CabinetShelfToggleChips(
-                context = context,
-                topicId = topic.id,
-                topicName = topic.name,
-                byline = topic.byline,
-                categoryId = cat.id,
-                ink = ink,
-                onSurface = onSurface,
-                surface = surface
-            )
-
-            // ── v378 — progress as ONE clean rail label (no divider bar, no
-            // duplicate "N / M") — reading progress lives in the words only.
-            if (hasChapters) {
-                Spacer(Modifier.height(14.dp))
-                val progressLabel = (if (chaptersDone > 0)
-                    "$chaptersDone of ${chapters.size} chapters read"
-                else "${chapters.size} chapters").replaceFirstChar { it.uppercase() }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                ) {
-                    Text(
-                        progressLabel,
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = ink,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Spacer(Modifier.height(10.dp))
-            }
-
-            // ── One scroll: synopsis accordion, then the chapter list ─────
-            LazyColumn(
-                state = listState,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 8.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                if (hasSynopsis) {
-                    item(key = "book_about") {
-                        BookSynopsisAccordion(
-                            surface = surface,
-                            accent = accent,
-                            ink = ink,
-                            onSurface = onSurface,
-                            synopsis = topic.synopsis.orEmpty(),
-                            initiallyExpanded = !hasChapters
-                        )
-                    }
-                }
-                if (hasChapters) {
-                    itemsIndexed(chapters) { _, ch ->
-                        val isOpen = expandedNumber == ch.number
-                        val isRead = ch.number <= chaptersDone
-                        Surface(
-                            onClick = { toggleChapter(ch) },
-                            shape = RoundedCornerShape(14.dp),
-                            // v371 — the OPEN row is a soft accent TINT over
-                            // the surface (not the old solid accent fill):
-                            // the solid fill fought the cover palette on
-                            // every vivid/light cover and read as a loud
-                            // slab. Tinted + accent border keeps the "open"
-                            // state obvious while the sheet stays elegant.
-                            color = when {
-                                isOpen -> lerp(
-                                    accent.copy(alpha = 0.80f),
-                                    surface.copy(alpha = 0.55f),
-                                    0.84f
-                                )
-                                isRead -> surfaceAlt
-                                else -> surface
-                            },
-                            // v354 — no elevation flip: the old 1dp lift popped
-                            // in/out on expand (glitchy touch shadow). A read
-                            // row gets a solid accent border instead.
-                            shadowElevation = 0.dp,
-                            border = when {
-                                isOpen -> BorderStroke(1.dp, accent.copy(alpha = 0.65f))
-                                isRead -> BorderStroke(1.dp, accent.copy(alpha = 0.55f))
-                                else -> null
-                            }
-                        ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
-                                ) {
-                                    // Leading chip: the chapter number always
-                                    // shows — a READ chapter tints the disc
-                                    // softly in the accent (fill + number +
-                                    // rim) instead of a loud ✓ (v355). v378 —
-                                    // the number's INK on tinted discs and the
-                                    // read tint is deeper so the count stays
-                                    // legible on the accent-tinted open row
-                                    // (accent-on-accent washed out).
-                                    Box(
-                                        modifier = Modifier
-                                            .size(30.dp)
-                                            .clip(CircleShape)
-                                            .background(
-                                                when {
-                                                    // v371 — open chip: solid
-                                                    // accent disc (the tinted
-                                                    // row keeps its accent pop
-                                                    // on the number).
-                                                    isOpen -> accent
-                                                    isRead -> accent.copy(alpha = 0.30f)
-                                                    else -> surfaceHigh
-                                                }
-                                            )
-                                            .border(
-                                                1.dp,
-                                                when {
-                                                    isOpen -> accent.copy(alpha = 0.5f)
-                                                    isRead -> accent.copy(alpha = 0.65f)
-                                                    else -> onSurfaceVariant.copy(alpha = 0.25f)
-                                                },
-                                                CircleShape
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            "${ch.number}",
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                            color = when {
-                                                isOpen -> onAccent
-                                                isRead -> ink
-                                                else -> onSurfaceVariant
-                                            }
-                                        )
-                                    }
-                                    Text(
-                                        text = ch.title.replaceFirstChar { it.uppercase() },
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            fontWeight = if (isOpen || isRead) FontWeight.Bold else FontWeight.Normal
-                                        ),
-                                        color = if (isOpen) ink else onSurface,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    // v352 — per-row action chips: the Like
-                                    // heart and the Mark-read toggle live on
-                                    // the row (not inside the expanded panel),
-                                    // so both are one tap away. Read state is
-                                    // a SOLID accent fill (no more washed-out
-                                    // read chips).
-                                    val isLiked = ch.number in chapterLikes
-                                    val chDone = chaptersDone >= ch.number
-                                    Surface(
-                                        onClick = {
-                                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            AppPreferences.toggleBookChapterLike(context, bookName, ch.number)
-                                        },
-                                        shape = CircleShape,
-                                        color = if (isLiked) Color(0xFFE5484D).copy(alpha = 0.18f)
-                                                else surface.copy(alpha = 0.7f)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(6.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            HeartGlyph(
-                                                // v375 — on an OPEN (accent-tinted)
-                                                // row an accent heart vanished into
-                                                // the tint; the ink tone keeps the
-                                                // heart visible on the tinted row.
-                                                // v3xx — dark mode: the unselected
-                                                // heart wears the full-strength ink
-                                                // twin so it never vanishes into the
-                                                // cover-tinted dark wash.
-                                                color = if (isLiked) Color(0xFFE5484D)
-                                                        else if (isOpen) ink
-                                                        else sheetActionIconTone(ink, onSurfaceVariant),
-                                                iconSize = 16.dp,
-                                                filled = isLiked
-                                            )
-                                        }
-                                    }
-                                    Surface(
-                                        onClick = { toggleChapterRead(ch) },
-                                        shape = CircleShape,
-                                        // Read = SOLID accent fill + rim in
-                                        // EVERY state (the old open+read flip
-                                        // to an onAccent disc read as a hole
-                                        // punched in the accent row in dark
-                                        // mode — v355).
-                                        color = if (chDone)
-                                            accent
-                                            else surface.copy(alpha = 0.7f),
-                                        border = BorderStroke(
-                                            1.dp,
-                                            if (chDone)
-                                                onAccent.copy(alpha = 0.7f)
-                                                else if (isOpen) ink.copy(alpha = 0.35f)
-                                                else onSurfaceVariant.copy(alpha = 0.3f)
-                                        )
-                                    ) {
-                                        CurioIcon(
-                                            CurioIcons.FoldedCorner,
-                                            if (chDone) "Mark chapter unread" else "Mark chapter read",
-                                            // v3xx — dark mode: the unselected
-                                            // toggle wears the full-strength ink
-                                            // twin (see [sheetActionIconTone]).
-                                            tint = if (chDone) onAccent
-                                                else if (isOpen) ink
-                                                else sheetActionIconTone(ink, onSurfaceVariant),
-                                            size = 16.dp,
-                                            modifier = Modifier.padding(6.dp)
-                                        )
-                                    }
-                                }
-                                // v354 — expand/collapse: height + fade together
-                                // (the old fade-only pop read glitchy).
-                                AnimatedVisibility(
-                                    visible = isOpen,
-                                    enter = expandVertically(
-                                        animationSpec = tween(180)
-                                    ) + fadeIn(
-                                        animationSpec = tween(140)
-                                    ),
-                                    exit = shrinkVertically(
-                                        animationSpec = tween(140)
-                                    ) + fadeOut(
-                                        animationSpec = tween(120)
-                                    )
-                                ) {
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(1.dp)
-                                                .background(accent.copy(alpha = 0.22f))
-                                        )
-                                        if (ch.pageStart > 0 && ch.pageEnd > 0) {
-                                            Text(
-                                                "pp. ${ch.pageStart}–${ch.pageEnd}",
-                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                                color = if (isOpen) accent.copy(alpha = 0.9f) else ink
-                                            )
-                                        }
-                                        Text(
-                                            ch.summary.ifBlank { "No summary for this chapter." },
-                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
-                                            color = if (isOpen) ink else onSurface
-                                        )
-                                        // v362 — personal note per chapter:
-                                        // a quiet one-line field that saves as
-                                        // you type (blank text removes it).
-                                        // Lives in the expanded panel below the
-                                        // summary so readers can jot thoughts.
-                                        ChapterNoteField(
-                                            initial = noteText(ch.number),
-                                            accent = accent,
-                                            onAccent = onAccent,
-                                            ink = ink,
-                                            // v3xx43 — the sheet's real
-                                            // container/text roles, so the
-                                            // add-note box reads correctly on
-                                            // the dark cover-tinted sheet.
-                                            surfaceHigh = surfaceHigh,
-                                            onSurface = onSurface,
-                                            onSurfaceVariant = onSurfaceVariant,
-                                            isOpen = isOpen,
-                                            // v375 — typing in the compact
-                                            // field rewrites the note, so any
-                                            // rich runs from the enlarged
-                                            // editor no longer line up — clear
-                                            // them (they return via the
-                                            // enlarged editor).
-                                            onSave = { text ->
-                                                writeNote(ch.number, text, emptyList())
-                                            },
-                                            // v371 — the note row carries two
-                                            // actions: EXPAND opens the full
-                                            // writing sheet (long notes), and
-                                            // SHARE seeds the share card with
-                                            // the note as a Chapter review.
-                                            onExpand = { noteEditorChapter = ch },
-                                            onShare = { text ->
-                                                if (text.isNotBlank()) {
-                                                    onShareNote(ch.number, text, noteSpans(ch.number))
-                                                }
-                                            }
-                                        )
-                                        // v352 — the Mark-read toggle + Like
-                                        // heart moved OUT of the expanded panel
-                                        // onto the row (chips above); the
-                                        // panel now only holds pages + notes.
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // v371 — the ENLARGE note writing sheet: the chapter note written BIG.
-    // v375 — it hosts the Save-your-take rich editor (Format dock: bold /
-    // italic / highlighter / letter size) on the theme surface, so styling
-    // is written WITH the text and survives onto the share card's Chapter
-    // review + export (spans ride the same AppPreferences slot as the text).
-    noteEditorChapter?.let { editCh ->
-        val editText = noteText(editCh.number)
-        val editSpans = noteSpans(editCh.number)
-        // v3xx — text-history capture + browser inside the enlarged editor:
-        // the pill sits in the header (lifted above the keyboard by the
-        // dialog's imePadding) and restores write straight back into this
-        // chapter's note slot.
-        var noteHistoryOpen by remember { mutableStateOf(false) }
-        rememberTextHistoryCapture(context, "Chapter note", editText, "book|$bookName|ch|${editCh.number}")
-        Dialog(
-            onDismissRequest = { noteEditorChapter = null },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {                    Surface(
-                        Modifier.fillMaxSize(),
-                        // v389 — the note expand is a JOURNAL PAGE now: the same
-                        // page background the journal writes on and the same
-                        // dock at the foot of the field, so a note taken from a
-                        // book and a journal page read as one surface (user
-                        // request: "make its background screen and all the
-                        // journal style with the same bottom tool style").
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                // v3xx — imePadding lifts the sheet above the keyboard and
-                // the editor area scrolls, so a long note's text is always
-                // reachable and selectable without closing the keyboard.
-                // v391 — and the page around the writing answers a tap: the
-                // caret and the selection let go (see [clearWritingOnOutsideTap]).
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .imePadding()
-                        .padding(20.dp)
-                        .clearWritingOnOutsideTap()
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            "Note · CH ${editCh.number}${editCh.title.takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""}",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
-                        )
-                        TextHistoryPill(onClick = { noteHistoryOpen = true })
-                        Spacer(Modifier.width(8.dp))
-                        TextButton(onClick = { noteEditorChapter = null }) {
-                            Text("Done", fontWeight = FontWeight.Bold)
-                        }
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    // v375 — rich editing: every change saves the text AND its
-                    // runs together (blank clears both). The compact field
-                    // below reflects the text; its own edits clear the runs.
-                    // v389 — the editor owns the scroll and the dock holds the
-                    // sheet's foot: pinned, the words move and the tools do not.
-                    RichTextEditor(
-                        text = editText,
-                        spans = editSpans,
-                        onRichTextChange = { newText, spans ->
-                            writeNote(
-                                editCh.number,
-                                newText.take(2000),
-                                if (newText.isBlank()) emptyList() else spans
-                            )
-                        },
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                        placeholder = "Write your thoughts on this chapter…",
-                        minHeight = 140.dp,
-                        maxCharacters = 2000,
-                        dockPinned = true,
-                        // v391 — the journal page's own writing hand.
-                        journalInk = true,
-                            // v389 — the note expand wears the JOURNAL's dock: a
-                            // floating strip at the foot of the field with every
-                            // tool its own button (bold, italic, underline,
-                            // highlight, text size), instead of a Format toggle
-                            // that unfolds a second toolbar over the words.
-                        toolbarMode = RichTextToolbarMode.DOCK,
-                        accent = MaterialTheme.colorScheme.primary,
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        // v391 — and the words sit ON the page, the way the
-                        // journal's own lines do: no bordered chip around the
-                        // writing, only the sheet's background behind it.
-                        surface = Color.Transparent,
-                        showFieldBorder = false
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    // Share the note straight to the share card as a Chapter
-                    // review — no copy/paste, no re-typing. v375 — the note's
-                    // rich runs ride along so the card shows the formatting.
-                    Surface(
-                        onClick = {
-                            noteEditorChapter = null
-                            if (editText.isNotBlank()) {
-                                onShareNote(editCh.number, editText, noteSpans(editCh.number))
-                            }
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(46.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                "Share as Chapter review",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        // v3xx — the text-history browser for this chapter's note: restoring
-        // writes straight back into the same AppPreferences slot (plain text;
-        // rich runs clear so the restored text renders exactly).
-        if (noteHistoryOpen) {
-            TextHistoryBrowser(
-                ctx = context,
-                activeField = "Chapter note",
-                currentText = editText,
-                onRestore = { restored, mode ->
-                    val combined = when (mode) {
-                        TextHistoryRestoreMode.REPLACE -> restored
-                        TextHistoryRestoreMode.ADD_TOP ->
-                            if (editText.isBlank()) restored else "$restored\n$editText"
-                        TextHistoryRestoreMode.ADD_BOTTOM ->
-                            if (editText.isBlank()) restored else "$editText\n$restored"
-                    }
-                    writeNote(editCh.number, combined.take(2000), emptyList())
-                },
-                onDismiss = { noteHistoryOpen = false }
-            )
-        }
-    }
-}
-
 /**
  * v362 — the chapter's PERSONAL note field: a multi-line text input that
  * saves on every change (blank = clears the note). Styled to sit quietly on
@@ -4289,119 +3483,6 @@ private fun BookNotesSheet(
  * sheet (long notes), and a SHARE button seeds the share card with the note
  * as a Chapter review.
  */
-@Composable
-private fun ChapterNoteField(
-    initial: String,
-    accent: Color,
-    onAccent: Color,
-    ink: Color,
-    isOpen: Boolean,
-    onSave: (String) -> Unit,
-    // v3xx43 — the sheet's OWN container + text roles. The old box mixed
-    // ink-alpha washes (a light 8% ink over a dark cover-tinted sheet read as
-    // a gray smudge, with dim gray text inside it — the reported "inaccurate
-    // colors in dark mode"); the box now wears the sheet's surface container
-    // and its real onSurface / onSurfaceVariant text tones in BOTH themes.
-    surfaceHigh: Color = Color.Unspecified,
-    onSurface: Color = Color.Unspecified,
-    onSurfaceVariant: Color = Color.Unspecified,
-    // v371 ��� EXPAND opens the full white writing sheet; SHARE seeds the
-    // share card with the current note as a Chapter review.
-    onExpand: () -> Unit = {},
-    onShare: (String) -> Unit = {}
-) {
-    var value by rememberSaveable(initial) { mutableStateOf(initial) }
-    val dark = isCurioDarkTheme()
-    // Fallbacks keep the field legible for callers that only pass ink/accent.
-    val boxSurface = if (surfaceHigh == Color.Unspecified) ink.copy(alpha = 0.08f)
-        else surfaceHigh.copy(alpha = if (dark) 0.92f else 0.78f)
-    val boxInk = if (onSurface == Color.Unspecified) ink else onSurface
-    val boxMuted = if (onSurfaceVariant == Color.Unspecified) ink.copy(alpha = 0.7f)
-        else onSurfaceVariant
-    androidx.compose.foundation.layout.Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                if (isOpen) accent.copy(alpha = if (dark) 0.22f else 0.14f)
-                else boxSurface,
-                RoundedCornerShape(12.dp)
-            )
-            .border(
-                1.dp,
-                if (isOpen) accent.copy(alpha = 0.5f) else boxInk.copy(alpha = 0.12f),
-                RoundedCornerShape(12.dp)
-            )
-            .padding(horizontal = 10.dp, vertical = 8.dp)
-    ) {
-        CurioIcon(
-            CurioIcons.Note,
-            if (value.isBlank()) "Add a note" else "Chapter note",
-            tint = if (isOpen) accent else boxMuted,
-            size = 15.dp
-        )
-        BasicTextField(
-            value = value,
-            onValueChange = { new ->
-                value = new.take(240)
-                onSave(value)
-            },
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodySmall.copy(color = boxInk),
-            cursorBrush = SolidColor(accent),
-            decorationBox = { inner ->
-                if (value.isBlank()) {
-                    // v3xx45 — the placeholder wears the sheet's REAL muted
-                    // tone at full strength. The old 0.85-alpha fade left the
-                    // "Add a note…" hint nearly invisible on the dark,
-                    // cover-tinted sheet (the reported dark-mode inaccuracy).
-                    Text(
-                        "Add a note…",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = boxMuted
-                    )
-                }
-                inner()
-            },
-            modifier = Modifier.weight(1f)
-        )
-        // v371 — EXPAND: opens the full writing sheet (long notes, no more
-        // tiny single-line box).
-        Surface(
-            onClick = onExpand,
-            shape = CircleShape,
-            color = boxInk.copy(alpha = if (isOpen) 0.16f else 0.10f)
-        ) {
-            CurioIcon(
-                CurioIcons.Fullscreen,
-                "Expand note",
-                tint = if (isOpen) boxInk else boxMuted,
-                size = 15.dp,
-                modifier = Modifier.padding(7.dp)
-            )
-        }
-        // v371 — SHARE: the note becomes a Chapter review on the share card.
-        if (value.isNotBlank()) {
-            Surface(
-                onClick = { onShare(value) },
-                shape = CircleShape,
-                color = if (isOpen) accent.copy(alpha = 0.25f) else accent.copy(alpha = 0.12f)
-            ) {
-                CurioIcon(
-                    CurioIcons.Share,
-                    "Share as chapter review",
-                    // v3xx — dark mode: the share glyph uses the light ink
-                    // twin — the dimmed accent vanished into the dark row.
-                    tint = if (isOpen) onAccent
-                        else if (isCurioDarkTheme()) ink else accent,
-                    size = 15.dp,
-                    modifier = Modifier.padding(7.dp)
-                )
-            }
-        }
-    }
-}
 
 /**
  * v348 — the book synopsis as a collapsible card pinned at the TOP of the

@@ -485,7 +485,7 @@ fun TextHistoryBrowser(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
-                            .background(if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f) else Color.White.copy(alpha = 0.68f))
+                            .background(if (dark) MaterialTheme.colorScheme.surfaceContainerHigh else Color.White)
                             .padding(3.dp)
                     ) {
                         HistoryModeChip("List", !treeMode, { treeMode = false })
@@ -504,7 +504,7 @@ fun TextHistoryBrowser(
                             .background(
                                 if (armedClear) MaterialTheme.colorScheme.error
                                 else if (dark) Color.White.copy(alpha = 0.09f)
-                                else Color.White.copy(alpha = 0.68f)
+                                else Color.White
                             )
                             .clickable {
                                 if (armedClear) {
@@ -695,8 +695,8 @@ fun TextHistoryBrowser(
                             color = if (isActive)
                                 if (dark) Color(0xFF815947).copy(alpha = 0.30f)
                                 else Color(0xFF815947).copy(alpha = 0.13f)
-                            else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                            else Color.White.copy(alpha = 0.68f),
+                            else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                            else Color.White,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -828,7 +828,7 @@ fun TextHistoryBrowser(
                     Spacer(Modifier.height(12.dp))
                     Surface(
                         shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp, max = 380.dp)
                     ) {
                         Text(
@@ -1330,8 +1330,8 @@ private fun HistoryVersionRow(
         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
     val cardColor = if (isActive)
         MaterialTheme.colorScheme.primary.copy(alpha = if (dark) 0.20f else 0.10f)
-    else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-    else Color.White.copy(alpha = 0.72f)
+    else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+    else Color.White
 
     Row(Modifier.padding(top = 7.dp), verticalAlignment = Alignment.Top) {
         // ── Branch + node — the stub starts at the rail (x=0 of this column
@@ -1606,8 +1606,8 @@ private fun HistorySearchBox(
             .fillMaxWidth()
             .clip(RoundedCornerShape(50))
             .background(
-                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                else Color.White.copy(alpha = 0.68f)
+                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                else Color.White
             )
             .padding(start = 12.dp, end = 6.dp, top = 8.dp, bottom = 8.dp)
     ) {
@@ -1785,7 +1785,7 @@ private fun CompareVersionCard(
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(12.dp)) {

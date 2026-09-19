@@ -161,8 +161,8 @@ fun BookCoverHubScreen(navController: NavController) {
                 val dark = isCurioDarkTheme()
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                            else Color.White.copy(alpha = 0.68f),
+                    color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                            else Color.White,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -238,8 +238,8 @@ fun BookCoverHubScreen(navController: NavController) {
                             },
                             shape = RoundedCornerShape(20.dp),
                             color = if (selected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = if (providerDark) 0.45f else 0.9f)
-                                    else if (providerDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                                    else Color.White.copy(alpha = 0.68f),
+                                    else if (providerDark) MaterialTheme.colorScheme.surfaceContainerHigh
+                                    else Color.White,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -288,8 +288,8 @@ fun BookCoverHubScreen(navController: NavController) {
                 val statsDark = isCurioDarkTheme()
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = if (statsDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                            else Color.White.copy(alpha = 0.68f),
+                    color = if (statsDark) MaterialTheme.colorScheme.surfaceContainerHigh
+                            else Color.White,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -358,8 +358,8 @@ fun BookCoverHubScreen(navController: NavController) {
                     val progressDark = isCurioDarkTheme()
                     Surface(
                         shape = RoundedCornerShape(20.dp),
-                        color = if (progressDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                                else Color.White.copy(alpha = 0.68f),
+                        color = if (progressDark) MaterialTheme.colorScheme.surfaceContainerHigh
+                                else Color.White,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -413,8 +413,8 @@ fun BookCoverHubScreen(navController: NavController) {
                     val failedDark = isCurioDarkTheme()
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = if (failedDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                                else Color.White.copy(alpha = 0.68f),
+                        color = if (failedDark) MaterialTheme.colorScheme.surfaceContainerHigh
+                                else Color.White,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(

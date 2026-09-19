@@ -1,5 +1,6 @@
 package com.curio.app.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -79,6 +80,16 @@ fun CurioSettingsCard(
         contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 3.dp,
         shadowElevation = shadowElevation,
+        // v408 — the card EDGE. The fill is a custom lerp (not a scheme
+        // token), and a 4dp black shadow on a cream page is a soft smudge
+        // rather than a boundary — so the card also wears the shared
+        // hairline the whole app separates its cards with (the theme's
+        // `outlineVariant`; rule: cards separate by lightness AND an
+        // outline, never by a tint of the page). Surface draws its own
+        // border after its fill, which is why this is a Surface border and
+        // not a `Modifier.border` (a border earlier in the chain is painted
+        // over by the fill).
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
             .fillMaxWidth()
             // v28 — dark mode: soft light glow + faint hairline so the

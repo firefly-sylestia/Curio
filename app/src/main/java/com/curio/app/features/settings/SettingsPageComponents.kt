@@ -1,6 +1,7 @@
 package com.curio.app.features.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.components.curioPressClickable
@@ -98,10 +101,16 @@ fun SettingsSectionHeading(
  *  (40dp tile + 13dp gap), so it aligns under every row's text the way
  *  [CurioSettingsDivider] did under the old bare icons. */
 @Composable
-fun SettingsOptionDivider(modifier: Modifier = Modifier) {
+fun SettingsOptionDivider(
+    modifier: Modifier = Modifier,
+    /** v408 — where the rule starts. 53dp is the icon-tile column (40dp tile
+     *  + 13dp gap); a PLAIN row has no tile, so its divider goes flush (0dp)
+     *  and lines up with that row's own text instead of floating past it. */
+    startInset: Dp = 53.dp
+) {
     HorizontalDivider(
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-        modifier = modifier.padding(start = 53.dp)
+        color = MaterialTheme.colorScheme.outlineVariant,
+        modifier = modifier.padding(start = startInset)
     )
 }
 
@@ -140,9 +149,23 @@ fun SettingsOptionCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
+            // v408 — OPAQUE, and it separates by LIGHTNESS from the page
+            // (see the theme's "card ladder"): a card here used to be a 68%
+            // whiteness laid over a cream page, which resolves to almost
+            // exactly the page — the option cards dissolved into the hero
+            // wash behind them. It is real white now, with a hairline edge
+            // (below) so it also reads as a card and not as a hole in the
+            // page. Dark keeps its raised step.
             .background(
-                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                else Color.White.copy(alpha = 0.68f)
+                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                else Color.White
+            )
+            // The card edge — drawn AFTER the fill so the hairline is not
+            // painted over (a border before a background is invisible).
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(20.dp)
             )
             .padding(horizontal = 15.dp, vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -178,7 +201,11 @@ private fun SettingsOptionIconTile(icon: String?, dark: Boolean) {
 private fun SettingsOptionCopy(
     title: String,
     subtitle: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** v408 — how many lines the subtitle may run to. One-line rows keep the
+     *  list dense; a PLAIN row gets three, because its whole point is that
+     *  its sentence should not be cut off. */
+    subtitleMaxLines: Int = 1
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -189,7 +216,9 @@ private fun SettingsOptionCopy(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = subtitleMaxLines,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -202,6 +231,10 @@ fun SettingsOptionRow(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
+    /** v408 — the roomy, icon-less row: no tile, taller, and copy free to
+     *  wrap to three lines (see [SettingsRowEntry.plain]). Used by the four
+     *  "front door" entries on the hub. */
+    plain: Boolean = false,
     onClick: () -> Unit
 ) {
     val dark = isCurioDarkTheme()
@@ -214,10 +247,15 @@ fun SettingsOptionRow(
             // v3xx46 — every settings row squishes + ticks on press now (the
             // shared press primitive); the ripple rides along via LocalIndication.
             .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
-            .padding(vertical = 10.dp)
+            .padding(vertical = if (plain) 14.dp else 10.dp)
     ) {
-        SettingsOptionIconTile(icon, dark)
-        SettingsOptionCopy(title, subtitle, Modifier.weight(1f))
+        if (!plain) SettingsOptionIconTile(icon, dark)
+        SettingsOptionCopy(
+            title,
+            subtitle,
+            Modifier.weight(1f),
+            subtitleMaxLines = if (plain) 3 else 1
+        )
         CurioIcon(
             name = CurioIcons.ChevronRight,
             contentDescription = null,

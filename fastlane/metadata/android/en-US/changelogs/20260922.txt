@@ -1,4 +1,15 @@
 ADD:
+- Settings: the main page is a plain list — a heading per section and a white card of rows underneath (icon, name, one line), instead of the big 2-up design cards with doodles and oversized titles. The rail stays where it belongs: inside the sections, where switching between them is what it is for.
+- Settings: Online mode, Recycle bin, Updates and Support read as full-width rows with no icon tile and their sentence whole, instead of being cut off mid-word inside four small cards.
+- Books: reading progress says what the FILE says — a book with a PDF shows a page bar with "page 87 of 312" and the chapter that page falls in; a book with an EPUB shows its own chapter. You can still set a chapter or a page by hand.
+- Books: a book added straight from a file is named after the file — the name on your own device is read, cleaned up, and put in front of you in two fields (title and author) to fix before the book is created. Its pages and chapters are read out of the file itself.
+
+FIX:
+- Theme: cards are white on the cream page — every card, tile and tab sat one warmth-step below the page it was drawn on, so on a tinted page (Home, Profile, Cabinet, Settings) they dissolved into it; the page keeps its colour and everything that reads as a card now separates from it by lightness, with a hairline edge. Dark mode's plates stepped up too.
+- Settings: the tab rail no longer sits on the all-settings page, and its leading "All Settings" chip is gone with it.
+- Books: tapping a book's synopsis or a chapter on a topic opens the book's own page now, instead of a smaller bottom-sheet copy of it — the same chapter list, the same notes and the real reading progress.
+
+ADD:
 - Cabinet: opening a collection is a move instead of a cut — the page rises and fades into the shelf you tapped, and the way back home does the same.
 - Curie: hold the pet's home to turn the pet off — the offer now lives where the pet actually lives, and a tap still wakes it or brings it out; the switch in Settings stays the other door.
 - Settings: the glyph watermarks are very subtle by default — the category glyphs behind every page, the scatter on the torn heroes (Home, Profile, Cabinet, Settings, Topic History, the intro and the saved-entry banner), the mood-board collage and the small card headers were all tuned deep and read as a distracting scatter, so they now sit at a whisper; Appearance ▸ Glyph backdrop offers Subtle or Deep, where Deep restores the old look everywhere at once.

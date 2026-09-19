@@ -180,8 +180,8 @@ internal fun SocialCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
             .background(
-                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                else Color.White.copy(alpha = 0.72f)
+                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                else Color.White
             )
             .border(
                 width = 1.dp,

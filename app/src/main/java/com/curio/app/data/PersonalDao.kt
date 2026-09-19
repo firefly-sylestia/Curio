@@ -80,6 +80,20 @@ interface PersonalDao {
     )
     suspend fun readerPosition(bookId: String, sourceKey: String): ReaderMarkEntity?
 
+    /**
+     * v408 — THE SAME ROW, REACTIVELY. The position row is deliberately
+     * excluded from every mark query (it is not a mark), so the book page's
+     * progress card — which shows the page the reader last had open — could
+     * only see it through a one-shot read and went stale the moment the
+     * reader moved. This flow emits on every position write, so the card
+     * updates while the member reads in the other tab and comes back.
+     */
+    @Query(
+        "SELECT * FROM reader_marks WHERE bookId = :bookId AND sourceKey = :sourceKey " +
+            "AND kind = 'position' LIMIT 1"
+    )
+    fun observeReaderPosition(bookId: String, sourceKey: String): Flow<ReaderMarkEntity?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertReaderMark(mark: ReaderMarkEntity)
 
@@ -235,6 +249,10 @@ class PersonalRepository(private val dao: PersonalDao) {
 
     suspend fun readerPosition(bookId: String, sourceKey: String): ReaderMarkEntity? =
         dao.readerPosition(bookId, sourceKey)
+
+    /** v408 — the reactive twin, for the book page's progress card. */
+    fun observeReaderPosition(bookId: String, sourceKey: String): Flow<ReaderMarkEntity?> =
+        dao.observeReaderPosition(bookId, sourceKey)
 
     /** The book's margins: every mark in it, across every file it was read in. */
     fun observeBookMarks(bookId: String): Flow<List<ReaderMarkEntity>> =

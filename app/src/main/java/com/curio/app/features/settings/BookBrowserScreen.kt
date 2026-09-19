@@ -298,8 +298,8 @@ private fun BookBrowserRow(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                else Color.White.copy(alpha = 0.68f),
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh
+                else Color.White,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(

@@ -598,8 +598,8 @@ private fun BinSummaryCard(
     val dark = isCurioDarkTheme()
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-        else Color.White.copy(alpha = 0.68f),
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+        else Color.White,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -675,8 +675,8 @@ private fun TrashedEntryRow(
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = if (selected) settingsRoseAccent().copy(alpha = 0.10f)
-        else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-        else Color.White.copy(alpha = 0.68f),
+        else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+        else Color.White,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onToggleSelect() }
