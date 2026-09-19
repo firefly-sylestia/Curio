@@ -8516,6 +8516,12 @@ app/src/main/java/com/curio/app/
 - **Not covered (deliberate):** the share-card watermarks (`TopicShareCard`) and the deck ticket's single large category symbol — card ART and an export design, not page/hero decoration.
 - Adding a new hero or backdrop: one shared component per job. Never add a second scatter component.
 
+### Hold-to-act gestures — the patient hold (v407)
+- **`ui/components/CurioPatientHold.kt` owns the app's hold timing:** `CurioHoldMillis = 2_000L` and `CurioPatientHold { }`, which provides a `ViewConfiguration` whose `longPressTimeoutMillis` is `max(platform, 2s)` — a device with a longer native hold never gets a shorter one.
+- **Why it exists:** at the platform's ~500ms, a scroll that starts ON a row armed that row's option pill on the way past (the member's report on Recents). The framework's own cancellation is half the fix and stays in place — a scroll consumes the gesture and cancels the pending press — so with a 2s window a swipe can never reach it.
+- **Used by** the Recents feed rows (`RecentScreen`) and the pet's home (`CurioPetHome`). A hold that OPENS something must play `HapticFeedbackType.LongPress` itself: Compose plays none for `combinedClickable` (every hold row in the app does this, hoisted as `val haptics = LocalHapticFeedback.current`).
+- Adding a new hold-to-act row: wrap its list or page in `CurioPatientHold` and fire the LongPress haptic in the handler. Do not write a second timeout mechanism, and do not move `RecentScreen`'s provider down to the rows.
+
 ### Adaptive layout (tablet & landscape) — ALWAYS-ON
 - **`ui/adaptive/CurioAdaptiveLayout.kt`** owns the window adaptation contract: `windowWidthSizeClass()` (material3-window-size-class, `calculateWindowSizeClass(activity)`) and `CurioContentMaxWidth = 720.dp`. No Settings toggle — the wide layout engages automatically on medium/expanded windows (>= 600dp wide; tablets, landscape, split-screen) and phones are untouched.
 - **Wide windows:** `CurioNavHost` renders `CurioNavigationRail` (left edge, full height) instead of the bottom bar and centers every route's content in the 720dp max-width column (`fillMaxHeight().widthIn(max = CurioContentMaxWidth)` inside a centered Box); the theme background fills the gutters. Screens keep drawing their own status-bar padding and full-bleed washes inside the NavHost.
@@ -8589,6 +8595,14 @@ app/src/main/java/com/curio/app/
   (`res/xml/file_paths.xml` cache/share). The home/house scene is a fixed
   layered sprite composition; the legacy home editor is removed from the
   studio UI, while old saved bed rows remain dormant compatibility data.
+- **v407 — the pet's home is the door to turning the pet OFF.** `CurioPetHome`
+  (`ui/pet/CurioFlowerBed.kt`) takes a HOLD that plays the long-press haptic and
+  opens a confirm dialog calling `AppPreferences.setPetEnabled(context, false)`;
+  a tap keeps its old meanings (wake / come out / check in), and the hold is only
+  offered while the pet is ON. Because `combinedClickable` reads
+  `LocalViewConfiguration`, the 2s timeout is supplied by the CALLERS (Home's bed
+  and the Quests hero) wrapping the scene in `CurioPatientHold` — a new call site
+  must do the same. The Appearance "Curie" switch stays the other door.
 
 ### Experimental features (A/B testing)
 - Per root `AGENTS.md`, any experimental/test behavior MUST be gated behind a **user-facing Settings toggle** so it can be A/B-compared against the current behavior and reverted without a code change — never hardcoded as the only path.

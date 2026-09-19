@@ -7,17 +7,25 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -27,14 +35,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlin.math.sin
 
 /**
@@ -46,7 +60,13 @@ import kotlin.math.sin
  * The old editable flower-bed rows are intentionally not read here. Existing
  * saved rows remain harmless legacy preference data, while every install sees
  * the new fixed house scene.
+ *
+ * v407 — holding the home offers to turn the pet OFF (it is where the pet
+ * lives, so the way out belongs there). Callers wrap the scene in
+ * `CurioPatientHold`: the hold then waits the app's patient timeout and plays
+ * the long-press haptic, so `onTap` (wake / come out / check in) stays a tap.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CurioPetHome(
     petInside: Boolean,
@@ -81,10 +101,26 @@ fun CurioPetHome(
     )
 
     val desc = contentDescription
+    // v407 — the hold's own state + the haptic Compose never plays for a
+    // long press itself. Only offered while the pet is actually ON: a home
+    // for a disabled pet has nothing to turn off.
+    var confirmOff by remember { mutableStateOf(false) }
+    val haptics = LocalHapticFeedback.current
+    val holdPetHome: (() -> Unit)? = if (AppPreferences.petEnabledState) {
+        ({
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            confirmOff = true
+        })
+    } else {
+        null
+    }
     Box(
         modifier = modifier
             .size(homeSize)
-            .then(if (onTap != null) Modifier.clickable { onTap() } else Modifier)
+            .then(
+                if (onTap == null) Modifier
+                else Modifier.combinedClickable(onClick = onTap, onLongClick = holdPetHome)
+            )
             .then(if (desc != null) Modifier.semantics { this.contentDescription = desc } else Modifier),
         contentAlignment = Alignment.Center
     ) {
@@ -246,5 +282,42 @@ fun CurioPetHome(
                 )
             }
         }
+    }
+
+    // ── v407 — the hold's own dialog. Turning the pet off rests the WHOLE
+    //    companion (this home, the floater that follows you and its quests),
+    //    so it asks first and names the switch that brings it back.
+    if (confirmOff) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { confirmOff = false },
+            title = { Text("Turn Curie off?", fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    "Curie's home, the companion that follows you and its quests all rest while the pet is off. Turn it back on any time in Settings ▸ Appearance."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmOff = false
+                        AppPreferences.setPetEnabled(context, false)
+                    }
+                ) {
+                    Text(
+                        "Turn off",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { confirmOff = false },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Keep Curie") }
+            }
+        )
     }
 }

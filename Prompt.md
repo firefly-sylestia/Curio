@@ -8,100 +8,106 @@ from the state rather than from memory.
 
 ## 1. The request
 
-> "Also tone down the mood-board and hero-banner glyph watermarks so they match the new
-> subtle backdrop"
+> "tap and holding the pet hub should bring up option to disable the pet, also when
+> scrolling above trecent topics it tap and hold by mistakes, make the tap and hold time
+> more longer and fix the accidental tap and hold."
 
-The follow-up to the previous change (v407: the page glyph backdrop became very subtle by
-default, with Appearance → "Glyph backdrop" → Subtle / Deep). Same intent, two more
-surfaces: the mood-board collage and the torn heroes' glyph watermarks.
+Two asks, and the first one needed clarification because **two** pet things already had a
+hold of their own:
 
-**One reading decision was made rather than asked:** the two surfaces ride the SAME
-Depth switch (Subtle by default, "Deep" restores every glyph watermark in the app at
-once) instead of getting their own independent alphas. Rationale: the member's first
-request was "very subtle by default, with the option for the current deep look", and a
-Deep that left the heroes and mood boards loud would be an inconsistent, half-set state.
-If they want the heroes independent of the backdrop, it is one line per surface.
+1. Holding the pet's hub should offer to disable the pet.
+2. In the recent-topics list, scrolling trips the hold by mistake. Make the hold longer.
+
+**The member's answers to the two questions asked before touching anything:**
+
+- **"no the home of it not the pet but the home of where the pet stays"** — the ask was
+  whether to put it on the floating pet (whose hold arms GAME MODE) or the over-other-apps
+  pet (whose hold already opens a Send home / Wander menu). Neither: it goes on **the pet's
+  HOME**, i.e. `CurioPetHome` — the little house/flower-bed scene the pet lives in. The
+  floating pet's hold was therefore left exactly as it was.
+- **"2 sec also add haptic for hold"** — the hold waits 2 seconds and plays a haptic, for
+  the recent-topics rows (the reported surface).
 
 ---
 
 ## 2. What was found
 
-- **The mood board** is `CurioMoodBoardBackdrop` in the SAME file as the page backdrop
-  (`ui/components/CurioWatermarkBackdrop.kt`). Its alphas are computed at draw time:
-  `baseAlpha` (dark 0.12, light 0.16; pastel 0.18 / 0.26) × the seeded `alphaBoost`
-  (0.85–1.2).
-- **The torn-hero glyph watermarks are SEVEN identical private composables**, one per
-  screen, each documented as "one mirrored watermark glyph … the banner's readable ink at
-  a soft alpha", each ending in `tint = tint.copy(alpha = alpha)`:
-  - `HomeScreen.HomeHeroSymbol` (quest hero)
-  - `ProfileScreen.ProfileHeroSymbol`
-  - `CabinetScreen.CabinetHeroSymbol`
-  - `SettingsHubScreen.SettingsHeroSymbol`
-  - `TopicHistoryScreen.HistoryHeroSymbol`
-  - `OnboardingScreen.OnboardingHeroSymbol`
-  - `EntryDetailScreen.HeroWatermarkGlyph` (saved-entry hero)
-  Their pair tables (5 pairs each, mirrored, alpha 0.10–0.21) are per-screen and were
-  deliberately NOT edited — the multiplier goes at the glyph's one tint line, so the
-  tables keep documenting the deep values.
-- **Two more banner-side marks found on the way:** the Spin picker's filter hero carries
-  two lone watermark glyphs (`filterHeroInk` at 0.10 / 0.07), and
-  `CurioTopicCard.MiniHeroWatermark` is, in its own doc, "a scaled-down version of the
-  torn-hero watermark". Both ride the same switch.
-- **Two card-ART marks deliberately left alone:** `TopicShareCard` (an exported card
-  design) and the Spin deck ticket's single large 150dp category symbol (the ticket's own
-  art, not a banner).
-- Verified with `grep -n "biasX = 0.93f"`: exactly the seven hero tables above — no hero
-  watermark was missed.
+- **The pet's home is `CurioPetHome` (`ui/pet/CurioFlowerBed.kt`)** — called from exactly
+  two places: Home's bed (`HomeScreen`, 52dp, tap = wake / come out) and the Quests hero's
+  bed (`ui/pet/CurioPetCompanion.kt`, 74dp, tap = wake / come out / check-in dialog). It was
+  `Modifier.clickable` ONLY — no hold existed, so adding one replaces nothing.
+- **The recent topics are `features/recent/RecentScreen.kt`.** Its rows carry
+  `combinedClickable(onClick = open the topic, onLongClick = the options pill)`. The
+  platform long-press timeout is ~500ms, which is short enough that a finger resting on a
+  row during a scroll reaches it. (Home's own recent rows have no long press at all, and
+  Topic History / Spin's browse list have none either — so Recents was the only surface
+  with this trap.)
+- **The app already solved this class of bug once:** `features/picker/RadialHoldMenu.kt`
+  (v337) cancels a pending hold the moment the finger travels past touch slop — "scrolling
+  through the grids no longer pops an option menu at the release point".
+- **The app's haptic convention for holds:** `HapticFeedbackType.LongPress`, hoisted as
+  `val haptics = LocalHapticFeedback.current` (SocialComponents, CurioCategoryCard,
+  DirectMessageScreen). Compose plays NO haptic for `combinedClickable` — it has to be
+  fired in the handler.
+- **`LocalViewConfiguration.longPressTimeoutMillis` is the one knob** the platform tap
+  detector reads, and it is a `compositionLocalOf` — so a subtree can provide a patient
+  `ViewConfiguration`. (Also noted: this Compose generation makes the gesture scope
+  `@RestrictsSuspension` — no `withTimeout`/`delay` inside `awaitEachGesture` — per
+  RadialHoldMenu's v325 note, which rules the custom-timer route out.)
 
 ---
 
 ## 3. What was changed
 
-- **`ui/components/CurioWatermarkBackdrop.kt`** — new shared `@Composable
-  glyphWatermarkDepthScale()` (`1f` when Appearance → "Glyph backdrop" is Deep, else
-  `GlyphBackdropSubtleScale = 0.32f`). `CurioWatermarkBackdrop` now reads it instead of
-  inlining the pref, and `CurioMoodBoardBackdrop` multiplies its `baseAlpha` by it. One
-  function now owns "how loud is glyph decoration", and the constant + pref stay in one
-  file.
-- **The seven hero composables** — `tint = tint.copy(alpha = alpha * glyphWatermarkDepthScale())`
-  (plus its import in each file; `CurioTopicCard` needs none, same package).
-- **`SpinScreen`** — the picker hero's two banner glyphs scaled the same way.
-- **`CurioTopicCard`** — `MiniHeroGlyph` scaled the same way.
-- **`app/AGENTS.md`** — the v407 section is now "Glyph watermarks — very subtle by
-  default", naming every covered surface, the one knob, and the "never raise the base
-  alphas to compensate" rule (the old text said the mood board and heroes were NOT this
-  backdrop — stale as of this change).
-- **Changelog** — the v407 ADD bullet now names the heroes, the mood board and the card
-  headers instead of only the page backdrop.
-
-Result at the default (Subtle): page backdrop ≈ 0.016–0.03 alpha, hero banners ≈
-0.03–0.07, mood board ≈ 0.04–0.06 — all whispers; Deep restores every one of them to the
-pre-v407 values exactly.
+- **New `ui/components/CurioPatientHold.kt`** — `CurioHoldMillis = 2_000L` and
+  `CurioPatientHold { }`, which provides a `ViewConfiguration` delegating to the platform
+  one with `longPressTimeoutMillis = max(platform, 2s)` (so a device with a longer native
+  hold never gets a shorter one). This is the app's ONE hold timing: the framework's own
+  cancellation still applies inside it, and a scroll that consumes the gesture cancels the
+  pending press, so a swipe can never arm a row.
+- **Recents (`features/recent/RecentScreen.kt`)** — the feed's `LazyColumn` is wrapped in
+  `CurioPatientHold`, and every row's hold now goes through one `hold` lambda that fires
+  the LongPress haptic before opening the options pill. (The three
+  `onLongClick = { onLongPress(item) }` sites now share it.)
+- **The pet's home (`ui/pet/CurioFlowerBed.kt`)** — `CurioPetHome` takes a
+  `combinedClickable` hold (with the same LongPress haptic) that opens a confirm dialog:
+  "Turn Curie off?" → `AppPreferences.setPetEnabled(context, false)`, with "Keep Curie" to
+  back out. A tap keeps every one of its old meanings (wake / come out / check in), the
+  hold is only offered while the pet is ON, and the dialog names the switch that brings it
+  back (Settings ▸ Appearance, where the "Curie" toggle already lives).
+- **Both call sites** (Home's bed and the Quests hero) wrap the scene in `CurioPatientHold`
+  — the timeout has to be provided above the composable that builds the modifier, because
+  that is where `combinedClickable` reads `LocalViewConfiguration`.
+- **`app/AGENTS.md`** — a new "Hold-to-act gestures — the patient hold (v407)" contract
+  (the constant, why the platform timeout was the bug, who uses it, the haptic rule) and a
+  v407 bullet in the Curie pet layer section (the home is the door to turning the pet off,
+  and new call sites must wrap the scene).
+- **Changelog** (`20260922.txt`) — one ADD for the pet-home hold, one FIX for the Recents
+  hold.
 
 ---
 
-## 4. Still open (carried over, unchanged by this request)
+## 4. Still open / decisions the member may want to revisit
 
+- **The longer hold is applied to the Recents feed and the pet's home only.** Every other
+  hold-to-act list (journal days, books, Cabinet entries, chats, friends, the category
+  grids) still uses the platform's ~500ms. Extending `CurioPatientHold` to one of those is
+  wrapping its list — say the word if they should all feel the same.
+- **The floating pet's hold still arms game mode** (untouched, per the clarification), and
+  the over-other-apps pet's hold still opens its own Send home / Wander menu. If "disable
+  the pet" should also appear there, that is a small addition to those two menus.
+- **The pet's home hold cannot be exercised without a device** — the gesture plumbing is
+  compile-checked only (CI), and `node scripts/check_braces.js` is clean. Worth a real
+  hold-test on the Home bed and the Quests hero.
 - **The forms SQL has not been pasted into Supabase**, so the ban ladder, the queue's Clear,
   and publish / read / vote / skip for a form have nothing to talk to yet; the `forms`
   permission also still needs granting to the team.
 - **Stop-the-poll in moderation** (asked for, not built) needs that schema first.
 - **Journal entries being slow** still needs a measurement: list open, or page load.
-- **Episode lists**: only 2 of the topics carry an authored `episodes` array; content, not
-  code.
 - **The deprecation sweep** (about 30 `rememberModalBottomSheetState` sites, 4
-  `LocalClipboardManager`, 1 `LocalLifecycleOwner`, and roughly 150 site-specific warnings)
-  is unstarted; each needs a compile to verify, and Material3 here is `1.5.0-alpha20`.
-- **The take editor's per-keystroke rebuild** was found by inspection only and never
-  profiled.
-- **The subtle factors are judgement calls on numbers**: `GlyphBackdropSubtleScale = 0.32f`
-  for everything, deliberately one knob. If the heroes should read a touch stronger than
-  the page backdrop, give the hero tint lines their own factor rather than touching
-  `watermarkAlpha`.
-- **`TopicShareCard` watermarks and the Spin deck ticket's category symbol are still at
-  their old strength** — card art, not banner decoration, so they were left alone. Ask if
-  those should quiet down too.
-- **`web/` carries its own React `CurioWatermarkBackdrop`.** Out of scope per the root
+  `LocalClipboardManager`, 1 `LocalLifecycleOwner`) is unstarted; Material3 here is
+  `1.5.0-alpha20`.
+- **`web/` carries its own React mirror** of these screens. Out of scope per the root
   AGENTS.md scope rail (web/ is on hold) — NOT touched.
 
 ---

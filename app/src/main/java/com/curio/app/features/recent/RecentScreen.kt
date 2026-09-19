@@ -32,7 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -54,6 +56,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioHoldPill
+import com.curio.app.ui.components.CurioPatientHold
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
@@ -191,34 +194,39 @@ val glassBackdrop = rememberLayerBackdrop()
                     )
                 }
             } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = wideContentEdgePadding(),
-                        end = wideContentEdgePadding(),
-                        top = if (wide) 0.dp else SettingsHeroTotalHeight,
-                        bottom = 24.dp
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    if (wide) {
-                        item(key = "hero", contentType = "hero") {
-                            SettingsHeroHeader(
-                                title = "Recents",
-                                subtitle = "Your latest discoveries, all in one place",
-                                onBack = { navController.popBackStack() }
+                // v407 — every row's hold waits CurioHoldMillis (2s) instead
+                // of the platform's short press, so scrolling a long feed can
+                // no longer arm a row's option pill on the way past.
+                CurioPatientHold {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = wideContentEdgePadding(),
+                            end = wideContentEdgePadding(),
+                            top = if (wide) 0.dp else SettingsHeroTotalHeight,
+                            bottom = 24.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (wide) {
+                            item(key = "hero", contentType = "hero") {
+                                SettingsHeroHeader(
+                                    title = "Recents",
+                                    subtitle = "Your latest discoveries, all in one place",
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                        }
+                        items(feed, key = { it.key }) { item ->
+                            RecentFeedRow(
+                                item = item,
+                                navController = navController,
+                                onLongPress = { optionItem = item }
                             )
                         }
+                        item { Spacer(Modifier.size(12.dp)) }
                     }
-                                        items(feed, key = { it.key }) { item ->
-                        RecentFeedRow(
-                            item = item,
-                            navController = navController,
-                            onLongPress = { optionItem = item }
-                        )
-                    }
-                    item { Spacer(Modifier.size(12.dp)) }
                 }
             }
         }
@@ -300,6 +308,14 @@ private fun RecentFeedRow(
     navController: NavController,
     onLongPress: (RecentFeedItem) -> Unit
 ) {
+    // v407 — the hold plays the long-press haptic Compose does not play for
+    // `combinedClickable` itself (the app's own hold rows all do), and every
+    // row shares the patient timeout provided by the screen.
+    val haptics = LocalHapticFeedback.current
+    val hold: () -> Unit = {
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        onLongPress(item)
+    }
     when (item) {
         is RecentFeedItem.Explored -> {
             val topic = item.topic
@@ -315,7 +331,7 @@ private fun RecentFeedRow(
                         CurioRoutes.revealFor(topic.categoryId.routeSlug, topic.topicName)
                     ) { launchSingleTop = true }
                 },
-                onLongClick = { onLongPress(item) }
+                onLongClick = hold
             )
         }
         is RecentFeedItem.Unexplored -> {
@@ -330,7 +346,7 @@ private fun RecentFeedRow(
                         CurioRoutes.revealFor(topic.categoryId.routeSlug, topic.topicName)
                     ) { launchSingleTop = true }
                 },
-                onLongClick = { onLongPress(item) }
+                onLongClick = hold
             )
         }
         is RecentFeedItem.SavedEntry -> {
@@ -355,7 +371,7 @@ private fun RecentFeedRow(
                                 CurioRoutes.revealFor(entry.topic.categoryId.routeSlug, entry.topic.name)
                             ) { launchSingleTop = true }
                         },
-                        onLongClick = { onLongPress(item) }
+                        onLongClick = hold
                     ),
                 shape = RoundedCornerShape(22.dp),
                 color = category.categorySurface(),

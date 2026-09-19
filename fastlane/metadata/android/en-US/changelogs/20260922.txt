@@ -1,8 +1,10 @@
 ADD:
+- Curie: hold the pet's home to turn the pet off — the offer now lives where the pet actually lives, and a tap still wakes it or brings it out; the switch in Settings stays the other door.
 - Settings: the glyph watermarks are very subtle by default — the category glyphs behind every page, the scatter on the torn heroes (Home, Profile, Cabinet, Settings, Topic History, the intro and the saved-entry banner), the mood-board collage and the small card headers were all tuned deep and read as a distracting scatter, so they now sit at a whisper; Appearance ▸ Glyph backdrop offers Subtle or Deep, where Deep restores the old look everywhere at once.
 - Settings: cover fetching and the Take studio start ON — both shipped opt-in, so a fresh install opened on placeholder art and a Save your take page without the studio the page is about; each keeps its switch, so turning either off still works.
 
 FIX:
+- Recents: a row's options no longer appear while you scroll — a hold now waits two full seconds and a swipe cancels it outright, and it gives a proper tap-weight haptic when the hold really lands.
 - Writing: a note's tools float above the keyboard — the dock was laid out inside the note, at the foot of its own field, so a note low on the page put its tools under the keyboard the moment the member tapped in to write; it is a floating strip pinned to the window and lifted by the keyboard's own inset now, so it is always just above the keys and never under a note.
 - Releases: builds are faster — the build cache is on, so a task whose inputs did not change is restored instead of re-run, and the topic catalog's own check declares what it produced, so a build that leaves the catalog alone no longer re-parses all 20,877 topics.
 

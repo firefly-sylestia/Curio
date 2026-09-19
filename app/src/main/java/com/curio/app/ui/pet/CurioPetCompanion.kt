@@ -44,6 +44,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
+import com.curio.app.ui.components.CurioPatientHold
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -214,34 +215,39 @@ fun CurioPetHeroCard(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    CurioPetHome(
-                        petInside = !CurioPet.awake ||
-                            CurioPet.atHome ||
-                            !AppPreferences.floatingPetEnabledState,
-                        sleeping = !CurioPet.awake,
-                        homeSize = 74.dp,
-                        celebrateKey = celebrateKey + wakeCelebrate,
-                        onTap = {
-                            when {
-                                !CurioPet.awake -> {
-                                    CurioPet.wake()
-                                    wakeCelebrate++
+                    // v407 — the pet's home is HELD to act (turn the pet
+                    // off), so it wears the app's patient hold. A tap still
+                    // wakes / brings it out / checks in.
+                    CurioPatientHold {
+                        CurioPetHome(
+                            petInside = !CurioPet.awake ||
+                                CurioPet.atHome ||
+                                !AppPreferences.floatingPetEnabledState,
+                            sleeping = !CurioPet.awake,
+                            homeSize = 74.dp,
+                            celebrateKey = celebrateKey + wakeCelebrate,
+                            onTap = {
+                                when {
+                                    !CurioPet.awake -> {
+                                        CurioPet.wake()
+                                        wakeCelebrate++
+                                    }
+                                    CurioPet.atHome -> {
+                                        CurioPet.comeOut()
+                                        wakeCelebrate++
+                                    }
+                                    else -> {
+                                        showDialog = true
+                                    }
                                 }
-                                CurioPet.atHome -> {
-                                    CurioPet.comeOut()
-                                    wakeCelebrate++
-                                }
-                                else -> {
-                                    showDialog = true
-                                }
+                            },
+                            contentDescription = when {
+                                !CurioPet.awake -> "${stage.displayName} asleep in its flower bed. Tap to wake"
+                                CurioPet.atHome -> "${stage.displayName} sitting in its flower bed. Tap to come out"
+                                else -> "${stage.displayName}'s flower bed. Tap to check in"
                             }
-                        },
-                        contentDescription = when {
-                            !CurioPet.awake -> "${stage.displayName} asleep in its flower bed. Tap to wake"
-                            CurioPet.atHome -> "${stage.displayName} sitting in its flower bed. Tap to come out"
-                            else -> "${stage.displayName}'s flower bed. Tap to check in"
-                        }
-                    )
+                        )
+                    }
                 }
                 Column(
                     modifier = Modifier.weight(1f),

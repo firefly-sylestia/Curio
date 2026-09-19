@@ -162,6 +162,7 @@ import com.curio.app.ui.components.CurioGlassToolbarMorph
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
+import com.curio.app.ui.components.CurioPatientHold
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.glyphWatermarkDepthScale
 import com.curio.app.ui.components.PaperTitleLines
@@ -355,25 +356,31 @@ fun HomeScreen(navController: NavController) {
                     kind = PetLandmarks.Kind.PLAY,
                     screen = "home"
                 ) { m ->
-                    CurioPetHome(
-                        petInside = !CurioPet.awake || CurioPet.atHome ||
-                            !AppPreferences.floatingPetEnabledState,
-                        sleeping = !CurioPet.awake,
-                        homeSize = 52.dp,
-                        onTap = {
-                            when {
-                                !CurioPet.awake -> CurioPet.wake()
-                                CurioPet.atHome -> CurioPet.comeOut()
-                                else -> Unit // already floating — the bed is vacant
-                            }
-                        },
-                        contentDescription = when {
-                            !CurioPet.awake -> "Curie asleep in its flower bed. Tap to wake"
-                            CurioPet.atHome -> "Curie sitting in its flower bed. Tap to come out"
-                            else -> "Curie's flower bed"
-                        },
-                        modifier = m
-                    )
+                    // v407 — the pet's home is HELD to act (turn the pet
+                    // off), so it wears the app's patient hold: a tap still
+                    // wakes / brings the pet out, only a real hold opens the
+                    // offer, and scrolling can never arm it.
+                    CurioPatientHold {
+                        CurioPetHome(
+                            petInside = !CurioPet.awake || CurioPet.atHome ||
+                                !AppPreferences.floatingPetEnabledState,
+                            sleeping = !CurioPet.awake,
+                            homeSize = 52.dp,
+                            onTap = {
+                                when {
+                                    !CurioPet.awake -> CurioPet.wake()
+                                    CurioPet.atHome -> CurioPet.comeOut()
+                                    else -> Unit // already floating — the bed is vacant
+                                }
+                            },
+                            contentDescription = when {
+                                !CurioPet.awake -> "Curie asleep in its flower bed. Tap to wake"
+                                CurioPet.atHome -> "Curie sitting in its flower bed. Tap to come out"
+                                else -> "Curie's flower bed"
+                            },
+                            modifier = m
+                        )
+                    }
                 }
                 // One-shot quest-complete celebration bubble.
                 if (nudgeBubble && CurioPet.awake) {
