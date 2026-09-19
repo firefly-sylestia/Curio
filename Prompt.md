@@ -82,7 +82,36 @@ attempting:
   it in the page's paper — the same treatment the record button wears, so the two
   controls are one shape in one ink.
 
-## 4. Still outstanding
+## 4. The "fetched poster is lost after a restart" investigation (findings only — no code changed)
+
+The member's report: *"its persistent the book covers etc loses its fetched
+poster and it reloads after restart"*. What the code actually shows:
+
+- **It is NOT "not persisted".** `AppPreferences.setSheetArtUrl` writes the whole
+  map into SharedPreferences as JSON and updates `sheetArtUrlsState`
+  (`data/AppPreferences.kt`), and the app-level init loads it back into that state
+  (`sheetArtUrlsState = getSheetArtUrls(context)`). The read/write pair is sound.
+- **What IS fragile is how the consumers seed themselves.** `ArtworkSheet.kt`
+  (and ~12 call sites in `TopicRevealScreen.kt`) do:
+  `var artUrl by remember(topic.imageUrl) { mutableStateOf(sheetArtUrlsState[artKey] ?: topic.imageUrl) }`
+  and then a `LaunchedEffect(topic.imageUrl, fetchConsent)` re-reads `stored`
+  INSIDE the effect and re-fetches when it is null. Neither the `remember` key nor
+  the effect key includes the cached value, so **a cache that loads after the
+  sheet composes is never noticed** — the value stays missed for that whole
+  visit, and the effect (already run) does not re-run. A restored sheet on a cold
+  start is exactly that case.
+- **And the remembered value is a REMOTE URL, with the bytes on disk unused.**
+  `features/cabinet/CoverCache.kt` already downloads covers to a local file
+  (`ensureLocalCover` / `localCoverFile`) and can report a persisted URL
+  (`persistedUrl`), but the sheets never prefer the local file — so a remote URL
+  that has gone stale (signed/expiring CDN links) shows as "lost" and re-fetches.
+
+The fix is therefore two small things, at every art call site: **key the seed and
+the effect on the cached value** (so a late load is picked up), and **read the
+locally stored cover file before the remote URL**. Not attempted yet: ~13 call
+sites, and there is no compiler in this workspace.
+
+## 5. Still outstanding
 
 - The warning families above (bottom-sheet migration, clipboard, lifecycle
   dependency, and the ~150 site-specific ones).
