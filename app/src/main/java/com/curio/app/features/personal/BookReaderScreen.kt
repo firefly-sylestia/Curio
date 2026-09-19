@@ -97,6 +97,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.withStyle
@@ -2000,9 +2001,24 @@ private fun ReaderParagraphBlock(
         // and every SEARCH FIND (the wash and a heavier weight). So the runs are
         // worked out from the spans themselves — each stretch of characters wears
         // every span that covers it — instead of one `if` picking a winner.
-        val shown = remember(block.text, query, hitHere, highlights, selection) {
+        val shown = remember(block.text, block.emphasis, query, hitHere, highlights, selection) {
             val needle = query.trim()
             val spans = ArrayList<ReaderTextSpan>()
+            // v398 — the BOOK's OWN emphasis goes in first: it is the paragraph's
+            // own type, and every wash added below (a highlight, the live
+            // selection, a find) paints over it rather than under it.
+            block.emphasis.forEach { run ->
+                spans.add(
+                    ReaderTextSpan(
+                        run.start.coerceIn(0, block.text.length),
+                        run.end.coerceIn(0, block.text.length),
+                        SpanStyle(
+                            fontWeight = if (run.bold) FontWeight.SemiBold else null,
+                            fontStyle = if (run.italic) FontStyle.Italic else null
+                        )
+                    )
+                )
+            }
             highlights.forEach { passage ->
                 val at = if (passage.text.isBlank()) -1 else block.text.indexOf(passage.text)
                 if (at >= 0) {
@@ -4179,8 +4195,21 @@ private data class ReaderBlock(
      * the page-list's `#page42` has something to land on. The block draws
      * nothing: it is a bookmark in the text, not a thing in the text.
      */
-    val anchor: String = ""
+    val anchor: String = "",
+    /**
+     * v398 — WHAT THE BOOK ITSELF SET IN BOLD OR ITALIC, as ranges into [text].
+     *
+     * The markup pass used to throw every tag away, so a phrase the edition
+     * emphasised read as plain prose (user request: "epub emphasis now"). A
+     * paragraph's own `<b>`/`<strong>` and `<i>`/`<em>` now survive as marks
+     * during the parse and arrive here as runs, which the reader draws through
+     * the same span layer its highlights and selections already use.
+     */
+    val emphasis: List<ReaderEmphasis> = emptyList()
 )
+
+/** One stretch of a paragraph the BOOK emphasised (see [ReaderBlock.emphasis]). */
+private data class ReaderEmphasis(val start: Int, val end: Int, val bold: Boolean, val italic: Boolean)
 
 /** What a long press was aimed at. */
 private data class ReaderParagraph(
@@ -4575,6 +4604,17 @@ private fun epubBlocks(
     sectionTitle: String
 ): List<ReaderBlock> {
     val marked = raw
+        // v398 — THE BOOK'S OWN EMPHASIS IS MARKED BEFORE ANYTHING ELSE IS
+        // STRIPPED. `<b>`/`<strong>` and `<i>`/`<em>` become characters no book
+        // text can hold, so they cross the tag-stripping pass, the whitespace
+        // collapse and the paragraph split, and [splitEmphasis] reads them back
+        // into ranges once the paragraph's own words are settled. Done FIRST so
+        // that a bold word inside a heading is marked before the heading's own
+        // regex captures its text.
+        .replace(Regex("<(b|strong)(\\s[^>]*)?>", RegexOption.IGNORE_CASE), "\u0001")
+        .replace(Regex("</(b|strong)\\s*>", RegexOption.IGNORE_CASE), "\u0002")
+        .replace(Regex("<(i|em)(\\s[^>]*)?>", RegexOption.IGNORE_CASE), "\u0003")
+        .replace(Regex("</(i|em)\\s*>", RegexOption.IGNORE_CASE), "\u0004")
         .replace(Regex("<(script|style)[^>]*>.*?</\\1>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)), " ")
         .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
         // A PAGE BREAK, turned into a marker of its own BEFORE the markup comes
@@ -4612,7 +4652,7 @@ private fun epubBlocks(
                 chunk.startsWith("\u0000H") -> {
                     val body = chunk.removePrefix("\u0000").removeSuffix("\u0000")
                     val level = body.substringAfter('H').substringBefore(':').toIntOrNull() ?: 2
-                    val text = body.substringAfter(':').trim()
+                    val (text, emphasis) = splitEmphasis(body.substringAfter(':').trim())
                     if (text.isNotBlank()) {
                         out.add(
                             ReaderBlock(
@@ -4620,7 +4660,8 @@ private fun epubBlocks(
                                 section = section,
                                 sectionTitle = sectionTitle,
                                 isHeading = true,
-                                headingLevel = level.coerceIn(1, 3)
+                                headingLevel = level.coerceIn(1, 3),
+                                emphasis = emphasis
                             )
                         )
                     }
@@ -4660,14 +4701,20 @@ private fun epubBlocks(
                     }
                 }
 
-                else -> out.add(
-                    ReaderBlock(
-                        text = chunk,
-                        section = section,
-                        sectionTitle = sectionTitle,
-                        isHeading = false
-                    )
-                )
+                else -> {
+                    val (text, emphasis) = splitEmphasis(chunk)
+                    if (text.isNotBlank()) {
+                        out.add(
+                            ReaderBlock(
+                                text = text,
+                                section = section,
+                                sectionTitle = sectionTitle,
+                                isHeading = false,
+                                emphasis = emphasis
+                            )
+                        )
+                    }
+                }
             }
         }
     return out
@@ -4745,6 +4792,59 @@ private fun bookImageBitmap(path: String): ImageBitmap? = runCatching {
     val options = android.graphics.BitmapFactory.Options().apply { inSampleSize = sample }
     android.graphics.BitmapFactory.decodeFile(path, options)?.asImageBitmap()
 }.getOrNull()
+
+/**
+ * v398 — A PARAGRAPH'S WORDS, WITH THE BOOK'S OWN EMPHASIS READ BACK OUT OF THEM.
+ *
+ * [epubBlocks] marks `<b>`/`<strong>` and `<i>`/`<em>` with four characters no
+ * book text can hold, because the alternative — measuring ranges in the markup
+ * and hoping the whitespace collapse did not move a single offset — is
+ * arithmetic that only has to be wrong once to put a bold run on the wrong
+ * words. Here the marks come out and the plain text is left exactly as it
+ * looked, so every range is by construction in the coordinates the reader
+ * draws with.
+ *
+ * Nesting is COUNTED rather than assumed: `<b>a <i>b</i> c</b>` is one bold run
+ * holding an italic one, and an unbalanced tag (a book with a stray `</b>`)
+ * cannot drive a count negative.
+ */
+private fun splitEmphasis(chunk: String): Pair<String, List<ReaderEmphasis>> {
+    if (!chunk.any { it == EMPH_BOLD_ON || it == EMPH_BOLD_OFF || it == EMPH_ITALIC_ON || it == EMPH_ITALIC_OFF }) {
+        return chunk to emptyList()
+    }
+    val text = StringBuilder(chunk.length)
+    val flags = ArrayList<Int>(chunk.length)
+    var bold = 0
+    var italic = 0
+    chunk.forEach { character ->
+        when (character) {
+            EMPH_BOLD_ON -> bold++
+            EMPH_BOLD_OFF -> bold = (bold - 1).coerceAtLeast(0)
+            EMPH_ITALIC_ON -> italic++
+            EMPH_ITALIC_OFF -> italic = (italic - 1).coerceAtLeast(0)
+            else -> {
+                text.append(character)
+                flags.add((if (bold > 0) 1 else 0) or (if (italic > 0) 2 else 0))
+            }
+        }
+    }
+    val runs = ArrayList<ReaderEmphasis>()
+    var i = 0
+    while (i < flags.size) {
+        val flag = flags[i]
+        var j = i + 1
+        while (j < flags.size && flags[j] == flag) j++
+        if (flag != 0) runs.add(ReaderEmphasis(i, j, flag and 1 != 0, flag and 2 != 0))
+        i = j
+    }
+    return text.toString() to runs
+}
+
+/** The four marks [epubBlocks] writes and [splitEmphasis] reads. */
+private const val EMPH_BOLD_ON = '\u0001'
+private const val EMPH_BOLD_OFF = '\u0002'
+private const val EMPH_ITALIC_ON = '\u0003'
+private const val EMPH_ITALIC_OFF = '\u0004'
 
 private fun stripMarkup(html: String): String = html
     .replace(Regex("<[^>]+>"), " ")

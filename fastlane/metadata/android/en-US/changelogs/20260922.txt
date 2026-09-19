@@ -92,6 +92,7 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Reading: a book's own emphasis comes through — a phrase the edition set in bold or italic reads that way in the reader (of the PDF's text layer too), instead of every tag being thrown away and the sentence arriving as plain prose, and a highlight or a selection still paints over it.
 - Social: a rainbow icon joins the cozy set in the leaf's place — a crescent moon, a sun, a star, a cloud, a rainbow, a mountain, a cup and a heart.
 - Writing: a picture or a voice note lands INSIDE the sentence you are writing — drop it with the caret in a line that already has words and it sits between them as a thumbnail with the text wrapping around it, at the size its own frame says, and the caret stays in the same paragraph. On a blank line, or at the start of one, it still takes a line of its own as before.
 - Reading: an attachment inside a paragraph reads back the way it was written — the thumbnail sits between the words on the page you read as well, so a picture dropped into a sentence is still in that sentence when the page is opened again.
