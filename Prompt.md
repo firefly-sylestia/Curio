@@ -112,6 +112,36 @@ Branch: `feat/drawer-and-curiosity-redesign` (started before the edit; `git pull
   section updated so it no longer points at rows that no longer exist.
 - `fastlane/metadata/android/en-US/changelogs/20260922.txt`: REMOVE/ADD/FIX block at the top.
 
+## 3b. The complexity audit (follow-up request: "audit more screen for complex")
+
+Measured across every `.kt` in the module (LOC · `@Composable` count · state slots · `LaunchedEffect`
+count · longest single composable). Full table + findings recorded in `app/AGENTS.md` → "Complexity
+audit — the heavy screens and the unreachable code (v409)".
+
+**Headline:** the app's complexity is concentrated, not spread. Three files hold a quarter of it —
+`TopicShareCard.kt` (12,722 LOC, one 3,445-line `TopicShareSheet` body), `TopicRevealScreen.kt`
+(7,092 / 1,716), `PetDesignerScreen.kt` (5,937 / 1,195) — plus `BookReaderScreen.kt` (5,744, 55
+`LaunchedEffect`s) and `CurioFloatingPet.kt` (2,914, 71 state slots).
+
+**Four structural findings** (all recommendations; none applied without approval):
+1. the share sheet carries the SAME nine-parameter design contract in six sibling composables;
+2. the settings drill-in scaffold (`PaddingValues(wideContentEdgePadding…) + top = if (wide) 0.dp
+   else SettingsHeroTotalHeight`) is copy-pasted into **22 files** and only 7 are still identical —
+   the drift is a tablet-consistency hazard;
+3. four sibling art/poster fetchers are four copies of one provider-chain lookup;
+4. **17 unreachable private declarations, ~1,300 lines** — split evenly between PARKED UI the author
+   deliberately hid (the pet designer's animation editor chain, 648 lines) and VESTIGIAL leftovers
+   (648 lines: `CurioShareCard`, the old Cabinet V2 tiles, the old Home rows, `chapterRangeLabel`…).
+   Verified by name-count, not by eye: each name appears exactly once in the module.
+
+**Checked and benign** (recorded so nobody "fixes" them): `PaperCard.kt`'s five `cachedSize` /
+`cachedOutline` pairs are per-`Shape` memoization, not globals; per-row navigations; the phone/wide
+and empty/list branches; the five screens that carry both a glass toolbar and a classic hero (that
+is the dual header STYLE).
+
+**Awaiting the member's word** on: which of the 17 declarations to delete (all / vestigial only /
+none) and which structural refactor to take on.
+
 ## 4. Still open
 
 - **Nothing here is device-verified.** No Gradle in this environment: every change is
@@ -140,6 +170,14 @@ is where the next instruction lands.
 > main constellaion bigger and it should not be a svg anymore or drawing, but proper ui
 > inetarctive style and make it clean. in a new branch, and do more screen aduits with duplicate
 > things and redundance thingies"
+
+> "audit more screen for complex"
+
+Status: **audited** — the measurements and findings are recorded in `app/AGENTS.md` and §3b above.
+Nothing was deleted or refactored yet: the 17 unreachable declarations include PARKED UI (the pet
+designer's hidden animation editor), and the root rule says a code path comes out only on the
+member's say-so. The findings are committed with the next real change (docs-only commits are not
+pushed on their own).
 
 <!-- Next user prompt goes here. This section is never cleared — the pending prompt and its
 status stay at the top, and the empty slot below is where the next instruction lands. -->

@@ -8579,6 +8579,35 @@ two-pane branches are one copy per branch, not a duplicate on screen.
 - **The Stats page ("Your Curiosity") is four instruments in `features/stats/StatsScreen.kt`:** `ProgressCard` (streak + level/XP + journey stages + medals + the Quests door — it REPLACES the old separate `StreakLevelCard` and `JourneyCard`, which were two cards about the same number), `BrainCard` (the six `brainProfile` dimensions as meters, with the tip printed for the WEAKEST dimension only — it used to print six paragraphs), `LaneMapCard` (the lane grid + the `StatsRangeSelectorPill` window + a `Cabinet` door on the selected lane through `PendingCabinetFilter.request` + `navigateToTab`), and `LifetimeTotalsCard` (compact counter panes). `StatsConstellationCard`, `LanesBreakdownCard` ("Your lanes" — the list that repeated the map) and `StatsSummaryChip` are DELETED, and `StatsCard`'s shell is the app-wide WHITE card (`surfaceContainerLowest` + an `outlineVariant` hairline), not the old seafoam lerp.
 - **Audit follow-up (v409):** a fresh sweep for duplicate copy and duplicate doors found only the legitimate patterns — per-row navigations (`revealFor` / `socialProfile` / `directMessage` once per list item) and the phone/two-pane or empty/list BINARY branches, which are one copy per branch rather than two on screen. Nothing else was co-visible duplication.
 
+### Complexity audit — the heavy screens and the unreachable code (v409)
+Measured across every `.kt` in the module: LOC · `@Composable` count · state slots · `LaunchedEffect` count · the longest single composable body. These are RECOMMENDATIONS, recorded so the next session starts from the numbers instead of an impression.
+
+| file | LOC | heaviest composable |
+|---|---|---|
+| `ui/components/TopicShareCard.kt` | 12,722 | `TopicShareSheet` — 3,445 lines in ONE body |
+| `features/reveal/TopicRevealScreen.kt` | 7,092 | `TopicRevealScreen` — 1,716 |
+| `features/petdesigner/PetDesignerScreen.kt` | 5,937 | `PetDesignerScreen` — 1,195 |
+| `features/personal/BookReaderScreen.kt` | 5,744 | `BookReaderScreen` — 912, with 55 `LaunchedEffect`s |
+| `features/personal/PersonalCanvas.kt` | 5,524 | `PersonalToolDock` — 399 |
+| `features/spin/SpinScreen.kt` | 4,565 | `SpinScreen` — 1,122 |
+| `features/detail/EntryDetailScreen.kt` | 4,512 | — |
+| `features/cabinet/CabinetV2Content.kt` | 4,324 | `CabinetV2Content` — 1,093 |
+| `features/home/HomeScreen.kt` | 3,484 | `HomeScreen` — 1,458 |
+| `ui/pet/CurioFloatingPet.kt` | 2,914 | 71 state slots · 44 effects |
+
+**1. The share sheet repeats ONE contract six times.** Six sibling composables in `TopicShareCard.kt` carry the same parameter block (`display`, `aspect`, `palette`, `factText`, `sharerName`, `categoryName`, `categoryGlyph`, `modifier`, `ratingStars`) — the design catalog is six copies of one signature. A spec type (or one design interface) would make it one contract with six implementations, and is the single biggest lever on the worst file in the app.
+
+**2. The settings drill-in scaffold is copy-pasted into 22 files.** Every settings-family page writes out `PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = if (wide) 0.dp else SettingsHeroTotalHeight, bottom = 24.dp)` by hand — plus its own header/toolbar branch and `SettingsNavRail`. Only SEVEN of those blocks are still byte-identical; the rest have drifted (added comments, an extra offset). That drift is exactly how a tablet layout goes inconsistent screen by screen. One shared page scaffold (or, at minimum, one `settingsDrillContentPadding(wide, …)` helper) is the fix; migrate every caller, do not add a 23rd copy.
+
+**3. Four sibling art/poster fetchers share a body.** `features/reveal/{SongArt,FilmPoster,SeriesPoster,AnimePoster}Fetch.kt` are four near-identical provider-chain lookups (~100–160 lines each). One generic fetcher over a provider list would collapse them.
+
+**4. ~1,300 lines of UNREACHABLE private code (17 declarations).** Each name appears exactly once in the module — its own declaration — verified by name-count, so none of it is called. Two kinds, and the difference matters before anyone deletes anything:
+- **PARKED UI (648 lines)** — deliberately hidden, by its own comments (`"Animation selection and preview remain implemented in the data/runtime layer but are hidden here while the animation UI is being refined"`): `AnimationTimelineEditor` (366), `AnimationPlayerDialog` (141), `ActionPreview` (64), `AnimationGalleryCard` (34), `LabeledChips` (29), `nudgeDetailRows` (14). Removing these throws away work the author may intend to re-enable.
+- **VESTIGIAL (648 lines)** — superseded or left behind: `CurioShareCard` (219, the share hub owns this now), `V2MediaTileCard` (133) + `V2ReviewTileCard` (103) (older Cabinet V2 tiles), `SavedQuoteRow` (54) + `PinnedTopicRow` (52) (older Home rows), `NewChip` (35), `StudioRailPulse` (23), `chapterRangeLabel` (21, superseded with the v408 book progress), `CustomiseLabel` (4), `moodFromName` (2), `contrastingInk` (2).
+- **Do not delete any of it without the member's word** — the root rule puts a code path on the ask-first list. The list is the audit's output; the deletion is a separate, approved change.
+
+**5. Checked and BENIGN — do not "fix":** `PaperCard.kt`'s five `private var cachedSize: Size? = null` + `cachedOutline` pairs are memoization INSIDE each `Shape` class (per-instance, not file-level globals — the path is rebuilt only when the size changes); the per-row navigations (`revealFor`/`socialProfile`/`directMessage` once per item); the phone-vs-wide and empty-vs-list branches; the per-branch title/subtitle literals. Also benign: the five two-header pairs (`CabinetScreen`, `SettingsHubScreen`, `StatsScreen`, `TopicHistoryScreen` carry a glass toolbar AND a classic hero) — that is the dual header STYLE, not a duplicate surface.
+
 ### Adaptive layout (tablet & landscape) — ALWAYS-ON
 - **`ui/adaptive/CurioAdaptiveLayout.kt`** owns the window adaptation contract: `windowWidthSizeClass()` (material3-window-size-class, `calculateWindowSizeClass(activity)`) and `CurioContentMaxWidth = 720.dp`. No Settings toggle — the wide layout engages automatically on medium/expanded windows (>= 600dp wide; tablets, landscape, split-screen) and phones are untouched.
 - **Wide windows:** `CurioNavHost` renders `CurioNavigationRail` (left edge, full height) instead of the bottom bar and centers every route's content in the 720dp max-width column (`fillMaxHeight().widthIn(max = CurioContentMaxWidth)` inside a centered Box); the theme background fills the gutters. Screens keep drawing their own status-bar padding and full-bleed washes inside the NavHost.
