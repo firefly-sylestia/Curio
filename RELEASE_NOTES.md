@@ -1,12 +1,3 @@
-<!--
-Curio release note - the content below becomes the top of the GitHub
-release body whenever a v* tag is pushed. The install guide (the Android
-APK table, or the Windows portable zip / MSI table) is appended
-automatically below it. Update this file for each release before
-tagging. This comment never appears in the published release.
-
-STYLE: no em dashes and no en dashes anywhere in this file.
--->
 
 # Curio v1.3.0
 
