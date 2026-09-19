@@ -656,9 +656,11 @@ internal fun CommunityReplyRow(
             color = if (depth == 0) {
                 MaterialTheme.colorScheme.surfaceContainerLow
             } else {
-                // A branch is quieter than its parent: the wall's own surface
-                // container, one step back — the reply reads as an answer.
-                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f)
+                // A branch is quieter than its parent: the ladder's nested
+                // step, one rung back from the white card — the reply reads as
+                // an answer. OPAQUE (v408): a 45% wash resolved to very nearly
+                // the parent card it was laid on.
+                MaterialTheme.colorScheme.surfaceContainerHigh
             },
             modifier = Modifier.weight(1f)
         ) {

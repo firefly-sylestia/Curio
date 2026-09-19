@@ -2008,7 +2008,7 @@ private fun V2EverythingCard(
                         Box(
                             modifier = tileSize
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.16f), RoundedCornerShape(10.dp))
                         ) {
                             V2JacketArt(

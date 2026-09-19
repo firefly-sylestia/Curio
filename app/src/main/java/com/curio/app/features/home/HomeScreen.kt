@@ -2516,7 +2516,7 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 modifier = Modifier
                                     .padding(start = 4.dp, end = 4.dp)
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                     .padding(vertical = 2.dp)
                             ) {
                                 DrawerNavItem(
@@ -2567,7 +2567,7 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 modifier = Modifier
                                     .padding(start = 4.dp, end = 4.dp)
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                     .padding(vertical = 2.dp)
                             ) {
                                 DrawerNavItem(

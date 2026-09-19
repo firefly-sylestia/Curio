@@ -114,26 +114,56 @@ Three requests arrived back to back; the third is the live one.
 
 ---
 
-## 3. ⏳ THE LIVE REQUEST — the full-app redundancy audit
+## 3. THE FULL-APP REDUNDANCY AUDIT (in progress)
 
-**Not started.** The ask: a full audit of the app for redundancy — duplicated tabs, duplicate
-or unnecessary texts, screens repeating themselves — and the fixes.
+**Method used:** (1) inventory every chrome surface and which routes render each; (2) mine every
+screen for UI copy that repeats within the file; (3) count `CurioRoutes.X` uses per file to find
+two doors to one destination on one screen; (4) read each hit to separate *per-branch* copies
+(phone vs wide, full vs compact — legitimate) from *co-visible* duplicates (a real finding).
 
-**Method decided (so the next session starts from the state, not from memory):**
+### Findings — duplicate doors (same destination, one screen)
+1. **Home's drawer has two doors to Stats & insights.** The curiosity-map / stat-strip card
+   opens `STATS` (`HomeScreen.kt:2471`, `:2474`), and the "Your Curiosity" group holds a
+   second row, "Stats & insights", opening the same screen (`:2526`).
+2. **Profile has two doors to Settings.** The header's Settings pill (`glassSettingsPill` in the
+   glass branch; `ProfileSearchPill` in the classic branch, `:1004`) opens the hub, and the
+   list also carries a full `SettingsNavCard` (`:677`).
+3. **Profile offers Quests three times** — the bar's streak pill (`onStreakClick`, `:797`), the
+   `fullActions` streak pill (`:846`) and the achievements card's `onOpenQuests` (`:628`). The
+   first two are the same bar in its two states; the third is a separate card.
+4. **Cabinet: two "open the whole shelf" tails** — `onOpenShelf` → `BOOKS` from the
+   reading-now shelf (`CabinetV2Content.kt:864`) and from the personal shelf (`:985`).
 
-1. **Inventory the chrome first.** The app has several navigation surfaces that can coexist on
-   one page: the bottom nav bar (`CurioBottomNav`), the wide-window rail (`CurioNavigationRail`),
-   the settings rail (`SettingsNavRail`), the settings quick-tools strip, `LiquidGlassPageNav`,
-   the per-screen back pills (`CurioTopBar` / `PersonalHeader`), and the LiquidGlass tab bars
-   (`CurioLiquidGlassTabBar`). A page carrying two of them, or a title printed twice (hero +
-   header, `PersonalHeader.titleRevealed`), is the first class of finding.
-2. **Then the page bodies** for repeated copy: a subtitle that repeats the title, a caption
-   under a heading that says the same thing, the same hint in two places (e.g. \"read from the
-   file's name\" style guidance), and empty-state text that repeats the section heading.
-3. **Then dead affordances:** two doors to the same destination on one screen, a chip and a
-   row that open the same route, a `Looks it up` / `Download` pair offered in two places.
-4. Fix what is unambiguous; for anything that REMOVES user-visible behaviour, ask first
-   (the AGENTS.md rule about deleting/replacing).
+### Findings — copy that says the same thing twice
+5. **Home's drawer stacks three near-synonyms:** the "Your Curiosity" heading with the subtitle
+   "Stats, streaks & insights", its own child row "Stats & insights", and the "Quests & Levels"
+   row above it with "Track your journey" (`HomeScreen.kt:2483`, `:2504`, `:2526`).
+6. **Online mode's page names itself inside itself:** the hero reads "Online mode / Account and
+   sync" and a switch row below is titled "Online mode" (`OnlineModeScreen.kt:108`, `:213`).
+
+### Findings — chrome (checked, NOT redundant)
+- The **settings rail on 19 screens** is the design (the settings family's own nav); the user
+  asked to keep it. The hub no longer has one (v408).
+- **No tab screen prints its own name**, and the bar's tabs are distinct
+  (Home / Shuffle / Cabinet / Social-opt-in). The **wide-window rail** and the **bottom pill bar**
+  never render together (`CurioNavHost` picks one). `LiquidGlassPageNav` is an in-page *page
+  turner* (prev / "3 / 12" / next + a jump sheet), not a second tab strip, and it only appears
+  where the bottom bar does not.
+- The **"repeated" titles** in `RecentScreen`, `RecycleBinScreen`, `BookBrowserScreen`,
+  `OnlineModeScreen` are one copy per BRANCH (phone vs wide two-pane) — not visible at once.
+
+### Fixed now (no behaviour removed, so no confirmation needed)
+- The last **translucent card fills** in the v408 ladder world became opaque scheme steps:
+  `surfaceContainerHigh.copy(alpha = 0.45f)` in Home's drawer group (`HomeScreen.kt:2519`,
+  `:2570`), the Cabinet's empty rails (`CabinetV2Content.kt:2011`) and the Community replies
+  (`CommunityCommentsSheet.kt:661` — a branch that resolved to very nearly its parent card).
+  (Skeleton shimmer placeholder fills are deliberately faint and were left alone.)
+
+### Recommended fixes — ASKED, awaiting the member's pick
+- **(a)** Drop Home's duplicate **"Stats & insights"** row (the card above already opens it).
+- **(b)** Drop Profile's **`SettingsNavCard`** (the header pill already opens Settings).
+- **(c)** Reword the overlapping copy (Home's drawer trio; Online mode's self-naming row) — text
+  only, nothing removed.
 
 ---
 
@@ -150,8 +180,8 @@ or unnecessary texts, screens repeating themselves — and the fixes.
 
 ## User prompts
 
-Status: (a), (b) and (c) are built and pushed. **(d) the full-app redundancy audit is the
-pending request below.**
+Status: (a), (b) and (c) are built and pushed. **(d) the full-app redundancy audit** is
+written up above; its three recommended fixes are asked (see "Recommended fixes").
 
 > "also many screen have redundancy alot of redundancy with the app, tabs etc, and and
 > unecessary texts duplicate tabs etc etc do a full app audit."
