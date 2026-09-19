@@ -1,3 +1,12 @@
+ADD:
+- Appearance: a Paper option — a white page with cream cards (the new default) or the previous cream page with white cards, one tap apart.
+- Books: the reading card is a gauge now — how far in as a percentage, over the chapter you are on, the page you are on and how long the book is, each as a labelled control; and the chapter list shows which chapters are read.
+
+FIX:
+- Books: the page number can be set — the card wrote the page count and the chapter but never the page, so the number sprang back to where the reader was; a hand-set page is kept on the book in either direction, reading on takes the card back over, and the reader's own place is never touched.
+- Books: marking a book finished closes every chapter with it, and "Reading again" puts the marks back exactly where they were.
+- Theme: light mode's paper is flipped — white page, cream cards, with a soft edge on every card and more room inside the Settings and Profile cards; the icon tiles are back on Online mode, Recycle bin, Updates and Support & diagnostics.
+
 REMOVE:
 - Home: the drawer's menu is gone — Quests & Levels, Your Curiosity (Topic history, Manage categories, Browse topics) and About (Support & diagnostics, Replay intro). Settings keeps those rows, Home keeps Browse topics, Profile keeps Quests.
 - Your Curiosity: the "Your lanes" list is gone — the lane map above it already names every lane and its knowledge.
