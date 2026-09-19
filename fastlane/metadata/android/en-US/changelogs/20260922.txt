@@ -1,4 +1,8 @@
 FIX:
+- Social: no portrait wears a line above its shoulders — the bust's outlined edge was a dark rule crossing the disc just above the shoulders and the collar floated above the line it belonged to (the collar now sits from the shoulder line down, and the garment's own tone is edge enough).
+- Social: the poses are within their own heads again — the tilts ran to eight degrees, which walks a head off its collar and reads as a bent neck, so every row now turns by no more than four.
+- Social: every gaze is a shape that means something — an open eye with its own catch-light, a closed smiling eye, a lidded eye whose lid sits on the eye, a wink, and a looking-down pair, instead of bars drawn straight across the eyes; and the four mouths are four different shapes (a grin with its own lip line and corners, a short quiet arc, an open o, a plain smile) instead of one arc at four sizes.
+- Social: the moon is a real crescent and the leaf is gone — the moon's arc was a broken ring that read as the letter C, so it is now a crescent built by taking one circle out of another, and the leaf's tile holds a rainbow (three bands of one arch with a cloud at each foot).
 - Writing: taking a picture out of a sentence closes the words up — deleting the space it stood in (or its ✕ on the thumbnail) hands the picture back to a line of its own instead of leaving a hole in the paragraph.
 - Writing: a chapter note is words only — a picture sitting inside a paragraph puts no stray mark in the middle of the note's text, and no blank line under it.
 - Reading: panning a zoomed PDF page no longer turns it — the drag the page could take is claimed from the first movement (before it reached Android's own tap-slop) instead of from the second event, which is what let the pager read the rest as a page turn; a drag the page has no room for is still handed back, so an edge swipe still changes pages while zoomed.
@@ -88,6 +92,7 @@ FIX:
 - Books: the book page's head rolls up the author along with the title.
 
 ADD:
+- Social: a rainbow icon joins the cozy set in the leaf's place — a crescent moon, a sun, a star, a cloud, a rainbow, a mountain, a cup and a heart.
 - Writing: a picture or a voice note lands INSIDE the sentence you are writing — drop it with the caret in a line that already has words and it sits between them as a thumbnail with the text wrapping around it, at the size its own frame says, and the caret stays in the same paragraph. On a blank line, or at the start of one, it still takes a line of its own as before.
 - Reading: an attachment inside a paragraph reads back the way it was written — the thumbnail sits between the words on the page you read as well, so a picture dropped into a sentence is still in that sentence when the page is opened again.
 - Reading: anime opens the series sheet — its own episode list from MyAnimeList's data, with the watched marks, the likes and the shelf toggles a series has, and the reveal card previews those episodes under its poster.

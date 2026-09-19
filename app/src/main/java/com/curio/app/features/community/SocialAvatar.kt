@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -72,8 +73,8 @@ import kotlin.math.sin
  * ## What an emoji row is
  *
  * The eight icons are the same disc and the same warm palette with a single
- * object on it — a moon, a sun, a star, a cloud, a leaf, a mountain, a cup, a
- * heart — drawn with the same primitives as the portraits. That is why they sit
+ * object on it — a crescent moon, a sun, a star, a cloud, a rainbow, a mountain,
+ * a cup, a heart — drawn with the same primitives as the portraits. That is why they sit
  * in the same picker and in the same bubble as a portrait without looking like a
  * different app: same ground, same light, same ink.
  *
@@ -127,29 +128,35 @@ private class AvatarArt(
 // long waves, a high bun, pigtails, braids, a hime cut, a flower crown, a
 // beret, a headband and space buns. No two rows share a silhouette, a gaze or a
 // mouth, and every row leans its own way.
+//
+// v398 — AND EVERY ROW LEANS A LITTLE. The tilts ran to eight degrees, which is
+// enough to walk the head off its own collar and read as a broken neck rather
+// than a pose (user report: "the poses are weird"). They are now within four
+// degrees, in the same directions, so the cast still turns its own way without
+// any row looking bent.
 private val PORTRAITS: List<AvatarArt> = listOf(
     // ── the men ───────────────────────────────────────────────────────────
-    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), KIND_CAP, FACE_OPEN, MOUTH_SMILE, -4f, 2f),
+    AvatarArt(Color(0xFFE9A9A2), Color(0xFF6C8FBF), Color(0xFFF3D2B6), Color(0xFF4A3B33), KIND_CAP, FACE_OPEN, MOUTH_SMILE, -3f, 1f),
     AvatarArt(Color(0xFFD8A98F), Color(0xFF6B5A4E), Color(0xFFE8C09A), Color(0xFF463832), KIND_BEARD, FACE_CALM, MOUTH_SMILE, -1f, 0f),
-    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF4A362C), KIND_CURLS, FACE_OPEN, MOUTH_GRIN, 5f, 3f),
-    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF443222), KIND_BEANIE, FACE_SLEEPY, MOUTH_SOFT, -6f, -2f),
-    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFF2F2723), KIND_HEADPHONES, FACE_HAPPY, MOUTH_GRIN, -7f, -3f),
-    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFFD9D2C4), KIND_WIZARD, FACE_OPEN, MOUTH_OPEN, 4f, -1f),
-    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF453730), KIND_HOOD, FACE_SLEEPY, MOUTH_SOFT, -8f, -2f),
-    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFF8C5A34), KIND_TOPKNOT, FACE_CALM, MOUTH_SMILE, 2f, 2f),
-    AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), KIND_LAUREL, FACE_HAPPY, MOUTH_GRIN, -3f, 2f),
-    AvatarArt(Color(0xFFF0AEC4), Color(0xFF4F7F72), Color(0xFFF6DCC6), Color(0xFF5B3A24), KIND_SIDE_PART, FACE_WINK, MOUTH_GRIN, 6f, 3f),
+    AvatarArt(Color(0xFFE8C583), Color(0xFFDA7F63), Color(0xFFE9BE97), Color(0xFF4A362C), KIND_CURLS, FACE_OPEN, MOUTH_GRIN, 3f, 2f),
+    AvatarArt(Color(0xFFB9A4E0), Color(0xFF4E5A78), Color(0xFFF2D3B8), Color(0xFF443222), KIND_BEANIE, FACE_SLEEPY, MOUTH_SOFT, -3f, -1f),
+    AvatarArt(Color(0xFF8E93C9), Color(0xFF3F4E86), Color(0xFFF1CFA9), Color(0xFF2F2723), KIND_HEADPHONES, FACE_HAPPY, MOUTH_GRIN, -4f, -2f),
+    AvatarArt(Color(0xFFA8BE8C), Color(0xFF5F7A4A), Color(0xFFEBC49C), Color(0xFFD9D2C4), KIND_WIZARD, FACE_OPEN, MOUTH_OPEN, 2f, -1f),
+    AvatarArt(Color(0xFF9FB0BE), Color(0xFF7A5B45), Color(0xFFF2D2B0), Color(0xFF453730), KIND_HOOD, FACE_SLEEPY, MOUTH_SOFT, -4f, -1f),
+    AvatarArt(Color(0xFFE3CFA6), Color(0xFF5E7F9C), Color(0xFFF4D8BC), Color(0xFF8C5A34), KIND_TOPKNOT, FACE_CALM, MOUTH_SMILE, 1f, 1f),
+    AvatarArt(Color(0xFFAE8FBC), Color(0xFF4A5870), Color(0xFFEFE2D2), Color(0xFF3C4553), KIND_LAUREL, FACE_HAPPY, MOUTH_GRIN, -2f, 1f),
+    AvatarArt(Color(0xFFF0AEC4), Color(0xFF4F7F72), Color(0xFFF6DCC6), Color(0xFF5B3A24), KIND_SIDE_PART, FACE_WINK, MOUTH_GRIN, 3f, 2f),
     // ── the women ─────────────────────────────────────────────────────────
-    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), KIND_BOB, FACE_OPEN, MOUTH_SOFT, 4f, -2f),
-    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), KIND_WAVES, FACE_HAPPY, MOUTH_SMILE, 3f, -3f),
-    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF4A3634), KIND_HIGH_BUN, FACE_CALM, MOUTH_SOFT, 2f, -2f),
-    AvatarArt(Color(0xFFEFA785), Color(0xFF7FB4C9), Color(0xFFF7DEC6), Color(0xFF6B3F26), KIND_PIGTAILS, FACE_WINK, MOUTH_GRIN, -7f, 4f),
-    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF40332E), KIND_BRAIDS, FACE_HAPPY, MOUTH_SMILE, 3f, -4f),
-    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), KIND_HIME, FACE_SLEEPY, MOUTH_SOFT, -2f, 1f),
-    AvatarArt(Color(0xFFF7C9A9), Color(0xFFE7A6B5), Color(0xFFF3D4B4), Color(0xFFE0A44E), KIND_FLOWERS, FACE_OPEN, MOUTH_SMILE, 5f, -3f),
-    AvatarArt(Color(0xFFBFD9F0), Color(0xFF6E7FB8), Color(0xFFF6DCC2), Color(0xFF4A3730), KIND_BERET, FACE_CALM, MOUTH_SOFT, -6f, 3f),
-    AvatarArt(Color(0xFFD9C6EE), Color(0xFF5E7F9C), Color(0xFFF8E0C9), Color(0xFF7A4A2C), KIND_HEADBAND, FACE_HAPPY, MOUTH_SMILE, -5f, 3f),
-    AvatarArt(Color(0xFFF5C9B0), Color(0xFF6B8F7A), Color(0xFFEFD3B8), Color(0xFF3F3330), KIND_SPACE_BUNS, FACE_OPEN, MOUTH_GRIN, 3f, 0f)
+    AvatarArt(Color(0xFF9FB8E8), Color(0xFFE7C6A8), Color(0xFFF6DCC4), Color(0xFF8C4A2F), KIND_BOB, FACE_OPEN, MOUTH_SOFT, 2f, -1f),
+    AvatarArt(Color(0xFF9FD0CB), Color(0xFFE4A15C), Color(0xFFF4D7BE), Color(0xFF5B3A24), KIND_WAVES, FACE_HAPPY, MOUTH_SMILE, 2f, -2f),
+    AvatarArt(Color(0xFFC5989C), Color(0xFF7E4A52), Color(0xFFF5D9C0), Color(0xFF4A3634), KIND_HIGH_BUN, FACE_CALM, MOUTH_SOFT, 1f, -1f),
+    AvatarArt(Color(0xFFEFA785), Color(0xFF7FB4C9), Color(0xFFF7DEC6), Color(0xFF6B3F26), KIND_PIGTAILS, FACE_WINK, MOUTH_GRIN, -4f, 2f),
+    AvatarArt(Color(0xFF6E7699), Color(0xFFD9DEEA), Color(0xFFF2D6BE), Color(0xFF40332E), KIND_BRAIDS, FACE_HAPPY, MOUTH_SMILE, 2f, -2f),
+    AvatarArt(Color(0xFFF2B8CE), Color(0xFFB98FD8), Color(0xFFF7DFC8), Color(0xFF6B4A3A), KIND_HIME, FACE_SLEEPY, MOUTH_SOFT, -1f, 1f),
+    AvatarArt(Color(0xFFF7C9A9), Color(0xFFE7A6B5), Color(0xFFF3D4B4), Color(0xFFE0A44E), KIND_FLOWERS, FACE_OPEN, MOUTH_SMILE, 3f, -2f),
+    AvatarArt(Color(0xFFBFD9F0), Color(0xFF6E7FB8), Color(0xFFF6DCC2), Color(0xFF4A3730), KIND_BERET, FACE_CALM, MOUTH_SOFT, -3f, 2f),
+    AvatarArt(Color(0xFFD9C6EE), Color(0xFF5E7F9C), Color(0xFFF8E0C9), Color(0xFF7A4A2C), KIND_HEADBAND, FACE_HAPPY, MOUTH_SMILE, -3f, 2f),
+    AvatarArt(Color(0xFFF5C9B0), Color(0xFF6B8F7A), Color(0xFFEFD3B8), Color(0xFF3F3330), KIND_SPACE_BUNS, FACE_OPEN, MOUTH_GRIN, 2f, 0f)
 )
 
 /**
@@ -171,7 +178,7 @@ private val ICONS: List<IconArt> = listOf(
     IconArt(Color(0xFFF6C98A), Color(0xFFF2A03D), Color(0xFFFBD98F), Color(0xFFD97B22), ICON_SUN),
     IconArt(Color(0xFF9FB8E8), Color(0xFFF7DC8E), Color(0xFFFFF3CB), Color(0xFFE0B44F), ICON_STAR),
     IconArt(Color(0xFFA9CBE8), Color(0xFFF9F5EC), Color(0xFFFFFFFF), Color(0xFFD8E4F0), ICON_CLOUD),
-    IconArt(Color(0xFFC9A96E), Color(0xFF7FA05A), Color(0xFFA8C77E), Color(0xFF4F6B38), ICON_LEAF),
+    IconArt(Color(0xFFAFCBE6), Color(0xFFE4657E), Color(0xFFF3C64E), Color(0xFF7AA05A), ICON_RAINBOW),
     IconArt(Color(0xFF8FA6C9), Color(0xFF6E7B8C), Color(0xFFF7F7F4), Color(0xFF4C5563), ICON_MOUNTAIN),
     IconArt(Color(0xFFD9B08C), Color(0xFFEFE6DA), Color(0xFFFFFDF8), Color(0xFF8E5A3C), ICON_CUP),
     IconArt(Color(0xFFF3B8C6), Color(0xFFE4657E), Color(0xFFF7A0B0), Color(0xFFB84258), ICON_HEART)
@@ -219,7 +226,7 @@ private const val ICON_MOON = 0
 private const val ICON_SUN = 1
 private const val ICON_STAR = 2
 private const val ICON_CLOUD = 3
-private const val ICON_LEAF = 4
+private const val ICON_RAINBOW = 4
 private const val ICON_MOUNTAIN = 5
 private const val ICON_CUP = 6
 private const val ICON_HEART = 7
@@ -553,20 +560,29 @@ private fun DrawScope.drawPortrait(art: AvatarArt, u: Float) {
  */
 private fun DrawScope.drawBust(art: AvatarArt, u: Float) {
     val garment = art.garment
+    // v398 — NO INK CONTOUR ON THE SHOULDERS, AND THE COLLAR SITS ON THEM. The
+    // stroked outline of this path was a dark rule running across the disc a few
+    // units ABOVE the shoulders, and the collar band floated above the line it
+    // was supposed to be part of — which is exactly what the member saw ("theres
+    // a line above shoulder"). The garment's own tone against the disc is edge
+    // enough at avatar size, and the collar now sits where a collar sits: from
+    // the shoulder line down, with the neck drawn over its middle.
     val shoulders = Path().apply {
-        moveTo(2f, 104f)
-        quadraticBezierTo(6f, 76f, 26f, 68f)
-        quadraticBezierTo(50f, 60f, 74f, 68f)
-        quadraticBezierTo(94f, 76f, 98f, 104f)
+        moveTo(-4f, 104f)
+        quadraticBezierTo(2f, 78f, 24f, 71f)
+        quadraticBezierTo(39f, 66f, 50f, 66f)
+        quadraticBezierTo(61f, 66f, 76f, 71f)
+        quadraticBezierTo(98f, 78f, 104f, 104f)
         close()
     }
-    fill(shoulders.scaled(u), garment, u, ink = 0.45f)
-    // The collar: a soft band across the shoulder line, so the bust has a front
-    // and a back rather than reading as a wedge of colour.
-    slab(32f, 62f, 68f, 72f, 5f, lighten(garment, 0.16f), u)
-    // The neckline shade under the chin, and one fold from the shoulder.
-    bar(50f, 66f, 50f, 72f, 1.6f, darken(garment, 0.28f), u)
-    arc(28f, 74f, 12f, 200f, 70f, 1.6f, darken(garment, 0.22f), u)
+    fill(shoulders.scaled(u), garment, u, ink = 0f)
+    // The collar: a soft band from the shoulder line down, so the bust has a
+    // front and a back rather than reading as a wedge of colour.
+    slab(38f, 65f, 62f, 75f, 7f, lighten(garment, 0.16f), u)
+    // The neckline's own shadow just under the chin, and one fold from the
+    // shoulder — both well below the collar so neither reads as a rule.
+    arc(41f, 70f, 10f, 200f, 140f, 1.4f, darken(garment, 0.24f), u)
+    arc(30f, 86f, 13f, 205f, 60f, 1.4f, darken(garment, 0.20f), u)
 }
 
 /** The neck, with the jaw's own shadow across its top. */
@@ -610,50 +626,74 @@ private fun DrawScope.drawHead(art: AvatarArt, u: Float) {
  * and every extra lash is one more thing that turns to noise.
  */
 private fun DrawScope.drawFace(art: AvatarArt, u: Float) {
-    val ink = INK.copy(alpha = 0.86f)
+    val ink = INK.copy(alpha = 0.88f)
     val leftX = HEAD_CX - EYE_DX
     val rightX = HEAD_CX + EYE_DX
+    // v398 — EVERY GAZE IS A SHAPE THAT MEANS SOMETHING. The first pass mixed
+    // bars, flat ovals and half-lids, and a straight bar across the eye reads as
+    // a rule drawn THROUGH the face rather than a closed eye — which is what the
+    // member noticed ("some avatars are weird looking with the eyes"). The five
+    // gazes are now five readable pairs, and the open eye carries a catch-light:
+    // one highlight is the difference between a living eye and a dead dot.
+    val openEye: (Float) -> Unit = { cx ->
+        oval(cx, EYE_Y, 3f, 3.6f, ink, u)
+        dot(cx - 1.1f, EYE_Y - 1.3f, 1.1f, PAPER, u)
+    }
+    val closedEye: (Float) -> Unit = { cx ->
+        arc(cx, EYE_Y + 1.4f, 3.4f, 200f, 140f, 2.1f, ink, u)
+    }
     when (art.face) {
         FACE_HAPPY -> {
-            // Closed into a smile: the same arc inverted, which is the one
-            // expression that reads instantly at any size.
-            arc(leftX, EYE_Y + 1f, 3.6f, 200f, 140f, 1.9f, ink, u)
-            arc(rightX, EYE_Y + 1f, 3.6f, 200f, 140f, 1.9f, ink, u)
+            closedEye(leftX)
+            closedEye(rightX)
         }
         FACE_SLEEPY -> {
-            oval(leftX, EYE_Y, 3.4f, 2.6f, ink, u)
-            oval(rightX, EYE_Y, 3.4f, 2.6f, ink, u)
-            bar(leftX - 3.4f, EYE_Y - 1.6f, leftX + 3.4f, EYE_Y - 1.6f, 1.5f, ink, u)
-            bar(rightX - 3.4f, EYE_Y - 1.6f, rightX + 3.4f, EYE_Y - 1.6f, 1.5f, ink, u)
+            // A lidded eye: the lid sits ON the eye with a pupil under it, so
+            // this reads as unbothered rather than as a pair of sunglasses (two
+            // flat ovals with a bar floating above them).
+            oval(leftX, EYE_Y + 0.6f, 3.2f, 2.4f, ink, u)
+            oval(rightX, EYE_Y + 0.6f, 3.2f, 2.4f, ink, u)
+            bar(leftX - 3.8f, EYE_Y - 1.9f, leftX + 3.8f, EYE_Y - 1.4f, 2f, ink, u)
+            bar(rightX - 3.8f, EYE_Y - 1.4f, rightX + 3.8f, EYE_Y - 1.9f, 2f, ink, u)
         }
         FACE_WINK -> {
-            oval(leftX, EYE_Y, 3.2f, 3.6f, ink, u)
-            arc(rightX, EYE_Y + 1f, 3.4f, 200f, 140f, 1.9f, ink, u)
+            openEye(leftX)
+            closedEye(rightX)
         }
         FACE_CALM -> {
-            bar(leftX - 3.2f, EYE_Y, leftX + 3.2f, EYE_Y, 2.1f, ink, u)
-            bar(rightX - 3.2f, EYE_Y, rightX + 3.2f, EYE_Y, 2.1f, ink, u)
+            // Looking down: the LOWER half of a circle is a whole expression —
+            // two level bars are a face with something wrong with it.
+            arc(leftX, EYE_Y - 0.6f, 3.2f, 20f, 140f, 2f, ink, u)
+            arc(rightX, EYE_Y - 0.6f, 3.2f, 20f, 140f, 2f, ink, u)
         }
         else -> {
-            oval(leftX, EYE_Y, 2.9f, 3.4f, ink, u)
-            oval(rightX, EYE_Y, 2.9f, 3.4f, ink, u)
+            openEye(leftX)
+            openEye(rightX)
         }
     }
     // Brows sit close above the gaze and lean with it, which is where the
     // difference between a kind face and a stern one actually comes from.
-    val browLift = if (art.face == FACE_HAPPY) 3f else 1.5f
+    val browLift = if (art.face == FACE_HAPPY) 2.5f else 1.5f
     bar(leftX - 5f, EYE_Y - 8f - browLift, leftX + 4.5f, EYE_Y - 8.5f, 1.8f, INK.copy(alpha = 0.5f), u)
     bar(rightX - 4.5f, EYE_Y - 8.5f, rightX + 5f, EYE_Y - 8f - browLift, 1.8f, INK.copy(alpha = 0.5f), u)
     // The nose: one short tick. A real nose at this size is a smudge.
     bar(HEAD_CX, EYE_Y + 2f, HEAD_CX - 1.2f, EYE_Y + 5f, 1.4f, darken(art.skin, 0.20f), u)
     when (art.mouth) {
         MOUTH_GRIN -> {
-            arc(HEAD_CX, MOUTH_Y - 2.4f, 5.2f, 30f, 120f, 2f, LIP, u)
-            bar(HEAD_CX - 3.4f, MOUTH_Y + 2.2f, HEAD_CX + 3.4f, MOUTH_Y + 2.2f, 1.2f, LIP.copy(alpha = 0.5f), u)
+            // A wide grin WITH its own lip line and two corners, so it is not the
+            // soft smile drawn bigger — every mouth used to be the same arc
+            // (user report: "that smile in each of them").
+            arc(HEAD_CX, MOUTH_Y - 3.2f, 6.2f, 25f, 130f, 2.1f, LIP, u)
+            bar(HEAD_CX - 5.4f, MOUTH_Y - 0.2f, HEAD_CX + 5.4f, MOUTH_Y - 0.2f, 1.3f, LIP.copy(alpha = 0.55f), u)
+            dot(HEAD_CX - 6.8f, MOUTH_Y + 0.8f, 1f, LIP.copy(alpha = 0.65f), u)
+            dot(HEAD_CX + 6.8f, MOUTH_Y + 0.8f, 1f, LIP.copy(alpha = 0.65f), u)
         }
-        MOUTH_SOFT -> arc(HEAD_CX, MOUTH_Y - 2.2f, 3.4f, 35f, 110f, 1.7f, LIP, u)
-        MOUTH_OPEN -> oval(HEAD_CX, MOUTH_Y, 2.6f, 3.2f, LIP, u)
-        else -> arc(HEAD_CX, MOUTH_Y - 2.6f, 4.6f, 25f, 130f, 1.8f, LIP, u)
+        MOUTH_SOFT -> arc(HEAD_CX, MOUTH_Y - 1.8f, 3f, 40f, 100f, 1.7f, LIP, u)
+        MOUTH_OPEN -> {
+            oval(HEAD_CX, MOUTH_Y, 2.8f, 3.4f, LIP, u)
+            oval(HEAD_CX - 0.8f, MOUTH_Y - 1.3f, 0.9f, 0.7f, PAPER, u, alpha = 0.7f)
+        }
+        else -> arc(HEAD_CX, MOUTH_Y - 2.6f, 4.6f, 25f, 130f, 1.9f, LIP, u)
     }
 }
 
@@ -1087,14 +1127,21 @@ private fun DrawScope.drawProp(art: AvatarArt, u: Float) {
 private fun DrawScope.drawIcon(art: IconArt, u: Float) {
     when (art.kind) {
         ICON_MOON -> {
-            // A thick crescent: one stroked arc is a moon, and the craters are
-            // three dots along it.
-            arc(50f, 52f, 27f, 40f, 280f, 17f, art.main, u)
-            dot(29f, 44f, 2.6f, art.deep, u)
-            dot(36f, 66f, 2f, art.deep, u)
-            dot(24f, 56f, 1.6f, art.deep, u)
-            star(72f, 28f, 4f, 1.6f, art.light, u)
-            star(78f, 60f, 2.8f, 1.1f, art.light, u)
+            // v398 — A CRESCENT, MADE BY TAKING ONE CIRCLE OUT OF ANOTHER. The
+            // first pass drew it as a stroked arc sweeping 280°, which is a
+            // broken ring: at avatar size its two ends nearly met and the whole
+            // tile read as the letter C (user report: "why the mon is C"). Two
+            // overlapping discs leave a solid crescent — an outline can never
+            // read as anything but a line.
+            val disc = Path().apply { addOval(Rect(21f, 22f, 75f, 76f)) }
+            val bite = Path().apply { addOval(Rect(37f, 12f, 89f, 64f)) }
+            val crescent = Path().apply { op(disc, bite, PathOperation.Difference) }
+            fill(crescent.scaled(u), art.main, u, ink = 0f)
+            // Two craters on the body it kept, and the night around it.
+            dot(34f, 58f, 2.6f, art.deep, u)
+            dot(31f, 44f, 1.7f, art.deep, u)
+            star(72f, 30f, 4f, 1.6f, art.light, u)
+            star(80f, 56f, 2.8f, 1.1f, art.light, u)
         }
         ICON_SUN -> {
             dot(50f, 50f, 24f, art.main.copy(alpha = 0.18f), u)
@@ -1124,12 +1171,16 @@ private fun DrawScope.drawIcon(art: IconArt, u: Float) {
             bar(52f, 70f, 50f, 78f, 2.4f, art.light, u)
             bar(60f, 70f, 58f, 75f, 2.4f, art.light, u)
         }
-        ICON_LEAF -> {
-            leaf(50f, 46f, -38f, 21f, 13f, art.main, u)
-            bar(38f, 54f, 62f, 38f, 1.8f, art.light, u)
-            bar(45f, 42f, 56f, 36f, 1.2f, art.light, u)
-            bar(43f, 51f, 54f, 45f, 1.2f, art.light, u)
-            bar(34f, 60f, 30f, 72f, 2.6f, art.deep, u)
+        ICON_RAINBOW -> {
+            // v398 — the LEAF's tile (the member's own ask: "for the leaf icon its
+            // bad change it … change the leaf to crescent moon", and the crescent
+            // now stands in the moon's own slot), so this one carries three bands
+            // of one arch instead: reads instantly, and never as a leaf.
+            arc(50f, 70f, 30f, 180f, 180f, 8f, art.main, u)
+            arc(50f, 70f, 22.5f, 180f, 180f, 7.5f, art.light, u)
+            arc(50f, 70f, 15.5f, 180f, 180f, 6f, art.deep, u)
+            dot(21f, 70f, 7.5f, PAPER, u)
+            dot(79f, 70f, 7.5f, PAPER, u)
         }
         ICON_MOUNTAIN -> {
             dot(74f, 30f, 9f, art.light, u)
