@@ -76,21 +76,67 @@ internal object BookEnrichment {
             updated = matched
             learned += "the catalog's own record"
         }
-        if (updated.chaptersJson.isBlank()) {
-            // v389e — FREE FIRST, KEYS LAST.
-            //
-            // Open Library and Crossref both answer for nothing, and between
-            // them they cover a table of contents someone typed AND an academic
-            // book's chapters registered as DOIs. Google Books used to sit in the
-            // middle of that list, and it is the one source that FAILS without a
-            // key: the anonymous endpoint answers 429 ("Quota exceeded … Queries
-            // per day", checked live from this repo), so every chapter lookup on a
-            // build with no key spent a request on a source that could not answer
-            // (user report: "the book chapters still doesnt fetch i am sure
-            // googlebooks api doesnt work"). It is asked LAST, and only when a key
-            // is actually configured (see googleBooksChapters).
-            val chapters = openLibraryChapters(updated.title, updated.author)
-                ?: crossrefChapters(updated.title, updated.author)
+        // ── WHAT IS ACTUALLY MISSING (v410) ──────────────────────────────
+        // Each question is asked ONCE, and only when the book cannot already
+        // answer it, so a pass over a complete book opens no socket at all.
+        val catalogChapters = if (updated.catalogId.isNotBlank() && updated.chaptersJson.isBlank()) {
+            withContext(Dispatchers.IO) {
+                runCatching { BookCatalog.chapters(updated.catalogId) }.getOrNull()
+            }.orEmpty()
+        } else {
+            emptyList()
+        }
+        // THE CATALOG'S OWN CHAPTER LIST IS A CHAPTER LIST (v410). It lives in
+        // the topic JSON and is read back by catalogId (see
+        // `rememberBookChapters`), so a catalog book has nothing to ask Open
+        // Library for — yet this pass asked anyway, on every first open, and
+        // spent three requests on a list the app was already holding.
+        val wantChapters = updated.chaptersJson.isBlank() && catalogChapters.isEmpty()
+        val wantPages = updated.pageCount <= 0
+        // A catalog book's about-text is the catalog's own (read live by the
+        // book's page), so only a book the catalog does not have asks Open
+        // Library for a description.
+        val wantDescription = updated.catalogId.isBlank() && updated.synopsis.isBlank()
+
+        // ── ONE OPEN LIBRARY PASS (v410) ─────────────────────────────────
+        // Open Library used to be asked THREE separate times for the same
+        // title — one search for a table of contents, a second for the page
+        // count, a third (plus a second work read) for the description — five
+        // sequential requests before Crossref was even reached. It is ONE
+        // title search and ONE work read now, and the table of contents, the
+        // page count and the description all come out of that single visit
+        // (member report: "the look up is slow … the look up should do look up
+        // in open library first check all").
+        if (wantChapters || wantPages || wantDescription) {
+            openLibraryPass(updated.title, updated.author, wantChapters, wantPages, wantDescription)
+                ?.let { pass ->
+                    pass.chapters?.let { list ->
+                        updated = updated.copy(
+                            chaptersJson = PersonalChapterCodec.encode(list),
+                            totalChapters = if (updated.totalChapters <= 0) list.size
+                            else updated.totalChapters
+                        )
+                        learned += "${list.size} chapters"
+                    }
+                    pass.pages?.let { pages ->
+                        updated = updated.copy(pageCount = pages)
+                        learned += "$pages pages"
+                    }
+                    pass.description?.let { text ->
+                        updated = updated.copy(synopsis = text)
+                        learned += "the description"
+                    }
+                }
+        }
+        // v389e — FREE FIRST, KEYS LAST, and only when Open Library had no
+        // table of contents at all. Crossref answers for nothing and covers an
+        // academic book's chapters registered as DOIs; Google Books is the one
+        // source that FAILS without a key — its anonymous endpoint answers 429
+        // ("Quota exceeded … Queries per day", checked live from this repo) — so
+        // it is asked LAST and only when a key is actually configured (see
+        // googleBooksChapters).
+        if (wantChapters && updated.chaptersJson.isBlank()) {
+            val chapters = crossrefChapters(updated.title, updated.author)
                 ?: googleBooksChapters(updated.title, updated.author)
             chapters?.let { list ->
                 updated = updated.copy(
@@ -99,21 +145,6 @@ internal object BookEnrichment {
                     else updated.totalChapters
                 )
                 learned += "${list.size} chapters"
-            }
-        }
-        if (updated.pageCount <= 0) {
-            openLibraryPages(updated.title, updated.author)?.let { pages ->
-                updated = updated.copy(pageCount = pages)
-                learned += "$pages pages"
-            }
-        }
-        // A catalog book's about-text is the catalog's own (read live by the
-        // book's page), so only a book the catalog does not have asks Open
-        // Library for a description.
-        if (updated.catalogId.isBlank() && updated.synopsis.isBlank()) {
-            openLibraryDescription(updated.title, updated.author)?.let { text ->
-                updated = updated.copy(synopsis = text)
-                learned += "the description"
             }
         }
 
@@ -126,37 +157,117 @@ internal object BookEnrichment {
         )
     }
 
+    /** What ONE Open Library visit learned — any of the three may be absent. */
+    private data class OpenLibraryPass(
+        val chapters: List<PersonalChapter>?,
+        val pages: Int?,
+        val description: String?
+    )
+
     /**
-     * The work's DESCRIPTION — Open Library's own about-text, the one its
-     * book pages show (the member asked which of the two the app uses: the
-     * catalog's synopsis when Curio has the book, this otherwise). It lives on
-     * the WORK, is sometimes an object (`{ "value": … }`) and is occasionally
-     * missing entirely, in which case the first sentence stands in. Null when
-     * consent is off, nothing matched by title, or the text is too short to be
-     * a description at all.
+     * v410 — ONE VISIT TO OPEN LIBRARY, ANSWERING EVERYTHING.
+     *
+     * The three functions this replaces each went to the catalogue on their own:
+     * `openLibraryChapters` did its own title search (plus an editions read and
+     * sometimes a work read), `openLibraryPages` did a SECOND search, and
+     * `openLibraryDescription` did a THIRD search and its own work read. Five
+     * sequential round trips for facts that live in one search hit and one work
+     * document — which is exactly the "the look up is slow" the member reported.
+     *
+     * So: the title is searched ONCE; the work the search matched is read ONCE,
+     * and only when the description or a table of contents is actually wanted;
+     * the editions are read at most once, and only for a table of contents. The
+     * three questions are still Open Library's THREE answers — the description
+     * (the work's own about-text, an object or a string, with the first sentence
+     * standing in), the median page count the search reports, and the work's or
+     * its editions' table of contents — they just arrive from one visit.
+     *
+     * Null when consent is off, when nothing matched the title, or when the
+     * catalogue could not be reached.
      */
-    suspend fun openLibraryDescription(title: String, author: String): String? {
+    private suspend fun openLibraryPass(
+        title: String,
+        author: String,
+        wantChapters: Boolean,
+        wantPages: Boolean,
+        wantDescription: Boolean
+    ): OpenLibraryPass? {
         if (title.isBlank()) return null
         if (!AppPreferences.bookFetchEnabledState) return null
         return withContext(Dispatchers.IO) {
             runCatching {
                 val wanted = normalise(title)
-                val search = getJson(searchUrl(title, author, 5, "key,title"))
-                    ?: return@runCatching null
-                val match = search.asJsonObject.array("docs")
+                // ONE search, carrying every field the three questions need.
+                val match = getJson(
+                    searchUrl(title, author, 5, "key,title,number_of_pages_median")
+                )?.let { runCatching { it.asJsonObject }.getOrNull() }
+                    ?.array("docs")
+                    .orEmpty()
                     .mapNotNull { it as? JsonObject }
                     .firstOrNull {
-                        normalise(it.str("title")) == wanted &&
-                            it.str("key").startsWith("/works/")
+                        normalise(it.str("title")) == wanted && it.str("key").isNotBlank()
                     }
                     ?: return@runCatching null
-                val work = getJson("https://openlibrary.org${match.str("key")}.json")
-                    ?.let { runCatching { it.asJsonObject }.getOrNull() }
-                    ?: return@runCatching null
-                val description = work.descriptionText().ifBlank { work.str("first_sentence") }
-                description.trim().takeIf { it.length >= MIN_DESCRIPTION }
+                val workKey = match.str("key")
+                val isWork = workKey.startsWith("/works/")
+                // ONE work read, and only when something needs it: the
+                // description lives on the work, and so does the table of
+                // contents its editions may not carry.
+                val work = if (isWork && (wantDescription || wantChapters)) {
+                    getJson("https://openlibrary.org$workKey.json")
+                        ?.let { runCatching { it.asJsonObject }.getOrNull() }
+                } else {
+                    null
+                }
+                val pages = if (wantPages) {
+                    match.get("number_of_pages_median")
+                        ?.takeIf { !it.isJsonNull }
+                        ?.let { runCatching { it.asInt }.getOrNull() }
+                        ?.takeIf { it > 0 }
+                } else {
+                    null
+                }
+                val description = if (wantDescription && work != null) {
+                    val text = work.descriptionText().ifBlank { work.str("first_sentence") }
+                    text.trim().takeIf { it.length >= MIN_DESCRIPTION }
+                } else {
+                    null
+                }
+                // v389d — THE RICHEST TABLE WINS, and the WORK is the second
+                // door: an edition's table is often a bare "Contents" stub while
+                // a sibling edition carries the book's real chapter list, and a
+                // good many works keep the only table anyone entered on the WORK
+                // itself. Fewer than [MIN_CHAPTERS] rows is not a chapter list.
+                val chapters = if (wantChapters && isWork) {
+                    val table = richestEditionTable(workKey)
+                        ?: work?.tableOfContents()?.takeIf { it.size >= MIN_CHAPTERS }
+                    table?.mapIndexed { index, chapter -> chapter.copy(number = index + 1) }
+                } else {
+                    null
+                }
+                OpenLibraryPass(chapters = chapters, pages = pages, description = description)
             }.getOrNull()
         }
+    }
+
+    /**
+     * The fullest table of contents among a work's EDITIONS (v389d).
+     *
+     * Open Library keeps a table of contents per edition, most editions have
+     * none, and an edition's table is often a bare "Contents" line — so every
+     * candidate is kept and the fullest one wins, with a table that carries page
+     * ranges preferred over one that has only names. Null when no edition has a
+     * real one.
+     */
+    private fun richestEditionTable(workKey: String): List<PersonalChapter>? {
+        val editions = getJson("https://openlibrary.org$workKey/editions.json?limit=50")
+            ?.let { runCatching { it.asJsonObject }.getOrNull() }
+            ?.array("entries")
+            .orEmpty()
+        return editions
+            .mapNotNull { entry -> (entry as? JsonObject)?.tableOfContents() }
+            .filter { it.size >= MIN_CHAPTERS }
+            .maxByOrNull { table -> table.count { it.pageStart > 0 } * 100 + table.size }
     }
 
     /** `description`, which Open Library writes as a string OR an object. */
@@ -187,63 +298,6 @@ internal object BookEnrichment {
             coverUrl = book.coverUrl.ifBlank { hit.coverUrl },
             author = book.author.ifBlank { hit.author }
         )
-    }
-
-    /**
-     * The book's chapter list, read out of Open Library's table of contents.
-     *
-     * Open Library keeps a ToC per EDITION, not per work, and most editions
-     * have none — so this looks up the work by title (the edition's title must
-     * match, or the result is a different book's contents) and then walks its
-     * editions for the first real table: fewer than three rows is a
-     * "Contents" line, not a chapter list. Null when nothing usable was found,
-     * when consent is off, or when the catalogue could not be reached.
-     */
-    suspend fun openLibraryChapters(title: String, author: String): List<PersonalChapter>? {
-        if (title.isBlank()) return null
-        if (!AppPreferences.bookFetchEnabledState) return null
-        return withContext(Dispatchers.IO) {
-            runCatching {
-                val wanted = normalise(title)
-                val search = getJson(
-                    searchUrl(title, author, 5, "key,title,number_of_pages_median")
-                ) ?: return@runCatching null
-                val docs = search.asJsonObject.array("docs")
-                val match = docs.mapNotNull { it as? JsonObject }
-                    .firstOrNull { normalise(it.str("title")) == wanted && it.str("key").isNotBlank() }
-                    ?: return@runCatching null
-                val editions = getJson(
-                    "https://openlibrary.org${match.str("key")}/editions.json?limit=50"
-                )?.let { runCatching { it.asJsonObject }.getOrNull() }?.array("entries").orEmpty()
-                // v389d — THE RICHEST TABLE WINS. This used to take the FIRST
-                // edition whose table had three rows or more, and an edition's
-                // table is often a bare "Contents" stub while a sibling edition
-                // carries the book's real chapter list. Every candidate is kept
-                // and the fullest one is used, with a table that has page ranges
-                // preferred over one that has only names.
-                val tables = editions
-                    .mapNotNull { entry -> (entry as? JsonObject)?.tableOfContents() }
-                    .filter { it.size >= MIN_CHAPTERS }
-                val best = tables.maxByOrNull { table ->
-                    table.count { it.pageStart > 0 } * 100 + table.size
-                }
-                // v389d — AND THE WORK ITSELF. Open Library keeps a table of
-                // contents on the WORK as well as on its editions, and for a
-                // good many records that is the only one anyone entered. Asked
-                // for only when the editions had nothing, so the common case
-                // costs no extra request.
-                val fromWork = if (best == null) {
-                    getJson("https://openlibrary.org${match.str("key")}.json")
-                        ?.let { runCatching { it.asJsonObject }.getOrNull() }
-                        ?.tableOfContents()
-                        ?.takeIf { it.size >= MIN_CHAPTERS }
-                } else {
-                    null
-                }
-                (best ?: fromWork)
-                    ?.mapIndexed { index, chapter -> chapter.copy(number = index + 1) }
-            }.getOrNull()
-        }
     }
 
     /**
@@ -344,31 +398,6 @@ internal object BookEnrichment {
             numbers.isEmpty() -> 0 to 0
             numbers.size == 1 -> numbers[0] to numbers[0]
             else -> numbers.min() to numbers.max()
-        }
-    }
-
-    /**
-     * Open Library's page count for a title. Null when the consent toggle is
-     * off (no network is touched at all), when the catalogue could not be
-     * reached, or when it does not know — the caller then simply leaves the
-     * book alone.
-     */
-    private suspend fun openLibraryPages(title: String, author: String): Int? {
-        if (title.isBlank()) return null
-        if (!AppPreferences.bookFetchEnabledState) return null
-        return withContext(Dispatchers.IO) {
-            runCatching {
-                val search = getJson(
-                    searchUrl(title, author, 3, "title,number_of_pages_median")
-                ) ?: return@runCatching null
-                search.asJsonObject.array("docs")
-                    .firstOrNull()
-                    ?.asJsonObject
-                    ?.get("number_of_pages_median")
-                    ?.takeIf { !it.isJsonNull }
-                    ?.asInt
-                    ?.takeIf { it > 0 }
-            }.getOrNull()
         }
     }
 

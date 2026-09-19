@@ -1,4 +1,13 @@
 ADD:
+- Books: a book shelved from a topic reveal keeps its own cover and its own length — the shelf, the book page and the Cabinet used to draw a plain placeholder for a book the app knows everything about.
+- Books: a book that came in without artwork has a cover fetched for it — the app's own catalog first, then iTunes and Open Library — and the cover that actually arrived is kept on the book, so the shelf, the book page and the Cabinet's shelf all show it.
+
+FIX:
+- Books: the look-up is one visit to Open Library instead of three — the chapters, the page count and the description were asked for in separate searches, one after the other, which is what made a first open crawl; one search and one work read answer all three now, and a book Curio's own catalog already holds is never asked for its chapter list.
+- Books: covers show up as they land — the shelf and the book page draw the artwork the app has already fetched, so a cover no longer waits for the book's own row to catch up.
+- Reading: an episode list opens with the one the card already fetched — the series and anime cards fetch the guide to draw their chips, and the sheet that opens from them fetched that same guide a second time, saying "No episode guide yet." in between.
+
+ADD:
 - Appearance: a Paper option — a white page with cream cards (the new default) or the previous cream page with white cards, one tap apart.
 - Books: the reading card is a gauge now — how far in as a percentage, over the chapter you are on, the page you are on and how long the book is, each as a labelled control; and the chapter list shows which chapters are read.
 

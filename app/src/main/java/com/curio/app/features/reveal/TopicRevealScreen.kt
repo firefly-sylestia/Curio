@@ -1349,6 +1349,15 @@ fun TopicRevealScreen(
     // they already wrote attached. A topic that somehow has no shelf row yet
     // is shelved first — additive, never destructive — so the page has a book
     // to open. One door, one book, one set of notes.
+    //
+    // v410 — AND IT IS SHELVED COMPLETE. The bridge used to write a book with
+    // nothing but its title, author and catalog id, so the shelf row it created
+    // had no cover URL at all: the shelf, the book page and the Cabinet all fell
+    // back to a code-generated plate for a book Curio knows everything about
+    // (member report: "the book covers are not loading in the book page now … my
+    // book shelf mainly it should fetch"). The topic's own cover, page count and
+    // chapter count are already in hand here, so they come along — no lookup, no
+    // network, and the page opens full instead of empty.
     val bookSheetTopic = resolved
     if (bookSheetTopic != null && bookSheetTopic.categoryId == CategoryId.BOOKS &&
         (showSynopsisDialog || selectedChapter != null) &&
@@ -1369,7 +1378,12 @@ fun TopicRevealScreen(
                                     id = newId,
                                     title = bookSheetTopic.name,
                                     author = bookSheetTopic.byline,
+                                    // v410 — the topic's own cover, so the shelf
+                                    // and the book page show the real artwork.
+                                    coverUrl = bookSheetTopic.imageUrl,
                                     catalogId = bookSheetTopic.id,
+                                    totalChapters = bookSheetTopic.chapters?.size ?: 0,
+                                    pageCount = bookSheetTopic.pageCount ?: 0,
                                     createdAtMillis = now,
                                     updatedAtMillis = now
                                 )
@@ -4842,7 +4856,27 @@ private fun EpisodeNotesSheet(
     // site is unchanged.
     variant: EpisodeSheetVariant = EpisodeSheetVariant.SERIES
 ) {
-  var episodes by remember { mutableStateOf(topic.episodes.orEmpty()) }
+  // v410 — SEEDED FROM WHAT THE CARD ABOVE ALREADY RESOLVED.
+  //
+  // The reveal's series/anime card fetches the episode guide to draw its chip
+  // row, and this sheet used to open on an EMPTY list and ask for that very
+  // same guide a second time — so the member watched "No episode guide yet."
+  // turn into a guide they had already been shown on the card (member report:
+  // "sometimes the series or anime data is already shown in preview but it
+  // loads again when the page opens"). The fetchers now keep the list they
+  // resolved ([SeriesEpisodeFetcher.cached] / [AnimeEpisodeFetcher.cached]),
+  // and the sheet opens with it in hand. Authored episodes still win.
+  val authoredEpisodes = topic.episodes.orEmpty()
+  val alreadyResolved = remember(topic.name, variant) {
+    when (variant) {
+      EpisodeSheetVariant.ANIME -> AnimeEpisodeFetcher.cached(topic.name)
+      EpisodeSheetVariant.FILM -> SeriesEpisodeFetcher.cached(topic.name)
+      EpisodeSheetVariant.SERIES -> SeriesEpisodeFetcher.cached(topic.name)
+    }
+  }
+  var episodes by remember(topic.name, variant) {
+    mutableStateOf(authoredEpisodes.ifEmpty { alreadyResolved.orEmpty() })
+  }
   val fetchConsent = AppPreferences.seriesFetchEnabledState
   val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -4854,7 +4888,12 @@ private fun EpisodeNotesSheet(
   // show "No episode guide yet" when the data is available.
   LaunchedEffect(topic.name, fetchConsent) {
   if (episodes.isNotEmpty()) {
-  episodes = SeriesEpisodeFetcher.enrich(topic.name, episodes)
+  // v410 — a PROVIDER's own list is left exactly as it arrived: it is already
+  // the provider's shape, and re-merging it by season/number would let another
+  // show's air dates and stills land on its rows.
+  if (authoredEpisodes.isNotEmpty()) {
+  episodes = SeriesEpisodeFetcher.enrich(topic.name, authoredEpisodes)
+  }
   } else if (fetchConsent) {
   // v389f — the open lane's own source. v398 — AND THE ANIME LANE'S OWN SOURCE
   // IS NOW THE SERIES ONE: AnimeEpisodeFetcher reads TVMaze first, exactly like
@@ -5808,7 +5847,12 @@ private fun AnimeInfoSection(
     // nothing to list.
     val seriesConsent = AppPreferences.seriesFetchEnabledState
     var previewEpisodes by remember(topic.name) {
-        mutableStateOf(topic.episodes.orEmpty())
+        // v410 — the list this title already resolved seeds the chip row, so
+        // re-entering a reveal opens WITH its episodes instead of an empty
+        // frame and a second lookup (the same answer the sheet reads).
+        mutableStateOf(
+            topic.episodes.orEmpty().ifEmpty { AnimeEpisodeFetcher.cached(topic.name).orEmpty() }
+        )
     }
     LaunchedEffect(topic.name, seriesConsent) {
         if (previewEpisodes.isEmpty() && seriesConsent) {

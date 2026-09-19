@@ -8,144 +8,106 @@ from the state rather than from memory.
 
 ## 1. The request
 
-> "you can merge this to the main branch and all commits nand push. skip the previous work, and
-> redesing the chapter and progress view in the book view and redesign the way i save im on etc,
-> also i am not able to chnage the pages update from there, also when marked finished they should
-> be automatically finished too. and when unmark restroing the previous marked. also home abut a
-> white app bacgroud as the main, but cream cards reverse of what we did, and add soft borders
-> where youve added borders for cards in profile and settings also give proper space and all. and
-> bring back icons for online mode reycle bin, updates and support and diagnostics. and then we
-> will be introducing new accent colors."
+> "somehow the book covers are not loading in the book page now, and also the look up is slow,
+> what happend the look up should do look up in open library first check all, also some times
+> the series or anime data is already shown in preview but it loads again when the page opens"
 
-### Decisions already taken with the member (ask_user, earlier in the session)
+### Clarified with the member (ask_user, this session)
 
-1. **The paper flip is APP-WIDE and REVERSIBLE** — "app wide and as a toggle to reverse it",
-   which is why `Appearance ▸ Paper` exists instead of a hardcoded swap.
-2. **Finishing a book closes its chapters too**, and the place the member had reached is
-   remembered so un-finishing restores it ("All chapters done + remember my place").
-3. **A hand-set page is persisted on the BOOK** ("Persist it on the book, don't touch the
-   reader").
-4. **The chapter list shows its state** ("Auto state: passed / reading / written").
-
-### Merge / push
-
-`main` already carried the drawer + curiosity commit (`301fac2b`, pushed) when this request
-started, so there was nothing left to merge — the branch `feat/drawer-and-curiosity-redesign`
-and `main` point at the same commit. The new work was committed straight onto `main` and
-pushed with it.
+1. **Where the covers are missing:** "all of it, my book shelf mainly — it should fetch."
+   So the fix is not only "carry the cover along at creation" but "resolve a missing cover".
+2. **The series/anime reload is:** opening the **episode sheet** from a card that had already
+   shown its episode chips.
+3. **Look-up UX:** keep it **silent** (no visible "checking…" note). Only the tapped pill reports.
 
 ## 2. What the code actually looked like (findings)
 
-- **The page stepper was writing everything EXCEPT the page.** `onPage` in
-  `BookDetailScreen` saved a whole book row (`pageCount = filePageCount`, a moved
-  `currentChapter`) and never a page — while the number the card DISPLAYED came from the
-  reader's `ReaderMarkKind.POSITION` row. So a hand move either did nothing visible or
-  changed the chapter under the member's fingertip. That is the reported bug, exactly.
-- **There was no column for a hand-set page.** `PersonalBookEntity` had `currentChapter`
-  and `pageCount` only; the reader's position row was the sole answer to "what page".
-- **"Mark finished" only set a timestamp.** `setFinished(bookId, finished)` wrote
-  `finishedAtMillis` and nothing else, so a finished book kept its mid-book progress and
-  un-finishing had nothing to restore (it just left the old number alone).
-- **The card was two strips plus three unlabelled steppers.** A page bar AND a chapter tick
-  row, each answering "how far" in its own units, over three bare numbers ("I'm on 12") with
-  no word saying which number was which.
-- **The chapter rows said nothing about where they sat** — the same row at chapter two and
-  at chapter forty, so the run could only be found by counting.
-- **v408 left ~25 hardcoded `Color.White` light-branch card fills.** They were the card
-  colour when the page was cream; on a white page they would vanish. A literal cannot follow
-  a paper switch, so each became a scheme token.
-- **The four "front door" settings rows had no icon tile** (`SettingsOptionRow(plain = true)`
-  skipped it) — the member wants the icons back without losing the three-line copy.
+- **The shelf bridge created a book with no cover at all.** `TopicRevealScreen`'s bridge (v408,
+  "the reveal's book sheet is the book page now") wrote `PersonalBookEntity(title, author,
+  catalogId)` — **no `coverUrl`, no `pageCount`, no `totalChapters`.** So a book opened from a
+  book topic landed on the shelf/book page wearing the code-generated plate, and its progress
+  card had nothing to count against. That is the reported "covers are not loading".
+- **`BookCover` painted ONLY the row's `coverUrl`** (`rememberAsyncImagePainter(coverUrl)`), so
+  art the app had already downloaded (the Cabinet's `cover_cache`) was invisible to the shelf,
+  the book page, Home and the Cabinet's personal shelf.
+- **The look-up asked Open Library three separate times for the same title:**
+  `openLibraryChapters` (title search + editions read + sometimes a work read),
+  `openLibraryPages` (a SECOND search), `openLibraryDescription` (a THIRD search + its own work
+  read) — up to five sequential round trips on the critical path of a first open. And a book
+  whose `catalogId` had a real chapter list in the topic JSON was *still* sent to Open Library
+  for one.
+- **The episode sheet seeded itself from `topic.episodes` only.** The anime card fetches the
+  guide to draw its chips (`AnimeEpisodeFetcher.fetchAll`), then `EpisodeNotesSheet` opened on
+  the authored list (usually empty) and fetched the very same list again — memoised, so fast,
+  but it rendered "No episode guide yet." first. `SeriesEpisodeFetcher` kept only the raw JSON,
+  so there was nothing in the sheet's own shape to seed from.
 
 ## 3. What was done
 
-### Books (`data/PersonalEntity.kt`, `data/PersonalDao.kt`, `data/CurioDatabase.kt`, `features/personal/BookDetailScreen.kt`)
+### Covers (the member's "it should fetch")
 
-- **Schema (migration 19→20, `MIGRATION_19_20`):** `personal_books` gains `currentPage`
-  (the book row's own page mark), `chapterBeforeFinish` and `pageBeforeFinish` (the remembered
-  place, `-1` = nothing kept — an already-finished book answers honestly instead of guessing).
-- **`setPage(bookId, page)`** is the column-scoped write a hand move makes; the reader's
-  position row is never touched. `ProgressCard`'s `lastPage` is now "the most recent answer":
-  the book row's page when it was written after the reader's row, else the reader's — so a
-  move sticks in either direction and reading on takes the card back over.
-- **`setFinished` is read-modify-write:** finishing stashes the place and closes the list
-  (`currentChapter = totalChapters`, `currentPage = pageCount`); "Reading again" restores the
-  stashed pair verbatim. `saveChapterNote`'s progress nudge is guarded on `!isFinished`.
-- **`ProgressCard` rebuilt:** "READING PROGRESS" label, the chapter name in Fraunces, the page
-  line, ONE gauge (the file's pages, else the chapter run) with the fraction as a percent,
-  the chapter ticks with "Chapter N of M · M pages", then a hairline and three
-  `ProgressStepperRow`s ("I'm on chapter" / "Page of N" / "The book has N chapters"). The
-  controls are hidden while finished, because a finished book has read all of it.
-- **`ChapterCard` wears its state** (`ChapterReadState` → read / reading now / to read): the
-  number's fill, the accent side rule (writing OR reading now) and the subtitle's own word.
-- **The call site** passes `progressPage` (the most-recent-wins page) and writes a hand page
-  through `setPage` + `setProgress(chapterForPage(page, chapters))` instead of a whole-row save.
+- **`TopicRevealScreen`'s shelf bridge** now carries the topic's own `imageUrl`, `pageCount` and
+  chapter count (all already in hand — no lookup, no network).
+- **`BookCoverWarmup` (new, `features/personal/`)** is the ONE resolver for a book with no
+  cover: the catalogue's own cover by `catalogId` (local, adopted even with fetching OFF), else
+  `CabinetCoverCache.ensureLocalCover` — the v407 verified-bytes cascade (persisted → authored →
+  iTunes → Open Library) — and the URL is written onto the **book's row** through the new
+  column-scoped `PersonalDao.setCoverUrl` / `PersonalRepository.setCoverUrl`. Callers bump
+  `CabinetCoverCache.version` once per batch.
+- **`BookShelfScreen`** warms every coverless book on the shelf (quietly, on IO, one at a time);
+  **`BookDetailScreen`** warms the one book it opened.
+- **`BookCover`** renders the art the app already has (`CabinetCoverCache.localCoverFile`, read
+  through the cache's version) before the row's `coverUrl`, with the generated cover still
+  underneath as the loading/error state.
 
-### The paper flip (`ui/theme/CurioTheme.kt`, `data/AppPreferences.kt`, ~13 feature files)
+### The look-up (one Open Library visit)
 
-- **Two light schemes, one switch.** `CurioWhitePageLightScheme` (NEW DEFAULT: white page,
-  cream cards, `surfaceContainerLow` = a card / `surfaceContainer` = a block inside one /
-  `surfaceContainerHigh` = a pill inside one) and `CurioCreamPageLightScheme` (the v408 pair,
-  kept verbatim). `curioColorScheme()` reads `AppPreferences.paperCreamCardsState`. Dark mode
-  is untouched — its black page with plates stepping up is the same rule.
-- **`Appearance ▸ Paper`** (`CompactSegmentedRow`, "White page" / "Cream page") +
-  a `SettingsDeepRow` so the hub search finds it. `KEY_PAPER_CREAM_CARDS`, the state, the
-  getter/setter and the `initThemeMode` seed follow the existing pref pattern.
-- **Card fills resolve through the scheme.** 25 sites where the light branch said
-  `Color.White` (cards, rows, pills, chat bubbles) now read `surfaceContainerLow`, and the two
-  nested ones (a clear button on a row, a pin button on a card) read `surfaceContainer`.
-- **Soft edges + room:** light `outlineVariant` 0.11 (cream-page scheme) / 0.10 (white-page
-  scheme), `SettingsOptionCard` padding 17/8, `CurioSettingsCard` padding 16/14,
-  `CurioSettingsRow` vertical 15.
-- **Icons back on the four front-door rows:** `SettingsOptionRow` always renders its icon tile
-  now; `plain` means "roomy, three-line copy" and nothing else.
+- **`BookEnrichment.openLibraryPass`** replaces `openLibraryChapters` / `openLibraryPages` /
+  `openLibraryDescription`: ONE title search (`key,title,number_of_pages_median`) and ONE work
+  read, only when the description or a table of contents is wanted, plus at most one editions
+  read for the table. `richestEditionTable` keeps the v389d "richest table wins, page ranges
+  preferred, work as the second door" rule.
+- **A catalog book's chapter list closes the chapter question** — `wantChapters` is false when
+  `catalogId` resolves to chapters in the topic JSON (they are what the book page reads back).
+- Crossref is asked only when Open Library had no table at all; Google Books still only when its
+  key is configured.
 
-### Docs & release notes
+### The episode sheet (no reload)
 
-- `app/AGENTS.md`: the card-ladder section is rewritten for v409 (the flip, the switch, the
-  "cards resolve through the scheme, never a literal" rule, the soft edge values), the settings
-  hub's `plain` bullet no longer claims the icon is gone, and a new v409 books block records
-  the page mark, the most-recent-wins rule, the finish/restore contract and the chapter states.
-- `fastlane/metadata/android/en-US/changelogs/20260922.txt`: ADD/FIX block at the top.
+- `SeriesEpisodeFetcher` gained a `seriesCache` (the MAPPED list, beside the raw JSON memo) and
+  `cached(name)`; `AnimeEpisodeFetcher` gained `cached(name)`.
+- `EpisodeNotesSheet` seeds `episodes` from that cache (authored episodes still win) and only
+  runs the provider fetch when nothing is known; a **provider's** list is never run through
+  `enrich` any more (that merge is for the authored list — its season/number match is keyed to
+  TVMaze's own numbering). The anime card seeds its chip row the same way.
 
-## 4. Still open
+## 4. Still open / worth a device pass
 
-- **The accent-colour pass has not started** — the member's words were "and then we will be
-  introducing new accent colors", i.e. the next request, not this one.
-- **Nothing here is device-verified.** No Gradle in this environment: every change is
-  `node scripts/check_braces.js`-checked, import-swept and diff-reviewed; **CI is the compile
-  check**.
-- Worth a device pass: the white-page/cream-card pair on a lane wash (Home/Profile/Cabinet),
-  the soft hairline at 0.10 on a cream card, and the reading card's rhythm (the gauge, the
-  ticks, three stepper rows).
-- The `Paper` switch is a member-facing option, not an experiment with an end date; if the
-  member later settles on one paper, the losing scheme and the switch come out together.
+- **Nothing here is device-verified.** No Gradle in this environment: `node scripts/check_braces.js`
+  passes (282 files), the diff was import-swept and read back; **CI is the compile check**.
+- Worth watching on device: the shelf's first open with several coverless books (the warm pass is
+  sequential on IO; `missedThisRun` stops it re-searching inside a session), the book page's first
+  frame for a book that gets its cover fetched mid-open, and whether the reveal's episode chips now
+  stay put when the sheet opens.
+- The look-up's own consent gate is unchanged (`bookFetchEnabledState` for metadata, the merged
+  `coverFetchEnabledState` for covers) — with fetching off, only the catalogue's own cover is
+  adopted, and the look-up reports "off in Settings" exactly as before.
+- Pre-v410 shelf books with a blank `coverUrl` get their cover on the next shelf/book-page visit;
+  there is no migration and none is needed (the row is written when the art is found).
 
 ---
 
 ## User prompts
 
-Status: **done and pushed on `main`** (`69e6c6f5`, `aa820f20`, plus this docs commit).
-CI follow-up: the first build failed on two compile errors — `SettingsOptionRow` called
-`.curioPressClickable(pressedScale = 0.975f)` without forwarding its own `onClick` (dead rows),
-and `laneGridItems` invoked the `@Composable` `themedAccent()` without being `@Composable`
-itself (both call sites already were). Both fixed; this commit is the CI compile pass.
+Status: **done — committed and pushed on `main`.**
 
-> "you can merge this to the main branch and all commits nand push. skip the previous work, and
-> redesing the chapter and progress view in the book view and redesign the way i save im on etc,
-> also i am not able to chnage the pages update from there, also when marked finished they should
-> be automatically finished too. and when unmark restroing the previous marked. also home abut a
-> white app bacgroud as the main, but cream cards reverse of what we did, and add soft borders
-> where youve added borders for cards in profile and settings also give proper space and all. and
-> bring back icons for online mode reycle bin, updates and support and diagnostics. and then we
-> will be introducing new accent colors."
+> "somehow the book covers are not loading in the book page now, and also the look up is slow,
+> what happend the look up should do look up in open library first check all, also some times
+> the series or anime data is already shown in preview but it loads again when the page opens"
 
-Earlier prompts in this session, all done and pushed: the theme/wallpaper subtle-by-default pass
-and mood-board/hero watermark tuning (v407); the pet-hub hold and the recents hold (v407); the
-Cabinet animations, empty-state, open book and cover/artist loading (v407); the AGPL licence,
-the plain-list Settings hub and the white-card ladder (v408); the library/app-wide redundancy
-audit (v408); the drawer + curiosity redesign and the lane grid (v409); the screen-complexity
-audit (v409, recommendations only — nothing deleted).
+Clarified with the member in the same round (cover scope / which reload / silent look-up), all
+three reports fixed as described above. Earlier prompts in this session are recorded in git
+history (`69e6c6f5`, `aa820f20`, `532a3dc3`, `b3c4c73f`, `301fac2b` and the ones before them).
 
 <!-- Next user prompt goes here. This section is never cleared — the pending prompt and its
 status stay at the top, and the empty slot below is where the next instruction lands. -->

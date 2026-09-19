@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,9 +69,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.newPersonalBookId
+import com.curio.app.features.cabinet.CabinetCoverCache
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
@@ -100,6 +103,7 @@ import java.util.concurrent.TimeUnit
  */
 @Composable
 fun BookShelfScreen(navController: NavController) {
+    val context = LocalContext.current
     val books by produceState(initialValue = emptyList<PersonalBookEntity>()) {
         runCatching {
             PersonalRepositoryHolder.repo.observeBooks().collect { value = it }
@@ -108,6 +112,32 @@ fun BookShelfScreen(navController: NavController) {
     var addOpen by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<PersonalBookEntity?>(null) }
     val scope = rememberCoroutineScope()
+
+    // ── THE COVERS COME TO THE SHELF (v410) ────────────────────────────
+    // Every book on the shelf carries its own cover URL once it has one, and
+    // books that came in without any (shelved from a topic reveal before v410,
+    // typed in by hand, imported from a file) are resolved here — quietly, one
+    // at a time, on the same verified-bytes machinery the Cabinet uses (see
+    // [BookCoverWarmup]) — so the shelf fills with real artwork instead of a
+    // grid of generated plates. Each result is written onto the book's row, so
+    // the shelf, the book page, the Cabinet and Home all pick it up at once.
+    val coverConsent = AppPreferences.coverFetchEnabledState
+    val coverless = remember(books) {
+        books.filter { it.coverUrl.isBlank() && it.title.isNotBlank() }
+    }
+    LaunchedEffect(coverless.map { it.id }, coverConsent) {
+        if (coverless.isEmpty()) return@LaunchedEffect
+        var fetched = 0
+        withContext(Dispatchers.IO) {
+            for (book in coverless) {
+                if (BookCoverWarmup.ensureCover(context, book) != null) fetched++
+            }
+        }
+        // ONE version bump for the whole batch, so the grid re-checks the
+        // local files once instead of recomposing per cover (the Cabinet's own
+        // warmer batching rule, v3xx37).
+        if (fetched > 0) CabinetCoverCache.version.intValue++
+    }
 
     Box(
         Modifier
@@ -400,6 +430,18 @@ internal fun BookCover(
     val tones = remember(title) { generatedCoverTones(title) }
     val top = tones.first
     val bottom = tones.second
+    // v410 — THE ART THE APP ALREADY FETCHED WINS. A cover resolved by the
+    // shelf's warm pass is on disk (see [BookCoverWarmup] / CabinetCoverCache)
+    // while the book's row may still be blank, so the cached file is read
+    // first and the row's URL second — and it is read through the cache's
+    // version, so a cover that lands while this plate is on screen appears
+    // without waiting for the next visit.
+    val context = LocalContext.current
+    val cacheVersion = CabinetCoverCache.version.intValue
+    val cachedArt = remember(title, cacheVersion) {
+        CabinetCoverCache.localCoverFile(context, CabinetCoverCache.CoverKind.BOOK, title)
+    }
+    val art: Any? = cachedArt ?: coverUrl.takeIf { it.isNotBlank() }
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -451,13 +493,13 @@ internal fun BookCover(
                     )
                 )
         )
-        if (coverUrl.isNotBlank()) {
+        if (art != null) {
             // The generated cover stays UNDER the artwork: it is the loading
             // and the error state at once, and the spine shows through a
             // cover that has not arrived yet.
 
             androidx.compose.foundation.Image(
-                painter = rememberAsyncImagePainter(coverUrl),
+                painter = rememberAsyncImagePainter(art),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

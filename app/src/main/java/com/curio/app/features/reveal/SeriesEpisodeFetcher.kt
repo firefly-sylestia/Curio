@@ -27,6 +27,10 @@ object SeriesEpisodeFetcher {
     /** In-process memo: show name → list of TVMaze episode JSONs (raw). */
     private val episodeCache = ConcurrentHashMap<String, List<JSONObject>>()
 
+    /** v410 — the MAPPED list per show, the shape the screens render (raw JSON
+     *  cannot seed a sheet, and mapping it again per open was the reload). */
+    private val seriesCache = ConcurrentHashMap<String, List<SeriesEpisode>>()
+
     /**
      * Enrich [episodes] with TVMaze metadata. Returns the same list with
      * the new fields populated where a match was found. Episodes that don't
@@ -68,7 +72,7 @@ object SeriesEpisodeFetcher {
 
     /** Fetch the episode list for [showName] from TVMaze, memoized. */
     private fun fetchEpisodes(showName: String): List<JSONObject> {
-        val title = showName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
+        val title = clean(showName)
         episodeCache[title]?.let { return it }
 
         // v389d — PLAIN BRANCHES, NOT `?: run { … return }`. A non-local return
@@ -103,14 +107,24 @@ object SeriesEpisodeFetcher {
      * Fetch ALL episodes for a show from TVMaze, converting them to
      * [SeriesEpisode] objects. Used when the topic has no authored episodes
      * but the member wants to see the episode guide.
+     *
+     * v410 — AND THE MAPPED LIST IS REMEMBERED, not just the provider's raw
+     * payload (see [cached]). Re-mapping the whole show on every open was the
+     * reason a sheet could not open with the episode list its own preview had
+     * already put on screen.
      */
     suspend fun fetchAll(showName: String): List<SeriesEpisode> = withContext(Dispatchers.IO) {
-        val title = showName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
+        val title = clean(showName)
+        if (title.isBlank()) return@withContext emptyList()
+        seriesCache[title]?.let { return@withContext it }
         // Reuse the same memoized episode payload as enrichment. The previous
         // path bypassed this cache, so opening the series sheet fetched again.
         val cachedEpisodes = fetchEpisodes(title)
-        if (cachedEpisodes.isEmpty()) return@withContext emptyList()
-        try {
+        if (cachedEpisodes.isEmpty()) {
+            seriesCache[title] = emptyList()
+            return@withContext emptyList()
+        }
+        val mapped = try {
             cachedEpisodes.mapNotNull { ep ->
                 run {
                     val season = ep.optInt("season", 0)
@@ -131,7 +145,26 @@ object SeriesEpisodeFetcher {
         } catch (_: Exception) {
             emptyList()
         }
+        seriesCache[title] = mapped
+        mapped
     }
+
+    /**
+     * v410 — THE ANSWER THIS TITLE ALREADY HAS, without asking anything.
+     *
+     * The reveal's series/anime card and the episode sheet show the same list,
+     * and the card is drawn first — it fetches the guide to render its chip row,
+     * so a sheet that opened on an empty list re-asked for a list that was
+     * already in memory and flashed "No episode guide yet." in between (member
+     * report: "sometimes the series or anime data is already shown in preview
+     * but it loads again when the page opens"). Null means "not asked yet",
+     * which is different from an empty list — an empty list is a real answer.
+     */
+    fun cached(showName: String): List<SeriesEpisode>? = seriesCache[clean(showName)]
+
+    /** A title without its "(2013)" disambiguator. */
+    fun clean(showName: String): String =
+        showName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
 
     /**
      * The episodes of a title that MIGHT be a show at all (v389f).

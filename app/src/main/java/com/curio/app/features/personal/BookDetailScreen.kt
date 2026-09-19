@@ -75,6 +75,7 @@ import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.ReaderMarkEntity
 import com.curio.app.data.openSearchUrl
+import com.curio.app.features.cabinet.CabinetCoverCache
 import com.curio.app.features.community.SocialPullQuote
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
@@ -264,6 +265,24 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             }
         }
         lookingUp = false
+    }
+
+    // ── AND ITS COVER, IF IT CAME IN WITHOUT ONE (v410) ───────────────
+    // The page's cover is the book row's own URL, and a book shelved from a
+    // topic reveal before v410 (or typed in, or imported from a file) has
+    // none — so the page drew a generated plate for a book whose artwork one
+    // search returns. It is resolved here through the same verified-bytes
+    // machinery the Cabinet and the shelf use (see [BookCoverWarmup]) and
+    // written onto the row, so the cover is there on this visit and every one
+    // after it. Fetching is gated on the Settings cover consent inside.
+    LaunchedEffect(book?.id, book?.coverUrl) {
+        val current = book ?: return@LaunchedEffect
+        if (current.coverUrl.isNotBlank()) return@LaunchedEffect
+        if (BookCoverWarmup.ensureCover(context, current) != null) {
+            // The bytes are on disk now, so the plate re-checks the local file
+            // rather than downloading the same art a second time through Coil.
+            CabinetCoverCache.version.intValue++
+        }
     }
 
     // The download-help sheet (PDF / EPUB).

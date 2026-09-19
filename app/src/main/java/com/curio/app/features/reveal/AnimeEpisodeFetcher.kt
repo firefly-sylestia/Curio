@@ -84,6 +84,18 @@ object AnimeEpisodeFetcher {
         out
     }
 
+    /**
+     * v410 — THE LIST THIS TITLE ALREADY RESOLVED, without asking anything.
+     *
+     * The anime card on the reveal draws its episode chip row from the answer
+     * this fetcher resolved, and the sheet that opens from that card shows the
+     * same list — so the sheet seeds itself from here instead of opening on an
+     * empty list and asking for what the card had already been handed (member
+     * report: "sometimes the series or anime data is already shown in preview
+     * but it loads again when the page opens"). Null means "not asked yet".
+     */
+    fun cached(animeName: String): List<SeriesEpisode>? = cache[clean(animeName)]
+
     /** Jikan's own anime id for a name, or 0 when nothing matches. */
     private fun lookupId(title: String): Int {
         val json = httpGet("https://api.jikan.moe/v4/anime?q=${Uri.encode(title)}&limit=5")

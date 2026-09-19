@@ -183,6 +183,15 @@ interface PersonalDao {
     @Query("UPDATE personal_books SET documentPath = :path, updatedAtMillis = :now WHERE id = :id")
     suspend fun setDocument(id: String, path: String, now: Long)
 
+    /**
+     * v410 — the book's own COVER URL, and nothing else. Column-scoped like the
+     * other single-fact writes: resolving a cover for a book that had none is
+     * not a reason to rewrite its progress, its chapters or its notes. A book
+     * added before the shelf carried its topic's cover gets one through here.
+     */
+    @Query("UPDATE personal_books SET coverUrl = :url, updatedAtMillis = :now WHERE id = :id")
+    suspend fun setCoverUrl(id: String, url: String, now: Long)
+
     @Query("DELETE FROM personal_notes WHERE id = :id")
     suspend fun deleteNote(id: String)
 
@@ -470,6 +479,16 @@ class PersonalRepository(private val dao: PersonalDao) {
      */
     suspend fun setDocument(bookId: String, path: String) =
         dao.setDocument(bookId, path, System.currentTimeMillis())
+
+    /**
+     * v410 — writes the cover URL a shelf book finally resolved. Nothing but
+     * [PersonalBookEntity.coverUrl] moves: the row may be mid-read, and finding
+     * its artwork is not a reason to touch its progress or its notes.
+     */
+    suspend fun setCoverUrl(bookId: String, url: String) {
+        if (url.isBlank()) return
+        dao.setCoverUrl(bookId, url, System.currentTimeMillis())
+    }
 
     /**
      * Stores the chapter list a book learned (Open Library's table of
