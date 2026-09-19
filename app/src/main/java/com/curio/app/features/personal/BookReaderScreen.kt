@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -1268,52 +1269,6 @@ private fun PdfScrollReader(
             }
         }
 
-        /**
-         * THE PINCH AND THE PAN FOR ONE PAGE, in that page's own frame: the zoom
-         * is anchored under the fingers, the travel is clamped to the page's
-         * edges, and the answer says how much of the drag the page took — zero
-         * hands it back to the column underneath, which is how a page turn at the
-         * end of a magnified page still feels like a page turn.
-         */
-        fun zoomThisPage(
-            page: Int,
-            box: IntSize,
-            aspect: Float,
-            zoom: Float,
-            drag: Offset,
-            focus: Offset
-        ): Offset {
-            val was = ReaderLook.pdfZoom
-            val next = (was * zoom).coerceIn(1f, 4f)
-            val wasPan = Offset(ReaderLook.pdfPanX, ReaderLook.pdfPanY)
-            if (next <= 1.02f) {
-                ReaderLook.pdfZoom = 1f
-                ReaderLook.pdfPanX = 0f
-                ReaderLook.pdfPanY = 0f
-                ReaderLook.pdfZoomPage = -1
-                return Offset.Zero
-            }
-            val moved = readerZoomedPan(
-                box = box,
-                drawn = readerDrawnPage(box, aspect),
-                from = was,
-                to = next,
-                focus = focus + drag,
-                pan = wasPan
-            )
-            ReaderLook.pdfZoom = next
-            ReaderLook.pdfZoomPage = page
-            ReaderLook.pdfPanX = moved.x
-            ReaderLook.pdfPanY = moved.y
-            // What the page TOOK, in the drag's own direction: a page out of
-            // room sideways must not claim a sideways drag, or the scroll would
-            // need a perfectly straight swipe to win one back.
-            val sideways = (if (drag.x < 0f) -drag.x else drag.x) >=
-                (if (drag.y < 0f) -drag.y else drag.y)
-            val took = if (sideways) moved.x != wasPan.x else moved.y != wasPan.y
-            return if (took) Offset(moved.x - wasPan.x, moved.y - wasPan.y) else Offset.Zero
-        }
-
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -1322,8 +1277,20 @@ private fun PdfScrollReader(
                 // drawn over its neighbours, and never asked to scroll sideways.
                 .clipToBounds()
                 .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
-            contentPadding = PaddingValues(start = 14.dp, end = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
+            // ── AND THE SHEETS ARE SEPARATED (v403) ──────────────────────
+            //
+            // The pages were stacked FLUSH (`spacedBy(0.dp)`), each one clipped
+            // at its own edge, so a column of scans read as one continuous strip
+            // with four slivers of rounding down it — and with a page magnified
+            // inside its frame the whole thing looked like a printout with the
+            // odd page swollen (user report: "its kind of weird looking when the
+            // above pages are not separated of their own pages"). A sheet of
+            // paper is its own object: it sits on the reader's own paper, it
+            // wears a hairline edge, and there is air between it and the next
+            // one — which is also what makes a magnified page read as a page
+            // held closer rather than as the column stretching.
+            contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
         items(count = pageCount, key = { page -> "pdf-page-$page" }) { page ->
             val bitmap by produceState<Bitmap?>(null, document, page) {
@@ -1371,6 +1338,17 @@ private fun PdfScrollReader(
                     // frame, a magnified page can never reach a neighbour — which
                     // is what the v395 growth was for, without the growth.
                     .clip(RoundedCornerShape(6.dp))
+                    // v403 — the frame is PAPER, so the letterbox around a page
+                    // that is not the frame's own shape is the sheet's margin
+                    // and not a hole through the reader's background, and the
+                    // sheet wears its own edge (the hairline below) so a column
+                    // of scans reads as pages and not as one continuous strip.
+                    .background(palette.paper)
+                    .border(
+                        width = 1.dp,
+                        color = palette.ink.copy(alpha = 0.10f),
+                        shape = RoundedCornerShape(6.dp)
+                    )
                     .onSizeChanged {
                         container = it
                         pageBox = it
@@ -1382,7 +1360,8 @@ private fun PdfScrollReader(
                         key = aspect,
                         zoomed = { ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f }
                     ) { zoom, drag, focus ->
-                        zoomThisPage(page, pageBox, aspect, zoom, drag, focus)
+                        // One rule for both surfaces: see [readerZoomThisPage].
+                        readerZoomThisPage(page, pageBox, aspect, zoom, drag, focus)
                     }
                     // Keyed on the page's SHAPE as well as its number: the tap
                     // handler outlives the composition that armed it, and a
@@ -1858,53 +1837,26 @@ private fun PageReader(
     // page has run out of room and the drag belongs to the pager again.
     //
     // The page is drawn INSIDE its box (`ContentScale.Fit`), so the thing being
-    // magnified is the letterboxed page and not the box around it — hence both
-    // the viewport and the page's own shape are kept here, beside the gesture
-    // that needs them.
+    // magnified is the letterboxed page and not the box around it — hence the
+    // box is kept here (a full-screen pager gives every page the same one) and
+    // each page carries the shape of the page drawn in IT, read where that
+    // page's own render lands.
     val viewport = remember { mutableStateOf(IntSize.Zero) }
-    val shownAspect = remember { mutableStateOf(0f) }
-    // v399 — ONE RULE FOR THE WHOLE GESTURE. The zoom is anchored at the fingers
-    // (see [readerZoomedPan]) and the drag is the same call at a constant zoom,
-    // so a pinch and a pan can no longer disagree about where the page sits.
-    val zoomModifier = Modifier.pinchToZoom(zoomed = { ReaderLook.pdfZoom > 1.02f }) { zoom, drag, focus ->
-        val was = ReaderLook.pdfZoom
-        val next = (was * zoom).coerceIn(1f, 4f)
-        val wasPan = Offset(ReaderLook.pdfPanX, ReaderLook.pdfPanY)
-        if (next <= 1.02f) {
-            ReaderLook.pdfZoom = 1f
-            ReaderLook.pdfPanX = 0f
-            ReaderLook.pdfPanY = 0f
-            Offset.Zero
-        } else {
-            val box = viewport.value
-            val moved = readerZoomedPan(
-                box = box,
-                drawn = readerDrawnPage(box, shownAspect.value),
-                from = was,
-                to = next,
-                // The fingers' own drift too, so a pinch that slides while it
-                // opens keeps its grip. At a constant zoom the focus cancels
-                // out and this is a plain pan.
-                focus = focus + drag,
-                pan = wasPan
-            )
-            ReaderLook.pdfZoom = next
-            ReaderLook.pdfPanX = moved.x
-            ReaderLook.pdfPanY = moved.y
-            // WHAT THE PAGE TOOK, in the drag's own direction: a page that is
-            // out of room sideways must not claim a sideways drag, or the page
-            // turn would need a perfectly straight swipe.
-            val sideways = (if (drag.x < 0f) -drag.x else drag.x) >=
-                (if (drag.y < 0f) -drag.y else drag.y)
-            val took = if (sideways) moved.x != wasPan.x else moved.y != wasPan.y
-            if (took) Offset(moved.x - wasPan.x, moved.y - wasPan.y)
-            else Offset.Zero
-        }
-    }
-
     HorizontalPager(
         state = pagerState,
-        modifier = Modifier.fillMaxSize().then(zoomModifier),
+        // ── v403 — THE PAGE OF THE PAGER OWNS ITS OWN GESTURE ──
+        //
+        // The pinch and the pan used to be a modifier on the PAGER (`Modifier
+        // .fillMaxSize().then(zoomModifier)`), which put the handler OUTSIDE the
+        // pager's own scroll detector. In the main pass a deeper node handles an
+        // event first, so `scrollable` had already taken the drag — and, with a
+        // second finger landing a moment later, had already started the page
+        // turn — before the zoom could claim it: the member's "the pages slip
+        // when its on side by side pages", a pinch that turns the page it is
+        // magnifying. On the PAGE, the page is the child: it claims the drag
+        // first (see [pinchToZoom]) and consumes it, and the pager's own slop
+        // wait is cancelled by that consumption instead of racing it.
+        modifier = Modifier.fillMaxSize(),
         // v394 — the PDF's pages sit flush too: a scan read as pages is one
         // document being slid across, not a stack of cards with gaps between.
         pageSpacing = 0.dp
@@ -1914,16 +1866,16 @@ private fun PageReader(
                 runCatching { renderPdfPage(context, document, page) }.getOrNull()
             }
         }
-        // The page being LOOKED AT is the one whose shape the pan is measured
-        // against, so it is the one that reports it — and it re-reports on a
-        // page TURN, because the turn is what makes another page the one being
-        // looked at (a neighbour rendered ahead of the swipe would otherwise
-        // leave the pan measured against the page just left behind).
-        val atRest = pagerState.currentPage
-        LaunchedEffect(page, bitmap, atRest) {
+        // THE SHAPE OF THIS PAGE (v403), read from its own render: it is what
+        // the pan is measured against, and it used to be reported only by the
+        // page being looked at (a single shared value re-written on every turn),
+        // which left a neighbour's pinch measuring against the page just left
+        // behind. A page's own shape is its own.
+        var myAspect by remember(page) { mutableStateOf(0f) }
+        LaunchedEffect(page, bitmap) {
             val drawn = bitmap
-            if (drawn != null && page == atRest) {
-                shownAspect.value = drawn.width.toFloat() / drawn.height.toFloat()
+            if (drawn != null && drawn.height > 0) {
+                myAspect = drawn.width.toFloat() / drawn.height.toFloat()
             }
         }
         // ── THE PAGE'S OWN WORDS (v389c) ───────────────────────────────
@@ -1951,7 +1903,22 @@ private fun PageReader(
                     // each page — read here, where the page is laid out.
                     viewport.value = it
                 }
-                .pointerInput(page) {
+                // ── THE PAGE'S OWN GESTURE (v403) ────────────────────────
+                //
+                // Armed AFTER the box is measured and keyed on the page's SHAPE
+                // as well as its number: the handler outlives the composition
+                // that armed it, so a pinch has to measure the page it actually
+                // sees rather than the page as it was before its render landed.
+                // It comes BEFORE the tap handler below, so the drag is claimed
+                // ahead of the pager's own scroll (see the pager's comment).
+                .pinchToZoom(
+                    key = page to myAspect,
+                    zoomed = { ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f }
+                ) { zoom, drag, focus ->
+                    // One rule for both surfaces: see [readerZoomThisPage].
+                    readerZoomThisPage(page, viewport.value, myAspect, zoom, drag, focus)
+                }
+                .pointerInput(page, myAspect) {
                     detectTapGestures(
                         onTap = { onTap() },
                         // v399 — A DOUBLE TAP IS THE PINCH, AT ONE POINT: in to
@@ -1960,7 +1927,7 @@ private fun PageReader(
                         // and it uses the same rule — so the page grows about
                         // the word the finger asked about.
                         onDoubleTap = { at ->
-                            readerDoubleTapZoom(pagerState.currentPage, viewport.value, shownAspect.value, at)
+                            readerDoubleTapZoom(page, viewport.value, myAspect, at)
                         },
                         // Held words are the sweep's: the layer below answers
                         // the press, and this one only stands in where the page
@@ -1977,14 +1944,29 @@ private fun PageReader(
                 // across the width and stayed white whatever the member chose
                 // (user request: "for the pdf reader make the pdf background
                 // change too").
+                // ── AND ONLY THE PAGE THAT OWNS THE ZOOM WEARS IT (v403) ──
+                //
+                // The pager's zoom used to be one number applied to EVERY page
+                // (a leftover from when the frame was the screen rather than a
+                // page), so turning the page carried the magnification onto a
+                // page nobody had pinched. A zoom belongs to the page it was
+                // asked for; its neighbours draw at 1×.
+                //
+                // WHOSE ZOOM THIS IS is read in the COMPOSITION and used in the
+                // draw lambda, which is the same split the column uses: the
+                // owner changes only when a pinch starts or ends on a page (one
+                // recomposition), while the scale and the pan are read live, so
+                // a pinch redraws a page instead of recomposing the pager.
+                val mine = ReaderLook.pdfZoomPage == page
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
-                            scaleX = ReaderLook.pdfZoom
-                            scaleY = ReaderLook.pdfZoom
-                            translationX = ReaderLook.pdfPanX
-                            translationY = ReaderLook.pdfPanY
+                            val z = if (mine) ReaderLook.pdfZoom else 1f
+                            scaleX = z
+                            scaleY = z
+                            translationX = if (z > 1.02f) ReaderLook.pdfPanX else 0f
+                            translationY = if (z > 1.02f) ReaderLook.pdfPanY else 0f
                         }
                 ) {
                     Image(
@@ -4380,11 +4362,9 @@ private fun Modifier.pinchToZoom(
      */
     onZoom: (zoom: Float, pan: Offset, focus: Offset) -> Offset
 ): Modifier = pointerInput(key) {
-    val slop = viewConfiguration.touchSlop * 0.6f
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false)
         var last: Offset? = null
-        var travelled = 0f
         var ownsTheDrag = false
         do {
             val event = awaitPointerEvent()
@@ -4403,25 +4383,32 @@ private fun Modifier.pinchToZoom(
                     event.changes.forEach { it.consume() }
                 }
                 last = null
-                travelled = 0f
             } else if (pressed.size == 1 && zoomed()) {
                 val position = pressed.first().position
                 val previous = last
                 last = position
-                if (!ownsTheDrag) {
-                    // The finger has to MEAN it before the page takes the drag.
-                    if (previous != null) travelled += (position - previous).getDistance()
-                    if (travelled > slop) ownsTheDrag = true
-                }
-                if (ownsTheDrag) {
-                    val delta = if (previous != null) position - previous else Offset.Zero
-                    val taken = if (delta == Offset.Zero) Offset.Zero else onZoom(1f, delta, position)
-                    if (taken != Offset.Zero) pressed.forEach { it.consume() }
-                }
+                // ── v403 — A MAGNIFIED PAGE OWNS THE DRAG FROM THE FIRST MOVE ──
+                //
+                // The claim used to wait for a share of the touch slop, which
+                // meant the scroll underneath started its own drag on the very
+                // same events and the page slid a little before the pan took
+                // over (user report: "i cant even move around when zoomed in
+                // in vertical scrolling"). While a page is magnified there is
+                // nothing to decide: the drag belongs to the page, and it is
+                // consumed here — in the page's own frame, which the scrolling
+                // column and the pager both sit OUTSIDE of — so their slop wait
+                // is cancelled by the consumption and neither of them ever
+                // starts. A drag the page has no room for is still left
+                // unconsumed (see [readerZoomThisPage]), so the turn at the end
+                // of a magnified page arrives on the next swipe, exactly as the
+                // member asked. [slop] still guards the pinch below.
+                ownsTheDrag = true
+                val delta = if (previous != null) position - previous else Offset.Zero
+                val taken = if (delta == Offset.Zero) Offset.Zero else onZoom(1f, delta, position)
+                if (taken != Offset.Zero) pressed.forEach { it.consume() }
             } else {
                 ownsTheDrag = false
                 last = null
-                travelled = 0f
             }
         } while (event.changes.any { it.pressed })
     }
@@ -4443,23 +4430,75 @@ private fun readerDrawnPage(box: IntSize, aspect: Float): Size {
 }
 
 /**
- * WHERE A MAGNIFIED PAGE HAS TO SIT so the point under the fingers stays there.
+ * THE PINCH, THE PAN AND THE HAND-BACK FOR ONE PAGE, in that page's own frame
+ * (v403).
  *
- * A magnified page is a scale about its box's centre plus a translation (the
- * readers' own `graphicsLayer`), so the page point under the fingers is
- * `centre + (focus - centre - pan) / zoom`. Growing to [to] with the fingers
- * where they are means solving that same equation for the new translation — the
- * difference between "the page grew under my fingers" and "the page grew and my
- * place slid out from under them" (user report: "when i pinch zoom in the middle
- * the top part of the previous page zooms in").
+ * Both reading surfaces use it: the column's frames are its page items, and the
+ * pager's frame is one page of the screen. It does four things, and the order
+ * matters:
  *
- * The travel is then clamped to what the page actually HAS: [drawn] is the page
- * inside [box], so half of the growth is how far either edge can travel before
- * it reaches its frame — and a page with no room says so by what it returns
- * ([pinchToZoom] leaves the drag to the scrolling or paging underneath). The
- * formula folds in a plain drag too: at a constant zoom the answer is exactly
- * `pan + drag`, which is what a one-finger pan is.
+ *  1. **A zoom belongs to a page.** If the page being pinched is not the page
+ *     that owns the current zoom, this pinch starts from NOTHING rather than
+ *     compounding a magnification the member left on a page they have since
+ *     turned away from (which is also why a one-finger pan on a page that owns
+ *     no zoom falls out at step 3 and is handed to the scroll underneath).
+ *  2. **The zoom is anchored under the fingers** ([readerZoomedPan]), so the
+ *     place the member grabbed stays under them as the page grows.
+ *  3. **At rest it clears itself** — zooming back out to nothing gives the page
+ *     back to the reader, with no pan left over.
+ *  4. **It answers with the part of the drag it TOOK**: a drag the page has no
+ *     room for is left unconsumed, which is what hands a page turn (or a scroll)
+ *     back to the surface underneath — the member's own rule ("it should page
+ *     change only when it reaches the page end and then on another swipe it
+ *     does").
  */
+private fun readerZoomThisPage(
+    page: Int,
+    box: IntSize,
+    aspect: Float,
+    zoom: Float,
+    drag: Offset,
+    focus: Offset
+): Offset {
+    val owns = ReaderLook.pdfZoomPage == page
+    val was = if (owns) ReaderLook.pdfZoom else 1f
+    val wasPan = if (owns) Offset(ReaderLook.pdfPanX, ReaderLook.pdfPanY) else Offset.Zero
+    val next = (was * zoom).coerceIn(1f, 4f)
+    if (next <= 1.02f) {
+        ReaderLook.pdfZoom = 1f
+        ReaderLook.pdfPanX = 0f
+        ReaderLook.pdfPanY = 0f
+        ReaderLook.pdfZoomPage = -1
+        return Offset.Zero
+    }
+    val moved = readerZoomedPan(
+        box = box,
+        drawn = readerDrawnPage(box, aspect),
+        from = was,
+        to = next,
+        // The fingers' own position WITHOUT the drag: the drag is folded in by
+        // [readerZoomedPan] itself (v404). It used to be added here instead,
+        // which cancelled the drag out at a constant zoom — the one-finger pan
+        // came back as "no room" and was handed to the surface underneath, so a
+        // zoomed page could not be moved at all and the column scrolled (or the
+        // pager turned the page) under the finger.
+        focus = focus,
+        pan = wasPan,
+        drag = drag
+    )
+    ReaderLook.pdfZoom = next
+    ReaderLook.pdfZoomPage = page
+    ReaderLook.pdfPanX = moved.x
+    ReaderLook.pdfPanY = moved.y
+    // What the page TOOK, in the drag's own direction: a page out of room
+    // sideways must not claim a sideways drag, or a page turn or a scroll
+    // would need a perfectly straight swipe to win one back.
+    val sideways = (if (drag.x < 0f) -drag.x else drag.x) >=
+        (if (drag.y < 0f) -drag.y else drag.y)
+    val took = if (sideways) moved.x != wasPan.x else moved.y != wasPan.y
+    return if (took) Offset(moved.x - wasPan.x, moved.y - wasPan.y) else Offset.Zero
+}
+
 /**
  * DOUBLE TAP: the same zoom as a pinch, asked for with one finger.
  *
@@ -4491,15 +4530,51 @@ private fun readerDoubleTapZoom(page: Int, box: IntSize, aspect: Float, at: Offs
     ReaderLook.pdfPanY = pan.y
 }
 
+/**
+ * THE PAN A MAGNIFIED PAGE NEEDS, from the fingers' [focus], the [drag] they
+ * just made, the zoom they had ([from]) and the zoom they are asking for ([to]).
+ *
+ * The page point under the fingers before the gesture is
+ * `centre + (p - centre) * from + pan`; after it, the SAME page point has to sit
+ * under the fingers where they have moved to — so solving for the new
+ * translation gives
+ *
+ *     next = pan * ratio + drag + (focus - centre) * (1 - ratio)
+ *
+ * with `ratio = to / from`. Both halves matter:
+ *
+ *  - `drag` is the one-finger pan, and it survives at a constant zoom, where
+ *    the ratio is exactly 1 and the formula reduces to `pan + drag` — the
+ *    reason a zoomed page can be moved at all. It was folded in by the CALLER
+ *    as `focus + drag` before (v403), which cancelled it out at `ratio == 1`:
+ *    every pan answered "no room", was left unconsumed, and the surface
+ *    underneath took it (user report: "i cant even move around when zoomed in
+ *    in vertical scrolling" / "the pages slips when its on side by side
+ *    pages").
+ *  - `(focus - centre) * (1 - ratio)` is the anchoring: the point the member
+ *    grabbed grows about itself instead of about the frame's centre, so a
+ *    pinch on the middle of a page does not drag the page's head out from under
+ *    the finger (the v399 report, "the top part of the previous page zooms in").
+ *
+ * The travel is then clamped to what the page actually HAS: [drawn] is the page
+ * inside [box], so half of the growth is how far either edge can travel before
+ * it reaches its frame — and a page with no room says so by what it returns
+ * ([pinchToZoom] leaves the drag to the scrolling or paging underneath, which
+ * is how a page turn at the end of a magnified page still arrives on the next
+ * swipe).
+ */
 private fun readerZoomedPan(
     box: IntSize,
     drawn: Size,
     from: Float,
     to: Float,
     focus: Offset,
-    pan: Offset
+    pan: Offset,
+    drag: Offset = Offset.Zero
 ): Offset {
-    if (box.width <= 0 || box.height <= 0) return Offset.Zero
+    // Nothing measured yet: this page has no room to give, so the drag belongs
+    // to whatever is underneath.
+    if (box.width <= 0 || box.height <= 0) return pan
     val centre = Offset(box.width / 2f, box.height / 2f)
     val ratio = if (from <= 0.001f) 1f else to / from
     // `Offset.Unspecified` (what a centroid is when there is no pointer to take
@@ -4507,8 +4582,8 @@ private fun readerZoomedPan(
     // fingers on it. Compared as a VALUE: Offset's own equality is bit-wise, so
     // its NaN-packed sentinel compares equal to itself.
     val at = if (focus != Offset.Unspecified) focus else centre
-    val nextX = at.x - centre.x - (at.x - centre.x - pan.x) * ratio
-    val nextY = at.y - centre.y - (at.y - centre.y - pan.y) * ratio
+    val nextX = pan.x * ratio + drag.x + (at.x - centre.x) * (1f - ratio)
+    val nextY = pan.y * ratio + drag.y + (at.y - centre.y) * (1f - ratio)
     val roomX = ((drawn.width * to - box.width) / 2f).coerceAtLeast(0f)
     val roomY = ((drawn.height * to - box.height) / 2f).coerceAtLeast(0f)
     return Offset(nextX.coerceIn(-roomX, roomX), nextY.coerceIn(-roomY, roomY))

@@ -2847,50 +2847,58 @@ internal fun PersonalCanvas(
                                             )
                                         )
                                     )
-                                }
-                                // ── v403 — NO RULE, AND A PRINT'S OWN CELL ────
-                                //
-                                // The solid rule that sat on the landing edge is
-                                // gone: a line says "somewhere on this edge",
-                                // and the member asked for the THING instead
-                                // ("stop using lines for preview"). What is left
-                                // is the dashed room the block will take.
-                                //
-                                // And when a PRINT is being brought against
-                                // another print, the room drawn is the CELL it
-                                // will take in the row the two are about to
-                                // become — the leading half of the measure, on
-                                // the side the finger is travelling — so the
-                                // page answers "these two go together" while
-                                // the print is still in the air.
-                                val carriedRef = rowDrag.draggedId
-                                val carriedIsPrint =
-                                    carriedRef?.let { state.block(it)?.isPhoto } == true
-                                if (carriedIsPrint && carriedRef != id && block.isPhoto) {
-                                    val cellWidth = (size.width * 0.5f).coerceAtLeast(1f)
-                                    val cellLeft =
-                                        if (rowDrag.goingDown) size.width - cellWidth else 0f
-                                    drawRoundRect(
-                                        color = accent.copy(alpha = 0.10f),
-                                        topLeft = Offset(cellLeft, lead),
-                                        size = Size(cellWidth, band),
-                                        cornerRadius = radius
-                                    )
-                                    drawRoundRect(
-                                        color = accent.copy(alpha = 0.55f),
-                                        topLeft = Offset(cellLeft + hairline, lead + hairline),
-                                        size = Size(
-                                            (cellWidth - hairline * 2f).coerceAtLeast(0f),
-                                            (band - hairline * 2f).coerceAtLeast(0f)
-                                        ),
-                                        cornerRadius = radius,
-                                        style = Stroke(
-                                            width = hairline,
-                                            pathEffect = PathEffect.dashPathEffect(
-                                                floatArrayOf(7.dp.toPx(), 6.dp.toPx())
+                                    // ── v403 — NO RULE, AND A PRINT'S OWN CELL ────
+                                    //
+                                    // The solid rule that sat on the landing edge
+                                    // is gone: a line says "somewhere on this
+                                    // edge", and the member asked for the THING
+                                    // instead ("stop using lines for preview").
+                                    // What is left is the dashed room the block
+                                    // will take.
+                                    //
+                                    // And when a PRINT is being brought against
+                                    // another print, the room drawn is the CELL
+                                    // it will take in the row the two are about
+                                    // to become — the half of the measure on the
+                                    // side the finger is travelling — so the page
+                                    // answers "these two go together" while the
+                                    // print is still in the air.
+                                    //
+                                    // Both are drawn INSIDE the room's own
+                                    // branch, so `radius`, `hairline`, `lead`
+                                    // and `band` are the room they describe.
+                                    val carriedRef = rowDrag.draggedId
+                                    val carriedIsPrint =
+                                        carriedRef?.let { state.block(it)?.isPhoto } == true
+                                    if (carriedIsPrint && carriedRef != id && block.isPhoto) {
+                                        val cellWidth = (size.width * 0.5f).coerceAtLeast(1f)
+                                        val cellLeft =
+                                            if (rowDrag.goingDown) size.width - cellWidth else 0f
+                                        drawRoundRect(
+                                            color = accent.copy(alpha = 0.10f),
+                                            topLeft = Offset(cellLeft, lead),
+                                            size = Size(cellWidth, band),
+                                            cornerRadius = radius
+                                        )
+                                        drawRoundRect(
+                                            color = accent.copy(alpha = 0.55f),
+                                            topLeft = Offset(
+                                                cellLeft + hairline,
+                                                lead + hairline
+                                            ),
+                                            size = Size(
+                                                (cellWidth - hairline * 2f).coerceAtLeast(0f),
+                                                (band - hairline * 2f).coerceAtLeast(0f)
+                                            ),
+                                            cornerRadius = radius,
+                                            style = Stroke(
+                                                width = hairline,
+                                                pathEffect = PathEffect.dashPathEffect(
+                                                    floatArrayOf(7.dp.toPx(), 6.dp.toPx())
+                                                )
                                             )
                                         )
-                                    )
+                                    }
                                 }
                             } else Modifier
                         )

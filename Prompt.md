@@ -1,62 +1,82 @@
 # Prompt.md — current request
 
-## 1. Moderation: the queue redesign, and the ban that would not work
+## 1. The reader: a zoomed page could not be moved, and the column looked wrong
 
-The member's ask: *"Redesign the moderation queue with per-report Dismiss and
-Remove, a delete reports button, and bans as open-only buttons"*, plus, in the
-same breath, *"i am not able to ban any members the ban button isnt working."*
+The member's ask: *"with pinched zoom still the pages slips when its on side by
+side pages properly fix the page chnaging when pinced zoom, also the vertical
+zoom is fine now but again really bad and buggy, so please fix it, i cant even
+move around when zoomed in in vetical scrolling, also kind of weird looking when
+the above pages are not separated of their on pages etc its kind of bad behavior
+and weird look fix and refine mit and also fix the ocl and push the fix."*
 
-Three answers were taken from the member before any code moved:
+### The real cause of BOTH zoom bugs — `readerZoomedPan` cancelled its own drag
 
-| Question | Answer |
-| --- | --- |
-| How should Dismiss and Remove behave? | **Keep the sheet for both** (reason + note), and let them be the row's two primary buttons. |
-| What should delete-reports clear? | **Handled reports only** — open ones stay. |
-| What does "bans open only" mean? | **Ban list: one Open button** per row; change tier and lift live in the sheet it opens. |
+`readerZoomThisPage` passed `focus = focus + drag`, and the helper solved
 
-### What was built
+```
+next = at - centre - (at - centre - pan) * ratio
+```
 
-**The ban that would not work.** Three silent dead ends were found by reading
-the flow, and each is now a visible one:
+At a **constant zoom** (`ratio == 1`, which is every one-finger pan) that
+expression collapses to exactly `pan` — the drag cancelled itself out. So a
+magnified page answered "no room" to every pan, `Offset.Zero` was returned, the
+drag was left unconsumed, and the surface underneath took it:
 
-1. **A refusal was written behind the dialog.** Every moderation decision is a
-   server function, and a failure landed on the page UNDER the open sheet, where
-   nobody reads it while a dialog is up. `ModerationReasonDialog` and
-   `ModerationBanDialog` now both take `error` and print it under the dialog's
-   own title (the one part of a dialog nothing can scroll away), and each sheet
-   opens on a clean slate (`error = null` at the call site).
-2. **The required reason sat below the fold.** The ban sheet's eight reasons
-   were full-width rows under the tier ladder and the clock, so a moderator
-   could pick a tier and a clock and then find a Ban button that never lit up.
-   They are wrapping `BanReasonChip`s in a `FlowRow` now, and the disabled
-   button says what it waits for ("Pick a reason").
-3. **The lift needed a list the queue had never read.** `lifting` was a row of
-   the BAN list, but "Lift the ban instead" is reachable from a REPORT too,
-   where that list is empty — so it silently did nothing. It is now a
-   `(userId, label)` pair, carried by the sheet that asks for it.
+- **vertical reader** — the column scrolled instead of the page moving:
+  *"i cant even move around when zoomed in in vetical scrolling"*;
+- **paged reader** — the pager turned the page you were magnifying:
+  *"the pages slips when its on side by side pages"* / *"the page chnaging when
+  pinced zoom"*.
 
-**The queue.** `Clear N handled` on the list's own head (only when something IS
-handled), behind `SocialConfirmDialog` → `CommunityApi.deleteHandledReports` →
-a new `curio_moderate_delete_reports()` that deletes `status <> 'open'` in the
-DELETE itself (a sweep can never drop an unread report), records one
-`moderation_actions` row, and answers with the count. The row's actions are now
-Remove + Dismiss as the pair, with `ModerationQuietAction("Hide the author")` as
-the quiet line beside them.
+**The fix (v404).** The drag is folded in by `readerZoomedPan` itself:
 
-**The refresh.** The first read is guarded by `loaded` (it also verifies the
-team row and reads the roster), and every action called it back and got nothing
-— a report that had just been decided stayed in the list until the screen was
-reopened. `refreshQueue` + `absorbQueue` and `refreshTeam(quiet)` are the
-re-readable halves, and every write goes through one of them.
+```
+next = pan * ratio + drag + (focus - centre) * (1 - ratio)
+```
 
-**The ban list.** One `Open` per row (filled while a tier is in force, outlined
-on a lapsed ban), a quiet `Profile`, and the tier chip. Change tier and lift
-live inside the sheet. A lapsed ban passes `currentKind = ""` so the sheet opens
-ready to SET a tier instead of "changing" one nobody is under.
+`drag = (0,0)` for a double tap, so the anchoring half still grows the page
+about the tapped word; at `ratio == 1` it reduces to `pan + drag`, which is what
+makes a zoomed page move. The caller now passes `focus` WITHOUT the drag. The
+travel is still clamped to the page's own room (`drawn` inside `box`), so a drag
+the page has no room for is still handed back — a page turn at the end of a
+magnified page still arrives on the next swipe, which is the member's own rule.
 
-## 2. Still open from the last batch
+### The column's look — sheets, not one continuous strip
 
-- The member should re-paste `supabase/schema.sql` for the ban ladder and the
-  new delete-reports function; if the ban RPC was missing, the sheet now SAYS so
-  instead of looking dead.
-- CI unconfirmed on the last two commits.
+The PDF column stacked its pages **flush** (`spacedBy(0.dp)`), each clipped at
+its own edge, so a run of scans read as one strip with slivers of rounding down
+it — and with one page magnified inside its frame the whole thing read as a
+printout with the odd page swollen (*"its kind of weird looking when the above
+pages are not separated of their on pages"*). Each page is now a sheet: it sits
+on the reader's own paper (`.background(palette.paper)`), wears a hairline edge
+(`.border(1.dp, ink @ 10%)`) and has air around it
+(`contentPadding(start/end 14, top 10, bottom 18)` + `spacedBy(16.dp)`).
+
+### Also in this batch
+
+- The stale duplicate of `readerZoomedPan`'s old doc comment (which sat orphaned
+  above `readerZoomThisPage`) is gone; the helper carries the derivation itself.
+- `app/AGENTS.md`: the reader rules that said zoom "waits for a second pointer"
+  and that "the focus cancels" at a constant zoom were both wrong after v403 and
+  are rewritten (the drag must never be folded in by the caller).
+
+## 2. The compile error (CI red)
+
+```
+PersonalCanvas.kt:2877 Unresolved reference 'radius'
+PersonalCanvas.kt:2881 Unresolved reference 'hairline'
+...
+```
+
+HEAD had the new print-cell branch of the landing ghost **outside** the
+`if (band > 0f) { ... }` block where `band`, `lead`, `radius` and `hairline` are
+declared (HEAD: the branch opens at 2814 and closes at 2850, with
+`carriedIsPrint` at 2866). The working tree already moves that branch inside the
+band's own scope (the branch closes at 2902), so `radius`/`hairline` resolve. No
+further code change was needed — the fix is committed in this push.
+
+## 3. Not pushed by choice, and known gaps
+
+- CI is unconfirmed on the previous two commits; this push is meant to turn it
+  green.
+- The member asked for the moderation/forms work to be held until they say.
