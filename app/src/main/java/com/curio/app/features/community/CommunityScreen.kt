@@ -324,9 +324,12 @@ fun CommunityScreen(navController: NavController) {
     // secondaryContainer — in dark mode a butter wash with a pale-butter ink
     // on top, which read as a yellow tab whose label was invisible. The
     // page's own action accent (the theme-aware rose/azure/Pantone accent the
-    // wall's buttons already wear) fills the pill now.
-    DisposableEffect(Unit) {
-        CurioNavTint.publishSocialAccent(curioDialogActionColor())
+    // wall's buttons already wear) fills the pill now. The accent is resolved
+    // IN COMPOSITION (curioDialogActionColor is @Composable; the effect's
+    // body is not) and the effect only re-runs when that value changes.
+    val socialNavAccent = curioDialogActionColor()
+    DisposableEffect(socialNavAccent) {
+        CurioNavTint.publishSocialAccent(socialNavAccent)
         onDispose { CurioNavTint.publishSocialAccent(null) }
     }
 
