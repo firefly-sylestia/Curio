@@ -250,7 +250,7 @@ fun SettingsOptionRow(
             .clip(RoundedCornerShape(14.dp))
             // v3xx46 — every settings row squishes + ticks on press now (the
             // shared press primitive); the ripple rides along via LocalIndication.
-            .curioPressClickable(pressedScale = 0.975f)
+            .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
             .padding(vertical = if (plain) 16.dp else 12.dp)
     ) {
         SettingsOptionIconTile(icon, dark)

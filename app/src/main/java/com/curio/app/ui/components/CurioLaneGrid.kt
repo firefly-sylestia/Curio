@@ -78,6 +78,7 @@ data class LaneGridItem(
  * Builds the grid's items from the member's real per-lane knowledge, in the
  * member's own lane order (hidden lanes excluded), explored lanes first.
  */
+@Composable
 fun laneGridItems(knowledge: Map<CategoryId, LaneKnowledge>): List<LaneGridItem> =
     CurioCategories.visible
         .map { cat ->

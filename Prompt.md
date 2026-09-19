@@ -126,6 +126,10 @@ pushed with it.
 ## User prompts
 
 Status: **done and pushed on `main`** (`69e6c6f5`, `aa820f20`, plus this docs commit).
+CI follow-up: the first build failed on two compile errors — `SettingsOptionRow` called
+`.curioPressClickable(pressedScale = 0.975f)` without forwarding its own `onClick` (dead rows),
+and `laneGridItems` invoked the `@Composable` `themedAccent()` without being `@Composable`
+itself (both call sites already were). Both fixed; this commit is the CI compile pass.
 
 > "you can merge this to the main branch and all commits nand push. skip the previous work, and
 > redesing the chapter and progress view in the book view and redesign the way i save im on etc,
