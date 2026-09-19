@@ -4495,7 +4495,11 @@ private fun readerZoomedPan(
     if (box.width <= 0 || box.height <= 0) return Offset.Zero
     val centre = Offset(box.width / 2f, box.height / 2f)
     val ratio = if (from <= 0.001f) 1f else to / from
-    val at = if (focus.isSpecified) focus else centre
+    // `Offset.Unspecified` (what a centroid is when there is no pointer to take
+    // one of) means "anchor at the frame's centre", which is a pinch with no
+    // fingers on it. Compared as a VALUE: Offset's own equality is bit-wise, so
+    // its NaN-packed sentinel compares equal to itself.
+    val at = if (focus != Offset.Unspecified) focus else centre
     val nextX = at.x - centre.x - (at.x - centre.x - pan.x) * ratio
     val nextY = at.y - centre.y - (at.y - centre.y - pan.y) * ratio
     val roomX = ((drawn.width * to - box.width) / 2f).coerceAtLeast(0f)
