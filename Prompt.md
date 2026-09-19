@@ -17,6 +17,13 @@ from the state rather than from memory.
 …with the CI log pasted: the v411 appearance commit had broken the build (unresolved
 imports, a broken `curioColorScheme` chain, a visibility error).
 
+Follow-up (same session, after the workflow/social push):
+
+> "bug alernt from the buttom sheet of color theme picker when i select a theme nothing
+> aheppens and the buttom sheet closes, fix the issue and also in dark mode the home
+> screen shuffle deice the shuffle the deck one dice it doesnt have its icon visible fix
+> it please then watch the cl after psuh"
+
 ## 2. What the code actually looked like (findings)
 
 - **The v411 commit shipped six distinct compile errors**, all in code written in the
@@ -78,6 +85,24 @@ imports, a broken `curioColorScheme` chain, a visibility error).
   composer's send disc, the Chats compose button, the wall's Following/Everyone chip, and
   the profile's Follow pill.
 
+### The follow-up pair (color-theme sheet + dark dice)
+
+- **The sheet closed without picking.** `ColorThemeSheet` created its own
+  `rememberCoroutineScope` and ran `switchVisualThemeWithReveal(...)` inside it — but the
+  very next statement was `onDismiss()`, which removes the sheet from composition and
+  CANCELS that scope. `switchVisualThemeWithReveal` launches (capture → `delay` →
+  `apply()`), so the pref write died during the capture/delay and never ran: the reveal
+  played, the sheet closed, the theme stayed. Fix: the sheet now takes the transition and
+  the scope as parameters, and the scope is remembered in `AppearanceSection` (which stays
+  composed after the sheet closes). Bonus: the reveal now expands from the tapped ROW
+  (`boundsInWindow`) instead of `Offset.Zero` — the same construction the ThemeModeSwitch
+  above it uses.
+- **The dark-mode dice.** `QuestShuffleCard`'s disc is `lerp(heroFill, White, 0.88f)`
+  (near-white) and its glyph wore `questInk` = `homeReadableInk(heroFill)`, which in dark
+  mode is the near-white `onBackground` — readable on the deep banner, invisible on its own
+  near-white disc. The glyph now wears `curioFillInk(disc)` — the same helper the social
+  fix introduced — so it reads on the plate in every theme.
+
 ## 4. Decisions
 
 - No ask_user round: every item named its own defect (the pasted CI log IS the spec for
@@ -86,7 +111,7 @@ imports, a broken `curioColorScheme` chain, a visibility error).
   works inside `remember`/Canvas blocks too.
 - `lintRelease` rather than dropping lint: lint still gates every run, it just stops paying
   for a second variant compile.
-- Release notes: one FIX bullet on top (this session's), riding the same 20260922 changelog.
+- Release notes: FIX bullets on top (this session's), riding the same 20260922 changelog.
 
 ## 5. Status
 

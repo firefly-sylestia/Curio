@@ -183,6 +183,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -920,10 +921,16 @@ fun HomeScreen(navController: NavController) {
                                         // A paper-white disc ON the rose banner:
                                         // the pastel accent would vanish into
                                         // its own hero, so the plate is the
-                                        // banner lifted toward white and the
-                                        // glyph keeps the banner's own ink.
+                                        // banner lifted toward white. v412 — the
+                                        // glyph must read ON THAT DISC, not on
+                                        // the banner: dark mode's questInk is the
+                                        // near-white onBackground (right for the
+                                        // banner's copy, invisible on a near-white
+                                        // disc), so the disc's ink walks the deep
+                                        // same-hue ink [curioFillInk] resolves on
+                                        // the plate.
                                         plate = lerp(heroFill, Color.White, 0.88f),
-                                        ink = questInk,
+                                        ink = curioFillInk(lerp(heroFill, Color.White, 0.88f)),
                                         copyInk = questInk,
                                         pet = homePetSprite,
                                         onShuffle = onQuestShuffle,

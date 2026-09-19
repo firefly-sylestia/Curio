@@ -71,6 +71,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
 import com.curio.app.ui.components.liquidGlassCapsule
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -119,6 +120,7 @@ import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.switchThemeWithReveal
+import com.curio.app.ui.theme.CurioThemeTransitionState
 import com.curio.app.ui.theme.switchVisualThemeWithReveal
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -376,7 +378,16 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // editor is no longer reachable, so the toggle was removed too).
     }
     if (colorThemeSheet) {
-        ColorThemeSheet(onDismiss = { colorThemeSheet = false })
+        // v412 — the transition scope lives HERE (in the section, which stays
+        // composed after the sheet closes) so the pref write inside the reveal
+        // coroutine survives the sheet's own removal — see ColorThemeSheet.
+        val sheetTransition = LocalCurioThemeTransition.current
+        val sheetScope = rememberCoroutineScope()
+        ColorThemeSheet(
+            onDismiss = { colorThemeSheet = false },
+            transition = sheetTransition,
+            transitionScope = sheetScope
+        )
     }
 }
 
@@ -671,14 +682,22 @@ private fun ColorThemeSwatch(choice: ColorThemeChoice) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ColorThemeSheet(onDismiss: () -> Unit) {
+private fun ColorThemeSheet(
+    onDismiss: () -> Unit,
+    /** v412 — the reveal is driven by a scope that OUTLIVES the sheet: the
+     *  pref write runs inside `switchVisualThemeWithReveal`'s coroutine, and
+     *  a scope remembered IN HERE dies the moment `onDismiss` leaves this
+     *  composable — which cancelled the write mid-flight, so picking a theme
+     *  closed the sheet and changed nothing. The caller owns the scope now
+     *  (it stays composed after the sheet is gone). */
+    transition: CurioThemeTransitionState?,
+    transitionScope: CoroutineScope,
+) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val current = AppPreferences.colorThemeState
     val accent = settingsCardAccentInk()
     val choices = colorThemeChoices()
-    val themeTransition = LocalCurioThemeTransition.current
-    val transitionScope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -708,11 +727,14 @@ private fun ColorThemeSheet(onDismiss: () -> Unit) {
             Spacer(Modifier.height(10.dp))
             choices.forEach { choice ->
                 val live = choice.id == current
+                // The reveal expands from the row that was tapped.
+                var rowBounds by remember { mutableStateOf(Rect.Zero) }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .onGloballyPositioned { rowBounds = it.boundsInWindow() }
                         .clip(RoundedCornerShape(18.dp))
                         .background(
                             if (live) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f)
@@ -722,8 +744,10 @@ private fun ColorThemeSheet(onDismiss: () -> Unit) {
                             if (!live) {
                                 // The whole scheme repaints, so the transition is
                                 // FORCED (like the Material toggle's used to be):
-                                // the circular reveal plays from the row itself.
-                                switchVisualThemeWithReveal(themeTransition, transitionScope, Offset.Zero) {
+                                // the circular reveal plays from the tapped row.
+                                val center = if (rowBounds == Rect.Zero) Offset.Zero
+                                else Offset(rowBounds.center.x, rowBounds.center.y)
+                                switchVisualThemeWithReveal(transition, transitionScope, center) {
                                     AppPreferences.setColorTheme(context, choice.id)
                                 }
                             }
