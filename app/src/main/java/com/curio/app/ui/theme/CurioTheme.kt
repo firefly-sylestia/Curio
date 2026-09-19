@@ -338,17 +338,20 @@ fun isCurioDarkThemeForContext(context: Context): Boolean = when (AppPreferences
  * category families (see [MaterialFamilies]).
  */
 @Composable
-fun curioColorScheme(): ColorScheme =
-    if (materialThemeOn) materialColorScheme()
+fun curioColorScheme(): ColorScheme {
+    if (materialThemeOn) return materialColorScheme()
     // v411 — a PANTONE theme brings its own palette (and its own dark twin),
     // so it answers before the Curio schemes: the paper flip below only ever
-    // describes Curio's own cream/white page pair.
-    else activePantoneTheme()?.let { it.schemeFor(isCurioDarkTheme()) }
-    else if (isCurioDarkTheme()) CurioDarkColorScheme
+    // describes Curio's own cream/white page pair. (`let` is inline, so this
+    // early return leaves the composable — and it keeps the chain readable:
+    // an `?.let` branch cannot sit mid-`if/else if`.)
+    activePantoneTheme()?.let { pantone -> return pantone.schemeFor(isCurioDarkTheme()) }
+    if (isCurioDarkTheme()) return CurioDarkColorScheme
     // v409 — the paper flip: white page with cream cards (the shipped look),
     // or the reverse. Read reactively, so the switch repaints immediately.
-    else if (AppPreferences.paperCreamCardsState) CurioWhitePageLightScheme
+    return if (AppPreferences.paperCreamCardsState) CurioWhitePageLightScheme
     else CurioCreamPageLightScheme
+}
 
 /**
  * v411 — the ACTIVE Pantone theme, or null when the color theme is one of the

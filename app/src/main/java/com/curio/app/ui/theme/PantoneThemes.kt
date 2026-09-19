@@ -57,7 +57,7 @@ import androidx.compose.ui.graphics.luminance
  *    a hero-filled card — and the shared `curioCardEdgeColor` helper answers
  *    "no edge" under these themes so the card components never draw one.
  */
-internal enum class PantoneTheme(
+enum class PantoneTheme(
     /** The stored id (see `AppPreferences.COLOR_THEME_*`). */
     val id: String,
     /** The sheet's row title. */
