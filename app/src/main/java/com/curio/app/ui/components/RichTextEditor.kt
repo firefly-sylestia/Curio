@@ -5,6 +5,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -22,9 +24,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -81,12 +85,15 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import kotlin.math.roundToInt
 import com.curio.app.data.NotePaperColor
@@ -1513,18 +1520,69 @@ fun RichTextEditor(
         // tool its own button (no grouped menus) — so the app's full-screen
         // editors and the journal read as ONE writing surface.
         if (toolbarMode == RichTextToolbarMode.DOCK) {
-            // The dock rises out of the field's own foot as the writing starts
-            // and folds away when it stops, which is also what keeps it clear of
-            // the save page's own buttons while a note is being READ rather
-            // than written.
-            AnimatedVisibility(
-                visible = dockVisible,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
+            // ── v406 — THE DOCK FLOATS OVER THE PAGE, ABOVE THE KEYBOARD ──
+            //
+            // It used to be laid out INSIDE the note, at the foot of its field
+            // - which is the one place a keyboard can cover it. A note low on
+            // the page put its tools under the IME the moment the member
+            // tapped in to write (member's report: "the tool that shows under
+            // the notes in save your take its hiding behind the keyboard when
+            // the note is too below … make it open as overlay which shows above
+            // keyboard not belo the note").
+            //
+            // It is a POPUP now, pinned to the foot of the WINDOW and lifted
+            // by the keyboard's own inset, so it is always just above the keys
+            // and never under a note. It also stops being clipped by the note's
+            // own bounds, which is what lets it float over the page at all.
+            //
+            // The width is capped and the content centred so a dock over a wide
+            // window does not stretch a row of tools across the whole screen.
+            val dockDensity = LocalDensity.current
+            // Lift = the keyboard when one is up, otherwise the navigation bar:
+            // the ime inset already contains the bar, so the larger of the two
+            // is the right amount and never double counts.
+            val imeBottom = WindowInsets.ime.getBottom(dockDensity)
+            val navBottom = WindowInsets.navigationBars.getBottom(dockDensity)
+            val dockLift = maxOf(imeBottom, navBottom)
+            // THE POSITION IS THE WINDOW'S, NOT THE NOTE'S. `Popup(alignment = …)`
+            // aligns against the PARENT's bounds, and the parent here is the note -
+            // so a note low on the page would put the dock off the bottom of the
+            // screen and a note high up would put it mid-page. The provider below
+            // ignores the anchor, centres the dock across the WINDOW and stands it
+            // on the lifted foot, which is the one place a keyboard cannot reach.
+            //
+            // It is built fresh on every composition (deliberately not
+            // remembered): the provider is a key of the Popup's own measure pass,
+            // so a new instance is what re-places the dock when the keyboard comes
+            // up, changes height or goes away.
+            val dockPosition = object : PopupPositionProvider {
+                override fun calculatePosition(
+                    anchorBounds: IntRect,
+                    windowSize: IntSize,
+                    layoutDirection: LayoutDirection,
+                    popupContentSize: IntSize
+                ): IntOffset {
+                    val x = (windowSize.width - popupContentSize.width) / 2
+                    val y = windowSize.height - popupContentSize.height - dockLift
+                    return IntOffset(x, y.coerceAtLeast(0))
+                }
+            }
+            Popup(
+                popupPositionProvider = dockPosition,
+                properties = PopupProperties(focusable = false)
             ) {
-                Column {
-                    Spacer(Modifier.height(8.dp))
-                    RichTextDock(
+                AnimatedVisibility(
+                    visible = dockVisible,
+                    enter = slideInVertically { it } + fadeIn(),
+                    exit = slideOutVertically { it } + fadeOut()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .widthIn(max = 560.dp)
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 10.dp)
+                    ) {
+                        RichTextDock(
                         boldActive = hasFlagAt(RichFlag.BOLD),
                         italicActive = hasFlagAt(RichFlag.ITALIC),
                         underlineActive = hasUnderlineAt(),
@@ -1564,6 +1622,7 @@ fun RichTextEditor(
                         trailingAction = trailingAction,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    }
                 }
             }
         }

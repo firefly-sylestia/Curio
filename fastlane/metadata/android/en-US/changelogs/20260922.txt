@@ -1,4 +1,11 @@
 ADD:
+- Settings: cover fetching and the Take studio start ON — both shipped opt-in, so a fresh install opened on placeholder art and a Save your take page without the studio the page is about; each keeps its switch, so turning either off still works.
+
+FIX:
+- Writing: a note's tools float above the keyboard — the dock was laid out inside the note, at the foot of its own field, so a note low on the page put its tools under the keyboard the moment the member tapped in to write; it is a floating strip pinned to the window and lifted by the keyboard's own inset now, so it is always just above the keys and never under a note.
+- Releases: builds are faster — the build cache is on, so a task whose inputs did not change is restored instead of re-run, and the topic catalog's own check declares what it produced, so a build that leaves the catalog alone no longer re-parses all 20,877 topics.
+
+ADD:
 - Updates: What's New arrives as a SHEET, and only once the welcome is over — it waits for the intro to be finished and for the tour offer to be answered, then rises over Home, with "See all" keeping the full page (which is still the door under Settings ▸ Updates).
 - Reveal: an anime with no episode guide says so, instead of ending at its poster in silence — only a couple of titles carry an authored list and the online one can come back empty.
 

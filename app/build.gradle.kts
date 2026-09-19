@@ -142,7 +142,10 @@ android {
         // releases (Updates page, auto backup, dark mode, …). versionCode is
         // date-based; 20260920 is the +1 bump over the previous 20260919.
         versionCode = 20260922
-        versionName = envReleaseVersion ?: "1.1.1"
+        // v406 — the local/PR default matches the version now being tagged, so
+        // a build from main reports the release it belongs to (a v* tag still
+        // overrides it through RELEASE_VERSION).
+        versionName = envReleaseVersion ?: "1.3.0"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the
@@ -421,6 +424,17 @@ tasks.register("validateTopics") {
     // the configuration cache.
     val topicsDir = file("src/main/assets/topics")
     inputs.dir(topicsDir)
+    // v406 — DECLARE AN OUTPUT, SO THE TASK CAN BE SKIPPED.
+    //
+    // This task has inputs but produced nothing, and Gradle can only mark a task
+    // UP-TO-DATE (or restore it from the build cache) when it has both: a task
+    // with no declared output is never up to date, so every build re-parsed the
+    // whole catalog. The stamp below is what the task produces. Unchanged JSON
+    // leaves the stamp good, the parse is skipped, and with org.gradle.caching
+    // on it can even be restored on a fresh CI runner.
+    val validationStamp = layout.buildDirectory.file("curio/validate-topics.stamp")
+    outputs.file(validationStamp)
+    outputs.cacheIf { true }
     doLast {
         if (!topicsDir.exists()) {
             logger.warn("topics/ directory missing — nothing to validate (OK for placeholder UI ships).")
@@ -500,6 +514,17 @@ tasks.register("validateTopics") {
             "(${jsonFiles.size - populatedFileCount} placeholder). " +
             "Schema errors (if any) are listed above.)"
         )
+        // The stamp is written LAST, so a failing validation fails before it is
+        // written and the next build checks the catalog again instead of
+        // treating a bad catalog as validated.
+        validationStamp.get().asFile.apply {
+            parentFile?.mkdirs()
+            writeText(
+                "validated=" + System.currentTimeMillis() +
+                    " files=" + jsonFiles.size +
+                    " populated=" + populatedFileCount + "\n"
+            )
+        }
     }
 }
 

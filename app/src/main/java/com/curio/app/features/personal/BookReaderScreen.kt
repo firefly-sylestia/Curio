@@ -312,6 +312,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // jump already did (see [pendingBlock]).
     var pendingPage by remember { mutableStateOf<Int?>(null) }
 
+    // ── AND A BLOCK ASKED FOR, HOISTED WITH IT (v406) ──────────────────
+    //
+    // [jumpToMark] hands a place to whichever surface is showing — a block for
+    // reflowable text, a page for a PDF — and a local function cannot reach a
+    // local that is declared LATER in the same body, so this state lives up
+    // here beside the page ask rather than down by the chapters sheet.
+    var pendingBlock by remember { mutableStateOf<Int?>(null) }
+
     /**
      * v405 — A TURN THE READER ASKED FOR IS NOT THE MEMBER MOVING.
      *
@@ -640,8 +648,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // A JUMP ASKED FOR FROM OUTSIDE the reading surface — the chapters sheet, a
     // search find. It is handed to whichever surface is showing (the scroll list
     // or the pager) because only that one knows where the block landed, and
-    // cleared by it so the same jump never fires twice.
-    var pendingBlock by remember { mutableStateOf<Int?>(null) }
+    // cleared by it so the same jump never fires twice. The state itself is
+    // hoisted with the page ask far above (see `pendingBlock` there):
+    // [jumpToMark] reads it, and a local function cannot reach a local declared
+    // later in the same body.
     fun jumpToBlock(index: Int) {
         pendingBlock = index
         chrome = false

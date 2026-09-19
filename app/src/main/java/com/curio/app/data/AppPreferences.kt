@@ -2358,8 +2358,16 @@ object AppPreferences {
 
     /** Whether the Capture studio experiment is on (default OFF; see the
      *  state comment above). */
+    /**
+     * v406 — THE TAKE STUDIO IS ON BY DEFAULT.
+     *
+     * It shipped opt-in, so a fresh install had the Save your take page without
+     * the studio that the page is about. The switch stays (Settings ▸
+     * Experiments), so anyone who wants it off still can; the default is simply
+     * the feature.
+     */
     fun isCaptureStudioEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, false)
+        prefs(context).getBoolean(KEY_CAPTURE_STUDIO, true)
 
   fun setCaptureStudioEnabled(context: Context, enabled: Boolean) {
   prefs(context).edit().putBoolean(KEY_CAPTURE_STUDIO, enabled).apply()
@@ -3601,8 +3609,23 @@ object AppPreferences {
         val legacy = p.getBoolean(KEY_BOOK_FETCH_ENABLED, false) ||
             p.getBoolean(KEY_ALBUM_FETCH_ENABLED, false) ||
             p.getBoolean(KEY_SERIES_FETCH_ENABLED, false)
-        if (legacy) p.edit().putBoolean(KEY_COVER_FETCH_ENABLED, true).apply()
-        return legacy
+        if (legacy) {
+            p.edit().putBoolean(KEY_COVER_FETCH_ENABLED, true).apply()
+            return true
+        }
+        // ── v406 — COVERS ARE ON BY DEFAULT ──────────────────────────────
+        //
+        // The merged consent used to start OFF, so every fresh install opened
+        // on placeholder art until the member went and found the switch. A
+        // stored legacy choice still wins (someone who turned the old per-kind
+        // switches off keeps them off); NO stored choice at all means nobody
+        // has ever answered the question, and the answer is yes.
+        val everChosen = p.contains(KEY_BOOK_FETCH_ENABLED) ||
+            p.contains(KEY_ALBUM_FETCH_ENABLED) ||
+            p.contains(KEY_SERIES_FETCH_ENABLED)
+        if (everChosen) return false
+        p.edit().putBoolean(KEY_COVER_FETCH_ENABLED, true).apply()
+        return true
     }
 
     fun setCoverFetchEnabled(context: Context, enabled: Boolean) {

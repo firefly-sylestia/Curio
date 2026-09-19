@@ -1,180 +1,135 @@
-# Prompt.md — the current request
+# Prompt.md — the running log of the current request
 
-The running log of what was asked, what was found, what changed, and what is
-still open. Replace it when a new request starts; add a completion summary
-when one finishes. No tool attribution, no em dashes in user-visible strings.
+This file is replaced for each new request (see `AGENTS.md`). It records what was asked,
+what was found, what was decided, and what is still open, so the next session can start
+from the state rather than from memory.
+
+---
 
 ## 1. The request
 
-Merge `ci/workflow-redesign` into `main` and work on `main` from there, then
-finish everything still open, one item at a time:
+> "check these [the CI failure + the post-job caching log], also tell me how can we make our
+> builds more faster. also turn on cover fetching and also the take studio on by default.
+> also the tool that shows under the notes in save your take its hiding behind the keyboard
+> when the note is too below, can u fix that and make it open as overlay which shows above
+> keyboard not belo the note. and then do the next tag release with no beta, proper release,
+> edit the release notes thats connected to release tag which gets added, update the notes
+> and make sure not to use erm dashes."
 
-1. Vertical zoom: a small shift when a page is zoomed or unzoomed.
-2. The reading progress is not live.
-3. Switching a page with the page-switch pill hides the tools (it should only
-   hide when the page is touched).
-4. Horizontal mode in the PDF and EPUB readers, with a text-size slider for
-   EPUB. Auto-detected, toggleable off, and it only affects the PDF.
-5. The waiting work: photo rows (join an existing pair into a three, and switch
-   sides), the zoomed-page swipe glitch, the home door lists feeling empty on a
-   first open, and the fetched posters/covers lost after a restart.
-6. Double tap to unzoom, the same as double tap to zoom.
+Member's answers to the two questions asked before the release:
 
-## 2. The merge
+- **Tag**: **v1.3.0** (typed as a custom answer; the offered v1.2.0 was not taken).
+- **Push**: "You push the commits and the tag."
 
-`ci/workflow-redesign` was four commits ahead of `main` with `main` holding
-nothing extra, so it was a clean fast-forward. Work continues on `main`.
+---
 
-## 3. What changed (v406)
+## 2. The CI failure that was pasted
 
-### Reading — the reader, `features/personal/BookReaderScreen.kt`
+```
+e: .../features/personal/BookReaderScreen.kt:390:17 Unresolved reference 'pendingBlock'.
+```
 
-- **Zoom, unzoom and the swipe, in one rule (`pinchToZoom`).** A gesture now
-  has ONE owner from its first move to the finger-lift:
-  - Two fingers consume from the FIRST event. The changes used to be consumed
-    only once the pinch had something to report (`zoom != 1f || pan !=
-    Offset.Zero`), so the column underneath took the opening frame of every
-    zoom and the page moved before the pinch did.
-  - A one-finger pan on a magnified page claims the gesture on its first move
-    and keeps it. The drag used to be handed back MID-GESTURE the moment the
-    page reached its edge, so the pager (whose slop the consumption had already
-    cancelled) took over with the finger's whole accumulated travel and jumped
-    to the next page in a flash — the member's "glitched preview".
-  - A page ALREADY at its edge when the gesture starts takes nothing at all, so
-    the surface underneath owns the entire swipe: the page turns on ANOTHER
-    swipe, which is exactly what was asked for.
-  - `declined` and `ownsTheDrag` are both per-gesture, reset at the down.
-- **The shift (`readerZoomThisPage` + the two draw lambdas).** The page was given
-  up at `1.02`, which threw away a live pan while the page was still 2%
-  magnified, so an unzoom snapped it back to its centre. The reset is now at
-  `1.001`: at exactly 1× the pan is already zero, because `readerZoomedPan`
-  clamps the travel to the page's own room and a page at 1× has none. The drawn
-  translation is also no longer gated on `z > 1.02f` — that dropped the pan in
-  one frame while the page was still scaled.
-- **The progress is LIVE (`ReaderLivePlace`).** The places sheet read the STORED
-  auto-bookmark, and that row is written only once a scroll settles (up to
-  900ms), so the card could name a place already left. Every surface now reports
-  what it is showing as it moves: `onBlockShown` (scroll list and the PAGED text
-  reader, the latter via a new `liveTextBlock`), `onPageShown` for the PDF
-  column, and `pagerState.currentPage` for the PDF pager. The sheet takes
-  `live: ReaderLivePlace?` and falls back to the stored mark only when no
-  surface has reported a place yet.
-- **A text jump is ASKED FOR.** `jumpToMark` moved `listState` directly, so a
-  mark, "Continue reading" or the bookmarks list did nothing visible in the
-  PAGED flow. It now sets `pendingBlock`, which whichever surface is showing
-  takes and clears (the PDF side already worked this way via `pendingPage`).
-  A new `onContinueAt` carries the live index from the progress card.
-- **The tools stay while the bar is used.** The auto-hide countdown now keys on
-  `askedByReader` and does not run while a turn asked for at the bar is in
-  flight; when it settles, the countdown restarts from full. It moved below the
-  `askedByReader` declaration to do it.
-- **A type-size slider (EPUB only).** `ReaderInkSheet` takes `showType`, and a
-  reflowable book gets a `Slider` over the very value the pinch writes
-  (`ReaderLook.textScale`, 0.8–2.6), said out loud as a percentage. A PDF is a
-  picture of a page, so its own size stays the pinch's.
-- **Double tap to unzoom already existed.** `readerDoubleTapZoom` resets to 1×
-  and clears the pan when the page already owns a zoom, and it is armed on both
-  surfaces (the column's frame and the pager's page). Nothing was added; if it
-  is not working on the device that is a separate bug (the tap not reaching the
-  page while magnified) and needs a reproduction.
+Cause: v406 hoisted a `pendingBlock` state so `jumpToMark` could hand a block to whichever
+reading surface is showing, but the declaration was left **below** the local functions that
+read it, and a Kotlin local cannot see a local declared later in the same body.
 
-### Reading — the page's own standing (`pageUpright`)
+Fix (already in the working tree, and carried by this commit): the state is declared up with
+`pendingPage`, under a comment that says why. `node scripts/check_braces.js` is clean.
 
-`ReaderLook.pageUpright` (default off) is the reader's one orientation choice.
-Off is "turn with the phone": the app declares no `screenOrientation` anywhere,
-so rotation is already allowed and a wide PDF page is read the way a wide page
-wants — the member's chosen "horizontal mode" (just allow landscape, auto
-detected). On keeps a PDF's pages UPRIGHT, applied on the ACTIVITY through
-`context.findActivity()` and only while the content is `ReaderContent.Pages`, so
-a reflowable book is never held to one way up. The switch lives in the page's
-ink sheet (`showUpright`), beside the EPUB type-size slider (`showType`), and
-`requestedOrientation` is restored to `SCREEN_ORIENTATION_UNSPECIFIED` on
-dispose.
+The rest of the pasted log is the **post-job cleanup**, not a failure: the Gradle User Home
+cache was restored (8 entries, 825 MB), 1 entry (20 MB) saved, daemons stopped, and the job
+summary generated with a green outcome. No action needed there.
 
-### Home — a door's row with nothing in it (`EmptyDoorChip`)
+---
 
-A first-time Home had two doors and two rows of nothing: a `LazyRow` draws no
-chip until a journal or a book exists, so each strip collapsed to the door alone
-(the member's "those place feels empty", and their answer that it is NOTHING at
-all rather than a late fill). Each door now emits an `EmptyDoorChip` at
-`CHIP_WIDTH` x `CHIP_HEIGHT` when its list is empty — "No pages yet / Start your
-first one" wired to `onWrite`, "No books yet / Open the shelf" wired to
-`CurioRoutes.BOOKS` — so the strip keeps its shape and offers the first step.
+## 3. Why the build was losing time, and what was done
 
-### Writing — the other side of a print row
+What the log shows: Gradle 9.4.1, configuration cache on ("Configuration cache entry
+stored"), `gradle/actions/setup-gradle` carrying `/home/runner/.gradle/caches` between runs,
+and `56 actionable tasks executed` on a commit that touched three Kotlin files.
 
-`PersonalRowDragState` gained a horizontal axis. `dragBy` now takes `amountX`
-and keeps it as INTENT only (`travelX`), never as a slot: a page lays its blocks
-out in one column, so sideways travel has no slot to move to. `takeLeftCell`
-answers "which end of a print row does the carried print take" — a REAL sideways
-drag (`SIDE_INTENT_PX = 40f`) chooses the end, and the vertical direction remains
-the fallback, so a plain downward carry onto a pair behaves exactly as before.
+Two cheap causes found by reading the repo, and both are fixed:
 
-Both halves of the drop read that ONE value: `printDropIndex(from, to,
-            takeLeft)` picks the cell, and the landing ghost draws the cell. The ghost
-used to draw the OPPOSITE end from the one the drop chose (a downward drop
-landed on the row's head while the dashed room was drawn at its tail), which is
-one of the ways a pair "sometimes upgroups". Joining an existing pair into a
-three already worked through `printDropIndex` (a print arriving from elsewhere
-is snapped to the run and inserted at its head or just past its tail), and the
-side switch is what was actually missing.
+1. **The build cache was never turned on.** `org.gradle.caching` was absent from
+   `gradle.properties`, so every task re-ran even when its inputs were identical, and the
+   restored Gradle User Home could only help with dependency resolution. It is on now, and
+   `org.gradle.parallel=true` with it (the modules that exist are independent).
 
-### Updates — What's New is GATED and arrives as a sheet
+2. **`validateTopics` could never be skipped.** It declared `inputs.dir(topicsDir)` and
+   **no output**, and Gradle can only mark a task UP-TO-DATE (or restore it from the cache)
+   when it has both. So the whole catalog, 20,877 topics across every JSON file, was parsed
+   and re-validated on every single build. It now writes a stamp under
+   `build/curio/validate-topics.stamp`, declared with `outputs.file(...)` and
+   `outputs.cacheIf { true }`, written LAST so a failing validation fails before the stamp
+   exists. Unchanged JSON means the parse is skipped; on CI it can be restored outright.
 
-The auto-open was a `LaunchedEffect(Unit)` that navigated to the `WHATS_NEW`
-route 700ms after the app settled, with SPLASH and ONBOARDING counted as a quiet
-start — so a fresh install could be handed the highlights DURING the intro, and
-the tour offer was pushed aside by it. The gate now lives at the top of
-`CurioNavHost`, keyed on `currentRoute`, `TourController.offerPending` and
-`TourController.active`: past SPLASH/ONBOARDING, intro complete
-(`CurioOnboardingState.isComplete`), and the tour offer ANSWERED. It then shows
-`WhatsNewSheet` (a `ModalBottomSheet` over Home, `release.items.take(3)`, "Got
-it" and "See all") and stamps `whatsNewSeenVersion` on the way out. The full
-`WhatsNewScreen` is untouched and remains the door under Settings ▸ Updates.
-The member's chosen order is intro → tour offer → What's New.
+Still on the table, **not done** (each changes what CI checks, so they are the member's call):
 
-### Moderation — the ban reasons collapse
+- **`lintDebug` compiles the whole debug variant** (`kspDebugKotlin`, `compileDebugKotlin`,
+  debug resources) on top of the release variant the job actually packages. Roughly half the
+  compile work in that job exists to run a lint pass. Either `lintRelease` (one variant
+  instead of two) or a **separate parallel lint job** (wall clock becomes the slower of the
+  two, not the sum).
+- **The `cp data/topics/*.json` asset copy** rewrites the whole asset tree on each run
+  before the build. A Gradle `Sync`/copy task with declared inputs and outputs would let
+  Gradle skip the merge and packaging work when the catalog has not changed.
+- **A fast compile-only job** for feedback (`compileReleaseKotlin`), with packaging behind
+  it, so a red compile is reported in a fraction of the time.
+- **AJDK 21** (LTS) instead of 17: the Kotlin and R8 toolchains are faster on it, and AGP
+  supports it. The project pins 17 in both workflows.
 
-`ModerationBanDialog` gained `reasonsOpen`. While a reason is unchosen the eight
-wrapping chips stand (they are what a moderator needs BEFORE picking); once one
-is chosen the list folds to a single chip of the chosen reason with a "Change"
-beside it, so the note field and the Ban button are on screen. Picking again
-closes it.
+---
 
-### Empty states — the audit
+## 4. What was changed
 
-The survey (every feature file with a `LazyColumn`/`LazyRow`, checked for
-`isEmpty()` guards and empty-state copy) found the lists already covered:
-Recents (`FirstTimeEmpty`), Cabinet and Cabinet V2 (`EmptyState`), the journal
-list, the book shelf, Chats, Friends, Community, Moderation and Quests. Two real
-gaps were fixed: Home's door strips (see `EmptyDoorChip` above) and the anime section, which hid its episode chips when the list was empty and so ended at its
-poster with no explanation — it now says "No episode guide yet.", the same words
-the series sheet already used.
+### Turned on by default (both keep their Settings switch)
 
-### Reveal — the fetched art survives (`sheetArtUrlsState`)
+- `AppPreferences.isCoverFetchEnabled` — the merged cover consent defaulted OFF, so a fresh
+  install opened on placeholder art. A stored choice still wins (someone who turned the old
+  per-kind switches off keeps them off); no stored choice at all, which means nobody has
+  ever answered, now means yes.
+- `AppPreferences.isCaptureStudioEnabled` — default `true`.
 
-Nine art sites (ArtworkSheet, AuthorWorks, and the album / film-variant / anime
-/ film / song / kind sheets in TopicRevealScreen) seeded themselves from the
-cache but keyed the `remember` and the `LaunchedEffect` on the TOPIC alone. The
-map is filled in `initThemeMode` at app start, but a URL another surface
-resolves after a card composed was therefore never noticed, and the art was
-fetched again on the next visit. Each site now reads the cached URL once and
-uses it as a KEY for both the seed and the effect.
+### The note's tools no longer hide under the keyboard (`RichTextEditor.kt`)
 
-## 4. Still open — needs the member
+The `DOCK` toolbar used to be laid out **inside** the note, at the foot of its own field,
+which is the one place an IME can cover. It is a `Popup` now, `BottomCenter` aligned with
+`focusable = false`, lifted by `maxOf(ime insets, navigation bar insets)` so it sits just
+above the keys when one is up and just above the nav bar when none is. Content is capped at
+`560.dp` and centred so a wide window does not stretch a row of tools across the screen, and
+the enter/exit is a slide instead of a vertical expand. MainActivity calls
+`enableEdgeToEdge()`, which is what makes the ime inset real rather than consumed by
+`adjustResize`.
 
-- **Journal entries being slow.** Needs a measurement (list open vs page load):
-  is it the list opening, or the page loading?
-- **The photo row's "it doesn't let me join a pair".** The drop logic and the
-  side now agree, so the next step is a reproduction on the device: if a print
-  still refuses to become a three, the suspect is `rowDrag.targetIndex` (the
-  slot the finger is pointing at) rather than the insertion itself.
-- **CI is unconfirmed for both commits of this session** (`e61c244c` and the one
-  after it), and neither has been pushed.
+### Build speed
 
-## 5. Notes
+`gradle.properties` (build cache + parallel) and `validateTopics` (declared output) as above.
 
-- Nothing in this batch has been CI-verified (no compiler in this workspace);
-  validation was `scripts/check_braces.js` and manual call-site arithmetic.
-- The store changelog (`20260922.txt`) and `app/AGENTS.md` carry the same
-  changes in the same commit.
+### The release
+
+- `RELEASE_NOTES.md` is rewritten in full for **v1.3.0**, in the style the release body wants:
+  grouped sections, one line per thing, and **no em dashes or en dashes anywhere** (verified
+  with a grep for U+2014 and U+2013: 0 matches). `release.yml` embeds this file at the top of
+  the release body, above the generated install table, and appends GitHub's own commit list.
+- `versionName`'s local/PR default moves from `1.1.1` to `1.3.0`, so a build from main
+  reports the release it belongs to (a `v*` tag still overrides it through `RELEASE_VERSION`).
+  `versionCode` stays `20260922`, whose `fastlane` changelog is the one this release ships.
+- The tag itself is `v1.3.0` (no `beta`, no `rc`, so `release.yml`'s prerelease check
+  resolves to a full release).
+
+---
+
+## 5. Still open (carried over, unchanged by this request)
+
+- **The forms SQL has not been pasted into Supabase**, so the ban ladder, the queue's Clear,
+  and publish / read / vote / skip for a form have nothing to talk to yet; the `forms`
+  permission also still needs granting to the team.
+- **Stop-the-poll in moderation** (asked for, not built) needs that schema first.
+- **Journal entries being slow** still needs a measurement: list open, or page load.
+- **Episode lists**: only 2 of the topics carry an authored `episodes` array; content, not
+  code.
+- **The deprecation sweep** (about 30 `rememberModalBottomSheetState` sites, 4
+  `LocalClipboardManager`, 1 `LocalLifecycleOwner`, and roughly 150 site-specific warnings)
+  is unstarted; each needs a compile to verify, and Material3 here is `1.5.0-alpha20`.
+- **The take editor's per-keystroke rebuild** was found by inspection only and never
+  profiled.
