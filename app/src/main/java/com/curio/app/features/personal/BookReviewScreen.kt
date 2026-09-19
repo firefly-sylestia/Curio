@@ -58,6 +58,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -173,7 +175,7 @@ fun BookReviewScreen(
     // it switches to the previous chapter view").
     val readScroll = rememberScrollState()
     val writeScroll = rememberScrollState()
-    val chapterLines = remember { mutableStateMapOf<String, PinnedChapterLine>() }
+    val chapterLines = remember { mutableStateMapOf<String, PersonalSectionLine>() }
     // WHICH MARKER IS BEHIND US — and where to go back to it.
     //
     // A marker is behind us only once its WHOLE line has gone up: the bar names
@@ -186,33 +188,61 @@ fun BookReviewScreen(
     // position even though the title isnt scrolled away yet"). The bottom edge
     // is what answers the question, and the id rides along so the bar can be
     // TAPPED to go back to the heading it names.
+    // v402 — THE PIN IS JUDGED IN THE WINDOW, ON THE SIDE BEING SHOWN.
+    //
+    // This page had the journal's exact defect (and its own version of it): a
+    // marker's place was translated into a scroller's coordinates with an offset
+    // that could not be kept in step, and while READING the comparison was run
+    // against the WRITING scroll — a scroll nobody was looking at. So the bar
+    // appeared early, named the wrong chapter, sometimes did not appear at all,
+    // and a tap could land anywhere (user reports: "shows the floating pin but
+    // sometimes it doesn't", "in reading view it shows that title … even though
+    // the title isnt scrolled away yet"). Markers now report where they are ON
+    // THE SCREEN (see `PersonalSectionLine`), the page knows where its writing
+    // area is on the same screen, and the side being shown is the only side read.
+    var areaTop by remember { mutableFloatStateOf(0f) }
     val pinnedMarker by remember {
         derivedStateOf {
-            val scroll = (if (editing) writeScroll.value else readScroll.value).toFloat()
-            chapterLines.entries
-                .filter { it.value.label.isNotBlank() && it.value.bottom - scroll <= 0f }
-                .maxByOrNull { it.value.bottom }
+            val side = editing
+            val scrollNow = if (side) writeScroll.value.toFloat()
+            else readScroll.value.toFloat()
+            chapterLines.values
+                .filter {
+                    it.label.isNotBlank() && it.writing == side &&
+                        it.liveBottom(scrollNow) <= areaTop + 1f
+                }
+                .maxByOrNull { it.liveBottom(scrollNow) }
         }
     }
     val pinnedChapter = pinnedMarker?.value?.label.orEmpty()
-    // A line the member deleted (or renamed away) stops being a place to pin.
+    // A line the member deleted (or renamed away) stops being a place to pin,
+    // whichever side of the switch last reported it.
     LaunchedEffect(draft, review) {
         val alive = (draft.blocks + (review?.doc?.blocks ?: emptyList())).map { it.id }.toSet()
-        chapterLines.keys.retainAll(alive)
+        chapterLines.keys.retainAll { key -> key.substringAfter(':') in alive }
     }
-    // v389d — THE MARKER IS MEASURED IN THE SCROLL'S OWN SPACE.
-    //
-    // A chapter marker reports where it sits inside the WRITING COLUMN, and the
-    // column is a child of the scrolling page — so the spacer above it was
-    // missing from every number. The pin therefore lit up before its heading had
-    // actually gone (user report: "it's very buggy in books … shows the floating
-    // pin but sometimes it doesn't"), and tapping it scrolled to the wrong place.
-    // The canvas' own place in the scroll is measured and added, so the judge and
-    // the jump agree.
-    var canvasTop by remember { mutableFloatStateOf(0f) }
-    val reportChapterLine: (String, String, Float, Float) -> Unit = { id, label, top, bottom ->
-        chapterLines[id] = PinnedChapterLine(label, top + canvasTop, bottom + canvasTop)
-    }
+    // One entry per SIDE: both halves of the page report the same block ids, and
+    // each half's numbers belong to its own box and its own scroll.
+    val reportChapterLine:
+        (String, String, Float, Float, Boolean, Float) -> Unit =
+        { id, label, top, bottom, writing, _ ->
+            val key = if (writing) "w:$id" else "r:$id"
+            if (label.isBlank()) {
+                chapterLines.remove(key)
+            } else {
+                chapterLines[key] = PersonalSectionLine(
+                    label = label,
+                    top = top,
+                    bottom = bottom,
+                    writing = writing,
+                    // This page owns BOTH scrolls, so the report is completed here
+                    // rather than being asked of the read view (which cannot see
+                    // which scroll holds it).
+                    scroll = if (writing) writeScroll.value.toFloat()
+                    else readScroll.value.toFloat()
+                )
+            }
+        }
 
     // Entering the canvas seeds it from the stored review exactly once (re-
     // seeding mid-typing is what drops the caret).
@@ -391,7 +421,14 @@ fun BookReviewScreen(
             )
         }
 
-        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                // This page's writing area, in the window: the line a chapter
+                // marker has to have gone above to be pinned (see pinnedMarker).
+                .onGloballyPositioned { areaTop = it.boundsInWindow().top }
+        ) {
             Crossfade(
                 targetState = editing,
                 animationSpec = tween(220),
@@ -416,21 +453,10 @@ fun BookReviewScreen(
                             .padding(horizontal = 20.dp)
                             .widthIn(max = 680.dp)
                     ) {
-                        // v389d — THE CANVAS' PLACE IN THE SCROLL.
-                        // v389h — AND THE NUMBER IS STORED. The book review had the
-                        // journal page's exact defect: the head's height was measured
-                        // into a local nothing else could see and `canvasTop` stayed
-                        // 0, so the pin judged every marker against a coordinate
-                        // that stopped at the canvas' own top (wrong chapter,
-                        // early arrival, a tap that jumped to the top).
-                        var aboveContentHeight by remember { mutableFloatStateOf(0f) }
-                        val density = LocalDensity.current
-                        Box(
-                            Modifier.onSizeChanged {
-                                aboveContentHeight = it.height.toFloat() + with(density) { 4.dp.toPx() }
-                                canvasTop = aboveContentHeight
-                            }
-                        ) { Spacer(Modifier.height(0.dp)) }
+                        // v402 — nothing to measure any more: a chapter marker
+                        // reports where it is on the SCREEN, so the pin needs no
+                        // offset from the canvas to the scroll (and the offset it
+                        // used to add was the whole of its misbehaviour).
                         PersonalCanvas(
                             state = editor,
                             modifier = Modifier.fillMaxWidth(),
@@ -516,16 +542,24 @@ fun BookReviewScreen(
             if (AppPreferences.pinnedTitleViewState) PersonalPinnedLine(
                 label = pinnedChapter,
                 accent = accent,
+                caption = "Chapter",
                 onClick = {
                     // A DOOR, not a label: the bar IS the chapter it names, so
                     // tapping it goes back to that heading (user request:
                     // "tapping that floating pinned should take me to that title
                     // position").
+                    // The distance is asked for in the WINDOW and applied to
+                    // whichever scroll is on screen, so the same tap works from
+                    // either side of the switch and lands ON the chapter — never
+                    // at the top of the page (user report: "tapping it scrolls all
+                    // the way to the top instead of going to that chapter").
                     val marker = pinnedMarker ?: return@PersonalPinnedLine
+                    val scroll = if (editing) writeScroll else readScroll
+                    val delta = marker.value.liveTop(scroll.value.toFloat()) - areaTop
                     scope.launch {
-                        val target = marker.value.top.toInt().coerceAtLeast(0)
-                        if (editing) writeScroll.animateScrollTo(target)
-                        else readScroll.animateScrollTo(target)
+                        scroll.animateScrollTo(
+                            (scroll.value + delta).toInt().coerceIn(0, scroll.maxValue)
+                        )
                     }
                 },
                 modifier = Modifier
@@ -739,7 +773,6 @@ fun BookReviewScreen(
  * ONE CHAPTER MARKER LINE, and where it sits in the page's scrolling content
  * (see [BookReviewScreen]'s pinned chapter).
  */
-private data class PinnedChapterLine(val label: String, val top: Float, val bottom: Float)
 
 /**
  * v389 — A CHAPTER'S NAME, WITH THE NUMBER SAID ONCE.

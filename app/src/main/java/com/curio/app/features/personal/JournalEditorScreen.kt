@@ -41,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -630,10 +631,21 @@ private fun JournalReadView(
     accent: Color,
     onOpenPhoto: (String, Rect?) -> Unit
 ) {
+    // v402 — THIS VIEW'S SCROLL, OFFERED TO THE PINNED BAR.
+    //
+    // The page that holds this reading side cannot see the scroll that carries it
+    // (it is this lambda's own), so the pinned bar had no way back to the heading
+    // it was naming and judged "has it gone by?" against the WRITING page's scroll
+    // while this one was on screen. The scroll is dropped in the page's holder
+    // instead — see PersonalPinScrollHolder.
+    val readScroll = rememberScrollState()
+    LocalPersonalPinScrollHolder.current?.let { holder ->
+        SideEffect { holder.scroll = readScroll }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(readScroll)
             .padding(horizontal = 22.dp)
             .widthIn(max = 680.dp)
     ) {

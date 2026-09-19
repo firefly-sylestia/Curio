@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -299,10 +300,16 @@ private fun TodoReadView(
     accent: androidx.compose.ui.graphics.Color,
     onOpenPhoto: (String, androidx.compose.ui.geometry.Rect?) -> Unit
 ) {
+    // v402 — this view's scroll, offered to the pinned bar (see
+    // PersonalPinScrollHolder).
+    val readScroll = rememberScrollState()
+    LocalPersonalPinScrollHolder.current?.let { holder ->
+        SideEffect { holder.scroll = readScroll }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(readScroll)
             .padding(horizontal = 22.dp)
             .widthIn(max = 680.dp)
     ) {

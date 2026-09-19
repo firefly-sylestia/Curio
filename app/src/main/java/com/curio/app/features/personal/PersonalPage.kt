@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
@@ -70,6 +71,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -568,33 +570,78 @@ internal fun PersonalWritingPage(
     // [LocalPersonalTitleReport] — the writing column's own scroll turns that
     // into "gone by", and the bar holds the top edge and goes back when tapped.
     val sectionLines = remember { mutableStateMapOf<String, PersonalSectionLine>() }
+    // v402 — THE PIN IS JUDGED IN THE WINDOW.
+    //
+    // Every earlier version of this tried to translate a heading's place into the
+    // scroller's own coordinates, and got it wrong every time: the first compared
+    // a parent-relative number against the scroll, the next added the canvas'
+    // offset twice, and the reading side was judged against the WRITING page's
+    // scroll while the reader was looking at the reading page's. The observable
+    // result was exactly what the member reported — a heading pinned before it had
+    // gone, a heading pinned when it was still on screen, the wrong heading, the
+    // bar missing altogether, and a tap that went to the top of the page.
+    //
+    // Window coordinates have no such problem: a title reports where it IS on the
+    // screen, the writing area knows where ITS top edge is on the same screen, and
+    // "gone by" is one comparison — no offsets to add, no side to translate. The
+    // page's own scroll is still what makes the answer change from frame to frame
+    // (it is what [liveBottom] is asked with), which is why it is read here even
+    // though it is not part of the comparison.
+    // The scroll a reading side writes into (see PersonalPinScrollHolder). Held on
+    // the page, not read from the local: the page is the one that PROVIDES it.
+    val pinHolder = remember { PersonalPinScrollHolder() }
+    // Where the writing area's own top edge is on the screen — the line a heading
+    // has to have gone above to be pinned.
+    var areaTop by remember { mutableFloatStateOf(0f) }
     val pinnedSection by remember {
         derivedStateOf {
-            val scroll = pageScroll.value.toFloat()
-            sectionLines.entries
-                .filter { it.value.label.isNotBlank() && it.value.bottom - scroll <= 0f }
-                .maxByOrNull { it.value.bottom }
+            val side = editing
+            val scrollNow = if (side) {
+                pageScroll.value.toFloat()
+            } else {
+                pinHolder.scroll?.value?.toFloat() ?: 0f
+            }
+            sectionLines.values
+                // Only this side's headings, and only whole lines that have gone
+                // above the writing area's own top edge (one dp of grace, so a
+                // heading whose last pixel is exactly on the line counts as gone).
+                .filter {
+                    it.label.isNotBlank() && it.writing == side &&
+                        it.liveBottom(scrollNow) <= areaTop + 1f
+                }
+                // The deepest one gone by is the one being read under it.
+                .maxByOrNull { it.liveBottom(scrollNow) }
         }
     }
-    // v389d — THE TITLE IS REPORTED IN THE SCROLL'S OWN COORDINATES.
-    //
-    // A title reports where it sits inside the WRITING COLUMN, and the column is
-    // itself a child of the scrolling page — so the offsets above it (the small
-    // spacer and whatever [aboveCanvas] draws) were missing from every number,
-    // and the pinned bar therefore lit up a little early and, when tapped, took
-    // the member to the TOP of the page instead of to the heading it named (user
-    // report: "it should only show when it's swiped aways … also tapping it
-    // should take me to that title point not to the full top"). The canvas' own
-    // place in the scroll is measured here and added, so "scrolled past" and
-    // "go there" both mean the same scroll value the pin is judged against.
-    var canvasTop by remember { mutableFloatStateOf(0f) }
-    val reportSectionLine: (String, String, Float, Float) -> Unit = { id, label, top, bottom ->
-        sectionLines[id] = PersonalSectionLine(label, top + canvasTop, bottom + canvasTop)
-    }
-    // A line the member deleted (or stopped being a title) stops being a place
-    // to pin.
+    val reportSectionLine:
+        (String, String, Float, Float, Boolean, Float) -> Unit =
+        { id, label, top, bottom, writing, scroll ->
+            // ONE ENTRY PER SIDE: both sides report the same block ids, and each
+            // side's numbers belong to its own box (see PersonalSectionLine).
+            val key = if (writing) "w:$id" else "r:$id"
+            if (label.isBlank()) {
+                // "Not a place anymore" — a line that lost its title flag, or one
+                // that left the page. Cleared rather than left behind, which is
+                // what let the bar name a heading that was no longer there.
+                sectionLines.remove(key)
+            } else {
+                sectionLines[key] = PersonalSectionLine(
+                    label = label,
+                    top = top,
+                    bottom = bottom,
+                    writing = writing,
+                    // The writing side's scroll IS the page's, so it is filled in
+                    // here; a read view's own scroll arrives with its report,
+                    // because nobody else can see it.
+                    scroll = if (writing) pageScroll.value.toFloat() else scroll
+                )
+            }
+        }
+    // A line the member deleted stops being a place to pin, whichever side of the
+    // switch last reported it.
     LaunchedEffect(doc) {
-        sectionLines.keys.retainAll(doc.blocks.map { it.id }.toSet())
+        val alive = doc.blocks.map { it.id }.toSet()
+        sectionLines.keys.retainAll { key -> key.substringAfter(':') in alive }
     }
 
     Column(
@@ -612,8 +659,22 @@ internal fun PersonalWritingPage(
         // whether the reading side wants it too).
         pinnedHead(editing)
 
-        CompositionLocalProvider(LocalPersonalTitleReport provides reportSectionLine) {
-        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        CompositionLocalProvider(
+            LocalPersonalTitleReport provides reportSectionLine,
+            // The box a read view drops its own scroll into (see
+            // PersonalPinScrollHolder) — provided here so a switch of side cannot
+            // lose it.
+            LocalPersonalPinScrollHolder provides pinHolder
+        ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                // The writing area's own top edge, in the window: the line a
+                // heading has to have gone above to be pinned (see
+                // `pinnedSection`).
+                .onGloballyPositioned { areaTop = it.boundsInWindow().top }
+        ) {
             // v389 — ONE PAGE TURNING, not two pages sliding past each other.
             //
             // The first cut slid the writing in from the right and the reading
@@ -720,48 +781,18 @@ internal fun PersonalWritingPage(
                             .widthIn(max = 680.dp)
                     ) {
                         Spacer(Modifier.height(6.dp))
-                        // v389d — THE CANVAS' PLACE IN THE SCROLL.
-                        // The title's `top` and `bottom` are reported inside the
-                        // canvas's own Column; to make "scrolled past" and "go
-                        // there" agree with the scroll, that Column's start in the
-                        // scrolling content must be added. A simple measurement box
-                        // (which also houses [aboveCanvas]) gives that offset.
-                        var aboveContentHeight by remember { mutableFloatStateOf(0f) }
-                        val density = LocalDensity.current
-                        // ── v389e — A COLUMN, NOT A BOX ─────────────────────
+                        // v402 — THE HEAD IS LAID OUT, NOT MEASURED.
                         //
-                        // This wrapper exists only to MEASURE where the canvas
-                        // begins inside the scroll (see the pin maths above), but
-                        // a Box STACKS its children: the day's mood pill and the
-                        // title written under it were drawn on top of each other
-                        // (user report: "the mood select and the journal title
-                        // the space between them is bad now, and they are
-                        // overlapping, which wasnt the case before"). A Column
-                        // measures exactly the same and lays the page's head out
-                        // the way the page means it.
-                        Column(
-                            Modifier.onSizeChanged {
-                                aboveContentHeight = it.height.toFloat() + with(density) { 6.dp.toPx() }
-                                // v389h — AND THIS IS THE NUMBER THE PIN READS.
-                                //
-                                // `canvasTop` was declared, read by the pin maths,
-                                // and never assigned: the head's height was measured
-                                // into a local that nothing outside this Column could
-                                // see, so the canvas' place in the scroll stayed 0
-                                // and every heading was judged against a coordinate
-                                // that stopped at the canvas' own top. That is the
-                                // whole of the reported misbehaviour — the bar lit
-                                // up against the wrong heading when a page had two
-                                // chapters ("chapter 1 and chapter 2 it doesnt show
-                                // both of them but only shows the last one"), it
-                                // arrived before the heading had really left the
-                                // screen, and a tap on it scrolled to the canvas'
-                                // top rather than to the heading it named ("tapping
-                                // it scrolls all the way to the top instead of going
-                                // to that chapter").
-                                canvasTop = aboveContentHeight
-                            }
-                        ) { aboveCanvas() }
+                        // This wrapper existed only to measure where the canvas
+                        // began inside the scroll, and that number was what the pin
+                        // maths was handed — an offset that grew three versions of
+                        // patches and never became right (see `pinnedSection`).
+                        // Headings now report where they are ON THE SCREEN, so
+                        // there is nothing to add and nothing to keep in step: a
+                        // Column lays the page's head out, and that is all it does
+                        // (a Box STACKED the mood pill on the title — "the mood
+                        // select and the journal title … are overlapping").
+                        Column { aboveCanvas() }
                         PersonalCanvas(
                             state = editor,
                             modifier = Modifier.fillMaxWidth(),
@@ -814,11 +845,23 @@ internal fun PersonalWritingPage(
             // goes back to the heading it names.
             if (AppPreferences.pinnedTitleViewState) PersonalPinnedLine(
                 label = pinnedSection?.value?.label.orEmpty(),
+                caption = "Heading",
                 accent = personalAccent(),
                 onClick = {
+                    // A DOOR: the bar IS the heading it names, so tapping it puts
+                    // that heading at the top edge of the writing area. The
+                    // distance is asked for in the window and applied to whichever
+                    // scroll is on screen, so the same tap works from the reading
+                    // side as from the writing one — and it can never land at the
+                    // top of the page instead of at the heading.
                     val section = pinnedSection ?: return@PersonalPinnedLine
+                    val scroll = (if (editing) pageScroll else pinHolder.scroll)
+                        ?: return@PersonalPinnedLine
+                    val delta = section.value.liveTop(scroll.value.toFloat()) - areaTop
                     scope.launch {
-                        pageScroll.animateScrollTo(section.value.top.toInt().coerceAtLeast(0))
+                        scroll.animateScrollTo(
+                            (scroll.value + delta).toInt().coerceIn(0, scroll.maxValue)
+                        )
                     }
                 },
                 modifier = Modifier
@@ -1003,8 +1046,36 @@ internal fun PersonalFloatingLayer(
  * because a journal day and a note on a topic both need it, and the two must not
  * disagree about which icon means which mode.
  */
-/** Where one of a page's TITLE lines sits in its content, and what it says. */
-internal data class PersonalSectionLine(val label: String, val top: Float, val bottom: Float)
+/**
+ * v402 — WHERE ONE OF A PAGE'S TITLE LINES SITS, AND WHAT IT SAYS.
+ *
+ * The numbers are WINDOW coordinates ([androidx.compose.ui.layout.boundsInWindow],
+ * taken by the reporting line) and [scroll] is how far the reporting side had
+ * scrolled when they were taken. The pair is what makes a report usable as the
+ * page keeps moving: a report is taken when a line is LAID OUT, which happens
+ * rarely, while the page slides under the member on every frame — so the host
+ * asks [liveTop] / [liveBottom] with the scroll it can see right now instead of
+ * trusting a stale number.
+ *
+ * [writing] says which side of the eye / pen switch reported it. Both sides hold
+ * the same block ids and different scrolls in different boxes, so one entry per
+ * side is kept and only the side being SHOWN is ever read (see
+ * `LocalPersonalTitleReport`).
+ */
+internal data class PersonalSectionLine(
+    val label: String,
+    val top: Float,
+    val bottom: Float,
+    val writing: Boolean = true,
+    val scroll: Float = 0f
+) {
+    /** Where the line's top edge is NOW, in the window. */
+    fun liveTop(scrollNow: Float): Float = top - (scrollNow - scroll)
+
+    /** Where the line's BOTTOM edge is NOW — the edge the pin is judged on, so
+     *  a heading is pinned only once its whole line has gone by. */
+    fun liveBottom(scrollNow: Float): Float = bottom - (scrollNow - scroll)
+}
 
 /**
  * v389 — THE PINNED LINE.
@@ -1022,15 +1093,38 @@ internal data class PersonalSectionLine(val label: String, val top: Float, val b
  * (user request: "make the pinned view bigger and attached to the header a
  * little, not like attached but closer"). Nothing here knows about scrolling:
  * the caller decides the label, and a blank one is simply the bar being away.
+ *
+ * v402 — IT WEARS THE PAGE'S OWN ACCENT, AND IT SAYS WHAT IT IS.
+ *
+ * The bar was a plain grey pill carrying one line of text: it named a place but
+ * never said what KIND of place it was naming (a heading of a journal reads the
+ * same as a chapter of a book), and its only colour was a small grey rail. It now
+ * reads as a small card of the page it belongs to — a filled accent medallion (the
+ * same rail-glyph idea, drawn as the app's own bookmark), the kind of place as a
+ * micro-label over the name ([caption]: "Heading" on a journal, "Chapter" on a
+ * book review), and the way back as an accent chevron. The name still swaps
+ * through a small vertical fade, so a change of heading reads as a change rather
+ * than a replacement (user request: "make the pinned view ui better and
+ * matching").
  */
 @Composable
 internal fun PersonalPinnedLine(
     label: String,
     accent: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** What kind of place a heading is on this page — "Heading" for a page's own
+     *  titles, "Chapter" for a book review's markers. */
+    caption: String = "Heading"
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
+    val surface = MaterialTheme.colorScheme.surfaceContainerHigh
+    // The medallion's fill is the accent BLENDED INTO the pill's own surface
+    // rather than the accent at a low alpha: a translucent fill on a surface that
+    // floats over the page lets the words underneath bleed through it (the root
+    // rail's own rule — see AGENTS rule 11).
+    val badge = lerp(surface, accent, 0.22f)
+    val badgeInk = lerp(MaterialTheme.colorScheme.onSurface, accent, 0.55f)
     AnimatedVisibility(
         visible = label.isNotBlank(),
         enter = fadeIn(tween(170)) + slideInVertically(tween(220)) { height -> -height / 2 },
@@ -1040,52 +1134,79 @@ internal fun PersonalPinnedLine(
         Surface(
             onClick = onClick,
             shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shadowElevation = 5.dp
+            color = surface,
+            // A hairline of the page's own accent: the bar belongs to the page it
+            // is standing on, and a shadowed grey pill could belong to any of them.
+            border = BorderStroke(1.dp, accent.copy(alpha = 0.30f)),
+            shadowElevation = 6.dp
         ) {
             Row(
                 modifier = Modifier.padding(
-                    start = 15.dp,
-                    end = 11.dp,
-                    top = 10.dp,
-                    bottom = 10.dp
+                    start = 8.dp,
+                    end = 12.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
                 ),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(9.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // THE MEDALLION — the place's own mark, at the app's floating-
+                // control size (30dp, the same as the page's own mic), so the bar
+                // reads as one of the page's objects rather than a notice.
                 Box(
                     modifier = Modifier
-                        .size(width = 4.dp, height = 16.dp)
-                        .background(accent, RoundedCornerShape(50))
-                )
-                AnimatedContent(
-                    targetState = label,
-                    transitionSpec = {
-                        (
-                            fadeIn(tween(180)) +
-                                slideInVertically(tween(200)) { height -> height / 2 }
-                            ) togetherWith (
-                            fadeOut(tween(120)) +
-                                slideOutVertically(tween(150)) { height -> -height / 2 }
-                            )
-                    },
-                    label = "personal-pinned-line"
-                ) { shown ->
+                        .size(30.dp)
+                        .background(badge, RoundedCornerShape(50)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 4.dp, height = 15.dp)
+                            .background(badgeInk, RoundedCornerShape(50))
+                    )
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
+                    modifier = Modifier.weight(1f, fill = false)
+                ) {
                     Text(
-                        shown,
-                        style = MaterialTheme.typography.labelLarge.copy(
+                        caption.uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.1.sp,
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = ink,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        color = accent,
+                        maxLines = 1
                     )
+                    AnimatedContent(
+                        targetState = label,
+                        transitionSpec = {
+                            (
+                                fadeIn(tween(180)) +
+                                    slideInVertically(tween(200)) { height -> height / 2 }
+                                ) togetherWith (
+                                fadeOut(tween(120)) +
+                                    slideOutVertically(tween(150)) { height -> -height / 2 }
+                                )
+                        },
+                        label = "personal-pinned-line"
+                    ) { shown ->
+                        Text(
+                            shown,
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = ink,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
                 CurioIcon(
                     CurioIcons.KeyboardArrowUp,
                     "Back to this heading",
-                    tint = ink.copy(alpha = 0.4f),
-                    size = 15.dp
+                    tint = accent,
+                    size = 17.dp
                 )
             }
         }

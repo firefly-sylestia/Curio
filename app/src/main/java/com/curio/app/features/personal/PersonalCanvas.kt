@@ -5,6 +5,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -744,10 +747,70 @@ internal data class PersonalRemovedRow(val block: PersonalBlock, val index: Int)
  */
 internal val LocalPersonalTapToEdit = compositionLocalOf<(() -> Unit)?> { null }
 
+/**
+ * v402 — WHERE A TITLE LINE SAYS IT IS.
+ *
+ * A page's headings report themselves here so the page can hold one at the top
+ * once it has scrolled by (see `PersonalPinnedLine`). The contract is narrow and
+ * it is the ONE thing every bug in this feature came from getting wrong:
+ *
+ * 1. **The numbers are WINDOW coordinates** ([LayoutCoordinates.boundsInWindow],
+ *    the same space `Modifier.onGloballyPositioned`'s `positionInRoot` speaks).
+ *    The first version reported `boundsInParent()` — the line's place inside its
+ *    own little wrapper box — so EVERY heading on the page reported a top of
+ *    zero and the bar pinned whichever entry the map happened to iterate last
+ *    ("sometimes something random will show", "it shows when the title isnt
+ *    scrolled away yet", "it doesnt show all titles"). Never report a position
+ *    relative to something that is not the window.
+ * 2. **`scroll` is the scroll the line was placed at.** A report is taken when
+ *    the line is laid out — rarely — and the page moves between reports, so the
+ *    host shifts the stored numbers by how far the page has travelled since
+ *    ([PersonalSectionLine.liveTop]). The report is right whether or not the
+ *    platform re-fires a layout callback on every scroll frame.
+ * 3. **A blank `label` means THIS ID IS NOT A PLACE ANYMORE** — the title flag
+ *    was taken off the line, or the line itself is gone. The host removes it, so
+ *    a pin can never name a heading that no longer exists ("sometimes something
+ *    random will show even when i deselect the title or remove it").
+ * 4. **`writing` says which side of the eye / pen switch is reporting.** Both
+ *    sides can be composed at once for the length of the cross-fade, and they
+ *    hold different scrolls in different boxes: the host keeps one entry per side
+ *    and reads only the side it is showing, so a swap can never leave the bar
+ *    judging the outgoing page's numbers.
+ */
 internal val LocalPersonalTitleReport =
     staticCompositionLocalOf<
-        ((id: String, label: String, top: Float, bottom: Float) -> Unit)?
+        (
+            id: String,
+            label: String,
+            top: Float,
+            bottom: Float,
+            writing: Boolean,
+            scroll: Float
+        ) -> Unit
         > { null }
+
+/**
+/**
+ * v402 — THE SCROLL THAT HOLDS A READ VIEW'S TITLES.
+ *
+ * The writing side's scroll belongs to the page ([PersonalWritingPage]), but a
+ * reading side is the CALLER's lambda and owns its own — so the pinned bar could
+ * not move a reader back to a heading it was naming, and its "has it gone by?"
+ * was judged against the writing page's scroll while the reader was looking at
+ * the reading page's (user report: "it sometimes wont take me to where the title
+ * is instead fully to the top").
+ *
+ * A read view DROPS its scroll in here ([PersonalPinScrollHolder.scroll]) instead
+ * of being asked for it: the page provides the box, every read view writes into
+ * it, and the bar reads whichever scroll is on screen. A read context that never
+ * writes one still gets a correct pin — it simply cannot be tapped.
+ */
+internal class PersonalPinScrollHolder {
+    var scroll: ScrollState? = null
+}
+
+internal val LocalPersonalPinScrollHolder =
+    staticCompositionLocalOf<PersonalPinScrollHolder?> { null }
 
 /**
  * The canvas' brain: the block list, each block's text + style mask, and the
@@ -2585,7 +2648,14 @@ internal fun PersonalCanvas(
      * still reading the heading of (user report: "it shows that title at the
      * same position even though the title isnt scrolled awasy yet").
      */
-    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
+    onTitlePosition: ((
+        id: String,
+        label: String,
+        top: Float,
+        bottom: Float,
+        writing: Boolean,
+        scroll: Float
+    ) -> Unit)? = null
 ) {
     // v389d — THE DEFERRED PASTE. A pasted paragraph is accepted as TEXT inside
     // the keyboard's own edit batch and cut into the page's lines one frame
@@ -3417,7 +3487,14 @@ private fun PersonalTextBlock(
     quoteJoinAbove: Boolean = false,
     quoteJoinBelow: Boolean = false,
     /** See [PersonalCanvas.onTitlePosition]. */
-    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null,
+    onTitlePosition: ((
+        id: String,
+        label: String,
+        top: Float,
+        bottom: Float,
+        writing: Boolean,
+        scroll: Float
+    ) -> Unit)? = null,
     /**
      * v398 — WHERE AN ATTACHMENT INSIDE THIS PARAGRAPH GOES WHEN IT IS TAPPED.
      *
@@ -3452,6 +3529,21 @@ private fun PersonalTextBlock(
     // A line that IS a title (or a small note) is set by the BLOCK, so a
     // heading really is bigger writing and not just a bolder word.
     val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+    // v402 — A LINE THAT STOPS BEING A TITLE STOPS BEING A PLACE.
+    //
+    // Taking the title flag off a line (or deleting the line) used to leave its
+    // entry in the page's map of headings for ever, so the pinned bar could go
+    // on naming a heading that was no longer there (user report: "sometimes
+    // something random will show even when i deselect the title or remove it").
+    // A blank label means "not a place anymore" — see LocalPersonalTitleReport.
+    if (onTitlePosition != null) {
+        // Keyed on the ID as well as the flag: a line that leaves the page (or
+        // stops being a title) clears its OWN entry, and never the one a
+        // neighbour has since reported.
+        DisposableEffect(isTitle, id) {
+            onDispose { onTitlePosition?.invoke(id, "", 0f, 0f, true, 0f) }
+        }
+    }
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
     // v393 — a row with no words on the list page still draws its box: the row's
@@ -3668,8 +3760,13 @@ private fun PersonalTextBlock(
                 // the chapter can follow the writing (see onTitlePosition).
                 if (isTitle && onTitlePosition != null) {
                     Modifier.onGloballyPositioned { coordinates ->
-                        val bounds = coordinates.boundsInParent()
-                        onTitlePosition(id, text, bounds.top, bounds.bottom)
+                        val bounds = coordinates.boundsInWindow()
+                        // The scroll sent here is 0 on purpose: the WRITING
+                        // side's scroll belongs to the page, and the page's own
+                        // reporter reads it (see LocalPersonalTitleReport). Only
+                        // a read view, whose scroll nobody else can see, sends
+                        // one across.
+                        onTitlePosition(id, text, bounds.top, bounds.bottom, true, 0f)
                     }
                 } else Modifier
             )
@@ -4471,10 +4568,22 @@ internal fun PersonalDocView(
      */
     rowSize: TextUnit = TextUnit.Unspecified,
     /** See [PersonalCanvas.onTitlePosition] — the read side of the same page. */
-    onTitlePosition: ((id: String, label: String, top: Float, bottom: Float) -> Unit)? = null
+    onTitlePosition: ((
+        id: String,
+        label: String,
+        top: Float,
+        bottom: Float,
+        writing: Boolean,
+        scroll: Float
+    ) -> Unit)? = null
 ) {
     // The page's own reporter, or the host's — see [LocalPersonalTitleReport].
     val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
+    // A read view's scroll, offered through the local so a pinned heading can be
+    // tapped from the READING side too. Read HERE (a composition local cannot be
+    // asked for inside a callback), and the STATE is what travels — so the
+    // callback still sees the live value when it runs.
+    val pinHolder = LocalPersonalPinScrollHolder.current
     val quoteRule = personalQuoteRule()
     val quoteWash = personalQuoteWash()
     val quoteInk = personalQuoteColor().copy(alpha = 0.92f)
@@ -4581,6 +4690,16 @@ internal fun PersonalDocView(
             val mask = runsToMask(text.length, block.runs)
             val isQuote = personalBlockIsQuote(text, mask)
             val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+            // v402 — A LINE THAT STOPS BEING A TITLE STOPS BEING A PLACE (see
+            // LocalPersonalTitleReport). Taking the flag off a line — or losing
+            // the line itself — clears its entry, so the pinned bar can never go
+            // on naming a heading that is not there. The side is FALSE: this is
+            // the reading half of the page.
+            if (titleReport != null) {
+                DisposableEffect(isTitle, block.id) {
+                    onDispose { titleReport?.invoke(block.id, "", 0f, 0f, false, 0f) }
+                }
+            }
             val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
             val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
             // v393/v393e — the read view's half of the same rule: a row with no
@@ -4684,8 +4803,15 @@ internal fun PersonalDocView(
                     .then(
                         if (isTitle && titleReport != null) {
                             Modifier.onGloballyPositioned { coordinates ->
-                                val bounds = coordinates.boundsInParent()
-                                titleReport(block.id, text, bounds.top, bounds.bottom)
+                                val bounds = coordinates.boundsInWindow()
+                                titleReport(
+                                    block.id,
+                                    text,
+                                    bounds.top,
+                                    bounds.bottom,
+                                    false,
+                                    pinHolder?.scroll?.value?.toFloat() ?: 0f
+                                )
                             }
                         } else Modifier
                     )

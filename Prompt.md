@@ -2,54 +2,61 @@
 
 ## The ask
 
-1. **The caption's own tools and a date — the full feature.** A print's caption
-   stops being a string under a picture and becomes the LABEL the print wears:
-   its own face, its own size, and a date.
+1. **The caption's own tools and a date — the full feature** (done, pushed as
+   `c0ac876c`).
 2. **"fix this"** — the CI failure pasted with the request
-   (`PersonalTodoRow.kt:438:33 @Composable invocations can only happen from the
-   context of a @Composable function`).
+   (`PersonalTodoRow.kt:438`), already fixed by `8ef16daf` (the run pasted was
+   `6d293e1b`'s, before that fix).
+3. **The pinned-title audit** — the bar appears when the heading is still on
+   screen, names a random heading, goes missing, names a heading that was
+   removed, and taps land at the top of the page instead of at the heading; the
+   member also wants its view reimagined and matching.
 
-## The member's answers (asked before writing, per the root rail)
+## The pinned title: root causes found
 
-| Question | Answer |
-| --- | --- |
-| How should the date live in a caption? | **Its own line**, always formatted live (never words inside the caption) |
-| Where does the date's order live? | **Both** — an app-wide preference AND a per-caption override |
-| Which faces may a caption wear? | A print's own typography, plus new ones complimenting the polaroid style |
-| What does the dock show while a caption has the caret? | **Face + date + size**, and the date tool is always on |
+- **The reports were in the wrong coordinate space.** Both reporters used
+  `boundsInParent()` — the place inside each line's own small wrapper — so every
+  heading on every page reported a top of ~0 and a bottom of its line height. The
+  host then added a `canvasTop` that never matched and compared against a scroll.
+  Everything the member saw follows from that: a heading "gone by" before it had
+  gone, the wrong heading chosen (`maxByOrNull` over equal numbers = whichever the
+  map happened to iterate last), the bar missing, and a tap that ran `top` (≈0)
+  into `animateScrollTo` — the top of the page.
+- **A heading never stopped being one.** Removing the title flag (or the line)
+  left its entry in the map for ever, so the bar could keep naming it.
+- **Both sides shared one map.** The reading half and the writing half hold the
+  same block ids in different boxes with different scrolls, and the reading side
+  was judged against the WRITING page's scroll while the reader was looking at
+  the reading page's.
+- **The tap could not reach the reading side's scroll**, which is the caller's
+  own `rememberScrollState()` inside the read view.
 
-## What shipped
+## What shipped (v402)
 
-- `PersonalDoc.kt` — `PersonalBlock` gains `captionDateMillis` / `captionFace` /
-  `captionSize` / `captionOrder` (codec keys `cdt` / `cfc` / `csz` / `cor`, each
-  omitted at its default, plus a `JsonObject.long` reader). A date is a DATE, not
-  text, so the order stays re-writable.
-- `PersonalCaptionLabel.kt` (new) — `PersonalCaptionFace` (7 bundled faces, `""`
-  = the print's own), `PersonalCaptionLabelSize` (small / standard / large as a
-  multiplier on the frame's own size), `PersonalCaptionDateOrder` (day / month /
-  year first) and `PersonalCaptionDates` (the app-wide order in snapshot state,
-  persisted to `curio_personal_writing`), with the formatter and the today /
-  yesterday stamps.
-- `PersonalCanvas.kt` — the editor state's caption accessors + `captionFocusedId`;
-  `PersonalPhotoBlock` draws the label (face, size, the date on its own line) and
-  reports its focus, wired at all three call sites; the read view draws the same
-  label from the same formatter; `PersonalToolDock` crossfades to the new
-  `PersonalCaptionTools` (date · face · size · back to the writing tools) while a
-  caption has the caret.
-- The CI failure was already fixed by `8ef16daf` (the paper is read in the
-  composition, not inside the `drawBehind` lambda) — the run pasted with this
-  request was `6d293e1b`'s, before that fix.
+- The report contract is now documented as four rules on
+  `LocalPersonalTitleReport`: **window coordinates**, **the scroll it was taken
+  at**, **blank label = not a place anymore**, **`writing` = which side**.
+- Both reporters use `boundsInWindow()` and send `writing`; a line that stops
+  being a title (or leaves the page) clears its own entry from a
+  `DisposableEffect(isTitle, id)`.
+- `PersonalSectionLine` carries `writing` + `scroll` with `liveTop` / `liveBottom`.
+- `PersonalPage` and `BookReviewScreen` judge the pin in window space against the
+  writing area's own `boundsInWindow().top`, keep one entry per side, and read
+  only the side being shown; the tap moves the scroll that is on screen by
+  `liveTop - areaTop`, clamped to the scroll's range.
+- `LocalPersonalPinScrollHolder`: a read view drops its own `ScrollState` in
+  (`JournalEditorScreen`, `TodoScreen`, `TopicNoteScreen`), so the bar can take a
+  reader back to a heading it is naming.
+- `PersonalPinnedLine` redrawn: an accent medallion, a micro-label naming the kind
+  of place (`caption` — "Heading" / "Chapter"), its name, an accent chevron, and a
+  hairline of the page's accent. The medallion's fill is a blend, not a
+  translucent accent (root rail rule 11).
 
-## Open questions for the member
+## Open questions for the member (from the caption work)
 
-1. **"The date is always on"** — read here as *the date tool is always in the
-   dock*. The alternative reading is *every new caption is stamped with today by
-   itself*; say the word and it is a one-line change.
-2. **The separator** — the request said `dd:mm:yyyy`; the labels write
-   `14/03/2026` because a colon reads as a clock time. Easy to switch.
-3. **The faces** — the seven offered are the app's own bundled ones. If a tenth
-   face should exist just for labels, that is a font file plus one enum entry.
-
-## Still queued (from the same request, not yet written)
-
-- Nothing from this request — it is complete pending the three answers above.
+1. **"The date is always on"** — read as *the date tool is always in the dock*.
+   The other reading is *every new caption is stamped with today by itself*.
+2. **The separator** — the request said `dd:mm:yyyy`; labels write `14/03/2026`
+   because a colon reads as a clock time. Easy to switch.
+3. **The faces** — the seven offered are the app's own bundled ones; a face made
+   just for labels is a font file plus one enum entry.
