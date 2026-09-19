@@ -999,8 +999,33 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * canvas' long-standing rule that an ARMED tool never crosses the break.
      * Set from [PersonalWritingPage]'s `checklistFirst`, so only the to-do page
      * turns it on.
+     *
+     * v398 — AND SETTING IT TURNS ITS OWN TOOL ON. The page opens with the box
+     * armed, so the first row is a box waiting to be written (which is what a
+     * to-do page is for) and the dock's box button reads as switched on. From
+     * there the ARM is the list's own switch: turning the box off — on the row,
+     * or in the dock — takes the arm with it, and the next Enter then writes
+     * prose instead of growing another box (user report: "when i deselect it …
+     * it still makes the next line in enter automatic reselect").
      */
     var keepsChecklistRows: Boolean = false
+        set(value) {
+            field = value
+            if (value) armed = armed or FLAG_CHECKBOX
+        }
+
+    /**
+     * v398 — THE ROWS WHOSE LIST THE WRITER ENDED (see [onFieldChange]). A row
+     * remembered here wears no box while it is blank, and the row after it is
+     * prose: taking the words out of a to-do row is how the member said "this
+     * list is done", not how they said "give me another empty box".
+     */
+    private val listEnded = mutableSetOf<String>()
+
+    /** Whether a blank row of a to-do page is still a box waiting to be written
+     *  — the renderer's half of the same rule (see [listEnded] and the arm). */
+    fun checklistRowWaits(id: String): Boolean =
+        id !in listEnded && armed and FLAG_CHECKBOX != 0
 
     /**
      * v389 — THE ROW THE WRITER JUST SWIPED AWAY.
@@ -1299,9 +1324,21 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // blank wear it whatever the page's memory of the arm was.
             if (keepsChecklistRows) {
                 if (newText.isBlank()) {
-                    armed = armed or FLAG_CHECKBOX
-                    armedOff = armedOff and FLAG_CHECKBOX.inv()
-                } else if (old.text.isBlank() &&
+                    // v398 — THE LIST ENDS WHERE ITS WORDS WERE TAKEN OUT. A row
+                    // that HAD words and now has none is a row the writer emptied,
+                    // and their own rule is that emptying it ends the list there:
+                    // the row is remembered (no box, and Enter under it writes
+                    // prose) instead of the box being armed back over it. A row
+                    // that was ALREADY empty is the row Enter just made, which is
+                    // a box waiting to be written — so it keeps the arm.
+                    if (old.text.isNotBlank()) {
+                        listEnded.add(id)
+                        armed = armed and FLAG_CHECKBOX.inv()
+                    } else if (id !in listEnded) {
+                        armed = armed or FLAG_CHECKBOX
+                        armedOff = armedOff and FLAG_CHECKBOX.inv()
+                    }
+                } else if (id !in listEnded && old.text.isBlank() &&
                     // …unless the member asked for something else on that row:
                     // a title or a bullet armed on a blank line is what those
                     // tools MEAN, and the box must not step on it.
@@ -3299,8 +3336,14 @@ private fun PersonalTextBlock(
     // v393e — BLANK, not only perfectly empty: a leftover space is not a task
     // either, and the box used to vanish the moment a word was deleted down to
     // one (the same report, on the row that still had a character in it).
+    // v398 — AND A BLANK ROW IS ONLY A BOX WHILE THE TOOL IS ON. The box on a row
+    // with WORDS is the row's own (v393e); the box on a row with none is the
+    // writer being ABOUT to write a task, so it follows the arm: turning the to-do
+    // tool off (or emptying the row) ends the list, and the next line is prose
+    // rather than another box (user report: "when i deselect it … it still makes
+    // the next line in enter automatic reselect").
     val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX) ||
-        (text.isBlank() && state.keepsChecklistRows)
+        (text.isBlank() && state.keepsChecklistRows && state.checklistRowWaits(id))
     val lineHeight = if (isTitle) 34.sp else if (isSmall) 22.sp else rowBody.sp
     // The tick the writer actually made is on the BLOCK now, not in this row's
     // widget state, so a reload cannot lose it.
