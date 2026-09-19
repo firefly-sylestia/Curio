@@ -5773,8 +5773,11 @@ private fun EpisodeNotesSheet(
   if (episodes.isNotEmpty()) {
   episodes = SeriesEpisodeFetcher.enrich(topic.name, episodes)
   } else if (fetchConsent) {
-  // v389f — the open lane's own source. Anime reads Jikan (MyAnimeList's own
-  // data, keyless) and only falls back to the show search; a film lane asks the
+  // v389f — the open lane's own source. v398 — AND THE ANIME LANE'S OWN SOURCE
+  // IS NOW THE SERIES ONE: AnimeEpisodeFetcher reads TVMaze first, exactly like
+  // this sheet's series variant, with Jikan behind it for what TVMaze does not
+  // carry (the member's own answer: "its look up is also so fast, can u make the
+  // anime use the same api as the first same as series"). A film lane asks the
   // source that can say whether the title is a film or a show at all, and gets
   // an empty list when it is a film, which is the signal that closes this sheet
   // entirely (see the reveal's routing).
@@ -6686,7 +6689,8 @@ private fun FilmPosterCard(
 
 /**
  * ANIME section — poster card with anime details. Mirrors [SeriesInfoSection]
- * for TV shows. The poster is fetched from Jikan/iTunes on demand.
+ * for TV shows. The poster is fetched on demand: TVMaze (the series lane's own
+ * resolver), then Jikan, then iTunes (v398).
  */
 @Composable
 private fun AnimeInfoSection(
@@ -6701,9 +6705,12 @@ private fun AnimeInfoSection(
     // v389f — THE EPISODE PREVIEW, which is what made this card a series card. The
     // member asked for the anime card to be "similar to" the series one, and the
     // series card's whole character is the chip row of its episodes under the
-    // poster. Jikan supplies them, keyless, once per topic; the fetch is skipped
-    // with the series toggle off, and the row simply does not appear when there
-    // is nothing to list.
+    // poster. v398 — the SAME SOURCE the series card reads: AnimeEpisodeFetcher
+    // asks TVMaze first and Jikan after it, so the chip row carries the airdate,
+    // the runtime, the rating and the still the series rows carry, and it lands
+    // in one request instead of Jikan's paged sweep. The fetch is skipped with
+    // the series toggle off, and the row simply does not appear when there is
+    // nothing to list.
     val seriesConsent = AppPreferences.seriesFetchEnabledState
     var previewEpisodes by remember(topic.name) {
         mutableStateOf(topic.episodes.orEmpty())

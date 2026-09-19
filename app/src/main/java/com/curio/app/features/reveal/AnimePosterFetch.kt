@@ -13,16 +13,23 @@ import org.json.JSONObject
  * and [AlbumArtFetch] for music.
  *
  * Anime in the catalog carry an AUTHORED `imageUrl` field (currently empty
- * for most entries); this resolver fills the gap with two keyless providers:
+ * for most entries); this resolver fills the gap with keyless providers:
  *
- *  1. **Jikan** — `api.jikan.moe/v4/anime?q=…`. Free, no API key, returns
- *     MAL poster art (`images.jpg.large_image_url` / `images.jpg.image_url`).
- *     Primary because it is purpose-built for anime.
+ *  1. **TVMaze** — through [SeriesPosterFetch], the very resolver the series
+ *     lane uses. v398, the member's own answer ("can u make the anime use the
+ *     same api as the first same as series" — TVMaze, like series): the anime
+ *     lane looks up the way the series lane looks up, and Jikan holds up what
+ *     TVMaze has never listed (OVAs, specials, one-cour titles it indexes as
+ *     something else).
  *
- *  2. **iTunes Search API** — `itunes.apple.com/search?term=…&media=tvShow&entity=tvSeason`.
+ *  2. **Jikan** — `api.jikan.moe/v4/anime?q=…`. Free, no API key, and
+ *     MyAnimeList's own art (`images.jpg.large_image_url`). The specialist for
+ *     a title TVMaze misses, and the fallback rather than the first ask.
+ *
+ *  3. **iTunes Search API** — `itunes.apple.com/search?term=…&media=tvShow&entity=tvSeason`.
  *     The same keyless endpoint the album and series fetchers use; some
- *     anime are listed as TV shows on iTunes. Runs only when Jikan finds no
- *     image.
+ *     anime are listed as TV shows on iTunes. Runs only when nothing else
+ *     finds an image.
  *
  * Results are memoized per title in-process so reopening never re-queries;
  * Coil's disk cache holds the poster bytes.
@@ -35,7 +42,7 @@ object AnimePosterFetch {
     /** Tiny in-process memo: anime title → poster URL ("" = miss). */
     private val cache = ConcurrentHashMap<String, String>()
 
-    /** The number of resolvable poster providers (0 = Jikan, 1 = iTunes). */
+    /** The number of resolvable poster providers (0 = TVMaze → Jikan, 1 = iTunes). */
     const val PROVIDER_COUNT = 2
 
     /**
@@ -51,18 +58,20 @@ object AnimePosterFetch {
             val key = "$title|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
-            // v389f — the keyless pair first (Jikan is MyAnimeList's own data and
-            // is the specialist here), with TMDB behind it when the key is set and
-            // both keyless providers came up empty. The TMDB call sits AFTER the
-            // `runCatching`, not inside it: that lambda is not suspend, so a
-            // suspend call in there would not compile.
-            val viaKeyless = runCatching {
-                when (provider) {
-                    1 -> itunesPoster(title)
-                    else -> jikanPoster(title)
-                }
+            // v398 — THE SERIES LANE'S OWN RESOLVER FIRST, then the specialist,
+            // then TMDB when a key is set and nothing keyless answered (see this
+            // file's header). [SeriesPosterFetch] is a SUSPEND call, so it sits
+            // OUTSIDE the `runCatching` — that lambda is not suspend — and the two
+            // provider branches keep their meaning: 0 is the keyless cascade, 1 is
+            // iTunes on its own.
+            val viaShow = if (provider == 1) null else SeriesPosterFetch.resolvePosterUrl(title, 0)
+            // The specialist next, then the store — the same two the lane asked
+            // before v398, kept in the same order behind the new first ask.
+            val viaSpecialist = viaShow ?: runCatching {
+                if (provider == 1) null else jikanPoster(title)
             }.getOrNull()
-            val resolved = viaKeyless ?: TmdbFetch.posterUrl(title)
+            val viaStore = viaSpecialist ?: runCatching { itunesPoster(title) }.getOrNull()
+            val resolved = viaStore ?: TmdbFetch.posterUrl(title)
 
             cache[key] = resolved.orEmpty()
             resolved

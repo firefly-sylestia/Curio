@@ -10,24 +10,29 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /**
- * An ANIME's episode list, from Jikan (MyAnimeList's public API) — keyless and
- * free, the same source that already answers this lane's poster and synopsis.
+ * An ANIME's episode list — TVMaze first, exactly like the series sheet, with
+ * Jikan (MyAnimeList's public API, keyless and free) holding up what TVMaze
+ * does not carry.
  *
  * v389f. The member's ask was that the anime sheet be "as series": a series
  * sheet is a poster, a progress rail and a real episode list you can tick off,
- * and the anime lane had only the poster and the synopsis. TVMaze — what the
- * series sheet reads — simply does not index anime as anime; it matches a few
- * of the famous ones as TV shows and nothing else, which is why the anime lane
- * needed its own fetcher rather than another call to the one that exists.
+ * and the anime lane had only the poster and the synopsis.
+ *
+ * v398 — AND THE SAME SOURCE THE SERIES SHEET READS. The member's own answer
+ * ("its look up is also so fast, can u make the anime use the same api as the
+ * first same as series" — TVMaze, like series): the order is TVMaze, then
+ * Jikan. What the order buys is [SeriesEpisodeFetcher]'s own per-episode data —
+ * the air date, the runtime, the rating and the episode's STILL — none of which
+ * Jikan states, and which is the whole reason a series sheet read richer than
+ * an anime one. It is also one request instead of a paged sweep with a 429
+ * back-off, which is the speed the member noticed.
  *
  * What Jikan states per episode: its number (`mal_id`), its title, its air date
  * and its community score. It states no synopsis and no still per episode —
  * those fields come back empty rather than invented, and the episode rows show
- * what there is.
- *
- * Rate limits are real (3 requests/second, 60/minute), so the answer is
- * memoised per title and a 429 is retried once before giving up, exactly as
- * [AnimePosterFetch] already does for its own calls.
+ * what there is. Rate limits are real (3 requests/second, 60/minute), so the
+ * answer is memoised per title and a 429 is retried once before giving up,
+ * exactly as [AnimePosterFetch] already does for its own calls.
  */
 object AnimeEpisodeFetcher {
 
@@ -48,6 +53,16 @@ object AnimeEpisodeFetcher {
         val title = clean(animeName)
         if (title.isBlank()) return@withContext emptyList()
         cache[title]?.let { return@withContext it }
+
+        // v398 — THE SERIES SHEET'S OWN SOURCE FIRST (see this file's header):
+        // one request, and the per-episode details Jikan has never had. An empty
+        // answer is not cached as the lane's answer — the Jikan sweep below is
+        // the fallback, and only ITS result is what this title is remembered by.
+        val fromShow = SeriesEpisodeFetcher.fetchAll(title)
+        if (fromShow.isNotEmpty()) {
+            cache[title] = fromShow
+            return@withContext fromShow
+        }
 
         val id = lookupId(title)
         if (id <= 0) {
