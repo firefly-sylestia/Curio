@@ -170,6 +170,21 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // The page the member last read, in the file's own terms (0 when the book
     // is not a PDF — no pretending a reflowable text has pages).
     val lastReadPage = lastPageOf(lastPosition, isPdfDocument)
+    // v409 — A HAND-SET PAGE IS THE BOOK ROW'S OWN MARK (see
+    // [PersonalBookEntity.currentPage]), and THE MOST RECENT ANSWER WINS: the
+    // reader stamps its position row on every turn, this page stamps the book
+    // row on a hand move, and the card shows whichever of the two was written
+    // last. That is what lets a hand move stick in EITHER direction — a plain
+    // "furthest wins" rule would snap a move backwards straight back to the
+    // reader's page and the stepper would keep looking broken — while reading
+    // on simply takes the card back over.
+    val handPage = book?.currentPage ?: 0
+    val progressPage = when {
+        handPage <= 0 -> lastReadPage
+        lastReadPage <= 0 -> handPage
+        (book?.updatedAtMillis ?: 0L) >= lastPosition.updatedAtMillis -> handPage
+        else -> lastReadPage
+    }
     // THE APP'S OWN CATALOG. A book added from Curio's own lane carries its
     // topic id, so its chapter rows can wear the book's REAL chapter names, page
     // ranges and summaries instead of "Chapter 7" — the catalog is the reason
@@ -607,32 +622,26 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         finished = current.isFinished,
                         // v408 — THE FILE'S OWN MEASURES.
                         pageCount = filePageCount,
-                        lastPage = lastReadPage,
+                        lastPage = progressPage,
                         chapterNames = chapters.map { it.title },
-                        // A hand move of the page: recorded on the ROW, never
-                        // on the reader's position row — the reader keeps its
-                        // own place (see ProgressCard's note on the two
-                        // clocks). A hand-set page that lands inside a later
-                        // chapter's range moves the chapter with it when the
-                        // file's outline knows the ranges.
+                        // v409 — A HAND MOVE OF THE PAGE LANDS ON THE BOOK ROW.
+                        // It used to be written as a whole-row save that set the
+                        // page COUNT and the chapter but never the page itself,
+                        // so the number snapped straight back to the reader's
+                        // position and the stepper looked broken (member: "i am
+                        // not able to change the pages update from there").
+                        // Now: the book's own page mark (one column), plus the
+                        // chapter the page falls in when the file's outline
+                        // knows its ranges — so the two steppers agree.
                         onPage = if (filePageCount > 0) { page ->
                             scope.launch {
                                 withContext(Dispatchers.IO) {
                                     runCatching {
-                                        PersonalRepositoryHolder.repo.saveBook(
-                                            current.copy(
-                                                pageCount = filePageCount,
-                                                // A hand-set page that lands in a
-                                                // later chapter MOVES the chapter
-                                                // with it when the file's outline
-                                                // knows the ranges — otherwise the
-                                                // two steppers disagree.
-                                                currentChapter = chapterForPage(
-                                                    page, chapters
-                                                ) ?: current.currentChapter,
-                                                updatedAtMillis = System.currentTimeMillis()
-                                            )
-                                        )
+                                        PersonalRepositoryHolder.repo.setPage(bookId, page)
+                                        val movedTo = chapterForPage(page, chapters)
+                                        if (movedTo != null && movedTo != book?.currentChapter) {
+                                            PersonalRepositoryHolder.repo.setProgress(bookId, movedTo)
+                                        }
                                     }
                                 }
                             }
@@ -708,6 +717,15 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                     val review = notes.firstOrNull { it.chapterIndex == chapter }
                     ChapterCard(
                         chapter = chapter,
+                        // v409 — where this chapter sits in the reading run, so
+                        // the list reads as progress instead of as forty
+                        // identical rows (a finished book closes all of them).
+                        state = when {
+                            current.isFinished || chapter < current.currentChapter ->
+                                ChapterReadState.DONE
+                            chapter == current.currentChapter -> ChapterReadState.HERE
+                            else -> ChapterReadState.AHEAD
+                        },
                         // The catalog's own words for this chapter, when the book came
                         // from Curio's lane: a name, and the pages it spans.
                         catalogTitle = chapters.getOrNull(chapter - 1)?.title.orEmpty(),
@@ -995,22 +1013,41 @@ private fun ProgressCard(
      *  count pages against (the page row then stays hidden). */
     onPage: ((Int) -> Unit)? = null
 ) {
-    val ink = MaterialTheme.colorScheme.onSurface
-    val accent = personalAccent()
-    Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(Modifier.padding(15.dp)) {
+        val ink = MaterialTheme.colorScheme.onSurface
+        val accent = personalAccent()
+        // ── THE ONE MEASURE THE CARD IS ABOUT ──────────────────────────────
+        // The honest fraction of the book: its own PAGES when there is a file
+        // to count (a PDF), else the chapter run. Finished is full, always.
+        val fraction = when {
+            finished -> 1f
+            pageCount > 0 && lastPage > 0 ->
+                (lastPage.toFloat() / pageCount.toFloat()).coerceIn(0f, 1f)
+            total > 0 -> (current.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+            else -> 0f
+        }
+        val percent = (fraction * 100f).toInt()
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+        Column(Modifier.padding(16.dp)) {
             // ── THE HEADLINE: WHERE I AM, IN THE FILE'S OWN WORDS ──
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    // PAGES lead when the file has them (a PDF's page is the
-                    // most honest "where I am" there is); the chapter name is
-                    // the PROMINENT line when the file carries an outline
-                    // ("Chapter 4 · The Count of Monte Cristo"), because a
-                    // chapter is what a reader says when asked where they are.
+                    Text(
+                        "READING PROGRESS",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 1.1.sp
+                        ),
+                        color = personalAccentInk().copy(alpha = 0.8f)
+                    )
+                    Spacer(Modifier.height(5.dp))
+                    // The chapter name is the PROMINENT line when the file
+                    // carries an outline ("The Count of Monte Cristo"),
+                    // because a chapter is what a reader says when asked where
+                    // they are; the page number is the precise answer beneath.
                     val chapterLabel = when {
                         finished -> "Finished"
                         current <= 0 -> "Not started"
@@ -1021,17 +1058,21 @@ private fun ProgressCard(
                     }
                     Text(
                         chapterLabel,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontFamily = FrauncesFontFamily,
+                            fontWeight = FontWeight.SemiBold
+                        ),
                         color = ink,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         when {
-                            finished -> "Read again anytime"
-                            pageCount > 0 && lastPage > 0 ->
-                                "Page $lastPage of $pageCount \u00b7 chapter $current of $total"
-                            total > 0 -> "$total chapters"
+                            finished -> "Every chapter closed"
+                            pageCount > 0 && lastPage > 0 -> "Page $lastPage of $pageCount"
+                            pageCount > 0 -> "Not opened yet"
+                            total > 0 -> "Chapter $current of $total"
                             else -> "Set how long the book is"
                         },
                         style = MaterialTheme.typography.labelSmall,
@@ -1046,9 +1087,9 @@ private fun ProgressCard(
                     ) {
                         Text(
                             "Reading again",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = ink.copy(alpha = 0.75f),
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = ink.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp)
                         )
                     }
                 } else {
@@ -1061,55 +1102,47 @@ private fun ProgressCard(
                             "Mark finished",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = personalAccentInk(),
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp)
                         )
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
-            // ── THE PAGE BAR — the file measured end to end. ──
-            // Only when the book has a file to count: a 1px-tall full-width
-            // bar with the page number ON it, so "how far into this book am
-            // I" is answered by looking, not by arithmetic.
-            if (pageCount > 0) {
-                val pageFraction = if (pageCount > 0 && lastPage > 0) {
-                    (lastPage.toFloat() / pageCount.toFloat()).coerceIn(0f, 1f)
-                } else 0f
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(ink.copy(alpha = 0.10f))
-                ) {
+            Spacer(Modifier.height(14.dp))
+            // ── THE GAUGE — how far in, in one look. ──
+            // The file's own pages when it has pages to count (a PDF), else
+            // the chapter run, with the same fraction said once as a percent.
+            // It replaces the two separate strips the card used to show (a
+            // page bar AND a chapter tick row), which each answered "how far"
+            // in their own units and had to be read twice.
+            if (pageCount > 0 || total > 0) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(pageFraction)
-                            .height(6.dp)
+                            .weight(1f)
+                            .height(9.dp)
                             .clip(RoundedCornerShape(50))
-                            .background(accent)
-                    )
-                }
-                Spacer(Modifier.height(4.dp))
-                Row {
+                            .background(ink.copy(alpha = 0.09f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fraction)
+                                .height(9.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(accent)
+                        )
+                    }
+                    Spacer(Modifier.width(11.dp))
                     Text(
-                        if (lastPage > 0) "Page $lastPage" else "Not opened yet",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        "$percent%",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = personalAccentInk()
                     )
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        "$pageCount pages",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ink.copy(alpha = 0.55f)
-                    )
                 }
-                Spacer(Modifier.height(12.dp))
             }
             // One tick per chapter, so the number is a PLACE and not a figure:
             // you can see the run you are in and how much is left at a glance.
             if (total in 1..MAX_TICKS) {
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(3.dp),
@@ -1133,50 +1166,108 @@ private fun ProgressCard(
                         )
                     }
                 }
-            }
-            Spacer(Modifier.height(14.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "I'm on",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ink.copy(alpha = 0.7f),
-                    modifier = Modifier.weight(1f)
-                )
-                ChapterStepper(
-                    count = current,
-                    onChange = { onChapter(it.coerceAtMost(if (total > 0) total else 999)) },
-                    accent = accent,
-                    ink = ink
-                )
-            }
-            if (onPage != null && pageCount > 0) {
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(7.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Page",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = ink.copy(alpha = 0.7f),
-                        modifier = Modifier.weight(1f)
+                        if (finished || current > 0) "Chapter $current of $total"
+                        else "$total chapters",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ink.copy(alpha = 0.55f)
                     )
-                    ChapterStepper(
-                        count = lastPage,
-                        onChange = { onPage(it.coerceIn(0, pageCount)) },
-                        accent = accent,
-                        ink = ink
-                    )
+                    if (pageCount > 0) {
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "$pageCount pages",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = ink.copy(alpha = 0.55f)
+                        )
+                    }
                 }
             }
-            Spacer(Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "The book has",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ink.copy(alpha = 0.7f),
-                    modifier = Modifier.weight(1f)
+            Spacer(Modifier.height(14.dp))
+            // ── THE CONTROLS — say where you are, or how long the book is. ──
+            // A hand move writes the BOOK ROW (currentChapter / currentPage)
+            // and leaves the reader's own memory alone, so the reader still
+            // opens where it was left and a move here can never yank the place
+            // they are really reading at (see this card's note on the two
+            // clocks). Hidden while finished: a finished book has read all of
+            // it, and "Reading again" is what un-closes the chapters.
+            if (!finished) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(ink.copy(alpha = 0.07f))
                 )
-                ChapterStepper(count = total, onChange = onTotal, accent = accent, ink = ink)
+                Spacer(Modifier.height(3.dp))
+                ProgressStepperRow(
+                    label = "I'm on chapter",
+                    value = if (total > 0) current.coerceAtMost(total) else current,
+                    detail = if (current > 0) "" else "not started",
+                    accent = accent,
+                    ink = ink,
+                    onChange = { onChapter(it.coerceAtMost(if (total > 0) total else 999)) }
+                )
+                if (onPage != null && pageCount > 0) {
+                    ProgressStepperRow(
+                        label = "Page",
+                        value = lastPage,
+                        detail = "of $pageCount",
+                        accent = accent,
+                        ink = ink,
+                        onChange = { onPage(it.coerceIn(0, pageCount)) }
+                    )
+                }
+                ProgressStepperRow(
+                    label = "The book has",
+                    value = total,
+                    detail = "chapters",
+                    accent = accent,
+                    ink = ink,
+                    onChange = onTotal
+                )
             }
         }
+    }
+}
+
+/**
+ * v409 — ONE PROGRESS CONTROL: what it sets, what it is now, and the stepper.
+ *
+ * The three rows are the same row because they are the same act — "I am on
+ * chapter 12", "I am on page 240", "this book has 40 chapters" — and because
+ * the value only means something beside its own name (the old card's bare
+ * "I'm on   12" left the member guessing which of the three numbers they were
+ * looking at).
+ */
+@Composable
+private fun ProgressStepperRow(
+    label: String,
+    value: Int,
+    detail: String,
+    accent: Color,
+    ink: Color,
+    onChange: (Int) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                color = ink.copy(alpha = 0.82f)
+            )
+            if (detail.isNotBlank()) {
+                Text(
+                    detail,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.5f)
+                )
+            }
+        }
+        ChapterStepper(count = value, onChange = onChange, accent = accent, ink = ink)
     }
 }
 
@@ -1277,12 +1368,29 @@ private fun BlurbField(
 }
 
 /**
+ * v409 — WHERE A CHAPTER SITS IN THE READING RUN.
+ *
+ * A chapter row is the same row whether the book is at chapter two or done
+ * with, so without a state the member has to count rows to find their place.
+ * These three say it in the row itself (the number's weight, the side rule and
+ * the subtitle), which is also what makes "Mark finished" visibly close every
+ * chapter at once — and "Reading again" visibly open them back up.
+ */
+private enum class ChapterReadState(val label: String) {
+    DONE("read"),
+    HERE("reading now"),
+    AHEAD("to read")
+}
+
+/**
  * One chapter: the review you wrote (read), or the invitation to write when
  * there is nothing yet. Tapping the row opens the writing IN PLACE.
  */
 @Composable
 private fun ChapterCard(
     chapter: Int,
+    /** v409 — where this chapter sits in the reading run. */
+    state: ChapterReadState,
     /** The catalog's name for this chapter (blank for a book added by hand). */
     catalogTitle: String = "",
     /** The pages this chapter spans, e.g. "pp. 121–154". */
@@ -1293,6 +1401,8 @@ private fun ChapterCard(
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     val accent = personalAccent()
+    val done = state == ChapterReadState.DONE
+    val here = state == ChapterReadState.HERE
     // `doc` re-parses the stored body on every access — read it once per
     // version of the review, never per recomposition.
     val words = remember(review?.id, review?.updatedAtMillis) { review?.doc?.wordsLabel().orEmpty() }
@@ -1307,7 +1417,7 @@ private fun ChapterCard(
                 // same language the page's quotes use, so "there is writing
                 // here" is visible before a single word is read.
                 .drawBehind {
-                    if (review == null) return@drawBehind
+                    if (review == null && !here) return@drawBehind
                     val barWidth = 3.dp.toPx()
                     drawRoundRect(
                         color = accent,
@@ -1320,15 +1430,22 @@ private fun ChapterCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     shape = CircleShape,
-                    color = if (review != null) accent.copy(alpha = 0.24f)
-                    else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = when {
+                        here -> accent
+                        done -> accent.copy(alpha = 0.22f)
+                        else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
                     modifier = Modifier.size(30.dp)
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             chapter.toString(),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (review != null) personalAccentInk() else ink.copy(alpha = 0.62f)
+                            color = when {
+                                here -> personalAccentInk()
+                                done -> personalAccentInk()
+                                else -> ink.copy(alpha = 0.62f)
+                            }
                         )
                     }
                 }
@@ -1351,14 +1468,17 @@ private fun ChapterCard(
                     Text(
                         text = listOfNotNull(
                             catalogPages.takeIf { it.isNotBlank() },
+                            state.label,
                             when {
-                                review == null -> "Nothing written yet"
-                                review.preview.isBlank() -> "Open to keep writing"
+                                review == null -> null
+                                review.preview.isBlank() -> "open to keep writing"
                                 else -> words
                             }
                         ).joinToString(" · "),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ink.copy(alpha = 0.5f),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = if (here) FontWeight.SemiBold else FontWeight.Normal
+                        ),
+                        color = if (here) personalAccentInk() else ink.copy(alpha = 0.5f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

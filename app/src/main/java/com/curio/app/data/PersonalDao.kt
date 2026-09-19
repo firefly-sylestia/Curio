@@ -156,6 +156,14 @@ interface PersonalDao {
     @Query("UPDATE personal_books SET currentChapter = :chapter, updatedAtMillis = :now WHERE id = :id")
     suspend fun setProgress(id: String, chapter: Int, now: Long)
 
+    /**
+     * v409 — the book row's own PAGE mark (see [PersonalBookEntity.currentPage]).
+     * Column-scoped on purpose: the reader's position row is the reader's, and
+     * a hand move of the page must never rewrite it.
+     */
+    @Query("UPDATE personal_books SET currentPage = :page, updatedAtMillis = :now WHERE id = :id")
+    suspend fun setPage(id: String, page: Int, now: Long)
+
     // `now` is a SEPARATE parameter on purpose: when the book is being marked
     // un-finished, `at` is NULL, and `updatedAtMillis = NULL` on a NOT NULL
     // column makes SQLite reject the whole update — which is why the Mark
@@ -383,7 +391,9 @@ class PersonalRepository(private val dao: PersonalDao) {
             )
         )
         val book = dao.book(bookId)
-        if (book != null && chapter > book.currentChapter) {
+        // A finished book's chapters are all closed (see [setFinished]); writing
+        // about chapter 4 afterwards must not re-open the list behind it.
+        if (book != null && !book.isFinished && chapter > book.currentChapter) {
             setProgress(bookId, chapter)
         }
         return saved
@@ -400,10 +410,55 @@ class PersonalRepository(private val dao: PersonalDao) {
     }
 
     suspend fun setProgress(bookId: String, chapter: Int) =
-        dao.setProgress(bookId, chapter, System.currentTimeMillis())
+        dao.setProgress(bookId, chapter.coerceAtLeast(0), System.currentTimeMillis())
 
-    suspend fun setFinished(bookId: String, finished: Boolean) =
-        dao.setFinished(bookId, if (finished) System.currentTimeMillis() else null, System.currentTimeMillis())
+    /** v409 — the book row's own page mark (a hand move on the book page). */
+    suspend fun setPage(bookId: String, page: Int) =
+        dao.setPage(bookId, page.coerceAtLeast(0), System.currentTimeMillis())
+
+    /**
+     * v409 — FINISHING CLOSES THE CHAPTERS, UN-FINISHING PUTS THEM BACK.
+     *
+     * A book that is finished has read all of it, so its chapter list closes
+     * with it (the member asked for exactly that: "when marked finished they
+     * should be automatically finished too"). The place they had really
+     * reached is stashed first, so "Reading again" restores the previous marks
+     * instead of dropping the reader back to the beginning ("when unmark
+     * restoring the previous marked").
+     *
+     * Read-modify-write rather than a column-scoped UPDATE because both moves
+     * touch four columns and have to agree with each other.
+     */
+    suspend fun setFinished(bookId: String, finished: Boolean) {
+        val book = dao.book(bookId) ?: return
+        val now = System.currentTimeMillis()
+        if (finished) {
+            dao.upsertBook(
+                book.copy(
+                    finishedAtMillis = now,
+                    chapterBeforeFinish = book.currentChapter,
+                    pageBeforeFinish = book.currentPage,
+                    currentChapter = if (book.totalChapters > 0) book.totalChapters
+                    else book.currentChapter,
+                    currentPage = if (book.pageCount > 0) book.pageCount else book.currentPage,
+                    updatedAtMillis = now
+                )
+            )
+        } else {
+            dao.upsertBook(
+                book.copy(
+                    finishedAtMillis = null,
+                    currentChapter = if (book.chapterBeforeFinish >= 0) book.chapterBeforeFinish
+                    else book.currentChapter,
+                    currentPage = if (book.pageBeforeFinish >= 0) book.pageBeforeFinish
+                    else book.currentPage,
+                    chapterBeforeFinish = -1,
+                    pageBeforeFinish = -1,
+                    updatedAtMillis = now
+                )
+            )
+        }
+    }
 
     suspend fun setBlurb(bookId: String, blurb: String) =
         dao.setBlurb(bookId, blurb, System.currentTimeMillis())

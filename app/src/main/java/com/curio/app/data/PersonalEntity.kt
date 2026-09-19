@@ -106,6 +106,32 @@ data class PersonalBookEntity(
     val pageCount: Int = 0,
     /** How far they are (1-based; 0 = not started). */
     val currentChapter: Int = 0,
+    /**
+     * v409 — WHERE THEY SAY THEY ARE, BY PAGE.
+     *
+     * The reader keeps its OWN memory (a `reader_marks` POSITION row, one per
+     * book + file, rewritten on every read) and this page never writes it. But
+     * a member who taps the PAGE stepper on the book page is telling the book
+     * where they are — and before this column that tap had nowhere to land: the
+     * number snapped straight back to the reader's page and the control looked
+     * broken (member report: "i am not able to change the pages update from
+     * there"). This is the book ROW's own page mark, so a hand move persists
+     * without touching the reader; the card shows whichever of the two is
+     * further along, so progress can never walk backwards.
+     */
+    val currentPage: Int = 0,
+    /**
+     * v409 — WHERE THEY WERE WHEN THEY MARKED IT FINISHED (-1 = never
+     * finished since this column existed).
+     *
+     * Marking a book finished closes its chapters too (all of them done, per
+     * member request), so the place they had actually reached is written here
+     * first and put back verbatim by "Reading again" — unmarking restores the
+     * previous marks instead of dropping them at zero.
+     */
+    val chapterBeforeFinish: Int = -1,
+    /** The page twin of [chapterBeforeFinish] (-1 = none kept). */
+    val pageBeforeFinish: Int = -1,
     /** The book's own note — why they picked it up. */
     val blurb: String = "",
     val createdAtMillis: Long = 0L,
