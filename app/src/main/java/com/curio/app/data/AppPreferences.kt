@@ -1043,6 +1043,19 @@ object AppPreferences {
     fun setTopicCatalogSyncVersion(context: Context, version: Int) =
         prefs(context).edit().putInt(KEY_LAST_CATALOG_SYNC_VERSION, version).apply()
 
+    // ── What's New seen version (v403) ────────────────────────────────
+    // The versionCode whose What's New page has already been shown. The page
+    // opens itself ONCE per version — on a fresh install and on an update
+    // alike — so nobody sees the same highlights twice, and the Settings row
+    // stays the way back to it at any time.
+    private const val KEY_WHATS_NEW_SEEN_VERSION = "whats_new_seen_version"
+
+    fun getWhatsNewSeenVersion(context: Context): Int =
+        prefs(context).getInt(KEY_WHATS_NEW_SEEN_VERSION, 0)
+
+    fun setWhatsNewSeenVersion(context: Context, version: Int) =
+        prefs(context).edit().putInt(KEY_WHATS_NEW_SEEN_VERSION, version).apply()
+
     // ── Topic catalog install stamp (v3xx) ────────────────────────────
     // The package's lastUpdateTime the catalog was last synced under.
     // versionCode only changes on RELEASES, so a data edit shipped in a

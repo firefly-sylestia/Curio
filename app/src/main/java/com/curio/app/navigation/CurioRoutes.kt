@@ -347,6 +347,10 @@ object CurioRoutes {
     const val SUPPORT = "support"
     // v112 — dedicated Updates sub-page (own UI, replaced the Support card).
     const val UPDATES = "updates"
+    // v403 — What's New: the release's own highlights, each with a "take me
+    // there" door. Opens ITSELF once per version (install and update alike);
+    // the Settings row stays the way back to it at any time.
+    const val WHATS_NEW = "whats-new"
     // v26 — recycle bin for soft-deleted captures (Settings entry).
     const val RECYCLE_BIN = "recycle-bin"
     const val DATABASE = "database"

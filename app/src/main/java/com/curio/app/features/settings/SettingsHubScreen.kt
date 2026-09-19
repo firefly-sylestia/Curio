@@ -1488,6 +1488,10 @@ private val SettingsSections = listOf(
                     // v112 — the dedicated Updates sub-page (its own UI,
                     // replaces the old update card inside Support).
                     SettingsRowEntry(CurioIcons.Download, "Updates", "Your build, release notes & update checker", CurioRoutes.UPDATES),
+                    // v403 — What's New: this version's highlights, each with a
+                    // door straight to the thing it describes. It also opens
+                    // itself once per version; this row is the way back.
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "What's New", "The highlights of this version, and where to find them", CurioRoutes.WHATS_NEW),
                     // v24 — merged into the shared Support & diagnostics page
                     // (same screen Profile's "Support & diagnostics" opens).
                     SettingsRowEntry(CurioIcons.Info, "Support & diagnostics", "Reports, help & app details", CurioRoutes.SUPPORT)
@@ -1556,6 +1560,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     // account, so they are stated on the Online mode page next to it.
     // ── Updates (v112 — dedicated sub-page) ─────────────────────────
     SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.UPDATES),
+    SettingsDeepRow(CurioIcons.AutoAwesome, "What's New", "The highlights of this version", CurioRoutes.WHATS_NEW),
     SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.UPDATES),
     SettingsDeepRow(CurioIcons.Notifications, "Update checker", "Opt-in background update checks", CurioRoutes.UPDATES),
     // ── About ────────────────────────────────────────────────────────

@@ -8715,6 +8715,29 @@ only ever catches taps that mean "not in any of these".
 - **Small text-only changes** (dead comments, punctuation, rewordings) must NOT be committed on their own — they ride along with the next real change. EXCEPTIONS: edits to AGENTS.md files / Prompt.md / master.md / user-visible strings / changelogs — those ARE committed.
 - **Before removing a user-visible feature/UI element**, ASK the user for confirmation (root AGENTS.md durable preference).
 
+## What's New page (v403)
+
+- **`features/updates/WhatsNewScreen.kt` owns the release highlights.**
+  `WHATS_NEW_RELEASES` is a hand-authored list of `WhatsNewRelease`
+  (`versionCode` + `versionName` + `headline` + `WhatsNewItem`s), newest
+  first, and each item carries a glyph, a title, one line of detail and an
+  optional `route` rendered as a **Take me there** pill. The copy ships in
+  the APK (offline first, no network, no markdown parsing) and a release
+  with no authored entry falls back to a plain "on their way" card, so the
+  route never opens an empty page.
+- **It opens ITSELF once per version.** `CurioNavHost`'s `LaunchedEffect`
+  compares `AppPreferences.getWhatsNewSeenVersion` (key
+  `whats_new_seen_version`) with `BuildConfig.VERSION_CODE` and pushes
+  `CurioRoutes.WHATS_NEW` after a short settle delay, but only from a quiet
+  start (splash / onboarding / home), so a deep link or a first-run flow is
+  never interrupted. The screen stamps the seen version on OPEN, so backing
+  out still counts as seen; **Settings ▸ Updates** keeps a `What's New` row
+  as the way back at any time. `WHATS_NEW` is a member of
+  `settingsFamilyRoutePrefixes` (shared chrome + crossfade).
+- **When a release ships user-visible work, add its entry here too** (same
+  commit as the changelog bullet), and keep the copy free of em dashes:
+  the highlights read as plain sentences.
+
 ## Child DOX Index
 
 - [`CURIO_DATA_PLAN.md`](CURIO_DATA_PLAN.md) — Canonical **data layer** spec. Owns: category taxonomy expansion (6 → 10), `CurioTopic` + `ExploreAction` schema, JSON-on-disk canonical format, Room DB seed flow, image strategy (URL + Coil, no bundling), authoring pipeline (LLM-draft + human-review + smoke test), per-category rollout cadence (one category per PR, Music first). Read this BEFORE adding any topic data, category entry, or capture-format prompt.

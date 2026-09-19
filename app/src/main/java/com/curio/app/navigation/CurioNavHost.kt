@@ -94,7 +94,10 @@ import kotlinx.coroutines.launch
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
 import com.curio.app.features.support.SupportScreen
+import com.curio.app.BuildConfig
 import com.curio.app.features.updates.UpdatesScreen
+import com.curio.app.features.updates.WhatsNewScreen
+import com.curio.app.features.updates.whatsNewRelease
 import com.curio.app.features.crash.CurioCrashScreen
 import com.curio.app.features.lightbox.LightboxScreen
 import com.curio.app.features.managecategories.ManageCategoriesScreen
@@ -255,7 +258,8 @@ private val settingsFamilyRoutePrefixes: Set<String> = setOf(
     CurioRoutes.PET_DESIGNER,
     CurioRoutes.SUPPORT,
     CurioRoutes.RECYCLE_BIN,
-    CurioRoutes.UPDATES
+    CurioRoutes.UPDATES,
+    CurioRoutes.WHATS_NEW
 )
 
 /** True when the entry is inside the settings family (shared chrome). */
@@ -688,6 +692,30 @@ fun CurioNavHost(
                 .widthIn(max = CurioContentMaxWidth)
         ) {
             val sharedTransitionScope = this
+        // ── What's New opens ITSELF once per version (v403) ────────────────
+        // A fresh install and an update alike: the highlights for the version
+        // this build IS are shown one time, then the page waits under
+        // Settings ▸ Updates. The stamp is written by the page itself, so
+        // backing out of it still counts as seen.
+        LaunchedEffect(Unit) {
+            val thisVersion = BuildConfig.VERSION_CODE
+            if (AppPreferences.getWhatsNewSeenVersion(context) == thisVersion) return@LaunchedEffect
+            if (whatsNewRelease(thisVersion) == null) return@LaunchedEffect
+            // Let the start destination settle, so the page reads as opening
+            // over the app rather than racing the splash hand-off.
+            delay(700)
+            // Only from the app's own opening pages: a deep link, a first-run
+            // onboarding or a notification that already moved somewhere is
+            // left where the user asked to be.
+            val current = navController.currentBackStackEntry?.destination?.route
+            val quietStart = current == null ||
+                current == CurioRoutes.SPLASH ||
+                current == CurioRoutes.ONBOARDING ||
+                current == CurioRoutes.HOME
+            if (quietStart) {
+                navController.navigate(CurioRoutes.WHATS_NEW) { launchSingleTop = true }
+            }
+        }
         NavHost(
             navController = navController,
             startDestination = CurioRoutes.SPLASH,
@@ -1323,6 +1351,12 @@ composable(CurioRoutes.COMMUNITY) {
             composable(CurioRoutes.UPDATES) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     UpdatesScreen(navController = navController)
+                }
+            }
+            // v403 — What's New: the release's own highlights, one door each.
+            composable(CurioRoutes.WHATS_NEW) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    WhatsNewScreen(navController = navController)
                 }
             }
             composable(CurioRoutes.DATABASE) {
