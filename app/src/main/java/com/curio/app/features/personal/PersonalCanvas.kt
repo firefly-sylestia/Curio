@@ -1879,8 +1879,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 if (i < at) oldMask.getOrElse(i) { 0 } else oldMask.getOrElse(i + 1) { 0 }
             }
             blocks[hostId] = host.copy(text = text, inlineRefs = refs)
-            selections[hostId] = selections[hostId]?.let { range ->
-                TextRange(range.min.coerceAtMost(text.length), range.max.coerceAtMost(text.length))
+            // A caret inside the sentence has one character fewer to count, so it is
+            // pulled back to the paragraph's own length (never removed — the writer
+            // is still in this line).
+            selections[hostId]?.let { range ->
+                selections[hostId] = TextRange(
+                    range.min.coerceAtMost(text.length),
+                    range.max.coerceAtMost(text.length)
+                )
             }
         }
     }
@@ -4481,18 +4487,24 @@ internal fun PersonalDocView(
                             } else {
                                 52.dp
                             }
+                            // The room is asked for in TEXT units — a Placeholder's
+                            // width and height are sp, because that is what a text
+                            // flow measures with — while the composable itself is
+                            // drawn at the same size in dp, so the frame and the room
+                            // reserved for it agree to the pixel.
+                            val drawnWidth = with(inlineDensity) { width.toDp() }
                             put(
                                 "$PERSONAL_INLINE_MARK$n",
                                 InlineTextContent(
                                     Placeholder(
-                                        width = with(inlineDensity) { width.toDp() },
-                                        height = height,
+                                        width = with(inlineDensity) { width.toSp() },
+                                        height = with(inlineDensity) { height.toSp() },
                                         placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                                     )
                                 ) {
                                     PersonalInlineAttachment(
                                         block = attachment,
-                                        width = with(inlineDensity) { width.toDp() },
+                                        width = drawnWidth,
                                         height = height,
                                         ink = ink,
                                         accent = ink,
