@@ -255,6 +255,7 @@ fun ModerationScreen(navController: NavController) {
     val canReplies = myRow?.allows("replies") == true
     val canBans = myRow?.allows("bans") == true
     val canAdmins = myRow?.allows("admins") == true
+    val canForms = myRow?.allows("forms") == true
 
     fun applyReportAction(action: String, report: CommunityReport, reason: String?, note: String?) {
         val active = token ?: return
@@ -344,6 +345,13 @@ fun ModerationScreen(navController: NavController) {
                                 label = if (live > 0) "Bans · $live" else "Bans",
                                 selected = tab == 2,
                                 onClick = { tab = 2 }
+                            )
+                        }
+                        if (canForms) {
+                            ModerationTabPill(
+                                label = "Forms",
+                                selected = tab == 3,
+                                onClick = { tab = 3 }
                             )
                         }
                         if (tab == 0) {
@@ -449,8 +457,16 @@ fun ModerationScreen(navController: NavController) {
                                 }
                             }
                         )
+                    }                } else if (tab == 3) {
+                    // ── The forms (v403) ───────────────────────────────────
+                    // The team's own questionnaire: write it, test it as often
+                    // as they like, publish it, then read the answers counted.
+                    item(key = "forms") {
+                        val active = token
+                        if (active != null) ModerationFormsTab(accessToken = active)
                     }
                 } else {
+
                     // ── The ban list ────────────────────────────────────────
                     // Every member carrying a ban stamp: the live ones first,
                     // then the bans that lapsed or were lifted, because "who is
@@ -630,7 +646,7 @@ fun ModerationScreen(navController: NavController) {
             existing = existing,
             busy = busy,
             onDismiss = { if (!busy) permissionTarget = null },
-            onSave = { posts, replies, reports_, admins, bans ->
+            onSave = { posts, replies, reports_, admins, bans, forms ->
                 val active = token ?: return@ModerationPermissionsDialog
                 busy = true
                 scope.launch {
@@ -642,7 +658,8 @@ fun ModerationScreen(navController: NavController) {
                         canDeleteReplies = replies,
                         canHandleReports = reports_,
                         canManageAdmins = admins,
-                        canBanMembers = bans
+                        canBanMembers = bans,
+                        canManageForms = forms
                     ).fold(
                         onSuccess = {
                             notice = "${person.label} ${if (existing == null) "joined the team" else "was updated"}."
@@ -1208,20 +1225,28 @@ private fun ModerationAddAdminCard(
     }
 }
 
-/** The five switches, and what each one means. */
+/** The six switches, and what each one means. */
 @Composable
 private fun ModerationPermissionsDialog(
     person: CurioPerson,
     existing: CommunityAdminRow?,
     busy: Boolean,
     onDismiss: () -> Unit,
-    onSave: (posts: Boolean, replies: Boolean, reports: Boolean, admins: Boolean, bans: Boolean) -> Unit
+    onSave: (
+        posts: Boolean,
+        replies: Boolean,
+        reports: Boolean,
+        admins: Boolean,
+        bans: Boolean,
+        forms: Boolean
+    ) -> Unit
 ) {
     var posts by remember { mutableStateOf(existing?.canDeletePosts ?: true) }
     var replies by remember { mutableStateOf(existing?.canDeleteReplies ?: true) }
     var reports_ by remember { mutableStateOf(existing?.canHandleReports ?: true) }
     var admins by remember { mutableStateOf(existing?.canManageAdmins ?: false) }
     var bans by remember { mutableStateOf(existing?.canBanMembers ?: false) }
+    var forms by remember { mutableStateOf(existing?.canManageForms ?: false) }
 
     androidx.compose.material3.AlertDialog(
         onDismissRequest = { if (!busy) onDismiss() },
@@ -1276,11 +1301,19 @@ private fun ModerationPermissionsDialog(
                     enabled = !busy,
                     onCheckedChange = { bans = it }
                 )
+                SettingsOptionSwitchRow(
+                    icon = CurioIcons.AutoAwesome,
+                    title = "Feedback forms",
+                    subtitle = "Write, test and publish a form, and read its answers",
+                    checked = forms,
+                    enabled = !busy,
+                    onCheckedChange = { forms = it }
+                )
             }
         },
         confirmButton = {
             androidx.compose.material3.TextButton(
-                onClick = { onSave(posts, replies, reports_, admins, bans) },
+                onClick = { onSave(posts, replies, reports_, admins, bans, forms) },
                 enabled = !busy,
                 colors = com.curio.app.ui.theme.curioDialogActionButtonColors()
             ) {

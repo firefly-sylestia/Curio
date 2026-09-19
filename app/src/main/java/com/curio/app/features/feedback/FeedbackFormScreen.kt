@@ -29,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -303,9 +302,21 @@ fun FeedbackFormCard(
  * question, and the two ways out the member asked for (Not now, Never show).
  */
 @Composable
-fun FeedbackFormSheet(form: FeedbackForm, onDismiss: () -> Unit) {
+fun FeedbackFormSheet(
+    form: FeedbackForm,
+    onDismiss: () -> Unit,
+    /**
+     * True when the TEAM is walking the form (a test): the words change to say
+     * so, nothing lands in this device's answered/never flags, and the answers
+     * only ever reach a test form's tally.
+     */
+    testing: Boolean = false,
+    /** How the team's walkthrough sends. Null = the member's own path. */
+    onSubmit: ((List<FeedbackAnswer>, (Boolean, String?) -> Unit) -> Unit)? = null,
+    /** How the team's walkthrough dismisses. Null = the member's own path. */
+    onSkip: ((Boolean) -> Unit)? = null
+) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val accent = curioRoseInk()
 
@@ -358,7 +369,8 @@ fun FeedbackFormSheet(form: FeedbackForm, onDismiss: () -> Unit) {
                         )
                     )
                     Text(
-                        "Anonymous · ${form.questions.size} question" +
+                        (if (testing) "A test run · " else "Anonymous · ") +
+                            "${form.questions.size} question" +
                             if (form.questions.size == 1) "" else "s",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -384,8 +396,13 @@ fun FeedbackFormSheet(form: FeedbackForm, onDismiss: () -> Unit) {
             }
 
             Text(
-                "Your answers arrive without your name, your account or your " +
-                    "device attached to them. Nobody can tell which ones were yours.",
+                if (testing) {
+                    "This is the team's own walkthrough. It is counted separately, " +
+                        "and a member never sees it."
+                } else {
+                    "Your answers arrive without your name, your account or your " +
+                        "device attached to them. Nobody can tell which ones were yours."
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -407,10 +424,12 @@ fun FeedbackFormSheet(form: FeedbackForm, onDismiss: () -> Unit) {
                         if (!ready || sending) return@Surface
                         sending = true
                         val ordered = form.questions.mapNotNull { picks[it.id] }
-                        FeedbackFormState.submit(context, form, ordered) { ok, message ->
+                        val done: (Boolean, String?) -> Unit = { ok, message ->
                             sending = false
                             if (ok) onDismiss() else trouble = message
                         }
+                        if (onSubmit != null) onSubmit(ordered, done)
+                        else FeedbackFormState.submit(context, form, ordered, done)
                     },
                     shape = RoundedCornerShape(50),
                     color = if (ready) accent else accent.copy(alpha = 0.35f),
@@ -418,7 +437,11 @@ fun FeedbackFormSheet(form: FeedbackForm, onDismiss: () -> Unit) {
                     else CurioColors.DeepPlum
                 ) {
                     Text(
-                        if (sending) "Sending…" else "Send my answers",
+                        when {
+                            sending -> "Sending…"
+                            testing -> "Send the test answers"
+                            else -> "Send my answers"
+                        },
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),
@@ -427,30 +450,33 @@ fun FeedbackFormSheet(form: FeedbackForm, onDismiss: () -> Unit) {
                 }
                 Spacer(Modifier.weight(1f))
                 Text(
-                    "Not now",
+                    if (testing) "Close the walkthrough" else "Not now",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .clickable {
-                            FeedbackFormState.skip(context, form, never = false)
+                            if (onSkip != null) onSkip(false)
+                            else FeedbackFormState.skip(context, form, never = false)
                             onDismiss()
                         }
                         .padding(horizontal = 12.dp, vertical = 12.dp)
                 )
             }
-            Text(
-                "Never show me another one",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .clickable {
-                        FeedbackFormState.skip(context, form, never = true)
-                        onDismiss()
-                    }
-                    .padding(horizontal = 10.dp, vertical = 8.dp)
-            )
+            if (!testing) {
+                Text(
+                    "Never show me another one",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable {
+                            FeedbackFormState.skip(context, form, never = true)
+                            onDismiss()
+                        }
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                )
+            }
         }
     }
 }
