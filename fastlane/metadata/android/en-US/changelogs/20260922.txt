@@ -1,4 +1,7 @@
 FIX:
+- Writing: a print's size is its OWN inside a row — in a pair, a three or a four, the size you pick is the size it takes (a portrait print stands taller and narrower than the one beside it), instead of every cell being forced into the same slot so the size menu changed nothing you could see.
+- Writing: a page read back is as tall as the page you wrote — the caption band under a print is drawn even with nothing written in it, so a row of prints no longer measures differently on the two sides of the eye / pen switch.
+- Writing: the landing preview follows the finger — each step was charged only the row being passed, so carrying a voice note down a page of paragraphs ran the guide a row or more ahead of the note under the thumb; a step is now half of the block in hand plus half of the row it is crossing.
 - Reading: the vertical PDF reader zooms where you pinched — a pinch magnified every page in the column at once, so growing the page above pushed it out from under the fingers; only the page you pinched is magnified now, inside its own frame, and it grows about the point you held.
 - Reading: a magnified page holds its place — the zoom is anchored at the fingers with the drag folded in, so the page no longer slides out from under them as it opens.
 - Reading: a zoomed page is panned before the column scrolls — the page takes the drag while it still has room in that direction and hands it back at its own edge, so a page turn only happens once the page has run out, on the next swipe.
@@ -20,6 +23,7 @@ FIX:
 - Social: a hat, a beret or a crown no longer swallows the face — the front hair on those rows stops above the brows.
 
 ADD:
+- Writing: the block in the air is a STACK — a carried print or voice note lifts with two sheets of paper peeking out behind it, and the landing preview is a dashed sketch of the block's own shape (the room a voice strip or a paragraph really takes) instead of a flat colour line.
 - Reading: double-tap a PDF page to zoom — in to read a line closely, out to see the page whole again, anchored on the point that was tapped, in both reading flows.
 - Writing: a run of photos lays itself out the way a page does — two side by side, three as one upright frame with the two others stacked beside it, four as a square — and the size menu gains a small portrait frame for a picture that belongs in a row rather than on a page of its own.
 - Reading: the bookmarks, the reading progress and the contents are ONE sheet on ONE page behind ONE button — the progress card first (the figure, a filled rail, the chapter or page it belongs to, "Continue reading" and "Mark my place"), then your marks, then the book's own contents, with no chips hiding two of the three. The figure follows you as you read instead of naming the place the book happened to open at.

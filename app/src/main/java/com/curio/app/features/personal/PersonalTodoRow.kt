@@ -36,7 +36,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -260,15 +264,27 @@ internal class PersonalRowDragState {
         val down = travel > 0f
         var index = fromIndex
         var spent = 0f
+        // ── v400 — HALF OF BOTH OF THEM, NOT HALF OF THE ONE IT PASSES ─────
+        //
+        // The step belongs at the moment the block in hand meets the row it is
+        // passing — its own centre reaching that row's centre — which is half of
+        // the block PLUS half of the row. Charging only the row being passed
+        // stepped early by half the carried block's own height for EVERY row it
+        // crossed, so the error accumulated down a page of paragraphs and the
+        // landing preview ended up a row or more above the thing under the thumb
+        // (user report: "the voice note drag and move is kinda off the previe
+        // guide shows way to the top when the voice note im holding is below").
+        //
+        // The gap between rows comes off `stride`, which is the carried block's
+        // own height plus that gap (see [begin]) — so a block the page does not
+        // draw as a row still costs nothing, as before.
+        val held = carriedHeight.coerceAtLeast(1f)
+        val gap = (stride - held).coerceIn(0f, 64f)
         while ((down && index < lastIndex) || (!down && travel < 0f && index > 0)) {
             val neighbour = ids.getOrElse(if (down) index + 1 else index - 1) { "" }
-            // Half of the row being PASSED is the crossing point: the carried
-            // block has to have travelled past that row's own middle before the
-            // list steps it, which is what makes the drop-line agree with the
-            // finger (a block the page does not draw as a row costs nothing).
-            val cost = heightOf(neighbour).coerceAtLeast(1f)
+            val cost = (held + gap + heightOf(neighbour).coerceAtLeast(1f)) / 2f
             val remaining = if (down) travel - spent else -travel - spent
-            if (remaining < cost / 2f) break
+            if (remaining < cost) break
             spent += cost
             index += if (down) 1 else -1
         }
@@ -404,10 +420,34 @@ internal fun PersonalMovableBlock(
     val heldSize = 1f + (heldScale - 1f) * raise
     val heldAngle = heldTilt * raise
 
+    // ── v400 — THE STACK UNDER THE ONE IN HAND ──────────────────────────
+    //
+    // What is picked up is not alone: a page of prints is picked up as a STACK,
+    // and the thing in the air says so — two sheets of paper peeking out behind
+    // it, a size bigger the further back they are, exactly what a hand shows when
+    // it lifts a pile of photographs. It is drawn BEHIND the card and inside the
+    // same layer, so it leans and rises with it (user request: "make the
+    // animation preview while holding them better with stack preview too").
+    //
     // The lifted look, the project's own rule: shadow BEFORE the fill, and an
     // OPAQUE fill (a translucent one lets the shadow bleed through).
     val lifted = if (isDragged) {
         Modifier
+            .drawBehind {
+                val shape = CornerRadius(12.dp.toPx())
+                val paper = if (isCurioDarkTheme()) Color(0xFF3A342E) else Color(0xFFEFE7DA)
+                listOf(7.dp to 0.40f, 3.5.dp to 0.72f).forEach { (behind, alpha) ->
+                    val step = behind.toPx()
+                    val room = (size.height - step).coerceAtLeast(0f)
+                    if (room <= 0f) return@forEach
+                    drawRoundRect(
+                        color = paper.copy(alpha = alpha),
+                        topLeft = Offset(step, step),
+                        size = Size((size.width - step * 2f).coerceAtLeast(0f), room),
+                        cornerRadius = shape
+                    )
+                }
+            }
             .shadow(heldLift, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(

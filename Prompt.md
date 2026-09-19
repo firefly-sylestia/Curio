@@ -88,20 +88,29 @@ use propere preview and smooth animations."
 
 Broken into the things to do (PersonalCanvas.kt, PersonalTodoRow.kt, PersonalPrintArrangement):
 
-1. **A print in a row keeps its own size.** Side by side, three-in-a-row and four-in-a-row currently
-   pin the size (a row is laid out from the run's own shape), so `Small portrait`/`Portrait` are not
-   reachable from the size menu once a print is in a row — let a print pick any size and have the row
-   re-arrange around it instead of refusing.
-2. **Three in a row collapses in the READ view.** The editor lays a 3-run out as one upright frame
-   with the other two stacked beside it; the eye then draws them collated instead. Editor and read
-   view must share the same arrangement rule (the v394 pair already does).
-3. **The caption strip stays.** Keep the wide bottom border on a print in a row — and show it in the
-   preview even when no caption has been written yet, so it can be tapped and filled.
-4. **Dates** (dd:mm:yyyy, with a switch to another order) and the print's own hand-written caption.
-5. **The dock changes with the caption.** While a caption is opened, show only the tools a caption
-   supports (its own font choices, the date) and hide the rest; put the writing tools back smoothly
-   when the canvas has the caret again.
-6. **The carry gesture's preview.** A better held-block animation with a stack preview of what is
-   landing; the voice note's drop guide currently reports a place far above the note being held (the
-   row measurement is off) — fix the accuracy and replace the flat colour line with a proper preview
-   of the block, smoothly animated.
+1. **DONE (v400)** — *A print in a row keeps its own size.* `PersonalPrintArrangement` hands every
+   cell its OWN size now: height from `personalPrintHeight(sizeOf(id))`, width from
+   `sizeOf(id).fraction` (the two fixed slot constants — pair/tall/stacked/quad — are gone). The
+   SHAPES are unchanged (two, the upright frame + two stacked, four as a square); only the slot each
+   print takes is the print's own answer. A `PAGE` print still leaves a row entirely.
+2. **DONE (v400)** — *Three in a row collapsed in the READ view.* The read view's cell drew its paper
+   band only when a caption had been written, so a cell without a caption was a line SHORTER on the
+   reading side than on the writing side and the row measured differently across the switch. The band
+   is always drawn now (`ifBlank { "\u00A0" }`, so it always takes its line's height).
+3. **DONE** — *The caption strip stays* — the same change as (2), on both sides.
+4. **PENDING — the caption's own tools and a date.** Needs a decision before it is written (see
+   below): the block model has ONE caption string, so a caption's own face, its date and the date's
+   order are new stored fields, and the dock has to swap tool sets while a caption has the caret.
+5. **DONE (v400)** — *The carry gesture's preview* — `PersonalRowDragState.advanceBy` charges a step
+   half of the block IN HAND plus half of the row being crossed (it used to charge only the row being
+   passed, so the guide accumulated an error of half the carried block per row and ran ahead of the
+   thumb). `PersonalMovableBlock` lifts with two sheets of paper peeking out behind it, and the
+   landing ghost is a dashed sketch of the carried block's own shape instead of a flat colour line.
+
+### The open question (asked, not answered yet)
+
+The caption's tools and its date are a NEW feature (a stored caption face + a date + a date order, and
+per-caption tool visibility in the dock). Per the root AGENTS rules a new measure is asked about
+before it is built, so the member was asked: whether the date is INSERTED into the caption's own words
+or kept as its own small line under it, whether the date order is a global preference or per caption,
+and whether the caption's face is one of the app's four bundled faces.

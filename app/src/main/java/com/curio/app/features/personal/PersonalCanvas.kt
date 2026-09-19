@@ -69,6 +69,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -2788,21 +2789,50 @@ internal fun PersonalCanvas(
                                 val band = rowDrag.carriedHeight.coerceIn(0f, size.height)
                                 val lead = if (rowDrag.goingDown) 0f else size.height - band
                                 if (band > 0f) {
+                                    // ── v400 — THE PREVIEW IS THE THING, NOT A BAR ──
+                                    //
+                                    // This used to be a flat wash with a solid
+                                    // rule on the landing edge, which said "about
+                                    // here" and nothing more. It is now the
+                                    // carried block's own SHAPE, sketched: a light
+                                    // fill inside a dashed outline of exactly the
+                                    // room it will take, so the page previews what
+                                    // is arriving (a waveform strip, a paragraph,
+                                    // a print) before it lands (user request:
+                                    // "instead of that color line use proper preview
+                                    // and smooth animations").
+                                    val radius = CornerRadius(10.dp.toPx())
+                                    val hairline = 1.2.dp.toPx()
                                     drawRoundRect(
-                                        color = accent.copy(alpha = 0.13f),
+                                        color = accent.copy(alpha = 0.09f),
                                         topLeft = Offset(0f, lead),
                                         size = Size(size.width, band),
-                                        cornerRadius = CornerRadius(10.dp.toPx())
+                                        cornerRadius = radius
+                                    )
+                                    drawRoundRect(
+                                        color = accent.copy(alpha = 0.5f),
+                                        topLeft = Offset(hairline, lead + hairline),
+                                        size = Size(
+                                            (size.width - hairline * 2f).coerceAtLeast(0f),
+                                            (band - hairline * 2f).coerceAtLeast(0f)
+                                        ),
+                                        cornerRadius = radius,
+                                        style = Stroke(
+                                            width = hairline,
+                                            pathEffect = PathEffect.dashPathEffect(
+                                                floatArrayOf(7.dp.toPx(), 6.dp.toPx())
+                                            )
+                                        )
                                     )
                                 }
                                 // The edge it lands on, drawn solid so the eye
                                 // finds the exact line rather than the band.
                                 val ruleY = if (rowDrag.goingDown) 0f else size.height
                                 drawLine(
-                                    color = accent,
+                                    color = accent.copy(alpha = 0.85f),
                                     start = Offset(0f, ruleY),
                                     end = Offset(size.width, ruleY),
-                                    strokeWidth = 2.dp.toPx()
+                                    strokeWidth = 1.5.dp.toPx()
                                 )
                             } else Modifier
                         )
@@ -3899,17 +3929,9 @@ private const val PRINT_ROW_LIMIT = 4
 /** The row's own gap — the pair's gap, shared by every shape. */
 private val PRINT_ROW_GAP = 8.dp
 
-/** A pair: two even halves of the measure. */
-private val PRINT_PAIR_HEIGHT = 128.dp
-
-/** A three: the upright frame, which is exactly the two stacked cells + the gap. */
-private val PRINT_TALL_HEIGHT = 232.dp
-
-/** A three: each of the two cells stacked beside the upright frame. */
-private val PRINT_STACKED_HEIGHT = 112.dp
-
-/** Four: a square's own cell. */
-private val PRINT_QUAD_HEIGHT = 124.dp
+// A row's cells have no heights of their own any more (v400): each print takes
+// ITS OWN size's height and its own size's share of the measure, so the sizes a
+// member picks in a row are sizes they can see (see [PersonalPrintArrangement]).
 
 /**
  * ONE ROW OF PRINTS, laid out by how many there are.
@@ -3928,45 +3950,68 @@ private fun PersonalPrintArrangement(
     cell: @Composable (id: String, slotHeight: Dp, modifier: Modifier) -> Unit
 ) {
     if (ids.size < 2) return
+    // ── A CELL'S SHAPE IS ITS OWN SIZE (v400) ────────────────────────────
+    //
+    // The row used to hand every cell the SAME slot (a pair's even halves, a
+    // square's four) and tell the cell to fill it, so choosing Small portrait or
+    // Portrait for a print inside a row changed nothing the member could see —
+    // the menu was there and the picture never answered it (user report: "in side
+    // by side now i cant chnge its sizes like yes page size isnt possible but i
+    // cant chnage between small portraifght etc in side by side now als same for 3
+    // together, let the flixibility to pick differnt size of that photo").
+    //
+    // A cell's HEIGHT is now its own size's height and its WIDTH is its own
+    // size's share of the measure, so a portrait print stands taller and narrower
+    // than the print beside it and the row is the row the member built. The
+    // SHAPES are unchanged (two, the upright frame with two stacked beside it,
+    // four as a square): only the slot each print takes is now the print's own
+    // answer. A PAGE print still leaves a row entirely — PAGE means the whole
+    // measure of the page, which is the one size a row cannot hold.
+    val heightOf: (String) -> Dp = { id -> personalPrintHeight(sizeOf(id)) }
+    val weightOf: (String) -> Float = { id -> sizeOf(id).fraction.coerceIn(0.3f, 1f) }
     if (ids.size == 2) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
+            horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP),
+            verticalAlignment = Alignment.Top
         ) {
             ids.forEach { id ->
-                Box(Modifier.weight(1f)) {
-                    cell(id, PRINT_PAIR_HEIGHT, Modifier.fillMaxWidth())
+                Box(Modifier.weight(weightOf(id))) {
+                    cell(id, heightOf(id), Modifier.fillMaxWidth())
                 }
             }
         }
         return
     }
     // A THREE. Whichever member asked to stand up — its own size said so —
-    // takes the tall frame; with none asking, the first print does, so the shape
-    // is the same shape either way and nothing has to be explained.
+    // takes the upright frame; with none asking, the first print does, so the
+    // shape is the same shape either way and nothing has to be explained.
     if (ids.size == 3) {
         val tall = ids.firstOrNull { PersonalPhotoSize.isUpright(sizeOf(it)) } ?: ids[0]
+        val stacked = ids.filterNot { it == tall }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP),
             verticalAlignment = Alignment.Top
         ) {
-            Box(Modifier.weight(1f)) {
-                cell(tall, PRINT_TALL_HEIGHT, Modifier.fillMaxWidth())
+            Box(Modifier.weight(weightOf(tall))) {
+                cell(tall, heightOf(tall), Modifier.fillMaxWidth())
             }
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(
+                    stacked.sumOf { weightOf(it).toDouble() }.toFloat().coerceAtLeast(0.3f)
+                ),
                 verticalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
             ) {
-                ids.filterNot { it == tall }.forEach { id ->
-                    cell(id, PRINT_STACKED_HEIGHT, Modifier.fillMaxWidth())
+                stacked.forEach { id ->
+                    cell(id, heightOf(id), Modifier.fillMaxWidth())
                 }
             }
         }
         return
     }
-    // FOUR — a square. (The row's limit is four, so nothing longer arrives; a
-    // page with more prints simply starts the next row.)
+    // FOUR — two lines of two. (The row's limit is four, so nothing longer
+    // arrives; a page with more prints simply starts the next row.)
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
@@ -3974,11 +4019,12 @@ private fun PersonalPrintArrangement(
         ids.chunked(2).forEach { line ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
+                horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP),
+                verticalAlignment = Alignment.Top
             ) {
                 line.forEach { id ->
-                    Box(Modifier.weight(1f)) {
-                        cell(id, PRINT_QUAD_HEIGHT, Modifier.fillMaxWidth())
+                    Box(Modifier.weight(weightOf(id))) {
+                        cell(id, heightOf(id), Modifier.fillMaxWidth())
                     }
                 }
                 if (line.size == 1) Spacer(Modifier.weight(1f))
@@ -4652,22 +4698,33 @@ internal fun PersonalDocView(
                 // [PersonalPrintArrangement]), otherwise its own size's.
                 height = slot ?: personalPrintHeight(printSize)
             )
-            if (block.caption.isNotBlank()) {
-                Text(
-                    block.caption,
-                    style = TextStyle(
-                        fontFamily = WritingFontFamily,
-                        fontSize = 13.sp,
-                        color = ink.copy(alpha = 0.62f)
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 5.dp, bottom = 5.dp),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            // ── v400 — THE WIDE BOTTOM BORDER, ALWAYS DRAWN ────────────────
+            //
+            // A print is the picture AND the band of paper under it that says
+            // what the picture is (see PersonalPhotoBlock, which owns the shape).
+            // The read view drew that band only when a caption had already been
+            // written — so a page read back was a SHORTER page than the one that
+            // was written, and a row of prints measured differently on the two
+            // sides of the switch (which is what made a three look collapsed in
+            // the eye) (user report: "keep the buttom strip here i write caption
+            // for them even if theres no captaion keep it in preview").
+            //
+            // The empty band carries a non-breaking space rather than nothing, so
+            // it always takes its own line's height.
+            Text(
+                block.caption.ifBlank { "\u00A0" },
+                style = TextStyle(
+                    fontFamily = WritingFontFamily,
+                    fontSize = 13.sp,
+                    color = ink.copy(alpha = 0.62f)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, bottom = 5.dp),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 
