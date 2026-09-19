@@ -8,84 +8,79 @@ from the state rather than from memory.
 
 ## 1. The request
 
-> "lets do some chnages with theme, so the backgroud glyph watermark make it very very
-> subtle by default as its distracting, and in apperance option add an option to make it
-> look like current deep look. bu tby default it will be very subtle"
+> "Also tone down the mood-board and hero-banner glyph watermarks so they match the new
+> subtle backdrop"
 
-Two clear halves, no ambiguity to ask about:
+The follow-up to the previous change (v407: the page glyph backdrop became very subtle by
+default, with Appearance → "Glyph backdrop" → Subtle / Deep). Same intent, two more
+surfaces: the mood-board collage and the torn heroes' glyph watermarks.
 
-1. The page-wide category glyph collage behind every screen becomes **very very subtle by
-   default** (it reads as distracting at full strength).
-2. **Appearance** gains the option to bring back **today's deep look**. The default stays
-   subtle.
-
-The user asked for the settings option themselves, so the "new feature — toggleable?"
-question of the root AGENTS.md was already answered by the request: it ships as a
-user-facing Appearance choice with the subtle path as the default.
+**One reading decision was made rather than asked:** the two surfaces ride the SAME
+Depth switch (Subtle by default, "Deep" restores every glyph watermark in the app at
+once) instead of getting their own independent alphas. Rationale: the member's first
+request was "very subtle by default, with the option for the current deep look", and a
+Deep that left the heroes and mood boards loud would be an inconsistent, half-set state.
+If they want the heroes independent of the backdrop, it is one line per surface.
 
 ---
 
 ## 2. What was found
 
-- **Exactly ONE component draws the page-wide glyph backdrop:**
-  `app/src/main/java/com/curio/app/ui/components/CurioWatermarkBackdrop.kt` —
-  `CurioWatermarkBackdrop(activeCat, topClearance, alphaScale)` scatters the 11 category
-  glyphs, each tinted with its own category accent, and hands each glyph an alpha from a
-  private `watermarkAlpha(active, isDark, pastel)` (dark: 0.22 active / 0.11 inactive,
-  light: 0.30 / 0.15, pastel raised a step further). `alphaScale` is per-screen tuning —
-  40+ call sites pass 0.45, Spin 0.5, Stats 0.40, the wide-window NavHost collage 0.55.
-- **Not this backdrop, deliberately left alone:** `CurioMoodBoardBackdrop` (the seeded
-  mood-board collage — board ART), the hero banners' mirrored watermark pairs
-  (`heroWatermarkSymbols`), and the capture paper's `WATERMARK` paper style.
-- **The preference pattern in `data/AppPreferences.kt`** is a private `KEY_*` const, one
-  `var …State by mutableStateOf(default) private set` seeded in `initThemeMode(context)`,
-  and an `is…Enabled` / `set…Enabled` pair — that is the shape every Appearance switch
-  already uses (e.g. `darkGlowState`), so the new option follows it exactly.
-- **The Appearance page is `AppearanceSection` in
-  `features/settings/SettingsSectionScreen.kt`**, its rows are `CompactSwitchRow` /
-  `CompactSegmentedRow` / `SettingsOptionRow` wrapped in `SettingsRowPulse(highlightKey == …)`,
-  and the hub's deep-search index (`SettingsDeepIndex` in `SettingsHubScreen.kt`) carries
-  one `SettingsDeepRow` per searchable row key.
+- **The mood board** is `CurioMoodBoardBackdrop` in the SAME file as the page backdrop
+  (`ui/components/CurioWatermarkBackdrop.kt`). Its alphas are computed at draw time:
+  `baseAlpha` (dark 0.12, light 0.16; pastel 0.18 / 0.26) × the seeded `alphaBoost`
+  (0.85–1.2).
+- **The torn-hero glyph watermarks are SEVEN identical private composables**, one per
+  screen, each documented as "one mirrored watermark glyph … the banner's readable ink at
+  a soft alpha", each ending in `tint = tint.copy(alpha = alpha)`:
+  - `HomeScreen.HomeHeroSymbol` (quest hero)
+  - `ProfileScreen.ProfileHeroSymbol`
+  - `CabinetScreen.CabinetHeroSymbol`
+  - `SettingsHubScreen.SettingsHeroSymbol`
+  - `TopicHistoryScreen.HistoryHeroSymbol`
+  - `OnboardingScreen.OnboardingHeroSymbol`
+  - `EntryDetailScreen.HeroWatermarkGlyph` (saved-entry hero)
+  Their pair tables (5 pairs each, mirrored, alpha 0.10–0.21) are per-screen and were
+  deliberately NOT edited — the multiplier goes at the glyph's one tint line, so the
+  tables keep documenting the deep values.
+- **Two more banner-side marks found on the way:** the Spin picker's filter hero carries
+  two lone watermark glyphs (`filterHeroInk` at 0.10 / 0.07), and
+  `CurioTopicCard.MiniHeroWatermark` is, in its own doc, "a scaled-down version of the
+  torn-hero watermark". Both ride the same switch.
+- **Two card-ART marks deliberately left alone:** `TopicShareCard` (an exported card
+  design) and the Spin deck ticket's single large 150dp category symbol (the ticket's own
+  art, not a banner).
+- Verified with `grep -n "biasX = 0.93f"`: exactly the seven hero tables above — no hero
+  watermark was missed.
 
 ---
 
-## 3. What was decided
+## 3. What was changed
 
-- **One multiplier, not new alphas.** `watermarkAlpha`'s current values ARE the deep look,
-  so they stay untouched and the depth is applied as a scale factor in the composable:
-  `depthScale = if (deep) 1f else GlyphBackdropSubtleScale` (0.32f), multiplied by the
-  call site's own `alphaScale`. Every one of the 40+ call sites therefore keeps its own
-  tuning and none has to know the toggle exists, and "Deep" is bit-for-bit today's look.
-- **Reactive state, not a one-shot read.** The composable reads
-  `AppPreferences.glyphBackdropDeepState` (a snapshot state seeded at startup), so flipping
-  the switch repaints every screen's collage immediately.
-- **A segmented row, not a switch.** "Subtle / Deep" shows which one is live and matches
-  the Theme / Hero rows beside it; a switch labelled "Deep" would hide the default.
+- **`ui/components/CurioWatermarkBackdrop.kt`** — new shared `@Composable
+  glyphWatermarkDepthScale()` (`1f` when Appearance → "Glyph backdrop" is Deep, else
+  `GlyphBackdropSubtleScale = 0.32f`). `CurioWatermarkBackdrop` now reads it instead of
+  inlining the pref, and `CurioMoodBoardBackdrop` multiplies its `baseAlpha` by it. One
+  function now owns "how loud is glyph decoration", and the constant + pref stay in one
+  file.
+- **The seven hero composables** — `tint = tint.copy(alpha = alpha * glyphWatermarkDepthScale())`
+  (plus its import in each file; `CurioTopicCard` needs none, same package).
+- **`SpinScreen`** — the picker hero's two banner glyphs scaled the same way.
+- **`CurioTopicCard`** — `MiniHeroGlyph` scaled the same way.
+- **`app/AGENTS.md`** — the v407 section is now "Glyph watermarks — very subtle by
+  default", naming every covered surface, the one knob, and the "never raise the base
+  alphas to compensate" rule (the old text said the mood board and heroes were NOT this
+  backdrop — stale as of this change).
+- **Changelog** — the v407 ADD bullet now names the heroes, the mood board and the card
+  headers instead of only the page backdrop.
 
----
-
-## 4. What was changed
-
-- **`data/AppPreferences.kt`** — `KEY_GLYPH_BACKDROP_DEEP` (`glyph_backdrop_deep`, default
-  OFF), `glyphBackdropDeepState` seeded in `initThemeMode`, and
-  `isGlyphBackdropDeepEnabled` / `setGlyphBackdropDeepEnabled`.
-- **`ui/components/CurioWatermarkBackdrop.kt`** — `internal const val
-  GlyphBackdropSubtleScale = 0.32f`, the `depthScale` / `glyphScale` pair in the
-  composable, and the scaled value handed to both the scattered and lower-band glyphs
-  (signatures unchanged).
-- **`features/settings/SettingsSectionScreen.kt`** — Appearance row `"Glyph backdrop"`
-  (`CurioIcons.Wallpaper`, Subtle / Deep) under Pastel colors, with the hub search key
-  `appearance-glyph-backdrop`.
-- **`features/settings/SettingsHubScreen.kt`** — the deep-search index entry for that row.
-- **`fastlane/metadata/android/en-US/changelogs/20260922.txt`** — one ADD line for the
-  subtle default and the option.
-- **`app/AGENTS.md`** — a durable "Background glyph backdrop" contract (one component, the
-  multiplier, the subtle default, and the warning not to raise `watermarkAlpha` to
-  compensate).
+Result at the default (Subtle): page backdrop ≈ 0.016–0.03 alpha, hero banners ≈
+0.03–0.07, mood board ≈ 0.04–0.06 — all whispers; Deep restores every one of them to the
+pre-v407 values exactly.
 
 ---
 
-## 5. Still open (carried over, unchanged by this request)
+## 4. Still open (carried over, unchanged by this request)
 
 - **The forms SQL has not been pasted into Supabase**, so the ban ladder, the queue's Clear,
   and publish / read / vote / skip for a form have nothing to talk to yet; the `forms`
@@ -99,11 +94,15 @@ user-facing Appearance choice with the subtle path as the default.
   is unstarted; each needs a compile to verify, and Material3 here is `1.5.0-alpha20`.
 - **The take editor's per-keystroke rebuild** was found by inspection only and never
   profiled.
-- **The subtle default is a judgement call on a number**: `GlyphBackdropSubtleScale =
-  0.32f`. It is one constant in `CurioWatermarkBackdrop.kt` if the member wants it quieter
-  or stronger after seeing it on a device.
-- **`web/` still carries its own `CurioWatermarkBackdrop`** (React mirror). Out of scope per
-  the root AGENTS.md scope rail (web/ is on hold) — it was NOT touched.
+- **The subtle factors are judgement calls on numbers**: `GlyphBackdropSubtleScale = 0.32f`
+  for everything, deliberately one knob. If the heroes should read a touch stronger than
+  the page backdrop, give the hero tint lines their own factor rather than touching
+  `watermarkAlpha`.
+- **`TopicShareCard` watermarks and the Spin deck ticket's category symbol are still at
+  their old strength** — card art, not banner decoration, so they were left alone. Ask if
+  those should quiet down too.
+- **`web/` carries its own React `CurioWatermarkBackdrop`.** Out of scope per the root
+  AGENTS.md scope rail (web/ is on hold) — NOT touched.
 
 ---
 

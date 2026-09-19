@@ -364,7 +364,10 @@ private fun BoxScope.MiniHeroGlyph(
     CurioIcon(
         name = glyph,
         contentDescription = null,
-        tint = tint.copy(alpha = alpha),
+        // v407 — the mini hero watermark is the torn heroes' language scaled
+        // down, so it rides the same Depth switch (Appearance → "Glyph
+        // backdrop").
+        tint = tint.copy(alpha = alpha * glyphWatermarkDepthScale()),
         size = size,
         modifier = Modifier
             .align(alignment)

@@ -153,6 +153,7 @@ import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.glyphWatermarkDepthScale
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -1951,10 +1952,12 @@ private fun FilterSheet(
                 ) {
                     // Watermark glyphs — a large category symbol peeking
                     // from the corner + a small twin, both in the hero ink.
+                    // v407 — the banner's glyphs ride the shared watermark
+                    // Depth switch (Appearance → "Glyph backdrop").
                     CurioIcon(
                         cat.iconGlyph,
                         null,
-                        tint = filterHeroInk.copy(alpha = 0.10f),
+                        tint = filterHeroInk.copy(alpha = 0.10f * glyphWatermarkDepthScale()),
                         size = 72.dp,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -1963,7 +1966,7 @@ private fun FilterSheet(
                     CurioIcon(
                         cat.iconGlyph,
                         null,
-                        tint = filterHeroInk.copy(alpha = 0.07f),
+                        tint = filterHeroInk.copy(alpha = 0.07f * glyphWatermarkDepthScale()),
                         size = 40.dp,
                         modifier = Modifier
                             .align(Alignment.TopStart)

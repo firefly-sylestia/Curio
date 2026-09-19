@@ -163,6 +163,7 @@ import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.glyphWatermarkDepthScale
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.ProfileAvatarImage
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -1734,7 +1735,9 @@ private fun BoxScope.HomeHeroSymbol(
     CurioIcon(
         name = glyph,
         contentDescription = null,
-        tint = tint.copy(alpha = alpha),
+        // v407 — the hero's mirrored glyph collage tones down with the page
+        // backdrop and the mood board (Appearance → "Glyph backdrop").
+        tint = tint.copy(alpha = alpha * glyphWatermarkDepthScale()),
         size = size,
         modifier = Modifier
             .align(alignment)

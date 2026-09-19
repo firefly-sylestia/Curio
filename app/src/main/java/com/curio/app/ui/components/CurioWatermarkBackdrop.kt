@@ -40,6 +40,20 @@ import kotlin.random.Random
 internal const val GlyphBackdropSubtleScale = 0.32f
 
 /**
+ * v407 — the depth multiplier shared by EVERY decorative glyph watermark: the
+ * page backdrop ([CurioWatermarkBackdrop]), the mood-board collage
+ * ([CurioMoodBoardBackdrop]) and the torn heroes' mirrored symbol pairs
+ * (Home, Profile, Cabinet, Settings, Topic History, Onboarding, the saved-entry
+ * hero). Subtle ([GlyphBackdropSubtleScale]) unless Appearance → "Glyph
+ * backdrop" is Deep. Each surface multiplies its OWN soft alphas by this, so
+ * one switch quiets the whole app's glyph decoration together and "Deep"
+ * restores every one of them exactly.
+ */
+@Composable
+fun glyphWatermarkDepthScale(): Float =
+    if (AppPreferences.glyphBackdropDeepState) 1f else GlyphBackdropSubtleScale
+
+/**
  * Decorative backdrop pinned behind screen content: all eleven category
  * glyphs scattered around the screen edges, each tinted with its own
  * category's accent — the exact color that drives that category's main-card
@@ -70,9 +84,9 @@ internal const val GlyphBackdropSubtleScale = 0.32f
  * v407 — DEPTH. Those alphas are the DEEP look and read as a busy scatter
  * behind flat content, so a page draws them at [GlyphBackdropSubtleScale] of
  * that unless Appearance → "Glyph backdrop" is set to Deep (see
- * `AppPreferences.glyphBackdropDeepState`). The per-screen [alphaScale]
- * rides on top of the depth either way, so every call site keeps its own
- * tuning without knowing about the toggle.
+ * `AppPreferences.glyphBackdropDeepState` and [glyphWatermarkDepthScale]).
+ * The per-screen [alphaScale] rides on top of the depth either way, so every
+ * call site keeps its own tuning without knowing about the toggle.
  */
 @Composable
 fun CurioWatermarkBackdrop(
@@ -93,8 +107,7 @@ fun CurioWatermarkBackdrop(
     // look, so a page draws them at a whisper by default and the Appearance
     // toggle restores them. Read from the reactive pref state, so flipping the
     // switch repaints every screen's collage on the spot.
-    val depthScale = if (AppPreferences.glyphBackdropDeepState) 1f else GlyphBackdropSubtleScale
-    val glyphScale = alphaScale * depthScale
+    val glyphScale = alphaScale * glyphWatermarkDepthScale()
     // Every glyph maps to its category accent — the same colors that open
     // the main-card gradients — so the backdrop palette always matches the
     // deck. Wildcard's glyph picks up the brand coral automatically.
@@ -321,6 +334,9 @@ fun CurioMoodBoardBackdrop(
 ) {
     val context = LocalContext.current
     val isDark = isCurioDarkThemeForContext(context)
+    // v407 — the mood board is glyph decoration too, so its base alphas ride
+    // the same Depth switch as the page backdrop and the hero collages.
+    val boardDepth = glyphWatermarkDepthScale()
     // v7.94 — accent map cached (same treatment as [CurioWatermarkBackdrop]):
     // keyed on the two real inputs (pastel mode + dark theme) so the mood
     // board stops recomputing 11 category colors on every frame while its
@@ -369,8 +385,8 @@ fun CurioMoodBoardBackdrop(
             // mode bumps both bases a step (ink twins over paler washes);
             // v7.9 — bumped again (0.22→0.26 light / 0.15→0.18 dark) so the
             // ink-tinted collage clearly reads on the tinted pastel canvas.
-            val baseAlpha = if (isDark) (if (pastelMode) 0.18f else 0.12f)
-                            else (if (pastelMode) 0.26f else 0.16f)
+            val baseAlpha = (if (isDark) (if (pastelMode) 0.18f else 0.12f)
+                             else (if (pastelMode) 0.26f else 0.16f)) * boardDepth
             val alpha = baseAlpha * p.alphaBoost
             // Anchor the icon on its CENTRE: the pattern's (xFrac, yFrac)
             // is the glyph centre, but [Modifier.offset] shifts the icon's

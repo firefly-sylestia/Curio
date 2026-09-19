@@ -74,6 +74,7 @@ import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.glyphWatermarkDepthScale
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -553,7 +554,9 @@ private fun BoxScope.HistoryHeroSymbol(
     CurioIcon(
         name = glyph,
         contentDescription = null,
-        tint = tint.copy(alpha = alpha),
+        // v407 — the hero's mirrored glyph collage tones down with the page
+        // backdrop and the mood board (Appearance → "Glyph backdrop").
+        tint = tint.copy(alpha = alpha * glyphWatermarkDepthScale()),
         size = size,
         modifier = Modifier
             .align(alignment)
