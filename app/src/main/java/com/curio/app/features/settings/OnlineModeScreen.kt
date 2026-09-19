@@ -176,9 +176,14 @@ fun OnlineModeScreen(navController: NavController) {
             item { SettingsSectionHeading("Sync") }
             item {
                 SettingsOptionCard {
+                    // v408 — the row does not repeat the page's own name. This
+                    // page IS "Online mode", so a switch also called "Online
+                    // mode" read as the page saying it twice; the row says what
+                    // the switch DOES instead (the heading above it already
+                    // says which part of the account it belongs to).
                     SettingsOptionSwitchRow(
                         icon = CurioIcons.Refresh,
-                        title = "Online mode",
+                        title = "Keep my areas in sync",
                         subtitle = if (account.signedIn) {
                             "Keeps your account and liked topics in sync. Text only — photos, audio and screenshots never leave this device."
                         } else {

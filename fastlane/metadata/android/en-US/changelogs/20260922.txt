@@ -1,3 +1,12 @@
+REMOVE:
+- Home: the drawer no longer offers Stats & insights twice — the curiosity map at the top of the drawer is the door, and the duplicate row inside the fold-out group is gone.
+- Profile: "Your lanes" is gone, and so is the Settings shortcut in the bar — the hero already says how many lanes there are, and Settings keeps the one door that says what it is. The lanes themselves are still arranged in Settings ▸ Manage categories and still browsed in the Cabinet.
+- Cabinet: the "Your books" heading on the Curiying-now shelf is a label, not a second way into My shelf.
+
+FIX:
+- Home: the drawer's rows stopped saying the same thing twice — "Quests & Levels" and "Your Curiosity" no longer both promise stats and streaks, and the curiosity group no longer claims to carry the stats it just handed to the map.
+- Settings: the Online mode page no longer names itself inside itself — the sync switch on that page says what it does instead of repeating the page's title.
+
 ADD:
 - Settings: the main page is a plain list — a heading per section and a white card of rows underneath (icon, name, one line), instead of the big 2-up design cards with doodles and oversized titles. The rail stays where it belongs: inside the sections, where switching between them is what it is for.
 - Settings: Online mode, Recycle bin, Updates and Support read as full-width rows with no icon tile and their sentence whole, instead of being cut off mid-word inside four small cards.

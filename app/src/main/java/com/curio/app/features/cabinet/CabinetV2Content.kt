@@ -859,9 +859,6 @@ fun CabinetV2Content(navController: NavController) {
                             navController.navigate(CurioRoutes.bookDetail(id)) {
                                 launchSingleTop = true
                             }
-                        },
-                        onOpenShelf = {
-                            navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
                         }
                     )
                 }

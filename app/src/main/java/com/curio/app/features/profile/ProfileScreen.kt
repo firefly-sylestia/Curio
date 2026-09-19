@@ -116,7 +116,6 @@ import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
-import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -650,26 +649,14 @@ fun ProfileScreen(navController: NavController) {
             // the bio, the streak rides its own pill), so the card was saying
             // the same two things twice on one page. Editing still happens in
             // Edit profile, which is the one place identity is written.
-            if (categoryCounts.isNotEmpty()) {
-                item {
-                    Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
-                        CurioSettingsCard(shadowElevation = 0.dp) {
-                            LanesCard(
-                                counts = categoryCounts,
-                                // v39 — lane tiles open the Cabinet filtered to
-                                // that lane; the pending filter rides the
-                                // out-of-band handoff so the tab keeps its
-                                // normal nav route (see PendingCabinetFilter).
-                                onOpenLane = { categoryId ->
-                                    PendingCabinetFilter.request(categoryId)
-                                    navController.navigate(CurioRoutes.CABINET) { launchSingleTop = true }
-                                },
-                                onCabinet = { navController.navigate(CurioRoutes.CABINET) { launchSingleTop = true } }
-                            )
-                        }
-                    }
-                }
-            }
+            //
+            // v408 — "YOUR LANES" WAS HERE and is gone (member's call on the
+            // redundancy audit). It listed every lane with a count and opened
+            // the Cabinet filtered to one — but the HERO's own stat strip
+            // already says how many lanes there are, and Manage Categories
+            // (Settings) is where lanes are actually arranged. A profile is
+            // about the person; the lane inventory lives with the Cabinet it
+            // describes.
             item {
                 Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
                     CurioSettingsCard(shadowElevation = 0.dp) {
@@ -744,39 +731,12 @@ fun ProfileScreen(navController: NavController) {
                     }
                 }
             }
-            // The Settings pill — the same frosted glass capsule as the
-            // pinned search pill it replaces (opens Settings' hub).
-            val glassSettingsPill: @Composable (Color) -> Unit = { sInk ->
-                val pillBg = if (isCurioDarkTheme()) Color(0xFF1B1B1D) else Color.White
-                Surface(
-                    onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
-                    shape = CircleShape,
-                    color = pillBg,
-                    contentColor = sInk,
-                    shadowElevation = 3.dp,
-                    modifier = Modifier
-                        .then(
-                            if (isInScreenGlassActive())
-                                Modifier.liquidGlassCapsule(
-                                    pillBg,
-                                    washAlpha = 0.45f,
-                                    backdrop = profileGlassBackdrop,
-                                    blurMultiplier = 1.6f
-                                )
-                            else Modifier
-                        )
-                        .size(44.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CurioIcon(
-                            name = CurioIcons.Settings,
-                            contentDescription = "Settings",
-                            size = 19.dp,
-                            tint = sInk
-                        )
-                    }
-                }
-            }
+            // v408 — THE HEADER'S SETTINGS PILL IS GONE (member's call on the
+            // redundancy audit: "for b remove the headers settings pill").
+            // Profile offered Settings twice — this icon-only circle in the
+            // bar AND the plain Settings card further down the page — and the
+            // card is the one that says what it is. The bar keeps the avatar
+            // and the back pill; nothing else was in this slot.
             CurioGlassToolbarMorph(
                 progress = profileStickyProgress,
                 compactHeight = ProfileCompactHeaderHeight,
@@ -791,7 +751,6 @@ fun ProfileScreen(navController: NavController) {
                     }
                 },
                 titleTrailing = glassAvatar,
-                trailing = glassSettingsPill,
                 compactAvatar = { glassAvatar(heroInk) },
                 streakCount = displayStreak,
                 onStreakClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
@@ -975,8 +934,9 @@ fun ProfileScreen(navController: NavController) {
         ) {
             // v246 — one gesture stream per pill, shared by the click and
             // the liquid-glass press feel (shrink + refraction bloom).
+            // v408 — the Settings/search pill's stream went with the pill (see
+            // the removal note below).
             val backPillInteraction = remember { MutableInteractionSource() }
-            val searchPillInteraction = remember { MutableInteractionSource() }
             CurioBackButton(
                 onClick = {
                     if (!isPopping) {
@@ -1001,69 +961,23 @@ fun ProfileScreen(navController: NavController) {
                         interactionSource = backPillInteraction
                     ) else Modifier
             )
-            ProfileSearchPill(
-                onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
-                bg = pillBg,
-                iconTint = pillIcon,
-                elevation = if (glassOn) 0.dp else 6.dp * frostShift,
-                pillInteraction = searchPillInteraction,
-                // v267 — always glass from rest.
-                modifier = if (glassOn)
-                    Modifier.liquidGlassCapsule(
-                        restPillBg,
-                        washAlpha = 0.45f,
-                        backdrop = profileGlassBackdrop,
-                        alwaysClear = true,
-                        interactionSource = searchPillInteraction
-                    ) else Modifier
-            )
+            // v408 — THE SETTINGS PILL IS GONE FROM HERE TOO. This was the
+            // classic bar's copy of it: an icon-only circle whose
+            // contentDescription and destination were both Settings, sitting
+            // on the same page as the Settings card in the list below. Profile
+            // reaches Settings one way now — the card that names it — and the
+            // bar is the back pill alone (see the glass branch above).
         }
         } // v3xx — end of the torn-style pinned pills
     }
 }
 
-/** The search pill on Profile's sticky bar — a rippleless circle that
- *  wears the same animated background/rim/icon as the back pill (Home's
- *  TopBarPill construction). Opens Settings, whose hub now carries a
- *  search box that filters every settings section as you type (v7.100). */
-@Composable
-private fun ProfileSearchPill(
-    onClick: () -> Unit,
-    bg: Color,
-    iconTint: Color,
-    elevation: Dp,
-    modifier: Modifier = Modifier,
-    // v246 — optional external gesture source shared with the glass press.
-    pillInteraction: MutableInteractionSource? = null
-) {
-    val fallbackInteraction = remember { MutableInteractionSource() }
-    val interactionSource = pillInteraction ?: fallbackInteraction
-    Surface(
-        shape = CircleShape,
-        color = bg,
-        shadowElevation = elevation,
-        modifier = modifier
-            // v244 — 44dp keeps the magnifier centered at every font scale.
-            .size(44.dp)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-    ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            CurioIcon(
-                name = CurioIcons.Search,
-                contentDescription = "Search settings",
-                tint = iconTint,
-                size = 22.dp,
-                // v115 — the magnifier reads a hair low in the 42dp pill;
-                // deepened -1dp -> -2dp (still a touch low after the first
-                // pass). Same optical-weight correction as the Home pills.
-            )
-        }
-    }
-}
+/* v408 — DELETED: ProfileSearchPill. It was the Settings door on Profile's
+ *  classic bar: a 44dp rippleless circle wearing a magnifier icon (the pill
+ *  was named for a search it never did) whose click opened the Settings hub.
+ *  Profile also carried a plain Settings card in its list, so the screen had
+ *  two doors to one place; the member chose to keep the card. The class of
+ *  pill is still live on Home (`TopBarPill`) if one is ever needed again. */
 
 @Composable
 private fun ProfileDialogs(
@@ -2163,65 +2077,6 @@ private fun SettingsNavCard(onOpenSettings: () -> Unit) {
                     )
                 }
                 CurioForwardArrow(tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f), size = 18.dp)
-            }
-        }
-    }
-}
-
-@Composable
-private fun LanesCard(
-    counts: Map<CategoryId, Int>,
-    // v39 — tapping a lane tile opens the Cabinet filtered to that lane.
-    onOpenLane: (CategoryId) -> Unit,
-    onCabinet: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Palette, "Your lanes", "Where you've been exploring")
-        Spacer(Modifier.height(6.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(counts.entries.sortedByDescending { it.value }.take(4)) { (categoryId, count) ->
-                val category = CurioCategories.byId(categoryId)
-                // v39 — the tile is tappable now, and the glyph wears the
-                // READABLE category ink instead of themedAccent (which in
-                // pastel light resolves to a near-white pastel that washed
-                // out on the pale tile — the "whitish icons" report).
-                Surface(
-                    onClick = { onOpenLane(categoryId) },
-                    shape = RoundedCornerShape(16.dp),
-                    // v27n — OPAQUE category-tinted tile (was 14% alpha, which
-                    // let the elevation shadow bleed through); the opaque lerp
-                    // keeps the same tint over the card surface.
-                    color = lerp(
-                        MaterialTheme.colorScheme.surfaceContainerLow,
-                        category.themedAccent(),
-                        0.14f
-                    ),
-                    shadowElevation = 2.dp,
-                    // v28 — dark mode elevation visibility.
-                    modifier = Modifier
-                        .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
-                ) {
-                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        CurioIcon(category.iconGlyph, null, tint = category.categoryInk(), size = 20.dp)
-                        Spacer(Modifier.height(4.dp))
-                        Text(category.displayName, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
-                        Text("$count saved", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-        Surface(
-            onClick = onCabinet,
-            shape = RoundedCornerShape(14.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                CurioIcon(CurioIcons.Inventory2, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 18.dp)
-                Spacer(Modifier.width(8.dp))
-                Text("Open the Cabinet", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                CurioForwardArrow(size = 16.dp)
             }
         }
     }

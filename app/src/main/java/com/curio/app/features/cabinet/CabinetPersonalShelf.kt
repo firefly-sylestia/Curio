@@ -181,13 +181,18 @@ internal fun LazyGridScope.v2PersonalWritingItems(
  * It is ADDITIVE: the collection's own saved members keep the grid above this
  * and their door below it, so nothing that lived on that shelf lost its way in.
  * Each tile is the personal shelf's own book tile, so a book reads the same in
- * both places, and the heading opens the shelf for the whole list.
+ * both places.
+ *
+ * v408 — ITS HEADING IS NOT A SECOND DOOR TO THE SHELF. It used to open My
+ * shelf, which is exactly what the personal shelf's own "Books" heading does
+ * one screen over — the same destination offered twice inside one Cabinet, and
+ * the only thing the audit found on this shelf. A heading is a LABEL here now;
+ * the way through to the whole shelf stays where it belongs, on the shelf.
  */
 internal fun LazyGridScope.v2ReadingNowItems(
     books: List<PersonalBookEntity>,
     searchQuery: String,
-    onOpenBook: (String) -> Unit,
-    onOpenShelf: () -> Unit
+    onOpenBook: (String) -> Unit
 ) {
     val needle = searchQuery.trim().lowercase()
     val shown = books.filter {
@@ -199,8 +204,7 @@ internal fun LazyGridScope.v2ReadingNowItems(
     item(key = "reading-now-head", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
         PersonalShelfHeading(
             title = "Your books",
-            caption = if (books.size == 1) "1 book" else "${books.size} books",
-            onClick = onOpenShelf
+            caption = if (books.size == 1) "1 book" else "${books.size} books"
         )
     }
     shown.forEach { book ->
@@ -214,14 +218,17 @@ internal fun LazyGridScope.v2ReadingNowItems(
 private fun PersonalShelfHeading(
     title: String,
     caption: String,
-    onClick: () -> Unit
+    /** v408 — null on a heading that is only a LABEL (see
+     *  [v2ReadingNowItems]): no click, no chevron, nothing that promises a
+     *  door the heading does not have. */
+    onClick: (() -> Unit)? = null
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 6.dp)
-            .clickable(onClick = onClick),
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -239,13 +246,15 @@ private fun PersonalShelfHeading(
                 style = MaterialTheme.typography.labelMedium,
                 color = ink.copy(alpha = 0.55f)
             )
-            Spacer(Modifier.width(4.dp))
-            CurioIcon(
-                CurioIcons.ChevronRight,
-                null,
-                tint = ink.copy(alpha = 0.45f),
-                size = 16.dp
-            )
+            if (onClick != null) {
+                Spacer(Modifier.width(4.dp))
+                CurioIcon(
+                    CurioIcons.ChevronRight,
+                    null,
+                    tint = ink.copy(alpha = 0.45f),
+                    size = 16.dp
+                )
+            }
         }
     }
 }

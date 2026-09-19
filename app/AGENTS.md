@@ -8545,6 +8545,28 @@ app/src/main/java/com/curio/app/
 - **`ProgressCard` shows two clocks and never runs backwards:** the page bar + "page N of M" (the file's `pdfPageCount`) and the chapter (the file's own `documentChapters` names, with `chapterForPage(page, chapters)` mapping a page into its chapter range). A HAND edit writes the book ROW only (`setProgress` for the chapter, `saveBook` for a hand-set page) and **never touches the position row**, so the member's real reading place cannot be yanked by editing the card. Keep it that way.
 - **File imports are named from the file, then confirmed.** `BookShelfScreen`'s `importLauncher` reads `BookFiles.displayName(context, uri)` (the provider's `OpenableColumns.DISPLAY_NAME` — `lastPathSegment` is an opaque id like `msf:1000000042`) through `detectBookFromFileName`, then shows `BookImportConfirm` with editable title/author before anything is written. `addBook` adopts the file's own facts (`documentChapters` + `pdfPageCount` → `adoptDocumentFacts`) on every import, not just on a later attach.
 
+### Redundancy — one door per destination, one statement per idea (v408 audit)
+- **A destination gets ONE door per screen.** The audit found and removed the duplicates: Home's
+drawer offered `STATS` from the curiosity-map card AND from a "Stats & insights" row inside the
+fold-out group (the row is gone — the card keeps it, because it is the thing you look at before
+you tap it); Profile offered `SETTINGS` from a header pill AND from its `SettingsNavCard` (the
+member kept the card and the BOTH header pills were deleted — `glassSettingsPill` in the glass
+branch and the whole `ProfileSearchPill` composable in the classic one); the Cabinet's
+Curiying-now shelf opened `BOOKS` from its heading as well as the personal shelf's (its heading
+is a LABEL now: `PersonalShelfHeading(onClick = null)` draws no click and no chevron, so a
+heading never promises a door it does not have).
+- **Do not remove a HEADING's door by passing an empty lambda** — that leaves a chevron and a
+click that does nothing. Make the click nullable (the `PersonalShelfHeading` pattern).
+- **Copy states one idea once.** Profile's "Your lanes" card was deleted (the hero's stat strip
+already counts the lanes; arranging them is Settings ▸ Manage categories). Home's drawer subtitles
+were re-cut so "Quests & Levels" and "Your Curiosity" no longer both promise stats, and the
+Online mode page's sync switch is no longer titled with the page's own name.
+- **Checked and NOT redundant (do not "fix" these):** the settings rail on its 19 settings-family
+screens (that IS the family's nav); the wide-window rail and the bottom pill bar never co-render
+(`CurioNavHost` picks one); `LiquidGlassPageNav` is an in-page page turner, not a tab strip; no tab
+screen prints its own name. Repeated title/subtitle literals across a screen's phone and
+two-pane branches are one copy per branch, not a duplicate on screen.
+
 ### Adaptive layout (tablet & landscape) — ALWAYS-ON
 - **`ui/adaptive/CurioAdaptiveLayout.kt`** owns the window adaptation contract: `windowWidthSizeClass()` (material3-window-size-class, `calculateWindowSizeClass(activity)`) and `CurioContentMaxWidth = 720.dp`. No Settings toggle — the wide layout engages automatically on medium/expanded windows (>= 600dp wide; tablets, landscape, split-screen) and phones are untouched.
 - **Wide windows:** `CurioNavHost` renders `CurioNavigationRail` (left edge, full height) instead of the bottom bar and centers every route's content in the 720dp max-width column (`fillMaxHeight().widthIn(max = CurioContentMaxWidth)` inside a centered Box); the theme background fills the gutters. Screens keep drawing their own status-bar padding and full-bleed washes inside the NavHost.

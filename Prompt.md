@@ -159,11 +159,34 @@ two doors to one destination on one screen; (4) read each hit to separate *per-b
   (`CommunityCommentsSheet.kt:661` — a branch that resolved to very nearly its parent card).
   (Skeleton shimmer placeholder fills are deliberately faint and were left alone.)
 
-### Recommended fixes — ASKED, awaiting the member's pick
-- **(a)** Drop Home's duplicate **"Stats & insights"** row (the card above already opens it).
-- **(b)** Drop Profile's **`SettingsNavCard`** (the header pill already opens Settings).
-- **(c)** Reword the overlapping copy (Home's drawer trio; Online mode's self-naming row) — text
-  only, nothing removed.
+### Fixes APPLIED — the member's answer
+- **(a) done** — Home's drawer: the duplicate "Stats & insights" row is gone; the curiosity-map /
+  stat-strip card above keeps the door.
+- **(b) inverted by the member** — "for b remove the headers settings pill". So Profile's header
+  pills went instead of the card: `glassSettingsPill` (glass branch) and the whole
+  `ProfileSearchPill` composable (classic branch, ~38 lines) are deleted, `searchPillInteraction`
+  with them, and the now-unused `PendingCabinetFilter` import was dropped. The `SettingsNavCard`
+  stays as Profile's one door to Settings.
+- **(c) done** — Home's drawer subtitle trio re-cut ("Levels, badges & the journey" / "History,
+  lanes & browse") and Online mode's sync switch is titled "Keep my areas in sync" instead of
+  repeating the page's own name.
+- **(d) done** — the Cabinet's Curiying-now heading is a label, not a door: `v2ReadingNowItems`
+  lost its `onOpenShelf` parameter and `PersonalShelfHeading` takes a nullable `onClick` (no
+  click, no chevron when null). The personal shelf's own "Books" heading + "My shelf" door stay.
+- **Also, on the member's instruction: Profile's "Your lanes" card is deleted** (with its private
+  `LanesCard` composable, ~58 lines). The hero's stat strip still shows the lane COUNT — the
+  member said "your lanes" (the card's own title); if they meant that stat too, it is one line to
+  remove.
+- `app/AGENTS.md` gained a "Redundancy — one door per destination" contract recording all of the
+  above plus the chrome that was checked and is NOT redundant (so a later session does not
+  "fix" the settings rail or the per-branch literals).
+
+### Not audited in depth (honest scope note)
+The sweep covered the chrome inventory, every screen's UI-copy duplicates, every screen's repeated
+`CurioRoutes` destinations, and a read of each hit. It is strongest on the five tab screens and the
+settings/cabinet/profile families. The long-tail screens (social sheets, quests, stats, the
+composer family) were only checked by the two automated passes, not read line by line — a second
+pass on those is the natural next step if the member wants more.
 
 ---
 
@@ -180,8 +203,7 @@ two doors to one destination on one screen; (4) read each hit to separate *per-b
 
 ## User prompts
 
-Status: (a), (b) and (c) are built and pushed. **(d) the full-app redundancy audit** is
-written up above; its three recommended fixes are asked (see "Recommended fixes").
+Status: everything above is built, pushed and recorded. No pending prompt below.
 
 > "also many screen have redundancy alot of redundancy with the app, tabs etc, and and
 > unecessary texts duplicate tabs etc etc do a full app audit."

@@ -2478,7 +2478,12 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     DrawerNavRow(
                         icon = CurioIcons.WorkspacePremium,
                         label = "Quests & Levels",
-                        subtitle = "Track your journey",
+                        // v408 — the copy no longer overlaps the curiosity
+                        // group below: "track your journey" and "stats,
+                        // streaks & insights" were two ways of saying the same
+                        // thing about two different doors. This row is the
+                        // QUESTS screen, so it says quests.
+                        subtitle = "Levels, badges & the journey",
                         iconTint = curioGoldInk(),
                         onClick = { onNavigate(CurioRoutes.QUESTS) }
                     )
@@ -2491,7 +2496,10 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     DrawerNavRow(
                         icon = CurioIcons.AutoAwesome,
                         label = "Your Curiosity",
-                        subtitle = "Stats, streaks & insights",
+                        // v408 — accurate, and it no longer claims to carry the
+                        // stats: the map card at the top of this drawer is the
+                        // one door to Stats & insights.
+                        subtitle = "History, lanes & browse",
                         iconTint = CurioColors.DustyBlue,
                         expanded = curiosityExpanded,
                         onClick = { curiosityExpanded = !curiosityExpanded }
@@ -2519,11 +2527,12 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                     .padding(vertical = 2.dp)
                             ) {
-                                DrawerNavItem(
-                                    icon = "monitoring",
-                                    label = "Stats & insights",
-                                    iconTint = Color(0xFF9B7BB8)
-                                ) { onNavigate(CurioRoutes.STATS) }
+                                // v408 — "Stats & insights" WAS HERE, and the
+                                // map card at the top of this drawer is the same
+                                // door: one destination, offered twice on one
+                                // screen (the audit's finding on Home). The
+                                // card keeps it — it is the thing you look at
+                                // before you tap it.
                                 DrawerNavItem(
                                     icon = CurioIcons.History,
                                     label = "Topic History",
