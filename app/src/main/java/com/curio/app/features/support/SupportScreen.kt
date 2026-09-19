@@ -27,6 +27,9 @@ import androidx.navigation.NavController
 import com.curio.app.BuildConfig
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.features.feedback.FeedbackFormCard
+import com.curio.app.features.feedback.FeedbackFormState
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsNavRail
@@ -71,6 +74,13 @@ import com.curio.app.features.settings.SettingsHeroTotalHeight
 fun SupportScreen(navController: NavController) {
     val context = LocalContext.current
     val crashCount = remember { CurioCrashReporter.getCrashHistory(context).size }
+
+    // v403 — the one published feedback form (if there is one). The card at
+    // the top of the page is the ask; the row inside the Feedback card is the
+    // way back to it later, which the member asked for by name.
+    LaunchedEffect(Unit) { FeedbackFormState.refresh(context) }
+    val liveForm = FeedbackFormState.liveForm
+    val formReady = liveForm != null && FeedbackFormState.visible
 
     // Version row five-tap (v24) — opens the Experiments screen (kept open);
     // the counter resets itself after a short pause so stray taps never fire.
@@ -141,10 +151,41 @@ fun SupportScreen(navController: NavController) {
                         navController = navController
                     )
                 }
+                // ── The form, first: the page's standout tile while one is
+                //    live (filled in the app's own accent tone, so it stands
+                //    apart from every pale settings card under it).
+                if (formReady) {
+                    val form = requireNotNull(liveForm)
+                    item(key = "feedback-form", contentType = "feedback-form") {
+                        FeedbackFormCard(
+                            form = form,
+                            onOpen = { FeedbackFormState.openSheet() },
+                            onSkip = { FeedbackFormState.skip(context, form, never = false) },
+                            onNever = { FeedbackFormState.skip(context, form, never = true) }
+                        )
+                    }
+                }
                 item { SettingsSectionHeading("Feedback") }
                 item {
                     SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
+                        // The form has a door here for as long as it is live, so
+                        // a member can take it later without hunting for it.
+                        SettingsOptionRow(
+                            CurioIcons.AutoAwesome,
+                            "Feedback form",
+                            when {
+                                !OnlineAccount.signedIn ->
+                                    "Turn Online mode on to answer"
+                                liveForm == null -> "No form is open right now"
+                                formReady -> "Answering is anonymous · take it when you like"
+                                else -> "You have already dealt with this one · " +
+                                    "thank you"
+                            }
+                        ) {
+                            if (formReady) FeedbackFormState.openSheet()
+                        }
+                        SettingsOptionDivider()
                         SettingsOptionRow(
                             CurioIcons.BugReport,
                             "Report a bug",

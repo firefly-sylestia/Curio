@@ -8738,6 +8738,40 @@ only ever catches taps that mean "not in any of these".
   commit as the changelog bullet), and keep the copy free of em dashes:
   the highlights read as plain sentences.
 
+## Feedback forms (v403)
+
+- **The server is `supabase/schema.sql` §6f** (`feedback_forms`,
+  `feedback_answers`, `feedback_skips`, `curio_publish_feedback_form`,
+  `curio_close_feedback_form`, `curio_feedback_tally`).
+- **Answers are anonymous by construction, and that is a hard contract.**
+  Neither answer table carries a user, device, session or account column, and
+  §8's self-check now FAILS the paste if one is ever added. Members may INSERT
+  an answer (or a skip) while the form is live and may never SELECT one back;
+  reading is the team's, behind `curio_admin_can('forms')`. A member's
+  "already answered" and "never show me" states are LOCAL only
+  (`AppPreferences.feedbackAnsweredIds` / `feedbackHiddenIds`), because
+  enforcing one-answer-per-member on the server is exactly what would make an
+  answer traceable.
+- **The team's switch is `community_admins.can_manage_forms`**, surfaced in the
+  app as `CommunityAdminRow.canManageForms` and `allows("forms")`.
+  `curio_set_community_admin` takes it as its eighth argument (the old
+  seven-argument function is DROPPED first, so a stale overload cannot silently
+  forget the permission).
+- **Cadence lives on the server**: one publication per 14 days, tests never
+  count, the owner may override, and publishing closes whatever was live. A
+  TEST publishes as `status = 'live' AND is_test = true`, which the RLS policy
+  hides from every non-team reader, so the team walks the real member UI
+  without the walkthrough reaching the members.
+- **The app side is `data/supabase/FeedbackApi.kt`** (models, ceilings, cadence
+  constant, REST + RPC) and `features/feedback/FeedbackFormScreen.kt`
+  (`FeedbackFormState`, the standout `FeedbackFormCard`, the answering
+  `FeedbackFormSheet`). The sheet is mounted ONCE at the NavHost root, so
+  Home's card and Support's card and row all share one sheet.
+- **Where it shows:** Home's card under the deck, Support's card at the top of
+  the page plus a row inside the Feedback card, and nothing at all when no form
+  is live. A member who is signed out is told to turn Online mode on rather
+  than being shown a form they cannot send.
+
 ## Child DOX Index
 
 - [`CURIO_DATA_PLAN.md`](CURIO_DATA_PLAN.md) — Canonical **data layer** spec. Owns: category taxonomy expansion (6 → 10), `CurioTopic` + `ExploreAction` schema, JSON-on-disk canonical format, Room DB seed flow, image strategy (URL + Coil, no bundling), authoring pipeline (LLM-draft + human-review + smoke test), per-category rollout cadence (one category per PR, Music first). Read this BEFORE adding any topic data, category entry, or capture-format prompt.

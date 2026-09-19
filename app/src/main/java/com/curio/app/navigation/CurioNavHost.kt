@@ -95,6 +95,8 @@ import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
 import com.curio.app.features.support.SupportScreen
 import com.curio.app.BuildConfig
+import com.curio.app.features.feedback.FeedbackFormSheet
+import com.curio.app.features.feedback.FeedbackFormState
 import com.curio.app.features.updates.UpdatesScreen
 import com.curio.app.features.updates.WhatsNewScreen
 import com.curio.app.features.updates.whatsNewRelease
@@ -1730,6 +1732,16 @@ composable(CurioRoutes.COMMUNITY) {
                 ) { Text("Later") }
             }
         )
+    }
+
+    // ── The feedback form's sheet (v403) ─────────────────────────────────
+    // Mounted at the NavHost root, like the drawer, so the ONE sheet is shared
+    // by every door into it (Home's card, Support's card and row) instead of
+    // each screen hosting its own copy.
+    if (FeedbackFormState.open) {
+        FeedbackFormState.liveForm?.let { form ->
+            FeedbackFormSheet(form = form, onDismiss = { FeedbackFormState.dismissSheet() })
+        }
     }
 }
 

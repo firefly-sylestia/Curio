@@ -1056,6 +1056,34 @@ object AppPreferences {
     fun setWhatsNewSeenVersion(context: Context, version: Int) =
         prefs(context).edit().putInt(KEY_WHATS_NEW_SEEN_VERSION, version).apply()
 
+    // ── Feedback forms: what THIS device has already dealt with (v403) ────
+    // The server cannot know that a member has answered (an answer carries no
+    // identity, by design), so the device keeps the two flags the member's own
+    // experience needs: which forms were already answered, and which ones they
+    // asked never to see again. Both are keyed by form id.
+    private const val KEY_FEEDBACK_ANSWERED = "feedback_answered_ids"
+    private const val KEY_FEEDBACK_HIDDEN = "feedback_hidden_ids"
+
+    fun feedbackAnsweredIds(context: Context): Set<String> =
+        prefs(context).getStringSet(KEY_FEEDBACK_ANSWERED, emptySet()).orEmpty()
+
+    fun markFeedbackAnswered(context: Context, formId: String) {
+        if (formId.isBlank()) return
+        prefs(context).edit()
+            .putStringSet(KEY_FEEDBACK_ANSWERED, feedbackAnsweredIds(context) + formId)
+            .apply()
+    }
+
+    fun feedbackHiddenIds(context: Context): Set<String> =
+        prefs(context).getStringSet(KEY_FEEDBACK_HIDDEN, emptySet()).orEmpty()
+
+    fun markFeedbackHidden(context: Context, formId: String) {
+        if (formId.isBlank()) return
+        prefs(context).edit()
+            .putStringSet(KEY_FEEDBACK_HIDDEN, feedbackHiddenIds(context) + formId)
+            .apply()
+    }
+
     // ── Topic catalog install stamp (v3xx) ────────────────────────────
     // The package's lastUpdateTime the catalog was last synced under.
     // versionCode only changes on RELEASES, so a data edit shipped in a

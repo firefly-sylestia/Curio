@@ -1,4 +1,5 @@
 ADD:
+- Support: a feedback form from the team, when one is open. It greets you on Home and stays in Support to take later, with the questions as they were written, a Not now, and a Never show me another one. Answers arrive with no name, no account and no device attached to them.
 - Updates: a What's New page says what each version shipped, one line per thing with a "Take me there" door straight to it. It opens itself once per version, on a fresh install and on an update alike, and waits under Settings, in Updates, any time after.
 
 FIX:

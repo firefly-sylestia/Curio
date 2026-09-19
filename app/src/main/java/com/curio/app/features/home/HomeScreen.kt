@@ -115,6 +115,8 @@ import com.curio.app.data.PinnedTopic
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.SavedQuote
+import com.curio.app.features.feedback.FeedbackFormCard
+import com.curio.app.features.feedback.FeedbackFormState
 import com.curio.app.features.personal.CreateEntrySheet
 import com.curio.app.features.incursion.IncursionHomeButton
 import com.curio.app.features.personal.PersonalCreateLauncher
@@ -921,6 +923,31 @@ fun HomeScreen(navController: NavController) {
             // v323 — the Home "Today's quests" strip was removed per user
             // direction (quests live on the Quests screen only).
             Spacer(Modifier.height(12.dp))
+
+            // ── The feedback form, while one is live (v403) ────────────────
+            // The member asked for the form to greet everyone who opens the
+            // app, so it leads Home under the deck: the page's own standout
+            // tile, with the two ways out beside it and Support keeping the
+            // door for later. Nothing else on Home changes shape when a form
+            // is live or when none is.
+            LaunchedEffect(Unit) { FeedbackFormState.refresh(context) }
+            val liveFeedbackForm = FeedbackFormState.liveForm
+            if (liveFeedbackForm != null && FeedbackFormState.visible) {
+                FeedbackFormCard(
+                    form = liveFeedbackForm,
+                    onOpen = { FeedbackFormState.openSheet() },
+                    onSkip = { FeedbackFormState.skip(context, liveFeedbackForm, never = false) },
+                    onNever = { FeedbackFormState.skip(context, liveFeedbackForm, never = true) },
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .widthIn(
+                            max = if (windowWidthSizeClass().isWide) WideContentMaxWidth
+                            else Dp.Infinity
+                        )
+                        .align(Alignment.CenterHorizontally)
+                )
+                Spacer(Modifier.height(12.dp))
+            }
 
             // ── 2. Currently exploring — live session card ──────────────
             val activeSession = ExploreSessionStore.activeSessionState
