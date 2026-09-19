@@ -19,6 +19,10 @@ import androidx.compose.runtime.remember
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -81,22 +85,31 @@ private val CurioWhitePageLightScheme = lightColorScheme(
     //   surfaceContainerHigh          deeper   — a pill / chip inside one
     //   surfaceContainerHighest       deepest  — the anchor step
     //
-    // A card is therefore visibly CREAM on a white page — one clean step, not
-    // a hair of warmth — and a control nested inside that card steps deeper
-    // into the same family, so nesting is legible without an outline on every
-    // box. Contrast for the ink only improves: every fill moved away from it.
+    // A card is therefore visibly CREAM on a white page, and a control nested
+    // inside that card steps deeper into the same family, so nesting is legible
+    // without an outline on every box. Contrast for the ink only improves:
+    // every fill moved away from it.
+    //
+    // v411 — A SUBTLER CREAM, AND THE SHADOW CARRIES THE EDGE. The member:
+    // "with white pages they look good, just the cream color is too much maybe
+    // subtle cream, and also soft shadow no border just shadow instead of
+    // borders". So the ladder is pitched lighter (the card is a whisper of
+    // cream, not a tan plate) and no card draws a hairline any more —
+    // `curioCardEdgeColor` answers "no border" for EVERY theme now, and the
+    // soft shadow ([curioCardShadow]) is what lifts a card off the page.
+    // The steps still climb evenly, which is what keeps nesting legible.
     background = Color(0xFFFFFFFF),
     onBackground = CurioColors.DeepPlum,
 
     surface                  = Color(0xFFFFFFFF),
     onSurface                = CurioColors.DeepPlum,
-    surfaceVariant           = Color(0xFFF4EBD8),
+    surfaceVariant           = Color(0xFFF7F0E2),
     onSurfaceVariant         = CurioColors.DeepPlum.copy(alpha = 0.75f),
     surfaceContainerLowest   = Color(0xFFFFFFFF),
-    surfaceContainerLow      = Color(0xFFFAF3E4),
-    surfaceContainer         = Color(0xFFF4EBD8),
-    surfaceContainerHigh     = Color(0xFFEEE3CB),
-    surfaceContainerHighest  = Color(0xFFE7DABE),
+    surfaceContainerLow      = Color(0xFFFCF7EC),
+    surfaceContainer         = Color(0xFFF7F0E2),
+    surfaceContainerHigh     = Color(0xFFF2E8D5),
+    surfaceContainerHighest  = Color(0xFFECE1C8),
 
     error             = CurioColors.WarmCoralRed,
     onError           = CurioColors.CreamWhite,
@@ -269,8 +282,17 @@ fun isCurioDarkTheme(): Boolean = when (AppPreferences.themeModeState) {
  * progress accents that sit on cards/cream — the light-mode wash-out fix.
  */
 @Composable
-fun curioRoseInk(): Color =
-    if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
+fun curioRoseInk(): Color {
+    // v411 — APP-WIDE: under a Pantone theme the brand's "rose ink" role IS
+    // that theme's own ink (the Pantone colour, deepened where it cannot read),
+    // so every surface that asks for an accent ink — pills, plate tints, icon
+    // chips, the journal's own headings — comes back in the member's three
+    // Pantone colours instead of coral. Only the decoratively-branded roles
+    // (gold, mint) and the 36 lane accents keep their own identity: a Pantone
+    // number is a page, a hero and an ink, not a replacement for every hue.
+    activePantoneTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
+    return if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
+}
 
 /**
  * v20 — the brand butter as INK, theme-aware: bright ButterYellow on dark
@@ -339,24 +361,49 @@ fun activePantoneTheme(): PantoneTheme? =
     AppPreferences.pantoneThemeId()?.let { id -> PantoneTheme.fromId(id) }
 
 /**
- * v411 — THE CARD EDGE, as the theme wants it.
+ * v411 — NO CARD BORDER, IN ANY THEME.
  *
- * Curio's cards separate by lightness AND a hairline edge (`outlineVariant`).
- * The member's rule for the new Pantone accents is the opposite: "dont use any
- * border for cards" — those themes want the card to be a solid plate with no
- * drawn box. So every card component asks this helper for its edge colour and
- * passes the fill it is painting ([fill]); under a Pantone theme the answer IS
- * that fill, which paints an edge of exactly the card's own colour (no border
- * to see, and no change to a single border/layout code path), and everywhere
- * else it is the theme's `outlineVariant` as before.
+ * This started as the Pantone-only rule ("dont use any border for cards"), and
+ * the member then asked for it everywhere: "soft shadow no border just shadow
+ * instead of borders". So a card's edge is now its OWN FILL — every border/
+ * `BorderStroke` site that asks this helper paints an edge of exactly the card's
+ * colour, which is no border to see — and what separates a card from the page is
+ * the fill step plus the soft shadow ([curioCardShadow]).
  *
- * Passing [fill] — rather than returning null and making callers branch — is
- * deliberate: `Surface(border = …)` and `Modifier.border(…)` sites keep their
- * exact shape and ordering, so this can never reorder a border under a fill.
+ * The signature still takes [fill] and still returns a COLOUR on purpose:
+ * `Surface(border = …)` and `Modifier.border(…)` call sites keep their exact
+ * shape and ordering (a null would make every caller branch, and a border moved
+ * after a fill paints over it — see the modifier-order rule). `outlineVariant`
+ * is untouched and still draws DIVIDERS, which is what it is for now.
  */
 @Composable
-fun curioCardEdgeColor(fill: Color): Color =
-    if (activePantoneTheme() != null) fill else MaterialTheme.colorScheme.outlineVariant
+fun curioCardEdgeColor(fill: Color): Color = fill
+
+/**
+ * v411 — THE SOFT CARD SHADOW.
+ *
+ * The member's call ("soft shadow no border just shadow instead of borders"),
+ * applied to the whole card language rather than to one screen: a card is a
+ * fill, a radius and a SOFT shadow, never a drawn hairline. It is a warm, wide
+ * shadow at a low alpha instead of Material's default black — on a cream page a
+ * hard one reads as a smudge and a black one as a dirt line — and it is applied
+ * BEFORE the fill in the chain (`shadow` → `clip` → `background`), which is what
+ * makes it sit under the card rather than blur over it.
+ *
+ * DARK MODE IS UNTOUCHED: its plates step up from a black page and already wear
+ * the theme's own glow ([curioDarkGlow]); a shadow there is invisible anyway.
+ * So this returns the modifier unchanged at night.
+ */
+@Composable
+fun Modifier.curioCardShadow(shape: Shape, elevation: Dp = 3.dp): Modifier =
+    if (isCurioDarkTheme()) this
+    else shadow(
+        elevation = elevation,
+        shape = shape,
+        clip = false,
+        ambientColor = CurioColors.DeepPlum.copy(alpha = 0.10f),
+        spotColor = CurioColors.DeepPlum.copy(alpha = 0.14f)
+    )
 
 /**
  * v411 — A TINT, RESOLVED SOLIDLY UNDER A PANTONE THEME.

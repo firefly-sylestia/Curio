@@ -37,6 +37,7 @@ import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.isCurioDarkTheme
 
@@ -145,14 +146,17 @@ fun SettingsOptionCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val dark = isCurioDarkTheme()
-    // v411 — the card's fill, named so the edge can be asked for it: under a
-    // Pantone theme a card wears NO border ([curioCardEdgeColor]).
     val cardFill =
         if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
         else MaterialTheme.colorScheme.surfaceContainerLow
     Column(
         modifier = modifier
             .fillMaxWidth()
+            // v411 — NO HAIRLINE: a soft shadow is what lifts this card off
+            // the page now (member: "soft shadow no border just shadow instead
+            // of borders"). The shadow is applied BEFORE the fill so it sits
+            // under the card instead of blurring over it.
+            .curioCardShadow(RoundedCornerShape(20.dp))
             .clip(RoundedCornerShape(20.dp))
             // v408 — OPAQUE, and it separates by LIGHTNESS from the page
             // (see the theme's "card ladder"): a card here used to be a 68%
@@ -162,17 +166,6 @@ fun SettingsOptionCard(
             // (below) so it also reads as a card and not as a hole in the
             // page. Dark keeps its raised step.
             .background(cardFill)
-            // The card edge — drawn AFTER the fill so the hairline is not
-            // painted over (a border before a background is invisible), and
-            // SOFT (v409): the theme's own `outlineVariant` is a whisper of
-            // plum now, so the border is an edge and not a drawn box.
-            // v411 — under a Pantone theme it is the fill itself: those
-            // themes want NO card border.
-            .border(
-                width = 1.dp,
-                color = curioCardEdgeColor(cardFill),
-                shape = RoundedCornerShape(20.dp)
-            )
             .padding(horizontal = 17.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) { content() }

@@ -58,6 +58,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import kotlinx.coroutines.Dispatchers
@@ -254,10 +255,14 @@ private fun JournalRow(
     val press = rememberCurioPressSource(pressedScale = 0.985f)
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        // v411 — the journal's OWN paper (a warm parchment tinted with the
+        // member's accent), lifted by the soft shadow: a page in the
+        // collection sits ON the page instead of being outlined into it.
+        color = journalPaper(),
         modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 720.dp)
+            .curioCardShadow(RoundedCornerShape(20.dp))
             .then(press.modifier)
             .combinedClickable(
                 interactionSource = press.interactionSource,
@@ -528,13 +533,15 @@ internal fun PersonalEmptyCard(
     actionLabel: String,
     onAction: () -> Unit
 ) {
-    val ink = MaterialTheme.colorScheme.onSurface
+    val ink = journalInk()
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        // v411 — the journal's paper and the soft elevation, same as a page.
+        color = journalPaper(),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
+            .curioCardShadow(RoundedCornerShape(24.dp))
     ) {
         Column(
             modifier = Modifier.padding(22.dp),

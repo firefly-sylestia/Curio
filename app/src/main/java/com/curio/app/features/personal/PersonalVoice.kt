@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -661,22 +662,36 @@ internal fun PersonalVoiceBar(
                     )
                 }
         ) {
-            // ── THE HAND-DRAWN PULSE (v404) ─────────────────────────────
+            // ── THE HAND-DRAWN PULSE (v404, REDRAWN AS ONE WAVE IN v411) ─
             //
             // v389 drew the note as a bar chart: rounded columns on a centre
             // line, evenly spaced, which is what an audio widget looks like and
             // not what a page looks like (user request: "make its graph the aduio
-            // graph pulse wave hand drawn style"). It is ONE INKED LINE now —
-            // the voice's own envelope drawn as a stroke that rises and falls
-            // with what was said and wobbles as it goes, so the strip reads as
-            // something drawn beside the writing rather than a chart laid on it.
-            // The wobble is a hash of the sample's own index and not a random
-            // number: the same ink on every frame, so the line never crawls
-            // while the note plays.
+            // graph pulse wave hand drawn style").
+            //
+            // v404 replaced that with the voice's own envelope as ink — but it
+            // drew the envelope TWICE, a mirrored pair of strokes above and
+            // below the centre line, so the strip read as two waves folded
+            // together (member: "the voice note wave in journal its 2 wave and
+            // looks weird fix it please and use 1 wave style and proper depth").
+            //
+            // It is ONE LINE now. The path crosses the centre on every step, so
+            // each peak of the voice is one rise and one fall of a single
+            // stroke — the pulse a spoken sentence makes, not a shape mirrored
+            // under itself. Two details keep it legible at 72 stored samples:
+            //  · the samples are BUCKETED (about 26 steps across the strip, the
+            //    loudest sample of each bucket wins), because a rise and a fall
+            //    every 3dp is a fuzzy band rather than a wave;
+            //  · a stable hand wobble (a hash of the sample's own index, never a
+            //    random number, so the ink never crawls while the note plays).
+            //
+            // DEPTH: the line is drawn a hair lower first, soft, so the ink sits
+            // ON the paper instead of floating over it — the strip itself stays
+            // backgroundless and shadowless (§v404), because a recording is part
+            // of the writing and not a card in it.
             Canvas(Modifier.fillMaxSize()) {
                 if (samples.isEmpty()) return@Canvas
                 val count = samples.size
-                val step = if (count > 1) size.width / (count - 1) else size.width
                 val mid = size.height / 2f
                 val playedUpTo = size.width * progress
 
@@ -685,46 +700,53 @@ internal fun PersonalVoiceBar(
                 fun wobble(seed: Int): Float {
                     val hash = seed * 374761393 + 668265263
                     val mixed = (hash xor (hash shr 13)) * 1274126177
-                    return ((mixed % 1000).toFloat() / 1000f - 0.5f) * size.height * 0.07f
+                    return ((mixed % 1000).toFloat() / 1000f - 0.5f) * size.height * 0.10f
                 }
 
-                // How far the voice reaches from the centre at [index]. A floor
-                // of 7% keeps a quiet passage reading as a voice rather than as
+                // How far the voice reaches from the centre for a level. A floor
+                // of 8% keeps a quiet passage reading as a voice rather than as
                 // a break in the line.
-                fun reach(index: Int): Float {
-                    val level = samples[index].coerceIn(0f, 1f)
-                    return (level * 0.42f + 0.07f) * size.height
-                }
+                fun reach(level: Float): Float =
+                    (level.coerceIn(0f, 1f) * 0.40f + 0.08f) * size.height
 
-                val upper = Path()
-                val lower = Path()
-                for (index in 0 until count) {
-                    val x = index * step
-                    val wob = wobble(index)
-                    val rise = (mid - reach(index) + wob).coerceIn(1f, size.height - 1f)
-                    val fall = (mid + reach(index) - wob).coerceIn(1f, size.height - 1f)
-                    if (index == 0) {
-                        upper.moveTo(x, rise)
-                        lower.moveTo(x, fall)
-                    } else {
-                        upper.lineTo(x, rise)
-                        lower.lineTo(x, fall)
+                // The buckets — the loudest sample of each one — so the wave
+                // keeps the peaks of a fast passage without drawing every one.
+                val buckets = 26
+                val perBucket = (count + buckets - 1) / buckets
+                val stepCount = (count + perBucket - 1) / perBucket
+                val span = (stepCount - 1).coerceAtLeast(1).toFloat()
+
+                val wave = Path()
+                for (step in 0 until stepCount) {
+                    val from = step * perBucket
+                    val to = (from + perBucket).coerceAtMost(count)
+                    var loudest = 0f
+                    for (i in from until to) {
+                        val level = samples[i]
+                        if (level > loudest) loudest = level
                     }
+                    val x = size.width * step / span
+                    val side = if (step % 2 == 0) -1f else 1f
+                    val y = (mid + side * reach(loudest) + wobble(from))
+                        .coerceIn(1f, size.height - 1f)
+                    if (step == 0) wave.moveTo(x, y) else wave.lineTo(x, y)
                 }
 
                 val stroke = Stroke(
-                    width = (size.height * 0.075f).coerceAtLeast(1.5f),
+                    width = (size.height * 0.085f).coerceAtLeast(1.5f),
                     cap = StrokeCap.Round,
                     join = StrokeJoin.Round
                 )
-                // THE WHOLE NOTE in the page's ink — and the part that has been
-                // HEARD in the note's own colour, cut at the playhead.
-                drawPath(upper, ink.copy(alpha = 0.30f), style = stroke)
-                drawPath(lower, ink.copy(alpha = 0.30f), style = stroke)
+                // ── DEPTH — the same line, a hair lower, drawn soft. ──
+                translate(top = size.height * 0.05f) {
+                    drawPath(wave, ink.copy(alpha = 0.16f), style = stroke)
+                }
+                // ── THE WHOLE NOTE in the page's ink — and the part that has
+                // been HEARD in the note's own colour, cut at the playhead. ──
+                drawPath(wave, ink.copy(alpha = 0.60f), style = stroke)
                 if (playedUpTo > 0f) {
                     clipRect(right = playedUpTo) {
-                        drawPath(upper, accent, style = stroke)
-                        drawPath(lower, accent, style = stroke)
+                        drawPath(wave, accent, style = stroke)
                     }
                 }
                 // The playhead, so a scrub lands where the eye expects.

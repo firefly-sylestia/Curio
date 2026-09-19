@@ -90,7 +90,10 @@ internal data class WhatsNewRelease(
 internal val WHATS_NEW_RELEASES: List<WhatsNewRelease> = listOf(
     WhatsNewRelease(
         versionCode = 20260922,
-        versionName = "1.1.1",
+        // v411 — the NAME has to match the build (`versionName` in
+        // app/build.gradle.kts), because this string is what the page prints
+        // as "v… · build …": it said 1.1.1 over a 1.3.0 build.
+        versionName = "1.3.0",
         headline = "Four screens rebuilt, and one sheet that reaches them",
         items = listOf(
             WhatsNewItem(

@@ -1,6 +1,5 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -26,7 +25,7 @@ import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.features.settings.settingsCardChipTint
 import com.curio.app.features.settings.settingsCardTintLift
 import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.curioCardEdgeColor
+import com.curio.app.ui.theme.curioCardShadow
 
 /**
  * Shared paper-card primitives for Profile + Settings — one visual language
@@ -46,9 +45,8 @@ fun CurioSettingsCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    // v411 — the card's own fill, named so the edge colour can be asked for
-    // it: [curioCardEdgeColor] answers "no border" under a Pantone theme, and
-    // the edge is then painted in exactly this colour (see the helper).
+    // v411 — the card's own fill, named so the elevation below can be tuned
+    // against the real surface instead of a guessed one.
     val cardFill = lerp(
         MaterialTheme.colorScheme.surfaceContainerLow,
         settingsCardTintLift(),
@@ -85,23 +83,20 @@ fun CurioSettingsCard(
         contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 3.dp,
         shadowElevation = shadowElevation,
-        // v408 — the card EDGE. The fill is a custom lerp (not a scheme
-        // token), and a 4dp black shadow on a light page is a soft smudge
-        // rather than a boundary — so the card also wears the shared
-        // hairline the whole app separates its cards with (the theme's
-        // `outlineVariant`; rule: cards separate by lightness AND an
-        // outline, never by a tint of the page). Surface draws its own
-        // border after its fill, which is why this is a Surface border and
-        // not a `Modifier.border` (a border earlier in the chain is painted
-        // over by the fill).
-        // v409 — the hairline is SOFT now (a whisper of plum: see the
-        // theme's paper flip), so a Profile/Settings card reads as a cream
-        // plate with a quiet edge rather than as a drawn box.
-        border = BorderStroke(1.dp, curioCardEdgeColor(cardFill)),
+        // v411 — THE SHADOW IS THE EDGE. This card used to wear the shared
+        // hairline on top of its fill (v408/v409); the member asked for the
+        // other language — "soft shadow no border just shadow instead of
+        // borders" — so the hairline is gone everywhere and the warm, wide
+        // [curioCardShadow] is what lifts the plate off the page. It is
+        // applied BEFORE the fill, which is what puts it under the card
+        // instead of blurring over it. A cream card on a white page plus a
+        // soft shadow reads as paper, where cream plus a boxed hairline read
+        // as a drawn rectangle.
         modifier = modifier
             .fillMaxWidth()
-            // v28 — dark mode: soft light glow + faint hairline so the
-            // elevation reads on midnight (black shadows are invisible).
+            .curioCardShadow(RoundedCornerShape(28.dp), shadowElevation)
+            // v28 — dark mode: soft light glow so the elevation reads on
+            // midnight (black shadows are invisible).
             .curioDarkGlow(shadowElevation, RoundedCornerShape(28.dp))
             .categoryEdgeShine(RoundedCornerShape(28.dp))
             // v81 — dark: a faint radial inner glow in the hero hue on the

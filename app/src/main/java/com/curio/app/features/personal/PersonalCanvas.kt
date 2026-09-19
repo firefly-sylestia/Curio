@@ -3845,7 +3845,9 @@ private fun PersonalPhotoBlock(
             // lets the shadow bleed through the print (see AGENTS rule 11).
             .shadow(5.dp, RoundedCornerShape(6.dp))
             .clip(RoundedCornerShape(6.dp))
-            .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
+            // v411 — the journal's own paper: a print and the page it is
+            // pasted on are the same paper (see journalPaper).
+            .background(journalPaper())
             .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
     ) {
         Box(
@@ -4397,7 +4399,7 @@ internal fun PersonalDocView(
                 .onGloballyPositioned { bounds = it.boundsInWindow() }
                 .shadow(5.dp, RoundedCornerShape(6.dp))
                 .clip(RoundedCornerShape(6.dp))
-                .background(if (isCurioDarkTheme()) Color(0xFF2B2723) else Color(0xFFFCF8F1))
+                .background(journalPaper())
                 .padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)
                 .clickable { onOpenPhoto(block.photo.orEmpty(), bounds) }
         ) {

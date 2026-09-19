@@ -72,6 +72,7 @@ import com.curio.app.data.wordCount
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import androidx.navigation.NavController
 import java.time.Instant
@@ -460,7 +461,9 @@ private fun MoodSelector(
             // The pill wears the CHOSEN feeling's ink, so the collapsed state
             // and the options below it are visibly the same thing.
             color = selected?.let { personalMoodInk(it).copy(alpha = 0.20f) }
-                ?: MaterialTheme.colorScheme.surfaceContainer
+                ?: journalPaperRaised(),
+            // v411 — the journal's own depth: a soft shadow, no hairline.
+            modifier = Modifier.curioCardShadow(RoundedCornerShape(50), 2.dp)
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -556,8 +559,9 @@ private fun MoodOption(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
         color = if (on) tint.copy(alpha = 0.20f)
-        else MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = modifier
+        // v411 — the journal's own paper and depth (no hairline anywhere).
+        else journalPaper(),
+        modifier = modifier.curioCardShadow(RoundedCornerShape(14.dp), 1.5.dp)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 9.dp),

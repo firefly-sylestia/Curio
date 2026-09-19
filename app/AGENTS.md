@@ -9154,6 +9154,49 @@ only ever catches taps that mean "not in any of these".
   finger lifts. One `detectTapGestures` owns both gestures, so a hold can never
   also fire the tap that ended it.
 
+### v411, pass two — one flat card language, the journal's own colours, one progress bar
+
+- **NO CARD BORDER, IN ANY THEME.** `curioCardEdgeColor(fill)` now answers `fill`
+  unconditionally (it used to be the Pantone-only rule), and the soft warm
+  `Modifier.curioCardShadow(shape, elevation)` — a DeepPlum-tinted low-alpha
+  shadow, applied BEFORE the fill, a no-op in dark where the theme's glow does
+  the work — is what separates a card from its page. `outlineVariant` still
+  draws DIVIDERS. Applied at: `CurioSettingsCard`, `SettingsOptionCard`,
+  `StatsCard`, `StatsDoorChip`, the settings rail tab / quick-tool chip / search
+  card, the lane tile (selected only), and the journal's own cards.
+- **THE CREAM IS SUBTLER.** `CurioWhitePageLightScheme`'s card ladder was pitched
+  lighter (a card is `#FCF7EC` on the white page); the steps still climb evenly,
+  which is what keeps nesting legible without a hairline.
+- **THE JOURNAL HAS ITS OWN COLOURS** (`PersonalTheme.kt`): `journalPaper()` (a
+  warm parchment carrying a whisper of the member's accent, so it follows a
+  Pantone theme, a lane-following hero or the rose without knowing which),
+  `journalPaperRaised()`, `journalInk()` and `journalRule()`. Used by the journal
+  list rows, the empty card, the editor's mood pill and chips, and the canvas's
+  prints — a print and the page under it are one paper.
+- **ONE WAVE IN A VOICE NOTE.** `PersonalVoiceBar` drew the voice's envelope
+  TWICE (a mirrored pair of strokes, which is the "2 wave" the member called
+  out); it is ONE stroke now, bucketed to ~26 steps (the loudest sample of each
+  bucket wins) so a rise and a fall every 3dp cannot read as a fuzzy band, with a
+  soft under-stroke for depth. The strip stays backgroundless and shadowless
+  (v404's call — a recording is part of the writing, not a card in it).
+- **THE BOOK'S PROGRESS CARD: ONE BAR, TWO TILES.** The card drew a page gauge
+  AND a chapter tick row — two bars answering "how far" in two units. It is
+  `ReadingGauge` now: one bar whose fill is the page fraction, with the chapter
+  openings as notches INSIDE the track (`chapterPages` is the 1-based page each
+  chapter opens at; `MAX_GAUGE_NOTCHES` caps a 300-chapter file). The three
+  identical stepper rows became two `ProgressTile`s — the things you change while
+  reading, with the chapter tile NAMING the chapter — plus one quiet "This book
+  has" row for the book's length.
+- **THE PANTONE ACCENT IS APP-WIDE.** `curioRoseInk()` and
+  `settingsCardChipTint()` now answer the Pantone palette first, so the icon
+  chips, plate tints and ink accents across the app come back in the member's
+  three colours. Deliberately NOT recoloured: the gold/mint brand inks and the 36
+  lane accents — a Pantone number is a page, a hero and an ink, not a replacement
+  for every hue.
+- **What's New prints the build's own version.** The release entry said
+  `v1.1.1 · build 20260922` over a 1.3.0 build; a `WhatsNewRelease.versionName`
+  must match `versionName` in `app/build.gradle.kts`.
+
 ## Child DOX Index
 
 - [`CURIO_DATA_PLAN.md`](CURIO_DATA_PLAN.md) — Canonical **data layer** spec. Owns: category taxonomy expansion (6 → 10), `CurioTopic` + `ExploreAction` schema, JSON-on-disk canonical format, Room DB seed flow, image strategy (URL + Coil, no bundling), authoring pipeline (LLM-draft + human-review + smoke test), per-category rollout cadence (one category per PR, Music first). Read this BEFORE adding any topic data, category entry, or capture-format prompt.

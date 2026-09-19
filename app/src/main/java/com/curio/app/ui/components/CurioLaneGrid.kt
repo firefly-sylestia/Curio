@@ -43,7 +43,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.LaneKnowledge
 import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.curioCardEdgeColor
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.themedAccent
 
@@ -173,13 +172,11 @@ private fun LaneTile(
         animationSpec = tween(180),
         label = "laneTileFill"
     )
-    // v411 — the tile's edge: the selected one wears its accent (resolved
-    // solidly under a Pantone theme, see [curioTintOn]) and an UNSELECTED tile
-    // wears whatever the theme says a card edge is — which under a Pantone
-    // theme is NO edge at all ([curioCardEdgeColor]).
+    // v411 — no card edge any more (the app's cards carry a soft shadow
+    // instead of a hairline). What is left of the ring is SELECTION feedback:
+    // only the picked tile draws one, and only the picked tile lifts.
     val ring by animateColorAsState(
-        targetValue = if (selected) curioTintOn(fill, item.accent, 0.75f)
-        else curioCardEdgeColor(fill),
+        targetValue = curioTintOn(fill, item.accent, 0.75f),
         animationSpec = tween(180),
         label = "laneTileRing"
     )
@@ -195,7 +192,8 @@ private fun LaneTile(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = fill,
-        border = BorderStroke(if (selected) 1.5.dp else 1.dp, ring),
+        border = if (selected) BorderStroke(1.5.dp, ring) else null,
+        shadowElevation = if (selected) 3.dp else 0.dp,
         modifier = modifier.height(height)
     ) {
         Column(

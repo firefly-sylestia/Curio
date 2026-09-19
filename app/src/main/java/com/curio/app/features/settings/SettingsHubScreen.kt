@@ -119,7 +119,7 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.activePantoneTheme
-import com.curio.app.ui.theme.curioCardEdgeColor
+import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -954,6 +954,10 @@ internal fun navigateToSettingsSection(navController: NavController, entry: Sett
  */
 @Composable
 fun settingsCardChipTint(): Color {
+    // v411 — a Pantone theme's own hero colour comes first, so the icon chips
+    // and the small controls on a card are painted in the member's Pantone
+    // rather than in coral (see the app-wide note on `curioRoseInk`).
+    activePantoneTheme()?.let { return it.heroFor(isCurioDarkTheme()) }
     // v78 — light Curio only (the Material/AMOLED coral fallback is gone
     // with those styles).
     heroLaneCategory()?.let { return it.themedAccent() }
@@ -1937,24 +1941,11 @@ internal fun SettingsNavRail(
                                 else -> Color.White
                             }
                         )
-                        // The tab edge — AFTER the fill, so the hairline
-                        // survives (see the card-edge rule) and an unselected
-                        // tab still has an outline even where the wash behind
-                        // it is pale.
-                        // v411 — the selected tab's edge is its OWN pill colour
-                        // (it was `Color.Transparent`, which is both a see-
-                        // through value and a wasted layer), and an unselected
-                        // tab asks the theme for its card edge — NO edge under
-                        // a Pantone theme.
-                        .border(
-                            width = 1.dp,
-                            color = if (selected) SettingsRailAccent
-                            else curioCardEdgeColor(
-                                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                                else Color.White
-                            ),
-                            shape = RoundedCornerShape(17.dp)
-                        )
+                        // v411 — NO TAB EDGE. This tab used to draw a hairline
+                        // (and a transparent one when selected). The app's cards
+                        // carry a soft shadow instead of borders now, and an
+                        // unselected tab is an OPAQUE tile sitting on the card,
+                        // so it separates by lightness without either.
                         .clickable(enabled = entryEnabled) { onSelect(entry) }
                         .alpha(if (entryEnabled) 1f else 0.42f)
                 ) {
@@ -2069,6 +2060,9 @@ private fun SettingsQuickTools(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     modifier = Modifier
+                        // v411 — a soft shadow BEFORE the fill (no hairline any
+                        // more: see the card-edge rule).
+                        .curioCardShadow(RoundedCornerShape(50), 2.dp)
                         .clip(RoundedCornerShape(50))
                         // v408 — opaque, like every other small control on
                         // this page (the card ladder): these chips sat at
@@ -2076,15 +2070,6 @@ private fun SettingsQuickTools(
                         .background(
                             if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
                             else MaterialTheme.colorScheme.surfaceContainerLow
-                        )
-                        // v411 — no card border under a Pantone theme.
-                        .border(
-                            1.dp,
-                            curioCardEdgeColor(
-                                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                                else MaterialTheme.colorScheme.surfaceContainerLow
-                            ),
-                            RoundedCornerShape(50)
                         )
                         // v3xx46 — the quick-tool chips squish + tick too.
                         .curioPressClickable(pressedScale = 0.96f) {
@@ -2140,18 +2125,13 @@ private fun SettingsJsxSearchField(
             // v408 — the search field is a CARD, so it follows the ladder:
             // opaque white in light (opaque raised step in dark) with the
             // shared hairline, instead of 70% white fading into the wash.
+            // v411 — soft shadow FIRST, then the fill (no hairline: see the
+            // card-edge rule). Order is the whole trick: a shadow after the
+            // fill paints a blur over the card.
+            .curioCardShadow(RoundedCornerShape(19.dp), 2.dp)
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
                 else MaterialTheme.colorScheme.surfaceContainerLow
-            )
-            // v411 — no card border under a Pantone theme.
-            .border(
-                1.dp,
-                curioCardEdgeColor(
-                    if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                    else MaterialTheme.colorScheme.surfaceContainerLow
-                ),
-                RoundedCornerShape(19.dp)
             )
             .padding(horizontal = 15.dp)
     ) {

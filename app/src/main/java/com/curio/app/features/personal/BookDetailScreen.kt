@@ -9,6 +9,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -80,6 +81,7 @@ import com.curio.app.features.community.SocialPullQuote
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import kotlinx.coroutines.Dispatchers
@@ -643,6 +645,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                         pageCount = filePageCount,
                         lastPage = progressPage,
                         chapterNames = chapters.map { it.title },
+                        chapterPages = chapters.map { it.pageStart },
                         // v409 — A HAND MOVE OF THE PAGE LANDS ON THE BOOK ROW.
                         // It used to be written as a whole-row save that set the
                         // page COUNT and the chapter but never the page itself,
@@ -1057,6 +1060,9 @@ private fun ProgressCard(
     pageCount: Int,
     lastPage: Int,
     chapterNames: List<String>,
+    /** v411 — the 1-based page each chapter opens at, for the gauge's notches
+     *  (empty when the file's outline has names but no ranges). */
+    chapterPages: List<Int> = emptyList(),
     onChapter: (Int) -> Unit,
     onTotal: (Int) -> Unit,
     onFinished: (Boolean) -> Unit,
@@ -1159,69 +1165,36 @@ private fun ProgressCard(
                 }
             }
             Spacer(Modifier.height(14.dp))
-            // ── THE GAUGE — how far in, in one look. ──
-            // The file's own pages when it has pages to count (a PDF), else
-            // the chapter run, with the same fraction said once as a percent.
-            // It replaces the two separate strips the card used to show (a
-            // page bar AND a chapter tick row), which each answered "how far"
-            // in their own units and had to be read twice.
+            // ── THE GAUGE — ONE BAR, AND IT CARRIES BOTH FACTS (v411) ──
+            // The card used to draw TWO progress bars — a page gauge and, under
+            // it, a whole row of chapter ticks — which said "how far" twice, in
+            // two units, and had to be read twice (member: "in book view there
+            // are 2 progress bars now which is again bad can u please fix its
+            // design"). There is ONE bar now: the gauge carries the page
+            // fraction, and the chapter openings are drawn INSIDE its track as
+            // notches, so the run you are in and how much of the file is left
+            // read in a single look.
             if (pageCount > 0 || total > 0) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(9.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(ink.copy(alpha = 0.09f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(fraction)
-                                .height(9.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(accent)
-                        )
-                    }
-                    Spacer(Modifier.width(11.dp))
-                    Text(
-                        "$percent%",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = personalAccentInk()
-                    )
-                }
-            }
-            // One tick per chapter, so the number is a PLACE and not a figure:
-            // you can see the run you are in and how much is left at a glance.
-            if (total in 1..MAX_TICKS) {
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(total) { index ->
-                        val done = finished || index < current
-                        val here = !finished && index == current - 1
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(if (here) 7.dp else 3.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(
-                                    when {
-                                        done -> accent
-                                        here -> personalAccentInk()
-                                        else -> ink.copy(alpha = 0.12f)
-                                    }
-                                )
-                        )
-                    }
-                }
-                Spacer(Modifier.height(7.dp))
+                ReadingGauge(
+                    fraction = fraction,
+                    percent = percent,
+                    chapterStarts = chapterPages,
+                    pageCount = pageCount,
+                    // The notch is the CARD's own fill, so a chapter line reads
+                    // as a cut in the bar rather than another colour on it.
+                    notch = MaterialTheme.colorScheme.surfaceContainerLow,
+                    accent = accent,
+                    ink = ink
+                )
+                Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        if (finished || current > 0) "Chapter $current of $total"
-                        else "$total chapters",
+                        when {
+                            finished -> "Every chapter closed"
+                            total > 0 && current > 0 -> "Chapter $current of $total"
+                            total > 0 -> "$total chapters"
+                            else -> ""
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = ink.copy(alpha = 0.55f)
                     )
@@ -1248,77 +1221,200 @@ private fun ProgressCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(ink.copy(alpha = 0.07f))
+                        .background(MaterialTheme.colorScheme.outlineVariant)
                 )
-                Spacer(Modifier.height(3.dp))
-                ProgressStepperRow(
-                    label = "I'm on chapter",
-                    value = if (total > 0) current.coerceAtMost(total) else current,
-                    detail = if (current > 0) "" else "not started",
-                    accent = accent,
-                    ink = ink,
-                    onChange = { onChapter(it.coerceAtMost(if (total > 0) total else 999)) }
-                )
-                if (onPage != null && pageCount > 0) {
-                    ProgressStepperRow(
-                        label = "Page",
-                        value = lastPage,
-                        detail = "of $pageCount",
-                        accent = accent,
+                Spacer(Modifier.height(12.dp))
+                // ── TWO TILES, THEN ONE QUIET SETTING (v411) ──
+                // The redesign ("please redesign its visual and options the
+                // im on chapter the book has that etc etc") splits the three
+                // identical rows by what they actually are: WHERE YOU ARE is
+                // two things you change while reading, so they get the space
+                // and the emphasis (a tile each, the chapter tile naming the
+                // CHAPTER and not just its number), while HOW LONG THE BOOK IS
+                // is a setting you touch once and sits below them in the quiet
+                // register.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    ProgressTile(
+                        label = "I'm on chapter",
+                        value = chapterNames.getOrNull(current - 1)
+                            ?.takeIf { it.isNotBlank() }
+                            ?: if (current > 0) "Chapter $current" else "Not started",
+                        detail = if (total > 0) "${current.coerceAtLeast(0)} of $total" else "",
                         ink = ink,
-                        onChange = { onPage(it.coerceIn(0, pageCount)) }
+                        modifier = Modifier.weight(1f),
+                        onDecrease = { onChapter((current - 1).coerceAtLeast(0)) },
+                        onIncrease = {
+                            onChapter((current + 1).coerceAtMost(if (total > 0) total else 999))
+                        }
                     )
+                    if (onPage != null && pageCount > 0) {
+                        ProgressTile(
+                            label = "Page",
+                            value = if (lastPage > 0) "$lastPage" else "—",
+                            detail = "of $pageCount",
+                            ink = ink,
+                            modifier = Modifier.weight(1f),
+                            onDecrease = { onPage((lastPage - 1).coerceIn(0, pageCount)) },
+                            onIncrease = { onPage((lastPage + 1).coerceIn(0, pageCount)) }
+                        )
+                    }
                 }
-                ProgressStepperRow(
-                    label = "The book has",
-                    value = total,
-                    detail = "chapters",
-                    accent = accent,
-                    ink = ink,
-                    onChange = onTotal
-                )
+                Spacer(Modifier.height(14.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "This book has",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                        color = ink.copy(alpha = 0.82f),
+                        modifier = Modifier.weight(1f)
+                    )
+                    ChapterStepper(count = total, onChange = onTotal, accent = accent, ink = ink)
+                }
             }
         }
     }
 }
 
 /**
- * v409 — ONE PROGRESS CONTROL: what it sets, what it is now, and the stepper.
+ * v411 — THE ONE GAUGE.
  *
- * The three rows are the same row because they are the same act — "I am on
- * chapter 12", "I am on page 240", "this book has 40 chapters" — and because
- * the value only means something beside its own name (the old card's bare
- * "I'm on   12" left the member guessing which of the three numbers they were
- * looking at).
+ * A single bar for the whole book: the fill is how far in the member is (the
+ * file's own pages when there are pages to count, else the chapter run), and
+ * the chapter openings are drawn INSIDE the track as notches — so the structure
+ * of the book and the position in it share one bar instead of being told on two
+ * ([MAX_GAUGE_NOTCHES] keeps a 300-chapter file from drawing 300 hairlines).
+ *
+ * [chapterStarts] are the 1-based pages the chapters open at (empty for a file
+ * whose outline carries names but no ranges — an EPUB from the catalogue), and
+ * the notches are skipped entirely when there is no page to place them on.
  */
 @Composable
-private fun ProgressStepperRow(
-    label: String,
-    value: Int,
-    detail: String,
+private fun ReadingGauge(
+    fraction: Float,
+    percent: Int,
+    chapterStarts: List<Int>,
+    pageCount: Int,
+    notch: Color,
     accent: Color,
-    ink: Color,
-    onChange: (Int) -> Unit
+    ink: Color
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                label,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                color = ink.copy(alpha = 0.82f)
-            )
-            if (detail.isNotBlank()) {
-                Text(
-                    detail,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ink.copy(alpha = 0.5f)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Canvas(
+            modifier = Modifier
+                .weight(1f)
+                .height(11.dp)
+                .clip(RoundedCornerShape(50))
+                .background(ink.copy(alpha = 0.09f))
+        ) {
+            val filled = size.width * fraction.coerceIn(0f, 1f)
+            if (filled > 0f) {
+                drawRoundRect(
+                    color = accent,
+                    size = Size(filled, size.height),
+                    cornerRadius = CornerRadius(size.height / 2f)
                 )
             }
+            if (pageCount > 1 && chapterStarts.size in 2..MAX_GAUGE_NOTCHES) {
+                val stroke = 1.5.dp.toPx()
+                chapterStarts.forEach { start ->
+                    val at = (start - 1).toFloat() / (pageCount - 1).toFloat() * size.width
+                    if (at > stroke && at < size.width - stroke) {
+                        drawLine(
+                            color = notch,
+                            start = Offset(at, 0f),
+                            end = Offset(at, size.height),
+                            strokeWidth = stroke
+                        )
+                    }
+                }
+            }
         }
-        ChapterStepper(count = value, onChange = onChange, accent = accent, ink = ink)
+        Spacer(Modifier.width(11.dp))
+        Text(
+            "$percent%",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = personalAccentInk()
+        )
+    }
+}
+
+/**
+ * v411 — ONE OF THE TWO CHOICES: a name, the value it holds, and the two ways to
+ * move it.
+ *
+ * The value is the PROMINENT line — a chapter is NAMED, not numbered, because
+ * the name is what a reader says when asked where they are — and the count sits
+ * under it. The stepper is two round buttons rather than the shared
+ * [ChapterStepper]: the value is already said above them, and printing it a
+ * second time between the arrows is exactly the duplication this card was
+ * rebuilt to remove.
+ */
+@Composable
+private fun ProgressTile(
+    label: String,
+    value: String,
+    detail: String,
+    ink: Color,
+    modifier: Modifier = Modifier,
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .curioCardShadow(RoundedCornerShape(16.dp), 2.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .padding(horizontal = 12.dp, vertical = 11.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(
+            label.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.1.sp
+            ),
+            color = personalAccentInk().copy(alpha = 0.8f)
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontFamily = FrauncesFontFamily,
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = ink,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (detail.isNotBlank()) {
+            Text(
+                detail,
+                style = MaterialTheme.typography.labelSmall,
+                color = ink.copy(alpha = 0.55f)
+            )
+        }
+        Spacer(Modifier.height(7.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            TileStepButton(CurioIcons.Remove, "One back", ink, onDecrease)
+            TileStepButton(CurioIcons.Add, "One on", ink, onIncrease)
+        }
+    }
+}
+
+/** One round end of a [ProgressTile]'s stepper. */
+@Composable
+private fun TileStepButton(glyph: String, label: String, ink: Color, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        modifier = Modifier.size(34.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CurioIcon(glyph, label, tint = ink.copy(alpha = 0.8f), size = 17.dp)
+        }
     }
 }
 
@@ -1992,3 +2088,12 @@ private fun BookReadPill(
 
 /** Past this many chapters the tick rail stops being readable. */
 private const val MAX_TICKS = 48
+
+/**
+ * v411 — how many chapter notches the gauge will draw before it gives up.
+ *
+ * A bar is about 200dp wide; past ~80 openings the hairlines stop reading as
+ * chapters and start reading as a texture, so a very long file simply gets the
+ * clean fill (its chapter count is still stated under the bar).
+ */
+private const val MAX_GAUGE_NOTCHES = 80

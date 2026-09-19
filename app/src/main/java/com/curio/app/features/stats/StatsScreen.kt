@@ -1,6 +1,5 @@
 package com.curio.app.features.stats
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,7 +69,7 @@ import com.curio.app.ui.components.laneGridItems
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioCardEdgeColor
+import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.isCurioDarkTheme
 
@@ -551,7 +550,8 @@ private fun StatsDoorChip(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         color = fill,
-        border = BorderStroke(1.dp, curioCardEdgeColor(fill))
+        // v411 — no hairline: a soft shadow lifts the chip instead.
+        shadowElevation = 2.dp
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -646,9 +646,10 @@ private fun StatsCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-        // v411 — no card border under a Pantone theme.
-        border = BorderStroke(1.dp, curioCardEdgeColor(MaterialTheme.colorScheme.surfaceContainerLowest)),
-        modifier = Modifier.fillMaxWidth()
+        // v411 — no hairline; the soft shadow is the card's edge now.
+        modifier = Modifier
+            .fillMaxWidth()
+            .curioCardShadow(RoundedCornerShape(22.dp))
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
