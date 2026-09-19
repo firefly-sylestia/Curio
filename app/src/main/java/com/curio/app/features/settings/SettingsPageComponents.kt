@@ -332,7 +332,12 @@ fun SettingsOptionSegmentedRow(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface
+                // v412 — a disabled row is GRAYED, title included: the
+                // segments' own disabled state only whispers, and a full-ink
+                // title over grayed buttons read as a row that was merely
+                // still loading.
+                color = if (enabled) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {

@@ -24,6 +24,11 @@ Follow-up (same session, after the workflow/social push):
 > screen shuffle deice the shuffle the deck one dice it doesnt have its icon visible fix
 > it please then watch the cl after psuh"
 
+Second follow-up:
+
+> "also the paper white page and cream page should be grayed out in dark mode and in other
+> theme that are not curio rose or azure hero."
+
 ## 2. What the code actually looked like (findings)
 
 - **The v411 commit shipped six distinct compile errors**, all in code written in the
@@ -102,6 +107,15 @@ Follow-up (same session, after the workflow/social push):
   mode is the near-white `onBackground` — readable on the deep banner, invisible on its own
   near-white disc. The glyph now wears `curioFillInk(disc)` — the same helper the social
   fix introduced — so it reads on the plate in every theme.
+
+### The Paper row's gray-out
+
+`AppPreferences.paperCreamCardsState` only drives `curioColorScheme()`'s final branch —
+the light Curio cream/white pair. Under dark mode, Material, Adaptive Hero or a Pantone
+theme the choice is dead weight, and the row looked alive while doing nothing. The row is
+now `enabled = !dark && theme in {CURIO, AZURE}` with a disabled hint naming why (the
+shared segmented row grew a full-ink→onSurfaceVariant title dim), and the stored pref is
+kept so returning to a light Curio/Azure theme restores the exact pick.
 
 ## 4. Decisions
 

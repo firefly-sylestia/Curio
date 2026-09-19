@@ -353,14 +353,33 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // directions — a card always separates from its page by lightness —
         // so this is a straight visual preference, not a mode. Dark mode is
         // untouched: its page is black and its plates step up from it.
+        // v412 — GRAYED OUT WHERE IT HAS NO EFFECT: the paper flip only ever
+        // describes Curio's own cream/white light pair (see curioColorScheme),
+        // so on dark mode — or under Material, Adaptive Hero or a Pantone
+        // theme, which paint their own pages — the row is disabled with a
+        // line saying why, instead of a control that silently does nothing.
+        // The stored choice is kept, so returning to a light Curio/Azure
+        // theme restores exactly what was picked.
         SettingsRowPulse(highlightKey == "appearance-paper") {
+            val dark = isCurioDarkTheme()
+            val theme = AppPreferences.colorThemeState
+            val paperApplies = !dark && (
+                theme == AppPreferences.COLOR_THEME_CURIO ||
+                    theme == AppPreferences.COLOR_THEME_AZURE
+                )
             CompactSegmentedRow(
                 CurioIcons.Contrast,
                 "Paper",
                 listOf("White page", "Cream page"),
-                if (AppPreferences.paperCreamCardsState) 0 else 1
+                if (AppPreferences.paperCreamCardsState) 0 else 1,
+                enabled = paperApplies,
+                disabledHint = when {
+                    paperApplies -> null
+                    dark -> "The paper follows the light Curio and Azure themes — dark mode wears its own page."
+                    else -> "The paper follows the Curio rose and Azure hero themes."
+                }
             ) { index ->
-                AppPreferences.setPaperCreamCardsEnabled(context, index == 0)
+                if (paperApplies) AppPreferences.setPaperCreamCardsEnabled(context, index == 0)
             }
         }
         SettingsOptionDivider()
