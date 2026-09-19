@@ -1,82 +1,89 @@
 # Prompt.md — current request
 
-## 1. The reader: a zoomed page could not be moved, and the column looked wrong
+Branch: **`ci/workflow-redesign`** (nothing pushed; every change here is committed
+only, per the member's instruction).
 
-The member's ask: *"with pinched zoom still the pages slips when its on side by
-side pages properly fix the page chnaging when pinced zoom, also the vertical
-zoom is fine now but again really bad and buggy, so please fix it, i cant even
-move around when zoomed in in vetical scrolling, also kind of weird looking when
-the above pages are not separated of their on pages etc its kind of bad behavior
-and weird look fix and refine mit and also fix the ocl and push the fix."*
+## 1. The CI run's surfaces (the headline of this branch)
 
-### The real cause of BOTH zoom bugs — `readerZoomedPan` cancelled its own drag
+The member's ask: *"github workflow desisgn in a new branch with more suggestions
+for screens"*, after *"mine workflow run looks very simple, i dont have the check
+run too etc etc yk what ould be a better workflow run."*
 
-`readerZoomThisPage` passed `focus = focus + drag`, and the helper solved
+The run had ONE surface (a job whose only output was a wall of Gradle log) and
+now has four, each read by a different person at a different moment:
 
-```
-next = at - centre - (at - centre - pan) * ratio
-```
+| Surface | Where | Written by |
+| --- | --- | --- |
+| Build summary | run page, bottom | `.github/scripts/build-summary.sh` |
+| Checks tab | annotations on the changed files | `.github/scripts/annotate-gradle.sh` |
+| Report check | a second job beside `verify` | the workflow itself |
+| PR comment | the pull request | `gh pr comment`, same-repo PRs only |
 
-At a **constant zoom** (`ratio == 1`, which is every one-finger pan) that
-expression collapses to exactly `pan` — the drag cancelled itself out. So a
-magnified page answered "no room" to every pan, `Offset.Zero` was returned, the
-drag was left unconsumed, and the surface underneath took it:
+Decisions worth keeping:
 
-- **vertical reader** — the column scrolled instead of the page moving:
-  *"i cant even move around when zoomed in in vetical scrolling"*;
-- **paged reader** — the pager turned the page you were magnifying:
-  *"the pages slips when its on side by side pages"* / *"the page chnaging when
-  pinced zoom"*.
+- **The scripts only READ.** `validateTopics` stays the authority for topic data;
+  the CI scripts derive the summary from the files the build left (the APK, the
+  lint report, the bundled catalogs), so re-ordering steps cannot make the
+  summary lie, and a missing log exits 0 instead of failing a step.
+- **The build step is `continue-on-error: true`.** A gate step re-fails the run
+  afterwards. That is the only way the annotation and summary steps run on a
+  FAILED build, which is when the compiler's own errors matter most.
+- **The PR comment is upserted**, matched by the `<!-- curio-ci-report -->`
+  marker, so there is one live comment per PR and not one per push — and it is
+  gated to same-repo PRs, because a fork PR's token is read-only.
+- **`report` needs only `verify`'s step outputs**, so anything the report must
+  say has to be published in `verify`'s `outputs:` block.
+- Further surfaces that are NOT built are listed in `.github/AGENTS.md` (timing
+  table, APK size trend, catalog diff, failure digest, coverage row, …).
 
-**The fix (v404).** The drag is folded in by `readerZoomedPan` itself:
+## 2. The deprecated Kotlin warnings
 
-```
-next = pan * ratio + drag + (focus - centre) * (1 - ratio)
-```
+Fixes done on this branch:
 
-`drag = (0,0)` for a double tap, so the anchoring half still grows the page
-about the tapped word; at `ratio == 1` it reduces to `pan + drag`, which is what
-makes a zoomed page move. The caller now passes `focus` WITHOUT the drag. The
-travel is still clamped to the page's own room (`drawn` inside `box`), so a drag
-the page has no room for is still handed back — a page turn at the end of a
-magnified page still arrives on the next swipe, which is the member's own rule.
+- **`quadraticBezierTo` → `quadraticTo`** — a straight rename, 75 call sites:
+  `SocialAvatar.kt` (62), `TopicShareCard.kt` (9), `CurioPetCompanion.kt` (4).
 
-### The column's look — sheets, not one continuous strip
+Deliberately NOT done, with the reason each one needs a real compile to be worth
+attempting:
 
-The PDF column stacked its pages **flush** (`spacedBy(0.dp)`), each clipped at
-its own edge, so a run of scans read as one strip with slivers of rounding down
-it — and with one page magnified inside its frame the whole thing read as a
-printout with the odd page swollen (*"its kind of weird looking when the above
-pages are not separated of their on pages"*). Each page is now a sheet: it sits
-on the reader's own paper (`.background(palette.paper)`), wears a hairline edge
-(`.border(1.dp, ink @ 10%)`) and has air around it
-(`contentPadding(start/end 14, top 10, bottom 18)` + `spacedBy(16.dp)`).
+- **`rememberModalBottomSheetState` (~30 sites).** Material3 here is
+  `1.5.0-alpha20`, which introduced `rememberBottomSheetState` as the unified
+  API. The replacement takes the sheet's initial value (`SheetValue.Hidden`) and
+  the release notes say the PartiallyExpanded anchor is no longer removed
+  automatically — i.e. it is a BEHAVIOUR change behind a rename, and the exact
+  parameter list could not be confirmed from the published docs. Needs a compile
+  (or the artifact's own sources) before it is trusted.
+- **`LocalClipboardManager` → `LocalClipboard` (4 sites).** Not a rename: the new
+  API is suspend-based, so every call site's control flow changes.
+- **`LocalLifecycleOwner` (`IsbnScannerScreen`).** The new home is
+  `androidx.lifecycle.compose.LocalLifecycleOwner`, from
+  `lifecycle-runtime-compose` — which is in the version catalog but is **not a
+  dependency of `:app`**, so this needs a dependency line first.
+- **The `Unnecessary safe call` / `Condition is always true` / `Elvis always
+  returns the left operand` / `Redundant call of conversion method` families
+  (~150 warnings).** Every one is a site-specific judgement (`?.` on a
+  smart-cast value, an `else` on an exhaustive `when`), and there is no compiler
+  in this workspace to catch a wrong call. They want a pass of their own, in
+  small batches, per file.
 
-### Also in this batch
+## 3. The journal voice note
 
-- The stale duplicate of `readerZoomedPan`'s old doc comment (which sat orphaned
-  above `readerZoomThisPage`) is gone; the helper carries the derivation itself.
-- `app/AGENTS.md`: the reader rules that said zoom "waits for a second pointer"
-  and that "the focus cancels" at a constant zoom were both wrong after v403 and
-  are rewritten (the drag must never be folded in by the caller).
+- **No shadow.** v403 lifted the strip with `.shadow(1.5.dp, …)`; the member
+  called it back — the block casts nothing and has no background, so it reads as
+  part of the writing (the recording capsule's own elevation is untouched: that
+  is the recording UI, not the page).
+- **The graph is a hand-drawn pulse.** The rounded-bar chart is gone; the voice's
+  envelope is now ONE inked line — an upper and a lower contour stroked in the
+  page's ink, the played part in the note's own accent, cut at the playhead by
+  `clipRect`. The wobble that makes it read as drawn is a HASH of the sample's
+  index rather than a random number, so the ink is identical on every frame and
+  the line never crawls while it plays.
+- **The play button is a dark, solid, filled disc** with the glyph knocked out of
+  it in the page's paper — the same treatment the record button wears, so the two
+  controls are one shape in one ink.
 
-## 2. The compile error (CI red)
+## 4. Still outstanding
 
-```
-PersonalCanvas.kt:2877 Unresolved reference 'radius'
-PersonalCanvas.kt:2881 Unresolved reference 'hairline'
-...
-```
-
-HEAD had the new print-cell branch of the landing ghost **outside** the
-`if (band > 0f) { ... }` block where `band`, `lead`, `radius` and `hairline` are
-declared (HEAD: the branch opens at 2814 and closes at 2850, with
-`carriedIsPrint` at 2866). The working tree already moves that branch inside the
-band's own scope (the branch closes at 2902), so `radius`/`hairline` resolve. No
-further code change was needed — the fix is committed in this push.
-
-## 3. Not pushed by choice, and known gaps
-
-- CI is unconfirmed on the previous two commits; this push is meant to turn it
-  green.
-- The member asked for the moderation/forms work to be held until they say.
+- The warning families above (bottom-sheet migration, clipboard, lifecycle
+  dependency, and the ~150 site-specific ones).
+- Nothing on this branch has been pushed, so none of it is CI-verified yet.

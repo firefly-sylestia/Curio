@@ -14,11 +14,47 @@ concurrency:
   group: curio-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# ─────────────────────────────────────────────────────────────────────────────
+# THE RUN HAS FOUR SURFACES (v405)
+#
+# The run page used to be one long job whose only output was a wall of Gradle
+# log. It now answers four questions in four places, because each of them is
+# read by a different person at a different moment:
+#
+#   1. THE SUMMARY (this page, bottom) — "what did this build actually do?" A
+#      table of the version, the catalogs bundled, the warning/error counts, the
+#      signing story and the APK's size and SHA-256. Written by
+#      `.github/scripts/build-summary.sh`, rendered by GitHub from
+#      `$GITHUB_STEP_SUMMARY`.
+#   2. THE CHECKS TAB — the Kotlin compiler's own `e:`/`w:` lines re-emitted as
+#      ANNOTATIONS (`::error`/`::warning` with a file, line and column), so a
+#      warning is a clickable row on the changed file instead of a line in a
+#      12,000-line log. Written by `.github/scripts/annotate-gradle.sh`.
+#   3. THE REPORT JOB — one check whose whole body is the summary, so the run's
+#      list reads "Curio Android CI / Curio CI report" next to the build, and a
+#      reviewer who opens only the report still sees everything.
+#   4. THE PULL REQUEST — the same summary as an upserted comment, for a
+#      same-repo PR only (a fork PR's token is read-only, so it is skipped).
+# ─────────────────────────────────────────────────────────────────────────────
+
 jobs:
   verify:
-    name: Validate, lint, and build release APKs
+    name: Curio Android (validate · lint · release)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+
+    outputs:
+      build_outcome: ${{ steps.build.outcome }}
+      version: ${{ steps.summary.outputs.version }}
+      apk_name: ${{ steps.apk.outputs.name }}
+      apk_size: ${{ steps.apk.outputs.size }}
+      apk_sha: ${{ steps.apk.outputs.sha }}
+      signature: ${{ steps.summary.outputs.signature }}
+      warnings: ${{ steps.annotate.outputs.warnings }}
+      errors: ${{ steps.annotate.outputs.errors }}
+      catalogs: ${{ steps.topics.outputs.catalogs }}
+      lint_errors: ${{ steps.lint.outputs.errors }}
+      lint_warnings: ${{ steps.lint.outputs.warnings }}
 
     steps:
       - name: Check out Curio
@@ -56,10 +92,48 @@ jobs:
           echo "Release keystore decoded (${size} bytes)."
           echo "decoded=true" >> "$GITHUB_OUTPUT"
 
+      # Bundle the source catalogs as Android assets. The app imports these JSON
+      # files into its user database on first launch (and retries for existing
+      # installs whose previous import produced zero rows). The per-file record
+      # goes into the summary — an empty or truncated catalog is the one failure
+      # this step exists to catch, and it is invisible in a log line count.
+      - name: Bundle the topic catalogs
+        id: topics
+        run: |
+          set -euo pipefail
+          rm -rf app/src/main/assets/topics
+          mkdir -p app/src/main/assets/topics
+          cp data/topics/*.json app/src/main/assets/topics/
+          catalogs=$(find app/src/main/assets/topics -maxdepth 1 -name '*.json' | wc -l)
+          if [ "$catalogs" -eq 0 ]; then
+            echo "::error::No topic JSON assets were bundled."
+            exit 1
+          fi
+          topics=$(python3 - <<'PY'
+          import glob, json
+          total = 0
+          for path in glob.glob("app/src/main/assets/topics/*.json"):
+              with open(path, encoding="utf-8") as handle:
+                  data = json.load(handle)
+              total += len(data if isinstance(data, list) else data.get("topics", []))
+          print(total)
+          PY
+          )
+          echo "catalogs=${catalogs}" >> "$GITHUB_OUTPUT"
+          echo "topics=${topics}" >> "$GITHUB_OUTPUT"
+          echo "Bundled ${catalogs} catalog files carrying ${topics} topics."
+
       # PR/push CI builds ONE universal release APK (curioAbiSplits=false
-      # disables the per-ABI split packaging in app/build.gradle.kts). The
-      # tag release workflow builds the full universal + per-ABI set.
-      - name: Run Android checks and build the universal release APK
+      # disables the per-ABI split packaging in app/build.gradle.kts). The tag
+      # release workflow builds the full universal + per-ABI set.
+      #
+      # `continue-on-error` so the annotation and summary steps below still run
+      # on a FAILED build — the compiler's own errors are exactly what the
+      # Checks tab should be showing — and the outcome is re-failed by the gate
+      # step after them.
+      - name: Validate, lint and build the release APK
+        id: build
+        continue-on-error: true
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -103,31 +177,33 @@ jobs:
           # own Site URL in charge and hides the app's password-recovery row.
           CURIO_AUTH_SITE_URL: ${{ secrets.CURIO_AUTH_SITE_URL }}
         run: |
+          set -o pipefail
           if [ -z "$SUPABASE_URL" ] || { [ -z "$SUPABASE_PUBLISHABLE_KEY" ] && [ -z "$SUPABASE_ANON_KEY" ]; }; then
             echo "::warning::Supabase URL/key secrets not provided — this build's Online Mode will report unconfigured."
           else
             echo "Supabase project URL + publishable key were provided to the build."
           fi
-          # Bundle the source catalogs as Android assets. The app imports these
-          # JSON files into its user database on first launch (and retries for
-          # existing installs whose previous import produced zero rows).
-          rm -rf app/src/main/assets/topics
-          mkdir -p app/src/main/assets/topics
-          cp data/topics/*.json app/src/main/assets/topics/
-          topic_files=$(find app/src/main/assets/topics -maxdepth 1 -name '*.json' | wc -l)
-          if [ "$topic_files" -eq 0 ]; then
-            echo "::error::No topic JSON assets were bundled."
-            exit 1
-          fi
-          echo "Bundled $topic_files topic catalog files into the APK."
-          ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
+          ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace 2>&1 \
+            | tee gradle-build.log
 
+      # ── SURFACE 2: THE CHECKS TAB ──────────────────────────────────────────
+      # Every Kotlin diagnostic in the log becomes a real annotation, and the
+      # counts become outputs the summary and the report job reuse. Nothing here
+      # can fail the run: it is a reader of the log, not a check.
+      - name: Publish compiler diagnostics as check annotations
+        id: annotate
+        if: always()
+        run: |
+          set -uo pipefail
+          chmod +x .github/scripts/annotate-gradle.sh .github/scripts/build-summary.sh
+          .github/scripts/annotate-gradle.sh gradle-build.log
+
+      # ── SURFACE 1: THE SUMMARY ─────────────────────────────────────────────
       - name: Verify release APKs and signatures
-        if: steps.keystore.outputs.decoded == 'true'
+        id: apk
+        if: steps.build.outcome == 'success' && steps.keystore.outputs.decoded == 'true'
         run: |
           set -euo pipefail
-          # PR/push CI: exactly one universal release APK (splits disabled
-          # via -PcurioAbiSplits=false — see app/build.gradle.kts).
           shopt -s nullglob
           apks=(app/build/outputs/apk/release/*.apk)
           if [ "${#apks[@]}" -eq 0 ]; then
@@ -148,7 +224,65 @@ jobs:
               exit 1
             fi
           done
+          apk="${apks[0]}"
+          echo "name=$(basename "$apk")" >> "$GITHUB_OUTPUT"
+          echo "size=$(du -h "$apk" | cut -f1)" >> "$GITHUB_OUTPUT"
+          echo "sha=$(sha256sum "$apk" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "signature=release keystore" >> "$GITHUB_OUTPUT"
           echo "Verified ${#apks[@]} release APK(s) — none signed with the debug key."
+
+      - name: Read the lint totals
+        id: lint
+        if: always()
+        run: |
+          set -uo pipefail
+          report=$(ls app/build/reports/lint-results*.txt 2>/dev/null | head -1 || true)
+          if [ -z "$report" ]; then
+            echo "errors=0" >> "$GITHUB_OUTPUT"
+            echo "warnings=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          totals=$(grep -oE '[0-9]+ (errors?|warnings?)' "$report" | tail -2 | tr '\n' ' ' || true)
+          errors=$(printf '%s' "$totals" | grep -oE '[0-9]+ error' | grep -oE '[0-9]+' | head -1)
+          warnings=$(printf '%s' "$totals" | grep -oE '[0-9]+ warning' | grep -oE '[0-9]+' | head -1)
+          echo "errors=${errors:-0}" >> "$GITHUB_OUTPUT"
+          echo "warnings=${warnings:-0}" >> "$GITHUB_OUTPUT"
+
+      - name: Write the run summary
+        id: summary
+        if: always()
+        env:
+          DECODED: ${{ steps.keystore.outputs.decoded }}
+          APK_SIGNATURE: ${{ steps.apk.outputs.signature }}
+        run: |
+          set -uo pipefail
+          version_code=$(grep -oE 'versionCode[[:space:]]*=[[:space:]]*[0-9]+' app/build.gradle.kts | grep -oE '[0-9]+' | head -1)
+          version_name=$(grep -oE 'envReleaseVersion \?: "[0-9.]+"' app/build.gradle.kts | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          if [ -n "$APK_SIGNATURE" ]; then
+            signature="$APK_SIGNATURE"
+          elif [ "$DECODED" == "true" ]; then
+            signature="release keystore (no APK to verify)"
+          else
+            signature="debug-key fallback (no keystore secrets)"
+          fi
+          .github/scripts/build-summary.sh "$signature"
+          echo "version=${version_name:-1.1.1} (${version_code:-20260922})" >> "$GITHUB_OUTPUT"
+          echo "signature=${signature}" >> "$GITHUB_OUTPUT"
+
+      - name: Fail the run when the build failed
+        if: steps.build.outcome == 'failure'
+        run: |
+          echo "::error::The Gradle build failed — see the annotations above and the uploaded log."
+          exit 1
+
+      - name: Upload the Gradle log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: curio-gradle-log-${{ github.run_number }}
+          path: gradle-build.log
+          if-no-files-found: ignore
+          retention-days: 1
 
       - name: Upload lint reports
         if: always()
@@ -177,6 +311,84 @@ jobs:
           # minimum so artifact storage barely accumulates. The official
           # APKs attached to tag RELEASES (release.yml) stay permanent.
           retention-days: 1
+
+      - name: Note the signing fallback
+        if: steps.keystore.outputs.decoded != 'true'
+        run: |
+          {
+            echo ""
+            echo "> Signing: **debug-key fallback** — no \`KEYSTORE_*\` secrets reached this run"
+            echo "> (a fork PR, or an unconfigured repository). A published release never falls back."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── SURFACE 3 + 4: THE REPORT JOB AND THE PULL REQUEST ─────────────────────
+  #
+  # A second job so the run's own list carries a "Curio CI report" entry: it
+  # needs nothing from the machine that built the APK, only the numbers the
+  # build job already published, which is why it is cheap. `if: always()` so a
+  # failed build still produces the reader-facing summary.
+  report:
+    name: Curio CI report
+    needs: verify
+    if: always() && needs.verify.result != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Publish the run report
+        run: |
+          set -uo pipefail
+          {
+            echo "# Curio Android CI — report"
+            echo ""
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Build | ${{ needs.verify.outputs.build_outcome == 'success' && '✅ passed' || '❌ failed' }} |"
+            echo "| Version | ${{ needs.verify.outputs.version }} |"
+            echo "| Topic catalogs | ${{ needs.verify.outputs.catalogs }} files |"
+            echo "| Compiler warnings | ${{ needs.verify.outputs.warnings }} |"
+            echo "| Compiler errors | ${{ needs.verify.outputs.errors }} |"
+            echo "| Lint | ${{ needs.verify.outputs.lint_errors }} error(s) · ${{ needs.verify.outputs.lint_warnings }} warning(s) |"
+            echo "| Signing | ${{ needs.verify.outputs.signature }} |"
+            echo "| APK | ${{ needs.verify.outputs.apk_name }} |"
+            echo "| APK size | ${{ needs.verify.outputs.apk_size }} |"
+            echo "| SHA-256 | \`${{ needs.verify.outputs.apk_sha }}\` |"
+            echo ""
+            echo "The Kotlin diagnostics are in the **Checks** tab of this run (one"
+            echo "annotation per file, line and column). The full Gradle log and the"
+            echo "lint reports are attached to the \`verify\` job as artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # SURFACE 4 — the pull request. Same-repo PRs only: GitHub hands a fork
+      # PR a read-only token, so this is skipped rather than failing. `gh pr
+      # comment` upserts nothing, so the step deletes its own previous comment
+      # first (marked below) to keep one live comment instead of one per push.
+      - name: Comment the report on the pull request
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          marker="<!-- curio-ci-report -->"
+          body=$(printf '%s\n\n%s\n\n| | |\n| --- | --- |\n| Build | %s |\n| Version | %s |\n| Compiler warnings | %s |\n| Lint | %s error(s) · %s warning(s) |\n| Signing | %s |\n| APK | %s (%s) |\n| SHA-256 | %s |\n\n_Kotlin diagnostics are in the Checks tab of this run._\n' \
+            "$marker" "## Curio Android CI" \
+            "${{ needs.verify.outputs.build_outcome == 'success' && '✅ passed' || '❌ failed' }}" \
+            "${{ needs.verify.outputs.version }}" \
+            "${{ needs.verify.outputs.warnings }}" \
+            "${{ needs.verify.outputs.lint_errors }}" \
+            "${{ needs.verify.outputs.lint_warnings }}" \
+            "${{ needs.verify.outputs.signature }}" \
+            "${{ needs.verify.outputs.apk_name }}" "${{ needs.verify.outputs.apk_size }}" \
+            "${{ needs.verify.outputs.apk_sha }}")
+          existing=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)
+          if [ -n "$existing" ]; then
+            gh api -X DELETE "repos/${{ github.repository }}/issues/comments/$existing" > /dev/null
+          fi
+          printf '%s' "$body" | gh pr comment "${{ github.event.pull_request.number }}" --body-file -
 
   # v27t — Compose Multiplatform desktop port. DISABLED (if: false) until
   # the desktop app is finished — the port isn't ready, so stop burning CI

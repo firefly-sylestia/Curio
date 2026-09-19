@@ -569,10 +569,10 @@ private fun DrawScope.drawBust(art: AvatarArt, u: Float) {
     // the shoulder line down, with the neck drawn over its middle.
     val shoulders = Path().apply {
         moveTo(-4f, 104f)
-        quadraticBezierTo(2f, 78f, 24f, 71f)
-        quadraticBezierTo(39f, 66f, 50f, 66f)
-        quadraticBezierTo(61f, 66f, 76f, 71f)
-        quadraticBezierTo(98f, 78f, 104f, 104f)
+        quadraticTo(2f, 78f, 24f, 71f)
+        quadraticTo(39f, 66f, 50f, 66f)
+        quadraticTo(61f, 66f, 76f, 71f)
+        quadraticTo(98f, 78f, 104f, 104f)
         close()
     }
     fill(shoulders.scaled(u), garment, u, ink = 0f)
@@ -716,10 +716,10 @@ private fun DrawScope.drawFace(art: AvatarArt, u: Float) {
 private fun DrawScope.hairCap(art: AvatarArt, u: Float, drop: Float = 0f) {
     val path = Path().apply {
         moveTo(HEAD_CX - 21f, HEAD_CY + 6f + drop)
-        quadraticBezierTo(HEAD_CX - 22f, HEAD_CY - 24f, HEAD_CX, HEAD_CY - 24f)
-        quadraticBezierTo(HEAD_CX + 22f, HEAD_CY - 24f, HEAD_CX + 21f, HEAD_CY + 6f + drop)
-        quadraticBezierTo(HEAD_CX + 14f, HEAD_CY - 4f, HEAD_CX, HEAD_CY - 5f)
-        quadraticBezierTo(HEAD_CX - 14f, HEAD_CY - 4f, HEAD_CX - 21f, HEAD_CY + 6f + drop)
+        quadraticTo(HEAD_CX - 22f, HEAD_CY - 24f, HEAD_CX, HEAD_CY - 24f)
+        quadraticTo(HEAD_CX + 22f, HEAD_CY - 24f, HEAD_CX + 21f, HEAD_CY + 6f + drop)
+        quadraticTo(HEAD_CX + 14f, HEAD_CY - 4f, HEAD_CX, HEAD_CY - 5f)
+        quadraticTo(HEAD_CX - 14f, HEAD_CY - 4f, HEAD_CX - 21f, HEAD_CY + 6f + drop)
         close()
     }
     fill(path.scaled(u), art.hair, u, ink = 0.45f)
@@ -737,10 +737,10 @@ private fun DrawScope.hairCap(art: AvatarArt, u: Float, drop: Float = 0f) {
 private fun DrawScope.hairFringe(art: AvatarArt, u: Float) {
     val fringe = Path().apply {
         moveTo(HEAD_CX - 20f, HEAD_CY - 14f)
-        quadraticBezierTo(HEAD_CX - 19f, HEAD_CY - 25f, HEAD_CX + 2f, HEAD_CY - 25f)
-        quadraticBezierTo(HEAD_CX + 18f, HEAD_CY - 25f, HEAD_CX + 20f, HEAD_CY - 16f)
-        quadraticBezierTo(HEAD_CX + 6f, HEAD_CY - 23f, HEAD_CX - 6f, HEAD_CY - 19f)
-        quadraticBezierTo(HEAD_CX - 14f, HEAD_CY - 21f, HEAD_CX - 20f, HEAD_CY - 14f)
+        quadraticTo(HEAD_CX - 19f, HEAD_CY - 25f, HEAD_CX + 2f, HEAD_CY - 25f)
+        quadraticTo(HEAD_CX + 18f, HEAD_CY - 25f, HEAD_CX + 20f, HEAD_CY - 16f)
+        quadraticTo(HEAD_CX + 6f, HEAD_CY - 23f, HEAD_CX - 6f, HEAD_CY - 19f)
+        quadraticTo(HEAD_CX - 14f, HEAD_CY - 21f, HEAD_CX - 20f, HEAD_CY - 14f)
         close()
     }
     fill(fringe.scaled(u), art.hair, u, ink = 0.45f)
@@ -765,9 +765,9 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
             // hair has to be more than a cap.
             val path = Path().apply {
                 moveTo(HEAD_CX - 24f, HEAD_CY - 4f)
-                quadraticBezierTo(HEAD_CX - 30f, HEAD_CY + 22f, HEAD_CX - 21f, HEAD_CY + 34f)
-                quadraticBezierTo(HEAD_CX, HEAD_CY + 26f, HEAD_CX + 21f, HEAD_CY + 34f)
-                quadraticBezierTo(HEAD_CX + 30f, HEAD_CY + 22f, HEAD_CX + 24f, HEAD_CY - 4f)
+                quadraticTo(HEAD_CX - 30f, HEAD_CY + 22f, HEAD_CX - 21f, HEAD_CY + 34f)
+                quadraticTo(HEAD_CX, HEAD_CY + 26f, HEAD_CX + 21f, HEAD_CY + 34f)
+                quadraticTo(HEAD_CX + 30f, HEAD_CY + 22f, HEAD_CX + 24f, HEAD_CY - 4f)
                 close()
             }
             fill(path.scaled(u), art.hair, u, ink = 0.45f)
@@ -776,11 +776,11 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
             // Chin length, tips turned in: the bob's whole identity.
             val path = Path().apply {
                 moveTo(HEAD_CX - 23f, HEAD_CY - 6f)
-                quadraticBezierTo(HEAD_CX - 27f, HEAD_CY + 16f, HEAD_CX - 19f, HEAD_CY + 24f)
-                quadraticBezierTo(HEAD_CX - 16f, HEAD_CY + 18f, HEAD_CX - 16f, HEAD_CY + 10f)
-                quadraticBezierTo(HEAD_CX, HEAD_CY + 16f, HEAD_CX + 16f, HEAD_CY + 10f)
-                quadraticBezierTo(HEAD_CX + 16f, HEAD_CY + 18f, HEAD_CX + 19f, HEAD_CY + 24f)
-                quadraticBezierTo(HEAD_CX + 27f, HEAD_CY + 16f, HEAD_CX + 23f, HEAD_CY - 6f)
+                quadraticTo(HEAD_CX - 27f, HEAD_CY + 16f, HEAD_CX - 19f, HEAD_CY + 24f)
+                quadraticTo(HEAD_CX - 16f, HEAD_CY + 18f, HEAD_CX - 16f, HEAD_CY + 10f)
+                quadraticTo(HEAD_CX, HEAD_CY + 16f, HEAD_CX + 16f, HEAD_CY + 10f)
+                quadraticTo(HEAD_CX + 16f, HEAD_CY + 18f, HEAD_CX + 19f, HEAD_CY + 24f)
+                quadraticTo(HEAD_CX + 27f, HEAD_CY + 16f, HEAD_CX + 23f, HEAD_CY - 6f)
                 close()
             }
             fill(path.scaled(u), art.hair, u, ink = 0.45f)
@@ -828,9 +828,9 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
             // One straight sheet to the chest with a blunt hem: the hime cut.
             val path = Path().apply {
                 moveTo(HEAD_CX - 23f, HEAD_CY - 6f)
-                quadraticBezierTo(HEAD_CX - 29f, HEAD_CY + 22f, HEAD_CX - 26f, HEAD_CY + 48f)
+                quadraticTo(HEAD_CX - 29f, HEAD_CY + 22f, HEAD_CX - 26f, HEAD_CY + 48f)
                 lineTo(HEAD_CX + 26f, HEAD_CY + 48f)
-                quadraticBezierTo(HEAD_CX + 29f, HEAD_CY + 22f, HEAD_CX + 23f, HEAD_CY - 6f)
+                quadraticTo(HEAD_CX + 29f, HEAD_CY + 22f, HEAD_CX + 23f, HEAD_CY - 6f)
                 close()
             }
             fill(path.scaled(u), art.hair, u, ink = 0.45f)
@@ -840,16 +840,16 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
             // Two long falls with a wave cut into each outer edge.
             val left = Path().apply {
                 moveTo(HEAD_CX - 22f, HEAD_CY - 8f)
-                quadraticBezierTo(HEAD_CX - 34f, HEAD_CY + 20f, HEAD_CX - 26f, HEAD_CY + 52f)
-                quadraticBezierTo(HEAD_CX - 30f, HEAD_CY + 40f, HEAD_CX - 20f, HEAD_CY + 44f)
-                quadraticBezierTo(HEAD_CX - 24f, HEAD_CY + 24f, HEAD_CX - 16f, HEAD_CY + 6f)
+                quadraticTo(HEAD_CX - 34f, HEAD_CY + 20f, HEAD_CX - 26f, HEAD_CY + 52f)
+                quadraticTo(HEAD_CX - 30f, HEAD_CY + 40f, HEAD_CX - 20f, HEAD_CY + 44f)
+                quadraticTo(HEAD_CX - 24f, HEAD_CY + 24f, HEAD_CX - 16f, HEAD_CY + 6f)
                 close()
             }
             val right = Path().apply {
                 moveTo(HEAD_CX + 22f, HEAD_CY - 8f)
-                quadraticBezierTo(HEAD_CX + 34f, HEAD_CY + 20f, HEAD_CX + 26f, HEAD_CY + 52f)
-                quadraticBezierTo(HEAD_CX + 30f, HEAD_CY + 40f, HEAD_CX + 20f, HEAD_CY + 44f)
-                quadraticBezierTo(HEAD_CX + 24f, HEAD_CY + 24f, HEAD_CX + 16f, HEAD_CY + 6f)
+                quadraticTo(HEAD_CX + 34f, HEAD_CY + 20f, HEAD_CX + 26f, HEAD_CY + 52f)
+                quadraticTo(HEAD_CX + 30f, HEAD_CY + 40f, HEAD_CX + 20f, HEAD_CY + 44f)
+                quadraticTo(HEAD_CX + 24f, HEAD_CY + 24f, HEAD_CX + 16f, HEAD_CY + 6f)
                 close()
             }
             fill(left.scaled(u), art.hair, u, ink = 0.45f)
@@ -859,14 +859,14 @@ private fun DrawScope.drawHairBack(art: AvatarArt, u: Float) {
             hairCap(art, u)
             val path = Path().apply {
                 moveTo(HEAD_CX - 22f, HEAD_CY - 4f)
-                quadraticBezierTo(HEAD_CX - 28f, HEAD_CY + 20f, HEAD_CX - 20f, HEAD_CY + 38f)
-                quadraticBezierTo(HEAD_CX - 8f, HEAD_CY + 30f, HEAD_CX - 6f, HEAD_CY + 18f)
+                quadraticTo(HEAD_CX - 28f, HEAD_CY + 20f, HEAD_CX - 20f, HEAD_CY + 38f)
+                quadraticTo(HEAD_CX - 8f, HEAD_CY + 30f, HEAD_CX - 6f, HEAD_CY + 18f)
                 close()
             }
             val mirror = Path().apply {
                 moveTo(HEAD_CX + 22f, HEAD_CY - 4f)
-                quadraticBezierTo(HEAD_CX + 28f, HEAD_CY + 20f, HEAD_CX + 20f, HEAD_CY + 38f)
-                quadraticBezierTo(HEAD_CX + 8f, HEAD_CY + 30f, HEAD_CX + 6f, HEAD_CY + 18f)
+                quadraticTo(HEAD_CX + 28f, HEAD_CY + 20f, HEAD_CX + 20f, HEAD_CY + 38f)
+                quadraticTo(HEAD_CX + 8f, HEAD_CY + 30f, HEAD_CX + 6f, HEAD_CY + 18f)
                 close()
             }
             fill(path.scaled(u), art.hair, u, ink = 0.45f)
@@ -883,13 +883,13 @@ private fun DrawScope.drawHairFront(art: AvatarArt, u: Float) {
             // face's anchor; plus a moustache either side of it.
             val beard = Path().apply {
                 moveTo(HEAD_CX - 19f, HEAD_CY + 2f)
-                quadraticBezierTo(HEAD_CX - 20f, HEAD_CY + 22f, HEAD_CX, HEAD_CY + 27f)
-                quadraticBezierTo(HEAD_CX + 20f, HEAD_CY + 22f, HEAD_CX + 19f, HEAD_CY + 2f)
+                quadraticTo(HEAD_CX - 20f, HEAD_CY + 22f, HEAD_CX, HEAD_CY + 27f)
+                quadraticTo(HEAD_CX + 20f, HEAD_CY + 22f, HEAD_CX + 19f, HEAD_CY + 2f)
                 // The inner edge sits BELOW the mouth's own dip (the smile's
                 // lowest stroke lands at about grid 51): a beard that closes
                 // over the smile eats the face's only expression.
-                quadraticBezierTo(HEAD_CX + 10f, HEAD_CY + 15f, HEAD_CX, HEAD_CY + 16f)
-                quadraticBezierTo(HEAD_CX - 10f, HEAD_CY + 15f, HEAD_CX - 19f, HEAD_CY + 2f)
+                quadraticTo(HEAD_CX + 10f, HEAD_CY + 15f, HEAD_CX, HEAD_CY + 16f)
+                quadraticTo(HEAD_CX - 10f, HEAD_CY + 15f, HEAD_CX - 19f, HEAD_CY + 2f)
                 close()
             }
             fill(beard.scaled(u), art.hair, u, ink = 0.45f)
@@ -930,9 +930,9 @@ private fun DrawScope.drawHairFront(art: AvatarArt, u: Float) {
             // Slicked back: one smooth sweep with a side part line.
             val sweep = Path().apply {
                 moveTo(HEAD_CX - 21f, HEAD_CY - 2f)
-                quadraticBezierTo(HEAD_CX - 18f, HEAD_CY - 22f, HEAD_CX + 2f, HEAD_CY - 22f)
-                quadraticBezierTo(HEAD_CX + 20f, HEAD_CY - 21f, HEAD_CX + 21f, HEAD_CY - 2f)
-                quadraticBezierTo(HEAD_CX + 6f, HEAD_CY - 12f, HEAD_CX - 21f, HEAD_CY - 2f)
+                quadraticTo(HEAD_CX - 18f, HEAD_CY - 22f, HEAD_CX + 2f, HEAD_CY - 22f)
+                quadraticTo(HEAD_CX + 20f, HEAD_CY - 21f, HEAD_CX + 21f, HEAD_CY - 2f)
+                quadraticTo(HEAD_CX + 6f, HEAD_CY - 12f, HEAD_CX - 21f, HEAD_CY - 2f)
                 close()
             }
             fill(sweep.scaled(u), art.hair, u, ink = 0.45f)
@@ -941,10 +941,10 @@ private fun DrawScope.drawHairFront(art: AvatarArt, u: Float) {
         KIND_SIDE_PART -> {
             val sweep = Path().apply {
                 moveTo(HEAD_CX - 21f, HEAD_CY - 1f)
-                quadraticBezierTo(HEAD_CX - 22f, HEAD_CY - 23f, HEAD_CX, HEAD_CY - 23f)
-                quadraticBezierTo(HEAD_CX + 20f, HEAD_CY - 23f, HEAD_CX + 21f, HEAD_CY - 4f)
-                quadraticBezierTo(HEAD_CX + 8f, HEAD_CY - 16f, HEAD_CX - 4f, HEAD_CY - 6f)
-                quadraticBezierTo(HEAD_CX - 12f, HEAD_CY - 12f, HEAD_CX - 21f, HEAD_CY - 1f)
+                quadraticTo(HEAD_CX - 22f, HEAD_CY - 23f, HEAD_CX, HEAD_CY - 23f)
+                quadraticTo(HEAD_CX + 20f, HEAD_CY - 23f, HEAD_CX + 21f, HEAD_CY - 4f)
+                quadraticTo(HEAD_CX + 8f, HEAD_CY - 16f, HEAD_CX - 4f, HEAD_CY - 6f)
+                quadraticTo(HEAD_CX - 12f, HEAD_CY - 12f, HEAD_CX - 21f, HEAD_CY - 1f)
                 close()
             }
             fill(sweep.scaled(u), art.hair, u, ink = 0.45f)
@@ -955,10 +955,10 @@ private fun DrawScope.drawHairFront(art: AvatarArt, u: Float) {
             // needs the brow line's own shade.
             val fringe = Path().apply {
                 moveTo(HEAD_CX - 20f, HEAD_CY - 4f)
-                quadraticBezierTo(HEAD_CX - 19f, HEAD_CY - 22f, HEAD_CX + 2f, HEAD_CY - 22f)
-                quadraticBezierTo(HEAD_CX + 18f, HEAD_CY - 22f, HEAD_CX + 20f, HEAD_CY - 6f)
-                quadraticBezierTo(HEAD_CX + 4f, HEAD_CY - 20f, HEAD_CX - 8f, HEAD_CY - 8f)
-                quadraticBezierTo(HEAD_CX - 14f, HEAD_CY - 14f, HEAD_CX - 20f, HEAD_CY - 4f)
+                quadraticTo(HEAD_CX - 19f, HEAD_CY - 22f, HEAD_CX + 2f, HEAD_CY - 22f)
+                quadraticTo(HEAD_CX + 18f, HEAD_CY - 22f, HEAD_CX + 20f, HEAD_CY - 6f)
+                quadraticTo(HEAD_CX + 4f, HEAD_CY - 20f, HEAD_CX - 8f, HEAD_CY - 8f)
+                quadraticTo(HEAD_CX - 14f, HEAD_CY - 14f, HEAD_CX - 20f, HEAD_CY - 4f)
                 close()
             }
             fill(fringe.scaled(u), art.hair, u, ink = 0.45f)
@@ -980,10 +980,10 @@ private fun DrawScope.drawHairFront(art: AvatarArt, u: Float) {
         KIND_WAVES, KIND_FLOWERS -> {
             val fringe = Path().apply {
                 moveTo(HEAD_CX - 21f, HEAD_CY - 3f)
-                quadraticBezierTo(HEAD_CX - 20f, HEAD_CY - 23f, HEAD_CX, HEAD_CY - 23f)
-                quadraticBezierTo(HEAD_CX + 20f, HEAD_CY - 23f, HEAD_CX + 21f, HEAD_CY - 3f)
-                quadraticBezierTo(HEAD_CX + 10f, HEAD_CY - 14f, HEAD_CX - 2f, HEAD_CY - 12f)
-                quadraticBezierTo(HEAD_CX - 12f, HEAD_CY - 10f, HEAD_CX - 21f, HEAD_CY - 3f)
+                quadraticTo(HEAD_CX - 20f, HEAD_CY - 23f, HEAD_CX, HEAD_CY - 23f)
+                quadraticTo(HEAD_CX + 20f, HEAD_CY - 23f, HEAD_CX + 21f, HEAD_CY - 3f)
+                quadraticTo(HEAD_CX + 10f, HEAD_CY - 14f, HEAD_CX - 2f, HEAD_CY - 12f)
+                quadraticTo(HEAD_CX - 12f, HEAD_CY - 10f, HEAD_CX - 21f, HEAD_CY - 3f)
                 close()
             }
             fill(fringe.scaled(u), art.hair, u, ink = 0.45f)
@@ -1000,8 +1000,8 @@ private fun DrawScope.drawProp(art: AvatarArt, u: Float) {
             rotate(degrees = -4f, pivot = o(HEAD_CX, HEAD_CY, u)) {
                 val crown = Path().apply {
                     moveTo(HEAD_CX - 21f, HEAD_CY - 12f)
-                    quadraticBezierTo(HEAD_CX - 18f, HEAD_CY - 30f, HEAD_CX, HEAD_CY - 30f)
-                    quadraticBezierTo(HEAD_CX + 18f, HEAD_CY - 30f, HEAD_CX + 21f, HEAD_CY - 12f)
+                    quadraticTo(HEAD_CX - 18f, HEAD_CY - 30f, HEAD_CX, HEAD_CY - 30f)
+                    quadraticTo(HEAD_CX + 18f, HEAD_CY - 30f, HEAD_CX + 21f, HEAD_CY - 12f)
                     close()
                 }
                 fill(crown.scaled(u), art.garment, u, ink = 0.45f)
@@ -1019,8 +1019,8 @@ private fun DrawScope.drawProp(art: AvatarArt, u: Float) {
             // A knit beanie: dome, folded cuff with ribs, and a pompom.
             val dome = Path().apply {
                 moveTo(HEAD_CX - 21f, HEAD_CY - 10f)
-                quadraticBezierTo(HEAD_CX - 22f, HEAD_CY - 30f, HEAD_CX, HEAD_CY - 30f)
-                quadraticBezierTo(HEAD_CX + 22f, HEAD_CY - 30f, HEAD_CX + 21f, HEAD_CY - 10f)
+                quadraticTo(HEAD_CX - 22f, HEAD_CY - 30f, HEAD_CX, HEAD_CY - 30f)
+                quadraticTo(HEAD_CX + 22f, HEAD_CY - 30f, HEAD_CX + 21f, HEAD_CY - 10f)
                 close()
             }
             fill(dome.scaled(u), art.garment, u, ink = 0.45f)
@@ -1041,7 +1041,7 @@ private fun DrawScope.drawProp(art: AvatarArt, u: Float) {
             slab(HEAD_CX + 21f, HEAD_CY + 1f, HEAD_CX + 26f, HEAD_CY + 7f, 2f, lighten(art.garment, 0.22f), u)
             val boom = Path().apply {
                 moveTo(HEAD_CX - 26f, HEAD_CY + 10f)
-                quadraticBezierTo(HEAD_CX - 20f, HEAD_CY + 22f, HEAD_CX - 8f, HEAD_CY + 20f)
+                quadraticTo(HEAD_CX - 20f, HEAD_CY + 22f, HEAD_CX - 8f, HEAD_CY + 20f)
             }
             drawPath(boom.scaled(u), darken(art.garment, 0.15f), style = Stroke(1.8f * u, cap = StrokeCap.Round))
             dot(HEAD_CX - 7f, HEAD_CY + 20f, 2.2f, darken(art.garment, 0.25f), u)
@@ -1053,8 +1053,8 @@ private fun DrawScope.drawProp(art: AvatarArt, u: Float) {
             // cone.
             val cone = Path().apply {
                 moveTo(HEAD_CX - 20f, HEAD_CY - 12f)
-                quadraticBezierTo(HEAD_CX - 16f, HEAD_CY - 30f, HEAD_CX + 6f, HEAD_CY - 36f)
-                quadraticBezierTo(HEAD_CX + 2f, HEAD_CY - 26f, HEAD_CX + 20f, HEAD_CY - 12f)
+                quadraticTo(HEAD_CX - 16f, HEAD_CY - 30f, HEAD_CX + 6f, HEAD_CY - 36f)
+                quadraticTo(HEAD_CX + 2f, HEAD_CY - 26f, HEAD_CX + 20f, HEAD_CY - 12f)
                 close()
             }
             fill(cone.scaled(u), art.garment, u, ink = 0.45f)
@@ -1101,8 +1101,8 @@ private fun DrawScope.drawProp(art: AvatarArt, u: Float) {
             rotate(degrees = -12f, pivot = o(HEAD_CX, HEAD_CY, u)) {
                 val cap = Path().apply {
                     moveTo(HEAD_CX - 23f, HEAD_CY - 12f)
-                    quadraticBezierTo(HEAD_CX - 24f, HEAD_CY - 30f, HEAD_CX + 6f, HEAD_CY - 30f)
-                    quadraticBezierTo(HEAD_CX + 27f, HEAD_CY - 30f, HEAD_CX + 25f, HEAD_CY - 12f)
+                    quadraticTo(HEAD_CX - 24f, HEAD_CY - 30f, HEAD_CX + 6f, HEAD_CY - 30f)
+                    quadraticTo(HEAD_CX + 27f, HEAD_CY - 30f, HEAD_CX + 25f, HEAD_CY - 12f)
                     close()
                 }
                 fill(cap.scaled(u), art.garment, u, ink = 0.45f)
@@ -1209,11 +1209,11 @@ private fun DrawScope.drawIcon(art: IconArt, u: Float) {
             arc(70f, 56f, 10f, 95f, 170f, 4.6f, art.main, u)
             val steamA = Path().apply {
                 moveTo(41f, 32f)
-                quadraticBezierTo(46f, 26f, 41f, 20f)
+                quadraticTo(46f, 26f, 41f, 20f)
             }
             val steamB = Path().apply {
                 moveTo(53f, 33f)
-                quadraticBezierTo(58f, 27f, 53f, 21f)
+                quadraticTo(58f, 27f, 53f, 21f)
             }
             drawPath(steamA.scaled(u), art.light, style = Stroke(2.2f * u, cap = StrokeCap.Round))
             drawPath(steamB.scaled(u), art.light, style = Stroke(2.2f * u, cap = StrokeCap.Round))

@@ -49,11 +49,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -568,41 +570,40 @@ internal fun PersonalVoiceBar(
     // PersonalMovableBlock, which is the only state that had any business
     // drawing a surface here.
     //
-    // v403 — AND A SOFT SHADOW UNDER THE STRIP. The member asked for the note to
-    // keep BLENDING with the canvas but to be lifted off it a little ("we can
-    // add shadow to the voice note bar but it was better previously blending
-    // with the canvas"), so there is still no box: the strip wears only the
-    // shadow its own outline casts, which reads as a piece of the page standing
-    // just proud of it rather than a card parked on the writing.
+    // v404 — AND NO SHADOW EITHER. v403 lifted the strip with a soft shadow and
+    // the member called it back: a recording is part of the writing, so it
+    // casts nothing (user request: "for voice note in journal dont give it the
+    // shadow keep it how it was ith no backgroud"). No box and no halo — the
+    // play button, the drawn pulse and the clock, sitting on the page itself.
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(1.5.dp, RoundedCornerShape(14.dp))
             .padding(end = 8.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // v390 — THE GLYPH ITSELF, WITH NO DISC UNDER IT.
+        // v404 — AND A DARK, SOLID, FILLED PLAY BUTTON.
         //
-        // The control wore a filled accent circle, which put a solid mark on the
-        // page where a voice note is meant to read as part of the writing (user
-        // request: "for voice note dont give the play button backgroud just keep
-        // solid filled icon"). What is left is the filled glyph — `play_arrow`
-        // and `pause` are both solid shapes, so nothing else has to be drawn —
-        // in the note's own accent, and the target is still the 38dp it was (the
-        // surface stays for the press ripple, with no colour of its own).
+        // The control has been round this loop before: v389's filled accent disc
+        // came off in favour of a bare accent glyph, and the member has settled
+        // it the other way — the disc is back, DARK and filled, with the glyph
+        // knocked out of it in the page's own paper (user request: "with dark
+        // solif filled play button"). It is the same treatment the record button
+        // wears ([PersonalVoiceButton]), so the two controls on a voice note are
+        // one shape in one ink and the mark reads as pressed rather than as
+        // decoration.
         Surface(
             onClick = { toggle() },
             shape = CircleShape,
-            color = Color.Transparent,
+            color = personalAccentInk(),
             modifier = Modifier.size(38.dp)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CurioIcon(
                     if (isPlaying) CurioIcons.Pause else CurioIcons.PlayArrow,
                     if (isPlaying) "Pause the voice note" else "Play the voice note",
-                    tint = accent,
-                    size = 26.dp
+                    tint = MaterialTheme.colorScheme.surface,
+                    size = 22.dp
                 )
             }
         }
@@ -630,31 +631,78 @@ internal fun PersonalVoiceBar(
                     )
                 }
         ) {
+            // ── THE HAND-DRAWN PULSE (v404) ─────────────────────────────
+            //
+            // v389 drew the note as a bar chart: rounded columns on a centre
+            // line, evenly spaced, which is what an audio widget looks like and
+            // not what a page looks like (user request: "make its graph the aduio
+            // graph pulse wave hand drawn style"). It is ONE INKED LINE now —
+            // the voice's own envelope drawn as a stroke that rises and falls
+            // with what was said and wobbles as it goes, so the strip reads as
+            // something drawn beside the writing rather than a chart laid on it.
+            // The wobble is a hash of the sample's own index and not a random
+            // number: the same ink on every frame, so the line never crawls
+            // while the note plays.
             Canvas(Modifier.fillMaxSize()) {
                 if (samples.isEmpty()) return@Canvas
-                val slot = size.width / samples.size
-                val barWidth = (slot * 0.62f).coerceAtLeast(1.6f)
+                val count = samples.size
+                val step = if (count > 1) size.width / (count - 1) else size.width
+                val mid = size.height / 2f
                 val playedUpTo = size.width * progress
-                samples.forEachIndexed { index, level ->
-                    // A floor of 8% keeps a quiet passage reading as a voice
-                    // note rather than a gap in the strip.
-                    val amplitude = (level.coerceIn(0f, 1f) * 0.92f + 0.08f)
-                    val barHeight = (size.height * amplitude).coerceAtLeast(3f)
-                    val left = index * slot + (slot - barWidth) / 2f
-                    drawRoundRect(
-                        color = if (left + barWidth / 2f <= playedUpTo) accent
-                        else ink.copy(alpha = 0.26f),
-                        topLeft = Offset(left, (size.height - barHeight) / 2f),
-                        size = Size(barWidth, barHeight),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f)
-                    )
+
+                // A stable little wobble, which is what makes the stroke read as
+                // drawn by hand instead of plotted.
+                fun wobble(seed: Int): Float {
+                    val hash = seed * 374761393 + 668265263
+                    val mixed = (hash xor (hash shr 13)) * 1274126177
+                    return ((mixed % 1000).toFloat() / 1000f - 0.5f) * size.height * 0.07f
+                }
+
+                // How far the voice reaches from the centre at [index]. A floor
+                // of 7% keeps a quiet passage reading as a voice rather than as
+                // a break in the line.
+                fun reach(index: Int): Float {
+                    val level = samples[index].coerceIn(0f, 1f)
+                    return (level * 0.42f + 0.07f) * size.height
+                }
+
+                val upper = Path()
+                val lower = Path()
+                for (index in 0 until count) {
+                    val x = index * step
+                    val wob = wobble(index)
+                    val rise = (mid - reach(index) + wob).coerceIn(1f, size.height - 1f)
+                    val fall = (mid + reach(index) - wob).coerceIn(1f, size.height - 1f)
+                    if (index == 0) {
+                        upper.moveTo(x, rise)
+                        lower.moveTo(x, fall)
+                    } else {
+                        upper.lineTo(x, rise)
+                        lower.lineTo(x, fall)
+                    }
+                }
+
+                val stroke = Stroke(
+                    width = (size.height * 0.075f).coerceAtLeast(1.5f),
+                    cap = StrokeCap.Round,
+                    join = StrokeJoin.Round
+                )
+                // THE WHOLE NOTE in the page's ink — and the part that has been
+                // HEARD in the note's own colour, cut at the playhead.
+                drawPath(upper, ink.copy(alpha = 0.30f), style = stroke)
+                drawPath(lower, ink.copy(alpha = 0.30f), style = stroke)
+                if (playedUpTo > 0f) {
+                    clipRect(right = playedUpTo) {
+                        drawPath(upper, accent, style = stroke)
+                        drawPath(lower, accent, style = stroke)
+                    }
                 }
                 // The playhead, so a scrub lands where the eye expects.
                 if (progress > 0f) {
                     drawLine(
                         color = accent,
-                        start = Offset(playedUpTo, 0f),
-                        end = Offset(playedUpTo, size.height),
+                        start = Offset(playedUpTo, 1f),
+                        end = Offset(playedUpTo, size.height - 1f),
                         strokeWidth = 2f.dp.toPx(),
                         cap = StrokeCap.Round
                     )

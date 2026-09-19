@@ -136,12 +136,12 @@ private fun CurvedBubbleTail(color: Color, pointingLeft: Boolean, modifier: Modi
                     // Rooted at the bubble's left edge, tapering to a
                     // rounded tip that points at the pet.
                     moveTo(w, h * 0.22f)
-                    quadraticBezierTo(w * 0.35f, h * 0.20f, 0f, h * 0.5f)
-                    quadraticBezierTo(w * 0.35f, h * 0.80f, w, h * 0.78f)
+                    quadraticTo(w * 0.35f, h * 0.20f, 0f, h * 0.5f)
+                    quadraticTo(w * 0.35f, h * 0.80f, w, h * 0.78f)
                 } else {
                     moveTo(0f, h * 0.22f)
-                    quadraticBezierTo(w * 0.65f, h * 0.20f, w, h * 0.5f)
-                    quadraticBezierTo(w * 0.65f, h * 0.80f, 0f, h * 0.78f)
+                    quadraticTo(w * 0.65f, h * 0.20f, w, h * 0.5f)
+                    quadraticTo(w * 0.65f, h * 0.80f, 0f, h * 0.78f)
                 }
                 close()
             }

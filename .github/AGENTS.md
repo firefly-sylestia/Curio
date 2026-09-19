@@ -25,14 +25,28 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 ### Android CI workflow
 
-`android.yml` runs on pushes and pull requests targeting `main`/`Alpha`, plus manual dispatch. It:
+`android.yml` runs on pushes and pull requests targeting `main`/`Alpha`, plus manual dispatch. It has FOUR JOBS: `verify` (the build), `report` (the reader-facing summary), `cache-cleanup`, and the disabled `desktop`. `verify`:
 
-- Validates all topic catalogs with the self-contained Gradle `validateTopics` task (wired into `preBuild`); no external scripts are shipped in the repo.
-- Runs the Gradle `lintDebug`, `validateTopics`, and `assembleRelease` checks in GitHub Actions using the hosted Android toolchain — **release build only**, no debug APK is produced (debug remains available for local development via the app's debug build type).
-- Uploads lint reports plus the single universal release APK (splits are disabled for PR/push via `-PcurioAbiSplits=false`) as throwaway artifacts with **1-day retention** (the tag release workflow attaches the permanent APK set to GitHub Releases instead). Lint-report upload is best-effort and silently skips the artifact when Gradle fails before producing reports; the Gradle check remains authoritative.
-- Signs the release variant with the same `KEYSTORE_*` signing secrets as the release workflow when GitHub provides them (pushes to `main`, same-repo PRs, manual dispatch) and verifies **every** release APK's signature is not the debug key. On fork PRs, where GitHub strips secrets, the release variant falls back to the app module's debug-signing config so CI still passes.
+- Validates all topic catalogs with the self-contained Gradle `validateTopics` task (wired into `preBuild`). The CI **build** scripts live in `.github/scripts/` — `validateTopics` is still the authority for topic data, and the two scripts there only READ what the build produced (see the surfaces below); nothing else is shipped to the runner.
+- Bundles `data/topics/*.json` into `app/src/main/assets/topics/` first, records the catalog count and the topic total as step outputs, and fails if the bundle is empty.
+- Runs the Gradle `lintDebug`, `validateTopics`, and `assembleRelease` checks in GitHub Actions using the hosted Android toolchain — **release build only**, no debug APK is produced (debug remains available for local development via the app's debug build type). The build step is `continue-on-error: true` and a gate step re-fails the run afterwards, purely so the annotation and summary steps below still run on a FAILED build: the compiler's own errors are exactly what the Checks tab should be showing.
+- Uploads the Gradle log, the lint reports and the single universal release APK (splits are disabled for PR/push via `-PcurioAbiSplits=false`) as throwaway artifacts with **1-day retention** (the tag release workflow attaches the permanent APK set to GitHub Releases instead). Uploads are best-effort and skip silently when Gradle failed before producing anything; the Gradle check remains authoritative.
+- Signs the release variant with the same `KEYSTORE_*` signing secrets as the release workflow when GitHub provides them (pushes to `main`, same-repo PRs, manual dispatch) and verifies **every** release APK's signature is not the debug key, publishing its name, size and SHA-256 as outputs. On fork PRs, where GitHub strips secrets, the release variant falls back to the app module's debug-signing config so CI still passes, and the summary says so.
 - Cancels an older in-progress run for the same ref when a newer run starts.
 - Runs a `cache-cleanup` job on branch pushes (not PRs) that deletes GitHub Actions cache entries not accessed in the last 2 days — `gradle/actions/setup-gradle` keys the Gradle User Home cache with the commit SHA, so every push otherwise leaves fresh entries behind until GitHub's 7-day eviction.
+
+### The run's surfaces (v405) — what a run SHOWS
+
+A run answered exactly one question ("did it pass?") and made you read a 12,000-line log to find out why. **Four surfaces now, each read by a different person at a different moment — and this is the contract for where any new presentation belongs:**
+
+1. **The build summary** (`$GITHUB_STEP_SUMMARY` in `verify`, rendered bottom-of-page) — version code and name, the variant, the catalogs bundled and the topics they carry, the signing story, the APK's name/size/SHA-256, the lint totals, and which optional keyed providers this build carried. Written by `.github/scripts/build-summary.sh [signing-story]`, which derives everything from the files on disk, so it stays correct when steps are re-ordered. Never fails the run.
+2. **The Checks tab** — every Kotlin `e:`/`w:` line re-emitted as an annotation with its file, line and column, written by `.github/scripts/annotate-gradle.sh [log-path]` (counts → step outputs, the per-file warning table → the summary). Both scripts are READERS of what the build produced and exit 0 on a missing log.
+3. **The `report` job** — one extra check whose entire body is the run report, built from `verify`'s step outputs (`if: always() && needs.verify.result != 'cancelled'`, so a failed build still produces it). Anything the build must publish for it to say belongs in `verify`'s `outputs:` block.
+4. **The pull request comment** — the same report, upserted (its own previous comment is deleted first, matched by the `<!-- curio-ci-report -->` marker, so there is one live comment per PR and not one per push). **Same-repo PRs only:** `permissions: pull-requests: write` lives on the `report` job, and a fork PR's token is read-only, so the step is gated rather than failing.
+
+Artifact/annotation/comment copy stays Curio-specific; never echo a secret's value into a summary (only whether it was present).
+
+**Ideas for more surfaces, not yet built** (pick one and it belongs in the list above): a **timing table** (per-Gradle-task wall time, parsed from `--profile` or the log's own `Task :x` stamps) so a slow build says WHICH task got slower; a **build-size trend** (the APK's bytes committed as a tiny JSON and compared with the previous run's, so "the APK grew 2 MB" is a sentence and not a discovery); a **catalog diff** (which `data/topics/*.json` changed and by how many topics, from the git diff of the base ref); a **step-level timing/expense line** (GitHub's own billable minutes per job); a **failure digest** that groups the errors by file into one comment instead of 260 annotations; a **coverage/unit-test row** the moment `./gradlew test` is wired into the job; and a **sticky status comment on the issue a PR closes** ("this fix is in 1.1.2") once releases are tagged from the same pipeline.
 
 ### Release workflow (Android)
 

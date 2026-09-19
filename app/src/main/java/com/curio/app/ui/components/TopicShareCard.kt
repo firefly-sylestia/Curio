@@ -3826,8 +3826,8 @@ private fun ShareMusicGlyph(
                 drawRoundRect(color, Offset(w * 0.52f, h * 0.08f), Size(w * 0.12f, h * 0.72f), CornerRadius(w * 0.06f))
                 val flag = Path().apply {
                     moveTo(w * 0.64f, h * 0.10f)
-                    quadraticBezierTo(w * 0.92f, h * 0.30f, w * 0.66f, h * 0.54f)
-                    quadraticBezierTo(w * 0.84f, h * 0.44f, w * 0.78f, h * 0.18f)
+                    quadraticTo(w * 0.92f, h * 0.30f, w * 0.66f, h * 0.54f)
+                    quadraticTo(w * 0.84f, h * 0.44f, w * 0.78f, h * 0.18f)
                     close()
                 }
                 drawPath(flag, color)
@@ -5829,9 +5829,9 @@ private fun signatureDesignClassic(categoryName: String, family: CategoryFamily)
                 // Page corner curl bottom-right
                 val cornerPath = Path().apply {
                     moveTo(w * 0.85f, h * 0.88f)
-                    quadraticBezierTo(w * 0.92f, h * 0.90f, w * 0.94f, h * 0.96f)
+                    quadraticTo(w * 0.92f, h * 0.90f, w * 0.94f, h * 0.96f)
                     lineTo(w * 0.88f, h * 0.96f)
-                    quadraticBezierTo(w * 0.86f, h * 0.93f, w * 0.85f, h * 0.88f)
+                    quadraticTo(w * 0.86f, h * 0.93f, w * 0.85f, h * 0.88f)
                 }
                 drawPath(cornerPath, Color(0xFFD4C4A8).copy(alpha = 0.30f))
                 // Gold leaf ornament top-right
@@ -5916,7 +5916,7 @@ private fun signatureDesignClassic(categoryName: String, family: CategoryFamily)
                 // Leaf vein pattern bottom
                 val veinPath = Path().apply {
                     moveTo(w * 0.05f, h * 0.85f)
-                    quadraticBezierTo(w * 0.30f, h * 0.78f, w * 0.55f, h * 0.85f)
+                    quadraticTo(w * 0.30f, h * 0.78f, w * 0.55f, h * 0.85f)
                 }
                 drawPath(veinPath, Color(0xFF2E7D32).copy(alpha = 0.20f), style = Stroke(1.5f))
                 // Small veins branching
@@ -5962,8 +5962,8 @@ private fun signatureDesignClassic(categoryName: String, family: CategoryFamily)
                 val flaskPath = Path().apply {
                     moveTo(w * 0.82f, h * 0.72f)
                     lineTo(w * 0.78f, h * 0.82f)
-                    quadraticBezierTo(w * 0.75f, h * 0.92f, w * 0.82f, h * 0.94f)
-                    quadraticBezierTo(w * 0.92f, h * 0.92f, w * 0.88f, h * 0.82f)
+                    quadraticTo(w * 0.75f, h * 0.92f, w * 0.82f, h * 0.94f)
+                    quadraticTo(w * 0.92f, h * 0.92f, w * 0.88f, h * 0.82f)
                     lineTo(w * 0.84f, h * 0.72f)
                     close()
                 }
@@ -6307,9 +6307,9 @@ private fun signatureDesignClassic(categoryName: String, family: CategoryFamily)
                 // Quill pen silhouette top-right
                 val quillPath = Path().apply {
                     moveTo(w * 0.82f, h * 0.06f)
-                    quadraticBezierTo(w * 0.88f, h * 0.12f, w * 0.85f, h * 0.22f)
+                    quadraticTo(w * 0.88f, h * 0.12f, w * 0.85f, h * 0.22f)
                     lineTo(w * 0.83f, h * 0.20f)
-                    quadraticBezierTo(w * 0.86f, h * 0.12f, w * 0.81f, h * 0.07f)
+                    quadraticTo(w * 0.86f, h * 0.12f, w * 0.81f, h * 0.07f)
                     close()
                 }
                 drawPath(quillPath, Color(0xFF8A6B42).copy(alpha = 0.12f))
