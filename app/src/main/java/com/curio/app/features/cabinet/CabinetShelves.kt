@@ -610,14 +610,22 @@ private fun BoxScope.ConstellationArt(dark: Boolean) = ShelfSceneCanvas { s ->
     sparkle(cx - h * 0.24f, cy + h * 0.60f, h * 0.045f, alpha = 0.5f)
 }
 
-/** CURIYING NOW (redrawn again v3xx52) — a clean OPEN BOOK from the front —
- *  a cover slab with a bottom lip, two stepped page sheets per side (so the
- *  block shows its thickness at the outer edge AND the foot), a shaded gutter,
- *  three ragged ruled lines per page and a ribbon bookmark — with a STEAMING
- *  MUG resting beside it (the shelf is the Curio verb: reading while the
- *  kettle is still warm). The previous pass stacked three page sheets, double
- *  edge hairlines, a page curl AND no mug; at strip size that read as a
- *  scribble, so this pass keeps one idea per element. */
+/** CURIYING NOW — the OPEN BOOK, redrawn (v407: "accurately redrawn the open
+ *  book look, its looking bad"). One hardcover lying open: its two boards under
+ *  the pages, a page block whose thickness reads along the fore edge and the
+ *  foot, two sheets meeting in a shadowed gutter, ruled lines that stop clear
+ *  of the spine, and a ribbon falling past the book's foot — with a steaming
+ *  mug set beside it (the shelf is the Curio verb: reading while the kettle is
+ *  still warm).
+ *
+ *  What the previous pass got wrong: its page edges were cubic curves that
+ *  bowed the WRONG way — the sheets came out S-shaped, the top edge sagged
+ *  below the gutter, and the fore edges floated above the cover slab — and its
+ *  ruled lines ran straight THROUGH the spine. Nothing here is eyeballed in
+ *  the path: the book's four numbers (gutter, fore edge, top, foot) are stated
+ *  once, both halves derive from them so they cannot disagree, and the pages
+ *  are drawn as a shallow V — dipping into the gutter, lifting a hair at the
+ *  fore edge — which is what an open book on a table actually looks like. */
 @Composable
 private fun BoxScope.ReadingArt(dark: Boolean) = ShelfSceneCanvas { s ->
     val w = s.w; val h = s.h
@@ -631,108 +639,151 @@ private fun BoxScope.ReadingArt(dark: Boolean) = ShelfSceneCanvas { s ->
     val mug = if (dark) Color(0xFFB3766A) else Color(0xFFE08C7A)
     val mugDim = if (dark) Color(0xFF8E5A50) else Color(0xFFC06D5C)
 
-    val gx = w * 0.36f              // the gutter (spine)
-    val top = h * 0.30f
-    val bot = h * 0.84f
-    val outL = w * 0.03f
-    val outR = w * 0.70f
+    // The book's own geometry, stated once: the gutter (spine), each page's
+    // fore edge, the top and foot of the page block, and the two numbers that
+    // make a sheet read as a PAGE — how far it dips INTO the gutter and how far
+    // its fore edge lifts off the table.
+    val gutter = w * 0.46f
+    val half = w * 0.285f
+    val foreL = gutter - half
+    val foreR = gutter + half
+    val pageTop = h * 0.30f
+    val pageBot = h * 0.80f
+    val dip = h * 0.020f
+    val lift = h * 0.012f
 
-    // One page sheet: pinched at the gutter, sagging out to its outer edge.
-    // `liftX` widens it (the sheets behind peek out at the sides), `liftY`
-    // drops it (they peek out at the foot too).
-    fun pagePath(side: Float, outer: Float, liftX: Float, liftY: Float): Path = Path().apply {
-        val ox = if (side < 0f) outer - liftX else outer + liftX
-        moveTo(gx, top + liftY)
+    /**
+     * One page sheet. [side] is -1 (left) / +1 (right); [inset] pulls the sheet
+     * in from its fore edge (a NEGATIVE inset pushes it out, which is how the
+     * block below shows its thickness) and [drop] moves the whole sheet down.
+     * The top edge rises a hair as it leaves the gutter, the fore edge is one
+     * line bowing out by a whisper, and the foot mirrors the top — so each
+     * sheet is a page rather than a polygon.
+     */
+    fun pagePath(side: Float, inset: Float, drop: Float): Path = Path().apply {
+        val outer = gutter + side * (half - inset)
+        val sheetTop = pageTop + drop
+        val sheetBot = pageBot + drop
+        moveTo(gutter, sheetTop + dip)
         cubicTo(
-            gx + side * w * 0.12f, top + liftY + h * 0.030f,
-            ox - side * w * 0.10f, top + liftY + h * 0.006f,
-            ox, top + liftY + h * 0.072f
+            gutter + side * half * 0.34f, sheetTop + dip * 0.35f,
+            outer - side * half * 0.30f, sheetTop - lift * 0.45f,
+            outer, sheetTop - lift
         )
-        lineTo(ox, bot + liftY)
         cubicTo(
-            ox - side * w * 0.11f, bot + liftY + h * 0.046f,
-            gx + side * w * 0.10f, bot + liftY + h * 0.050f,
-            gx, bot + liftY - h * 0.018f
+            outer + side * w * 0.012f, sheetTop + (sheetBot - sheetTop) * 0.34f,
+            outer + side * w * 0.012f, sheetBot - (sheetBot - sheetTop) * 0.34f,
+            outer, sheetBot - lift
+        )
+        cubicTo(
+            outer - side * half * 0.30f, sheetBot + lift * 0.45f,
+            gutter + side * half * 0.34f, sheetBot + dip * 0.35f,
+            gutter, sheetBot + dip
         )
         close()
     }
 
-    groundShadow(w * 0.46f, bot + h * 0.118f, w * 0.45f, h * 0.042f, dark)
+    groundShadow(w * 0.50f, pageBot + h * 0.118f, w * 0.42f, h * 0.040f, dark)
 
-    // ── The cover slab, a whisper wider than the pages.
+    // ── The boards: one cover slab a hair wider than the pages, its spine
+    //    shaded at the centre and its own thickness showing under the block.
+    val slabL = foreL - w * 0.022f
+    val slabR = foreR + w * 0.022f
+    val slabTop = pageTop - h * 0.030f
+    val slabBot = pageBot + h * 0.030f
     drawRoundRect(
-        cover.copy(alpha = 0.95f),
-        topLeft = Offset(outL - w * 0.010f, top + h * 0.048f),
-        size = Size((outR - outL) + w * 0.020f, (bot + h * 0.052f) - (top + h * 0.048f)),
-        cornerRadius = CornerRadius(w * 0.012f)
+        cover.copy(alpha = 0.96f),
+        topLeft = Offset(slabL, slabTop),
+        size = Size(slabR - slabL, slabBot - slabTop),
+        cornerRadius = CornerRadius(w * 0.014f)
     )
     drawRoundRect(
         Color.White.copy(alpha = 0.90f),
-        topLeft = Offset(outL - w * 0.010f, top + h * 0.048f),
-        size = Size((outR - outL) + w * 0.020f, (bot + h * 0.052f) - (top + h * 0.048f)),
-        cornerRadius = CornerRadius(w * 0.012f),
+        topLeft = Offset(slabL, slabTop),
+        size = Size(slabR - slabL, slabBot - slabTop),
+        cornerRadius = CornerRadius(w * 0.014f),
         style = Stroke(width = stroke * 0.55f)
     )
-    // The block's thickness below the pages.
+    // The board's own thickness, one hairline under the foot.
     drawLine(
-        coverDim.copy(alpha = 0.85f),
-        Offset(outL - w * 0.008f, bot + h * 0.036f),
-        Offset(outR + w * 0.008f, bot + h * 0.036f),
+        coverDim.copy(alpha = 0.9f),
+        Offset(slabL + w * 0.006f, slabBot - h * 0.013f),
+        Offset(slabR - w * 0.006f, slabBot - h * 0.013f),
         strokeWidth = stroke * 0.5f
     )
-    // ── Two page sheets per side: the lower one carries the block's thickness.
+    // The spine, under the pages.
+    drawRoundRect(
+        coverDim.copy(alpha = 0.5f),
+        topLeft = Offset(gutter - w * 0.017f, slabTop + h * 0.010f),
+        size = Size(w * 0.034f, (slabBot - slabTop) - h * 0.020f),
+        cornerRadius = CornerRadius(w * 0.007f)
+    )
+    // ── Two sheets a side: the lower one is pushed OUT a hair and down, so the
+    //    page block's thickness reads along the fore edge and the foot.
     listOf(
-        Triple(0.016f, h * 0.022f, pageShade.copy(alpha = 0.95f)),
+        Triple(-w * 0.009f, h * 0.014f, pageShade),
         Triple(0f, 0f, page)
-    ).forEach { (offset, lift, fill) ->
+    ).forEach { (inset, drop, fill) ->
         listOf(-1f, 1f).forEach { side ->
-            val sheet = pagePath(side, if (side < 0f) outL else outR, w * offset, lift)
+            val sheet = pagePath(side, inset, drop)
             drawPath(sheet, fill)
-            drawPath(sheet, Color.White.copy(alpha = 0.88f), style = Stroke(width = stroke * 0.45f))
-            // The sheet's own foot line — the page edge, one hairline only.
-            if (lift > 0f) {
-                val edge = if (side < 0f) outL - w * offset else outR + w * offset
-                drawLine(
-                    pageShade.copy(alpha = 0.8f),
-                    Offset(edge, top + h * 0.10f),
-                    Offset(edge, bot + lift),
-                    strokeWidth = stroke * 0.35f
-                )
-            }
+            drawPath(sheet, Color.White.copy(alpha = 0.90f), style = Stroke(width = stroke * 0.45f))
         }
     }
-    // ── Ruled text: three lines per page, ragged at the outer edge.
-    for (i in 0 until 3) {
-        val ly = top + h * (0.30f + i * 0.155f)
-        drawLine(rule.copy(alpha = 0.5f), Offset(gx - w * 0.28f, ly), Offset(gx - w * 0.045f, ly), strokeWidth = 1.0f)
+    // ── Ruled text: four lines a page, stopping clear of the gutter (the
+    //    binding margin) and running out toward the fore edge, the last one
+    //    short the way a paragraph ends.
+    val textMargin = w * 0.048f
+    for (i in 0 until 4) {
+        val ly = pageTop + h * (0.11f + i * 0.10f)
+        val reach = w * (0.185f - (if (i == 3) 0.050f else 0f))
         drawLine(
-            rule.copy(alpha = 0.5f),
-            Offset(gx + w * 0.045f, ly),
-            Offset(gx + w * 0.28f - (if (i == 2) w * 0.10f else 0f), ly),
+            rule.copy(alpha = 0.55f),
+            Offset(gutter - textMargin - reach, ly),
+            Offset(gutter - textMargin, ly),
+            strokeWidth = 1.0f
+        )
+        drawLine(
+            rule.copy(alpha = 0.55f),
+            Offset(gutter + textMargin, ly),
+            Offset(gutter + textMargin + reach, ly),
             strokeWidth = 1.0f
         )
     }
-    // ── The gutter: a white join with a soft crease each side.
-    drawLine(Color.White.copy(alpha = 0.92f), Offset(gx, top + h * 0.01f), Offset(gx, bot - h * 0.02f), strokeWidth = 1.8f)
-    drawLine(rule.copy(alpha = 0.25f), Offset(gx + w * 0.008f, top + h * 0.06f), Offset(gx + w * 0.008f, bot - h * 0.05f), strokeWidth = stroke * 0.4f)
-    drawLine(rule.copy(alpha = 0.25f), Offset(gx - w * 0.008f, top + h * 0.06f), Offset(gx - w * 0.008f, bot - h * 0.05f), strokeWidth = stroke * 0.4f)
-    // ── A ribbon bookmark over the right page, V-notched tail.
+    // ── The gutter: the shadow that falls into the join, then the join itself.
+    drawRoundRect(
+        Color.Black.copy(alpha = if (dark) 0.13f else 0.07f),
+        topLeft = Offset(gutter - w * 0.030f, pageTop - lift * 0.6f),
+        size = Size(w * 0.060f, (pageBot - pageTop) + lift * 1.2f),
+        cornerRadius = CornerRadius(w * 0.030f)
+    )
+    drawLine(
+        Color.White.copy(alpha = 0.92f),
+        Offset(gutter, pageTop - lift * 0.5f),
+        Offset(gutter, pageBot + dip * 0.6f),
+        strokeWidth = 1.6f
+    )
+    // ── A ribbon over the right page: it falls past the book's own foot, with
+    //    the notched tail a real ribbon is cut with.
+    val rbX = gutter + half * 0.50f
+    val rbW = w * 0.040f
     val rb = Path().apply {
-        moveTo(gx + w * 0.014f, top + h * 0.015f)
-        lineTo(gx + w * 0.058f, top + h * 0.015f)
-        lineTo(gx + w * 0.058f, top + h * 0.42f)
-        lineTo(gx + w * 0.036f, top + h * 0.35f)
-        lineTo(gx + w * 0.014f, top + h * 0.42f)
+        moveTo(rbX, pageTop + dip * 0.4f)
+        lineTo(rbX + rbW, pageTop + dip * 0.4f)
+        lineTo(rbX + rbW, pageBot + h * 0.078f)
+        lineTo(rbX + rbW * 0.5f, pageBot + h * 0.046f)
+        lineTo(rbX, pageBot + h * 0.078f)
         close()
     }
-    drawPath(rb, ribbon.copy(alpha = 0.95f))
-    drawPath(rb, Color.White.copy(alpha = 0.88f), style = Stroke(width = stroke * 0.45f))
+    drawPath(rb, ribbon.copy(alpha = 0.96f))
+    drawPath(rb, Color.White.copy(alpha = 0.88f), style = Stroke(width = stroke * 0.5f))
 
     // ── The mug beside the book: rim, handle, a shade band and two wisps.
-    val mw = w * 0.17f
-    val mx = w * 0.74f
-    val mTop = bot - h * 0.30f
-    val mBot = bot + h * 0.052f
+    //    Set clear of the book's fore edge so the two subjects never crowd.
+    val mw = w * 0.135f
+    val mx = w * 0.80f
+    val mTop = pageBot - h * 0.26f
+    val mBot = pageBot + h * 0.075f
     drawRoundRect(
         color = mug.copy(alpha = 0.95f),
         topLeft = Offset(mx, mTop),

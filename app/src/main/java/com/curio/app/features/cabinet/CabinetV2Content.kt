@@ -118,8 +118,6 @@ import com.curio.app.data.matchesSavedName
 import com.curio.app.data.matchesSavedNameStrict
 import com.curio.app.data.shortName
 import com.curio.app.features.personal.personalRouteFor
-import com.curio.app.features.reveal.AlbumArtFetch
-import com.curio.app.features.reveal.SeriesPosterFetch
 import com.curio.app.features.settings.BookCoverFetch
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
@@ -566,35 +564,13 @@ fun CabinetV2Content(navController: NavController) {
     }
     val allVisibleSelected = visibleIds.isNotEmpty() && visibleIds.all { it in selectedEntryIds }
 
-    // ── RAW content — decides between the genuinely-empty Cabinet
-    // (suggestions) and a filtered-to-nothing page. The seeded starter
-    // shelves don't count: a fresh Cabinet is still "empty" until the user
-    // saves or likes something.
-    val rawContent = entries.isNotEmpty() || books.isNotEmpty() ||
-        albums.isNotEmpty() || series.isNotEmpty() || userCollections.isNotEmpty()
-
-    // ── Empty-Cabinet suggestions: exactly three shuffled picks from the
-    // shelves members can collect here — one book, series, and album.
-    var suggestions by remember { mutableStateOf<Map<CategoryId, List<CurioTopic>>>(emptyMap()) }
-    var suggestionSeed by remember { mutableStateOf(0) }
-    val suggestionCats = remember {
-        listOf(CategoryId.BOOKS, CategoryId.SERIES, CategoryId.ALBUMS)
-    }
-    LaunchedEffect(suggestionSeed) {
-        val grouped = mutableMapOf<CategoryId, MutableList<CurioTopic>>()
-        for (cat in suggestionCats) {
-            val picks = mutableListOf<CurioTopic>()
-            val seen = mutableSetOf<String>()
-            var guard = 0
-            while (picks.size < 1 && guard < 20) {
-                guard++
-                val t = runCatching { TopicCatalog.randomFor(cat) }.getOrNull() ?: break
-                if (t.name !in seen) { seen.add(t.name); picks.add(t) }
-            }
-            if (picks.isNotEmpty()) grouped[cat] = picks
-        }
-        suggestions = grouped
-    }
+    // ── v407 — THE EMPTY-CABINET SUGGESTION RAILS ARE GONE (user: "dont
+    // show those recommendations when the cabinet is empty"). An empty or
+    // fresh Cabinet now opens straight onto its own furniture — the Cupboard
+    // card and the shelves below it — instead of a second, louder empty state
+    // with three shuffled picks and a Shuffle pill. Nothing else changed:
+    // the shelves, the Cupboard and the New-collection tile all still lead
+    // where they always did.
 
     // ── Collection edit state.
     var showCreateSheet by rememberSaveable { mutableStateOf(false) }
@@ -702,6 +678,37 @@ fun CabinetV2Content(navController: NavController) {
             )
         }
 
+        // ── OPENING A LEVEL ANIMATES (v407: "opening collections doesnt have
+        // any animations"). The swap used to be an instant cut: tapping a
+        // collection replaced the whole grid in the same frame, so going INTO
+        // something read as a glitch. Now every level change — a collection, a
+        // shelf, the Cupboard, back home — rises 14dp and fades in over 300ms
+        // with a whisper of scale, the same idiom the Cupboard's filter swap
+        // already uses. The content itself is recreated per level (the key
+        // below), so the motion also covers the fresh scroll position.
+        val levelSwap = remember { Animatable(1f) }
+        var lastLevel by remember { mutableStateOf(openLevel) }
+        LaunchedEffect(openLevel) {
+            if (lastLevel == openLevel) return@LaunchedEffect
+            lastLevel = openLevel
+            levelSwap.snapTo(0f)
+            levelSwap.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(300, easing = FastOutSlowInEasing)
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    val v = levelSwap.value
+                    alpha = v
+                    val scale = 0.975f + 0.025f * v
+                    scaleX = scale
+                    scaleY = scale
+                    translationY = (1f - v) * 16.dp.toPx()
+                }
+        ) {
         key(openLevel) {
         // ── THE CUPBOARD — the JSX masonry wall: a dense STAGGERED grid of
         // covers-only posters (books tall jackets, albums squares, series
@@ -1016,17 +1023,10 @@ fun CabinetV2Content(navController: NavController) {
                     onRenameCollection = { id -> renameTarget = id },
                     onDeleteCollection = { id -> deleteTarget = id },
                     onNewCollection = { showCreateSheet = true },
-                    suggestions = suggestions,
-                    onShuffle = { suggestionSeed++ },
-                    onOpenSuggestion = { t ->
-                        navController.navigate(
-                            CurioRoutes.revealFor(t.categoryId.routeSlug, t.name)
-                        ) { launchSingleTop = true }
-                    },
-                    showSuggestions = archiveReady && !rawContent,
                     onClearSearch = { searchQuery = ""; searchActive = false }
                 )
             }
+        }
         }
         }
         }
@@ -1279,10 +1279,6 @@ private fun LazyGridScope.v2HomeItems(
     onRenameCollection: (String) -> Unit,
     onDeleteCollection: (String) -> Unit,
     onNewCollection: () -> Unit,
-    suggestions: Map<CategoryId, List<CurioTopic>>,
-    onShuffle: () -> Unit,
-    onOpenSuggestion: (CurioTopic) -> Unit,
-    showSuggestions: Boolean,
     onClearSearch: () -> Unit
 ) {
     if (searching && visibleShelves.isEmpty() && userCollections.isEmpty()) {
@@ -1300,17 +1296,6 @@ private fun LazyGridScope.v2HomeItems(
     }
 
     if (!searching) {
-        // A genuinely empty Cabinet: three suggested discoveries first, then
-        // the design still shows the shelves + Everything card below.
-        if (showSuggestions) {
-            item(key = "suggestions", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-                V2EmptySuggestions(
-                    suggestions = suggestions,
-                    onShuffle = onShuffle,
-                    onOpen = onOpenSuggestion
-                )
-            }
-        }
         item(key = "everything-card", span = { GridItemSpan(maxLineSpan) }, contentType = "collection") {
             V2EverythingCard(
                 likes = everythingLikes,
@@ -4024,89 +4009,6 @@ private fun topicKindForMember(m: CurioCollectionMember): V2Kind = when (m.kind)
     CurioCollectionMember.MemberKind.ENTRY -> V2Kind.BOOK
 }
 
-/** ANALYSIS.md 4.4.4 — an empty Cabinet starts with three suggested
- *  discoveries (re-rolled by the Shuffle pill) instead of a blank page. */
-@Composable
-private fun V2EmptySuggestions(
-    suggestions: Map<CategoryId, List<CurioTopic>>,
-    onShuffle: () -> Unit,
-    onOpen: (CurioTopic) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "Your Cabinet is empty",
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = "Here are some topics to get you started.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(16.dp))
-        if (suggestions.isEmpty()) {
-            // Pools still loading — keep the frame steady.
-            repeat(3) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(72.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f))
-                )
-                Spacer(Modifier.height(10.dp))
-            }
-        } else {
-            suggestions.forEach { (catId, topics) ->
-                val cat = CurioCategories.byId(catId)
-                Text(
-                    text = catId.name.lowercase().replaceFirstChar { it.uppercase() } + "s",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = cat?.themedAccent() ?: settingsRoseAccent(),
-                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
-                )
-                topics.forEach { t ->
-                    V2LikedRow(
-                        item = V2Liked(t.name, topicKind(t), t),
-                        onClick = { onOpen(t) }
-                    )
-                    Spacer(Modifier.height(6.dp))
-                }
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-        Surface(
-            onClick = onShuffle,
-            shape = RoundedCornerShape(50),
-            color = settingsRoseAccent().copy(alpha = 0.13f),
-            contentColor = settingsRoseAccent(),
-            modifier = Modifier.height(38.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                CurioIcon(
-                    name = CurioIcons.Shuffle,
-                    contentDescription = null,
-                    tint = settingsAccentInk(),
-                    size = 17.dp
-                )
-                Text(
-                    text = "Shuffle suggestions",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = settingsAccentInk()
-                )
-            }
-        }
-    }
-}
-
-
-
 /** The full-width liked row: contain-fit jacket art + name / byline +
  *  category + chevron. Tap opens the reveal page (where the heart lives);
  *  optional long-press opens a "more" pill (used in collection details). */
@@ -4282,6 +4184,10 @@ private fun V2JacketArt(
         if (!sheetArt.isNullOrBlank() && sheetArt != stored) list.add(sheetArt)
         if (!authored.isNullOrBlank() && authored != stored && authored != sheetArt) list.add(authored)
         if (item.kind == V2Kind.BOOK) {
+            // v407 — the stored URL, the authored URL, then Open Library's
+            // bare title. iTunes is NOT added here: it is a SEARCH, not a URL,
+            // so it is resolved by the live cascade below (which now runs for
+            // books too) instead of being guessed at composition time.
             list.add(BookCoverFetch.coverUrlFor(item.name, ""))
         }
         list.distinct()
@@ -4299,37 +4205,47 @@ private fun V2JacketArt(
     // network (the tile serves only bytes already on disk).
     val fetchConsent = AppPreferences.coverFetchEnabledState
     LaunchedEffect(item.name, item.kind, coverIndex, liveDone, fetchConsent) {
-        if (fetchConsent && !liveDone && item.kind != V2Kind.BOOK && coverIndex >= candidates.size) {
+        if (fetchConsent && !liveDone && coverIndex >= candidates.size) {
+            val coverKind = CabinetCoverCache.CoverKind.valueOf(item.kind.name)
             var found: String? = null
-            when (item.kind) {
-                V2Kind.ALBUM -> {
-                    for (p in 0 until AlbumArtFetch.PROVIDER_COUNT) {
-                        val u = AlbumArtFetch.resolveArtworkUrl(item.name, topic?.byline, p)
-                        if (!u.isNullOrBlank()) { found = u; break }
-                    }
-                }
-                V2Kind.SERIES -> {
-                    for (p in 0 until SeriesPosterFetch.PROVIDER_COUNT) {
-                        val u = SeriesPosterFetch.resolvePosterUrl(item.name, p)
-                        if (!u.isNullOrBlank()) { found = u; break }
-                    }
-                }
-                else -> Unit
+            // v407 — BOOKS CASCADE TOO (user: "many book covers doesnt load,
+            // can u use the itune fallback for loading book covers"). They
+            // used to be excluded here — the stored URL, the authored URL and
+            // Open Library's bare title were the only shots — so a book whose
+            // three candidates all missed landed on its blank plate and was
+            // never resolved again. Every kind now walks its OWN provider
+            // cascade: books iTunes Search then Open Library, albums iTunes
+            // then MusicBrainz, series TVMaze then iTunes.
+            for (p in 0 until CabinetCoverCache.providerCount(coverKind)) {
+                val u = CabinetCoverCache.resolveWithProvider(
+                    context,
+                    coverKind,
+                    item.name,
+                    topic?.byline,
+                    authored,
+                    p
+                )
+                if (!u.isNullOrBlank()) { found = u; break }
             }
             resolved = found
             if (!found.isNullOrBlank()) {
+                // The cache downloads AND verifies the bytes, and only then
+                // persists the URL — so a provider that answers with nothing
+                // usable can no longer leave a dead record behind.
                 CabinetCoverCache.ensureLocalCover(
                     context,
-                    CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                    coverKind,
                     item.name,
                     topic?.byline,
                     authored
                 )
-                AppPreferences.setSheetArtUrl(
-                    context,
-                    "${item.kind.name.lowercase()}|${item.name}",
-                    found
-                )
+                if (item.kind != V2Kind.BOOK) {
+                    AppPreferences.setSheetArtUrl(
+                        context,
+                        "${coverKind.stateKey}|${item.name}",
+                        found
+                    )
+                }
             }
             liveDone = true
         }

@@ -61,6 +61,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
@@ -98,6 +100,22 @@ internal data class ArtworkInfo(
     val pageUrl: String
 )
 
+/**
+ * v407 — A MAKER'S OWN RECORD (an artist or a painter), from Wikipedia: the
+ * prose that describes them, their lead image, and their article. The Met is
+ * asked first for their works (see [ArtworkFetch.worksBy]) because its answers
+ * are attributed, but the Met only knows what the Met holds — this is what
+ * fills an artist or painter page that the museum's catalogue has nothing to
+ * say about (user: "artist info wasnt loading at all, and many painter info
+ * wasnt loading too").
+ */
+internal data class MakerInfo(
+    val name: String,
+    val summary: String,
+    val portraitUrl: String,
+    val pageUrl: String
+)
+
 object ArtworkFetch {
 
     private const val MET = "https://collectionapi.metmuseum.org/public/collection/v1"
@@ -110,8 +128,17 @@ object ArtworkFetch {
         val key = "${title.trim()}|${artist.trim()}"
         if (title.isBlank()) return@withContext null
         cache[key]?.let { return@withContext it }
-        val met = runCatching { metObject(title, artist) }.getOrNull()
-        val wiki = runCatching { wikiSummary(title, artist) }.getOrNull()
+        // v407 — THE TWO SOURCES ARE QUERIED AT THE SAME TIME. They are
+        // independent, but they used to run back to back: the Met's search,
+        // then up to five object records, THEN the Wikipedia article — so a
+        // painting's sheet waited for the SUM of both round trips (user: "the
+        // painting artworks loading was so slow"). In parallel the wait is the
+        // slower of the two, and each source still fails alone.
+        val (met, wiki) = coroutineScope {
+            val metJob = async { runCatching { metObject(title, artist) }.getOrNull() }
+            val wikiJob = async { runCatching { wikiSummary(title, artist) }.getOrNull() }
+            metJob.await() to wikiJob.await()
+        }
         if (met == null && wiki == null) return@withContext null
         val merged = ArtworkInfo(
             title = met?.title?.takeIf { it.isNotBlank() } ?: title.trim(),
@@ -175,7 +202,57 @@ object ArtworkFetch {
         return worksBy(name, limit = CARD_LOOKUPS)
             .firstOrNull { it.coverUrl.isNotBlank() }
             ?.coverUrl
+            // v407 — THE PERSON'S OWN PICTURE WHEN THE MUSEUM HAS NOTHING.
+            // The Met only knows what it holds, so an artist or a painter with
+            // no attribution there used to leave the reveal card with no image
+            // at all (user: "artist info wasnt loading at all, and many painter
+            // info wasnt loading too"). Their Wikipedia lead image is the
+            // fallback — the same rule the AUTHOR lane already lives by.
+            ?: makerInfo(name)?.portraitUrl?.takeIf { it.isNotBlank() }
     }
+
+    /**
+     * v407 — WHO THE MAKER IS, in Wikipedia's words (with their lead image and
+     * their article), for the ARTIST / PAINTER sheet and card. Memoized per
+     * name; null when the page is a disambiguation or says nothing at all.
+     */
+    internal suspend fun makerInfo(maker: String): MakerInfo? = withContext(Dispatchers.IO) {
+        val person = maker.trim()
+        if (person.isBlank()) return@withContext null
+        makerInfoCache[person]?.let { return@withContext it }
+        val record = runCatching { wikiPerson(person) }.getOrNull() ?: return@withContext null
+        makerInfoCache[person] = record
+        record
+    }
+
+    /** Wikipedia's page summary for a PERSON: prose + lead image + article. */
+    private fun wikiPerson(name: String): MakerInfo? {
+        val slug = Uri.encode(name.replace(' ', '_'))
+        val body = getJson("https://en.wikipedia.org/api/rest_v1/page/summary/$slug")
+            ?: return null
+        val row = runCatching { JSONObject(body) }.getOrNull() ?: return null
+        // A disambiguation page is not a person.
+        if (row.optString("type") != "standard") return null
+        val words = row.optString("extract").trim()
+        val image = row.optJSONObject("originalimage")?.optString("source")
+            ?.takeIf { it.isNotBlank() }
+            ?: row.optJSONObject("thumbnail")?.optString("source").orEmpty()
+        // Nothing to say and nothing to show is not a record.
+        if (words.length < MIN_SUMMARY && image.isBlank()) return null
+        val page = row.optJSONObject("content_urls")
+            ?.optJSONObject("desktop")
+            ?.optString("page")
+            .orEmpty()
+        return MakerInfo(
+            name = row.optString("title").ifBlank { name },
+            summary = words,
+            portraitUrl = image,
+            pageUrl = page.ifBlank { "https://en.wikipedia.org/wiki/$slug" }
+        )
+    }
+
+    /** name → the maker's record (absent answer is not cached). */
+    private val makerInfoCache = ConcurrentHashMap<String, MakerInfo>()
 
     /**
      * A PERSON'S OWN PICTURE, for an author's card: Wikipedia's lead image for
@@ -193,18 +270,8 @@ object ArtworkFetch {
     }
 
     /** The page's own lead image for a NAME (a person, here) — or null. */
-    private fun wikiLeadImage(name: String): String? {
-        val slug = Uri.encode(name.replace(' ', '_'))
-        val body = getJson("https://en.wikipedia.org/api/rest_v1/page/summary/$slug")
-            ?: return null
-        val row = runCatching { JSONObject(body) }.getOrNull() ?: return null
-        // A disambiguation page is not a person, and a page with no image has
-        // nothing to draw — both answer null rather than a wrong face.
-        if (row.optString("type") != "standard") return null
-        return row.optJSONObject("originalimage")?.optString("source")
-            ?.takeIf { it.isNotBlank() }
-            ?: row.optJSONObject("thumbnail")?.optString("source")?.takeIf { it.isNotBlank() }
-    }
+    private fun wikiLeadImage(name: String): String? =
+        wikiPerson(name)?.portraitUrl?.takeIf { it.isNotBlank() }
 
     /** The Met's search ids for a query, best-effort. */
     private fun metIds(query: String, artistScoped: Boolean): List<Int> {
@@ -222,7 +289,9 @@ object ArtworkFetch {
 
     /** The Met's object record for a title, matched by name — or null. */
     private fun metObject(title: String, artist: String): ArtworkInfo? {
-        val ids = metIds(title, artistScoped = false).take(5)
+        // v407 — three records, not five: each one is a round trip and the
+        // title match almost always arrives on the first or second hit.
+        val ids = metIds(title, artistScoped = false).take(3)
         if (ids.isEmpty()) return null
         val wanted = normalise(title)
         for (id in ids) {
@@ -244,8 +313,14 @@ object ArtworkFetch {
                 date = row.optString("objectDate").trim(),
                 medium = row.optString("medium").trim(),
                 museum = row.optString("department").trim(),
-                imageUrl = row.optString("primaryImage").ifBlank {
-                    row.optString("primaryImageSmall")
+                // v407 — THE WEB-SIZE IMAGE FIRST. `primaryImage` is the
+                // museum's full-resolution original — routinely several
+                // thousand pixels and several megabytes — while the card that
+                // draws it is 200–230dp tall, so the sheet was downloading a
+                // poster to paint a stamp (the other half of "the painting
+                // artworks loading was so slow").
+                imageUrl = row.optString("primaryImageSmall").ifBlank {
+                    row.optString("primaryImage")
                 },
                 summary = "",
                 pageUrl = row.optString("objectURL")
@@ -360,10 +435,20 @@ internal fun ArtworkSheet(
 
     var info by remember(topic.name) { mutableStateOf<ArtworkInfo?>(null) }
     var makerWorks by remember(topic.name) { mutableStateOf<List<AuthorWork>?>(null) }
+    // v407 — the maker's OWN record (prose + portrait) as well as the Met's
+    // list of their works.
+    var makerAbout by remember(topic.name) { mutableStateOf<MakerInfo?>(null) }
     LaunchedEffect(topic.name, mode) {
         when (mode) {
             ArtworkSheetMode.WORK -> info = ArtworkFetch.artwork(topic.name, topic.byline)
-            ArtworkSheetMode.MAKER -> makerWorks = ArtworkFetch.worksBy(topic.name)
+            ArtworkSheetMode.MAKER -> coroutineScope {
+                // The two lookups are independent, so they run side by side:
+                // the sheet waits for the slower one, not for their sum.
+                val worksJob = async { ArtworkFetch.worksBy(topic.name) }
+                val aboutJob = async { ArtworkFetch.makerInfo(topic.name) }
+                makerWorks = worksJob.await()
+                makerAbout = aboutJob.await()
+            }
         }
     }
 
@@ -442,28 +527,73 @@ internal fun ArtworkSheet(
                 MakerHeader(
                     topic = topic,
                     count = makerWorks,
+                    about = makerAbout,
                     ink = ink,
                     onSurface = onSurface
                 )
                 Spacer(Modifier.height(12.dp))
                 val listed = makerWorks.orEmpty()
-                if (listed.isEmpty()) {
-                    Text(
-                        if (makerWorks == null) "Looking them up\u2026"
-                        else "The Met holds no attributed works for this name.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                            horizontal = 20.dp,
-                            vertical = 2.dp
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                val about = makerAbout
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 20.dp,
+                        vertical = 2.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // ── v407 — WHO THEY ARE FIRST, then what they made.
+                    // The Met can only answer for the works it holds, so an
+                    // artist or a painter the museum has nothing attributed
+                    // to used to open an empty sheet that said so and stopped
+                    // (user: "artist info wasnt loading at all, and many
+                    // painter info wasnt loading too"). Their article's own
+                    // words and their face are the answer now, and the works
+                    // list follows when there is one.
+                    about?.summary?.takeIf { it.isNotBlank() }?.let { words ->
+                        item(key = "maker-about") {
+                            Text(
+                                words,
+                                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 21.sp),
+                                color = onSurfaceVariant
+                            )
+                        }
+                    }
+                    about?.pageUrl?.takeIf { it.isNotBlank() }?.let { recordUrl ->
+                        item(key = "maker-record") {
+                            Surface(
+                                onClick = { openSearchUrl(context, recordUrl) },
+                                shape = RoundedCornerShape(50),
+                                color = accent.copy(alpha = 0.14f)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 7.dp)
+                                ) {
+                                    CurioIcon(CurioIcons.Search, null, tint = ink, size = 15.dp)
+                                    Text(
+                                        "THE RECORD",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            letterSpacing = 0.8.sp
+                                        ),
+                                        color = ink
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    if (listed.isEmpty()) {
+                        item(key = "maker-none") {
+                            Text(
+                                if (makerWorks == null) "Looking them up\u2026"
+                                else "The Met holds no attributed works for this name.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = onSurfaceVariant
+                            )
+                        }
+                    } else {
                         items(items = listed, key = { it.key.ifBlank { it.title } }) { work ->
                             Surface(
                                 onClick = {
@@ -646,6 +776,7 @@ private fun WorkHeader(
 private fun MakerHeader(
     topic: CurioTopic,
     count: List<AuthorWork>?,
+    about: MakerInfo?,
     ink: Color,
     onSurface: Color
 ) {
@@ -656,14 +787,32 @@ private fun MakerHeader(
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
     ) {
+        // v407 — their face when Wikipedia has one, the glyph when it does
+        // not: a maker is a person, and a portrait says that better than an
+        // icon does.
         Surface(shape = CircleShape, color = ink.copy(alpha = 0.16f)) {
-            CurioIcon(
-                CurioIcons.Person,
-                null,
-                tint = ink,
-                size = 20.dp,
-                modifier = Modifier.padding(9.dp)
-            )
+            val portrait = about?.portraitUrl?.takeIf { it.isNotBlank() }
+            if (portrait != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(portrait)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                )
+            } else {
+                CurioIcon(
+                    CurioIcons.Person,
+                    null,
+                    tint = ink,
+                    size = 20.dp,
+                    modifier = Modifier.padding(9.dp)
+                )
+            }
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(

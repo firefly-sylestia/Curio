@@ -83,16 +83,42 @@ object BookCoverFetch {
         provider: BookCoverProvider
     ): String? = withContext(Dispatchers.IO) {
         val resolved = imageUrl.takeIf { it.isNotBlank() }
-            ?: when (provider) {
-                BookCoverProvider.ITUNES -> itunesThumbnail(bookName, author)
-                BookCoverProvider.OPEN_LIBRARY ->
-                    "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
-                BookCoverProvider.LIBRARY_THING -> libraryThingCover(bookName, author)
-            }
+            ?: providerCoverUrl(bookName, author, provider)
         // v352 — remember what the hub actually resolved so the reveal poster
         // (and the share card) can reuse it instead of re-guessing.
         if (resolved != null) AppPreferences.setBookCoverUrl(context, bookName, resolved)
         resolved
+    }
+
+    /**
+     * v407 — THE PROVIDER'S OWN COVER, with no authored-URL shortcut.
+     *
+     * [resolveCoverUrl] deliberately hands back the topic's own `imageUrl`
+     * whatever provider is asked for, which is right for the reveal poster (a
+     * curated URL should win) but wrong for a CASCADE: many catalog books
+     * carry an Open Library placeholder that no longer resolves, and that one
+     * dead URL used to answer for every provider in turn — so the cover cache
+     * could never advance past it and the book kept its blank plate forever
+     * (user: "many book covers doesnt load, can u use the itune fallback for
+     * loading book covers"). Callers that need to try a real second source
+     * ask for it with this, and the winner is only persisted once its bytes
+     * have actually arrived (see CabinetCoverCache.ensureLocalCover).
+     *
+     * It hits the network (iTunes Search is a request, not a URL), so the
+     * lookup runs on the IO dispatcher itself — callers may invoke it from any
+     * coroutine without having to hop dispatchers first.
+     */
+    suspend fun providerCoverUrl(
+        bookName: String,
+        author: String?,
+        provider: BookCoverProvider
+    ): String? = withContext(Dispatchers.IO) {
+        when (provider) {
+            BookCoverProvider.ITUNES -> itunesThumbnail(bookName, author)
+            BookCoverProvider.OPEN_LIBRARY ->
+                "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
+            BookCoverProvider.LIBRARY_THING -> libraryThingCover(bookName, author)
+        }
     }
 
     /** v354 — Google Books volumes endpoint. Stays fully KEYLESS unless the

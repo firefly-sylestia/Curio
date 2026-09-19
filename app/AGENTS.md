@@ -8865,6 +8865,70 @@ only ever catches taps that mean "not in any of these".
   is live. A member who is signed out is told to turn Online mode on rather
   than being shown a form they cannot send.
 
+## Cabinet covers, the open book and the art lane (v407)
+
+- **A persisted cover URL is a HINT, never a verdict.**
+  `CabinetCoverCache.ensureLocalCover` walks a candidate list (the persisted
+  URL, the topic's authored `imageUrl`, then each provider's own cover) and
+  writes a URL to the store ONLY in the same breath as the bytes that came
+  back from it (`downloadBytes` requires more than 512 bytes, so Open
+  Library's 1x1 GIF placeholder fails). The old path persisted the first URL
+  that RESOLVED — usually an authored placeholder — and then failed to
+  download it, so the item read as "already resolved" forever and kept its
+  blank plate (the reported "many book covers doesnt load"). Never
+  reintroduce a resolve-then-persist step; `resolveAndPersist` was deleted for
+  exactly that reason.
+- **For books, a provider means THAT provider.**
+  `BookCoverFetch.providerCoverUrl` (suspend, IO dispatcher) is the
+  provider-exclusive resolver — iTunes Search, Open Library's title cover, or
+  LibraryThing. `BookCoverFetch.resolveCoverUrl` keeps its authored-first rule
+  for the reveal poster and the share card only. Routing the cover-source
+  switch through the authored-first rule is what made "Open Library" a no-op
+  for every book that carried an `imageUrl`.
+- **Failures are remembered per RUN, not forever.**
+  `CabinetCoverCache.missedThisRun` keeps the Cabinet's warmer from
+  re-searching the same fruitless item on every visit inside a session, while
+  a fresh launch retries (a miss may just have been the network). Never move
+  a miss into `AppPreferences` — a stored failure is what left covers blank.
+- **Book tiles cascade too.** `V2JacketArt`'s live resolve runs for books as
+  well (iTunes then Open Library); it used to skip `V2Kind.BOOK` entirely,
+  which is the other half of the blank-cover report. Books persist through
+  `setBookCoverUrl`, albums and series through `setSheetArtUrl("kind|name")`.
+- **The open book (`ReadingArt` in CabinetShelves.kt) is drawn from six
+  numbers**: `gutter`, `half` (each page's fore edge from the gutter),
+  `pageTop`, `pageBot`, `dip` (how far a sheet sinks INTO the gutter) and
+  `lift` (how far its fore edge leaves the table). Both halves derive from
+  them, so they cannot disagree — do not hand-place points in that path
+  again. The ruled lines stop clear of the gutter (the binding margin) and
+  the ribbon falls past the book's own foot.
+- **Opening a Cabinet level ANIMATES.** `CabinetV2Content` wraps its
+  `key(openLevel)` content in one `Box` whose `graphicsLayer` reads
+  `levelSwap` (alpha + 0.975 to 1 scale + 16dp rise, tween 300): the layer
+  updates without recomposing the grid, and the level's own scroll position is
+  created fresh by `key(openLevel)`, so the motion covers it. Every level
+  change — a collection, a shelf, the Cupboard, back home — goes through it.
+- **The empty-Cabinet suggestion rails are REMOVED** (user request, 2026-09-19).
+  There is no "Your Cabinet is empty" block, no shuffled picks and no Shuffle
+  pill: `v2HomeItems` leads with the Cupboard card and the shelves.
+  `V2EmptySuggestions`, the suggestion state and its effect, and the
+  `showSuggestions` / `suggestions` / `onShuffle` / `onOpenSuggestion`
+  parameters are gone. Do not add a second empty state to a page that is never
+  blank.
+- **The art lane asks both sources AT ONCE.** `ArtworkFetch.artwork` runs the
+  Met and Wikipedia lookups in parallel (`coroutineScope` + `async`); they are
+  independent, and running them back to back made a painting's sheet wait for
+  the sum. `metObject` opens at most THREE records and prefers
+  `primaryImageSmall` — the web-size image — over `primaryImage`, the museum's
+  full-resolution original that is routinely several megabytes behind a 230dp
+  band.
+- **A maker is a person, so the maker lane has a Wikipedia half.**
+  `ArtworkFetch.makerInfo(name)` returns `MakerInfo` (prose + lead image +
+  article); it is what makes an ARTIST or PAINTER page say something when the
+  Met holds no attributed work. `makerArtwork` falls back to that portrait for
+  the reveal card, and the MAKER sheet shows the extract, the portrait in its
+  header and a THE RECORD door above the works list. `wikiLeadImage` (the
+  author lane) is a thin wrapper over the same `wikiPerson` lookup now.
+
 ## Child DOX Index
 
 - [`CURIO_DATA_PLAN.md`](CURIO_DATA_PLAN.md) — Canonical **data layer** spec. Owns: category taxonomy expansion (6 → 10), `CurioTopic` + `ExploreAction` schema, JSON-on-disk canonical format, Room DB seed flow, image strategy (URL + Coil, no bundling), authoring pipeline (LLM-draft + human-review + smoke test), per-category rollout cadence (one category per PR, Music first). Read this BEFORE adding any topic data, category entry, or capture-format prompt.

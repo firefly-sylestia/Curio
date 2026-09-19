@@ -169,9 +169,11 @@ object CabinetCoverCache {
     /**
      * Resolve a cover URL for [provider] (0-based; see the fetchers).
      * Books: 0 = iTunes, 1 = Open Library title; albums: 0 = iTunes,
-     * 1 = MusicBrainz; series: 0 = TVMaze, 1 = iTunes. An authored topic
-     * imageUrl always wins for books (provider-independent) — pass it in
-     * [authoredUrl] so the caller can keep it as the first candidate.
+     * 1 = MusicBrainz; series: 0 = TVMaze, 1 = iTunes. v407 — the answer is
+     * the PROVIDER'S own cover, never the book's authored URL, so asking for
+     * the second source really returns the second source. An authored
+     * imageUrl still stays in play: pass it in [authoredUrl] and
+     * [ensureLocalCover] tries it before the providers do.
      */
     suspend fun resolveWithProvider(
         context: Context,
@@ -181,37 +183,19 @@ object CabinetCoverCache {
         authoredUrl: String?,
         provider: Int
     ): String? = when (kind) {
-        CoverKind.BOOK -> BookCoverFetch.resolveCoverUrl(
-            context,
+        // v407 — the PROVIDER'S OWN cover, not the authored-first shortcut:
+        // switching a book's source used to re-resolve to the same authored
+        // URL, so picking the other provider changed nothing (and the cascade
+        // could not advance past a dead placeholder). The authored URL keeps
+        // its place at the front of [ensureLocalCover]'s candidate list.
+        CoverKind.BOOK -> BookCoverFetch.providerCoverUrl(
             name,
             byline,
-            authoredUrl.orEmpty(),
             if (provider == 1) BookCoverFetch.BookCoverProvider.OPEN_LIBRARY
             else BookCoverFetch.BookCoverProvider.ITUNES
         )
         CoverKind.ALBUM -> AlbumArtFetch.resolveArtworkUrl(name, byline, provider)
         CoverKind.SERIES -> SeriesPosterFetch.resolvePosterUrl(name, provider)
-    }
-
-    /** Resolve with the DEFAULT cascade (best provider first, then the next
-     *  — "if one doesn't show, show the other") and persist the winner. */
-    suspend fun resolveAndPersist(
-        context: Context,
-        kind: CoverKind,
-        name: String,
-        byline: String?,
-        authoredUrl: String?
-    ): String? {
-        val existing = persistedUrl(context, kind, name)
-        if (existing != null) return existing
-        for (p in 0 until providerCount(kind)) {
-            val url = resolveWithProvider(context, kind, name, byline, authoredUrl, p)
-            if (!url.isNullOrBlank()) {
-                persistUrl(context, kind, name, url)
-                return url
-            }
-        }
-        return null
     }
 
     /**
@@ -234,18 +218,80 @@ object CabinetCoverCache {
         // open). Single saves (the tile live-resolve) keep the bump.
         bumpVersion: Boolean = true
     ): File? = withContext(Dispatchers.IO) {
+        val memoKey = "${kind.stateKey}|$name"
         if (!redownload) {
             localCoverFile(context, kind, name)?.let { return@withContext it }
+            // Already searched for this one and come up empty in THIS run:
+            // don't hammer the providers again on the next visit.
+            if (missedThisRun.contains(memoKey)) return@withContext null
         }
-        val url = persistedUrl(context, kind, name)
-            ?: resolveAndPersist(context, kind, name, byline, authoredUrl)
-            ?: return@withContext null
-        val bytes = downloadBytes(url) ?: return@withContext null
-        val f = File(dir(context), fileName(kind, name))
-        runCatching { f.writeBytes(bytes) }
-        if (bumpVersion && f.exists() && f.length() > 0L) version.intValue++
-        f.takeIf { it.exists() && it.length() > 0L }
+        // v407 — EVERY CANDIDATE IS TRIED, AND ONLY A URL THAT ACTUALLY
+        // DELIVERED AN IMAGE IS PERSISTED.
+        //
+        // The old path resolved ONE url (authored first), wrote it to the
+        // store and only THEN tried to download it — so a dead placeholder
+        // was recorded as the answer, and the next visit (and every visit
+        // after it) read that URL back, skipped the item as
+        // "already resolved" and never looked again. That, plus the authored
+        // URL answering for every provider, is why so many covers stayed
+        // blank. Now the list is walked — the persisted URL first (it may be
+        // good), then the authored one, then each provider's own cover (for
+        // books: iTunes Search, then Open Library) — and the file is only
+        // saved together with the URL that produced it, so the worst case is
+        // an item that retries next time instead of one that gives up for
+        // good.
+        val candidates = LinkedHashSet<String>()
+        // The persisted URL goes first EVEN on a redownload: the cover-source
+        // switch writes the provider the user just picked there before calling
+        // us, so honouring it keeps "show the other one" meaning what it says.
+        persistedUrl(context, kind, name)?.let { candidates.add(it) }
+        authoredUrl?.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
+        when (kind) {
+            CoverKind.BOOK -> for (p in 0 until providerCount(kind)) {
+                BookCoverFetch.providerCoverUrl(
+                    name,
+                    byline,
+                    if (p == 1) BookCoverFetch.BookCoverProvider.OPEN_LIBRARY
+                    else BookCoverFetch.BookCoverProvider.ITUNES
+                )?.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
+            }
+            CoverKind.ALBUM -> for (p in 0 until providerCount(kind)) {
+                AlbumArtFetch.resolveArtworkUrl(name, byline, p)
+                    ?.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
+            }
+            CoverKind.SERIES -> for (p in 0 until providerCount(kind)) {
+                SeriesPosterFetch.resolvePosterUrl(name, p)
+                    ?.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
+            }
+        }
+        val file = File(dir(context), fileName(kind, name))
+        for (url in candidates) {
+            val bytes = downloadBytes(url) ?: continue
+            val written = runCatching { file.writeBytes(bytes) }.isSuccess
+            if (written && file.length() > 0L) {
+                persistUrl(context, kind, name, url)
+                missedThisRun.remove(memoKey)
+                if (bumpVersion) version.intValue++
+                return@withContext file
+            }
+        }
+        // Nothing delivered an image. Remember it for the rest of this run (a
+        // fresh launch tries again — the network may simply have been down),
+        // so the Cabinet's warmer doesn't re-search every provider on every
+        // visit. The STORE keeps no record of the miss, which is the point:
+        // giving up permanently is what left the covers blank.
+        missedThisRun.add(memoKey)
+        null
     }
+
+    /**
+     * v407 — topics whose cascade found nothing DURING THIS RUN. The persisted
+     * store never records a failure as an answer any more (see
+     * [ensureLocalCover]), so this in-memory memo is what keeps a fruitless
+     * search from being repeated on every visit to the Cabinet.
+     */
+    private val missedThisRun: MutableSet<String> =
+        java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     /** Download the image bytes (8s timeouts, best-effort). */
     private fun downloadBytes(urlString: String): ByteArray? = runCatching {
