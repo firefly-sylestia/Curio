@@ -1978,13 +1978,22 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * photo … sometimes it ungroups" they reported.
      *
      * A carried print therefore SNAPS to the run it was dropped against: above
-     * the run when the finger was travelling down (so it takes the row's first
-     * cell), just below it when travelling up (the last cell), and nowhere near
-     * it when the block at the landing slot is not a print at all. A block that
-     * is not a print is left exactly where the finger put it — paragraphs,
-     * voice notes and to-do rows still land where they were dropped.
+     * the run when it is taking the row's LEFT cell, just below it when it is
+     * taking the right one, and nowhere near it when the block at the landing
+     * slot is not a print at all. A block that is not a print is left exactly
+     * where the finger put it — paragraphs, voice notes and to-do rows still
+     * land where they were dropped.
+     *
+     * v406 — WHICH END IS NO LONGER THE VERTICAL DIRECTION'S ANSWER.
+     *
+     * It used to be (`goingDown`), so a member who carried a picture down onto
+     * a pair had no way to ask for the other side: every drop into a row landed
+     * on its head. The end comes from [PersonalRowDragState.takeLeftCell] now
+     * — a sideways drag when there is one, the vertical direction when there is
+     * not — and the SAME value draws the landing ghost, so the cell shown in the
+     * air is the cell that is taken (see the drawing pass below).
      */
-    fun printDropIndex(from: Int, to: Int, goingDown: Boolean): Int {
+    fun printDropIndex(from: Int, to: Int, takeLeft: Boolean): Int {
         val ids = order
         if (from !in ids.indices) return to
         if (blocks[ids[from]]?.isPhoto != true) return to
@@ -2019,7 +2028,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val landing = when {
             from in start..end -> to
             from == start - 1 || from == end + 1 -> from
-            goingDown -> start
+            takeLeft -> start
             below in ids.indices -> below
             else -> start
         }
@@ -2872,8 +2881,12 @@ internal fun PersonalCanvas(
                                         carriedRef?.let { state.block(it)?.isPhoto } == true
                                     if (carriedIsPrint && carriedRef != id && block.isPhoto) {
                                         val cellWidth = (size.width * 0.5f).coerceAtLeast(1f)
+                                        // v406 — the SAME value the drop uses
+                                        // (see printDropIndex), so the dashed
+                                        // cell in the air is the cell taken.
                                         val cellLeft =
-                                            if (rowDrag.goingDown) size.width - cellWidth else 0f
+                                            if (rowDrag.takeLeftCell) 0f
+                                            else size.width - cellWidth
                                         drawRoundRect(
                                             color = accent.copy(alpha = 0.10f),
                                             topLeft = Offset(cellLeft, lead),

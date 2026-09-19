@@ -325,6 +325,25 @@ fun PersonalChipsRow(
                 )
             }
         ) {
+            // ── v406 — A DOOR'S ROW WITH NOTHING IN IT SAYS SO ──
+            //
+            // A first-time member's Home had two doors and two rows of nothing:
+            // a LazyRow draws no chip until a journal or a book exists, so the
+            // strip collapsed to the door alone and read as part of the page
+            // that had failed to load (member's report: "in home screen the
+            // doors and its list so when user opens the page for the first time
+            // those place feels empty"). The door now offers the first step
+            // itself, at a chip's own size, so the row keeps its shape.
+            if (journals.isEmpty()) {
+                item("empty-journals") {
+                    EmptyDoorChip(
+                        glyph = CurioIcons.Add,
+                        label = "No pages yet",
+                        caption = "Start your first one",
+                        onClick = onWrite
+                    )
+                }
+            }
             // v389d — MORE THAN THREE (user question: "why only 3 books and 3
             // journal shows. add more keeping scroll too"). The row has always
             // been a LazyRow — it scrolls — so the cap was the only reason the
@@ -348,6 +367,19 @@ fun PersonalChipsRow(
                 )
             }
         ) {
+            // The shelf's own first step, for the same reason as the row above.
+            if (books.isEmpty()) {
+                item("empty-books") {
+                    EmptyDoorChip(
+                        glyph = CurioIcons.Add,
+                        label = "No books yet",
+                        caption = "Open the shelf",
+                        onClick = {
+                            navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                        }
+                    )
+                }
+            }
             items(items = books.take(CHIP_ROW_LIMIT), key = { it.id }) { book ->
                 BookChip(book = book, onClick = {
                     navController.navigate(CurioRoutes.bookDetail(book.id)) { launchSingleTop = true }
@@ -417,6 +449,61 @@ private fun PinnedDoorRow(
  * about not building a chip for a library of hundreds on first frame.
  */
 private const val CHIP_ROW_LIMIT = 12
+
+/**
+ * v406 — THE FIRST STEP, WHERE A DOOR'S ROW HAS NOTHING YET.
+ *
+ * A chip's own width and height, so an empty row is a row and not a strip that
+ * collapsed to its door. It reads as an invitation rather than as an error: the
+ * glyph in the accent's own wash, the label a plain fact, the caption the thing
+ * to do about it (see [PersonalChipsRow]).
+ */
+@Composable
+private fun EmptyDoorChip(
+    glyph: String,
+    label: String,
+    caption: String,
+    onClick: () -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    val accent = personalAccent()
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier
+            .width(CHIP_WIDTH)
+            .height(CHIP_HEIGHT)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = accent.copy(alpha = 0.14f),
+                modifier = Modifier.size(34.dp)
+            ) {
+                Box(Modifier.size(34.dp), contentAlignment = Alignment.Center) {
+                    CurioIcon(glyph, null, tint = accent, size = 18.dp)
+                }
+            }
+            Spacer(Modifier.height(9.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = ink
+            )
+            Text(
+                caption,
+                style = MaterialTheme.typography.labelSmall,
+                color = ink.copy(alpha = 0.55f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
 
 @Composable
 private fun NewChip(onClick: () -> Unit) {

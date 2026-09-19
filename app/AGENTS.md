@@ -8735,6 +8735,21 @@ only ever catches taps that mean "not in any of these".
   (called from `onCreate`, before `setContent`), but a write from ANOTHER surface
   lands after a card composes — so the cached URL must key BOTH the `remember`
   seed and the `LaunchedEffect`, or the card re-fetches art the app already has.
+- **Orientation.** The app declares no `screenOrientation` anywhere, so the
+  reader already follows the device's rotation. `ReaderLook.pageUpright` is the
+  one standing choice: it sets `requestedOrientation` on the ACTIVITY (via
+  `Context.findActivity()`), and only while a PDF is open. Always restore
+  `SCREEN_ORIENTATION_UNSPECIFIED` on dispose.
+- **Block drag has TWO axes now.** `PersonalRowDragState.dragBy(amountX,
+  amountY, …)` — the vertical travel steps the list, the horizontal travel is
+  INTENT only (`takeLeftCell`) and chooses which end of a print row a dropped
+  print takes. `PersonalEditorState.printDropIndex(from, to, takeLeft)` and the
+  landing ghost in the drawing pass must read the SAME `takeLeftCell`, or the
+  cell shown in the air is not the cell that is taken.
+- **Home's doors need an empty row.** A `LazyRow` draws nothing when its source
+  is empty, so a first-time Home collapsed both door strips to the door alone.
+  Each door emits an `EmptyDoorChip` at `CHIP_WIDTH` × `CHIP_HEIGHT` when its
+  list is empty, so the strip keeps its shape and offers the first step.
 
 ### Bottom-anchoring with weight spacers
 - To anchor controls to the bottom edge regardless of screen height: replace fixed `Spacer(26.dp)` (which floats on tall screens) with `Spacer(Modifier.weight(1f))` inside a `fillMaxSize` `Column`. The weight spacer absorbs all free space above the controls.

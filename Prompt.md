@@ -78,6 +78,47 @@ nothing extra, so it was a clean fast-forward. Work continues on `main`.
   is not working on the device that is a separate bug (the tap not reaching the
   page while magnified) and needs a reproduction.
 
+### Reading — the page's own standing (`pageUpright`)
+
+`ReaderLook.pageUpright` (default off) is the reader's one orientation choice.
+Off is "turn with the phone": the app declares no `screenOrientation` anywhere,
+so rotation is already allowed and a wide PDF page is read the way a wide page
+wants — the member's chosen "horizontal mode" (just allow landscape, auto
+detected). On keeps a PDF's pages UPRIGHT, applied on the ACTIVITY through
+`context.findActivity()` and only while the content is `ReaderContent.Pages`, so
+a reflowable book is never held to one way up. The switch lives in the page's
+ink sheet (`showUpright`), beside the EPUB type-size slider (`showType`), and
+`requestedOrientation` is restored to `SCREEN_ORIENTATION_UNSPECIFIED` on
+dispose.
+
+### Home — a door's row with nothing in it (`EmptyDoorChip`)
+
+A first-time Home had two doors and two rows of nothing: a `LazyRow` draws no
+chip until a journal or a book exists, so each strip collapsed to the door alone
+(the member's "those place feels empty", and their answer that it is NOTHING at
+all rather than a late fill). Each door now emits an `EmptyDoorChip` at
+`CHIP_WIDTH` x `CHIP_HEIGHT` when its list is empty — "No pages yet / Start your
+first one" wired to `onWrite`, "No books yet / Open the shelf" wired to
+`CurioRoutes.BOOKS` — so the strip keeps its shape and offers the first step.
+
+### Writing — the other side of a print row
+
+`PersonalRowDragState` gained a horizontal axis. `dragBy` now takes `amountX`
+and keeps it as INTENT only (`travelX`), never as a slot: a page lays its blocks
+out in one column, so sideways travel has no slot to move to. `takeLeftCell`
+answers "which end of a print row does the carried print take" — a REAL sideways
+drag (`SIDE_INTENT_PX = 40f`) chooses the end, and the vertical direction remains
+the fallback, so a plain downward carry onto a pair behaves exactly as before.
+
+Both halves of the drop read that ONE value: `printDropIndex(from, to,
+            takeLeft)` picks the cell, and the landing ghost draws the cell. The ghost
+used to draw the OPPOSITE end from the one the drop chose (a downward drop
+landed on the row's head while the dashed room was drawn at its tail), which is
+one of the ways a pair "sometimes upgroups". Joining an existing pair into a
+three already worked through `printDropIndex` (a print arriving from elsewhere
+is snapped to the run and inserted at its head or just past its tail), and the
+side switch is what was actually missing.
+
 ### Reveal — the fetched art survives (`sheetArtUrlsState`)
 
 Nine art sites (ArtworkSheet, AuthorWorks, and the album / film-variant / anime
@@ -90,26 +131,14 @@ uses it as a KEY for both the seed and the effect.
 
 ## 4. Still open — needs the member
 
-- **Horizontal mode.** Genuinely ambiguous: nothing in the reader is
-  landscape-aware today (no orientation lock, no side-by-side layout), so
-  "horizontal mode, auto-detected, toggleable off, only affects the PDF" reads
-  as a two-page spread in a wide window, but it could also mean a horizontal
-  strip of pages or plain landscape support. A two-page spread changes the
-  pager's index space, which every page number, mark and bookmark shares, so it
-  is not something to guess at. **Ask before building.**
-- **The home door lists feeling empty on a first open.** Needs one detail: is it
-  NOTHING, a placeholder that STAYS, or the right thing arriving LATE? Home
-  already has a `FirstTimeEmpty` for Recents, so the answer decides the whole
-  fix.
-- **Photo rows: switching sides.** `PersonalRowDragState` carries NO horizontal
-  intent — the landing side is chosen from vertical travel alone
-  (`if (rowDrag.goingDown) size.width - cellWidth else 0f`), so "move it to the
-  other side" is a new gesture axis, not a bug fix. Joining an existing pair
-  into a three is handled by `printDropIndex` (a carried print snaps to the run
-  and becomes its first cell travelling down, its last travelling up), so the
-  report that it "doesn't let me" needs a reproduction before the drop logic is
-  reworked.
-- **Journal entries being slow.** Needs a measurement (list open vs page load).
+- **Journal entries being slow.** Needs a measurement (list open vs page load):
+  is it the list opening, or the page loading?
+- **The photo row's "it doesn't let me join a pair".** The drop logic and the
+  side now agree, so the next step is a reproduction on the device: if a print
+  still refuses to become a three, the suspect is `rowDrag.targetIndex` (the
+  slot the finger is pointing at) rather than the insertion itself.
+- **CI is unconfirmed for both commits of this session** (`e61c244c` and the one
+  after it), and neither has been pushed.
 
 ## 5. Notes
 

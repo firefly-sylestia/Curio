@@ -106,6 +106,45 @@ internal class PersonalRowDragState {
     private val travel = mutableFloatStateOf(0f)
     val travelY: Float get() = travel.floatValue
 
+    /**
+     * v406 — HOW FAR THE FINGER HAS TRAVELLED SIDEWAYS, in pixels.
+     *
+     * Read in exactly two places, and neither is a layout: [takeLeftCell]
+     * (which the drop and the landing ghost both ask) and nothing else. A page
+     * lays its blocks out in one column, so sideways travel has no slot to move
+     * to — it is INTENT, and its one meaning is which end of a print row the
+     * carried print takes. That is the report this answers: "let me switch the
+     * sides too like rn i can only move the image up and down and i cant take
+     * them to the other side".
+     */
+    private val travelX = mutableFloatStateOf(0f)
+
+    /**
+     * v406 — WHICH END OF A PRINT ROW THE CARRIED PRINT WILL TAKE.
+     *
+     * `true` = the row's LEFT cell, `false` = its RIGHT cell. A sideways drag
+     * says so, and it has to be a REAL one ([SIDE_INTENT_PX] of it) or the
+     * vertical answer stands: carrying a picture straight down onto a pair must
+     * keep choosing the end it always chose, and a jitter of a few pixels must
+     * not flip it.
+     *
+     * BOTH sides of the drop read THIS one value: [PersonalEditorState
+     * .printDropIndex] picks the cell from it, and the landing ghost draws the
+     * cell from it — so what the member sees in the air is what they get. The
+     * ghost used to draw the OPPOSITE end from the one the drop chose (a
+     * travelling-down drop landed on the row's head while the dashed room was
+     * drawn at its tail), which is one of the ways a pair "sometimes upgroups".
+     */
+    val takeLeftCell: Boolean
+        get() {
+            val x = travelX.floatValue
+            return when {
+                x >= SIDE_INTENT_PX -> false
+                x <= -SIDE_INTENT_PX -> true
+                else -> travelY >= 0f
+            }
+        }
+
     /** One slot's height in pixels — the row's own height plus the list's gap. */
     var stride: Float = 0f
         private set
@@ -184,6 +223,7 @@ internal class PersonalRowDragState {
     fun commit() {
         fromIndex = -1
         steps = 0
+        travelX.floatValue = 0f
     }
 
     /**
@@ -229,6 +269,7 @@ internal class PersonalRowDragState {
         fromIndex = index
         steps = 0
         travel.floatValue = 0f
+        travelX.floatValue = 0f
         stride = slotStride.coerceAtLeast(1f)
         pointerRootY = fingerRootY
     }
@@ -243,7 +284,10 @@ internal class PersonalRowDragState {
      * had; with uneven ones it is the whole reason it now lands where the finger
      * put it.
      */
-    fun dragBy(amountY: Float, ids: List<String>, lastIndex: Int) {
+    fun dragBy(amountX: Float, amountY: Float, ids: List<String>, lastIndex: Int) {
+        // The sideways part is INTENT only: it never steps a slot, it only
+        // answers "which end" (see [takeLeftCell]).
+        travelX.floatValue += amountX
         pointerRootY += amountY
         advanceBy(amountY, ids, lastIndex)
     }
@@ -317,9 +361,19 @@ internal class PersonalRowDragState {
         fromIndex = -1
         steps = 0
         travel.floatValue = 0f
+        travelX.floatValue = 0f
         stride = 0f
     }
 }
+
+/**
+ * v406 — HOW FAR SIDEWAYS A CARRIED BLOCK MUST GO TO CHOOSE AN END OF A ROW.
+ *
+ * A deliberate flick rather than a wobble: 40px is about a third of a thumb's
+ * width, which a finger crossing a page never does by accident, so the vertical
+ * answer still holds for every gesture that is not asking for a side.
+ */
+private const val SIDE_INTENT_PX = 40f
 
 /** How far a row must travel sideways before it leaves the list. */
 private const val SWIPE_AWAY_FRACTION = 0.34f
@@ -498,7 +552,7 @@ internal fun PersonalMovableBlock(
                         },
                         onDrag = { change, amount ->
                             change.consume()
-                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
+                            drag.dragBy(amount.x, amount.y, state.blockIds, state.blockIds.lastIndex)
                         },
                         onDragEnd = {
                             val from = drag.fromIndex
@@ -506,7 +560,7 @@ internal fun PersonalMovableBlock(
                             // v403 — a PRINT snaps to the row it was dropped
                             // against, so bringing two prints together really
                             // groups them (see PersonalEditorState.printDropIndex).
-                            val landing = state.printDropIndex(from, to, drag.goingDown)
+                            val landing = state.printDropIndex(from, to, drag.takeLeftCell)
                             if (from in 0..state.blockIds.lastIndex && from != landing) {
                                 state.moveBlock(from, landing)
                             }
@@ -634,7 +688,7 @@ internal fun PersonalTodoRow(
                         },
                         onDrag = { change, amount ->
                             change.consume()
-                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
+                            drag.dragBy(amount.x, amount.y, state.blockIds, state.blockIds.lastIndex)
                         },
                         onDragEnd = {
                             val from = drag.fromIndex
@@ -642,7 +696,7 @@ internal fun PersonalTodoRow(
                             // v403 — a PRINT snaps to the row it was dropped
                             // against, so bringing two prints together really
                             // groups them (see PersonalEditorState.printDropIndex).
-                            val landing = state.printDropIndex(from, to, drag.goingDown)
+                            val landing = state.printDropIndex(from, to, drag.takeLeftCell)
                             if (from in 0..state.blockIds.lastIndex && from != landing) {
                                 state.moveBlock(from, landing)
                             }
@@ -735,7 +789,7 @@ internal fun PersonalTodoRow(
                         },
                         onDrag = { change, amount ->
                             change.consume()
-                            drag.dragBy(amount.y, state.blockIds, state.blockIds.lastIndex)
+                            drag.dragBy(amount.x, amount.y, state.blockIds, state.blockIds.lastIndex)
                         },
                         onDragEnd = {
                             val from = drag.fromIndex
@@ -743,7 +797,7 @@ internal fun PersonalTodoRow(
                             // v403 — a PRINT snaps to the row it was dropped
                             // against, so bringing two prints together really
                             // groups them (see PersonalEditorState.printDropIndex).
-                            val landing = state.printDropIndex(from, to, drag.goingDown)
+                            val landing = state.printDropIndex(from, to, drag.takeLeftCell)
                             if (from in 0..state.blockIds.lastIndex && from != landing) {
                                 state.moveBlock(from, landing)
                             }

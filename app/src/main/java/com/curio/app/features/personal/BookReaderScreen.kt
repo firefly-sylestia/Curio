@@ -3,6 +3,7 @@ package com.curio.app.features.personal
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
@@ -59,6 +60,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -454,6 +457,36 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
 
         null -> null
+    }
+
+    // ── THE PAGE FOLLOWS THE PHONE, UNLESS IT IS ASKED NOT TO (v406) ────
+    //
+    // The reader has no orientation of its own: the window turns and the page
+    // turns with it, which IS the horizontal mode a wide page wants and needs no
+    // layout of its own (member's choice: "just allow landscape"). What it also
+    // wants is a way OUT of it, for a member reading in bed: [ReaderLook
+    // .pageUpright] keeps a PDF's pages standing up. It is applied on the
+    // ACTIVITY, because the window is the activity's own, and only while a PDF
+    // is open, so a reflowable book is never held to one way up.
+    val readerActivity = remember(context) { context.findActivity() }
+    LaunchedEffect(content, ReaderLook.pageUpright) {
+        val act = readerActivity ?: return@LaunchedEffect
+        val lock = ReaderLook.pageUpright && content is ReaderContent.Pages
+        runCatching {
+            act.requestedOrientation = if (lock) {
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            } else {
+                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
+    }
+    DisposableEffect(readerActivity) {
+        onDispose {
+            runCatching {
+                readerActivity?.requestedOrientation =
+                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
     }
 
     val pageBar: ReaderPageBar? = when (val loaded = content) {
@@ -868,6 +901,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // v406 — the type size is a text book's business: a PDF page is a
             // picture of a page, and its own size is the pinch's.
             showType = content is ReaderContent.Text,
+            // …and how the page stands is a PDF's business: a reflowed book
+            // re-lays itself out and has nothing to stand up (see pageUpright).
+            showUpright = content is ReaderContent.Pages,
             onPick = { key -> ReaderLook.inkKey = key },
             onDismiss = { sheet = null }
         )
@@ -2848,6 +2884,8 @@ private fun ReaderInkSheet(
     palette: ReaderPalette,
     /** v406 — whether this book has a type size to set (a reflowable one does). */
     showType: Boolean,
+    /** v406 — whether this book has a way up to keep (a PDF page does). */
+    showUpright: Boolean,
     onPick: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -2922,6 +2960,48 @@ private fun ReaderInkSheet(
                             thumbColor = palette.accent,
                             activeTrackColor = palette.accent,
                             inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
+                        )
+                    )
+                }
+            }
+
+            // ── HOW THE PAGE STANDS (v406) ───────────────────────────
+            //
+            // Off is "turn with the phone" and is what the reader does by
+            // itself; on holds a PDF's pages upright while the book is open,
+            // for reading with the phone lying on its side (see
+            // [ReaderLook.pageUpright]). A reflowable book has no such choice
+            // and is not offered one.
+            if (showUpright) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            "KEEP THE PAGE UPRIGHT",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                letterSpacing = 1.1.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = palette.accent
+                        )
+                        Text(
+                            if (ReaderLook.pageUpright) {
+                                "On: the page stays upright while this book is open."
+                            } else {
+                                "Off: the page turns with your phone."
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = palette.ink.copy(alpha = 0.6f)
+                        )
+                    }
+                    Switch(
+                        checked = ReaderLook.pageUpright,
+                        onCheckedChange = { next -> ReaderLook.pageUpright = next },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = palette.accent,
+                            checkedTrackColor = palette.accent.copy(alpha = 0.4f),
+                            uncheckedThumbColor = palette.ink.copy(alpha = 0.55f),
+                            uncheckedTrackColor = palette.ink.copy(alpha = 0.12f),
+                            uncheckedBorderColor = palette.ink.copy(alpha = 0.2f)
                         )
                     )
                 }
@@ -4453,6 +4533,19 @@ private object ReaderLook {
      */
     var textFlow by mutableStateOf(ReaderFlow.SCROLL)
     var pageFlow by mutableStateOf(ReaderFlow.PAGED)
+
+    /**
+     * v406 — HOW THE PAGE STANDS, and the only orientation choice the reader
+     * has.
+     *
+     * OFF (the default) is "turn with the phone": the window rotates and a wide
+     * PDF page is read the way a wide page wants, which is the horizontal mode
+     * (member's choice: "just allow landscape", "auto detected"). ON keeps the
+     * page UPRIGHT while a PDF is open, for reading in bed with the phone lying
+     * on its side. It applies to a PDF only — a reflowable book re-lays itself
+     * out at any width, so it has nothing to stand up.
+     */
+    var pageUpright by mutableStateOf(false)
 }
 
 /** The two ways a book can be laid out on screen. */
