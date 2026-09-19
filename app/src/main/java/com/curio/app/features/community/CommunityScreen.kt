@@ -85,6 +85,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ShareCardAspect
 import com.curio.app.ui.components.ShareCardStyle
@@ -316,6 +317,17 @@ fun CommunityScreen(navController: NavController) {
      */
     fun patchCard(cardId: String, transform: (CommunityCard) -> CommunityCard) {
         cards = cards.map { if (it.id == cardId) transform(it) else it }
+    }
+
+    // v412b — the Social tab PUBLISHES ITS NAV ACCENT: it was the one bottom
+    // tab that published none, so its active pill fell back to the theme's
+    // secondaryContainer — in dark mode a butter wash with a pale-butter ink
+    // on top, which read as a yellow tab whose label was invisible. The
+    // page's own action accent (the theme-aware rose/azure/Pantone accent the
+    // wall's buttons already wear) fills the pill now.
+    DisposableEffect(Unit) {
+        CurioNavTint.publishSocialAccent(curioDialogActionColor())
+        onDispose { CurioNavTint.publishSocialAccent(null) }
     }
 
     LaunchedEffect(eligible, token) {

@@ -29,6 +29,11 @@ Second follow-up:
 > "also the paper white page and cream page should be grayed out in dark mode and in other
 > theme that are not curio rose or azure hero."
 
+Third follow-up (the sheet STILL not picking, and the Social tab yellow/invisible):
+
+> "i still cant switch themes with the buttom sheet, tell me whats blocking it, and also in
+> social tab still the text isnt visible and the tab color is yellow in dark mode"
+
 ## 2. What the code actually looked like (findings)
 
 - **The v411 commit shipped six distinct compile errors**, all in code written in the
@@ -116,6 +121,28 @@ theme the choice is dead weight, and the row looked alive while doing nothing. T
 now `enabled = !dark && theme in {CURIO, AZURE}` with a disabled hint naming why (the
 shared segmented row grew a full-ink→onSurfaceVariant title dim), and the stored pref is
 kept so returning to a light Curio/Azure theme restores the exact pick.
+
+### The REAL sheet blocker (v412b) — the previous fix was insufficient
+
+My first fix moved the scope into `if (colorThemeSheet) { … }` — still a composition
+position that DIES with the sheet. `rememberCoroutineScope` is bound to where it is
+remembered; the scope must be remembered in the section's always-composed body. It now
+is (with `sheetTransition` beside it), so the reveal coroutine survives the sheet's
+removal and `setColorTheme` actually runs. Lesson recorded: a scope that must outlive a
+dialog lives above the `if` that shows it.
+
+### The yellow Social tab (v412b)
+
+Two layers:
+1. **Social published no nav accent** — the only bottom tab without a slot
+   (Home/Spin/Cabinet each publish one). Its active pill fell to the
+   `secondaryContainer` fallback. Fix: `CurioNavTint.socialAccent` +
+   `publishSocialAccent`, published from CommunityScreen with
+   `curioDialogActionColor()` and read in `curioNavActiveAccent` for COMMUNITY.
+2. **The fallback itself was yellow-on-yellow in dark**: secondaryContainer is butter at
+   16% over black (murky yellow) and its ink `onSecondaryContainer` is PALE BUTTER. The
+   fallback now answers `primary` / `onPrimary` — a guaranteed pair in both modes — so
+   no future unaccented page can repeat the bug.
 
 ## 4. Decisions
 

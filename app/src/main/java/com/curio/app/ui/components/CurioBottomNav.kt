@@ -105,6 +105,12 @@ object CurioNavTint {
         private set
     var homeAccent by mutableStateOf<Color?>(null)
         private set
+    // v412b — the SOCIAL tab's accent, published by CommunityScreen. Social
+    // was the one tab with no slot, so its active pill always fell through to
+    // the secondaryContainer fallback — in dark mode the butter-on-butter
+    // pair that read as a yellow tab with an invisible label.
+    var socialAccent by mutableStateOf<Color?>(null)
+        private set
 
     fun publishSpinWash(color: Color?) {
         spinWash = color
@@ -128,6 +134,11 @@ object CurioNavTint {
 
     fun publishHomeAccent(color: Color?) {
         homeAccent = color
+    }
+
+    /** v412b — the Social tab's own accent slot (see [socialAccent]). */
+    fun publishSocialAccent(color: Color?) {
+        socialAccent = color
     }
 }
 
@@ -882,6 +893,9 @@ private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePref
     CurioRoutes.CABINET -> CurioNavTint.cabinetAccent
         ?: (CurioNavTint.spinAccent ?: MaterialTheme.colorScheme.primary)
     CurioRoutes.HOME -> CurioNavTint.homeAccent
+    // v412b — Social's own accent; without it this route hit the butter
+    // secondaryContainer fallback (the "yellow tab, invisible label" in dark).
+    CurioRoutes.COMMUNITY -> CurioNavTint.socialAccent
     else -> null
 }
 
@@ -914,7 +928,12 @@ internal fun curioActivePillFill(accent: Color?): Color {
         }
         return accent
     }
-    return MaterialTheme.colorScheme.secondaryContainer
+    // v412b — the no-accent fallback is the scheme primary, not
+    // secondaryContainer: in dark mode that container is a BUTTER wash and
+    // its paired ink is pale butter too (yellow-on-yellow — the reported
+    // "yellow tab, invisible text"). The primary's own fill/ink pair is a
+    // guaranteed contrast in both modes, which is what a fallback is for.
+    return MaterialTheme.colorScheme.primary
 }
 
 /** Ink that pairs with [curioActivePillFill] — the accent's pastel-aware
@@ -926,5 +945,8 @@ internal fun curioActivePillInk(accent: Color?): Color {
     // v190 — Material theme: onSecondaryContainer on the M3 indicator.
     if (materialThemeOn) return MaterialTheme.colorScheme.onSecondaryContainer
     if (accent != null) return pastelFillInk(accent)
-    return MaterialTheme.colorScheme.onSecondaryContainer
+    // v412b — pairs with the primary fallback fill (see curioActivePillFill);
+    // the old onSecondaryContainer ink was pale butter ON a butter wash in
+    // dark mode, which is exactly the invisible label.
+    return MaterialTheme.colorScheme.onPrimary
 }

@@ -275,6 +275,15 @@ private fun AppearanceSection(highlightKey: String? = null) {
     // v411 — the Color theme sheet (Material / hero / Adaptive Hero folded
     // into ONE picker with previews).
     var colorThemeSheet by remember { mutableStateOf(false) }
+    // v412b — the sheet's reveal scope and transition state live HERE, in the
+    // section's always-composed body: a rememberCoroutineScope is bound to the
+    // composition position it is remembered at, so one remembered INSIDE the
+    // `if (colorThemeSheet)` block (and one inside the sheet itself) is
+    // CANCELLED the moment the sheet leaves composition — which killed the
+    // pref write mid-reveal and made every pick a no-op. From here the scope
+    // survives the sheet's whole lifecycle.
+    val sheetTransition = LocalCurioThemeTransition.current
+    val sheetScope = rememberCoroutineScope()
     // v81 — the Theme picker (Light / Dark / System) is back: dark mode is
     // the reimagined pitch-black + glow design (no AMOLED/Material styles).
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -397,11 +406,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // editor is no longer reachable, so the toggle was removed too).
     }
     if (colorThemeSheet) {
-        // v412 — the transition scope lives HERE (in the section, which stays
-        // composed after the sheet closes) so the pref write inside the reveal
-        // coroutine survives the sheet's own removal — see ColorThemeSheet.
-        val sheetTransition = LocalCurioThemeTransition.current
-        val sheetScope = rememberCoroutineScope()
         ColorThemeSheet(
             onDismiss = { colorThemeSheet = false },
             transition = sheetTransition,

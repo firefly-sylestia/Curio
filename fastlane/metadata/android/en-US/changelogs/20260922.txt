@@ -1,4 +1,6 @@
 FIX:
+- Appearance: the Color theme sheet's pick survives its own close — the write was riding a coroutine scoped to the sheet, so dismissing the sheet cancelled it before it landed; the scope now outlives the sheet, and the reveal expands from the row you tapped.
+- Social: the bottom bar's Social tab wears the app's accent instead of the butter fallback — dark mode painted the tab yellow-on-yellow (a yellow pill with a yellow label, hence the invisible text), and the no-accent fallback is fixed for every page after it.
 - Appearance: the Paper option grays itself out where it can't act — dark mode and the Material, Adaptive Hero and Pantone themes paint their own pages, so the row is disabled with a line saying why instead of a switch that silently did nothing; the stored choice comes back on a light Curio or Azure theme.
 - Appearance: picking a theme in the Color theme sheet takes — the reveal coroutine lived in the sheet's own scope, so closing the sheet cancelled the pref write mid-flight and the app repainted nothing; the write now survives the close.
 - Home: the Shuffle-the-deck dice shows again in dark mode — the disc is near-white and its glyph wore the banner's near-white ink, so the dice vanished into its own button; the glyph now wears the ink that reads on the disc itself.
