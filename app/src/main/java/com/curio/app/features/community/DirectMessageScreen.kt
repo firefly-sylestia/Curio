@@ -1162,7 +1162,7 @@ private fun MessagePeerHeader(
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.72f),
+        else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.72f),
         modifier = Modifier
             .fillMaxWidth()
             .border(
@@ -1928,7 +1928,7 @@ private fun MessageComposer(
                     .clip(RoundedCornerShape(26.dp))
                     .background(
                         if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f)
-                        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f)
+                        else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.85f)
                     )
                     .border(
                         width = 1.dp,

@@ -678,7 +678,7 @@ private fun AccountField(
             .clip(RoundedCornerShape(17.dp))
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White
+                else MaterialTheme.colorScheme.surfaceContainerLow
             )
             .border(
                 1.dp,

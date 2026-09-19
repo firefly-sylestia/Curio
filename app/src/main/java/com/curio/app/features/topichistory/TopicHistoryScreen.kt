@@ -604,7 +604,7 @@ private fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White,
+                else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -733,7 +733,7 @@ private fun SentimentTopicRow(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White,
+                else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
@@ -834,7 +834,7 @@ private fun PinnedRow(pinned: PinnedTopic, onClick: () -> Unit, onUnpin: () -> U
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White,
+                else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -885,7 +885,7 @@ private fun PinnedRow(pinned: PinnedTopic, onClick: () -> Unit, onUnpin: () -> U
                 onClick = onUnpin,
                 shape = CircleShape,
                 color = if (dark) Color.White.copy(alpha = 0.09f)
-                        else Color.White
+                        else MaterialTheme.colorScheme.surfaceContainer
             ) {
                 CurioIcon(
                     CurioIcons.BookmarkBorder, "Unpin",

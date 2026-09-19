@@ -162,7 +162,7 @@ fun BookCoverHubScreen(navController: NavController) {
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                            else Color.White,
+                            else MaterialTheme.colorScheme.surfaceContainerLow,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -239,7 +239,7 @@ fun BookCoverHubScreen(navController: NavController) {
                             shape = RoundedCornerShape(20.dp),
                             color = if (selected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = if (providerDark) 0.45f else 0.9f)
                                     else if (providerDark) MaterialTheme.colorScheme.surfaceContainerHigh
-                                    else Color.White,
+                                    else MaterialTheme.colorScheme.surfaceContainerLow,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -289,7 +289,7 @@ fun BookCoverHubScreen(navController: NavController) {
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = if (statsDark) MaterialTheme.colorScheme.surfaceContainerHigh
-                            else Color.White,
+                            else MaterialTheme.colorScheme.surfaceContainerLow,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -359,7 +359,7 @@ fun BookCoverHubScreen(navController: NavController) {
                     Surface(
                         shape = RoundedCornerShape(20.dp),
                         color = if (progressDark) MaterialTheme.colorScheme.surfaceContainerHigh
-                                else Color.White,
+                                else MaterialTheme.colorScheme.surfaceContainerLow,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -414,7 +414,7 @@ fun BookCoverHubScreen(navController: NavController) {
                     Surface(
                         shape = RoundedCornerShape(16.dp),
                         color = if (failedDark) MaterialTheme.colorScheme.surfaceContainerHigh
-                                else Color.White,
+                                else MaterialTheme.colorScheme.surfaceContainerLow,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(

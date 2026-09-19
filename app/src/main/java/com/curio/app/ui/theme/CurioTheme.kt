@@ -32,7 +32,91 @@ import com.curio.app.data.AppPreferences
  * cream/sand surfaces.
  */
 
-private val CurioLightColorScheme = lightColorScheme(
+/**
+ * ── v409 — THE PAPER FLIP (light mode only) ─────────────────────────────
+ *
+ * WHICH SURFACE LEADS, the page or the cards.
+ *
+ * v408 put a white card on the member's cream page and the app read as white
+ * slabs floating on cream. The member's direction is the other way round:
+ * "home about a white app background as the main, but cream cards reverse of
+ * what we did". So the LIGHT page is WHITE and a CARD is CREAM — the same
+ * separation rule v408 established (a card separates from its page by
+ * LIGHTNESS, never by a tint of it), with the two surfaces swapped over.
+ *
+ * Two schemes, one switch ([AppPreferences.paperCreamCardsState]):
+ *
+ *  [CurioWhitePageLightScheme]  DEFAULT — white page, cream cards
+ *  [CurioCreamPageLightScheme]  the reverse — the v408 page/card pair
+ *
+ * Both keep the same three promises: the page is the brand's, the cards climb
+ * AWAY from it (never toward it), and the ink only ever moves away from the
+ * fill. Dark mode is untouched by the flip — its page is pitch black and its
+ * plates step UP from it, which is the same rule said in the dark's own
+ * language.
+ */
+private val CurioWhitePageLightScheme = lightColorScheme(
+    primary           = CurioColors.CoralBlush,
+    onPrimary         = CurioColors.CreamWhite,
+    primaryContainer  = CurioColors.CoralBlush.copy(alpha = 0.18f),
+    onPrimaryContainer = CurioColors.DeepPlum,
+
+    secondary           = CurioColors.ButterYellow,
+    onSecondary         = CurioColors.DeepPlum,
+    secondaryContainer  = CurioColors.ButterYellow.copy(alpha = 0.30f),
+    onSecondaryContainer = CurioColors.DeepPlum,
+
+    tertiary           = CurioColors.SkyMint,
+    onTertiary         = CurioColors.DeepPlum,
+    tertiaryContainer  = CurioColors.SkyMint.copy(alpha = 0.30f),
+    onTertiaryContainer = CurioColors.DeepPlum,
+
+    // ── v409 — THE CARD LADDER, INVERTED ────────────────────────────────
+    //
+    //   background                    WHITE    — the page
+    //   surfaceContainerLowest        WHITE    — a dialog (the scrim is what
+    //                                  separates it, not a fill step)
+    //   surfaceContainerLow           cream    — A CARD
+    //   surfaceContainer              deeper   — a block inside a card
+    //   surfaceContainerHigh          deeper   — a pill / chip inside one
+    //   surfaceContainerHighest       deepest  — the anchor step
+    //
+    // A card is therefore visibly CREAM on a white page — one clean step, not
+    // a hair of warmth — and a control nested inside that card steps deeper
+    // into the same family, so nesting is legible without an outline on every
+    // box. Contrast for the ink only improves: every fill moved away from it.
+    background = Color(0xFFFFFFFF),
+    onBackground = CurioColors.DeepPlum,
+
+    surface                  = Color(0xFFFFFFFF),
+    onSurface                = CurioColors.DeepPlum,
+    surfaceVariant           = Color(0xFFF4EBD8),
+    onSurfaceVariant         = CurioColors.DeepPlum.copy(alpha = 0.75f),
+    surfaceContainerLowest   = Color(0xFFFFFFFF),
+    surfaceContainerLow      = Color(0xFFFAF3E4),
+    surfaceContainer         = Color(0xFFF4EBD8),
+    surfaceContainerHigh     = Color(0xFFEEE3CB),
+    surfaceContainerHighest  = Color(0xFFE7DABE),
+
+    error             = CurioColors.WarmCoralRed,
+    onError           = CurioColors.CreamWhite,
+
+    // v409 — SOFT EDGES. The separators are the same readable stride v408
+    // settled on, pitched a touch softer because a cream card on a white page
+    // already carries its own height: the hairline is a quiet edge, not a
+    // drawn box (member: "add soft borders where you've added borders for
+    // cards in profile and settings").
+    outline           = CurioColors.DeepPlum.copy(alpha = 0.20f),
+    outlineVariant    = CurioColors.DeepPlum.copy(alpha = 0.10f)
+)
+
+/**
+ * v408 — THE OTHER PAPER: the member's cream page with white cards, kept
+ * exactly as it shipped for [AppPreferences.paperCreamCardsState] OFF.
+ * The two schemes are the same design read in two directions; nothing else in
+ * the app has to know which one is on.
+ */
+private val CurioCreamPageLightScheme = lightColorScheme(
     primary           = CurioColors.CoralBlush,
     onPrimary         = CurioColors.CreamWhite,
     primaryContainer  = CurioColors.CoralBlush.copy(alpha = 0.18f),
@@ -107,8 +191,8 @@ private val CurioLightColorScheme = lightColorScheme(
     // "add proper formula for hierarchy and proper separations per
     // clickable element"). These are the values [Modifier.curioCardEdge]
     // and every divisor multiply from — dividers still halve them.
-    outline           = CurioColors.DeepPlum.copy(alpha = 0.24f),
-    outlineVariant    = CurioColors.DeepPlum.copy(alpha = 0.13f)
+    outline           = CurioColors.DeepPlum.copy(alpha = 0.22f),
+    outlineVariant    = CurioColors.DeepPlum.copy(alpha = 0.11f)
 )
 
 /**
@@ -234,7 +318,11 @@ fun isCurioDarkThemeForContext(context: Context): Boolean = when (AppPreferences
 @Composable
 fun curioColorScheme(): ColorScheme =
     if (materialThemeOn) materialColorScheme()
-    else if (isCurioDarkTheme()) CurioDarkColorScheme else CurioLightColorScheme
+    else if (isCurioDarkTheme()) CurioDarkColorScheme
+    // v409 — the paper flip: white page with cream cards (the shipped look),
+    // or the reverse. Read reactively, so the switch repaints immediately.
+    else if (AppPreferences.paperCreamCardsState) CurioWhitePageLightScheme
+    else CurioCreamPageLightScheme
 
 @Composable
 fun CurioTheme(

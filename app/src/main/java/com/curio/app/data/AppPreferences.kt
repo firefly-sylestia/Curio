@@ -92,6 +92,7 @@ object AppPreferences {
     // default) draws the whole collage at a whisper, ON restores the old deep
     // look. The multiplier lives in CurioWatermarkBackdrop.kt.
     private const val KEY_GLYPH_BACKDROP_DEEP = "glyph_backdrop_deep"
+    private const val KEY_PAPER_CREAM_CARDS = "paper_cream_cards"    // white page + cream cards (v409)
     // v185 — proper M3 Material theme (opt-in, default OFF): the whole
     // color system re-does per M3 guidelines (single primary, neutral
     // surfaces, 36 lane accents collapsed to ~6 muted families).
@@ -1198,6 +1199,16 @@ object AppPreferences {
     var glyphBackdropDeepState by mutableStateOf(false)
         private set
 
+    // v409 — WHICH SURFACE LEADS (Appearance): the shipped light look is a
+    // WHITE page with CREAM cards, and this switch (default ON) flips it back
+    // to the pre-v409 construction — a cream page with white cards — for
+    // anyone who preferred that. It is the member's own reversal of the very
+    // change they asked for, which is why it is a visible option and not a
+    // hidden flag. Dark mode is untouched either way (black page, raised
+    // plates — both states agree there). Seeded in [initThemeMode].
+    var paperCreamCardsState by mutableStateOf(true)
+        private set
+
     // Pastel crown depth (v7.12, EXPERIMENTAL) — when pastel mode is ON
     // and this toggle is ON, the top of pastel card gradients gets a
     // subtle 5% black deepen so every card reads with a gentle darker
@@ -1828,6 +1839,7 @@ object AppPreferences {
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
         glyphBackdropDeepState = isGlyphBackdropDeepEnabled(context)
+        paperCreamCardsState = isPaperCreamCardsEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
         peekHairlineState = isPeekHairlineEnabled(context)
         peekShadowsState = isPeekShadowsEnabled(context)
@@ -2063,6 +2075,17 @@ object AppPreferences {
     fun setGlyphBackdropDeepEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLYPH_BACKDROP_DEEP, enabled).apply()
         glyphBackdropDeepState = enabled
+    }
+
+    // ── Paper: which surface leads, the page or the cards (v409) ───────
+    /** Whether light mode wears a WHITE page with CREAM cards (the shipped
+     *  default) instead of the cream page with white cards. */
+    fun isPaperCreamCardsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_CREAM_CARDS, true)
+
+    fun setPaperCreamCardsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_CREAM_CARDS, enabled).apply()
+        paperCreamCardsState = enabled
     }
 
     // ── Promo/demo-content mode (v7.107 hidden) ───────────────────────

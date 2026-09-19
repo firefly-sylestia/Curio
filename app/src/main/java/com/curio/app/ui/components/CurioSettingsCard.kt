@@ -81,7 +81,7 @@ fun CurioSettingsCard(
         tonalElevation = 3.dp,
         shadowElevation = shadowElevation,
         // v408 — the card EDGE. The fill is a custom lerp (not a scheme
-        // token), and a 4dp black shadow on a cream page is a soft smudge
+        // token), and a 4dp black shadow on a light page is a soft smudge
         // rather than a boundary — so the card also wears the shared
         // hairline the whole app separates its cards with (the theme's
         // `outlineVariant`; rule: cards separate by lightness AND an
@@ -89,6 +89,9 @@ fun CurioSettingsCard(
         // border after its fill, which is why this is a Surface border and
         // not a `Modifier.border` (a border earlier in the chain is painted
         // over by the fill).
+        // v409 — the hairline is SOFT now (a whisper of plum: see the
+        // theme's paper flip), so a Profile/Settings card reads as a cream
+        // plate with a quiet edge rather than as a drawn box.
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
             .fillMaxWidth()
@@ -99,7 +102,7 @@ fun CurioSettingsCard(
             // v81 — dark: a faint radial inner glow in the hero hue on the
             // card (One UI pushed-in glass; self-gating, light is a no-op).
             .curioInnerGlow(RoundedCornerShape(28.dp), settingsCardChipTint(), strength = 0.10f)
-    ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
+    ) { Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp), content = content) }
 }
 
 /** Icon-card header — bare accent icon + title + subtitle (v115: the
@@ -131,7 +134,7 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
 @Composable
 fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) {
     Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             // v115 — bare glyph at the info-row size (21dp, accent ink).
             CurioIcon(icon, null, tint = settingsCardAccentInk(), size = 21.dp)
             Column(modifier = Modifier.weight(1f)) {

@@ -1572,6 +1572,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.Palette, "Category tint", "Colorful page backgrounds", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
     SettingsDeepRow(CurioIcons.Wallpaper, "Glyph backdrop", "Subtle or deep background glyphs", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-glyph-backdrop"),
+    SettingsDeepRow(CurioIcons.Contrast, "Paper", "White page with cream cards, or the reverse", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-paper"),
     SettingsDeepRow(CurioIcons.AutoAwesome, "Adaptive Hero", "Shared hero + page take the category you last picked on Spin", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane"),
     // ── Preferences (v26) — search engine, explore behavior, pet personality ──
     // v19 — which search engine the "Explore in browser" button opens.
@@ -2048,7 +2049,7 @@ private fun SettingsQuickTools(
                         // 62% white over the hero wash and dissolved into it.
                         .background(
                             if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                            else Color.White
+                            else MaterialTheme.colorScheme.surfaceContainerLow
                         )
                         .border(
                             1.dp,
@@ -2111,7 +2112,7 @@ private fun SettingsJsxSearchField(
             // shared hairline, instead of 70% white fading into the wash.
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White
+                else MaterialTheme.colorScheme.surfaceContainerLow
             )
             .border(
                 1.dp,

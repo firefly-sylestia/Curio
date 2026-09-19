@@ -313,6 +313,23 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         SettingsOptionDivider()
+        // v409 — WHICH SURFACE LEADS. The shipped light look is a WHITE page
+        // with CREAM cards; "Cream page" reverses it to the pre-v409 pair (a
+        // cream page with white cards). Both are the same design read in two
+        // directions — a card always separates from its page by lightness —
+        // so this is a straight visual preference, not a mode. Dark mode is
+        // untouched: its page is black and its plates step up from it.
+        SettingsRowPulse(highlightKey == "appearance-paper") {
+            CompactSegmentedRow(
+                CurioIcons.Contrast,
+                "Paper",
+                listOf("White page", "Cream page"),
+                if (AppPreferences.paperCreamCardsState) 0 else 1
+            ) { index ->
+                AppPreferences.setPaperCreamCardsEnabled(context, index == 0)
+            }
+        }
+        SettingsOptionDivider()
         // v185 — the proper M3 Material theme system (opt-in, default OFF —
         // the current app look is untouched). The v185 "Material guidelines"
         // + "Material chrome" options were removed (user verdict: not good).

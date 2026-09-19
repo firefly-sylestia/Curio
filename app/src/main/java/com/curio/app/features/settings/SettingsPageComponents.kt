@@ -158,16 +158,18 @@ fun SettingsOptionCard(
             // page. Dark keeps its raised step.
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White
+                else MaterialTheme.colorScheme.surfaceContainerLow
             )
             // The card edge — drawn AFTER the fill so the hairline is not
-            // painted over (a border before a background is invisible).
+            // painted over (a border before a background is invisible), and
+            // SOFT (v409): the theme's own `outlineVariant` is a whisper of
+            // plum now, so the border is an edge and not a drawn box.
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outlineVariant,
                 shape = RoundedCornerShape(20.dp)
             )
-            .padding(horizontal = 15.dp, vertical = 6.dp),
+            .padding(horizontal = 17.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) { content() }
 }
@@ -231,9 +233,11 @@ fun SettingsOptionRow(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
-    /** v408 — the roomy, icon-less row: no tile, taller, and copy free to
-     *  wrap to three lines (see [SettingsRowEntry.plain]). Used by the four
-     *  "front door" entries on the hub. */
+    /** v408 — the roomy row: taller, and copy free to wrap to three lines
+     *  (see [SettingsRowEntry.plain]). Used by the four "front door" entries
+     *  on the hub. v409 — it wears its ICON TILE again: the icon was dropped
+     *  with the roomier copy, and the member asked for it back, so `plain` now
+     *  means "roomy copy" and nothing else. */
     plain: Boolean = false,
     onClick: () -> Unit
 ) {
@@ -246,10 +250,10 @@ fun SettingsOptionRow(
             .clip(RoundedCornerShape(14.dp))
             // v3xx46 — every settings row squishes + ticks on press now (the
             // shared press primitive); the ripple rides along via LocalIndication.
-            .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
-            .padding(vertical = if (plain) 14.dp else 10.dp)
+            .curioPressClickable(pressedScale = 0.975f)
+            .padding(vertical = if (plain) 16.dp else 12.dp)
     ) {
-        if (!plain) SettingsOptionIconTile(icon, dark)
+        SettingsOptionIconTile(icon, dark)
         SettingsOptionCopy(
             title,
             subtitle,

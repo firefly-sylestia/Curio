@@ -284,7 +284,7 @@ val glassBackdrop = rememberLayerBackdrop()
                         Surface(
                             shape = RoundedCornerShape(20.dp),
                             color = if (lockDark) MaterialTheme.colorScheme.surfaceContainerHigh
-                            else Color.White,
+                            else MaterialTheme.colorScheme.surfaceContainerLow,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp, vertical = 6.dp)

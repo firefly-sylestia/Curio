@@ -181,7 +181,7 @@ internal fun SocialCard(
             .clip(RoundedCornerShape(22.dp))
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White
+                else MaterialTheme.colorScheme.surfaceContainerLow
             )
             .border(
                 width = 1.dp,
@@ -902,7 +902,7 @@ internal fun SocialSearchField(
             .clip(RoundedCornerShape(26.dp))
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f)
-                else Color.White.copy(alpha = 0.85f)
+                else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.85f)
             )
             .border(
                 width = 1.dp,

@@ -485,7 +485,7 @@ fun TextHistoryBrowser(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
-                            .background(if (dark) MaterialTheme.colorScheme.surfaceContainerHigh else Color.White)
+                            .background(if (dark) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow)
                             .padding(3.dp)
                     ) {
                         HistoryModeChip("List", !treeMode, { treeMode = false })
@@ -504,7 +504,7 @@ fun TextHistoryBrowser(
                             .background(
                                 if (armedClear) MaterialTheme.colorScheme.error
                                 else if (dark) Color.White.copy(alpha = 0.09f)
-                                else Color.White
+                                else MaterialTheme.colorScheme.surfaceContainer
                             )
                             .clickable {
                                 if (armedClear) {
@@ -696,7 +696,7 @@ fun TextHistoryBrowser(
                                 if (dark) Color(0xFF815947).copy(alpha = 0.30f)
                                 else Color(0xFF815947).copy(alpha = 0.13f)
                             else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                            else Color.White,
+                            else MaterialTheme.colorScheme.surfaceContainerLow,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -1331,7 +1331,7 @@ private fun HistoryVersionRow(
     val cardColor = if (isActive)
         MaterialTheme.colorScheme.primary.copy(alpha = if (dark) 0.20f else 0.10f)
     else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-    else Color.White
+    else MaterialTheme.colorScheme.surfaceContainerLow
 
     Row(Modifier.padding(top = 7.dp), verticalAlignment = Alignment.Top) {
         // ── Branch + node — the stub starts at the rail (x=0 of this column
@@ -1607,7 +1607,7 @@ private fun HistorySearchBox(
             .clip(RoundedCornerShape(50))
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                else Color.White
+                else MaterialTheme.colorScheme.surfaceContainerLow
             )
             .padding(start = 12.dp, end = 6.dp, top = 8.dp, bottom = 8.dp)
     ) {

@@ -599,7 +599,7 @@ private fun BinSummaryCard(
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-        else Color.White,
+        else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -676,7 +676,7 @@ private fun TrashedEntryRow(
         shape = RoundedCornerShape(16.dp),
         color = if (selected) settingsRoseAccent().copy(alpha = 0.10f)
         else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-        else Color.White,
+        else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onToggleSelect() }
