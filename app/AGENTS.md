@@ -9110,10 +9110,12 @@ only ever catches taps that mean "not in any of these".
   switches are GONE from the page, and their deep-search keys now point at
   `appearance-color-theme`. Pastel colors and Category tint stay on the page.
 - **`PantoneTheme` (`ui/theme/PantoneThemes.kt`) owns the three Pantone
-  palettes** — page, hero/cards, ink — each with a LIGHT scheme and a DARK twin
-  built from the same three numbers (`schemeFor(dark)`), plus the ink ladder
-  (`inkOn`, `pageInkFor`, `cardInkFor`, `accentFor`, `onHeroFor`) because two of
-  the three Pantone inks cannot carry body text on their own page.
+  palettes** — page, hero, ink — each with a LIGHT scheme and a DARK twin built
+  from the same three numbers (`schemeFor(dark)`), plus the tone ladder
+  (`pageFor`, `heroFor`, `accentFor`, `onHeroFor`, `pageInkFor`, `cardInkFor`)
+  because two of the three Pantone inks cannot carry body text on their own
+  page. **v413 rebuilt the ladder — read the "Pantone Tone Ladder" section
+  below before changing any tone.**
 - **TWO RULES THAT MUST NOT REGRESS in these themes.** (1) **No transparency:**
   every colour in the scheme is opaque — a faded role is a `lerp` mix, never
   `copy(alpha = …)` — and any app code that tints by alpha asks `curioTintOn(base,
@@ -9127,6 +9129,57 @@ only ever catches taps that mean "not in any of these".
   `settingsReadableInk`, `settingsCardAccentInk` in `SettingsHubScreen.kt`), so
   a Pantone theme paints the torn heroes, the option cards and their icons in
   its own three colours.
+
+### The Pantone tone ladder (v413) — cards climb ABOVE the page, never below it
+
+- **WHAT WAS WRONG (member: "all 3 are bad, dont use too deep colors for the
+  cards or background … use more shades palette per pantone theme").** v412
+  built the card ladder by DEEPENING THE HERO five times: on Pantone Terracotta
+  (hero 2350 U) that made every sheet, settings card and journal block a deep
+  brick red, each nested step darker still — and on the two pale heroes (Cream's
+  P 109-10 U, Lime's P 163-8 C) it walked into grey-olive mud. The hero fill
+  was being asked to be both the page's furniture and the page's accent.
+- **THE FIX: THE LADDER IS THE PAGE'S OWN HUE AND IT CLIMBS.** The page keeps
+  its Pantone number; every step above it is a near-white reading of the page's
+  hue — `surfaceContainerLowest` 0.975, `Low` 0.945, `Mid` 0.915, `High` 0.882,
+  `Highest` 0.845 — so a card separates by LIGHTNESS (the app's own rule) and
+  nothing in the app is ever a dark block. The night ladder is the same idea
+  downward: page 0.115, then 0.13 / 0.165 / 0.195 / 0.21 / 0.24, small steps
+  because dark-mode steps must be small.
+- **THE HERO NUMBER IS THE ACCENT AGAIN, WITH A CONTAINER TWIN.** `primary` is
+  the Pantone hero (the banner, a button, a selected rail), `primaryContainer`
+  is its PALE twin (0.90, what a selected chip or tinted rail wears) and the
+  deep hero reading (0.28) is what reads on both — so a chip and the button
+  beside it are finally tellable apart. `secondary` is the INK number at accent
+  depth (0.40) with its own container twin, `tertiary` is the PAGE number at
+  accent depth — three real, separable fills instead of three copies of the
+  hero.
+- **THE DERIVED ROLES ARE PICKED, NOT GUESSED.** `warm` is the most SATURATED
+  number in the amber band 15°–70° (Terracotta's page and ink both qualify and
+  the ink is the real amber, so the duller page must not win); `cool` is the
+  coolest number; `goldInkFor` = the warm one at ink depth; `sageInkFor` = the
+  cool one's hue walked FORWARD (through green) toward 250° by ≤45° at low
+  saturation — walking the short way round made Pantone Terracotta's "sage" a
+  second brick, olive is the one cool-family ink a warm brief can honestly give;
+  `errorFor` = the warm one's hue walked toward red by ≤35° (`alert()`), because
+  a delete button painted in Lime's indigo reads as decoration.
+- **THE SCHEMES ARE COMPLETE.** `errorContainer` / `onErrorContainer` exist
+  (they used to fall through to Material's baseline PINK — the one colour in a
+  Pantone scheme that was not from the brief) and `scrim` is the theme's own
+  near-black.
+- **EVERY PAIR WAS MEASURED BEFORE IT WAS WRITTEN DOWN**, in both schemes: body,
+  muted, container, gold, sage and error inks clear 4.5:1 on their own page AND
+  on the deepest card step; the three container twins clear it against their own
+  contents; white clears it on the light error fill. The one named margin: Lime's
+  indigo accent is 4.26:1 on the deepest nested step (above the 3:1 bar icons and
+  large labels are held to), which is why the accent stays the real Pantone ink
+  instead of deepening into a colour indistinguishable from body text. If a tone
+  changes, re-measure the pairs — `contrast()` is `internal` in the same file.
+- **UNCHANGED, DELIBERATELY:** the lane/category fills still resolve to the hero
+  number (`themedAccent`) — a lane card is a fill, not a plate, and it is the one
+  place the palette is allowed to be saturated (the app's own lane cards are
+  700-level deep too). The 36-lane hue collapse, the no-alpha and no-card-border
+  rules, and the shared-hero branches all still hold.
 
 ### v414 — the drawer chart: a lattice, and more of the drawer
 
@@ -9228,13 +9281,13 @@ only ever catches taps that mean "not in any of these".
   — the same ordering `settingsRoseAccent` has always used. Home's page
   background also skips the lane wash under a Pantone theme.
 - **THE ROLES THE THREE NUMBERS NEVER NAMED are now derived, not borrowed.**
-  `PantoneTheme` grew `secondaryFor` (the hero one step deeper — `secondary`
-  and `secondaryContainer` used to be a second copy of the hero), `tertiaryFor`
-  (the ink read as a fill), `goldInkFor` (the hero at ink depth), `sageInkFor`
-  (the ink, desaturated) and `errorFor` (the ink pinned to alert depth). The
-  schemes use them, and `curioGoldInk()` / `curioSageInk()` answer them first,
-  so the streak flame, XP and mastery icons stop wearing the brand butter/sage.
-  The scheme `error` is no longer `CurioColors.WarmCoralRed`.
+  `PantoneTheme` grew `secondaryFor`, `tertiaryFor`, `goldInkFor`,
+  `sageInkFor` and `errorFor`. The schemes use them, and `curioGoldInk()` /
+  `curioSageInk()` answer them first, so the streak flame, XP and mastery icons
+  stop wearing the brand butter/sage. The scheme `error` is no longer
+  `CurioColors.WarmCoralRed`. **(v413 re-derived all five — gold now comes off
+  the warmest number, sage off the cool hue, and the fills off their own
+  number's accent depth; see "The Pantone tone ladder" above.)**
 - **THE 36 LANE ACCENTS RESOLVE TO THE PANTONE PALETTE TOO.** `CategoryInk.kt`
   takes an `activePantoneTheme()` branch at the top of `categoryInk`,
   `themedAccent`, `headerAccent`, `readableAccentInk`, `onAccent`,

@@ -8,109 +8,96 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "now for the mepty staes of the my shelf door and pages door instead of new buun show like
-> today, yesterday or day before date and say write down somethign about them, and for books
-> show 3 book suggestions. dont push it yet"
+> "now lets fix pantone colors. all 3 are bad, dont use too deep colors for the cards or
+> backgroud, can u fix all of them see whats right, and chnage the hero etc on the basic of
+> the colors use new colors if needed. and do it all. fully revamp the hirarcy contrast etc
+> properly use more shades pallete per pantone theme"
 
-Home's two door rows (`Pages` and `My shelf`), when their list is empty, stop offering a
-"New"-style chip and offer subjects instead: the last three days for Pages, three books for
-the shelf. **Committed but NOT pushed** — the member's own instruction.
+One target: `ui/theme/PantoneThemes.kt` and the scheme it hands to `CurioTheme`. The member
+authorised judgement ("see whats right", "use new colors if needed"), so the only plan step
+was the palette maths itself — done with a Python mirror of `toHsl`/`fromHsl`/`luminance` so
+every tone and every pair could be measured before it was written into Kotlin.
 
-The previous request (the fifteen hidden journal gestures and the gauge's chapter divisions)
-was already committed and pushed as `00d8fac0` before this one started; the tree was clean on
-arrival.
+The previous request (the empty Pages / My shelf doors) was committed as `966ec4c1` and left
+unpushed at the member's own instruction; it rides along with this commit.
 
-## 2. What the code actually looked like (findings)
+## 2. What was wrong (findings)
 
-- `PersonalHome.kt` → `PersonalChipsRow` builds both door rows. Each door, when its list was
-  empty, emitted ONE `EmptyDoorChip`:
-  - Pages: `glyph = Add, label = "No pages yet", caption = "Start your first one"` →
-    `onWrite` (Home's writing sheet).
-  - My shelf: `glyph = Add, label = "No books yet", caption = "Open the shelf"` →
-    navigate to `CurioRoutes.BOOKS` — the same shelf the row already is.
-- `EmptyDoorChip` is `CHIP_WIDTH` 96dp × `CHIP_HEIGHT` 118dp: a 34dp accent disc, a label and
-  a two-line caption — so a replacement chip has an exact shape to match.
-- The journal page seeds its day with `startOfToday()` (`JournalEditorScreen` line ~117) and
-  overrides it from the stored row when one exists; the route carries an entry id and nothing
-  else, and `PendingCabinetFilter` was the house pattern for out-of-band handoff.
-- `startOfToday()` / `shiftDay(millis, days)` are `internal` in `JournalEditorScreen.kt` (same
-  package), and a journal day is a calendar day at local midnight.
-- `BookCatalog` (Curio's own `BOOKS` lane, ~800 curated books) already exposes `library()`,
-  `search()`, `book()`, `bestMatch()` — and every `Hit` carries the real cover, the page
-  count and the REAL chapter list. It had no "give me a few" door.
-- Creating a book from the shelf's add flow is `addBook(...)` — a LOCAL fun inside
-  `BookShelfScreen` (it needs that screen's scope, context and file-import path), so it is
-  not reusable; `TopicRevealScreen` and `IsbnScannerScreen` each write their own
-  `PersonalBookEntity` + `saveBook` inline instead.
-- `BookChip` reads only `title`, `author` and `coverUrl` off the entity it is given, so a
-  throwaway entity can draw a book that is not on the shelf yet.
+1. **The card ladder deepened the HERO.** v412's `surfaceContainer*` were `deepen(hero, 0.05…
+   0.15)`. Pantone Terracotta's hero (2350 U, `#9E483F`) therefore made every sheet, settings
+   card and journal block a deep brick red, each nested step darker — "too deep colors for the
+   cards". On Cream (`#B6CADF`) and Lime (`#CDD325`) it walked into grey-olive mud.
+   The hero was being asked to be both the page's furniture and the page's accent.
+2. **Three fills, one colour.** `primary`/`primaryContainer` were both the hero; v412's
+   `secondary` was the hero one step deeper. A chip and the button beside it were the same
+   colour.
+3. **Derived roles were picked by the wrong number.** `goldInkFor` off the HERO (Lime's hero is
+   a yellow-green → a green "amber" streak flame) and `sageInkFor` off the ink desaturated
+   (Terracotta's → a second brick). `errorFor` off the ink's hue (Lime's indigo → an
+   indigo "delete").
+4. **`errorContainer` / `onErrorContainer` / `scrim` were never set**, so they fell through to
+   Material's baseline palette — a PINK error container in a theme whose rule is "no other
+   colors". 11 + 9 + 1 call sites read those roles.
 
-## 3. What was done
+## 3. What was built
 
-### Pages door — the last three days
-- The empty row now leads with a new `EmptyDoorLead` — "Nothing here yet" over "Write down
-  something about one of these days." — sized and centred like a chip (158dp × 118dp), no
-  button of its own.
-- Then three `EmptyDoorChip`s from `emptyDayChips()`: **Today**, **Yesterday** and the day
-  before (named by its WEEKDAY, e.g. "Tuesday", caption the date, e.g. "18 September"), each
-  with the `CalendarToday` glyph.
-- Each chip stashes its own local midnight in **`PendingJournalDay`** (new object in
-  `CurioRoutes.kt`, modelled on `PendingCabinetFilter`) and navigates to
-  `journalEditor(PERSONAL_NEW)`; the journal's date seed now reads
-  `PendingJournalDay.take() ?: startOfToday()`, so the page opens ON the day the chip said.
-  A saved page still overrides it with the date it was written on.
+- **The ladder is the PAGE's own hue and it climbs:** `surfaceContainerLowest` 0.975, `Low`
+  0.945, `Mid` 0.915, `High` 0.882, `Highest` 0.845 (light) — cards separate from the page by
+  LIGHTNESS, the app's own rule, and nothing is a dark block. Night: 0.115 page, then 0.13 /
+  0.165 / 0.195 / 0.21 / 0.24 (small steps, because dark steps must be small).
+- **The hero is the accent again** with a PALE container twin: `primaryContainer` = hero at
+  0.90, `onPrimaryContainer` = hero at 0.28. `secondary` = the INK at accent depth (0.40) with
+  its own container twin; `tertiary` = the PAGE at accent depth (0.30). Night gets the
+  mirror set.
+- **Derived roles are picked, then walked:** `warm` = the most SATURATED number in the amber
+  band 15°–70° (Terracotta's page 40°/0.68 vs ink 28°/0.83 → the ink wins, it is the real
+  amber); `cool` = the coolest number; `goldInkFor` = warm at ink depth; `sageInkFor` = the
+  cool hue walked FORWARD toward 250° by ≤45° (shortest-path walking swung Terracotta back
+  through red into a brick — olive is the honest cool ink for an all-warm brief);
+  `errorFor` = the warm hue walked toward red by ≤35° (`alert()`), so Lime's delete is a deep
+  violet-red and not its indigo.
+- **`errorContainer` / `onErrorContainer` / `scrim` now come from the palette** (`alert()` at
+  0.90/0.26 light and 0.28/0.88 dark; scrim = the ink at 0.10 light / 0.08 dark).
+- **`warm`/`cool`/`coolHue` are `val`s computed once** with the enum, not per composition.
+- **Not changed, deliberately:** lane/category FILLS still resolve to the hero number
+  (`themedAccent`) — a lane card is a fill, not a plate, and it is the one place the palette is
+  allowed to be saturated (the app's own lane cards are 700-level deep). Also unchanged: the
+  no-alpha rule, the no-card-border rule, the pure-`at()` derivation (nothing outside the three
+  numbers is painted) and the ink ladder's role names, so no call site moved.
 
-### My shelf door — three book suggestions
-- The empty row leads the same way ("Nothing here yet" / "Pick one to start with.") and then
-  draws **three real books** from the catalog with the ordinary `BookChip` cover chip.
-- New `BookCatalog.suggestions(count = 3)`: shuffles the catalog with a **seed from the
-  current day**, so the three are stable all day (a strip that reshuffles under a finger
-  reads as a glitch) and fresh tomorrow.
-- Tapping one calls the new `shelveSuggestion(hit)` — a `PersonalBookEntity` with the
-  catalog's title, author, cover, page count, `catalogId` and `chapterCount`, stamped with
-  `createdAtMillis`/`updatedAtMillis` so it sorts as the newest book — then navigates to the
-  book's own page. A `shelving` flag guards the write, since a double tap would shelve the
-  same book twice; the empty state lasts exactly as long as that write (both rows read the
-  same flow).
-- The suggestion list is read only while the shelf IS empty (`produceState(…, books.isEmpty())`),
-  so a member with books never pays for the catalog parse.
+## 4. The measured palette (light / dark, per theme)
 
-### Cleanup
-- `PersonalChipsRow`'s `onWrite` parameter had exactly one caller — the chip that was just
-  replaced — so it is deleted along with the argument at Home's call site, rather than left
-  behind as a dead one. The writing sheet keeps its real door: Home's floating "+"
-  (`PersonalCreateLauncher` → `writeSheetOpen`).
+Every pair below cleared 4.5:1 on its own page AND on the deepest card step; container twins
+were checked against their own contents; white was checked on the light error fill.
 
-Docs + notes: a new bullet in `app/AGENTS.md` (what an empty row offers, `PendingJournalDay`,
-the day-seeded suggestions, the guard flag, the deleted parameter) and a changelog group
-(two ADD, one FIX).
+| role | Cream | Terracotta | Lime |
+|---|---|---|---|
+| page | `#F7E9C6` | `#F5E1C5` | `#FAF4D3` |
+| card ladder (5 steps) | `#F5F3EC` → `#E5DDCA` | `#F5F2EC` → `#E5DACA` | `#F5F4EC` → `#E5E1CA` |
+| body ink | `#3E353D` | `#4C3A27` | `#2A2C48` |
+| muted ink | `#5D505C` | `#6C5741` | `#41436C` |
+| accent (= the Pantone ink) | `#4D424C` | `#7C3831` (ink is orange, 1.74:1 → hero at 0.34) | `#5F62A1` |
+| hero + its words | `#B6CADF` / `#3E353D` | `#9E483F` / white | `#CDD325` / `#2A2C48` |
+| second fill | `#6E5E6C` | `#996833` | `#4B4E81` |
+| third fill | `#6F5B2A` | `#6F522A` | `#6F642A` |
+| gold | `#785B11` | `#784711` | `#786911` |
+| sage | `#3F3960` | `#536039` (olive) | `#3F3960` |
+| error | `#A53827` | `#A53827` | `#A54827` |
+| night page | `#232017` | `#231E17` | `#232117` |
 
-## 4. Decisions
-
-- **"Day before" is named by its weekday.** The member wrote "day before"; at a 96dp chip
-  with `labelLarge` type, "Day before yesterday" either wraps or shrinks, and the weekday plus
-  the date under it says the same thing more precisely. Flagged here in case they want the
-  literal words.
-- **The lead-in line is not a button.** The sentence the member asked for ("write down
-  something about them") is a lead-in to the three days, and the chips under it are the
-  actions — a text that also navigated would be a second, invisible door.
-- **Three days, not "the last three days you have nothing for".** Days are a fixed, learnable
-  set (Today / Yesterday / the day before) and match how a diary is written backwards from;
-  scanning the store for empty days would make the row's meaning depend on data.
-- **Suggestions come from Curio's own catalog, not Open Library.** It is offline, curated, and
-  every book arrives with a real chapter list and page count — which is what makes a
-  one-tap suggestion become a *complete* book on the shelf rather than a stub to enrich later.
-- **Day-seeded, not per-composition random.** Stable under a finger, new each day.
-- **The `onWrite` parameter was removed rather than kept.** A dead parameter on a shared
-  composable is worse than a smaller signature; the write sheet's primary door is untouched.
-- No ask_user: the member's instruction was explicit about both rows and about the push.
+One named margin: Lime's indigo accent is 4.26:1 on the deepest nested step (0.845) — above the
+3:1 bar icons and large labels are held to, below the body-text bar — which is why the accent
+stays the real Pantone ink instead of deepening into a colour indistinguishable from body text.
 
 ## 5. Status
 
-- Implemented; brace/paren balance verified (0/0) on every edited file. No Gradle in this
-  environment, so CI validates the compile.
-- **Committed, NOT pushed** (member: "dont push it yet") — the tree is one commit ahead.
-- Open: push when the member asks; CI then validates it together with the next change.
+- Implemented in `PantoneThemes.kt` (roles, both schemes, palette maths) + `app/AGENTS.md`
+  ("The Pantone tone ladder (v413)") + three FIX bullets in `20260922.txt`.
+- Brace/paren/bracket balance verified 0/0; no stale references to the removed private helpers
+  (`inkOn`, `paleInk`, `deepen`, `lift`, `shade`) anywhere in the app; all role function names
+  the rest of the app calls are unchanged.
+- No Gradle in this environment — CI validates the compile.
+- Pushed together with the held `966ec4c1`; CI watched and any failure fixed.
 
 ---
 
