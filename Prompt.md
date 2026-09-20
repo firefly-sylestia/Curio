@@ -64,15 +64,65 @@ Confirmed with the member earlier via `ask_user`:
 
 ## 3. What was built
 
-*(in progress — see §5)*
+**The form greets you on Home (v425)** — `MainActivity` seeds `OnlineAccount.restore(this)`
+with the rest of the app's state, and `FeedbackFormState.refresh` parks ONE read on
+`snapshotFlow { session?.accessToken }` when it is asked before the account is ready, then
+runs it the moment one arrives. Two screens needed no change at all. (Answer to the
+member's own question: yes, a form is only visible with Online mode ON and a signed-in
+session — it is published on the server and read with the member's own token, so a member
+with Online mode off never sees one. That is the design, not an oversight.)
 
-## 4. Still open
+**The night is muted (v425)** — `NamedThemes.darkScheme()` / `pageFor(true)` / `heroFor(true)`
+/ `accentFor(true)`:
 
-*(nothing yet)*
+| | before | after |
+|---|---|---|
+| page | 0.36 chroma @ 0.11 | 0.30 @ 0.10 |
+| card ladder | 0.34→0.24 @ 0.14…0.30 | 0.24→0.16 @ 0.135…0.255 |
+| hero | 0.50 @ 0.33 | 0.36 @ 0.30 |
+| accent | 0.40 @ 0.69 | 0.30 @ 0.70 |
+| second/third fills | 0.46/0.44 @ 0.42/0.44 | 0.36/0.34 @ 0.34/0.36 |
+
+Measured with a Python replica of `fromHsl` + Compose's luminance/`contrast`:
+`onHero` 5.5:1 (Jade, was 4.2 — under the bar), accent on the TOP card step 4.64:1
+(Orchid, worst) to 5.08:1 (Jade); the old 0.40-chroma accent measured 3.79–4.05 there.
+Dark `onSecondary`/`onTertiary` are now `readableOn(...)` (white wins at ≥4.97:1).
+Light mode is untouched.
+
+**Incursion (v425)** — `statusInk` is one @Composable tone resolver (six hues, the app's
+day/night tone discipline); the head plate, phase headers and rows are cards
+(`surfaceContainerLow` + `curioTintOn` + `curioCardShadow`), the chips lost their
+`BorderStroke`, the tiles lost their top colour bar (status = a whisper in the fill + a
+dot), the filter chips take their ink from `curioFillInk`, and `IncursionDetailSheet` is a
+`ModalBottomSheet`. `IncursionUnlockReveal` is a Curio card in the theme's ink with
+rewritten copy ("The watching order is yours") — it read as an app-store notice.
+
+**A file answers its own page count (v425)** — `epubPageCount` (the EPUB 3 page-list) +
+`documentPageCount` as the one door; used by the detail page's own length, the shelf's
+attach drop, and `documentChapters`' chapter ranges. `BookDetailScreen`'s
+`filePageCount` no longer bails on a non-PDF.
+
+## 4. Still open (the rest of this request — BOOKS)
+
+1. **Series fetching + covers, and a detail sheet for a series** — the member wants a
+   series' own covers fetched and its details opened in the SAME bottom sheet the topic
+   reveal uses, with the lookup adding information while the stored ones stay.
+2. **Manga / manhwa / comics as book KINDS**, with full-kind reading.
+3. **More providers / more ways to fetch and scrape** (books and, per the member's answer,
+   artworks/artists/songs/films too).
+4. **EPUB in the page-swipe flow** — the side-by-side view is poor and a pinch zoom lags.
+5. **Title detection for files is still bad** — `detectBookFromFileName` keeps a bracketed
+   publisher/edition (`(Penguin Classics, 1996)`), and a name with two dashes splits its
+   author wrongly. NEEDS THE MEMBER'S OWN EXAMPLES before guessing.
 
 ## 5. Work log
 
-- **Phase 1 — the form and the night.** (in progress)
+- **Phase 1 — the form and the night.** Done, committed, pushed (`f3604631`).
+- **Phase 2 — Incursion.** Done, committed, pushed (`33db4480`).
+- **Phase 3 — the file's own page count (Books).** Done, committed, pushed (`94e66bf9`).
+- **DOX pass** — `app/AGENTS.md`: the Incursion section's tile description corrected (the
+  status bar is gone), the page's v425 language added, and the file/page-count contract
+  added to the chapters bullet. Committed with this file; NOT pushed (docs-only).
 
 ## User prompts
 
