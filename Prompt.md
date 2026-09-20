@@ -8,69 +8,78 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "make the progress gause animate smoothly as the help steepper moves the count, and also
-> a subtle idle animation, gradient style maybe, and then for the voice note graph in
-> journal it looks so bad can u fix it please, and also many of how did the day feel the
-> mood pills are using transparent fills can u fix it and look for more things that have
-> transparent fill. also for the device in theme option chnage the icon please it looks
-> bad,"
+> "now for the material theme well the shuffle page cards they have differnt colors right i
+> want them to keep the color how about you use the mterial theme device color as the fill
+> which goes from the top side to the buttom side but not full to the butom 70% then 30% is
+> the category accent, wouldnt that be cool, we already have grdint 2 colos for one
+> category how about we use that style and for multiplre mix just use the full all material
+> device color mixes with differnt gradient styles"
 
-Four independent fixes, done in one pass.
+Answered on ask_user: the **whole deck family** (front ticket, both peek slabs, the spin
+button and the confetti accent); the 70/30 join is **blended**, not a hard band; a MIXED
+deck is the **full device colour with the existing per-deck gradient styles**.
 
 ## 2. What the code actually looked like (findings)
 
-- **The gauge was a still frame.** `ReadingGauge` (BookDetailScreen.kt) drew
-  `size.width * fraction` directly and printed the `percent` parameter — a held stepper
-  writes a new fraction many times a second, so the bar and the figure both snapped.
-- **The voice wave was a sawtooth.** `PersonalVoiceBar` (PersonalVoice.kt) joined its
-  bucketed points with `lineTo`, 26 buckets across the strip, at a 0.085 stroke of the
-  page's ink at 60% alpha — every peak a hard corner, the whole thing a hairline scribble.
-- **The mood pills were translucent.** The collapsed "How did the day feel?" pill used
-  `personalMoodInk(it).copy(alpha = 0.20f)`, the picked `MoodOption` chip the same, and its
-  idle disc `tint.copy(alpha = 0.20f)` — on the journal's parchment the page showed
-  straight through. A scan of the personal family found the same pattern on ~12 more
-  fills (topic row, glyph discs, chips, empty-state discs, scan doors, pills).
-- **The System glyph was hand-drawn.** `HalfCelestialGlyph` (SettingsSectionScreen.kt)
-  built a half-sun/half-moon out of arcs at 20dp; the onboarding's System chip has always
-  used the bundled `CurioIcons.Contrast` font glyph instead — the same half-lit circle.
+- The deck's colour pipeline is two functions on `CurioMixedDeck` in `CurioColors.kt`:
+  `mixedDeckAccent(accents, pastel, dark, materialPrimary)` — the single accent the peeks,
+  spin button and confetti derive from — and `mixedDeckGradient(accents, materialPrimary)`
+  — the hero ticket's stop list.
+- Under the Material theme both took a `materialPrimary` (resolved at the Spin call site as
+  `settingsRoseAccent()`, i.e. the scheme's `primaryContainer`) and fell back to a lane's
+  muted **family fill** — so a single-lane deck was per-category family colours, and a mixed
+  deck was one family tone rendered as `CurioGradients.cardGradient(raw)`.
+- The hero ticket's brush (`HeroTicketCard`) had exactly two paths: `isMixed` →
+  `CurioMixedDeck.mixedDeckHeroBrush` (diagonal / reversed-diagonal / radial, keyed off the
+  deck's category set), else the enhanced diagonal crown→base sweep.
+- Peek slabs derive their fills by deepening the deck's gradient stops (HSL lightness drop
+  + saturation pull), so they follow whatever `gradient` holds — no separate plumbing.
+- Card inks came from `cat.onAccent()` (the family on-fill) — which is wrong once the fill
+  is the device colour.
 
 ## 3. What was done
 
-- **`ReadingGauge` animates.** Fill through `animateFloatAsState` (spring 0.88/380), the
-  figure derived from that same animated value (the `percent` parameter is DELETED, so the
-  two can never disagree), the fill a `Brush.horizontalGradient(accent → lerp(accent,
-  White, 0.30f))`, and a 2.8s `rememberInfiniteTransition` sheen `clipRect`ed to the fill
-  so it only ever travels along the progress. All stops opaque.
-- **The voice wave is a curve.** Points collected first, joined with `cubicTo` whose
-  control points sit at the midpoint between steps (rounded peaks, no corners), buckets
-  26 → 18, stroke 0.085 → 0.11 (min 1.8dp), depth pass 0.16 → 0.22, ink 0.60 → 0.72.
-- **The fills are opaque.** Every offender now reads
-  `lerp(<the surface it sits on>, tint, alpha)`: the three mood surfaces, `TopicNoteScreen`
-  (row, glyph disc, open-topic pill, note disc), `PersonalHome` (both discs + `NewChip`),
-  `JournalListScreen`'s empty-disc, `BookShelfScreen`'s selected scan door,
-  `BookDetailScreen`'s "Mark finished" pill, and the empty-state discs in `ChapterScreen`
-  and `BookReviewScreen`.
-- **`HalfCelestialGlyph` deleted**; the System segment wears
-  `CurioIcon(CurioIcons.Contrast, "System", …)`.
+All in `ui/theme/CurioColors.kt` and `features/spin/SpinScreen.kt`:
 
-Docs + notes: a new `### v412 — the gauge, the voice wave, the mood pills, the System
-glyph` section in `app/AGENTS.md` (and the "ONE WAVE IN A VOICE NOTE" bullet updated), plus
-a FIX/ADD block in the 20260922 changelog.
+- **`CurioGradients.materialDeckBlend(device, accent)`** — 10 evenly-spaced stops: the first
+  seven hold the device colour (positions 0.00–0.667 = the top ~70% of the card), the last
+  three ramp through OKLab into the lane's accent. A plain `Brush.verticalGradient` then
+  renders the 70/30 split with a blended seam, with **no stop-position plumbing** — the hold
+  is just the same colour repeated across evenly spaced stops.
+- **`mixedDeckAccent` / `mixedDeckGradient` gained a `materialDevice: Color?` parameter.**
+  `mixedDeckAccent` returns it (pastel-softened in pastel mode) as the deck accent, so the
+  peeks, spin button and confetti follow. `mixedDeckGradient` uses `materialPrimary != null`
+  as the mixed signal: mixed → `[device, device deepened at the foot]` for the existing
+  per-deck brushes; single lane → `materialDeckBlend(device, laneAccent)`.
+- **`SpinScreen`** resolves `materialDeckFill = MaterialTheme.colorScheme.primary` once and
+  passes it to both; `HeroTicketCard` gains a `materialThemeOn` brush branch
+  (`Brush.verticalGradient(gradient)`) ahead of the diagonal sweep — the mixed branch above
+  it still takes the style-varied brush; and both the hero card's and the peek slab's ink
+  take a `materialThemeOn` branch through `curioFillInk(...)` so the words read on the
+  device fill.
+
+Docs + notes: a new `### v413 — the Material deck wears the device colour` section in
+`app/AGENTS.md` and one ADD bullet in the 20260922 changelog.
 
 ## 4. Decisions
 
-- The `percent` parameter was removed rather than kept and ignored — the figure is derived
-  from the animated fill, which is the only way the number and the bar cannot drift apart.
-- The transparent-fill sweep extends the Pantone "no transparent colours" rule to the
-  journal family generally: the fix is a `lerp` into the surface the fill sits on, which is
-  visually the same colour but opaque.
-- `lerp` imports added where missing (`TopicNoteScreen`, `PersonalHome`, `JournalListScreen`,
-  `ChapterScreen`, `BookReviewScreen`, `BookShelfScreen`).
-- Left alone deliberately: text/glyph alphas (`ink.copy(alpha = …)` — those are ink, not
-  fills) and the big surface-level washes.
+- The device colour is the scheme **primary** (the wallpaper-derived tone) — that is what
+  "device color" means in Material, and it is what the deck now wears.
+- The 70/30 hold is expressed by repeating a colour across evenly spaced stops rather than
+  by threading `Pair<Float, Color>` stop positions through `List<Color>` signatures used by
+  three call sites and the peek deepen — same visual result, no API churn.
+- The mixed-deck **different gradient styles** were already there (`mixedDeckHeroBrush`);
+  the change is only what it paints with, so no new style system was invented.
+- **No new experiment toggle.** The Material theme is itself an opt-in Appearance choice, so
+  choosing Material is choosing this fill — per AGENTS.md's rule that a settings gate is
+  about how an experiment ships, and this one ships inside an existing user-facing toggle.
+- Pastel mode + Material keeps the device colour (softened) without the accent foot — the
+  pastel single-lane branch in `SpinScreen` builds its own two stops before
+  `mixedDeckGradient` is consulted. Accepted: the requested recipe is the non-pastel look.
 
 ## 5. Status
 
-- All four items implemented; brace/paren balance verified on every touched file (the
-  pre-existing -2 parens in `BookReviewScreen.kt` is unchanged by this diff).
-- No pending follow-up from this request.
+- Implemented; brace/paren balance verified on both files (deltas unchanged: 0/0). The
+  previous batch is committed as `3770d967`.
+- **Nothing has been pushed** — the user asked to hold the push.
+- No pending follow-up.

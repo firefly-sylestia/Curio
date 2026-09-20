@@ -169,6 +169,7 @@ import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.lightAccentTint
+import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.materialThemeOn
 import com.curio.app.ui.theme.oklabGradientStops
 import com.curio.app.ui.theme.onAccent
@@ -722,15 +723,24 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // v190 — Material: a MIXED deck wears ONE material color — the scheme
     // primary (user: "make it the material color when they get mixed") —
     // instead of a blend; single lanes keep their muted family fill.
+    //
+    // v413 — AND THE DEVICE COLOUR FILLS THE DECK. The member's own wallpaper
+    // tone IS Material's identity, so the whole deck FAMILY wears it now: the
+    // front ticket holds it down the top ~70% and hands its foot to the lane's
+    // own category accent, a mixed deck is the device colour throughout (laid
+    // out by the per-deck gradient styles), and the peek slabs, the spin button
+    // and the confetti follow the same tone.
+    val materialDeckFill = if (materialThemeOn) MaterialTheme.colorScheme.primary else null
     val materialPrimary = if (materialThemeOn && activeCatIds.distinct().size > 1) {
         settingsRoseAccent()
     } else null
-    val deckAccent = remember(deckAccents, pastelMode, darkMode, materialPrimary) {
+    val deckAccent = remember(deckAccents, pastelMode, darkMode, materialPrimary, materialDeckFill) {
         CurioMixedDeck.mixedDeckAccent(
             deckAccents,
             pastel = pastelMode,
             dark = darkMode,
-            materialPrimary = materialPrimary
+            materialPrimary = materialPrimary,
+            materialDevice = materialDeckFill
         )
     }
 
@@ -789,7 +799,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             )
         }
     } else {
-        CurioMixedDeck.mixedDeckGradient(deckAccents, materialPrimary = materialPrimary)
+        CurioMixedDeck.mixedDeckGradient(
+            deckAccents,
+            materialPrimary = materialPrimary,
+            materialDevice = materialDeckFill
+        )
     }
     val deckCat = remember(activeCatIds, deckAccent, activeCategory) {
         if (isMixedDeck) {
@@ -2962,6 +2976,12 @@ private fun HeroTicketCard(
     val pastelLightHero = AppPreferences.pastelColorsState
     val ticketBrush = if (isMixed) {
         CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
+    } else if (materialThemeOn) {
+        // v413 — MATERIAL: the deck's own TOP→BOTTOM fill. The device colour
+        // runs from the top edge down ~70% of the card, then blends into the
+        // lane's category accent at the foot (the stops come from
+        // CurioGradients.materialDeckBlend, so the split lives in one place).
+        Brush.verticalGradient(gradient)
     } else if (heroBlendOn) {
         // v10 — dual-accent blend: category accent meets a warm golden
         // companion in a multi-stop vertical gradient.
@@ -3001,7 +3021,15 @@ private fun HeroTicketCard(
     // card reads with the same calm deep-hue ink instead of the raw 700
     // accent or the fixed DeepPlum special-case for pale accents — no hue
     // surprises on the card, and it matches every other pastel surface.
-    val ink = if (AppPreferences.pastelColorsState) pastelFillInk(accent) else cat.onAccent()
+    // v413 — Material: the card's top 70% is the DEVICE colour now, so its
+    // words resolve against THAT fill (white where white reads, a deep
+    // same-hue ink where it does not) instead of the lane's family on-fill,
+    // which can vanish on a light wallpaper primary.
+    val ink = when {
+        materialThemeOn -> curioFillInk(gradient.first())
+        AppPreferences.pastelColorsState -> pastelFillInk(accent)
+        else -> cat.onAccent()
+    }
 
     // ── Opening handoff — NO pre-grow. The shared-element morph (see
     //    CurioNavHost) IS the expansion. A pre-grow made the visual card
@@ -3536,7 +3564,9 @@ private fun PeekCard(
     }
     // v7.5 — pastel mode lightens the peek fill, so content flips to a deep
     // ink of the deck color (light mode) / a light tint (dark).
-    val ink = pastelFillInk(accent)
+    // v413 — Material: the peeks are deepened DEVICE-colour slabs now, so
+    // their words resolve against the fill they actually wear.
+    val ink = if (materialThemeOn) curioFillInk(cardStops.first()) else pastelFillInk(accent)
     // Peek cards stay fully present through the first half of the reel, then
     // dissolve into the background so the final selection has visual focus.
     // Opacity belongs to the card's own AnimatedContent transition below.

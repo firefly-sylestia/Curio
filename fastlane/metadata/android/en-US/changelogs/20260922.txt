@@ -57,6 +57,9 @@ ADD:
 - Home: the drawer is your brain — your streak, your level with its XP bar and your total knowledge, over a grid of your lanes, one card per lane with a meter that fills as you build there; tap a lane and its own figures open under it.
 - Your Curiosity: the constellation drawing is replaced by that same lane map — real tiles, a meter per lane, and a Cabinet door onto the lane you tap that opens the Cabinet filtered to it.
 
+ADD:
+- Shuffle: on the Material theme the deck is your own device colour now — a single lane keeps its category colour as the bottom of the card (the device tone runs down the top ~70% and blends into it), a mixed deck is the device colour throughout in the deck's own per-mix gradient styles, and the peek cards, spin button and confetti follow the same tone.
+
 FIX:
 - Journal: the voice note's wave is one smooth drawn pulse now instead of a thin sawtooth scribble.
 - Journal: the "How did the day feel?" pill and its mood chips are solid fills — the page no longer shows through them — and the same fix went to the other see-through chips, discs and pills across the journal, notes and books.

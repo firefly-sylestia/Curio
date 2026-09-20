@@ -560,6 +560,32 @@ object CurioGradients {
     }
 
     /**
+     * v413 — THE MATERIAL DECK FILL: the DEVICE colour holding the top ~70% of
+     * the card, ramping into the lane's own CATEGORY accent by the foot.
+     *
+     * The member's ask for the Material theme's shuffle page: "use the material
+     * theme device color as the fill which goes from the top side to the bottom
+     * side but not full to the bottom 70% then 30% is the category accent". The
+     * lane keeps the colour it always had — it just owns the bottom of the card
+     * now, under the member's wallpaper tone.
+     *
+     * TEN evenly-spaced stops do it without any stop-position plumbing: the
+     * first seven hold [device] (positions 0.00–0.667, the top ~70% of the
+     * card) and the last three ramp through OKLab into [accent], so a plain
+     * `Brush.verticalGradient` renders the split with a BLENDED seam (the
+     * member's choice) rather than a hard band. Both colours stay opaque — no
+     * alpha anywhere in the deck's fill.
+     */
+    fun materialDeckBlend(device: Color, accent: Color): List<Color> {
+        // OKLab steps: perceptually even, so the ramp never passes through a
+        // muddy RGB midpoint between a cool wallpaper tone and a warm lane.
+        val ramp = oklabGradientStops(device, accent, 4)
+        // i 0..6 → device (the 70% hold); i 7..9 → ramp[1], ramp[2], ramp[3],
+        // i.e. the blended 30% that lands exactly on the category accent.
+        return List(10) { i -> if (i <= 6) device else ramp[i - 6] }
+    }
+
+    /**
      * v10 — Dual-accent blend hero gradient: the category accent meets a
      * warm golden companion in HSL space for a richer, more sophisticated
      * multi-tone gradient. The blend creates a premium duotone effect —
@@ -739,7 +765,12 @@ object CurioMixedDeck {
         // v190 — Material: the scheme primary a MIXED deck wears instead of
         // a blend (the caller resolves it in composition; null keeps the
         // family-tone centroid fallback for non-material callers).
-        materialPrimary: Color? = null
+        materialPrimary: Color? = null,
+        // v413 — Material: the DEVICE colour (the wallpaper-derived scheme
+        // primary) the whole deck FAMILY now wears — the front ticket's fill,
+        // the peek slabs, the spin button and the confetti. The caller
+        // resolves it in composition; null keeps the pre-v413 behaviour.
+        materialDevice: Color? = null
     ): Color {
         // v185 — Material theme: every lane collapses to its muted M3 family.
         // v190 — a MIXED deck wears ONE material color — the scheme primary
@@ -747,6 +778,11 @@ object CurioMixedDeck {
         // family-tone blend. Pastel mode softens the resolved fill to its
         // pastel twin like the rest of the app.
         if (materialThemeOn) {
+            // v413 — THE DECK'S COLOUR IS THE MEMBER'S OWN DEVICE COLOUR.
+            // Material's identity is the wallpaper, so the deck's accent IS
+            // that tone — the lane keeps its colour at the FOOT of the card
+            // (see CurioGradients.materialDeckBlend), not in the accent.
+            materialDevice?.let { return if (pastel) pastelAccent(it, dark) else it }
             val d = accents.distinct()
             if (d.isEmpty()) return CurioColors.CategoryCoral
             val families = d.map { materialFamilyFor(it) }.distinct()
@@ -790,24 +826,39 @@ object CurioMixedDeck {
      * color family per deck, no light seams on dark cards.
      */
     @Composable
-    fun mixedDeckGradient(accents: List<Color>, materialPrimary: Color? = null): List<Color> {
+    fun mixedDeckGradient(
+        accents: List<Color>,
+        materialPrimary: Color? = null,
+        // v413 — Material: the DEVICE colour (scheme primary), resolved in
+        // composition. See the Material branch below.
+        materialDevice: Color? = null
+    ): List<Color> {
         // Color is a value class — value-based equality means distinct() alone
         // dedupes (toArgb() isn't part of the Compose BOM resolved here).
         val distinct = accents.distinct()
         // v185 — Material theme: lanes collapse to their muted M3 families.
-        // v190 — a MIXED deck wears ONE material color — the scheme primary
-        // (user verdict) — rendered as the standard quiet card gradient, so
-        // the multi-hue family sweep is gone. Pastel softening happens inside
-        // [CurioGradients.cardGradient].
+        // v413 — AND THE FILL IS THE DEVICE COLOUR. A single lane holds it down
+        // the top ~70% of the card and hands the foot to that lane's own
+        // category accent (CurioGradients.materialDeckBlend); a MIXED deck is
+        // the FULL device colour, laid out by the per-deck brushes
+        // ([mixedDeckHeroBrush]) so different mixes keep their own style
+        // (member: "for multiple mix just use the full all material device
+        // color mixes with different gradient styles").
         if (materialThemeOn) {
             val dark = isCurioDarkTheme()
-            val families = distinct.map { materialFamilyFor(it) }.distinct()
-            val raw = when {
-                families.isEmpty() -> CurioColors.CategoryCoral
-                families.size == 1 -> families.first().fill(dark)
-                else -> materialPrimary ?: oklabCentroid(families.map { it.fill(dark) })
+            val pastel = AppPreferences.pastelColorsState
+            val laneAccent = distinct.firstOrNull()?.let { materialFamilyFor(it).fill(dark) }
+                ?: CurioColors.CategoryCoral
+            val rawDevice = materialDevice ?: laneAccent
+            val device = if (pastel) pastelAccent(rawDevice, dark) else rawDevice
+            if (materialPrimary != null) {
+                // MIXED — the whole card is the device colour, a touch deeper
+                // at the foot so the sweep still has a direction.
+                return listOf(device, lerp(device, Color.Black, if (dark) 0.16f else 0.06f))
             }
-            return CurioGradients.cardGradient(raw)
+            // SINGLE LANE — device colour over the lane's own accent.
+            val laneFill = if (pastel) pastelAccent(laneAccent, dark) else laneAccent
+            return CurioGradients.materialDeckBlend(device, laneFill)
         }
         val pastel = AppPreferences.pastelColorsState
         val dark = isCurioDarkTheme()

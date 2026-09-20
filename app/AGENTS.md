@@ -9104,6 +9104,38 @@ only ever catches taps that mean "not in any of these".
   a Pantone theme paints the torn heroes, the option cards and their icons in
   its own three colours.
 
+### v413 — the Material deck wears the device colour
+
+- **THE MATERIAL SHUFFLE DECK IS THE MEMBER'S WALLPAPER TONE.** `MaterialTheme`
+  identity IS the device palette, so the whole deck FAMILY resolves from
+  `MaterialTheme.colorScheme.primary`: `SpinScreen` resolves it once as
+  `materialDeckFill` and passes it to `CurioMixedDeck.mixedDeckAccent` (new
+  `materialDevice` parameter — the deck accent, which the peek slabs' deepening,
+  the spin button and the confetti all derive from) and to
+  `CurioMixedDeck.mixedDeckGradient` (same new parameter).
+- **SINGLE LANE: DEVICE COLOUR FOR 70%, THE LANE'S ACCENT FOR 30%.**
+  `CurioGradients.materialDeckBlend(device, accent)` returns TEN evenly-spaced
+  stops — the first seven hold the device colour (positions 0.00–0.667) and the
+  last three ramp through OKLab into the lane's own family accent, so a plain
+  `Brush.verticalGradient` renders the split with a BLENDED seam. No stop-position
+  plumbing anywhere: the hold is expressed by repeating a colour across evenly
+  spaced stops. The hero ticket brushes through `Brush.verticalGradient(gradient)`
+  (a new `materialThemeOn` branch in `HeroTicketCard`'s `ticketBrush`, before the
+  diagonal crown/base sweep).
+- **MIXED DECKS ARE THE FULL DEVICE COLOUR, STYLE-VARIED.**
+  `materialPrimary != null` is the mixed signal; the stops become
+  `[device, device deepened at the foot]` and the EXISTING per-deck brush
+  (`CurioMixedDeck.mixedDeckHeroBrush` — diagonal, reversed diagonal, radial,
+  keyed off the deck's category set) lays it out, so different mixes still read
+  differently without a second palette.
+- **THE CARD'S WORDS RESOLVE AGAINST THE DEVICE FILL.** `HeroTicketCard`'s ink
+  and `PeekCard`'s ink take a `materialThemeOn` branch through
+  `curioFillInk(gradient.first())` / `curioFillInk(cardStops.first())` — white
+  where white reads, a deep same-hue ink where it does not — instead of the
+  lane's family on-fill, which can vanish on a light wallpaper primary.
+- Gated by the Material theme itself (an opt-in Appearance choice), so no extra
+  experiment toggle: picking Material is picking this.
+
 ### v412 — the gauge, the voice wave, the mood pills, the System glyph
 
 - **THE READING GAUGE ANIMATES.** `ReadingGauge` resolves its fill through
