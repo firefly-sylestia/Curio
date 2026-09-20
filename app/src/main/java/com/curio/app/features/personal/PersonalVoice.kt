@@ -703,7 +703,17 @@ internal fun PersonalVoiceBar(
             .then(
                 if (bubble) {
                     Modifier
-                        .clip(RoundedCornerShape(18.dp))
+                        // v423 — AND IT IS A MESSAGE, NOT A CARD: the bubble's
+                        // own corner is cut at the foot, the way a sent message
+                        // reads as coming from a mouth and not from a box.
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 18.dp,
+                                topEnd = 18.dp,
+                                bottomEnd = 18.dp,
+                                bottomStart = 5.dp
+                            )
+                        )
                         .background(
                             curioTintOn(
                                 MaterialTheme.colorScheme.surfaceContainerLow,
@@ -813,9 +823,9 @@ internal fun PersonalVoiceBar(
             // of the writing and not a card in it.
             Canvas(Modifier.fillMaxSize()) {
                 if (samples.isEmpty()) return@Canvas
-                // The two looks that are NOT the drawn pulse draw themselves (see
-                // [drawVoiceWave]); HAND and BUBBLE are the pulse below.
-                if (style == PersonalVoiceStyle.BARS || style == PersonalVoiceStyle.MINIMAL) {
+                // v423 — EVERY LOOK BUT THE HAND-DRAWN ONE IS A SHAPE (see
+                // [drawVoiceWave]); HAND is the pulse.
+                if (style != PersonalVoiceStyle.HAND) {
                     drawVoiceWave(samples, progress, ink, accent, style)
                     return@Canvas
                 }
@@ -968,8 +978,10 @@ internal fun PersonalVoiceBar(
 internal enum class PersonalVoiceStyle(val key: String, val label: String, val hint: String) {
     HAND("hand", "Hand-drawn", "A drawn pulse in ink, with a drawn play mark"),
     BARS("bars", "Bars", "Rounded columns on a centre line, with a filled disc"),
-    BUBBLE("bubble", "Bubble", "A soft bubble holding the wave — a voice message"),
-    MINIMAL("minimal", "Minimal", "One thin line and a dot, with an outlined mark");
+    BUBBLE("bubble", "Bubble", "A voice message — mirrored bars in a tinted bubble"),
+    MINIMAL("minimal", "Minimal", "One thin line and a dot, with an outlined mark"),
+    RIBBON("ribbon", "Ribbon", "A smooth ribbon, mirrored under its own line"),
+    BEADS("beads", "Beads", "A dot per moment, each as big as the sound it stands for");
 
     companion object {
         /** The stored key, or [HAND] — the look every earlier note already had. */
@@ -1119,6 +1131,14 @@ private fun DrawScope.drawVoicePulse(
  *
  * Both measure from the same idea the pulse does — a band, inset so no peak can
  * reach the canvas edge — for the same reason.
+ *
+ * v423 — AND THE LOOKS THAT ARE SHAPES. [RIBBON] draws the envelope and its own
+ * mirror as ONE closed shape, [BEADS] sets a dot per moment on the centre line
+ * (each as big as the sound it stands for), and [BUBBLE] draws the mirrored bars
+ * a voice message is drawn with — the three looks the member asked for when they
+ * said the bubble was not good enough and that the note wanted more of them. The
+ * heard run is the SAME drawing in the accent, cut at the play head, in every one
+ * of them: a bar that fills up is not part of a drawing, and neither is a knob.
  */
 private fun DrawScope.drawVoiceWave(
     samples: FloatArray,
@@ -1173,6 +1193,64 @@ private fun DrawScope.drawVoiceWave(
                     color = accent,
                     radius = r,
                     center = Offset(played.coerceIn(r, size.width - r), bandMid)
+                )
+            }
+        }
+        PersonalVoiceStyle.RIBBON -> {
+            val steps = bucketLevels(samples, 34)
+            val span = (steps.size - 1).coerceAtLeast(1).toFloat()
+            val tops = FloatArray(steps.size)
+            for (index in steps.indices) {
+                val reach = (steps[index].coerceIn(0f, 1f) * 0.86f + 0.14f) * bandHalf
+                tops[index] = bandMid - reach
+            }
+            val path = Path()
+            path.moveTo(0f, tops[0])
+            for (index in 1 until steps.size) {
+                val x = size.width * index / span
+                val previous = size.width * (index - 1) / span
+                val midX = (previous + x) / 2f
+                path.cubicTo(midX, tops[index - 1], midX, tops[index], x, tops[index])
+            }
+            for (index in steps.size - 1 downTo 0) {
+                path.lineTo(size.width * index / span, bandMid + (bandMid - tops[index]))
+            }
+            path.close()
+            drawPath(path, ink.copy(alpha = 0.26f))
+            if (progress > 0f) {
+                clipRect(right = played) { drawPath(path, accent.copy(alpha = 0.90f)) }
+            }
+        }
+        PersonalVoiceStyle.BEADS -> {
+            val steps = bucketLevels(samples, 34)
+            val span = (steps.size - 1).coerceAtLeast(1).toFloat()
+            val maxRadius = (bandHalf * 0.92f).coerceAtLeast(1.4f)
+            val minRadius = (maxRadius * 0.22f).coerceAtLeast(0.9f)
+            steps.forEachIndexed { index, level ->
+                val radius = minRadius + (maxRadius - minRadius) * level.coerceIn(0f, 1f)
+                val x = radius + (size.width - radius * 2f) * index / span
+                drawCircle(
+                    color = if (progress > 0f && x <= played) accent else ink.copy(alpha = 0.40f),
+                    radius = radius,
+                    center = Offset(x, bandMid)
+                )
+            }
+        }
+        PersonalVoiceStyle.BUBBLE -> {
+            val columns = 34
+            val steps = bucketLevels(samples, columns)
+            val slot = size.width / columns
+            val barW = (slot * 0.52f).coerceAtLeast(1.6f)
+            steps.forEachIndexed { index, level ->
+                val reach = (level.coerceIn(0f, 1f) * 0.86f + 0.14f) * bandHalf
+                val h = (reach * 2f).coerceAtLeast(3f)
+                val left = index * slot + (slot - barW) / 2f
+                drawRoundRect(
+                    color = if (progress > 0f && left + barW / 2f <= played) accent
+                    else ink.copy(alpha = 0.40f),
+                    topLeft = Offset(left, bandMid - h / 2f),
+                    size = Size(barW, h),
+                    cornerRadius = CornerRadius(barW / 2f)
                 )
             }
         }
@@ -1421,10 +1499,10 @@ private fun VoiceStylePreview(
             }
             Canvas(Modifier.weight(1f).height(18.dp)) {
                 if (samples.isEmpty()) return@Canvas
-                if (style == PersonalVoiceStyle.BARS || style == PersonalVoiceStyle.MINIMAL) {
-                    drawVoiceWave(samples, 0.42f, ink, accent, style)
-                } else {
+                if (style == PersonalVoiceStyle.HAND) {
                     drawVoicePulse(samples, 0.42f, ink, accent)
+                } else {
+                    drawVoiceWave(samples, 0.42f, ink, accent, style)
                 }
             }
         }
