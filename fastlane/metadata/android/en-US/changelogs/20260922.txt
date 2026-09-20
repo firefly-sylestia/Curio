@@ -58,6 +58,9 @@ ADD:
 - Your Curiosity: the constellation drawing is replaced by that same lane map — real tiles, a meter per lane, and a Cabinet door onto the lane you tap that opens the Cabinet filtered to it.
 
 ADD:
+- Home: the drawer's curiosity map is a real chart now — the lanes sit on orbit rings and radial spokes with a hub, each ring woven closed through its own stars, and the map fills more of the drawer.
+
+ADD:
 - Shuffle: on the Material theme the deck is your own device colour now — a single lane keeps its category colour as the bottom of the card (the device tone runs down the top ~70% and blends into it), a mixed deck is the device colour throughout in the deck's own per-mix gradient styles, and the peek cards, spin button and confetti follow the same tone.
 
 FIX:

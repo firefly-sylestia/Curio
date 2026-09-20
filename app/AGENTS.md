@@ -9104,6 +9104,34 @@ only ever catches taps that mean "not in any of these".
   a Pantone theme paints the torn heroes, the option cards and their icons in
   its own three colours.
 
+### v414 — the drawer chart: a lattice, and more of the drawer
+
+- **IT COVERS MORE OF THE DRAWER.** `DrawerStarMapHeight` 188dp → **254dp** — at
+  the old height the chart read as a strip wedged between the brain stats and
+  the lane readout (member: "it doesnt cover the drawer a little more").
+- **THE STARS SIT ON A RING-AND-SPOKE LATTICE, NOT A SCATTER.** `starScatter`
+  (phyllotaxis) is GONE; `starLattice(count)` places lanes on 1–3 orbits
+  (chosen by lane count) at radii evenly spaced 0.30–0.92 of the panel's
+  half-height, each orbit's capacity proportional to its radius (so neighbours
+  sit about the same distance apart everywhere), spread evenly by angle, with
+  odd orbits set half a step out of phase. Still deterministic, and knowledge
+  still never MOVES a star — it changes size and brightness only, so the map
+  stays the landmark the member learns (member: "still not beautiful and
+  geometric enough").
+- **THE CHART IS DRAWN UNDER THE STARS:** one faint circle per orbit actually
+  used, `STAR_CHART_SPOKES` (12) radial spokes, and a small hub — all opaque
+  `lerp(panel, muted, 0.16f)` hairlines.
+- **THE HAIRLINES ARE RING POLYGONS.** `starLinks` (two nearest neighbours) is
+  GONE; `starRingLinks` closes each orbit through its own stars — a chord
+  between neighbouring pairs and the last back to the first — so the lattice
+  reads as geometry rather than a nearest-neighbour mesh.
+- **SLOTS, NOT POINTS.** `StarSlot(angle, radius)` replaced the old unit-space
+  `Offset` scatter, and `starPoint(slot, hub, unitPx)` is the ONE placement
+  function the canvas and the hit test both call (in PIXEL space now, with the
+  radius multiplied by the SHORTER side) — so the orbits stay round in a wide
+  drawer AND a tap can never miss the star it looks like it hit. `sqrt` import
+  dropped with the phyllotaxis.
+
 ### v413 — the Material deck wears the device colour
 
 - **THE MATERIAL SHUFFLE DECK IS THE MEMBER'S WALLPAPER TONE.** `MaterialTheme`

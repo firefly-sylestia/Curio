@@ -8,78 +8,64 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "now for the material theme well the shuffle page cards they have differnt colors right i
-> want them to keep the color how about you use the mterial theme device color as the fill
-> which goes from the top side to the buttom side but not full to the butom 70% then 30% is
-> the category accent, wouldnt that be cool, we already have grdint 2 colos for one
-> category how about we use that style and for multiplre mix just use the full all material
-> device color mixes with differnt gradient styles"
+> "now the drawer map is good, fine ig but still not beautiful and geometric enough and it
+> doesnt cover the drawer a little more. also push the previous"
 
-Answered on ask_user: the **whole deck family** (front ticket, both peek slabs, the spin
-button and the confetti accent); the 70/30 join is **blended**, not a hard band; a MIXED
-deck is the **full device colour with the existing per-deck gradient styles**.
+Two parts: push the held commits (done — `8032b37b..56d318bb`), then redesign the Home
+drawer's curiosity map.
 
 ## 2. What the code actually looked like (findings)
 
-- The deck's colour pipeline is two functions on `CurioMixedDeck` in `CurioColors.kt`:
-  `mixedDeckAccent(accents, pastel, dark, materialPrimary)` — the single accent the peeks,
-  spin button and confetti derive from — and `mixedDeckGradient(accents, materialPrimary)`
-  — the hero ticket's stop list.
-- Under the Material theme both took a `materialPrimary` (resolved at the Spin call site as
-  `settingsRoseAccent()`, i.e. the scheme's `primaryContainer`) and fell back to a lane's
-  muted **family fill** — so a single-lane deck was per-category family colours, and a mixed
-  deck was one family tone rendered as `CurioGradients.cardGradient(raw)`.
-- The hero ticket's brush (`HeroTicketCard`) had exactly two paths: `isMixed` →
-  `CurioMixedDeck.mixedDeckHeroBrush` (diagonal / reversed-diagonal / radial, keyed off the
-  deck's category set), else the enhanced diagonal crown→base sweep.
-- Peek slabs derive their fills by deepening the deck's gradient stops (HSL lightness drop
-  + saturation pull), so they follow whatever `gradient` holds — no separate plumbing.
-- Card inks came from `cat.onAccent()` (the family on-fill) — which is wrong once the fill
-  is the device colour.
+- The drawer's map is `DrawerLaneStarMap` in `HomeScreen.kt`: a 188dp panel
+  (`DrawerStarMapHeight`) on `surfaceContainerHigh`, filled by a `Canvas`.
+- Star positions came from `starScatter(count)` — a **phyllotaxis** (sunflower) scatter in
+  UNIT space (0..1), multiplied by `size.width` / `size.height` separately in the canvas, so
+  the layout stretched into an ellipse on a wide panel.
+- Hairlines came from `starLinks(stars)` — every star joined to its **two nearest**
+  neighbours (O(n²)), i.e. a mesh, not a structure.
+- The tap test worked in the same unit space with a `min(width, height)`-derived reach — a
+  different mapping from the painter's, which is why it could drift.
+- Nothing geometric was drawn: the panel was an empty tinted rectangle with a cloud of dots.
 
 ## 3. What was done
 
-All in `ui/theme/CurioColors.kt` and `features/spin/SpinScreen.kt`:
+All in `app/src/main/java/com/curio/app/features/home/HomeScreen.kt`:
 
-- **`CurioGradients.materialDeckBlend(device, accent)`** — 10 evenly-spaced stops: the first
-  seven hold the device colour (positions 0.00–0.667 = the top ~70% of the card), the last
-  three ramp through OKLab into the lane's accent. A plain `Brush.verticalGradient` then
-  renders the 70/30 split with a blended seam, with **no stop-position plumbing** — the hold
-  is just the same colour repeated across evenly spaced stops.
-- **`mixedDeckAccent` / `mixedDeckGradient` gained a `materialDevice: Color?` parameter.**
-  `mixedDeckAccent` returns it (pastel-softened in pastel mode) as the deck accent, so the
-  peeks, spin button and confetti follow. `mixedDeckGradient` uses `materialPrimary != null`
-  as the mixed signal: mixed → `[device, device deepened at the foot]` for the existing
-  per-deck brushes; single lane → `materialDeckBlend(device, laneAccent)`.
-- **`SpinScreen`** resolves `materialDeckFill = MaterialTheme.colorScheme.primary` once and
-  passes it to both; `HeroTicketCard` gains a `materialThemeOn` brush branch
-  (`Brush.verticalGradient(gradient)`) ahead of the diagonal sweep — the mixed branch above
-  it still takes the style-varied brush; and both the hero card's and the peek slab's ink
-  take a `materialThemeOn` branch through `curioFillInk(...)` so the words read on the
-  device fill.
+- **`DrawerStarMapHeight` 188dp → 254dp**, so the chart covers more of the drawer.
+- **`StarSlot(angle, radius)` replaced the unit-space `Offset` scatter**, with
+  `starPoint(slot, hub, unitPx)` as the ONE placement function — and it multiplies the
+  radius by the SHORTER side, so the orbits are true circles in a wide drawer.
+- **`starLattice(count)` replaced `starScatter`:** 1–3 orbits by lane count at radii evenly
+  spaced 0.30–0.92 of the half-height, capacity proportional to radius (even spacing on
+  every orbit), stars spread evenly by angle, odd orbits half a step out of phase. Still
+  deterministic, and knowledge still never moves a star.
+- **`starRingLinks` replaced `starLinks`:** each orbit is a CLOSED POLYGON through its own
+  stars (chord between neighbours, last back to the first) — geometry instead of a mesh.
+- **The chart itself is now drawn** under the stars: one faint circle per orbit actually
+  used, 12 radial spokes, and a small hub — all opaque `lerp(panel, muted, 0.16f)` hairlines.
+- **The hit test moved to pixel space** through the same `starPoint`, with a 30dp halo, so a
+  tap can no longer miss the star it looks like it hit.
+- `sqrt` import dropped with the phyllotaxis; the stale `[starLinks]` KDoc reference fixed.
 
-Docs + notes: a new `### v413 — the Material deck wears the device colour` section in
-`app/AGENTS.md` and one ADD bullet in the 20260922 changelog.
+Docs + notes: a new `### v414 — the drawer chart: a lattice, and more of the drawer` section
+in `app/AGENTS.md` and one ADD bullet in the 20260922 changelog.
 
 ## 4. Decisions
 
-- The device colour is the scheme **primary** (the wallpaper-derived tone) — that is what
-  "device color" means in Material, and it is what the deck now wears.
-- The 70/30 hold is expressed by repeating a colour across evenly spaced stops rather than
-  by threading `Pair<Float, Color>` stop positions through `List<Color>` signatures used by
-  three call sites and the peek deepen — same visual result, no API churn.
-- The mixed-deck **different gradient styles** were already there (`mixedDeckHeroBrush`);
-  the change is only what it paints with, so no new style system was invented.
-- **No new experiment toggle.** The Material theme is itself an opt-in Appearance choice, so
-  choosing Material is choosing this fill — per AGENTS.md's rule that a settings gate is
-  about how an experiment ships, and this one ships inside an existing user-facing toggle.
-- Pastel mode + Material keeps the device colour (softened) without the accent foot — the
-  pastel single-lane branch in `SpinScreen` builds its own two stops before
-  `mixedDeckGradient` is consulted. Accepted: the requested recipe is the non-pastel look.
+- **The user's "geometric" was read as structure, not as a different metaphor:** the stars
+  stay stars and the lanes stay a constellation, but they now sit on countable orbits and
+  readable spokes with a drawn chart under them, instead of an unstructured cloud.
+- **"Cover the drawer a little more" was read as height** (188 → 254dp). The map already
+  fills the drawer's width; if they meant edge-to-edge bleed, that is a separate change and
+  would need the drawer's horizontal padding to give way.
+- Radius is scaled by the SHORTER side so orbits stay round — the old unit-space mapping
+  could not express that, which is why the slot type was introduced rather than patching the
+  scatter.
+- No ask_user round here: the direction was short but the two clear asks (bigger, more
+  geometric) had a defensible reading, and the change is internal to one composable.
 
 ## 5. Status
 
-- Implemented; brace/paren balance verified on both files (deltas unchanged: 0/0). The
-  previous batch is committed as `3770d967`.
-- **Nothing has been pushed** — the user asked to hold the push.
+- Implemented; brace/paren balance verified (0/0 before and after).
+- The previously held commits are **pushed** (`8032b37b..56d318bb`).
 - No pending follow-up.

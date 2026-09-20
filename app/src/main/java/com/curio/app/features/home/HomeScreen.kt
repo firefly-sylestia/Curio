@@ -202,7 +202,6 @@ import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.onAccent
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.math.sqrt
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 import kotlinx.coroutines.launch
@@ -3013,8 +3012,15 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
     }
 }
 
-/** How tall the drawer's constellation stands. */
-private val DrawerStarMapHeight = 188.dp
+/**
+ * How tall the drawer's constellation stands.
+ *
+ * v414 — it COVERS MORE OF THE DRAWER: 188dp made the chart read as a strip
+ * wedged between the brain stats and the lane readout, so the sky grew to 254dp
+ * and the orbits now spread to the panel's own edges (member: "it doesnt cover
+ * the drawer a little more").
+ */
+private val DrawerStarMapHeight = 254.dp
 
 /**
  * v411 — THE DRAWER'S CURIOSITY MAP: the lanes as a sky.
@@ -3025,15 +3031,19 @@ private val DrawerStarMapHeight = 188.dp
  * no longer lists lanes as tiles; it DRAWS them.
  *
  * Every lane is one star:
- *  * **Position** — fixed for a given lane count ([starScatter]: phyllotaxis,
- *    the sunflower scatter, deterministic, evenly spread and identical at
- *    every knowledge level, so the map is a landmark the member learns).
+ *  * **Position** — fixed for a given lane count ([starLattice]: a RING-AND-
+ *    SPOKE lattice, deterministic and identical at every knowledge level, so
+ *    the map is a landmark the member learns). v414 replaced the old
+ *    phyllotaxis scatter with this, and the chart it sits on (orbit circles +
+ *    radial spokes + hub) is drawn under it — the member: "still not beautiful
+ *    and geometric enough".
  *  * **Size + brightness** — the lane's knowledge against the strongest lane.
  *    An explored lane is a big lit star; an untouched one is a dim hollow
  *    point, so the map shows the member what is left without being a meter.
  *  * **Colour** — the lane's own accent, glowing through two halo steps.
- *  * **Hairlines** — each star joined to its two nearest neighbours, which is
- *    what turns a scatter into constellations ([starLinks]).
+ *  * **Hairlines** — each orbit drawn as its own closed polygon through its own
+ *    stars, which is what turns the lattice into constellations
+ *    ([starRingLinks]).
  *
  * It is TAPPABLE: the star nearest a touch within a 30dp halo is picked (the
  * tap target is the finger, not the dot) and the readout under the map names
@@ -3056,8 +3066,11 @@ private fun DrawerLaneStarMap(
     if (lanes.isEmpty()) return
     val panel = MaterialTheme.colorScheme.surfaceContainerHigh
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val stars = remember(lanes.size) { starScatter(lanes.size) }
-    val links = remember(stars) { starLinks(stars) }
+    val slots = remember(lanes.size) { starLattice(lanes.size) }
+    val links = remember(slots) { starRingLinks(slots) }
+    // The orbits the chart draws — one circle per ring the lattice actually
+    // used, so the grid and the stars can never disagree.
+    val orbits = remember(slots) { slots.map { it.radius }.distinct().sorted() }
     val strongest = lanes.maxOf { it.knowledge }.coerceAtLeast(1)
     val lit = remember { Animatable(0f) }
     LaunchedEffect(lanes.size) {
@@ -3075,11 +3088,18 @@ private fun DrawerLaneStarMap(
             .pointerInput(lanes, selected, sizePx) {
                 detectTapGestures { tap ->
                     if (sizePx.width <= 0 || sizePx.height <= 0) return@detectTapGestures
-                    val unit = Offset(x = tap.x / sizePx.width, y = tap.y / sizePx.height)
-                    val reach = 30.dp.toPx() / minOf(sizePx.width, sizePx.height)
-                    val hit = stars.indices
-                        .filter { (stars[it] - unit).getDistance() <= reach }
-                        .minByOrNull { (stars[it] - unit).getDistance() }
+                    // The finger is the target: a 30dp halo around a star. The
+                    // slot is mapped through the SAME function the canvas
+                    // draws with (pixel space, not unit space), so a tap can
+                    // never land a few dp off the star it looks like it hit.
+                    val hub = Offset(sizePx.width / 2f, sizePx.height / 2f)
+                    val unitPx = minOf(sizePx.width, sizePx.height) * 0.5f
+                    val reach = 30.dp.toPx()
+                    val hit = slots.indices
+                        .map { i -> i to starPoint(slots[i], hub, unitPx) }
+                        .filter { (_, point) -> (point - tap).getDistance() <= reach }
+                        .minByOrNull { (_, point) -> (point - tap).getDistance() }
+                        ?.first
                     if (hit != null) {
                         onSelect(if (lanes[hit].id == selected) null else lanes[hit].id)
                     }
@@ -3087,14 +3107,40 @@ private fun DrawerLaneStarMap(
             }
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            fun at(index: Int) = Offset(
-                x = stars[index].x * size.width,
-                y = stars[index].y * size.height
-            )
-            // ── The hairlines, under the stars. ──
+            val hub = Offset(size.width / 2f, size.height / 2f)
+            val unitPx = minOf(size.width, size.height) * 0.5f
+            fun at(index: Int) = starPoint(slots[index], hub, unitPx)
+            // ── THE CHART ITSELF (v414) — the faint astrolabe grid the stars
+            //    sit on: one circle per orbit, a ring of radial spokes, and a
+            //    small hub. This is what makes the map read as a GEOMETRIC
+            //    instrument instead of a scatter (member: "still not beautiful
+            //    and geometric enough"). Every line is an OPAQUE mix of the
+            //    panel toward the muted ink — no alpha anywhere.
+            val grid = lerp(panel, muted, 0.16f)
+            val thin = 1.dp.toPx()
+            val outer = orbits.lastOrNull() ?: 0.92f
+            orbits.forEach { radius ->
+                drawCircle(grid, unitPx * radius, hub, style = Stroke(width = thin))
+            }
+            repeat(STAR_CHART_SPOKES) { i ->
+                val a = (i.toFloat() / STAR_CHART_SPOKES) * TWO_PI
+                drawLine(
+                    color = grid,
+                    start = hub,
+                    end = Offset(
+                        x = hub.x + cos(a) * unitPx * outer,
+                        y = hub.y + sin(a) * unitPx * outer
+                    ),
+                    strokeWidth = thin
+                )
+            }
+            drawCircle(grid, unitPx * 0.10f, hub, style = Stroke(width = thin))
+            // ── The hairlines: each orbit drawn as its own CLOSED POLYGON
+            //    through its own stars, so the lattice reads as woven rings
+            //    rather than a nearest-neighbour mesh of chords. ──
             links.forEach { link ->
                 drawLine(
-                    color = lerp(panel, muted, 0.20f),
+                    color = lerp(panel, muted, 0.30f),
                     start = at(link.first),
                     end = at(link.second),
                     strokeWidth = 1.dp.toPx()
@@ -3142,44 +3188,105 @@ private fun DrawerLaneStarMap(
     }
 }
 
+/** A full turn, in radians — the chart's own arithmetic reads in radians. */
+private const val TWO_PI = 6.2831855f
+
+/** How many radial spokes the chart's grid draws. */
+private const val STAR_CHART_SPOKES = 12
+
 /**
- * Star positions for [count] lanes in unit space (0..1): a phyllotaxis
- * (sunflower) scatter. The golden angle places each point as far from every
- * point already placed as it can, which is the one cheap layout that stays
- * evenly spread at any count, needs no random seed, and can never reshuffle —
- * the same lane is always the same star.
+ * v414 — ONE LANE'S PLACE ON THE CHART: a polar SLOT (angle + radius), not a
+ * point.
+ *
+ * Keeping the slot is what lets the canvas draw TRUE circles whatever aspect
+ * the panel ends up: the painter multiplies the radius by the SHORTER side, so
+ * the orbits stay round in a wide drawer instead of stretching into ellipses —
+ * the old unit-space scatter had exactly that problem, which is also why it
+ * could not be reused for a grid.
  */
-private fun starScatter(count: Int): List<Offset> {
+private data class StarSlot(val angle: Float, val radius: Float)
+
+/** Where [slot] sits, in pixels, around [hub]. Shared by the painter and the
+ *  hit test, so a tap can never miss the star it looks like it hit. */
+private fun starPoint(slot: StarSlot, hub: Offset, unitPx: Float): Offset = Offset(
+    x = hub.x + cos(slot.angle) * unitPx * slot.radius,
+    y = hub.y + sin(slot.angle) * unitPx * slot.radius
+)
+
+/**
+ * v414 — LANES ON A RING-AND-SPOKE LATTICE (this replaced a phyllotaxis
+ * scatter).
+ *
+ * The member: "still not beautiful and geometric enough". A phyllotaxis is
+ * evenly spread, but it is a CLOUD — no lane relates to any other and the eye
+ * finds no structure in it. A lattice gives the chart what geometry gives a
+ * real star map: orbits you can count and spokes you can read across.
+ *
+ * The rules that keep it honest:
+ *  * one to three orbits, chosen by lane count, at radii evenly spaced between
+ *    0.30 and 0.92 of the panel's half-height;
+ *  * an orbit's CAPACITY is proportional to its radius, so neighbouring stars
+ *    sit about the same distance apart on every orbit;
+ *  * stars spread EVENLY by angle around their orbit, and odd orbits are set
+ *    half a step out of phase — which is what makes the lattice read as a woven
+ *    chart rather than a stack of aligned spokes;
+ *  * deterministic, and knowledge never moves a star (it changes size and
+ *    brightness only), so the map stays the landmark the member learns.
+ */
+private fun starLattice(count: Int): List<StarSlot> {
     if (count <= 0) return emptyList()
-    val goldenAngle = 2.399963f   // radians
-    val inner = 0.09f
-    val outer = 0.42f
-    return List(count) { index ->
-        val t = (index + 0.5f) / count
-        val radius = (inner + (outer - inner) * sqrt(t)) * 0.94f
-        val angle = index * goldenAngle
-        Offset(
-            x = 0.5f + cos(angle) * radius,
-            y = 0.5f + sin(angle) * radius
-        )
+    val rings = when {
+        count <= 6 -> 1
+        count <= 16 -> 2
+        else -> 3
     }
+    val radii = List(rings) { i -> 0.30f + 0.62f * (i + 1) / rings }
+    val total = radii.sum()
+    val capacities = MutableList(rings) { i ->
+        maxOf(1, kotlin.math.round(count * (radii[i] / total)).toInt())
+    }
+    // Rounding drift lands on the OUTER orbit (the longest, so the extra star
+    // has the most room) rather than leaving the last orbit short.
+    capacities[rings - 1] = maxOf(1, capacities[rings - 1] + (count - capacities.sum()))
+    val slots = mutableListOf<StarSlot>()
+    var index = 0
+    for (ring in 0 until rings) {
+        val capacity = capacities[ring]
+        val phase = if (ring % 2 == 0) 0f else (TWO_PI / capacity) * 0.5f
+        for (k in 0 until capacity) {
+            if (index >= count) break
+            slots.add(
+                StarSlot(
+                    angle = phase + (TWO_PI * k) / capacity,
+                    radius = radii[ring]
+                )
+            )
+            index++
+        }
+    }
+    return slots
 }
 
 /**
- * The sky's hairlines: every star joined to its two nearest stars of a higher
- * index (the reverse pairs come from the other side), so the map reads as
- * constellations instead of a mesh. O(n²) over ~36 points, computed once per
- * lane count.
+ * The chart's hairlines: every orbit drawn as its own CLOSED POLYGON through its
+ * own stars — a chord between each neighbouring pair, and the last back to the
+ * first — which is what turns the lattice into geometry instead of a mesh of
+ * nearest-neighbour spaghetti. Computed once per lane count.
  */
-private fun starLinks(stars: List<Offset>): List<Pair<Int, Int>> {
+private fun starRingLinks(slots: List<StarSlot>): List<Pair<Int, Int>> {
     val links = mutableListOf<Pair<Int, Int>>()
-    for (i in stars.indices) {
-        stars.indices
-            .filter { it > i }
-            .sortedBy { (stars[it] - stars[i]).getDistance() }
-            .take(2)
-            .forEach { links.add(i to it) }
-    }
+    slots.mapIndexed { index, slot -> index to slot }
+        .groupBy { (_, slot) -> (slot.radius * 1000f).toInt() }
+        .values
+        .forEach { orbit ->
+            when {
+                orbit.size < 2 -> Unit
+                orbit.size == 2 -> links.add(orbit[0].first to orbit[1].first)
+                else -> for (i in orbit.indices) {
+                    links.add(orbit[i].first to orbit[(i + 1) % orbit.size].first)
+                }
+            }
+        }
     return links
 }
 
