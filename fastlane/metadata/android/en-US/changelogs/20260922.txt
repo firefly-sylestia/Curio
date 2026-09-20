@@ -452,3 +452,10 @@ FIX:
 - Writing: a voice note's graph is a drawn pulse now — one inked line that rises and falls with the voice and wobbles as it goes, instead of a bar chart — and its play control is a dark filled disc with the glyph knocked out of it.
 - Releases: a CI run reads at a glance — a build summary on the run page (version, catalogs bundled, signing, APK size and SHA-256, lint totals, and which optional providers the build carried), every Kotlin warning and error re-emitted as a clickable annotation in the Checks tab instead of a line 12,000 lines into a log, and the same report as a check beside the build and as a comment on the pull request.
 - Reading: a PDF's pages are separate sheets in the continuous reader — they were drawn flush, edge to edge, so a column of scans read as one continuous strip; each page now sits on the reader's own paper with a hairline edge and air between it and the next, which is also what makes a magnified page read as a page held closer rather than the column stretching.
+
+ADD:
+- Your Curiosity: lane stats is a ranked bar chart now — knowledge per lane, strongest first, with the rest counted in your Cabinet; tap a bar for that lane's figures and its Cabinet door.
+
+FIX:
+- Books: the +/- on a book's reading progress takes every tap again — each step re-proposed the value the card was showing when it first appeared, so the count stuck at one until the card was rebuilt; it now follows your finger, a hold keeps running, and the bar moves with it.
+- Appearance: the Paper option is live under Adaptive Hero — a lane only tints the page wash and the banner, so the cream/white flip still has its effect there instead of being greyed out.

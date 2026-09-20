@@ -364,17 +364,24 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // untouched: its page is black and its plates step up from it.
         // v412 — GRAYED OUT WHERE IT HAS NO EFFECT: the paper flip only ever
         // describes Curio's own cream/white light pair (see curioColorScheme),
-        // so on dark mode — or under Material, Adaptive Hero or a Pantone
-        // theme, which paint their own pages — the row is disabled with a
-        // line saying why, instead of a control that silently does nothing.
-        // The stored choice is kept, so returning to a light Curio/Azure
-        // theme restores exactly what was picked.
+        // so on dark mode — or under Material or a Pantone theme, which paint
+        // their own page pair — the row is disabled with a line saying why,
+        // instead of a control that silently does nothing. The stored choice
+        // is kept, so returning to a light paper theme restores exactly what
+        // was picked.
+        // v413 — ADAPTIVE HERO KEEPS ITS PAPER: the greyed-out set used to
+        // include it, but a lane only tints the PAGE WASH and the torn hero —
+        // the card ladder under them is still the scheme's own cream/white
+        // pair, so the flip has a real effect here and disabling the row was
+        // hiding a working control (member: "for color theme of adaptive hero
+        // dont gray out the paper option").
         SettingsRowPulse(highlightKey == "appearance-paper") {
             val dark = isCurioDarkTheme()
             val theme = AppPreferences.colorThemeState
             val paperApplies = !dark && (
                 theme == AppPreferences.COLOR_THEME_CURIO ||
-                    theme == AppPreferences.COLOR_THEME_AZURE
+                    theme == AppPreferences.COLOR_THEME_AZURE ||
+                    theme == AppPreferences.COLOR_THEME_LANE
                 )
             CompactSegmentedRow(
                 CurioIcons.Contrast,
@@ -385,7 +392,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 disabledHint = when {
                     paperApplies -> null
                     dark -> "The paper follows the light Curio and Azure themes — dark mode wears its own page."
-                    else -> "The paper follows the Curio rose and Azure hero themes."
+                    else -> "The paper follows the Curio rose, Azure and Adaptive Hero themes."
                 }
             ) { index ->
                 if (paperApplies) AppPreferences.setPaperCreamCardsEnabled(context, index == 0)

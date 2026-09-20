@@ -1,6 +1,10 @@
 package com.curio.app.features.stats
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -62,7 +67,6 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.components.CurioBadgeMedal
 import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioLaneDetailStrip
-import com.curio.app.ui.components.CurioLaneGrid
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.LaneGridItem
 import com.curio.app.ui.components.laneGridItems
@@ -87,14 +91,14 @@ import com.curio.app.ui.theme.isCurioDarkTheme
  *                  cards about the same number).
  *   - YOUR BRAIN — the six cognitive dimensions as meters, plus the single
  *                  tip that applies to the weakest one (it used to print six).
- *   - LANE MAP   — the interactive lane grid ([CurioLaneGrid]): the same real
- *                  UI the navigation drawer uses, so the drawer and this page
- *                  can never show two different maps. "Your lanes" — the list
- *                  that repeated the constellation — is gone.
+ *   - LANE STATS — the ranked bar list ([LaneStatsGraph]): knowledge per lane,
+ *                  strongest first, cut to the top [LANE_BARS_SHOWN] so the
+ *                  card's height never depends on how many lanes you've met.
  *   - LIFETIME   — the counters, with their captions trimmed to the number
  *                  itself.
  *
- *  The painted constellation is gone from both surfaces (see CurioLaneGrid).
+ *  The drawer keeps the painted constellation — the one place a map is
+ *  actually a map. Here the same lanes are a chart.
  */
 @Composable
 fun StatsScreen(navController: NavController) {
@@ -479,9 +483,17 @@ private fun BrainCard(dimensions: List<BrainDimension>) {
 }
 
 /**
- * v409 — THE LANE MAP: the interactive lane grid, and the selected lane's own
- * line under it. This replaces BOTH the painted constellation and the "Your
- * lanes" list that sat under it repeating the same thing in a second shape.
+ * v413 — LANE STATS: the ranked bar chart of where your knowledge actually is.
+ *
+ * The interactive lane grid it replaces was a *navigation* surface wearing a
+ * statistics label: 24 tiles, a reveal strip and a door on every one of them,
+ * which is more furniture than this card can carry and still be read at a
+ * glance. A statistics page wants the shape of the data, so this is a plain
+ * ranked bar list — knowledge per lane, longest bar first, one line each.
+ *
+ * Nothing became unreachable: a row is still a tap (it selects), and the one
+ * lane you land on gets the readout strip and the Cabinet door underneath it,
+ * so the card names a lane once instead of 24 times.
  */
 @Composable
 private fun LaneMapCard(
@@ -498,7 +510,7 @@ private fun LaneMapCard(
     StatsCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Lane map",
+                "Lane stats",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                 color = ink,
                 modifier = Modifier.weight(1f)
@@ -512,27 +524,135 @@ private fun LaneMapCard(
             color = muted
         )
         Spacer(Modifier.height(12.dp))
-        CurioLaneGrid(
-            lanes = lanes,
-            selected = selected,
-            onSelect = onSelect,
-            columns = 4,
-            tileHeight = 78.dp,
-            detail = { item ->
-                CurioLaneDetailStrip(
-                    item = item,
-                    action = {
-                        StatsDoorChip(
-                            label = "Cabinet",
-                            accent = item.accent,
-                            onClick = { onOpenLane(item.id) }
-                        )
-                    }
-                )
-            }
-        )
+        LaneStatsGraph(lanes = lanes, selected = selected, onSelect = onSelect)
+        // The readout and the Cabinet door belong to the ONE lane you tapped,
+        // not to every row — that is the whole difference from the grid.
+        selectedLane(lanes, selected)?.let { item ->
+            Spacer(Modifier.height(12.dp))
+            CurioLaneDetailStrip(
+                item = item,
+                action = {
+                    StatsDoorChip(
+                        label = "Cabinet",
+                        accent = item.accent,
+                        onClick = { onOpenLane(item.id) }
+                    )
+                }
+            )
+        }
     }
 }
+
+/** How many lanes the compact graph prints before the rest stay in the Cabinet. */
+private const val LANE_BARS_SHOWN = 7
+
+/**
+ * The ranked horizontal bar list: name, a bar scaled against the strongest
+ * lane, and the count. One row per lane, strongest first — cutting the tail at
+ * [LANE_BARS_SHOWN] so the card keeps a stable height no matter how many lanes
+ * a reader has touched (a 36-row bar chart is a list, not a chart).
+ */
+@Composable
+private fun LaneStatsGraph(
+    lanes: List<LaneGridItem>,
+    selected: CategoryId?,
+    onSelect: (CategoryId?) -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val ranked = remember(lanes) { lanes.sortedByDescending { it.knowledge } }
+    val shown = ranked.take(LANE_BARS_SHOWN)
+    // Bars are relative to the strongest lane, never to 100: the chart reads as
+    // "where is it concentrated" the moment there is data at all.
+    val strongest = shown.firstOrNull()?.knowledge?.coerceAtLeast(1) ?: 1
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        shown.forEach { item ->
+            val on = item.id == selected
+            val lane = if (item.knowledge > 0) {
+                item.knowledge.toFloat() / strongest
+            } else {
+                0f
+            }
+            val grown by animateFloatAsState(
+                targetValue = lane,
+                animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing),
+                label = "laneBar"
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (on) {
+                            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, item.accent, 0.16f)
+                        } else {
+                            Color.Transparent
+                        }
+                    )
+                    .clickable { onSelect(if (on) null else item.id) }
+                    .padding(horizontal = 8.dp, vertical = 7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                CurioIcon(name = item.icon, contentDescription = null, tint = item.accent, size = 17.dp)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            item.name,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = if (on) FontWeight.Bold else FontWeight.Medium
+                            ),
+                            color = ink,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            if (item.knowledge > 0) "${item.knowledge}" else "—",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = if (item.explored) item.accent else muted
+                        )
+                    }
+                    // One track, one fill — the only chart furniture on the card.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(lerp(MaterialTheme.colorScheme.surfaceContainerHigh, item.accent, 0.12f))
+                    ) {
+                        if (grown > 0f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(grown.coerceIn(0f, 1f))
+                                    .height(6.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(item.accent)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        // The tail, counted rather than shown: the Cabinet holds them all.
+        val rest = ranked.size - shown.size
+        if (rest > 0) {
+            Text(
+                "+$rest more lanes in your Cabinet",
+                style = MaterialTheme.typography.labelSmall,
+                color = muted,
+                modifier = Modifier.padding(start = 8.dp, top = 6.dp, bottom = 2.dp)
+            )
+        }
+    }
+}
+
+/** The lane behind an id, or null when nothing is picked. */
+private fun selectedLane(lanes: List<LaneGridItem>, selected: CategoryId?): LaneGridItem? =
+    selected?.let { id -> lanes.firstOrNull { it.id == id } }
 
 /** The small "Quests ›" / "Cabinet ›" pill: one destination, one door. */
 @Composable

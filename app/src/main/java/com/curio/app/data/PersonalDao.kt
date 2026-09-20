@@ -164,6 +164,17 @@ interface PersonalDao {
     @Query("UPDATE personal_books SET currentPage = :page, updatedAtMillis = :now WHERE id = :id")
     suspend fun setPage(id: String, page: Int, now: Long)
 
+    /**
+     * v413 — the book's own LENGTH (how many chapters it has). Column-scoped
+     * for the same reason [setPage] is: the reading card's book-length stepper
+     * REPEATS while it is held, and the whole-row `upsertBook` it used to run
+     * rewrote every other column from the composition's snapshot of the book on
+     * each tick — an out-of-order pair could then land the old length over the
+     * new one, and any other edit made in the same window was reverted.
+     */
+    @Query("UPDATE personal_books SET totalChapters = :total, updatedAtMillis = :now WHERE id = :id")
+    suspend fun setTotalChapters(id: String, total: Int, now: Long)
+
     // `now` is a SEPARATE parameter on purpose: when the book is being marked
     // un-finished, `at` is NULL, and `updatedAtMillis = NULL` on a NOT NULL
     // column makes SQLite reject the whole update — which is why the Mark
@@ -424,6 +435,15 @@ class PersonalRepository(private val dao: PersonalDao) {
     /** v409 — the book row's own page mark (a hand move on the book page). */
     suspend fun setPage(bookId: String, page: Int) =
         dao.setPage(bookId, page.coerceAtLeast(0), System.currentTimeMillis())
+
+    /**
+     * v413 — the book row's own LENGTH (a hand move on the reading card's book
+     * length rail). A column-scoped write like [setPage] and [setProgress]: the
+     * stepper repeats while held, so the row's other columns must not travel
+     * with each tick.
+     */
+    suspend fun setTotalChapters(bookId: String, total: Int) =
+        dao.setTotalChapters(bookId, total.coerceAtLeast(0), System.currentTimeMillis())
 
     /**
      * v409 — FINISHING CLOSES THE CHAPTERS, UN-FINISHING PUTS THEM BACK.

@@ -59,6 +59,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -705,13 +706,20 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                                 }
                             }
                         },
+                        // v413 — THE LENGTH GOES THROUGH ITS OWN COLUMN NOW.
+                        // It used to be a whole-row `saveBook(current.copy(…))`
+                        // built from this composition's snapshot of the book,
+                        // which is fine for one deliberate tap and wrong for a
+                        // hold: the rail now repeats while it is held, so every
+                        // tick rewrote every column from a snapshot that was
+                        // already behind — and two ticks landing out of order
+                        // could put the old length back.
                         onTotal = { chapters ->
                             scope.launch {
                                 withContext(Dispatchers.IO) {
                                     runCatching {
-                                        PersonalRepositoryHolder.repo.saveBook(
-                                            current.copy(totalChapters = chapters)
-                                        )
+                                        PersonalRepositoryHolder.repo
+                                            .setTotalChapters(bookId, chapters)
                                     }
                                 }
                             }
@@ -1090,14 +1098,61 @@ private fun ProgressCard(
 ) {
         val ink = MaterialTheme.colorScheme.onSurface
         val accent = personalAccent()
+        // ── v413 — THE STEPPER'S OWN COUNT, UNTIL THE BOOK CATCHES UP ───────
+        // The tiles printed the PERSISTED value and nothing else, so a step
+        // only appeared after a database write AND a flow round trip — a hold
+        // that ticked twenty times still displayed one step, which reads as a
+        // dead button (member: "the tap and hold works i hear the haptics but
+        // the count only goes 1 and no more"). These three overlays are the
+        // number the FINGER has reached: a step moves its overlay the instant
+        // it is pressed, the write follows behind it, and the moment the
+        // book's own value changes the overlay steps aside for it. The card is
+        // therefore either showing the truth or the truth in flight, never a
+        // stale read.
+        var chapterMove by remember { mutableStateOf<Int?>(null) }
+        var pageMove by remember { mutableStateOf<Int?>(null) }
+        var totalMove by remember { mutableStateOf<Int?>(null) }
+        LaunchedEffect(current) { chapterMove = null }
+        LaunchedEffect(lastPage) { pageMove = null }
+        LaunchedEffect(total) { totalMove = null }
+        val shownChapter = chapterMove ?: current
+        val shownPage = pageMove ?: lastPage
+        val shownTotal = totalMove ?: total
+        // A step reads the OVERLAY, never the persisted value — that is what
+        // lets a hold pile onto itself instead of re-proposing the same "+1".
+        val stepChapter: (Int) -> Unit = { delta ->
+            val next = (shownChapter + delta)
+                .coerceAtLeast(0)
+                .coerceAtMost(if (shownTotal > 0) shownTotal else 999)
+            if (next != shownChapter) {
+                chapterMove = next
+                onChapter(next)
+            }
+        }
+        val stepPage: (Int) -> Unit = { delta ->
+            val next = (shownPage + delta).coerceIn(0, pageCount)
+            if (next != shownPage) {
+                pageMove = next
+                onPage?.invoke(next)
+            }
+        }
+        val stepTotal: (Int) -> Unit = { delta ->
+            val next = (shownTotal + delta).coerceIn(0, 999)
+            if (next != shownTotal) {
+                totalMove = next
+                onTotal(next)
+            }
+        }
         // ── THE ONE MEASURE THE CARD IS ABOUT ──────────────────────────────
         // The honest fraction of the book: its own PAGES when there is a file
         // to count (a PDF), else the chapter run. Finished is full, always.
+        // Read off the overlays, so the gauge moves WITH the finger rather than
+        // a round trip behind it.
         val fraction = when {
             finished -> 1f
-            pageCount > 0 && lastPage > 0 ->
-                (lastPage.toFloat() / pageCount.toFloat()).coerceIn(0f, 1f)
-            total > 0 -> (current.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+            pageCount > 0 && shownPage > 0 ->
+                (shownPage.toFloat() / pageCount.toFloat()).coerceIn(0f, 1f)
+            shownTotal > 0 -> (shownChapter.toFloat() / shownTotal.toFloat()).coerceIn(0f, 1f)
             else -> 0f
         }
         Surface(
@@ -1220,31 +1275,33 @@ private fun ProgressCard(
                 ) {
                     ProgressTile(
                         label = "I'm on chapter",
-                        value = chapterNames.getOrNull(current - 1)
+                        value = chapterNames.getOrNull(shownChapter - 1)
                             ?.takeIf { it.isNotBlank() }
-                            ?: if (current > 0) "Chapter $current" else "Not started",
-                        detail = if (total > 0) "${current.coerceAtLeast(0)} of $total" else "",
+                            ?: if (shownChapter > 0) "Chapter $shownChapter" else "Not started",
+                        detail = if (shownTotal > 0) {
+                            "${shownChapter.coerceAtLeast(0)} of $shownTotal"
+                        } else {
+                            ""
+                        },
                         ink = ink,
                         modifier = Modifier.weight(1f),
-                        onDecrease = { onChapter((current - 1).coerceAtLeast(0)) },
-                        onIncrease = {
-                            onChapter((current + 1).coerceAtMost(if (total > 0) total else 999))
-                        }
+                        onDecrease = { stepChapter(-1) },
+                        onIncrease = { stepChapter(1) }
                     )
                     if (onPage != null && pageCount > 0) {
                         ProgressTile(
                             label = "Page",
-                            value = if (lastPage > 0) "$lastPage" else "—",
+                            value = if (shownPage > 0) "$shownPage" else "—",
                             detail = "of $pageCount",
                             ink = ink,
                             modifier = Modifier.weight(1f),
-                            onDecrease = { onPage((lastPage - 1).coerceIn(0, pageCount)) },
-                            onIncrease = { onPage((lastPage + 1).coerceIn(0, pageCount)) }
+                            onDecrease = { stepPage(-1) },
+                            onIncrease = { stepPage(1) }
                         )
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                BookLengthRow(total = total, onTotal = onTotal, ink = ink)
+                BookLengthRow(total = shownTotal, onStep = stepTotal, ink = ink)
             }
         }
     }
@@ -1263,7 +1320,7 @@ private fun ProgressCard(
 @Composable
 private fun BookLengthRow(
     total: Int,
-    onTotal: (Int) -> Unit,
+    onStep: (Int) -> Unit,
     ink: Color
 ) {
     Row(
@@ -1289,7 +1346,7 @@ private fun BookLengthRow(
                 modifier = Modifier.padding(4.dp)
             ) {
                 TileStepButton(CurioIcons.Remove, "One fewer chapter", ink) {
-                    onTotal((total - 1).coerceAtLeast(0))
+                    onStep(-1)
                 }
                 Box(Modifier.width(34.dp), contentAlignment = Alignment.Center) {
                     Text(
@@ -1301,7 +1358,7 @@ private fun BookLengthRow(
                     )
                 }
                 TileStepButton(CurioIcons.Add, "One more chapter", ink) {
-                    onTotal((total + 1).coerceAtMost(999))
+                    onStep(1)
                 }
             }
         }
@@ -1505,6 +1562,21 @@ private fun ProgressTile(
 private fun TileStepButton(glyph: String, label: String, ink: Color, onClick: () -> Unit) {
     val repeater = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
+    // ── v413 — EVERY STEP READS THE CURRENT NUMBER (the real bug behind "the
+    // +- only accepts one tap") ────────────────────────────────────────────
+    // `pointerInput(Unit)` runs its block exactly ONCE, so the `onClick` it
+    // closed over was the one handed in on the FIRST composition — and every
+    // step after that computed from the chapter/page/total the card was
+    // showing back then. Tapping "+" moved 0 → 1 and then re-proposed "start
+    // + 1" forever, so the count stuck at one no matter how many times it was
+    // pressed, and only jumped ahead once the card happened to be rebuilt from
+    // scratch (member: "the +- only accepts one tap ... it goes forward but
+    // after so long or when i scroll a little and tap again it goes ahead" —
+    // scrolling the LazyColumn into a new composition is exactly that
+    // rebuild). rememberUpdatedState hands the gesture the LATEST callback
+    // without restarting it; restarting pointerInput on the callback instead
+    // would drop the press the finger is still holding.
+    val step = rememberUpdatedState(onClick)
     // Plain flag (not Compose state): nothing in composition reads it, it only
     // tells the trailing tap whether the hold already did the work.
     val held = remember { booleanArrayOf(false) }
@@ -1530,7 +1602,7 @@ private fun TileStepButton(glyph: String, label: String, ink: Color, onClick: ()
                             held[0] = true
                             var interval = TileStepRepeatStartMs
                             while (true) {
-                                onClick()
+                                step.value()
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 delay(interval)
                                 interval = (interval - TileStepRepeatAccelMs)
@@ -1548,7 +1620,7 @@ private fun TileStepButton(glyph: String, label: String, ink: Color, onClick: ()
                     },
                     onTap = {
                         if (!held[0]) {
-                            onClick()
+                            step.value()
                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }
                     }
