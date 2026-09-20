@@ -1,3 +1,6 @@
+FIX:
+- Reveal: the previews on a topic read properly again — a book's synopsis teaser, an album's track list, a series or anime's synopsis and episode rows, and the chapter chips all sit on a card tinted with the topic's own colour, while their words were wearing the inks meant for the UNTINTED page; each card now asks its own fill what reads on it, in light and dark alike.
+
 ADD:
 - Art: a painting the Met does not hold has a museum's own record now — the Cleveland Museum of Art joins the artwork and maker pages, keyless, so an artist or painter whose works hang there is no longer an empty page (and it brings the museum's own biography of them when Wikipedia has no article at all).
 - Music: a song finds its cover in two places instead of one — MusicBrainz and the Cover Art Archive are the second door the albums already had, so a track the shop does not carry is no longer art-less.

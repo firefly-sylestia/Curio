@@ -233,6 +233,7 @@ import com.curio.app.ui.theme.notesSheetPalette
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.lightAccentTint
@@ -2894,14 +2895,14 @@ private fun BookSynopsisCard(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.2.sp
                     ),
-                    color = cat.categoryInk()
+                    color = revealCardInk(cat)
                 )
                 if (pageCount != null) {
                     Spacer(Modifier.weight(1f))
                     Text(
                         text = "$pageCount pages",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = revealCardInk(cat)
                     )
                 }
                 // v320 — a keyless-fetched average rating (from the Settings
@@ -2956,7 +2957,7 @@ private fun BookSynopsisCard(
                 Text(
                     text = synopsis,
                     style = RevealEditorialBody,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = revealCardInk(cat),
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -2967,7 +2968,7 @@ private fun BookSynopsisCard(
                 Text(
                     text = "Read the full synopsis →",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = cat.categoryInk(),
+                    color = revealCardInk(cat),
                     modifier = Modifier.align(Alignment.End)
                 )
             }
@@ -3152,7 +3153,7 @@ private fun BookChapterChip(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = cat.categoryInk()
+                color = revealCardInk(cat)
             )
             
             // Chapter title — one line, the preview below carries the detail
@@ -3161,7 +3162,7 @@ private fun BookChapterChip(
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = revealCardInk(cat),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -3171,7 +3172,7 @@ private fun BookChapterChip(
                 Text(
                     text = "pp. ${chapter.pageStart}–${chapter.pageEnd}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = revealCardInk(cat)
                 )
             }
             
@@ -3180,7 +3181,7 @@ private fun BookChapterChip(
                 Text(
                     text = chapter.summary,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = revealCardInk(cat),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -3597,6 +3598,34 @@ private fun BookSynopsisAccordion(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * v426b — THE INK THAT READS ON A CATEGORY-TINTED CARD.
+ *
+ * Every preview on this screen — the book's synopsis teaser, an album's track
+ * list, a series or anime's synopsis and episode rows, the chapter chips — sits
+ * on a card filled with [CurioCategory.categorySurface], i.e. the theme's own
+ * surface TINTED TOWARD THE CATEGORY'S ACCENT. The words inside them were
+ * painted with the theme's own `onSurface` / `onSurfaceVariant`, which are the
+ * inks for the UNTINTED surface: on a tinted fill they are the wrong pair, and
+ * `onSurfaceVariant` (already muted) is worst of all — which is why every one of
+ * those previews was reported as reading wrong.
+ *
+ * So a tinted card asks the fill what reads on it. `curioFillInk` is the app's
+ * one answer for that, and it hands back white only when white really clears
+ * 4.5:1 and otherwise walks a deep ink of the FILL'S OWN hue down until it does
+ * — so a light card keeps a dark ink, a night card keeps a pale one, and the
+ * category keeps its own hue either way.
+ *
+ * Hierarchy on these cards comes from size and weight, not from making the
+ * quieter words dimmer: a quiet word that cannot be read is not quiet, it is
+ * missing.
+ */
+@Composable
+private fun revealCardInk(
+    cat: com.curio.app.data.CurioCategory,
+    container: Color = MaterialTheme.colorScheme.surface
+): Color = curioFillInk(cat.categorySurface(container))
+
+/**
  * Shared "top hairline" for the full-height NOTES sheets (book notes +
  * album track list + series episodes): a soft accent glow under the drag
  * handle giving the sheet a crisp accent top edge. Takes the sheet's
@@ -3702,7 +3731,7 @@ private fun AlbumTrackListCard(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.2.sp
                     ),
-                    color = cat.categoryInk()
+                    color = revealCardInk(cat)
                 )
                 Spacer(Modifier.weight(1f))
                 val runtime = albumRuntimeSeconds(tracks)
@@ -3713,7 +3742,7 @@ private fun AlbumTrackListCard(
                 Text(
                     text = meta,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = revealCardInk(cat),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -3743,7 +3772,7 @@ private fun AlbumTrackListCard(
                         Text(
                             artist,
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = revealCardInk(cat),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -3759,13 +3788,13 @@ private fun AlbumTrackListCard(
                             Text(
                                 text = "${tr.number}",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = cat.categoryInk(),
+                                color = revealCardInk(cat),
                                 maxLines = 1
                             )
                             Text(
                                 text = tr.title,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = revealCardInk(cat),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f)
@@ -3774,7 +3803,7 @@ private fun AlbumTrackListCard(
                                 Text(
                                     text = tr.duration,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = revealCardInk(cat),
                                     maxLines = 1
                                 )
                             }
@@ -4574,7 +4603,7 @@ private fun SeriesPosterCard(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.2.sp
                     ),
-                    color = cat.categoryInk()
+                    color = revealCardInk(cat)
                 )
                 Spacer(Modifier.weight(1f))
                 if (hasEpisodes) {
@@ -4586,7 +4615,7 @@ private fun SeriesPosterCard(
                     Text(
                         text = meta,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = revealCardInk(cat),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -4616,7 +4645,7 @@ private fun SeriesPosterCard(
                         Text(
                             creator,
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = revealCardInk(cat),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -4626,7 +4655,7 @@ private fun SeriesPosterCard(
                         Text(
                             text = synopsis,
                             style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = revealCardInk(cat),
                             maxLines = 4,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -4639,13 +4668,13 @@ private fun SeriesPosterCard(
                                 Text(
                                     text = ep.key(),
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = cat.categoryInk(),
+                                    color = revealCardInk(cat),
                                     maxLines = 1
                                 )
                                 Text(
                                     text = ep.title,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = revealCardInk(cat),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f)
@@ -4660,7 +4689,7 @@ private fun SeriesPosterCard(
                 Text(
                     text = "View the episode list →",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = cat.categoryInk(),
+                    color = revealCardInk(cat),
                     modifier = Modifier.align(Alignment.End)
                 )
             }
@@ -4702,12 +4731,12 @@ private fun SeriesEpisodeChips(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.2.sp
                 ),
-                color = cat.categoryInk()
+                color = revealCardInk(cat)
             )
             Text(
                 text = "${episodes.size}",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = revealCardInk(cat)
             )
         }
         LazyRow(
