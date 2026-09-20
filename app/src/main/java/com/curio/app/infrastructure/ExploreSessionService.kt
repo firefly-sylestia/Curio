@@ -54,6 +54,7 @@ import com.curio.app.data.toJsonString
 import com.curio.app.ui.components.ExploreBubbleContent
 import com.curio.app.ui.theme.CurioShapes
 import com.curio.app.ui.theme.CurioTypography
+import com.curio.app.ui.theme.activePantoneThemeNow
 import com.curio.app.ui.theme.curioColorScheme
 import com.curio.app.ui.theme.isCurioDarkThemeForContext
 import com.curio.app.ui.theme.pastelAccent
@@ -487,6 +488,13 @@ class ExploreSessionService : Service() {
      * matches the rest of the app; the raw deep accent is used otherwise.
      */
     private fun notificationAccent(category: CurioCategory): Int {
+        // v412 — a Pantone theme tints the notification with its own hero
+        // colour, the same fill the topic's page and banner wear (the
+        // non-composable twin of `activePantoneTheme`, since a service is not
+        // a composition).
+        activePantoneThemeNow()?.let { theme ->
+            return theme.heroFor(isCurioDarkThemeForContext(this)).toArgb()
+        }
         val raw = category.accent
         return if (AppPreferences.isPastelColorsEnabled(this))
             pastelAccent(raw, isCurioDarkThemeForContext(this)).toArgb()

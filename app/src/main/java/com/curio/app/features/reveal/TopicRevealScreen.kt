@@ -234,6 +234,7 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.activePantoneTheme
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.oklabGradientStops
@@ -2768,9 +2769,13 @@ private fun HeroCard(
             //    its solid fill reads on any hero gradient, light or dark.
             val heroTopic = resolved
             if (heroTopic != null && heroTopic.progressTarget != null) {
+                // v412 — under a Pantone theme the badge wears the theme's own
+                // hero + ink pair, never the raw lane accent ("no other
+                // colors"); every other theme keeps the pill exactly as it was.
+                val pillAccent = activePantoneTheme()?.heroFor(isCurioDarkTheme()) ?: cat.accent
                 CurioProgressPill(
                     topic = heroTopic,
-                    accent = cat.accent,
+                    accent = pillAccent,
                     // v45 — the pill's text stays the deep accent (readable
                     // on the light frosted pill). v53 — the EDITOR dialog
                     // now wears the standard background tint. v66 — the
@@ -2779,9 +2784,9 @@ private fun HeroCard(
                     // — ring, steppers, slider, Save — reads on the dialog
                     // in both modes instead of the raw accent going
                     // dark-on-dark.
-                    ink = cat.accent,
-                    background = if (isCurioDarkTheme()) lerp(cat.accent, Color.Black, 0.55f)
-                    else lerp(cat.accent, Color.White, 0.85f),
+                    ink = activePantoneTheme()?.accentFor(isCurioDarkTheme()) ?: cat.accent,
+                    background = if (isCurioDarkTheme()) lerp(pillAccent, Color.Black, 0.55f)
+                    else lerp(pillAccent, Color.White, 0.85f),
                     showBar = false,
                     dialogContentColor = cat.categoryInk(),
                     modifier = Modifier

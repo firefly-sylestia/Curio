@@ -24,6 +24,14 @@ import com.curio.app.data.CurioCategory
  */
 @Composable
 fun CurioCategory.categoryInk(): Color {
+    // v412 — under a PANTONE theme every category ink is the theme's own
+    // accent ink. The member's rule is "all of them get the colors no other
+    // colors", so the 36 researched lane accents are the one palette the
+    // Pantone themes replace outright (see the note on
+    // `curioRoseInk`). Each of the resolvers below takes the same first
+    // branch; the lanewise identity it drops is the identity the brief never
+    // gave a Pantone number for.
+    activePantoneTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
     // v185 — Material theme: muted family ink (M3-aligned), never the raw
     // Tailwind accent.
     if (materialThemeOn) return materialInk()
@@ -61,6 +69,8 @@ fun CurioCategory.categoryInk(): Color {
  */
 @Composable
 fun CurioCategory.themedAccent(): Color {
+    // v412 — a Pantone theme's category FILL is its own hero colour.
+    activePantoneTheme()?.let { return it.heroFor(isCurioDarkTheme()) }
     // v185 — Material theme: the muted M3 family color (one per family),
     // not the vivid per-lane Tailwind accent.
     if (materialThemeOn) return materialAccent()
@@ -91,6 +101,10 @@ fun CurioCategory.themedAccent(): Color {
  */
 @Composable
 fun CurioCategory.headerAccent(): Color {
+    // v412 — a Pantone theme's torn banner is its own Pantone hero (the same
+    // fill the shared heroes wear, so a topic banner and the page banner
+    // above it are one colour).
+    activePantoneTheme()?.let { return it.heroFor(isCurioDarkTheme()) }
     // v185 — Material theme: the muted family banner fill.
     if (materialThemeOn) return materialHeaderAccent()
     val base = themedAccent()
@@ -129,6 +143,8 @@ fun CurioCategory.headerAccent(): Color {
  */
 @Composable
 fun CurioCategory.readableAccentInk(): Color {
+    // v412 — the Pantone accent ink, exactly like [categoryInk].
+    activePantoneTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
     // v81 — dark mode resolves the light twin, exactly like [categoryInk].
     if (isCurioDarkTheme()) return lightAccent
     return if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
@@ -145,20 +161,24 @@ fun CurioCategory.readableAccentInk(): Color {
  * when pastel mode is off, so existing call sites keep their exact look.
  */
 @Composable
-fun CurioCategory.onAccent(): Color = when {
-    // v185 — Material theme: ink that reads on the muted family fill.
-    materialThemeOn -> materialOnAccent()
-    !AppPreferences.pastelColorsState -> Color.White
-    isCurioDarkTheme() -> lightAccent
-    // The wildcard's accent is ALREADY a pastel pink — a deep hue twin (the
-    // brand maroon) reads on it, not the pale accent itself.
-    accent.isPale() -> CurioColors.DeepPlum
-    // v27p — pastel light: content on the airy pastel fills flips to a DEEP
-    // same-hue ink (the design contract), but the old `accent` as ink still
-    // dropped even deep accents below 4.5:1 on the light pastel (indigo
-    // 4.1, violet 3.7, green 3.6). The deep twin pins lightness low enough
-    // that every category's pastel text passes.
-    else -> readableLightInk(accent)
+fun CurioCategory.onAccent(): Color {
+    // v412 — the Pantone pair for its own hero fill.
+    activePantoneTheme()?.let { return it.onHeroFor(isCurioDarkTheme()) }
+    return when {
+        // v185 — Material theme: ink that reads on the muted family fill.
+        materialThemeOn -> materialOnAccent()
+        !AppPreferences.pastelColorsState -> Color.White
+        isCurioDarkTheme() -> lightAccent
+        // The wildcard's accent is ALREADY a pastel pink — a deep hue twin (the
+        // brand maroon) reads on it, not the pale accent itself.
+        accent.isPale() -> CurioColors.DeepPlum
+        // v27p — pastel light: content on the airy pastel fills flips to a DEEP
+        // same-hue ink (the design contract), but the old `accent` as ink still
+        // dropped even deep accents below 4.5:1 on the light pastel (indigo
+        // 4.1, violet 3.7, green 3.6). The deep twin pins lightness low enough
+        // that every category's pastel text passes.
+        else -> readableLightInk(accent)
+    }
 }
 
 /**
@@ -175,6 +195,8 @@ fun CurioCategory.onAccent(): Color = when {
  */
 @Composable
 fun CurioCategory.heroHeaderInk(): Color {
+    // v412 — the ink on a Pantone hero is the theme's own readable pair.
+    activePantoneTheme()?.let { return it.onHeroFor(isCurioDarkTheme()) }
     // v81 — dark mode always reads cream-white on the dark banner (the same
     // blend the shared rose heroes use), never the tinted light twin.
     if (isCurioDarkTheme()) return pastelFillInk(themedAccent())
@@ -279,24 +301,34 @@ fun curioFillInk(fill: Color): Color {
  * accent map can be cached per theme change instead of rebuilt on every
  * recomposition of animated screens. v7.94.
  */
-internal fun CurioCategory.categoryInkFor(pastel: Boolean, dark: Boolean): Color = when {
-    // v185 — Material theme (non-composable twin path).
-    materialThemeOn -> materialInkFor(dark)
-    dark -> lightAccent
-    // v27p — same light-mode rule as [categoryInk]: deepen mid-lightness
-    // accents so watermark glyphs track the text ink exactly.
-    else -> if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
+internal fun CurioCategory.categoryInkFor(pastel: Boolean, dark: Boolean): Color {
+    // v412 — the non-composable Pantone path (the watermark map is built in a
+    // `remember` calculation lambda): [activePantoneThemeNow] reads the stored
+    // theme id without composition, which is safe there and keeps the map and
+    // the composable resolvers on the same colour.
+    activePantoneThemeNow()?.let { return it.accentFor(dark) }
+    return when {
+        // v185 — Material theme (non-composable twin path).
+        materialThemeOn -> materialInkFor(dark)
+        dark -> lightAccent
+        // v27p — same light-mode rule as [categoryInk]: deepen mid-lightness
+        // accents so watermark glyphs track the text ink exactly.
+        else -> if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
+    }
 }
 
 /**
  * Non-composable twin of [CurioCategory.themedAccent] — same resolution,
  * parameterized by pastel mode + dark theme (see [categoryInkFor]).
  */
-internal fun CurioCategory.themedAccentFor(pastel: Boolean, dark: Boolean): Color =
+internal fun CurioCategory.themedAccentFor(pastel: Boolean, dark: Boolean): Color {
+    // v412 — the non-composable Pantone path (see [categoryInkFor]).
+    activePantoneThemeNow()?.let { return it.heroFor(dark) }
     // v185 — Material theme (non-composable twin path): the muted family
     // fill instead of the vivid accent.
-    if (materialThemeOn) materialAccentFor(dark)
+    return if (materialThemeOn) materialAccentFor(dark)
     else if (!pastel) (if (dark) darkAccent(accent) else accent) else pastelAccent(accent, dark)
+}
 
 /** Whether a color is pale enough to need a deep ink twin instead of itself. */
 private fun Color.isPale(): Boolean {
@@ -369,6 +401,10 @@ private fun Color.needsLightDeepInk(): Boolean = luminance() > 0.105f
 @Composable
 fun CurioCategory.categoryBackgroundWash(): Color {
     val background = MaterialTheme.colorScheme.background
+    // v412 — NO LANE WASH UNDER A PANTONE THEME. The page is the member's own
+    // Pantone page (the scheme background) on every screen, whichever lane the
+    // topic belongs to or the Spin picker last landed on — "no other colors".
+    activePantoneTheme()?.let { return background }
     // v185 — Material theme: M3 keeps page backgrounds NEUTRAL (the
     // multi-color guideline — surfaces stay neutral, one primary carries
     // the brand), so the category wash collapses to the scheme background.
@@ -401,6 +437,8 @@ fun CurioCategory.categoryBackgroundWash(): Color {
  */
 @Composable
 fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
+    // v412 — a Pantone theme's cards are the scheme's own ladder.
+    activePantoneTheme()?.let { return base }
     // v185 — Material theme: neutral M3 surfaces (no per-category tint).
     if (materialThemeOn) return base
     if (!AppPreferences.tintWashEffective()) return base
@@ -428,6 +466,9 @@ fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfac
  */
 @Composable
 fun CurioCategory.notesSheetContainerColor(): Color {
+    // v412 — a Pantone theme's sheets are its own dialog surface (which is
+    // already the theme's card family; see `curioDialogContainerColor`).
+    activePantoneTheme()?.let { return curioDialogContainerColor() }
     // v185 — Material theme: bottom sheets stay neutral M3 surfaces.
     if (materialThemeOn) return curioDialogContainerColor()
     if (!AppPreferences.tintWashEffective()) return curioDialogContainerColor()
@@ -454,6 +495,8 @@ fun CurioCategory.notesSheetContainerColor(): Color {
 @Composable
 fun CurioCategory.notesSheetContainerColorForCover(swatch: Color?): Color {
     if (swatch == null) return notesSheetContainerColor()
+    // v412 — cover-derived sheets step aside under a Pantone theme too.
+    if (activePantoneTheme() != null) return notesSheetContainerColor()
     if (materialThemeOn) return notesSheetContainerColor()
     if (!AppPreferences.tintWashEffective()) return notesSheetContainerColor()
     if (isCurioDarkTheme()) {
@@ -494,6 +537,9 @@ data class CoverSheetPalette(
 @Composable
 fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette? {
     if (swatches == null) return null
+    // v412 — a cover-artwork palette is not one of the member's three numbers,
+    // so under a Pantone theme the sheets fall back to the Pantone surfaces.
+    if (activePantoneTheme() != null) return null
     if (materialThemeOn) return null
     if (!AppPreferences.tintWashEffective()) return null
     // Accent = the classic vibrant-family pick, kept ONLY when it actually
@@ -580,6 +626,8 @@ fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette
  */
 @Composable
 fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorScheme.surfaceContainerHigh): Color {
+    // v412 — the mood board keeps a Pantone surface like every other card.
+    activePantoneTheme()?.let { return base }
     if (!AppPreferences.tintWashEnabledState) return base
     // v81 — dark mode: the mood board keeps its category tint even on the
     // pitch-black page via the dark surface shade.
@@ -603,6 +651,8 @@ fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorSche
  */
 @Composable
 fun CurioCategory.categoryChipSurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
+    // v412 — a Pantone theme's chips are the scheme's own ladder.
+    activePantoneTheme()?.let { return base }
     // v185 — Material theme: neutral M3 chip surfaces.
     if (materialThemeOn) return base
     if (!AppPreferences.tintWashEffective()) return base

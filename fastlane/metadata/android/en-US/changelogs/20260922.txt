@@ -58,6 +58,12 @@ ADD:
 - Your Curiosity: the constellation drawing is replaced by that same lane map — real tiles, a meter per lane, and a Cabinet door onto the lane you tap that opens the Cabinet filtered to it.
 
 ADD:
+- Theme: a Pantone theme paints the WHOLE app now — Home and Profile banners, the page, the cards, the 36 lane colours, the error red, the streak gold and the mastery sage are all derived from your three Pantone numbers, with no coral, gold or lane hue left anywhere.
+
+FIX:
+- Theme: the Home and Profile heroes wear your Pantone colours now. They had their own copy of the hero rule and never read the Pantone palette, so they stayed rose while Settings and the Cabinet wore your three colours.
+
+ADD:
 - Books: hold the +/- on a book's reading progress and the count runs — a tap moves one step, a hold speeds up the longer you keep it, with a tick you can feel at every step.
 
 FIX:

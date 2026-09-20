@@ -9104,6 +9104,47 @@ only ever catches taps that mean "not in any of these".
   a Pantone theme paints the torn heroes, the option cards and their icons in
   its own three colours.
 
+### v412 — a Pantone theme paints the WHOLE app ("no other colors")
+
+- **THE BUG: Home and Profile had their OWN copies of the hero resolver.**
+  `homeRoseAccent()` / `profileRoseAccent()` (and `homeReadableInk` /
+  `profileReadableInk`) fell straight through to rose / azure / the last Spin
+  lane and never called `activePantoneTheme()` — only `settingsRoseAccent()`
+  did, which is why Settings and the Cabinet hero wore the Pantone colours
+  while Home's banner and Profile's did not. Each now takes the Pantone branch
+  FIRST (`heroFor` / `onHeroFor`), before the lane, the azure and the rose-wood
+  — the same ordering `settingsRoseAccent` has always used. Home's page
+  background also skips the lane wash under a Pantone theme.
+- **THE ROLES THE THREE NUMBERS NEVER NAMED are now derived, not borrowed.**
+  `PantoneTheme` grew `secondaryFor` (the hero one step deeper — `secondary`
+  and `secondaryContainer` used to be a second copy of the hero), `tertiaryFor`
+  (the ink read as a fill), `goldInkFor` (the hero at ink depth), `sageInkFor`
+  (the ink, desaturated) and `errorFor` (the ink pinned to alert depth). The
+  schemes use them, and `curioGoldInk()` / `curioSageInk()` answer them first,
+  so the streak flame, XP and mastery icons stop wearing the brand butter/sage.
+  The scheme `error` is no longer `CurioColors.WarmCoralRed`.
+- **THE 36 LANE ACCENTS RESOLVE TO THE PANTONE PALETTE TOO.** `CategoryInk.kt`
+  takes an `activePantoneTheme()` branch at the top of `categoryInk`,
+  `themedAccent`, `headerAccent`, `readableAccentInk`, `onAccent`,
+  `heroHeaderInk`, plus `categoryBackgroundWash` (→ the scheme background: NO
+  lane page wash), `categorySurface` / `categoryChipSurface` /
+  `categorySurfaceMoodBoard` (→ the passed `base`, i.e. the scheme ladder),
+  `notesSheetContainerColor` (→ the Pantone dialog surface) and the
+  cover-artwork paths (`notesSheetContainerColorForCover`, `notesSheetPalette`
+  → null, so the sheets fall back to the Pantone surfaces). The non-composable
+  twins `categoryInkFor` / `themedAccentFor` use `activePantoneThemeNow()`
+  (added beside `activePantoneTheme`, for the `remember` calculation lambdas the
+  watermark map is built in). Consequence, deliberate: under a Pantone theme
+  the lanes no longer carry a per-category hue — that identity is exactly what
+  the member asked to drop ("all of them get the colors no other colors").
+- **The few RAW-accent call sites were closed too:** the category card's
+  selected crown (`saturated`), the reveal hero's `CurioProgressPill`
+  (accent + ink + frosted background) and `ExploreSessionService`'s
+  notification tint.
+- **NOTHING was made transparent or bordered by this pass** — the two Pantone
+  rules above still hold, and every new derived role is an opaque `lerp`/HSL
+  reading of a page, hero or ink number.
+
 ### Home: one hero, with the greeting and the quest inside it
 
 - **The daily quest is INSIDE the torn banner** — `QuestShuffleCard` is called

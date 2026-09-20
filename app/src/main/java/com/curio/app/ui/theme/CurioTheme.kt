@@ -283,13 +283,14 @@ fun isCurioDarkTheme(): Boolean = when (AppPreferences.themeModeState) {
  */
 @Composable
 fun curioRoseInk(): Color {
-    // v411 — APP-WIDE: under a Pantone theme the brand's "rose ink" role IS
-    // that theme's own ink (the Pantone colour, deepened where it cannot read),
-    // so every surface that asks for an accent ink — pills, plate tints, icon
-    // chips, the journal's own headings — comes back in the member's three
-    // Pantone colours instead of coral. Only the decoratively-branded roles
-    // (gold, mint) and the 36 lane accents keep their own identity: a Pantone
-    // number is a page, a hero and an ink, not a replacement for every hue.
+    // v411/v412 — APP-WIDE: under a Pantone theme the brand's "rose ink" role
+    // IS that theme's own ink (the Pantone colour, deepened where it cannot
+    // read), so every surface that asks for an accent ink — pills, plate
+    // tints, icon chips, the journal's own headings — comes back in the
+    // member's Pantone colours instead of coral. v412 extended the same rule
+    // to the two roles that were still holding their own identity (the gold
+    // and sage inks below) and to the 36 lane accents (see `CategoryInk.kt`):
+    // "I want all of them to get the colors no other colors".
     activePantoneTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
     return if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
 }
@@ -300,8 +301,13 @@ fun curioRoseInk(): Color {
  * light background). Gold twin of [curioRoseInk].
  */
 @Composable
-fun curioGoldInk(): Color =
-    if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.GoldInk
+fun curioGoldInk(): Color {
+    // v412 — a Pantone theme derives it from its OWN hero number (see
+    // `PantoneTheme.goldInkFor`), so the streak flame and the XP figures are
+    // painted from the member's brief rather than from the brand butter.
+    activePantoneTheme()?.let { return it.goldInkFor(isCurioDarkTheme()) }
+    return if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.GoldInk
+}
 
 /**
  * v20 — the soft sage as INK, theme-aware: soft Sage on dark surfaces, deep
@@ -309,8 +315,12 @@ fun curioGoldInk(): Color =
  * "done"/mastered icons, text and progress accents.
  */
 @Composable
-fun curioSageInk(): Color =
-    if (isCurioDarkTheme()) CurioColors.Sage else CurioColors.SageInk
+fun curioSageInk(): Color {
+    // v412 — the Pantone twin of the gold branch above, derived from the
+    // theme's ink number (see `PantoneTheme.sageInkFor`).
+    activePantoneTheme()?.let { return it.sageInkFor(isCurioDarkTheme()) }
+    return if (isCurioDarkTheme()) CurioColors.Sage else CurioColors.SageInk
+}
 
 /**
  * Non-composable dark check for services/workers — mirrors
@@ -360,7 +370,18 @@ fun curioColorScheme(): ColorScheme {
  * previews — asks this one question instead of re-reading the pref.
  */
 @Composable
-fun activePantoneTheme(): PantoneTheme? =
+fun activePantoneTheme(): PantoneTheme? = activePantoneThemeNow()
+
+/**
+ * v412 — the NON-COMPOSABLE twin of [activePantoneTheme], for the paths that
+ * cannot read composition state: the category watermark map is built inside a
+ * `remember` calculation lambda (`@DisallowComposableCalls`), so its
+ * non-composable resolvers ([CurioCategory.categoryInkFor] /
+ * [CurioCategory.themedAccentFor]) ask this instead. The read still happens
+ * during composition at the call sites that ARE composable, so the theme
+ * change still repaints them.
+ */
+fun activePantoneThemeNow(): PantoneTheme? =
     AppPreferences.pantoneThemeId()?.let { id -> PantoneTheme.fromId(id) }
 
 /**

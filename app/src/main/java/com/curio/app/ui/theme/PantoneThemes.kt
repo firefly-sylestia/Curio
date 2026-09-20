@@ -49,7 +49,17 @@ import androidx.compose.ui.graphics.luminance
  *    hairline or a label. (The app-wide alpha-role convention is untouched —
  *    this is the rule for the Pantone palettes themselves.)
  *
- * 4. **CARDS WEAR NO BORDER HERE.** `outlineVariant` is the app's card-edge
+ * 4. **THE REST OF THE APP IS DERIVED, NOT BORROWED (v412).** The three
+ *    numbers above paint more than the scheme: the roles the brief never
+ *    named — the scheme's `secondary` and `tertiary`, the brand's warm and
+ *    cool inks, the error colour — are lightness/saturation readings of the
+ *    same three numbers (see [secondaryFor], [tertiaryFor], [goldInkFor],
+ *    [sageInkFor], [errorFor]), and the 36 lane/category accents resolve to
+ *    this palette too (see `CategoryInk.kt`). Member: "I want all of them to
+ *    get the colors no other colors" — so no neutral grey is invented here
+ *    and no coral/gold/sage from the app's own palette leaks in.
+ *
+ * 5. **CARDS WEAR NO BORDER HERE.** `outlineVariant` is the app's card-edge
  *    colour, and these three themes drop that edge entirely: their cards
  *    separate by the hero-fill lightness ladder ALONE (see
  *    [lightScheme]'s `surfaceContainer*` steps). `outlineVariant` below is
@@ -122,6 +132,49 @@ enum class PantoneTheme(
     /** The readable ink ON the hero fill — what the hero's words wear. */
     fun onHeroFor(dark: Boolean): Color = inkOn(heroFor(dark), ink)
 
+    // ── v412 — THE ROLES THE THREE NUMBERS DID NOT NAME ────────────────
+    //
+    // The member's second ask: "add some more colours … for things that dont
+    // have colours", and the rule that comes with it — nothing outside the
+    // three Pantone numbers may be painted. So every role the app needs but
+    // the brief never named (a SECOND fill that is not a copy of the first, a
+    // THIRD one, the brand's warm and cool inks, the error colour) is a
+    // lightness/saturation reading of the page, hero or ink number it is
+    // derived from. No neutral grey is invented and none of the app's own
+    // coral/gold/sage palette leaks in: a Pantone theme paints the WHOLE app
+    // from one three-colour brief.
+
+    /**
+     * The scheme's SECOND fill — the HERO number one step deeper.
+     *
+     * `secondary` and `secondaryContainer` used to be the hero itself, so the
+     * surfaces that ask for a second tone (nav pills, selected rails, tinted
+     * chips) got the same colour twice. This is a real sibling: same hue, same
+     * number, one step down the ladder.
+     */
+    fun secondaryFor(dark: Boolean): Color =
+        if (dark) lift(heroFor(true), 0.07f) else deepen(hero, 0.09f)
+
+    /** The scheme's THIRD fill — the INK number read as a fill. */
+    fun tertiaryFor(dark: Boolean): Color =
+        if (dark) shade(ink, saturation = 0.40f, lightness = 0.36f)
+        else shade(ink, saturation = 0.46f, lightness = 0.50f)
+
+    /** The brand's WARM ink (streak flame, XP, levels) — the HERO number at ink depth. */
+    fun goldInkFor(dark: Boolean): Color =
+        if (dark) shade(hero, saturation = 0.55f, lightness = 0.72f)
+        else shade(hero, saturation = 0.62f, lightness = 0.33f)
+
+    /** The brand's COOL ink (done ticks, mastery, "mastered") — the INK number, desaturated. */
+    fun sageInkFor(dark: Boolean): Color =
+        if (dark) shade(ink, saturation = 0.34f, lightness = 0.76f)
+        else shade(ink, saturation = 0.38f, lightness = 0.29f)
+
+    /** The error / destructive fill — the INK number pinned to alert depth. */
+    fun errorFor(dark: Boolean): Color =
+        if (dark) shade(ink, saturation = 0.52f, lightness = 0.66f)
+        else shade(ink, saturation = 0.64f, lightness = 0.38f)
+
     /** The theme's own [ColorScheme] for [dark]. */
     fun schemeFor(dark: Boolean): ColorScheme = if (dark) darkScheme() else lightScheme()
 
@@ -140,13 +193,13 @@ enum class PantoneTheme(
         primaryContainer = hero,
         onPrimaryContainer = inkOn(hero, ink),
 
-        secondary = hero,
-        onSecondary = inkOn(hero, ink),
-        secondaryContainer = hero,
-        onSecondaryContainer = inkOn(hero, ink),
+        secondary = secondaryFor(false),
+        onSecondary = inkOn(secondaryFor(false), ink),
+        secondaryContainer = secondaryFor(false),
+        onSecondaryContainer = inkOn(secondaryFor(false), ink),
 
-        tertiary = hero,
-        onTertiary = inkOn(hero, ink),
+        tertiary = tertiaryFor(false),
+        onTertiary = inkOn(tertiaryFor(false), ink),
 
         background = page,
         onBackground = inkOn(page, ink),
@@ -163,8 +216,9 @@ enum class PantoneTheme(
         surfaceContainerHigh = deepen(hero, 0.10f),
         surfaceContainerHighest = deepen(hero, 0.15f),
 
-        error = CurioColors.WarmCoralRed,
-        onError = CurioColors.CreamWhite,
+        // v412 — derived from the Pantone ink, never the app's coral.
+        error = errorFor(false),
+        onError = inkOn(errorFor(false), ink),
 
         // `outline` = an edge ON THE PAGE; `outlineVariant` = the inset
         // DIVIDER hairline on a hero-filled card (rule 4 — cards have no
@@ -189,13 +243,13 @@ enum class PantoneTheme(
             primaryContainer = deepHero,
             onPrimaryContainer = paleInk(ink),
 
-            secondary = deepHero,
-            onSecondary = inkOn(deepHero, ink),
-            secondaryContainer = deepHero,
+            secondary = secondaryFor(true),
+            onSecondary = inkOn(secondaryFor(true), ink),
+            secondaryContainer = secondaryFor(true),
             onSecondaryContainer = paleInk(ink),
 
-            tertiary = deepHero,
-            onTertiary = inkOn(deepHero, ink),
+            tertiary = tertiaryFor(true),
+            onTertiary = inkOn(tertiaryFor(true), ink),
 
             background = deepPage,
             onBackground = pageInk,
@@ -212,8 +266,9 @@ enum class PantoneTheme(
             surfaceContainerHigh = lift(deepHero, 0.10f),
             surfaceContainerHighest = lift(deepHero, 0.15f),
 
-            error = Color(0xFFE0706A),
-            onError = Color(0xFF2A0A08),
+            // v412 — derived from the Pantone ink, never the app's coral.
+            error = errorFor(true),
+            onError = inkOn(errorFor(true), ink),
 
             outline = lerp(pageInk, deepPage, 0.66f),
             outlineVariant = lerp(inkOn(deepHero, ink), deepHero, 0.86f)
