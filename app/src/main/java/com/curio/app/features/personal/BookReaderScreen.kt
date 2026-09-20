@@ -788,7 +788,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     error.orEmpty(),
-                    color = palette.ink.copy(alpha = 0.7f),
+                    color = palette.ink.copy(alpha = 0.75f),
                     modifier = Modifier.padding(horizontal = 32.dp),
                     style = TextStyle(fontFamily = LoraFontFamily, fontSize = 16.sp, lineHeight = 24.sp)
                 )
@@ -1781,7 +1781,7 @@ private fun PdfScrollReader(
                         Text(
                             "$marksHere marked",
                             style = MaterialTheme.typography.labelSmall,
-                            color = palette.ink.copy(alpha = 0.7f),
+                            color = palette.ink.copy(alpha = 0.75f),
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         )
                     }
@@ -1804,7 +1804,7 @@ private fun PdfScrollReader(
                     Text(
                         "${page + 1}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = palette.ink.copy(alpha = 0.62f),
+                        color = palette.ink.copy(alpha = 0.75f),
                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
                     )
                 }
@@ -2432,7 +2432,7 @@ private fun PageReader(
                     Text(
                         "$marksHere marked",
                         style = MaterialTheme.typography.labelSmall,
-                        color = palette.ink.copy(alpha = 0.7f),
+                        color = palette.ink.copy(alpha = 0.75f),
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -2918,7 +2918,7 @@ private fun ReaderChrome(
                     Text(
                         positionLabel,
                         style = MaterialTheme.typography.labelSmall,
-                        color = palette.ink.copy(alpha = 0.55f),
+                        color = palette.ink.copy(alpha = 0.75f),
                         maxLines = 1,
                         modifier = Modifier.padding(start = 8.dp)
                     )
@@ -3093,7 +3093,7 @@ private fun ReaderSearchSheet(
                     CurioIcon(
                         CurioIcons.Search,
                         null,
-                        tint = palette.ink.copy(alpha = 0.5f),
+                        tint = palette.ink.copy(alpha = 0.75f),
                         size = 17.dp
                     )
                     BasicTextField(
@@ -3160,7 +3160,7 @@ private fun ReaderSearchSheet(
                         else -> "${search.hits.size} found \u00b7 read ${search.scanned} of ${search.total}"
                     },
                     style = MaterialTheme.typography.labelSmall,
-                    color = palette.ink.copy(alpha = 0.55f)
+                    color = palette.ink.copy(alpha = 0.75f)
                 )
             }
 
@@ -3274,7 +3274,7 @@ private fun ReaderInkSheet(
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.SemiBold
                             ),
-                            color = palette.ink.copy(alpha = 0.7f)
+                            color = palette.ink.copy(alpha = 0.75f)
                         )
                     }
                     Slider(
@@ -3311,7 +3311,7 @@ private fun ReaderInkSheet(
                 Text(
                     ReaderLook.orientation.detail,
                     style = MaterialTheme.typography.bodySmall,
-                    color = palette.ink.copy(alpha = 0.6f)
+                    color = palette.ink.copy(alpha = 0.75f)
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ReaderOrientation.entries.forEach { option ->
@@ -3627,7 +3627,7 @@ private fun ReaderProgressCard(
             Text(
                 "through",
                 style = MaterialTheme.typography.bodySmall,
-                color = palette.ink.copy(alpha = 0.5f),
+                color = palette.ink.copy(alpha = 0.75f),
                 modifier = Modifier.padding(start = 7.dp, bottom = 6.dp)
             )
         }
@@ -3712,7 +3712,7 @@ private fun ReaderMarksSection(
         Text(
             "Nothing marked yet \u2014 hold a passage while you read.",
             style = MaterialTheme.typography.bodySmall,
-            color = palette.ink.copy(alpha = 0.55f)
+            color = palette.ink.copy(alpha = 0.75f)
         )
     }
     val paged = content is ReaderContent.Pages
@@ -3916,7 +3916,7 @@ private fun ReaderContentsSection(
                                         if (bookmark != null) "Remove this bookmark"
                                         else "Bookmark this chapter",
                                         tint = if (bookmark != null) palette.paper
-                                        else palette.ink.copy(alpha = 0.6f),
+                                        else palette.ink.copy(alpha = 0.75f),
                                         size = 14.dp
                                     )
                                 }
@@ -3938,7 +3938,7 @@ private fun ReaderContentsSection(
                 Text(
                     "This PDF carries no contents of its own.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = palette.ink.copy(alpha = 0.6f)
+                    color = palette.ink.copy(alpha = 0.75f)
                 )
                 val chunks = (0 until content.pageCount).chunked(4)
                 chunks.take(60).forEachIndexed { row, pageRow ->
@@ -3966,7 +3966,7 @@ private fun ReaderContentsSection(
                         Text(
                             "More in the file itself",
                             style = MaterialTheme.typography.labelSmall,
-                            color = palette.ink.copy(alpha = 0.5f)
+                            color = palette.ink.copy(alpha = 0.75f)
                         )
                     }
                 }
@@ -3974,12 +3974,12 @@ private fun ReaderContentsSection(
             content is ReaderContent.Text -> Text(
                 "This file has no chapter headings of its own.",
                 style = MaterialTheme.typography.bodySmall,
-                color = palette.ink.copy(alpha = 0.6f)
+                color = palette.ink.copy(alpha = 0.75f)
             )
             else -> Text(
                 "Still opening the file\u2026",
                 style = MaterialTheme.typography.bodySmall,
-                color = palette.ink.copy(alpha = 0.6f)
+                color = palette.ink.copy(alpha = 0.75f)
             )
         }
     }
@@ -4064,7 +4064,7 @@ private fun ReaderMarkRow(
                         Text(
                             where,
                             style = MaterialTheme.typography.labelSmall,
-                            color = palette.ink.copy(alpha = 0.55f),
+                            color = palette.ink.copy(alpha = 0.75f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -4178,7 +4178,7 @@ private fun ReaderMarkSheet(
                     Text(
                         if (existing.any { it.isHighlight }) "Change the highlight" else "Highlight",
                         style = MaterialTheme.typography.labelSmall,
-                        color = palette.ink.copy(alpha = 0.55f)
+                        color = palette.ink.copy(alpha = 0.75f)
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         ReaderHighlighter.entries.forEach { color ->

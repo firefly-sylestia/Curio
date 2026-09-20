@@ -1,4 +1,13 @@
 FIX:
+- Reading: the scrolling PDF zooms the whole file — a pinch magnified one sheet among its neighbours, which read as a swollen page rather than a zoom, so every sheet now lays out at the magnified size and the column scrolls the bigger book (sideways as well as down), with each page's words still measuring the frame they are given.
+- Reading: a page's words are read for every sheet on screen — only the column's first page carried a text layer, so holding the words on the page below it marked the page instead of sweeping the passage.
+- Reading: the reader's quiet words stop blending into the page — the label at the foot, a page's own number and the small captions were painted as low as 2.5:1 on the sepia page; every one of them clears 4.5:1 now, on all four inks.
+- Reading: an EPUB names its own page — the page bar counted the reader's own screenfuls ("Page 12 of 340", a number that moved with the type size), so it now says the book's own printed page, and a book that prints none shows the two arrows alone.
+
+ADD:
+- Reading: the page's corners turn it and its head and foot move the reading on — a tap in a corner goes back or forward (a page where the book has pages, a screenful where it scrolls), a tap in the head or foot moves it the same way, anywhere else is the tap that brings the chrome back, and a Crop switch in the reader's own foot turns the zones on and off.
+
+FIX:
 - Reading: the progress bar on a book is a control now — drag or tap it to move the page (or chapter), and the knob only appears under your finger.
 - Reading: auto-rotate is a real three-way choice — Auto, Upright or Wide — for both PDF and EPUB; it used to be a PDF-only upright switch.
 - Reading: the Scrolling↔Pages switch settles in instead of flinching, and the progress bar's sheen no longer jumps back to the start.

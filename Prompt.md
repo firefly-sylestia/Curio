@@ -138,6 +138,70 @@ Confirmed with the member via `ask_user`:
   change was gated on the previous run being green (member's instruction: "check
   the ci if its green then push or else just commit").
 
+## 9. The scrolling reader's zoom, its words, and a page's own taps (v422)
+
+**The asks (member):** *"fix the pdf reading in vertical the zoom of individual
+pages, the behavior is fine, but like only one pages zooms in in that place feels
+wrong, so fix it. also in th vertical way i cant select texts to highlight too,
+fix and push only after the cl is green also analyse any elements thats blending
+the texts with bckgroud etc mainly"* · *"also the epub our page number is making
+the epub feels bad can u fix it, also add tapping the corner of the pages to go
+ahead or back, buttom or top tapping to scroll, a small area with toggle"*
+
+**Answers taken before implementing** (ask_user): the scrolling PDF's pinch zooms
+THE WHOLE DOCUMENT · the EPUB's number becomes THE BOOK'S OWN PRINTED PAGE
+(nothing when it prints none) · the tap zones work in BOTH formats, in EVERY flow ·
+the switch lives IN THE READER'S OWN CHROME.
+
+**What changed** — all in `app/src/main/java/com/curio/app/features/personal/`:
+
+- **`PdfScrollReader` (the vertical flow) — the zoom is the DOCUMENT's.**
+  `docZoom` multiplies every sheet's `requiredWidth`/`requiredHeight`; the column is
+  as wide as its own sheet (`.width(pageWidth * docZoom + 28.dp)`, stated because a
+  lazy list needs a bounded width) and rides a `horizontalScroll` above it, so the
+  two-finger pan is a real pan. The pinch calls `readerZoomDocument(...)`, which
+  dispatches the pan to the column and the across-scroll and returns `Offset.Zero`
+  for a single finger — so a drag still scrolls and a swipe still turns the page.
+  `readerDoubleTapDocument()` is the one-point twin. **The text layer needed no
+  maths**: it measures the frame it is given, so a magnified page still sweeps the
+  word under the finger.
+- **Words for every sheet on screen (the selection fix).** `visiblePages`
+  (`snapshotFlow { layoutInfo.visibleItemsInfo.map { it.index }.toSet() }` +
+  `distinctUntilChanged`, written only when the set changes) replaces
+  `page == listState.firstVisibleItemIndex`. The column shows a page and a half, so
+  the sheet under the finger was frequently the second one — which had no text
+  layer, so a hold fell through to the old "mark this page" press.
+- **The EPUB names its own page.** The page bar reports
+  `printedPageAt(liveTextBlock)` — the last book page at or before the reading
+  place — and `ReaderChrome` draws its label only when there is one, so a book with
+  no page list shows the two arrows alone. `printedPages` + `printedPageAt` moved
+  ABOVE `pageBar`, because a local function cannot reach a local declared later in
+  the same body.
+- **Tap zones + switch.** `ReaderLook.tapZones` (default on), `readerTapStep(at,
+  size, corner)` (a corner is 72dp of either side, a band is 16% of the surface) and
+  the host's `stepPage(step)` (a turn where the book has pages, a screenful where it
+  scrolls) behind one `onSurfaceTap: (Offset, IntSize) -> Unit`, threaded through all
+  four reader surfaces. The switch is a `CurioIcons.Crop` button in the reader's
+  foot that wears the accent while the zones are on.
+- **Contrast (the blending ask, in the reader).** All 14 `palette.ink.copy(alpha = …)`
+  between 0.5 and 0.7 are 0.75 now. Measured over each skin's paper: sepia's
+  `ink .55` was **2.83:1** and `ink .62` **3.32:1**, paper-lt's `.55` **3.44:1**;
+  0.75 clears 4.5:1 on every ink (sepia 4.61, paper-lt 6.30, white 7.57,
+  paper-dk 7.60, night 7.25).
+
+**Not done — needs its own pass:** the app-wide blending audit. The reader's own
+chrome was measured and fixed here; the same alpha-over-tint check has not been run
+across Home / Profile / Cabinet / Settings or the named themes' non-hero roles.
+
+## Verification (v422)
+
+- Brace/paren balance 0/0 on `BookReaderScreen.kt`; imports gained
+  `ScrollableState`, `animateScrollBy` and `fillMaxHeight`; no `pageBox` reference
+  and no `PLACEHOLDER` left; every `detectTapGestures(onTap = …)` site and all four
+  surface signatures moved to `(Offset, IntSize) -> Unit` together.
+- No Gradle in this environment, so CI compiles it — the member's gate stands:
+  **push only when the run is green**.
+
 ---
 
 ## User prompts
@@ -146,4 +210,4 @@ Confirmed with the member via `ask_user`:
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- (none — both requests are logged above as §1–§8)
+- (none — the v422 request is logged above as §9)
