@@ -73,7 +73,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
@@ -3017,8 +3016,14 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
  * wedged between the brain stats and the lane readout, so the sky grew to 254dp
  * and the stars now spread to the panel's own edges (member: "it doesnt cover
  * the drawer a little more").
+ *
+ * v422 — 320dp, because this number is the ONLY dial that makes the pattern
+ * bigger. [starPoint] multiplies a polar radius by half the box's SHORTER side,
+ * which on a phone drawer is this height — so widening the drawer, or the panel,
+ * moves not one star (member: "in the drawer the pattern is good … incrase the
+ * size").
  */
-private val DrawerStarMapHeight = 254.dp
+private val DrawerStarMapHeight = 320.dp
 
 /**
  * v411 — THE DRAWER'S CURIOSITY MAP: the lanes as a sky.
@@ -3045,13 +3050,33 @@ private val DrawerStarMapHeight = 254.dp
  * It is TAPPABLE: the star nearest a touch within a 30dp halo is picked (the
  * tap target is the finger, not the dot) and the readout under the map names
  * the pick. Nothing on this canvas is transparent — every colour is an OPAQUE
- * mix between the panel and the ink ([lerp]), which is the member's rule for
- * the new themes ("dont use transparent colors") applied to the one surface in
- * the app that is nothing but paint.
+ * mix between the SURFACE the sky is drawn on and the ink ([lerp]), which is
+ * the member's rule for the new themes ("dont use transparent colors") applied
+ * to the one surface in the app that is nothing but paint.
  *
  * The sky lights up ONCE, star by star ([Animatable], not an infinite
  * transition): the drawer is composed even while it is closed, so an idle
  * twinkle would spend the battery on a surface nobody is looking at.
+ *
+ * v422 — NO PLATE, A TALLER SKY, SOLID POINTS, AND A PICK THAT COMES ON.
+ *
+ *  * **The panel is GONE.** Its own fill, its corner radius and its clip are
+ *    removed and the sky is drawn straight on the drawer's page (member: "now
+ *    remove its background just keep the pattern"). Every tone in it therefore
+ *    reads from `surface` — the page the map actually sits on — instead of from
+ *    a plate that is no longer there, which is also what made the halos look
+ *    like plate-tinted blobs in BOTH modes (member: "fix its colors in both
+ *    white and dark mode just the draer").
+ *  * **The sky grew** (254 → 320dp — see [DrawerStarMapHeight] for why the
+ *    height is the only dial that can do it).
+ *  * **An untouched lane is a SOLID point**, never a hollow ring: a sky is made
+ *    of points (member: "make the dots of it solid filled").
+ *  * **The picked star LIGHTS UP** — its core grows and its halo steps brighten
+ *    toward the lane's own accent, and an untouched lane's solid point lights in
+ *    its colour too, at the smallest lit size. The orbit ring is gone: it was
+ *    the one piece of chrome the map added, and it read as a circle drawn around
+ *    a star rather than as the star answering (member: "tapping them the
+ *    highligh tis bad fix that too").
  */
 @Composable
 private fun DrawerLaneStarMap(
@@ -3061,7 +3086,12 @@ private fun DrawerLaneStarMap(
     modifier: Modifier = Modifier
 ) {
     if (lanes.isEmpty()) return
-    val panel = MaterialTheme.colorScheme.surfaceContainerHigh
+    // v422 — THE PAGE, NOT A PLATE. The map used to carry its own
+    // `surfaceContainerHigh` panel and every tone in the drawing was mixed FROM
+    // that fill. The plate is gone, so the base is the surface the sky is drawn
+    // on — the drawer's own `surface` — which is what keeps the stars, their
+    // halos, the hairlines and the dust reading in white AND in dark mode.
+    val page = MaterialTheme.colorScheme.surface
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val slots = remember(lanes.size) { starScatter(lanes.size) }
     val links = remember(slots) { starLinks(slots) }
@@ -3080,8 +3110,8 @@ private fun DrawerLaneStarMap(
             .fillMaxWidth()
             .onSizeChanged { sizePx = it }
             .height(DrawerStarMapHeight)
-            .clip(RoundedCornerShape(18.dp))
-            .background(panel)
+            // v422 — no clip and no fill: the pattern is the whole thing, drawn
+            // on the drawer's page. (The touch target still spans the full box.)
             .pointerInput(lanes, selected, sizePx) {
                 detectTapGestures { tap ->
                     if (sizePx.width <= 0 || sizePx.height <= 0) return@detectTapGestures
@@ -3116,8 +3146,8 @@ private fun DrawerLaneStarMap(
             //    muted ink — no alpha anywhere.
             dust.forEach { dot ->
                 drawCircle(
-                    color = lerp(panel, muted, 0.05f + 0.06f * dot.y),
-                    radius = 0.8.dp.toPx(),
+                    color = lerp(page, muted, 0.06f + 0.09f * dot.y),
+                    radius = 0.9.dp.toPx(),
                     center = Offset(dot.x * size.width, dot.y * size.height)
                 )
             }
@@ -3126,7 +3156,7 @@ private fun DrawerLaneStarMap(
             //    regular mesh. ──
             links.forEach { link ->
                 drawLine(
-                    color = lerp(panel, muted, 0.30f),
+                    color = lerp(page, muted, 0.34f),
                     start = at(link.first),
                     end = at(link.second),
                     strokeWidth = 1.dp.toPx()
@@ -3141,32 +3171,35 @@ private fun DrawerLaneStarMap(
                 val born = ((lit.value - wait) / (1f - wait)).coerceIn(0f, 1f)
                 if (born <= 0f) return@forEachIndexed
                 val fraction = (lane.knowledge.toFloat() / strongest).coerceIn(0f, 1f)
-                val core = if (lane.explored) (2.2f + 3.4f * fraction) * born else 0f
+                // v422 — THE PICK MAKES THE STAR COME ON. It grows and its halo
+                // steps brighten toward the lane's own accent; there is no ring
+                // any more, because a circle drawn around a star read as
+                // furniture rather than as the star answering.
+                val picked = lane.id == selected
                 if (lane.explored) {
+                    val core = (2.2f + 3.4f * fraction) * born * (if (picked) 1.5f else 1f)
                     val corePx = core.dp.toPx()
-                    // Halo, mid ring, core — three OPAQUE steps of the panel
+                    // Halo, mid ring, core — three OPAQUE steps of the PAGE
                     // mixed toward the lane's accent (no alpha anywhere).
-                    drawCircle(lerp(panel, lane.accent, 0.16f), corePx * 2.6f, centre)
-                    drawCircle(lerp(panel, lane.accent, 0.40f), corePx * 1.5f, centre)
-                    drawCircle(lerp(panel, lane.accent, 0.94f), corePx, centre)
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.30f else 0.16f), corePx * 2.6f, centre)
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.62f else 0.40f), corePx * 1.5f, centre)
+                    drawCircle(lerp(page, lane.accent, 0.94f), corePx, centre)
+                } else if (picked) {
+                    // A lane you have not started still answers a tap: it lights
+                    // in its own colour at the smallest lit size, so the readout
+                    // under the map and the star agree about which one was
+                    // picked.
+                    val corePx = 3.6f.dp.toPx()
+                    drawCircle(lerp(page, lane.accent, 0.26f), corePx * 2.4f, centre)
+                    drawCircle(lerp(page, lane.accent, 0.55f), corePx * 1.4f, centre)
+                    drawCircle(lerp(page, lane.accent, 0.94f), corePx, centre)
                 } else {
-                    // Unexplored: a dim hollow point — present, but plainly
-                    // not lit yet.
+                    // Unexplored: a SOLID dim point — present, but plainly not
+                    // lit yet.
                     drawCircle(
-                        color = lerp(panel, muted, 0.06f + 0.28f * born),
-                        radius = 2.4f.dp.toPx(),
-                        center = centre,
-                        style = Stroke(width = 1.dp.toPx())
-                    )
-                }
-                // The picked star wears an orbit — the one piece of chrome the
-                // map adds, so a tap is unambiguous without a single label.
-                if (lane.id == selected) {
-                    drawCircle(
-                        color = lerp(panel, lane.accent, 0.85f),
-                        radius = (if (lane.explored) core + 5.5f else 7f).dp.toPx(),
-                        center = centre,
-                        style = Stroke(width = 1.4f.dp.toPx())
+                        color = lerp(page, muted, 0.20f + 0.30f * born),
+                        radius = 2.6f.dp.toPx(),
+                        center = centre
                     )
                 }
             }
@@ -3174,8 +3207,13 @@ private fun DrawerLaneStarMap(
     }
 }
 
-/** How many faint dust specks fill the sky behind the stars. */
-private const val STAR_DUST_COUNT = 46
+/**
+ * How many faint dust specks fill the sky behind the stars.
+ *
+ * v422 — 56, not 46: the sky is taller now, and the dust is what gives a
+ * backgroundless scatter its depth, so it has to cover the area it grew into.
+ */
+private const val STAR_DUST_COUNT = 56
 
 /**
  * v414 — ONE LANE'S PLACE ON THE CHART: a polar SLOT (angle + radius), not a

@@ -26,6 +26,7 @@ FIX:
 - Appearance: a named theme's light hero is airy, not a heavy slab — Jade, Orchid, Ocean, Sand and Ember now wear a soft banner with the theme's own deep ink, in the app's own banner language.
 - Appearance: a named theme's dark twin is calm and deep — the hero was so bright that pale words could not read on it (Jade worst, then Orchid) and every element around it felt washed; the page is a quieter jewel and the hero a deep one that carries its pale ink.
 - Theme: the Curio rose is muted at night — the dark banner carried the light hero's vibrancy onto a black page and read as neon.
+- Home: the drawer's sky has no plate under it — the star pattern is drawn straight on the drawer, the sky is taller so the scatter reaches further, an untouched lane's point is a solid dot instead of a hollow circle, and the picked star lights up in its own colour instead of wearing a ring drawn around it; every tone in it now reads from the drawer's own surface in white and in dark.
 - Home and Profile: accents read on the deepest card again — a named theme's own accent ink now clears the bar where it used to sit just under it, which is where buttons and text blended.
 
 ADD:

@@ -96,6 +96,48 @@ Confirmed with the member via `ask_user`:
 - The voice note's scrubber maps the finger across the WHOLE strip while the wave is drawn
   inside a half-stroke inset — under ~2% of the strip, no audible difference.
 
+## 6. The request that followed (this session, drawer)
+
+> "no in the drawer the pattern is good, now remove its background just keep the
+> pattern, increase the size, make the dots of it solid filled. and tapping them
+> the highlight is bad fix that too, and fix its colors in both white and dark
+> mode just the drawer, and before pushing check the ci if its green then push or
+> else just commit"
+
+Confirmed with the member via `ask_user`:
+
+- "increase the size" is **the whole pattern** (not just the dots), with the dots
+  solid at their current size.
+- The picked star's highlight should be **the star lighting up, no ring**.
+
+## 7. What was built
+
+- **The map's plate is gone** — `DrawerLaneStarMap` lost its
+  `surfaceContainerHigh` fill, its 18dp clip and its corner radius, so the
+  pattern is drawn straight on the drawer. Every tone (dust, hairlines, each
+  star's three steps) now mixes from `page = MaterialTheme.colorScheme.surface`
+  — the surface it actually sits on — which is also the colour fix in both modes:
+  mixing toward a plate that is no longer there is what made the halos look like
+  plate-tinted blobs.
+- **The sky is taller** — `DrawerStarMapHeight` 254 → 320dp, because `starPoint`
+  scales a polar radius by half the box's SHORTER side, so on a phone drawer the
+  height is the only dial that can enlarge the pattern. `STAR_DUST_COUNT` 46 → 56
+  with it.
+- **Solid points** — an untouched lane is a solid dim dot; the hollow `Stroke`
+  circle is gone (and with it the file's only use of `Stroke`).
+- **The pick comes on** — the orbit ring is deleted. A picked lane's core grows
+  1.5× and its halo steps brighten toward the lane's own accent; an unexplored
+  lane lights too (at the smallest lit size), so a tap on a lane you have not
+  started still answers.
+
+## 8. Verification
+
+- Brace/paren balance on `HomeScreen.kt` 411/411 and 1335/1335; no `panel`
+  reference left outside comments; `Stroke` import removed (no longer used).
+- No Gradle in this environment — CI validates the compile. The push for this
+  change was gated on the previous run being green (member's instruction: "check
+  the ci if its green then push or else just commit").
+
 ---
 
 ## User prompts
@@ -104,4 +146,4 @@ Confirmed with the member via `ask_user`:
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- (none — this request is logged above as §1–§5)
+- (none — both requests are logged above as §1–§8)

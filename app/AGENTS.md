@@ -8589,7 +8589,7 @@ two-pane branches are one copy per branch, not a duplicate on screen.
 ### The drawer and the lane grid — no more painted constellation (v409)
 - **The navigation drawer is the BRAIN PANEL and nothing else.** `HomeDrawerContent`'s LazyColumn holds exactly two items: `DrawerBrainPanel` (the "YOUR BRAIN" card + the lane grid) and `DrawerFooter`. The row menu is gone for good: `DrawerNavRow`, `DrawerNavItem`, the collapsible "Your Curiosity" group (Topic History / Manage categories / Browse topics), the "Quests & Levels" row, the whole "About" group (Support & diagnostics / Replay intro) and both `rememberSaveable` expansion flags are DELETED. Nothing lost a door — Topic history and Manage categories are Settings rows, Browse topics is Home's own browse pill, Quests is Profile's progress card AND the Stats progress card, Support & Replay intro are Settings rows under Safety & support. **Do not re-add a navigation menu to the drawer**; a door belongs on the surface that owns it.
 - **The "YOUR BRAIN" row is the drawer panel's ONE door** (`onOpenStats` → `CurioRoutes.STATS`). The lane tiles only SELECT, so the drawer can never offer two doors to one destination again.
-- **`ui/components/CurioLaneGrid.kt` is the shared LANE DATA, not the drawing.** `LaneGridItem` + `laneGridItems(knowledge)` build the items (explored lanes first by knowledge, then the rest in the member's own lane order, hidden lanes excluded) and BOTH lane surfaces read them, so the drawer and the Stats page can never disagree about which lanes exist or what they hold. `CurioLaneDetailStrip` is the selected lane's own line (`name · saved · knowledge` + an action slot) and is the one piece both surfaces still draw. `CurioConstellation.kt` (the Canvas star map, its star tables, the nebula/starfield painters and the 3D zoom) is DELETED. **v413: each surface draws its own shape from that data** — the drawer is a PAINTED chart (`DrawerLaneStarMap`, ring-and-spoke lattice, in `HomeScreen.kt`) because a map is what a drawer wants, and the Stats page is a bar list (`LaneStatsGraph`) because a chart is what a statistics page wants. The `CurioLaneGrid` composable itself has no caller left (nothing to remove without asking — left in place, unreferenced). Do not reintroduce a second item model or a second `laneGridItems`: the DATA is what must stay single, not the shape.
+- **`ui/components/CurioLaneGrid.kt` is the shared LANE DATA, not the drawing.** `LaneGridItem` + `laneGridItems(knowledge)` build the items (explored lanes first by knowledge, then the rest in the member's own lane order, hidden lanes excluded) and BOTH lane surfaces read them, so the drawer and the Stats page can never disagree about which lanes exist or what they hold. `CurioLaneDetailStrip` is the selected lane's own line (`name · saved · knowledge` + an action slot) and is the one piece both surfaces still draw. `CurioConstellation.kt` (the Canvas star map, its star tables, the nebula/starfield painters and the 3D zoom) is DELETED. **v413: each surface draws its own shape from that data** — the drawer is a PAINTED chart (`DrawerLaneStarMap` — a golden-angle star scatter drawn on the drawer's own page, no plate, in `HomeScreen.kt`) because a map is what a drawer wants, and the Stats page is a bar list (`LaneStatsGraph`) because a chart is what a statistics page wants. The `CurioLaneGrid` composable itself has no caller left (nothing to remove without asking — left in place, unreferenced). Do not reintroduce a second item model or a second `laneGridItems`: the DATA is what must stay single, not the shape.
 - **The constellation's two Experiments switches are gone** (`starZoom3dState` / `KEY_STAR_ZOOM_3D`, `drawerConstellationState` / `KEY_DRAWER_CONSTELLATION`, and `AppPreferences.isStarZoom3dEnabled` / `setStarZoom3dEnabled` / `isDrawerConstellationEnabled` / `setDrawerConstellationEnabled`). The Experiments screen's old "Constellation" section is now **Navigation** and holds only the nav-bar "Classic active indicator" row. Those experiments concluded, so the winning path is hardcoded — do not re-gate them.
 - **The Stats page ("Your Curiosity") is four instruments in `features/stats/StatsScreen.kt`:** `ProgressCard` (streak + level/XP + journey stages + medals + the Quests door — it REPLACES the old separate `StreakLevelCard` and `JourneyCard`, which were two cards about the same number), `BrainCard` (the six `brainProfile` dimensions as meters, with the tip printed for the WEAKEST dimension only — it used to print six paragraphs), `LaneMapCard` (v413: `LaneStatsGraph` — the ranked horizontal BAR LIST, knowledge per lane, strongest first, cut to `LANE_BARS_SHOWN` = 7 so the card's height never depends on how many lanes were met, bars scaled against the strongest lane and grown in with one `animateFloatAsState`; a row is a tap that selects, and the readout strip + single `Cabinet` door render only for the SELECTED lane, through `PendingCabinetFilter.request` + `navigateToTab` — it used to be the interactive 24-tile grid, which was a navigation surface wearing a statistics label), and `LifetimeTotalsCard` (compact counter panes). `StatsConstellationCard`, `LanesBreakdownCard` ("Your lanes" — the list that repeated the map) and `StatsSummaryChip` are DELETED, and `StatsCard`'s shell is the app-wide WHITE card (`surfaceContainerLowest` + an `outlineVariant` hairline), not the old seafoam lerp.
 - **Audit follow-up (v409):** a fresh sweep for duplicate copy and duplicate doors found only the legitimate patterns — per-row navigations (`revealFor` / `socialProfile` / `directMessage` once per list item) and the phone/two-pane or empty/list BINARY branches, which are one copy per branch rather than two on screen. Nothing else was co-visible duplication.
@@ -9295,7 +9295,8 @@ rather than for the ink it has to carry.
 
 - **IT COVERS MORE OF THE DRAWER.** `DrawerStarMapHeight` 188dp → **254dp**
   (v414) — at the old height the chart read as a strip wedged between the brain
-  stats and the lane readout; that part still holds.
+  stats and the lane readout; that part still holds. **v422: 254 → 320dp** (see
+  the star-map section — the height is the only dial that sizes the pattern).
 - **POSITION: a golden-angle scatter with a hashed wobble.** `starScatter(count)`
   replaces `starLattice` — the member reversed v414: "the drawer graph is bad …
   the previous version was at least better … its too symmetric". The i-th star
@@ -9466,14 +9467,32 @@ rather than for the ink it has to carry.
 - `DrawerLaneStarMap` replaces the lane grid in the drawer: one star per lane,
   phyllotaxis-scattered by lane COUNT (`starScatter`) so a star never moves when
   knowledge changes, sized and brightened by knowledge, coloured by the lane's
-  own accent, and joined to its two nearest neighbours (`starLinks`). Stars are
-  TAPPABLE (a 30dp halo, nearest star wins) and the selected one wears an orbit;
-  the readout under the map is `CurioLaneDetailStrip`. `CurioLaneGrid` still
-  serves the Stats page — only the drawer changed.
-- Nothing on that canvas is transparent (every colour is an opaque `lerp` of the
-  panel toward the ink), and the light-up is a ONE-SHOT `Animatable`, never an
-  infinite transition: the drawer is composed while it is closed, so an idle
-  twinkle would spend the battery on a surface nobody is looking at.
+  own accent, and joined to its nearest neighbour (`starLinks`). Stars are
+  TAPPABLE (a 30dp halo, nearest star wins) and the readout under the map is
+  `CurioLaneDetailStrip`. `CurioLaneGrid` still serves the Stats page — only the
+  drawer changed.
+- **v422 — NO PLATE, AND THE PAGE IS THE BASE.** The map used to carry its own
+  `surfaceContainerHigh` panel (fill + 18dp clip) and every tone in the drawing
+  was an opaque `lerp` FROM that panel — which is what made the halos look like
+  plate-tinted blobs. The panel is gone (the pattern is the whole thing, drawn
+  straight on the drawer) and **`page` = `MaterialTheme.colorScheme.surface` is
+  the base for the dust, the hairlines and all three of a star's steps**. If the
+  drawer's container colour ever changes, this base changes with it.
+- **v422 — THE HEIGHT IS THE ONLY DIAL THAT SIZES THE PATTERN.** `starPoint`
+  multiplies a polar radius by HALF THE BOX'S SHORTER SIDE, so on a phone drawer
+  (`DrawerStarMapHeight` 320dp < the sheet's width) the sky's diameter can never
+  exceed that height. Widening the drawer moves not one star. 254 → 320dp is how
+  "incrase the size" was answered; `STAR_DUST_COUNT` went 46 → 56 with it.
+- **The picked star LIGHTS UP; there is no orbit ring.** Its core grows 1.5× and
+  its two halo steps brighten toward the lane's accent, and an UNEXPLORED lane
+  lights too (at the smallest lit size) so a tap on a lane you have not started
+  still answers. The ring was removed because a circle drawn around a star read
+  as chrome rather than as the star responding. An untouched lane is a SOLID dim
+  point, never a hollow `Stroke` circle.
+- Nothing on that canvas is transparent (every colour is an opaque `lerp`), and
+  the light-up is a ONE-SHOT `Animatable`, never an infinite transition: the
+  drawer is composed while it is closed, so an idle twinkle would spend the
+  battery on a surface nobody is looking at.
 
 ### The reader owns the page it is showing
 
