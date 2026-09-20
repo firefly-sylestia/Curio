@@ -15,6 +15,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -30,10 +31,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,17 +54,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.media3.common.AudioAttributes
@@ -70,12 +82,12 @@ import androidx.navigation.NavController
 import com.curio.app.data.AudioStorageManager
 import com.curio.app.data.PersonalAudioBars
 import com.curio.app.features.capture.AudioRecorder
-import com.curio.app.ui.components.LiveWaveform
 import com.curio.app.ui.components.WaveformExtractor
 import com.curio.app.ui.components.formatRecordingTime
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.curioTintOn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -406,10 +418,25 @@ internal fun PersonalVoiceRecorderCapsule(
         animationSpec = infiniteRepeatable(tween(760), RepeatMode.Reverse),
         label = "voice-recording-pulse"
     )
+    // ── v421 — THE CAPSULE SPEAKS THE NOTE'S LANGUAGE ───────────────────
+    //
+    // It used to be a 50%-radius pill running the bar-chart meter, which is the
+    // one drawing the member had already retired on the note itself ("make its
+    // graph the aduio graph pulse wave hand drawn style"). A recording under way
+    // is a PREVIEW of the note it is about to become, so it now wears the same
+    // three things the note does: the drawn pulse as a live meter, the clock in
+    // the page's serif face, and a soft card instead of a pill (a 22dp radius — 
+    // a capsule read as a system control, and this is part of the page). The
+    // fill is an OPAQUE tint of the floating surface rather than an alpha wash,
+    // so its shadow stays clean (see the shadow rule in the root AGENTS.md).
     Surface(
-        shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 8.dp,
+        shape = RoundedCornerShape(22.dp),
+        color = curioTintOn(
+            MaterialTheme.colorScheme.surfaceContainerHigh,
+            accent,
+            0.10f
+        ),
+        shadowElevation = 6.dp,
         modifier = modifier
     ) {
         Row(
@@ -424,15 +451,18 @@ internal fun PersonalVoiceRecorderCapsule(
             )
             Text(
                 session.elapsed,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = ink
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = FrauncesFontFamily
+                ),
+                color = ink.copy(alpha = 0.9f)
             )
-            LiveWaveform(
-                color = accentInk,
-                active = !session.paused,
-                barCount = 22,
+            LiveVoiceWave(
                 level = session.level,
-                modifier = Modifier.width(74.dp).height(26.dp)
+                active = !session.paused,
+                ink = ink.copy(alpha = 0.62f),
+                accent = accentInk,
+                modifier = Modifier.width(84.dp).height(28.dp)
             )
             if (session.paused) {
                 Text(
@@ -445,19 +475,19 @@ internal fun PersonalVoiceRecorderCapsule(
             VoiceControl(
                 glyph = if (session.paused) CurioIcons.PlayArrow else CurioIcons.Pause,
                 label = if (session.paused) "Resume recording" else "Pause recording",
-                tint = ink,
+                tint = ink.copy(alpha = 0.85f),
                 onClick = { if (session.paused) session.resume() else session.pause() }
             )
             VoiceControl(
                 glyph = CurioIcons.Close,
                 label = "Discard the recording",
-                tint = ink.copy(alpha = 0.7f),
+                tint = ink.copy(alpha = 0.6f),
                 onClick = onDiscard
             )
             Surface(
                 onClick = onKeep,
                 shape = CircleShape,
-                color = accent,
+                color = accentInk,
                 modifier = Modifier.size(38.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -465,6 +495,45 @@ internal fun PersonalVoiceRecorderCapsule(
                 }
             }
         }
+    }
+}
+
+/**
+ * v421 — THE LIVE METER, DRAWN LIKE THE NOTE IT IS MAKING.
+ *
+ * The same rolling history the old bar meter kept (one entry per 70ms, eased
+ * toward the recorder's real level), drawn as the note's own [drawVoicePulse].
+ * The played part is the whole strip while it is live — a recording in progress
+ * has been "heard" all the way to its own front.
+ */
+@Composable
+internal fun LiveVoiceWave(
+    level: Float,
+    active: Boolean,
+    ink: Color,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    barCount: Int = 40
+) {
+    val levelState by rememberUpdatedState(level)
+    val history = remember(barCount) { FloatArray(barCount) { 0.06f } }
+    var tick by remember { mutableIntStateOf(0) }
+    LaunchedEffect(active, barCount) {
+        while (true) {
+            val target = if (active) levelState.coerceIn(0f, 1f) else 0.06f
+            if (barCount > 0) {
+                for (i in 0 until barCount - 1) history[i] = history[i + 1]
+                val front = history[barCount - 1]
+                history[barCount - 1] = (front + (target - front) * 0.65f).coerceIn(0.06f, 1f)
+            }
+            tick++
+            delay(70)
+        }
+    }
+    val drawn = tick
+    Canvas(modifier) {
+        if (drawn < 0) return@Canvas
+        drawVoicePulse(history, 1f, ink, accent)
     }
 }
 
@@ -493,10 +562,19 @@ private fun VoiceControl(
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * A VOICE NOTE AS IT SITS IN A PAGE: a round play/pause and the waveform, with
- * the played part filled in [accent]. Tap or drag ANYWHERE along the bars to
- * jump to that moment (the whole strip is the scrubber — a timestamp should
- * never need a handle to be findable).
+ * A VOICE NOTE AS IT SITS IN A PAGE: a play control and the waveform, with the
+ * part that has been HEARD filled in [accent]. Tap or drag ANYWHERE along the
+ * bars to jump to that moment (the whole strip is the scrubber — a timestamp
+ * should never need a handle to be findable).
+ *
+ * v421 — THE NOTE HAS LOOKS ([PersonalVoiceStyle]), picked from a control on
+ * the note itself while the page is being EDITED and remembered per recording.
+ * Every look pairs a WAVE DRAWING with a PLAY TREATMENT, because those are the
+ * two things the member pointed at when they asked for styles ("the voice note
+ * looks adds differnt waves and button styles"). The default — the drawn pulse
+ * with a drawn play mark — is the one the member described in full: the control
+ * stops being a Material disc parked beside a hand-drawn wave and becomes part
+ * of the drawing.
  */
 @Composable
 internal fun PersonalVoiceBar(
@@ -506,9 +584,14 @@ internal fun PersonalVoiceBar(
     ink: Color,
     accent: Color,
     modifier: Modifier = Modifier,
+    /** The note's look. Absent on an older note: the drawn wave. */
+    style: PersonalVoiceStyle = PersonalVoiceStyle.HAND,
     /** Non-null in the EDITOR: the ✕ that throws the recording away with the
      *  block. The read-only views pass nothing. */
-    onRemove: (() -> Unit)? = null
+    onRemove: (() -> Unit)? = null,
+    /** Non-null in the EDITOR: the door to the look picker. A read-only view
+     *  renders the stored look and offers no way to change it. */
+    onStyle: ((PersonalVoiceStyle) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val samples = remember(bars) { PersonalAudioBars.decode(bars) }
@@ -518,6 +601,8 @@ internal fun PersonalVoiceBar(
     var duration by rememberSaveable(path) { mutableLongStateOf(seconds * 1000L) }
     /** The ✕ holds here until the member says yes (see the dialog below). */
     var confirmRemove by remember(path) { mutableStateOf(false) }
+    /** The look picker (editor only — see [onStyle]). */
+    var pickingStyle by remember(path) { mutableStateOf(false) }
 
     // A stored audio path is an absolute file path — wrap it, or ExoPlayer's
     // data source parses it as a schemeless URI and plays nothing.
@@ -606,36 +691,72 @@ internal fun PersonalVoiceBar(
     // casts nothing (user request: "for voice note in journal dont give it the
     // shadow keep it how it was ith no backgroud"). No box and no halo — the
     // play button, the drawn pulse and the clock, sitting on the page itself.
+    // The BUBBLE look wears its chrome as a fill BEHIND the strip rather than as
+    // a second layout: a voice message is the same three things in one bubble,
+    // and one row can say both. Its fill is an OPAQUE tint of the card it sits
+    // on (never an alpha wash), so nothing shows through it.
+    val bubble = style == PersonalVoiceStyle.BUBBLE
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(end = 8.dp, top = 4.dp, bottom = 4.dp),
+            .then(
+                if (bubble) {
+                    Modifier
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            curioTintOn(
+                                MaterialTheme.colorScheme.surfaceContainerLow,
+                                accent,
+                                0.14f
+                            )
+                        )
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                } else {
+                    Modifier.padding(end = 8.dp, top = 4.dp, bottom = 4.dp)
+                }
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // v404 — AND A DARK, SOLID, FILLED PLAY BUTTON.
+        // ── v421 — THE PLAY CONTROL, IN THE NOTE'S OWN LANGUAGE ──────────
         //
-        // The control has been round this loop before: v389's filled accent disc
-        // came off in favour of a bare accent glyph, and the member has settled
-        // it the other way — the disc is back, DARK and filled, with the glyph
-        // knocked out of it in the page's own paper (user request: "with dark
-        // solif filled play button"). It is the same treatment the record button
-        // wears ([PersonalVoiceButton]), so the two controls on a voice note are
-        // one shape in one ink and the mark reads as pressed rather than as
-        // decoration.
-        Surface(
-            onClick = { toggle() },
-            shape = CircleShape,
-            color = personalAccentInk(),
-            modifier = Modifier.size(38.dp)
-        ) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CurioIcon(
-                    if (isPlaying) CurioIcons.Pause else CurioIcons.PlayArrow,
-                    if (isPlaying) "Pause the voice note" else "Play the voice note",
-                    tint = MaterialTheme.colorScheme.surface,
-                    size = 22.dp
-                )
+        // v404 made it a dark, solid, filled disc, and the member took it back
+        // with the wave beside it in view: a Material disc next to a hand-drawn
+        // line is two drawings in one strip, and the disc is the odd one
+        // (user request: "the play button doesnt matches the wave look as its a
+        // pill"). The two bare looks DROP THE DISC and draw the mark in the
+        // wave's own ink and weight, so the whole note is one drawing; the two
+        // that keep a filled control keep a REAL one (a round disc is the voice
+        // message's own mark, and the bubble is that language).
+        when (style) {
+            PersonalVoiceStyle.HAND -> VoiceDrawnControl(
+                playing = isPlaying,
+                tint = ink.copy(alpha = 0.86f),
+                ring = null,
+                label = if (isPlaying) "Pause the voice note" else "Play the voice note",
+                onClick = { toggle() }
+            )
+            PersonalVoiceStyle.MINIMAL -> VoiceDrawnControl(
+                playing = isPlaying,
+                tint = ink.copy(alpha = 0.80f),
+                ring = ink.copy(alpha = 0.26f),
+                label = if (isPlaying) "Pause the voice note" else "Play the voice note",
+                onClick = { toggle() }
+            )
+            else -> Surface(
+                onClick = { toggle() },
+                shape = CircleShape,
+                color = personalAccentInk(),
+                modifier = Modifier.size(38.dp)
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        if (isPlaying) CurioIcons.Pause else CurioIcons.PlayArrow,
+                        if (isPlaying) "Pause the voice note" else "Play the voice note",
+                        tint = MaterialTheme.colorScheme.surface,
+                        size = 22.dp
+                    )
+                }
             }
         }
         Box(
@@ -691,98 +812,13 @@ internal fun PersonalVoiceBar(
             // of the writing and not a card in it.
             Canvas(Modifier.fillMaxSize()) {
                 if (samples.isEmpty()) return@Canvas
-                val count = samples.size
-                val mid = size.height / 2f
-                val playedUpTo = size.width * progress
-
-                // A stable little wobble, which is what makes the stroke read as
-                // drawn by hand instead of plotted.
-                fun wobble(seed: Int): Float {
-                    val hash = seed * 374761393 + 668265263
-                    val mixed = (hash xor (hash shr 13)) * 1274126177
-                    return ((mixed % 1000).toFloat() / 1000f - 0.5f) * size.height * 0.10f
+                // The two looks that are NOT the drawn pulse draw themselves (see
+                // [drawVoiceWave]); HAND and BUBBLE are the pulse below.
+                if (style == PersonalVoiceStyle.BARS || style == PersonalVoiceStyle.MINIMAL) {
+                    drawVoiceWave(samples, progress, ink, accent, style)
+                    return@Canvas
                 }
-
-                // How far the voice reaches from the centre for a level. A floor
-                // of 8% keeps a quiet passage reading as a voice rather than as
-                // a break in the line.
-                fun reach(level: Float): Float =
-                    (level.coerceIn(0f, 1f) * 0.40f + 0.08f) * size.height
-
-                // The buckets — the loudest sample of each one — so the wave
-                // keeps the peaks of a fast passage without drawing every one.
-                // v412 — 18, not 26: at 26 a phone-width strip turns a rise and
-                // a fall every ~8dp, which reads as a fuzzy band rather than as
-                // the pulse of a sentence.
-                val buckets = 18
-                val perBucket = (count + buckets - 1) / buckets
-                val stepCount = (count + perBucket - 1) / perBucket
-                val span = (stepCount - 1).coerceAtLeast(1).toFloat()
-
-                // v412 — THE POINTS FIRST, THEN ONE SMOOTH STROKE THROUGH THEM.
-                //
-                // A hard `lineTo` at every step is a sawtooth: every peak is a
-                // corner and every corner is a spike, which at this stroke
-                // weight reads as a scribble rather than as a voice (member:
-                // "for the voice note graph in journal it looks so bad can u fix
-                // it please"). Each rise and fall is a CUBIC segment whose two
-                // control points sit at the midpoint between the steps, so the
-                // wave keeps its peaks but curves into them — a drawn pulse.
-                val points = ArrayList<Offset>(stepCount)
-                for (step in 0 until stepCount) {
-                    val from = step * perBucket
-                    val to = (from + perBucket).coerceAtMost(count)
-                    var loudest = 0f
-                    for (i in from until to) {
-                        val level = samples[i]
-                        if (level > loudest) loudest = level
-                    }
-                    val x = size.width * step / span
-                    val side = if (step % 2 == 0) -1f else 1f
-                    val y = (mid + side * reach(loudest) + wobble(from))
-                        .coerceIn(1f, size.height - 1f)
-                    points.add(Offset(x, y))
-                }
-                val wave = Path()
-                points.firstOrNull()?.let { first -> wave.moveTo(first.x, first.y) }
-                for (i in 1 until points.size) {
-                    val prev = points[i - 1]
-                    val point = points[i]
-                    val midX = (prev.x + point.x) / 2f
-                    wave.cubicTo(midX, prev.y, midX, point.y, point.x, point.y)
-                }
-
-                // v412 — HEAVIER INK. A 0.085 stroke of the page's ink at 60%
-                // is a hairline on parchment, which is what made the strip look
-                // weak; the line, its depth pass and its played part are all
-                // read at a weight that stands on the page now.
-                val stroke = Stroke(
-                    width = (size.height * 0.11f).coerceAtLeast(1.8f),
-                    cap = StrokeCap.Round,
-                    join = StrokeJoin.Round
-                )
-                // ── DEPTH — the same line, a hair lower, drawn soft. ──
-                translate(top = size.height * 0.06f) {
-                    drawPath(wave, ink.copy(alpha = 0.22f), style = stroke)
-                }
-                // ── THE WHOLE NOTE in the page's ink — and the part that has
-                // been HEARD in the note's own colour, cut at the playhead. ──
-                drawPath(wave, ink.copy(alpha = 0.72f), style = stroke)
-                if (playedUpTo > 0f) {
-                    clipRect(right = playedUpTo) {
-                        drawPath(wave, accent, style = stroke)
-                    }
-                }
-                // The playhead, so a scrub lands where the eye expects.
-                if (progress > 0f) {
-                    drawLine(
-                        color = accent,
-                        start = Offset(playedUpTo, 1f),
-                        end = Offset(playedUpTo, size.height - 1f),
-                        strokeWidth = 2f.dp.toPx(),
-                        cap = StrokeCap.Round
-                    )
-                }
+                drawVoicePulse(samples, progress, ink, accent)
             }
         }
         // v390 — ONE FIGURE, NEVER TWO.
@@ -796,19 +832,55 @@ internal fun PersonalVoiceBar(
         // figures make every digit the same width, so counting up does not
         // twitch either — a recording of a minute or less reads as `m:ss` in
         // both states, which is the same width digit for digit.
+        // ── v421 — THE CLOCK IS PART OF THE DRAWING TOO ─────────────────
+        //
+        // The member named the number in the same breath as the play button —
+        // "the play button doesnt matches the wave look as its a pill. also the
+        // number" — and they are right: beside a hand-drawn line a plain UI
+        // label reads as a caption borrowed from another app. In the two BARE
+        // looks the clock takes the page's editorial face (the Fraunces serif
+        // the app already sets its heads in) at the wave's own ink, so the strip
+        // is one hand. The disc looks keep the plain label, which is what a
+        // voice message's own clock is.
+        val drawnLook = style == PersonalVoiceStyle.HAND ||
+            style == PersonalVoiceStyle.MINIMAL
+        val clock = MaterialTheme.typography.labelMedium.copy(
+            fontWeight = FontWeight.SemiBold,
+            fontFeatureSettings = "tnum"
+        )
         Text(
             if (isPlaying || position > 0L) {
                 formatRecordingTime((position / 1000L).toInt())
             } else {
                 formatRecordingTime(seconds)
             },
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontFeatureSettings = "tnum"
-            ),
-            color = ink.copy(alpha = 0.7f),
+            style = if (drawnLook) clock.copy(fontFamily = FrauncesFontFamily) else clock,
+            color = ink.copy(alpha = if (drawnLook) 0.82f else 0.7f),
             maxLines = 1
         )
+        // ── v421 — THE LOOK PICKER'S DOOR (editor only) ────────────────
+        //
+        // A quiet mark beside the ✕ rather than a pill of its own: the note is
+        // part of the writing and the strip is not a toolbar, so the door to its
+        // looks is drawn at the same weight as the rest of the furniture — its
+        // shape is previewed in the sheet, which is where a look is chosen.
+        if (onStyle != null) {
+            Surface(
+                onClick = { pickingStyle = true },
+                shape = CircleShape,
+                color = Color.Transparent,
+                modifier = Modifier.size(30.dp)
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        CurioIcons.Tune,
+                        "Change the voice note style",
+                        tint = ink.copy(alpha = 0.45f),
+                        size = 16.dp
+                    )
+                }
+            }
+        }
         if (onRemove != null) {
             Surface(
                 // v389 — ASKS FIRST. The ✕ sits beside the play button, on the
@@ -853,6 +925,490 @@ internal fun PersonalVoiceBar(
             }
         )
     }
+    if (pickingStyle && onStyle != null) {
+        PersonalVoiceStyleSheet(
+            current = style,
+            ink = ink,
+            accent = accent,
+            samples = samples,
+            onPick = {
+                onStyle(it)
+                pickingStyle = false
+            },
+            onDismiss = { pickingStyle = false }
+        )
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// The note's looks
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * v421 — HOW A VOICE NOTE IS DRAWN.
+ *
+ * Each entry is a WAVE DRAWING *and* a play treatment, because those are the
+ * two halves of what a note looks like and pairing them is what keeps a look
+ * coherent: a hand-drawn pulse beside a filled Material disc was exactly the
+ * mismatch the member reported.
+ *
+ *  · [HAND] — the drawn pulse in ink, a drawn play mark, the clock in the
+ *    page's serif face. The default, and the one the member described.
+ *  · [BARS] — rounded columns on a centre line (the v389 drawing) with the
+ *    filled disc: the plainest, most utilitarian reading of a voice.
+ *  · [BUBBLE] — the pulse inside a soft bubble with a disc, the voice-MESSAGE
+ *    language: the note as something that was SENT rather than drawn.
+ *  · [MINIMAL] — one flat line with the played run and a dot, and an outlined
+ *    mark: the note reduced to the single fact that it is playing.
+ *
+ * The key is what the document stores, so these strings are a contract: never
+ * rename one — a new look is a new key, and an unknown key reads as [HAND].
+ */
+internal enum class PersonalVoiceStyle(val key: String, val label: String, val hint: String) {
+    HAND("hand", "Hand-drawn", "A drawn pulse in ink, with a drawn play mark"),
+    BARS("bars", "Bars", "Rounded columns on a centre line, with a filled disc"),
+    BUBBLE("bubble", "Bubble", "A soft bubble holding the wave — a voice message"),
+    MINIMAL("minimal", "Minimal", "One thin line and a dot, with an outlined mark");
+
+    companion object {
+        /** The stored key, or [HAND] — the look every earlier note already had. */
+        fun fromKey(key: String?): PersonalVoiceStyle =
+            entries.firstOrNull { it.key == key } ?: HAND
+    }
+}
+
+/**
+ * THE PULSE — the note as a single hand-drawn line.
+ *
+ * Everything is measured from ONE BAND, and the band is what makes the drawing
+ * safe: it is inset by half a stroke on every side, so the loudest possible
+ * sample still leaves the ink inside the canvas. `bandBottom` reserves the depth
+ * pass's own drop as well, because the depth line is drawn a hair lower than the
+ * main one and used to be the first thing to run off the bottom on a loud note.
+ *
+ * The stroke is ONE line crossing the centre on every step: each peak of the
+ * voice is one rise and one fall, never a shape mirrored under itself. Two
+ * details keep it legible at 72 stored samples — the samples are BUCKETED (18
+ * steps: the loudest sample of each bucket wins, because a rise and a fall every
+ * 3dp is a fuzzy band rather than a wave) and a stable hand wobble (a hash of the
+ * sample's own index, never a random number, so the ink never crawls while the
+ * note plays).
+ */
+private fun DrawScope.drawVoicePulse(
+    samples: FloatArray,
+    progress: Float,
+    ink: Color,
+    accent: Color
+) {
+    val count = samples.size
+    if (count == 0) return
+    val strokeWidth = (size.height * 0.11f).coerceAtLeast(1.8f)
+    val halfStroke = strokeWidth / 2f
+    val depthDrop = size.height * 0.06f
+    val bandLeft = halfStroke
+    val bandRight = size.width - halfStroke
+    val bandTop = halfStroke
+    val bandBottom = size.height - halfStroke - depthDrop
+    val bandMid = (bandTop + bandBottom) / 2f
+    val bandHalf = ((bandBottom - bandTop) / 2f).coerceAtLeast(1f)
+    val playedUpTo = bandLeft + (bandRight - bandLeft) * progress
+
+    // A stable little wobble, which is what makes the stroke read as drawn by
+    // hand instead of plotted.
+    fun wobble(seed: Int): Float {
+        val hash = seed * 374761393 + 668265263
+        val mixed = (hash xor (hash shr 13)) * 1274126177
+        return ((mixed % 1000).toFloat() / 1000f - 0.5f) * bandHalf * 0.10f
+    }
+
+    // How far the voice reaches from the centre for a level. The floor keeps a
+    // quiet passage reading as a voice rather than as a break in the line, and
+    // the lift is what the band's own half-width can hold.
+    fun reach(level: Float): Float =
+        (level.coerceIn(0f, 1f) * 0.86f + 0.14f) * bandHalf
+
+    val buckets = 18
+    val perBucket = (count + buckets - 1) / buckets
+    val stepCount = (count + perBucket - 1) / perBucket
+    val span = (stepCount - 1).coerceAtLeast(1).toFloat()
+
+    // THE POINTS FIRST, THEN ONE SMOOTH STROKE THROUGH THEM. A hard `lineTo` at
+    // every step is a sawtooth — every peak a corner, every corner a spike — so
+    // each rise and fall is a CUBIC segment whose control points sit at the
+    // midpoint between the steps: the wave keeps its peaks but curves into them.
+    val points = ArrayList<Offset>(stepCount)
+    for (step in 0 until stepCount) {
+        val from = step * perBucket
+        val to = (from + perBucket).coerceAtMost(count)
+        var loudest = 0f
+        for (i in from until to) {
+            val level = samples[i]
+            if (level > loudest) loudest = level
+        }
+        val x = bandLeft + (bandRight - bandLeft) * step / span
+        val side = if (step % 2 == 0) -1f else 1f
+        val y = (bandMid + side * reach(loudest) + wobble(from))
+            .coerceIn(bandTop, bandBottom)
+        points.add(Offset(x, y))
+    }
+    val wave = Path()
+    points.firstOrNull()?.let { first -> wave.moveTo(first.x, first.y) }
+    for (i in 1 until points.size) {
+        val prev = points[i - 1]
+        val point = points[i]
+        val midX = (prev.x + point.x) / 2f
+        wave.cubicTo(midX, prev.y, midX, point.y, point.x, point.y)
+    }
+
+    val stroke = Stroke(
+        width = strokeWidth,
+        cap = StrokeCap.Round,
+        join = StrokeJoin.Round
+    )
+    // DEPTH — the same line, a hair lower, drawn soft, so the ink sits ON the
+    // paper instead of floating over it.
+    translate(top = depthDrop) {
+        drawPath(wave, ink.copy(alpha = 0.22f), style = stroke)
+    }
+    // THE WHOLE NOTE in the page's ink — and the part that has been HEARD in the
+    // note's own colour, cut at the playhead.
+    drawPath(wave, ink.copy(alpha = 0.72f), style = stroke)
+    if (progress > 0f) {
+        clipRect(right = playedUpTo) {
+            drawPath(wave, accent, style = stroke)
+        }
+        // The playhead spans the band, so it can never be clipped either.
+        drawLine(
+            color = accent,
+            start = Offset(playedUpTo, bandTop - halfStroke * 0.5f),
+            end = Offset(playedUpTo, bandBottom + halfStroke * 0.5f),
+            strokeWidth = 2f.dp.toPx(),
+            cap = StrokeCap.Round
+        )
+    }
+}
+
+/**
+ * THE LOOKS THAT ARE NOT THE PULSE: [PersonalVoiceStyle.BARS] and
+ * [PersonalVoiceStyle.MINIMAL].
+ *
+ *  · **BARS** — rounded columns on a centre line, the v389 drawing: the plainest
+ *    way to show a voice, and what a member who wants a meter picks.
+ *  · **MINIMAL** — one flat line with the played run in the accent and a dot at
+ *    the playhead: the note reduced to the fact that it is playing.
+ *
+ * Both measure from the same idea the pulse does — a band, inset so no peak can
+ * reach the canvas edge — for the same reason.
+ */
+private fun DrawScope.drawVoiceWave(
+    samples: FloatArray,
+    progress: Float,
+    ink: Color,
+    accent: Color,
+    style: PersonalVoiceStyle
+) {
+    val bandTop = size.height * 0.12f
+    val bandBottom = size.height * 0.88f
+    val bandMid = size.height / 2f
+    val bandHalf = ((bandBottom - bandTop) / 2f).coerceAtLeast(1f)
+    val played = (size.width * progress).coerceIn(0f, size.width)
+    when (style) {
+        PersonalVoiceStyle.BARS -> {
+            val columns = 42
+            val steps = bucketLevels(samples, columns)
+            val slot = size.width / columns
+            val gap = (slot * 0.30f).coerceAtLeast(0.6f)
+            val barW = (slot - gap).coerceAtLeast(1.2f)
+            steps.forEachIndexed { index, level ->
+                val reach = level.coerceIn(0f, 1f) * bandHalf * 0.88f + bandHalf * 0.12f
+                val h = (reach * 2f).coerceAtLeast(2.4f)
+                val left = index * slot + gap / 2f
+                drawRoundRect(
+                    color = if (left + barW / 2f <= played) accent else ink.copy(alpha = 0.55f),
+                    topLeft = Offset(left, bandMid - h / 2f),
+                    size = Size(barW, h),
+                    cornerRadius = CornerRadius(barW / 2f)
+                )
+            }
+        }
+        PersonalVoiceStyle.MINIMAL -> {
+            val lineW = (size.height * 0.055f).coerceAtLeast(1.2f)
+            drawLine(
+                color = ink.copy(alpha = 0.30f),
+                start = Offset(0f, bandMid),
+                end = Offset(size.width, bandMid),
+                strokeWidth = lineW,
+                cap = StrokeCap.Round
+            )
+            if (progress > 0f) {
+                drawLine(
+                    color = accent,
+                    start = Offset(0f, bandMid),
+                    end = Offset(played, bandMid),
+                    strokeWidth = lineW,
+                    cap = StrokeCap.Round
+                )
+                val r = (size.height * 0.15f).coerceAtLeast(2.4f)
+                drawCircle(
+                    color = accent,
+                    radius = r,
+                    center = Offset(played.coerceIn(r, size.width - r), bandMid)
+                )
+            }
+        }
+        else -> Unit
+    }
+}
+
+/**
+ * THE LOUDEST SAMPLE OF EACH BUCKET, [buckets] of them.
+ *
+ * A waveform is stored at 72 samples so a page can draw it without decoding the
+ * audio, but drawing all 72 across a phone-width strip puts a rise and a fall
+ * every few dp — a fuzzy band, not a wave. Taking the loudest of each bucket
+ * keeps the PEAKS of a fast passage (a quieter mean would flatten exactly the
+ * thing the drawing is about) while giving the stroke room to read.
+ */
+private fun bucketLevels(samples: FloatArray, buckets: Int): FloatArray {
+    if (samples.isEmpty()) return FloatArray(buckets) { 0.08f }
+    val out = FloatArray(buckets)
+    val per = (samples.size + buckets - 1) / buckets
+    for (bucket in 0 until buckets) {
+        val from = bucket * per
+        if (from >= samples.size) {
+            out[bucket] = out[bucket - 1]
+            continue
+        }
+        val to = (from + per).coerceAtMost(samples.size)
+        var loudest = 0f
+        for (i in from until to) {
+            if (samples[i] > loudest) loudest = samples[i]
+        }
+        out[bucket] = loudest
+    }
+    return out
+}
+
+/**
+ * THE PLAY CONTROL, DRAWN.
+ *
+ * [ring] is null for the bare drawn look and a hairline colour for the outlined
+ * one. Either way the mark is a path in the WAVE'S OWN INK at the wave's own
+ * weight, which is the whole point: a note drawn by hand should not have a
+ * Material button parked in the middle of it.
+ */
+@Composable
+private fun VoiceDrawnControl(
+    playing: Boolean,
+    tint: Color,
+    ring: Color?,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** The control's own box. The previews draw the same mark smaller. */
+    controlSize: Dp = 38.dp
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = Color.Transparent,
+        modifier = modifier
+            .size(controlSize)
+            .semantics { contentDescription = label }
+    ) {
+        Canvas(Modifier.fillMaxSize()) {
+            val stroke = (size.minDimension * 0.085f).coerceAtLeast(1.7f)
+            if (ring != null) {
+                drawCircle(
+                    color = ring,
+                    radius = size.minDimension / 2f - stroke / 2f,
+                    style = Stroke(stroke)
+                )
+            }
+            val insetX = if (ring != null) 0.34f else 0.28f
+            val top = size.height * 0.28f
+            val bottom = size.height * 0.72f
+            if (playing) {
+                val left = size.width * 0.40f
+                val right = size.width * 0.60f
+                drawLine(tint, Offset(left, top), Offset(left, bottom), stroke, StrokeCap.Round)
+                drawLine(tint, Offset(right, top), Offset(right, bottom), stroke, StrokeCap.Round)
+            } else {
+                val mark = Path().apply {
+                    moveTo(size.width * insetX, top)
+                    lineTo(size.width * (1f - insetX), (top + bottom) / 2f)
+                    lineTo(size.width * insetX, bottom)
+                    close()
+                }
+                drawPath(
+                    path = mark,
+                    color = tint,
+                    style = Stroke(width = stroke, cap = StrokeCap.Round, join = StrokeJoin.Round)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * THE LOOK PICKER.
+ *
+ * One row per look, each PREVIEWED in its own drawing — the wave it will draw and
+ * the control it will wear, at the note's own inks — so choosing between them is
+ * looking, not reading. The current one wears the accent wash and the tick, the
+ * app's own sheet language.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PersonalVoiceStyleSheet(
+    current: PersonalVoiceStyle,
+    ink: Color,
+    accent: Color,
+    samples: FloatArray,
+    onPick: (PersonalVoiceStyle) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                "Voice note style",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFamily = FrauncesFontFamily
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                "How this recording is drawn on the page. Each note keeps the look you give it.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(10.dp))
+            PersonalVoiceStyle.entries.forEach { option ->
+                val live = option == current
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            if (live) {
+                                curioTintOn(
+                                    MaterialTheme.colorScheme.surfaceContainerLow,
+                                    accent,
+                                    0.14f
+                                )
+                            } else {
+                                Color.Transparent
+                            }
+                        )
+                        .clickable { onPick(option) }
+                        .padding(horizontal = 12.dp, vertical = 11.dp)
+                ) {
+                    VoiceStylePreview(option, ink = ink, accent = accent, samples = samples)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            option.label,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            option.hint,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (live) {
+                        CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * ONE LOOK, DRAWN SMALL — the row's own proof of what it does: its wave form, its
+ * play treatment, and (for the bubble) its chrome.
+ */
+@Composable
+private fun VoiceStylePreview(
+    style: PersonalVoiceStyle,
+    ink: Color,
+    accent: Color,
+    samples: FloatArray
+) {
+    Box(
+        modifier = Modifier
+            .size(width = 76.dp, height = 34.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .then(
+                if (style == PersonalVoiceStyle.BUBBLE) {
+                    Modifier.background(
+                        curioTintOn(
+                            MaterialTheme.colorScheme.surfaceContainerLow,
+                            accent,
+                            0.14f
+                        )
+                    )
+                } else {
+                    Modifier
+                }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            when (style) {
+                PersonalVoiceStyle.HAND, PersonalVoiceStyle.MINIMAL -> VoiceDrawnControl(
+                    playing = false,
+                    tint = ink.copy(alpha = 0.80f),
+                    ring = if (style == PersonalVoiceStyle.MINIMAL) {
+                        ink.copy(alpha = 0.26f)
+                    } else {
+                        null
+                    },
+                    label = "",
+                    onClick = {},
+                    controlSize = 20.dp
+                )
+                else -> Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clip(CircleShape)
+                        .background(personalAccentInk())
+                )
+            }
+            Canvas(Modifier.weight(1f).height(18.dp)) {
+                if (samples.isEmpty()) return@Canvas
+                if (style == PersonalVoiceStyle.BARS || style == PersonalVoiceStyle.MINIMAL) {
+                    drawVoiceWave(samples, 0.42f, ink, accent, style)
+                } else {
+                    drawVoicePulse(samples, 0.42f, ink, accent)
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -869,7 +1425,12 @@ internal fun PersonalVoicePageBlock(
     accent: Color,
     enabled: Boolean,
     onRemove: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** The look the note wears (v421). */
+    style: PersonalVoiceStyle = PersonalVoiceStyle.HAND,
+    /** The look picker's door. Only the EDITOR passes it — a read-only view
+     *  renders the stored look and offers no way to change it. */
+    onStyle: ((PersonalVoiceStyle) -> Unit)? = null
 ) {
     val context = LocalContext.current
     PersonalVoiceBar(
@@ -879,6 +1440,8 @@ internal fun PersonalVoicePageBlock(
         ink = ink,
         accent = accent,
         modifier = modifier,
+        style = style,
+        onStyle = if (enabled) onStyle else null,
         onRemove = if (!enabled) null else (
             {
                 AudioStorageManager.deleteAudio(context, path)

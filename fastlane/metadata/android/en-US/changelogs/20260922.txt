@@ -20,6 +20,13 @@ FIX:
 - Books: one progress bar instead of two — the page gauge and the chapter tick row are one bar now, with each chapter's opening drawn inside its track.
 - Books: the chapter and page controls are two tiles you change while reading (the chapter one names the chapter) with how long the book is stated quietly beneath them.
 - What's New: the page shows the version this build really is.
+- Reading: the book progress bar follows your finger — the drag detector was keyed on a callback the card re-creates on every redraw, so the bar restarted its own gesture mid-drag and only a tap ever moved the place; a touch no longer teleports the fill either, it follows once the finger moves.
+- Writing: a voice note's wave can no longer be cut — a loud passage ran off the top of its strip and the first peak was sliced in half at the left edge, so the drawing now measures from a band inset by its own stroke.
+- Writing: a voice note's play mark and clock are part of the drawing — the filled disc beside a hand-drawn line was two drawings in one strip, so the bare looks draw the mark in the wave's own ink and set the clock in the page's own hand.
+- Appearance: a named theme's light hero is airy, not a heavy slab — Jade, Orchid, Ocean, Sand and Ember now wear a soft banner with the theme's own deep ink, in the app's own banner language.
+- Appearance: a named theme's dark twin is calm and deep — the hero was so bright that pale words could not read on it (Jade worst, then Orchid) and every element around it felt washed; the page is a quieter jewel and the hero a deep one that carries its pale ink.
+- Theme: the Curio rose is muted at night — the dark banner carried the light hero's vibrancy onto a black page and read as neon.
+- Home and Profile: accents read on the deepest card again — a named theme's own accent ink now clears the bar where it used to sit just under it, which is where buttons and text blended.
 
 ADD:
 - Appearance: one Color theme door — Curio rose, Azure, Material and Adaptive Hero, each its own row with a preview of the page, the hero and the ink it would paint. Pastel colors and Category tint stay on the page.
@@ -28,6 +35,10 @@ ADD:
 - Home: one hero — the torn banner is taller and "Today's quest / Shuffle the deck" lives inside it now, under your figures, instead of a button parked below the seam.
 - Home: the drawer's lanes are a star map — a star per lane, its size and brightness its knowledge, its colour its own accent, joined into constellations; tap one and its own figures open below the map.
 - Reading: hold a page arrow to keep turning — a tap still turns one page, holding turns them until you let go.
+- Writing: four voice note styles — Hand-drawn, Bars, Bubble and Minimal — chosen from the note itself, each pairing its own wave drawing with its own play mark, and each note keeps the look you gave it.
+
+REMOVE:
+- Appearance: the Paper option is gone from Curio rose and Azure — both wear a soft silver-gray card on a white page now, and the white-page/cream-page choice belongs to Adaptive Hero alone.
 
 FIX:
 - Home: the greeting is one line and the type is bigger — "Welcome back" over your name, the name at 40sp — and the "A fresh mix of ideas, picked for you" line under Today's quest is gone.

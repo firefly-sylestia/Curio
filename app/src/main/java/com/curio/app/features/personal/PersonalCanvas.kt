@@ -1942,6 +1942,18 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         onDocChanged(doc())
     }
 
+    /** v421 — a voice note's LOOK ([PersonalVoiceStyle.key], stored with the
+     *  block so a re-opened page draws the note the way it was given). */
+    fun voiceStyle(id: String): PersonalVoiceStyle =
+        PersonalVoiceStyle.fromKey(blocks[id]?.audioStyle)
+
+    fun setVoiceStyle(id: String, style: PersonalVoiceStyle) {
+        val block = blocks[id] ?: return
+        if (block.audioStyle == style.key) return
+        blocks[id] = block.copy(audioStyle = style.key)
+        onDocChanged(doc())
+    }
+
     /** Removes a photo block (and its caption). */
     fun removeBlock(id: String) {
         val index = order.indexOf(id)
@@ -3197,7 +3209,12 @@ internal fun PersonalCanvas(
                             ink = ink,
                             accent = accent,
                             enabled = enabled,
-                            onRemove = { state.removeBlock(id) }
+                            onRemove = { state.removeBlock(id) },
+                            // v421 — the note's own look, and the door to its
+                            // picker, live on the note in the page (see
+                            // PersonalVoiceStyle).
+                            style = state.voiceStyle(id),
+                            onStyle = { state.setVoiceStyle(id, it) }
                         )
                     }
                 } else if (state.keepsChecklistRows) {
@@ -4614,7 +4631,10 @@ internal fun PersonalDocView(
                     seconds = block.audioSeconds,
                     bars = block.audioBars,
                     ink = ink,
-                    accent = accent
+                    accent = accent,
+                    // v421 — the look the note was given, and no picker: a
+                    // read-only view renders a document, it does not edit one.
+                    style = PersonalVoiceStyle.fromKey(block.audioStyle)
                 )
             } else if (besideSkips.contains(block.id)) {
                 // v389d — this line is drawn INSIDE the print above it (see the

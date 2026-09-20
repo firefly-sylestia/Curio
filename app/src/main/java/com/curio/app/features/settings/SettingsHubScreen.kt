@@ -847,7 +847,17 @@ fun settingsRoseAccent(): Color {
         val base = toHsl(CurioColors.HomeRosewood)
         if (AppPreferences.pastelColorsState) {
             val pinkHue = (base.h - 15f + 360f) % 360f
-            return fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.40f)
+            // v421 — MUTED. The dark banner was carrying the light hero's own
+            // vibrancy at a night lightness, and on a black page that read as a
+            // neon rose (member: "in dark mode the curio rose is too vibrant in
+            // dark mode maybe mute it"). The hue and the depth stay; the hold
+            // drops from ~0.59 to ~0.37, which is a rose in the dark rather
+            // than a rose under a spotlight.
+            return fromHsl(
+                pinkHue,
+                (base.s * 0.62f).coerceIn(0f, 0.52f),
+                0.40f
+            )
         }
         return CurioColors.HomeRosewoodDark
     }

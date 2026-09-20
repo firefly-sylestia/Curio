@@ -1839,7 +1839,12 @@ private fun profileRoseAccent(): Color {
         val base = toHsl(CurioColors.HomeRosewood)
         if (AppPreferences.pastelColorsState) {
             val pinkHue = (base.h - 15f + 360f) % 360f
-            return fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.40f)
+            // v421 — MUTED (see settingsRoseAccent).
+            return fromHsl(
+                pinkHue,
+                (base.s * 0.62f).coerceIn(0f, 0.52f),
+                0.40f
+            )
         }
         return CurioColors.HomeRosewoodDark
     }

@@ -131,6 +131,17 @@ data class PersonalBlock(
      */
     val audioBars: String = "",
     /**
+     * v421 — WHICH LOOK the voice note wears ([PersonalVoiceStyle.key]), "" for
+     * the default drawn wave. Only meaningful on an audio block.
+     *
+     * It is stored WITH the block for the same reason the waveform is: the look
+     * a recording was given is part of what the member made. A page reload, a
+     * read-only view or another device all draw the note the same way. (The
+     * enum itself lives beside the drawing — `PersonalVoice.kt` — because a
+     * style is a rendering decision, and the document only needs its key.)
+     */
+    val audioStyle: String = "",
+    /**
      * A checklist line's TICK (v389). Stored WITH THE BLOCK, which is the whole
      * point of a to-do page: the tick used to live in the editor's own widget
      * state, so it vanished the moment the page reloaded and the read-only view
@@ -333,6 +344,11 @@ object PersonalDocCodec {
                 b.addProperty("aud", audio)
                 b.addProperty("aus", block.audioSeconds)
                 if (block.audioBars.isNotBlank()) b.addProperty("aub", block.audioBars)
+                // v421 — the note's LOOK, omitted at its default so a voice
+                // note written before this version encodes byte-for-byte as it
+                // did, and an older build reads the key as an unknown style and
+                // falls back to the drawn wave.
+                if (block.audioStyle.isNotBlank()) b.addProperty("ast", block.audioStyle)
             }
             val runs = JsonArray()
             block.runs.forEach { run ->
@@ -425,7 +441,10 @@ object PersonalDocCodec {
                 // so it decodes as an ordinary text block, exactly as before.
                 audio = b.str("aud").ifBlank { null },
                 audioSeconds = b.int("aus"),
-                audioBars = b.str("aub")
+                audioBars = b.str("aub"),
+                // v421 — absent on an older note: it reads as the drawn wave,
+                // which is exactly how that note already looked.
+                audioStyle = b.str("ast")
             )
         }
         // A note whose body decoded to nothing still needs ONE writable block,

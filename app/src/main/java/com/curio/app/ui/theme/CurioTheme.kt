@@ -130,10 +130,72 @@ private val CurioWhitePageLightScheme = lightColorScheme(
 )
 
 /**
+ * v421 — THE SILVER PAGE: the light pair for the app's TWO DEFAULT themes.
+ *
+ * Curio rose and Azure no longer have a paper choice at all. The member's call
+ * ("remove that paper cream color and its option of paper from the default rose
+ * and azure and introduce, soft silverish gray") is that the cream is what made
+ * those two themes read heavy, and that the paper flip was one decision too many
+ * on the two themes a member lands on by default. So this scheme is FIXED: a
+ * white page and a SOFT SILVER-GRAY card ladder — the same separation rule the
+ * other ladders follow (a card steps AWAY from its page by lightness), said in a
+ * cool neutral instead of a warm cream.
+ *
+ * The hue roles (primary, the containers, the error family) are identical to
+ * [CurioWhitePageLightScheme]: only the surface ladder and the surface variant
+ * changed, so nothing that reads the brand colours moves.
+ *
+ * The Paper row in Appearance therefore no longer applies here — it belongs to
+ * Adaptive Hero alone now (see `AppearanceSection`).
+ */
+private val CurioSilverLightScheme = lightColorScheme(
+    primary           = CurioColors.CoralBlush,
+    onPrimary         = CurioColors.CreamWhite,
+    primaryContainer  = CurioColors.CoralBlush.copy(alpha = 0.18f),
+    onPrimaryContainer = CurioColors.DeepPlum,
+
+    secondary           = CurioColors.ButterYellow,
+    onSecondary         = CurioColors.DeepPlum,
+    secondaryContainer  = CurioColors.ButterYellow.copy(alpha = 0.30f),
+    onSecondaryContainer = CurioColors.DeepPlum,
+
+    tertiary           = CurioColors.SkyMint,
+    onTertiary         = CurioColors.DeepPlum,
+    tertiaryContainer  = CurioColors.SkyMint.copy(alpha = 0.30f),
+    onTertiaryContainer = CurioColors.DeepPlum,
+
+    //   background                    WHITE    — the page
+    //   surfaceContainerLowest        WHITE    — a dialog
+    //   surfaceContainerLow           silver   — A CARD
+    //   surfaceContainer              silver-  — a block inside a card
+    //   surfaceContainerHigh          silver-- — a pill / chip inside one
+    //   surfaceContainerHighest       silver--- — the anchor step
+    background = Color(0xFFFFFFFF),
+    onBackground = CurioColors.DeepPlum,
+
+    surface                  = Color(0xFFFFFFFF),
+    onSurface                = CurioColors.DeepPlum,
+    surfaceVariant           = Color(0xFFF0F1F4),
+    onSurfaceVariant         = CurioColors.DeepPlum.copy(alpha = 0.75f),
+    surfaceContainerLowest   = Color(0xFFFFFFFF),
+    surfaceContainerLow      = Color(0xFFF3F4F6),
+    surfaceContainer         = Color(0xFFEBECEF),
+    surfaceContainerHigh     = Color(0xFFE3E5E9),
+    surfaceContainerHighest  = Color(0xFFDBDEE3),
+
+    error             = CurioColors.WarmCoralRed,
+    onError           = CurioColors.CreamWhite,
+
+    outline           = CurioColors.DeepPlum.copy(alpha = 0.20f),
+    outlineVariant    = CurioColors.DeepPlum.copy(alpha = 0.10f)
+)
+
+/**
  * v408 — THE OTHER PAPER: the member's cream page with white cards, kept
  * exactly as it shipped for [AppPreferences.paperCreamCardsState] OFF.
  * The two schemes are the same design read in two directions; nothing else in
- * the app has to know which one is on.
+ * the app has to know which one is on. v421 — this pair now belongs to the
+ * ADAPTIVE HERO theme alone (see [CurioSilverLightScheme]).
  */
 private val CurioCreamPageLightScheme = lightColorScheme(
     primary           = CurioColors.CoralBlush,
@@ -356,8 +418,18 @@ fun curioColorScheme(): ColorScheme {
     // cream/white light pair).
     activeNamedTheme()?.let { named -> return named.schemeFor(isCurioDarkTheme()) }
     if (isCurioDarkTheme()) return CurioDarkColorScheme
+    // v421 — the two DEFAULT themes wear the fixed silver page: no paper choice
+    // is offered for them any more (member: "remove that paper cream color and
+    // its option of paper from the default rose and azure and introduce, soft
+    // silverish gray").
+    val theme = AppPreferences.colorThemeState
+    if (theme == AppPreferences.COLOR_THEME_CURIO || theme == AppPreferences.COLOR_THEME_AZURE) {
+        return CurioSilverLightScheme
+    }
     // v409 — the paper flip: white page with cream cards (the shipped look),
     // or the reverse. Read reactively, so the switch repaints immediately.
+    // v421 — Adaptive Hero (and the Material theme's own scheme) are what the
+    // row still describes.
     return if (AppPreferences.paperCreamCardsState) CurioWhitePageLightScheme
     else CurioCreamPageLightScheme
 }

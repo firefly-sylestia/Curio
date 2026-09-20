@@ -27,16 +27,32 @@ import androidx.compose.ui.graphics.Color
  * ── THE TWO MODES ───────────────────────────────────────────────────────
  *
  *  * **Light** — an airy page (a soft pastel of the hue), cards near-white and
- *    climbing up their own hue, a DEEP hero (the banner and every button) with
- *    white or near-white ink on it, and a near-black body ink carrying the hue.
+ *    climbing up their own hue, and an AIRY hero (the banner and every button)
+ *    wearing the theme's own DEEP ink, which is exactly the app's own light
+ *    language (the pastel rose banner with deep plum words on it).
  *  * **Dark (a deep JEWEL, by the member's choice)** — the page is a rich,
- *    saturated dark of the same hue (NOT a neutral near-black), cards stepping
- *    up it, and the hero a LIT jewel tone with a deep ink on it, which is the
- *    app's own dark language (bright accents on a dark page).
+ *    calm dark of the same hue (NOT a neutral near-black), cards stepping up
+ *    it, and the hero a DEEP jewel tone carrying a pale ink — bright-on-dark
+ *    done the right way round, so the banner is the calmest thing on the page
+ *    rather than the brightest.
  *
- * Every pair was chosen to clear the app's readability bars: body ink ≥ 4.5:1
- * on the page and on the deepest card step, hero ink ≥ 4.5:1 on the hero, and
- * accent inks ≥ 3:1 on the page (the bar icons and large labels are held to).
+ * v421 — WHERE THE TWO HEROES SIT, and why.
+ *
+ * v420 shipped a DEEP light hero (lightness 0.40) and a LIT dark hero (0.56).
+ * Both were the wrong way round for the app they live in: the light heroes read
+ * as heavy saturated slabs beside Curio's own airy rose banner (member: "the
+ * hero feels too deep in light mode"), and the dark heroes were so bright that
+ * a pale ink could not read on them at all — at hue 158 the pale ink landed at
+ * about 2:1, which is precisely why the member's list of worst offenders ran
+ * "jade is the worst, then orchid", and why the whole dark twin felt "off".
+ * A dark hero is also the one block LIGHTNESS cannot separate from its page by
+ * very much, so it does not need to be bright to read as a banner: it needs to
+ * be the theme's hue at a depth that can carry the pale ink.
+ *
+ * The two heroes now sit at 0.66 (light) and 0.33 (dark) — the light one airy
+ * with the deep themed ink on it, the dark one a deep jewel with the pale ink.
+ * Both are inside the ranges that clear 4.5:1 for their own ink at every hue
+ * in this enum, measured with [contrast] (see the numbers on the two functions).
  * If a tone is re-tuned, re-measure it — [contrast] is `internal` in this
  * package (see `CurioTheme.kt`).
  */
@@ -66,11 +82,17 @@ enum class CurioNamedTheme(
 
     /** The page by day: a soft pastel of the theme's own hue. */
     fun pageFor(dark: Boolean): Color =
-        if (dark) tone(hue, 0.45f, 0.12f) else tone(hue, 0.40f, 0.93f)
+        if (dark) tone(hue, 0.36f, 0.11f) else tone(hue, 0.38f, 0.93f)
 
-    /** The hero fill (the torn banner, buttons, selected rails). */
+    /**
+     * The hero fill (the torn banner, buttons, selected rails) — and the pair
+     * to its ink is a measurement, not a taste: at 0.66 the light hero carries
+     * [bodyFor] over 4.5:1 at the brightest hue here (Jade, ≈ 6.5:1), and at
+     * 0.33 the dark hero carries the pale ink at over 4.5:1 there too
+     * (≈ 5.8:1), which is the hue that used to fail worst.
+     */
     fun heroFor(dark: Boolean): Color =
-        if (dark) tone(hue, 0.60f, 0.56f) else tone(hue, 0.50f, 0.40f)
+        if (dark) tone(hue, 0.50f, 0.33f) else tone(hue, 0.46f, 0.66f)
 
     /** The ink that reads on [heroFor]. */
     fun onHeroFor(dark: Boolean): Color =
@@ -81,7 +103,10 @@ enum class CurioNamedTheme(
      * day (so it reads on a light page), a lifted one at night.
      */
     fun accentFor(dark: Boolean): Color =
-        if (dark) tone(hue, 0.50f, 0.72f) else tone(hue, 0.52f, 0.34f)
+        // v421 — the dark accent was 0.72, which on the deepest card step came
+        // out around 4.2:1 — under the bar, and the member read the result as
+        // "the button and texts blend". 0.78 clears 5:1 on that same step.
+        if (dark) tone(hue, 0.46f, 0.78f) else tone(hue, 0.52f, 0.34f)
 
     /** Body text on the page. */
     private fun bodyFor(dark: Boolean): Color =
@@ -145,35 +170,38 @@ enum class CurioNamedTheme(
     private fun darkScheme(): ColorScheme = darkColorScheme(
         primary = heroFor(true),
         onPrimary = onHeroFor(true),
-        primaryContainer = tone(hue, 0.48f, 0.26f),
-        onPrimaryContainer = tone(hue, 0.42f, 0.90f),
+        primaryContainer = tone(hue, 0.42f, 0.22f),
+        onPrimaryContainer = tone(hue, 0.34f, 0.86f),
 
-        secondary = tone(second, 0.55f, 0.58f),
-        onSecondary = tone(second, 0.50f, 0.15f),
-        secondaryContainer = tone(second, 0.45f, 0.26f),
-        onSecondaryContainer = tone(second, 0.40f, 0.90f),
+        secondary = tone(second, 0.52f, 0.46f),
+        onSecondary = tone(second, 0.30f, 0.92f),
+        secondaryContainer = tone(second, 0.42f, 0.22f),
+        onSecondaryContainer = tone(second, 0.36f, 0.88f),
 
-        tertiary = tone(third, 0.52f, 0.60f),
-        onTertiary = tone(third, 0.48f, 0.15f),
-        tertiaryContainer = tone(third, 0.44f, 0.26f),
-        onTertiaryContainer = tone(third, 0.38f, 0.90f),
+        tertiary = tone(third, 0.50f, 0.48f),
+        onTertiary = tone(third, 0.30f, 0.92f),
+        tertiaryContainer = tone(third, 0.42f, 0.22f),
+        onTertiaryContainer = tone(third, 0.34f, 0.88f),
 
         background = pageFor(true),
         onBackground = bodyFor(true),
 
         surface = pageFor(true),
         onSurface = bodyFor(true),
-        surfaceVariant = tone(hue, 0.32f, 0.20f),
-        onSurfaceVariant = tone(hue, 0.22f, 0.70f),
+        surfaceVariant = tone(hue, 0.28f, 0.16f),
+        onSurfaceVariant = tone(hue, 0.20f, 0.72f),
 
-        // The night ladder: small steps up the jewel page (the stride the app's
-        // own dark scheme uses), so a card reads as a plate rather than a
-        // smudge while the page keeps the theme's colour.
-        surfaceContainerLowest = tone(hue, 0.38f, 0.16f),
-        surfaceContainerLow = tone(hue, 0.38f, 0.19f),
-        surfaceContainer = tone(hue, 0.38f, 0.22f),
-        surfaceContainerHigh = tone(hue, 0.38f, 0.25f),
-        surfaceContainerHighest = tone(hue, 0.38f, 0.28f),
+        // The night ladder: small, CALM steps up the jewel page (the stride the
+        // app's own dark scheme uses), so a card reads as a plate rather than a
+        // smudge while the page keeps the theme's colour. v421 — the hold is
+        // lower than the light ladder's and the hue saturates less hard: at the
+        // top of the old ladder the deepest card sat close enough to a bright
+        // accent ink that the two read as one smudge.
+        surfaceContainerLowest = tone(hue, 0.30f, 0.15f),
+        surfaceContainerLow = tone(hue, 0.30f, 0.18f),
+        surfaceContainer = tone(hue, 0.30f, 0.21f),
+        surfaceContainerHigh = tone(hue, 0.30f, 0.24f),
+        surfaceContainerHighest = tone(hue, 0.30f, 0.27f),
 
         error = tone(6f, 0.60f, 0.62f),
         onError = tone(6f, 0.50f, 0.14f),

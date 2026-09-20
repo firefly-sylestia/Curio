@@ -22,7 +22,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -1456,6 +1457,16 @@ private fun ReadingGauge(
     // again on release (member: "dont show the knob always, but it appears when
     // user touches it").
     var scrubbing by remember { mutableStateOf(false) }
+    // v421 — THE SCRUB CALLBACK, READ LIVE.
+    //
+    // `ProgressCard` passes a fresh lambda on every recomposition, and the
+    // gesture used to be keyed on it — so the first scrub wrote the new place,
+    // the card recomposed with a new callback, and `pointerInput` RESTARTED,
+    // cancelling the gesture in flight. That is why only a tap (whose seek runs
+    // on the DOWN, before any recomposition) ever did anything. Reading through
+    // this reference keeps the old lambda identity and lets the drag run to its
+    // end.
+    val scrubNow by rememberUpdatedState(onScrub)
     val animated by animateFloatAsState(
         targetValue = fraction.coerceIn(0f, 1f),
         animationSpec = if (scrubbing) {
@@ -1531,29 +1542,58 @@ private fun ReadingGauge(
                 .height(28.dp)
                 .then(
                     if (onScrub != null) {
-                        Modifier
-                            .pointerInput(onScrub) {
-                                detectHorizontalDragGestures(
-                                    onDragStart = { pos ->
-                                        scrubbing = true
-                                        onScrub((pos.x / size.width).coerceIn(0f, 1f))
-                                    },
-                                    onDragEnd = { scrubbing = false },
-                                    onDragCancel = { scrubbing = false },
-                                    onHorizontalDrag = { change, _ ->
+                        // ── v421 — ONE DETECTOR, AND IT FOLLOWS THE FINGER ──
+                        //
+                        // This node used to carry TWO detectors keyed on
+                        // `onScrub`, and both halves of that were wrong:
+                        //
+                        //  · THE KEY restarted the gesture mid-drag (see
+                        //    [scrubNow]) — the member's report, in their own
+                        //    words: "the pill directly teleports to where i
+                        //    touch and also when i try to drag it it does
+                        //    nothing, it doesnt move … only tap works";
+                        //  · THE COUNT: a drag detector and a tap detector on
+                        //    one node both read the same events, and the tap one
+                        //    consumes the DOWN. One gesture is enough, and this
+                        //    is it.
+                        //
+                        // A touch no longer seeks on the DOWN either: the knob
+                        // lights up and the fill starts following the moment
+                        // the finger MOVES, which is what makes touching the bar
+                        // stop reading as a teleport. A press that never moves
+                        // is still a tap, and it seeks on the release — so "tap
+                        // a spot to jump there" behaves exactly as it did.
+                        Modifier.pointerInput(Unit) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                scrubbing = true
+                                down.consume()
+                                var moved = false
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes
+                                        .firstOrNull { it.id == down.id } ?: break
+                                    if (change.positionChanged()) moved = true
+                                    if (moved) {
                                         change.consume()
-                                        onScrub((change.position.x / size.width).coerceIn(0f, 1f))
+                                        scrubNow?.invoke(
+                                            (change.position.x / size.width)
+                                                .coerceIn(0f, 1f)
+                                        )
                                     }
-                                )
+                                    if (!change.pressed) {
+                                        if (!moved) {
+                                            scrubNow?.invoke(
+                                                (change.position.x / size.width)
+                                                    .coerceIn(0f, 1f)
+                                            )
+                                        }
+                                        break
+                                    }
+                                }
+                                scrubbing = false
                             }
-                            .pointerInput(onScrub) {
-                                detectTapGestures(onPress = { pos ->
-                                    scrubbing = true
-                                    onScrub((pos.x / size.width).coerceIn(0f, 1f))
-                                    tryAwaitRelease()
-                                    scrubbing = false
-                                })
-                            }
+                        }
                     } else {
                         Modifier
                     }

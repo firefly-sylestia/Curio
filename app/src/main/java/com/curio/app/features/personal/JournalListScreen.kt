@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -436,25 +437,68 @@ internal fun PersonalHeader(
             label = "personal-header-roll",
             modifier = Modifier.weight(1f)
         ) { rolled ->
-            Column(Modifier.fillMaxWidth()) {
-                Text(
-                    if (rolled) title else idleTitle,
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontFamily = FrauncesFontFamily,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = if (rolled) ink else ink.copy(alpha = 0.72f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.labelMedium,
-                    // The line HOLDS ITS HEIGHT while it is out of the way, so
-                    // the head is one size whatever it is saying.
-                    color = if (rolled) ink.copy(alpha = 0.5f) else Color.Transparent,
-                    maxLines = 1
-                )
+            if (!rolled && idleTitle.isNotBlank()) {
+                // ── v421 — THE IDLE LINE IS A PAGE HEADING, NOT A PLACEHOLDER ──
+                //
+                // The idle line used to be the ROLLED line's exact slot: the
+                // same `headlineSmall`, with the subtitle's own line left in
+                // place but transparent to hold the head's height. Stacked that
+                // way the words sat ABOVE the head's centre — level with the top
+                // of the back pill rather than with the pill itself — and, being
+                // the same size as the title they stand in for, they read as a
+                // small grey ghost of it (member: "the your shelf text isnt
+                // properly bigger and not properly aligned").
+                //
+                // So the idle state is its own layout: ONE line, one step up the
+                // scale (`headlineMedium`), centred inside a box whose height is
+                // EXACTLY the two-line slot the rolled state occupies. The head
+                // therefore does not change size when the roll happens, and the
+                // idle words line up with the back pill.
+                val stackHeight = with(LocalDensity.current) {
+                    // headlineSmall's 32sp line + labelMedium's 16sp line: the
+                    // rolled state's own two rows, resolved in dp so a larger
+                    // system font scale grows the box with the words instead of
+                    // clipping them.
+                    (32.sp).toDp() + (16.sp).toDp()
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(stackHeight),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(
+                        idleTitle,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = FrauncesFontFamily,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = ink.copy(alpha = 0.86f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            } else {
+                Column(Modifier.fillMaxWidth()) {
+                    Text(
+                        if (rolled) title else idleTitle,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontFamily = FrauncesFontFamily,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = if (rolled) ink else ink.copy(alpha = 0.72f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.labelMedium,
+                        // The line HOLDS ITS HEIGHT while it is out of the way, so
+                        // the head is one size whatever it is saying.
+                        color = if (rolled) ink.copy(alpha = 0.5f) else Color.Transparent,
+                        maxLines = 1
+                    )
+                }
             }
         }
         action?.invoke()

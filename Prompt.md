@@ -8,59 +8,93 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "add some new accents colors, beautiful and also differnt omplimenting for dark ode. ne
-> accent names" → "not just accent colors but also they are proper theme"
+> voice note: the play button doesn't match the wave look (it's a pill), also the number,
+> also the progress drag of it; the highlight while it plays is bad — if the waves are too
+> big it cuts from the top, and from the start it looks cut; and add some more voice note
+> styles. Book detail: the progress pill teleports to where I touch and dragging does
+> nothing (only tap works) — fix it; the "Your shelf" text isn't properly bigger and isn't
+> properly aligned. Themes: the hero feels too deep in light mode (sand, ocean, ember,
+> jade); in dark mode jade is worst, then orchid, ocean, sand, ember — not just the hero,
+> everything feels off, and the hero is too light; the dark Curio rose is too vibrant,
+> mute it; Ocean's background cards are perfect but some buttons and texts blend (Home's
+> stat text and icon, Profile's stats); and remove the paper cream colour and its Paper
+> option from the default rose and azure, introducing a soft silverish grey.
 
-Confirmed with the member via `ask_user`: add **five named FULL themes — Jade, Orchid,
-Ocean, Sand, Ember** — each with a **deep-jewel dark twin**, listed **in the existing
-Color theme sheet**.
+Confirmed with the member via `ask_user`:
+
+- **Voice note looks are PICKABLE per note** (a control on the note itself), **and the
+  recording capsule is restyled too**.
+- **The play mark is hand-drawn in the wave's own ink**, and the clock goes with it.
+- **Curio rose and Azure get the silver-grey cards**; Material / Adaptive Hero are
+  untouched, and the Paper row stays for Adaptive Hero.
+- **The dark twins become a deeper, calmer jewel** (not a neutral black).
+- **"Your shelf" should be bigger and centred with the back button.**
+- The styles ship as **the picker on the note only** — no Settings row.
+- The looks are **different waves and different button styles**.
 
 ## 2. Findings
 
-- The Color theme system is `AppPreferences.colorThemeState` + `curioColorScheme()`
-  (Material → dark → White/Cream paper). The heroes and accent inks branch off
-  `materialHeroTearsOn()` / `heroLaneCategory()` / `heroBlueState`.
-- The retired Pantone themes had solved "a theme paints the whole app"; that machinery was
-  removed in v414, so a named theme now needs: a scheme, hero/ink resolvers, the sheet
-  rows, and a page that beats the category wash.
+- The book gauge's drag died on `Modifier.pointerInput(onScrub)` **twice**: `ProgressCard`
+  mints a fresh lambda every recomposition, so the first scrub restarted the
+  `pointerInput` and cancelled the gesture in flight. Only the tap survived, because
+  `detectTapGestures`' `onPress` seeks on the DOWN, before any recomposition — which is
+  also why the fill "teleported".
+- The voice wave was measured from the raw canvas: a peak could reach within 2% of the top
+  with an 11%-of-height round-capped stroke drawn on it, and the first point sat at x = 0
+  so its cap was sliced. That is both halves of the member's clipping report.
+- The dark named hero (`tone(hue, 0.60, 0.56)`) could not carry a pale ink at all — at
+  hue 158 it landed near 2:1, which is exactly the member's "jade is the worst, then
+  orchid". `readableOn` tries white and then the DARK body ink (a BRIGHT tone in dark
+  mode), so a dark-mode hero has to be deep enough for white on its own.
+- `paperStatCardColor` blends the hero toward `#FFF6EB`, and the light named hero was a
+  0.40-lightness slab beside the app's own pastel rose banner.
 
-## 3. What was built (v420)
+## 3. What was built (v421)
 
-- **`ui/theme/NamedThemes.kt`** — `CurioNamedTheme` enum (Jade 158°, Orchid 318°, Ocean
-  191°, Sand 36°, Ember 12°). Everything is `tone(hue, sat, light)`; `second` = hue+38°,
-  `third` = hue−46° for the scheme's 2nd/3rd fills. `schemeFor(dark)`:
-  - **light**: airy page `tone(hue,0.40,0.93)`, near-white card ladder 0.995→0.86 climbing
-    above it, deep hero `tone(hue,0.50,0.40)`, near-black body ink `tone(hue,0.30,0.18)`;
-  - **dark (deep jewel)**: page `tone(hue,0.45,0.12)`, cards 0.16→0.28, lit hero
-    `tone(hue,0.60,0.56)`, pale ink. `readableOn` picks white/the theme ink; `contrast` is
-    reused from `CurioTheme.kt`.
-- **`AppPreferences`** — `NAMED_ID_PREFIX` (`named-`), five ids in `COLOR_THEMES`,
-  `namedThemeId()` (no ui import in the data layer).
-- **`CurioTheme`** — `activeNamedTheme()`; `curioColorScheme()` returns
-  `named.schemeFor(isCurioDarkTheme())` before the paper flip; `curioRoseInk()` → `accentFor`.
-- **Heroes/inks** — `settingsRoseAccent` / `homeRoseAccent` / `profileRoseAccent` →
-  `primary`; their readable-ink helpers → `onPrimary`; `settingsCardAccentInk` →
-  `accentFor`; `settingsCardChipTint` → `primary`.
-- **`CategoryInk`** — the page/surface resolvers return the theme's own background/ladder
-  (so the theme's page shows instead of a lane wash); lane ACCENTS are left intact.
-- **Sheet** — `colorThemeChoices` appends the five rows (page/hero/ink previews),
-  `colorThemeLabel` names them, and the deep-search hint / sheet subtitle were updated.
+- **Voice note looks** — `PersonalVoiceStyle` (HAND / BARS / BUBBLE / MINIMAL) in
+  `PersonalVoice.kt`, each pairing a wave drawing with a play treatment. Stored per
+  recording in `PersonalBlock.audioStyle` (codec key `ast`, omitted at the default), so a
+  read-only view draws what the editor drew. The picker is the Tune mark on the note in
+  the editor, opening `PersonalVoiceStyleSheet` with live previews per look.
+- **The clipping fix and the drawn control** — the pulse and the alt drawings now measure
+  from a band inset by half a stroke (plus the depth pass's drop), so nothing can run off
+  any edge; the play mark and the clock are drawn/ set in the wave's own ink (HAND and
+  MINIMAL), while the disc looks keep a real disc.
+- **`LiveVoiceWave`** — the recording capsule rolls the same history through the same
+  drawing, wears a 22dp card instead of a pill, and sets its clock in Fraunces.
+- **The gauge drag** — ONE `awaitEachGesture` keyed `Unit`, reading the callback through
+  `rememberUpdatedState`, seeking from the first MOVEMENT (a press that never moves is
+  still a tap, and seeks on release).
+- **"Your shelf"** — one `headlineMedium` line, centred in a box exactly as tall as the
+  rolled two-line slot (resolved in dp so a large font scale grows it).
+- **The named themes** — light hero `tone(hue, 0.46, 0.66)` (airy, the theme's own deep
+  ink); dark page `tone(hue, 0.36, 0.11)`, dark ladder `0.30` hold 0.15→0.27, dark hero
+  `tone(hue, 0.50, 0.33)` with the pale ink, dark accent ink `tone(hue, 0.46, 0.78)`.
+- **The dark Curio rose** — `HomeRosewoodDark` `#7D2C3B` → `#713842`, and the
+  pastel-dark rose branch in all three hero resolvers takes a ~0.37 hold.
+- **The silver page** — `CurioSilverLightScheme` (white page, silver-grey ladder) for
+  Curio rose and Azure; the Appearance Paper row now exists only for light + Adaptive
+  Hero.
 
 ## 4. Verification
 
-- Brace/paren balance 0/0 on all 9 touched/new files; `activeNamedTheme` referenced from
-  Home/Profile/Settings/CategoryInk/CurioTheme.
-- CI on the prior two commits was checked: both had failed on the single `contrast()`
-  reference, fixed in `f353b28d` (moved into `CurioTheme.kt`).
+- Brace/paren balance 0/0 across every touched Kotlin file (`PersonalVoice.kt` 216/216,
+  `PersonalCanvas.kt` 646/646, `BookDetailScreen.kt` 370/370, `JournalListScreen.kt`
+  80/80).
+- Every `PersonalBlock(...)` construction checked for positional arguments before the new
+  field was added — all named, so no call site broke.
 - No Gradle in this environment — CI validates the compile.
 
 ## 5. Open notes
 
-- Deep-jewel dark was the member's choice; the `tone(...)` calls in `darkScheme()` are the
-  dials to re-tune (page sat/light, hero light).
-- A named theme does NOT collapse the 36 lane accents (unlike the retired Pantone themes) —
-  lane chips keep their identity on a themed page. Say the word to collapse them.
-- `activeNamedThemeNow()` was not added: nothing non-composable needed it.
+- The dark accent ink and the `hue`-derived tones were measured by hand for the five hues
+  in the enum; if a sixth theme or a re-tune lands, re-measure with `contrast` (it is
+  `internal` in `ui/theme`).
+- `settingsAccentInk()` was deliberately left alone: it is shared with Curio rose, azure
+  and Adaptive Hero, and its dark lift is derived from the hero, which the named themes
+  now supply at a deeper value.
+- The voice note's scrubber maps the finger across the WHOLE strip while the wave is drawn
+  inside a half-stroke inset — under ~2% of the strip, no audible difference.
 
 ---
 

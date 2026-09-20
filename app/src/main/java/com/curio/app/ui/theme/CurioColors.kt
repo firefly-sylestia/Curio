@@ -201,8 +201,13 @@ object CurioColors {
      *  slightly desaturated lightness (a NEW SHADE of the same spectrum).
      *  v414 — matched to the light twin's second vibrancy step (0.405 → 0.48)
      *  so the day and night roses stay the one spectrum at their own
-     *  lightness. */
-    val HomeRosewoodDark = Color(0xFF7D2C3B)
+     *  lightness.
+     *  v421 — MUTED. The night rose carried that same vibrancy down onto a
+     *  black page, and there it read as neon rather than as a banner (member:
+     *  "in dark mode the curio rose is too vibrant in dark mode maybe mute
+     *  it"). The hue is untouched — only the hold drops (0.48 → 0.34), so the
+     *  banner is the same rose at a calm night depth. */
+    val HomeRosewoodDark = Color(0xFF713842)
     // v27l — the optional sky-azure hero variant: a brighter, fresher azure
     // (the Science/Sky hue at sky-300-ish saturation, held a touch softer
     // than neon).

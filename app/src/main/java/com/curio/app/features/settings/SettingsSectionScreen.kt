@@ -356,48 +356,41 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         SettingsOptionDivider()
-        // v409 — WHICH SURFACE LEADS. The shipped light look is a WHITE page
-        // with CREAM cards; "Cream page" reverses it to the pre-v409 pair (a
-        // cream page with white cards). Both are the same design read in two
-        // directions — a card always separates from its page by lightness —
-        // so this is a straight visual preference, not a mode. Dark mode is
-        // untouched: its page is black and its plates step up from it.
-        // v412 — GRAYED OUT WHERE IT HAS NO EFFECT: the paper flip only ever
-        // describes Curio's own cream/white light pair (see curioColorScheme),
-        // so on dark mode — or under the Material theme, which paints its own
-        // page pair — the row is disabled with a line saying why, instead of a
-        // control that silently does nothing. The stored choice is kept, so
-        // returning to a light paper theme restores exactly what was picked.
-        // v413 — ADAPTIVE HERO KEEPS ITS PAPER: the greyed-out set used to
-        // include it, but a lane only tints the PAGE WASH and the torn hero —
-        // the card ladder under them is still the scheme's own cream/white
-        // pair, so the flip has a real effect here and disabling the row was
-        // hiding a working control (member: "for color theme of adaptive hero
-        // dont gray out the paper option").
-        SettingsRowPulse(highlightKey == "appearance-paper") {
-            val dark = isCurioDarkTheme()
-            val theme = AppPreferences.colorThemeState
-            val paperApplies = !dark && (
-                theme == AppPreferences.COLOR_THEME_CURIO ||
-                    theme == AppPreferences.COLOR_THEME_AZURE ||
-                    theme == AppPreferences.COLOR_THEME_LANE
-                )
-            CompactSegmentedRow(
-                CurioIcons.Contrast,
-                "Paper",
-                listOf("White page", "Cream page"),
-                if (AppPreferences.paperCreamCardsState) 0 else 1,
-                enabled = paperApplies,
-                disabledHint = when {
-                    paperApplies -> null
-                    dark -> "The paper follows the light Curio and Azure themes — dark mode wears its own page."
-                    else -> "The paper follows the Curio rose, Azure and Adaptive Hero themes."
+        // v409 — WHICH SURFACE LEADS, for the theme that still has the choice:
+        // Adaptive Hero. "White page" is a white page with cream cards;
+        // "Cream page" reverses it to the pre-v409 pair. Both are the same
+        // design read in two directions — a card always separates from its page
+        // by lightness — so this is a straight visual preference, not a mode.
+        // Dark mode is untouched: its page is black and its plates step up.
+        // The stored choice is kept, so returning to Adaptive Hero restores
+        // exactly what was picked.
+        // v421 — THE PAPER ROW BELONGS TO ADAPTIVE HERO.
+        //
+        // Curio rose and Azure no longer have a paper choice: both wear the
+        // fixed SILVER page (see `CurioSilverLightScheme`), because the cream
+        // was what made the two default themes read heavy and the flip was one
+        // decision too many on the themes a member lands on (user request:
+        // "remove that paper cream color and its option of paper from the
+        // default rose and azure"). Adaptive Hero still tints only the page
+        // wash and the torn hero — the card ladder under them is still this
+        // cream/white pair, so the flip has a real effect there and keeps its
+        // row. Everywhere else the row is not shown at all: a control that can
+        // never do anything is not a choice, it is furniture.
+        val paperApplies = !isCurioDarkTheme() &&
+            AppPreferences.colorThemeState == AppPreferences.COLOR_THEME_LANE
+        if (paperApplies) {
+            SettingsRowPulse(highlightKey == "appearance-paper") {
+                CompactSegmentedRow(
+                    CurioIcons.Contrast,
+                    "Paper",
+                    listOf("White page", "Cream page"),
+                    if (AppPreferences.paperCreamCardsState) 0 else 1
+                ) { index ->
+                    AppPreferences.setPaperCreamCardsEnabled(context, index == 0)
                 }
-            ) { index ->
-                if (paperApplies) AppPreferences.setPaperCreamCardsEnabled(context, index == 0)
             }
+            SettingsOptionDivider()
         }
-        SettingsOptionDivider()
         // v8.5 — the Curio pet companion (spec §10): pixel pet + rule-based
         // dialogue + passport/discovery on Quests and Home. Default ON.
         SettingsRowPulse(highlightKey == "appearance-pet") {
