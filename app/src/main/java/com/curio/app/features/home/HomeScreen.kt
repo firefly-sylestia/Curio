@@ -3003,7 +3003,7 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
  *
  * v414 — it COVERS MORE OF THE DRAWER: 188dp made the chart read as a strip
  * wedged between the brain stats and the lane readout, so the sky grew to 254dp
- * and the orbits now spread to the panel's own edges (member: "it doesnt cover
+ * and the stars now spread to the panel's own edges (member: "it doesnt cover
  * the drawer a little more").
  */
 private val DrawerStarMapHeight = 254.dp
@@ -3017,19 +3017,18 @@ private val DrawerStarMapHeight = 254.dp
  * no longer lists lanes as tiles; it DRAWS them.
  *
  * Every lane is one star:
- *  * **Position** — fixed for a given lane count ([starLattice]: a RING-AND-
- *    SPOKE lattice, deterministic and identical at every knowledge level, so
- *    the map is a landmark the member learns). v414 replaced the old
- *    phyllotaxis scatter with this, and the chart it sits on (orbit circles +
- *    radial spokes + hub) is drawn under it — the member: "still not beautiful
- *    and geometric enough".
+ *  * **Position** — fixed for a given lane count ([starScatter]: a golden-angle
+ *    spiral with a small hashed wobble, deterministic and identical at every
+ *    knowledge level, so the map is a landmark the member learns). v419
+ *    replaced the v414 ring-and-spoke lattice with this — the lattice was too
+ *    symmetric (member: "the drawer graph is bad … its too symmetric") — and a
+ *    faint dust field ([starDust]) gives the panel its depth instead of a grid.
  *  * **Size + brightness** — the lane's knowledge against the strongest lane.
  *    An explored lane is a big lit star; an untouched one is a dim hollow
  *    point, so the map shows the member what is left without being a meter.
  *  * **Colour** — the lane's own accent, glowing through two halo steps.
- *  * **Hairlines** — each orbit drawn as its own closed polygon through its own
- *    stars, which is what turns the lattice into constellations
- *    ([starRingLinks]).
+ *  * **Hairlines** — each star joined to its NEAREST neighbour, so the sky reads
+ *    as loose constellations rather than rings ([starLinks]).
  *
  * It is TAPPABLE: the star nearest a touch within a 30dp halo is picked (the
  * tap target is the finger, not the dot) and the readout under the map names
@@ -3052,11 +3051,11 @@ private fun DrawerLaneStarMap(
     if (lanes.isEmpty()) return
     val panel = MaterialTheme.colorScheme.surfaceContainerHigh
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val slots = remember(lanes.size) { starLattice(lanes.size) }
-    val links = remember(slots) { starRingLinks(slots) }
-    // The orbits the chart draws — one circle per ring the lattice actually
-    // used, so the grid and the stars can never disagree.
-    val orbits = remember(slots) { slots.map { it.radius }.distinct().sorted() }
+    val slots = remember(lanes.size) { starScatter(lanes.size) }
+    val links = remember(slots) { starLinks(slots) }
+    // A faint dust field behind the stars, so the panel has depth without the
+    // regular grid the member rejected (v419).
+    val dust = remember { starDust(STAR_DUST_COUNT) }
     val strongest = lanes.maxOf { it.knowledge }.coerceAtLeast(1)
     val lit = remember { Animatable(0f) }
     LaunchedEffect(lanes.size) {
@@ -3096,34 +3095,23 @@ private fun DrawerLaneStarMap(
             val hub = Offset(size.width / 2f, size.height / 2f)
             val unitPx = minOf(size.width, size.height) * 0.5f
             fun at(index: Int) = starPoint(slots[index], hub, unitPx)
-            // ── THE CHART ITSELF (v414) — the faint astrolabe grid the stars
-            //    sit on: one circle per orbit, a ring of radial spokes, and a
-            //    small hub. This is what makes the map read as a GEOMETRIC
-            //    instrument instead of a scatter (member: "still not beautiful
-            //    and geometric enough"). Every line is an OPAQUE mix of the
-            //    panel toward the muted ink — no alpha anywhere.
-            val grid = lerp(panel, muted, 0.16f)
-            val thin = 1.dp.toPx()
-            val outer = orbits.lastOrNull() ?: 0.92f
-            orbits.forEach { radius ->
-                drawCircle(grid, unitPx * radius, hub, style = Stroke(width = thin))
-            }
-            repeat(STAR_CHART_SPOKES) { i ->
-                val a = (i.toFloat() / STAR_CHART_SPOKES) * TWO_PI
-                drawLine(
-                    color = grid,
-                    start = hub,
-                    end = Offset(
-                        x = hub.x + cos(a) * unitPx * outer,
-                        y = hub.y + sin(a) * unitPx * outer
-                    ),
-                    strokeWidth = thin
+            // ── THE SKY, NOT A DIAL (v419) — the astrolabe grid is GONE.
+            //    The rings and the twelve spokes were perfectly regular, and
+            //    that regularity is exactly what read as too symmetric (member:
+            //    "the drawer graph is bad … its too symmetric"). The stars are
+            //    scattered now and a faint dust field gives the panel its depth
+            //    instead. Every colour is an OPAQUE mix of the panel toward the
+            //    muted ink — no alpha anywhere.
+            dust.forEach { dot ->
+                drawCircle(
+                    color = lerp(panel, muted, 0.05f + 0.06f * dot.y),
+                    radius = 0.8.dp.toPx(),
+                    center = Offset(dot.x * size.width, dot.y * size.height)
                 )
             }
-            drawCircle(grid, unitPx * 0.10f, hub, style = Stroke(width = thin))
-            // ── The hairlines: each orbit drawn as its own CLOSED POLYGON
-            //    through its own stars, so the lattice reads as woven rings
-            //    rather than a nearest-neighbour mesh of chords. ──
+            // ── The hairlines: each star joined to its NEAREST neighbour, so
+            //    the sky reads as loose constellations — never rings, never a
+            //    regular mesh. ──
             links.forEach { link ->
                 drawLine(
                     color = lerp(panel, muted, 0.30f),
@@ -3174,11 +3162,8 @@ private fun DrawerLaneStarMap(
     }
 }
 
-/** A full turn, in radians — the chart's own arithmetic reads in radians. */
-private const val TWO_PI = 6.2831855f
-
-/** How many radial spokes the chart's grid draws. */
-private const val STAR_CHART_SPOKES = 12
+/** How many faint dust specks fill the sky behind the stars. */
+private const val STAR_DUST_COUNT = 46
 
 /**
  * v414 — ONE LANE'S PLACE ON THE CHART: a polar SLOT (angle + radius), not a
@@ -3186,9 +3171,8 @@ private const val STAR_CHART_SPOKES = 12
  *
  * Keeping the slot is what lets the canvas draw TRUE circles whatever aspect
  * the panel ends up: the painter multiplies the radius by the SHORTER side, so
- * the orbits stay round in a wide drawer instead of stretching into ellipses —
- * the old unit-space scatter had exactly that problem, which is also why it
- * could not be reused for a grid.
+ * the scatter stays round in a wide drawer instead of stretching into ellipses,
+ * which is what the old unit-space scatter got wrong.
  */
 private data class StarSlot(val angle: Float, val radius: Float)
 
@@ -3200,80 +3184,87 @@ private fun starPoint(slot: StarSlot, hub: Offset, unitPx: Float): Offset = Offs
 )
 
 /**
- * v414 — LANES ON A RING-AND-SPOKE LATTICE (this replaced a phyllotaxis
- * scatter).
+ * v419 — LANES ON A GOLDEN-ANGLE SCATTER (this replaced the v414 lattice).
  *
- * The member: "still not beautiful and geometric enough". A phyllotaxis is
- * evenly spread, but it is a CLOUD — no lane relates to any other and the eye
- * finds no structure in it. A lattice gives the chart what geometry gives a
- * real star map: orbits you can count and spokes you can read across.
+ * The member: "the drawer graph is bad … the previous version was at least
+ * better … its too symmetric". The lattice was legible but rigid — perfect
+ * rings, evenly spaced stars, twelve spokes — and a sky is not a machine dial.
+ * This is the phyllotaxis idea the member preferred, kept WELL-SPREAD (the
+ * reason the lattice was tried at all) and given a small deterministic wobble
+ * so no two neighbours sit at the same radius or the same angle.
  *
  * The rules that keep it honest:
- *  * one to three orbits, chosen by lane count, at radii evenly spaced between
- *    0.30 and 0.92 of the panel's half-height;
- *  * an orbit's CAPACITY is proportional to its radius, so neighbouring stars
- *    sit about the same distance apart on every orbit;
- *  * stars spread EVENLY by angle around their orbit, and odd orbits are set
- *    half a step out of phase — which is what makes the lattice read as a woven
- *    chart rather than a stack of aligned spokes;
- *  * deterministic, and knowledge never moves a star (it changes size and
- *    brightness only), so the map stays the landmark the member learns.
+ *  * the i-th star sits at the GOLDEN ANGLE times i, the classic Vogel spiral,
+ *    so the disc fills evenly at any lane count instead of clumping;
+ *  * its radius grows with sqrt(i / count), so the sky reaches the panel's
+ *    edge without crowding the hub;
+ *  * a small HASHED jitter (never random — the same lanes always land in the
+ *    same places, so the map stays the landmark the member learns) breaks the
+ *    symmetry;
+ *  * knowledge never moves a star; it changes size and brightness only.
  */
-private fun starLattice(count: Int): List<StarSlot> {
+private fun starScatter(count: Int): List<StarSlot> {
     if (count <= 0) return emptyList()
-    val rings = when {
-        count <= 6 -> 1
-        count <= 16 -> 2
-        else -> 3
+    // The golden angle in radians — Vogel's constant, irrational on purpose so
+    // successive points never fall into a repeating spoke.
+    val goldenAngle = 2.3999632f
+    return List(count) { i ->
+        // A deterministic 0..7 wobble per star, from a multiplicative hash.
+        val jitter = (((i * 2654435761L) and 7L)).toInt()
+        val wobble = jitter - 3
+        val base = kotlin.math.sqrt((i + 0.55f) / count)
+        StarSlot(
+            angle = i * goldenAngle + wobble * 0.055f,
+            radius = (0.20f + 0.74f * base + wobble * 0.011f).coerceIn(0.16f, 0.95f)
+        )
     }
-    val radii = List(rings) { i -> 0.30f + 0.62f * (i + 1) / rings }
-    val total = radii.sum()
-    val capacities = MutableList(rings) { i ->
-        maxOf(1, kotlin.math.round(count * (radii[i] / total)).toInt())
-    }
-    // Rounding drift lands on the OUTER orbit (the longest, so the extra star
-    // has the most room) rather than leaving the last orbit short.
-    capacities[rings - 1] = maxOf(1, capacities[rings - 1] + (count - capacities.sum()))
-    val slots = mutableListOf<StarSlot>()
-    var index = 0
-    for (ring in 0 until rings) {
-        val capacity = capacities[ring]
-        val phase = if (ring % 2 == 0) 0f else (TWO_PI / capacity) * 0.5f
-        for (k in 0 until capacity) {
-            if (index >= count) break
-            slots.add(
-                StarSlot(
-                    angle = phase + (TWO_PI * k) / capacity,
-                    radius = radii[ring]
-                )
-            )
-            index++
-        }
-    }
-    return slots
 }
 
 /**
- * The chart's hairlines: every orbit drawn as its own CLOSED POLYGON through its
- * own stars — a chord between each neighbouring pair, and the last back to the
- * first — which is what turns the lattice into geometry instead of a mesh of
- * nearest-neighbour spaghetti. Computed once per lane count.
+ * The sky's hairlines: each star joined to its NEAREST neighbour.
+ *
+ * The v414 lattice drew a closed polygon per orbit, which is what made the
+ * chart read as rings. With a scatter there are no orbits, so the link is
+ * LOCAL — the one neighbour a star is actually closest to — and the result is a
+ * loose constellation, not a mesh. Measured in unit space (the same ellipse the
+ * drawer's aspect would give) and computed once per lane count.
  */
-private fun starRingLinks(slots: List<StarSlot>): List<Pair<Int, Int>> {
-    val links = mutableListOf<Pair<Int, Int>>()
-    slots.mapIndexed { index, slot -> index to slot }
-        .groupBy { (_, slot) -> (slot.radius * 1000f).toInt() }
-        .values
-        .forEach { orbit ->
-            when {
-                orbit.size < 2 -> Unit
-                orbit.size == 2 -> links.add(orbit[0].first to orbit[1].first)
-                else -> for (i in orbit.indices) {
-                    links.add(orbit[i].first to orbit[(i + 1) % orbit.size].first)
-                }
-            }
+private fun starLinks(slots: List<StarSlot>): List<Pair<Int, Int>> {
+    if (slots.size < 2) return emptyList()
+    val points = slots.map { slot ->
+        Offset(cos(slot.angle) * slot.radius, sin(slot.angle) * slot.radius)
+    }
+    val links = LinkedHashSet<Pair<Int, Int>>()
+    slots.indices.forEach { i ->
+        val nearest = slots.indices
+            .filter { it != i }
+            .minByOrNull { d -> (points[d] - points[i]).getDistanceSquared() }
+        if (nearest != null) {
+            links.add(minOf(i, nearest) to maxOf(i, nearest))
         }
-    return links
+    }
+    return links.toList()
+}
+
+/**
+ * v419 — A FAINT DUST FIELD, so the panel is a SKY rather than a flat plate.
+ *
+ * A cheap deterministic pseudo-random (a linear congruential step) scatters
+ * tiny dim points in UNIT space; the painter scales them by the panel, so the
+ * dust never stretches. Not random: the same specks land in the same places on
+ * every open.
+ */
+private fun starDust(count: Int): List<Offset> {
+    val out = ArrayList<Offset>(count)
+    var seed = 0x2545F491
+    repeat(count) {
+        seed = seed * 1103515245 + 12345
+        val x = ((seed ushr 8) and 0xFFFF) / 65535f
+        seed = seed * 1103515245 + 12345
+        val y = ((seed ushr 8) and 0xFFFF) / 65535f
+        out.add(Offset(x, y))
+    }
+    return out
 }
 
 /** One pane of the drawer's brain strip: accent glyph, big value, quiet

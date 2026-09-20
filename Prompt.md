@@ -8,46 +8,45 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "Add page-turn motion polish to the PDF pager (a subtle slide/curl)" — a follow-up to the
-> v418 reader work, chosen from the suggested next steps.
+> "the drawer graph is bad like othe previewus version was atleast better, do something
+> about it plaes its too symmetric"
+
+The member reversed the v414 direction on the Home drawer's lane star map: the ring-and-spoke
+lattice reads as too symmetric, and the earlier phyllotaxis scatter was better.
 
 ## 2. Findings
 
-- The PDF reader is the second `HorizontalPager` in `BookReaderScreen.kt` (`PageReader`).
-  Its pages are **flush and full-bleed** (`pageSpacing = 0.dp`), so a swipe was two stills
-  swapping with nothing travelling between them.
-- Each page box already carries its own pinch/zoom `graphicsLayer` (owned by the page that
-  asked for the zoom); the outer page `Box` was plain.
+- `DrawerLaneStarMap` (HomeScreen.kt) drew: `starLattice(count)` → 1–3 orbits at even
+  radii, even angles per orbit, half-step phase on odd orbits; plus a grid of orbit
+  circles, `STAR_CHART_SPOKES` (12) spokes and a hub; plus `starRingLinks` (a closed
+  polygon per orbit).
+- Exactly that regularity was the complaint. `StarSlot(angle, radius)` + `starPoint(...)`
+  are the placement/hit-test pair and are worth keeping.
 
 ## 3. What was built (v419)
 
-- Each PDF page now wears an outer `graphicsLayer` driven by its own distance from the
-  settle point: a **0.10-of-a-width slide**, a **9° `rotationY`** about the page's OUTER
-  edge (`transformOrigin`), a **4.5% shrink**, a light fade (`0.22` at full offset) and a
-  long `cameraDistance` (`24f * density`, vs the default 8× which curls too sharply).
-- The offset is read **inside the layer lambda** (`pagerState.currentPage - page +
-  currentPageOffsetFraction`), never hoisted into composition — so a swipe invalidates the
-  layer, not the composition. Hoisting it would recompose every page on every frame.
+- **`starScatter(count)`** replaces `starLattice`: the i-th star at the GOLDEN ANGLE
+  (2.3999632 rad) × i, radius `0.20 + 0.74 * sqrt((i + 0.55) / count)`, with a
+  deterministic 0..7 hashed wobble (`i * 2654435761L and 7`) on both angle and radius.
+  Deterministic; knowledge still only changes size/brightness.
+- **The grid is gone** — no orbit circles, no spokes, no hub; `STAR_CHART_SPOKES` and
+  `TWO_PI` deleted. A faint **`starDust(STAR_DUST_COUNT = 46)`** field (deterministic LCG,
+  unit space) gives the panel depth.
+- **`starLinks`** (nearest neighbour, unit-space `getDistanceSquared`) replaces
+  `starRingLinks`, so hairlines read as loose constellations.
+- `StarSlot` and `starPoint` are unchanged, so the tap target still matches the paint.
 
 ## 4. Verification
 
-- Brace/paren balance 0/0 on `BookReaderScreen.kt`; no leftover composition-level
-  `pageOffset`. New imports: `TransformOrigin`, `kotlin.math.abs`.
+- Brace/paren balance 0/0 on `HomeScreen.kt`; no remaining `starLattice` / `starRingLinks`
+  / `TWO_PI` / `STAR_CHART_SPOKES` / `orbits` references; `cos` / `sin` already imported.
 - No Gradle in this environment — CI validates the compile.
-
-## 4b. CI fix (same session)
-
-CI failed on the two prior commits (`4f6c69ae`, `cfe99f7d`) with ONE root cause:
-`CategoryInk.kt:262` and `:269 — Unresolved reference 'contrast'`, because `contrast()`
-lived in the deleted `PantoneThemes.kt`. It is restored as `internal fun contrast(a, b)`
-in `CurioTheme.kt` (same package, plus the `luminance` import), which is where the
-category ink resolvers can reach it. Pushed as `f353b28d`.
 
 ## 5. Open notes
 
-- The effect is a DRAW transform only: layout, the pinch-zoom and the marks are untouched.
-- The reflowable TEXT pager was left as-is (the ask named the PDF pager). The same layer
-  drops in there if wanted.
+- `DrawerStarMapHeight` stays 254dp (v414); only the arrangement changed.
+- If the scatter is now TOO loose, the wobble constants (`0.055` angle, `0.011` radius)
+  and the `0.20 + 0.74 * sqrt(...)` spread are the two dials to tune.
 
 ---
 

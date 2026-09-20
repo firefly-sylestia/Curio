@@ -9207,33 +9207,32 @@ only ever catches taps that mean "not in any of these".
   700-level deep too). The 36-lane hue collapse, the no-alpha and no-card-border
   rules, and the shared-hero branches all still hold.
 
-### v414 — the drawer chart: a lattice, and more of the drawer
+### v419 — the drawer chart is a SKY again (the v414 lattice was too symmetric)
 
-- **IT COVERS MORE OF THE DRAWER.** `DrawerStarMapHeight` 188dp → **254dp** — at
-  the old height the chart read as a strip wedged between the brain stats and
-  the lane readout (member: "it doesnt cover the drawer a little more").
-- **THE STARS SIT ON A RING-AND-SPOKE LATTICE, NOT A SCATTER.** `starScatter`
-  (phyllotaxis) is GONE; `starLattice(count)` places lanes on 1–3 orbits
-  (chosen by lane count) at radii evenly spaced 0.30–0.92 of the panel's
-  half-height, each orbit's capacity proportional to its radius (so neighbours
-  sit about the same distance apart everywhere), spread evenly by angle, with
-  odd orbits set half a step out of phase. Still deterministic, and knowledge
-  still never MOVES a star — it changes size and brightness only, so the map
-  stays the landmark the member learns (member: "still not beautiful and
-  geometric enough").
-- **THE CHART IS DRAWN UNDER THE STARS:** one faint circle per orbit actually
-  used, `STAR_CHART_SPOKES` (12) radial spokes, and a small hub — all opaque
-  `lerp(panel, muted, 0.16f)` hairlines.
-- **THE HAIRLINES ARE RING POLYGONS.** `starLinks` (two nearest neighbours) is
-  GONE; `starRingLinks` closes each orbit through its own stars — a chord
-  between neighbouring pairs and the last back to the first — so the lattice
-  reads as geometry rather than a nearest-neighbour mesh.
-- **SLOTS, NOT POINTS.** `StarSlot(angle, radius)` replaced the old unit-space
-  `Offset` scatter, and `starPoint(slot, hub, unitPx)` is the ONE placement
-  function the canvas and the hit test both call (in PIXEL space now, with the
-  radius multiplied by the SHORTER side) — so the orbits stay round in a wide
-  drawer AND a tap can never miss the star it looks like it hit. `sqrt` import
-  dropped with the phyllotaxis.
+- **IT COVERS MORE OF THE DRAWER.** `DrawerStarMapHeight` 188dp → **254dp**
+  (v414) — at the old height the chart read as a strip wedged between the brain
+  stats and the lane readout; that part still holds.
+- **POSITION: a golden-angle scatter with a hashed wobble.** `starScatter(count)`
+  replaces `starLattice` — the member reversed v414: "the drawer graph is bad …
+  the previous version was at least better … its too symmetric". The i-th star
+  sits at the GOLDEN ANGLE (2.3999632 rad) times i, its radius grows with
+  `sqrt((i + 0.55) / count)` so the disc fills evenly, and a deterministic 0..7
+  hash (`i * 2654435761L and 7`) wobbles the angle and radius so no two
+  neighbours align. Still deterministic — the same lanes always land in the same
+  places — and knowledge still never MOVES a star (size and brightness only), so
+  the map stays the landmark the member learns.
+- **NO GRID.** The v414 astrolabe (one circle per orbit, `STAR_CHART_SPOKES` =
+  12 spokes, a hub) was the symmetry the member rejected, so it is GONE — and so
+  are those constants and `TWO_PI`. A faint `starDust(STAR_DUST_COUNT = 46)`
+  field (a deterministic LCG in unit space) gives the panel its depth instead.
+- **HAIRLINES ARE LOCAL AGAIN.** `starRingLinks` is GONE; `starLinks` joins each
+  star to its NEAREST neighbour (unit-space `getDistanceSquared`), so the sky
+  reads as loose constellations, never rings or a regular mesh.
+- **SLOTS STAY.** `StarSlot(angle, radius)` is unchanged, and
+  `starPoint(slot, hub, unitPx)` is still the ONE placement function the canvas
+  and the hit test both call (pixel space, radius × the SHORTER side) — so the
+  scatter stays round in a wide drawer AND a tap can never miss the star it
+  looks like it hit.
 
 ### v413 — the Material deck wears the device colour
 
