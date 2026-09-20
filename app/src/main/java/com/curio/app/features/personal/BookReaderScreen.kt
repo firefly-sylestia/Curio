@@ -912,8 +912,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                             isHeading = false,
                             isPage = true
                         )
-                    },
-                    onTap = onSurfaceTap,
+                    },                    onTap = onSurfaceTap,
+                    // v424 — the screen the tap zones are measured on, and
+                    // where it starts in the window: the scrolling PDF's frames
+                    // sit on a document wider than the screen, so a tap inside
+                    // one of them is reported in the FRAME's coordinates and has
+                    // to be said in the screen's (see [PdfScrollReader]).
+                    viewport = surfaceSize,
+                    surfaceOrigin = surfaceOrigin,
                     onScrolled = { scrolling ->
                         // A scroll the READER asked for keeps the chrome (v405).
                         if (scrolling) {
@@ -922,6 +928,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                             askedByReader = false
                         }
                     },
+
                     flow = ReaderLook.pageFlow,
                     // The sweep on a PDF page is reported the same way the
                     // reflowable one is, because it is the same act: the words
@@ -2250,6 +2257,10 @@ private fun PageReader(
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onLongPress: (Int) -> Unit,
     onTap: (Offset, IntSize) -> Unit,
+    /** v424 — the size of the screen the zones are measured on. */
+    viewport: IntSize,
+    /** v424 — where that screen starts, so a frame's own tap can be translated. */
+    surfaceOrigin: Offset,
     onScrolled: (Boolean) -> Unit,
     flow: ReaderFlow,
     /** v389c — the live sweep, when it belongs to this page of the file. */
