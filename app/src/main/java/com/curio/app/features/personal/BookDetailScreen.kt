@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -13,6 +14,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,14 +58,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -1418,14 +1424,77 @@ private fun ProgressTile(
     }
 }
 
-/** One round end of a [ProgressTile]'s stepper. */
+/**
+ * v412 — ONE ROUND END OF A STEPPER, AND IT KEEPS GOING WHILE IT IS HELD.
+ *
+ * A tap moves the value one step; pressing and holding past
+ * [TileStepHoldDelayMs] starts a repeat that ACCELERATES — every tick comes a
+ * little sooner than the last, from [TileStepRepeatStartMs] down to
+ * [TileStepRepeatMinMs] — so a hundred chapters or three hundred pages are one
+ * press of a finger away instead of a hundred taps (member: "make the plus
+ * holdable and when held it goes fast the page count"). Every step, the tap
+ * and each tick alike, plays a light haptic tick, so the count can be felt
+ * moving without watching the number.
+ *
+ * The press gesture owns the whole thing rather than sitting beside a
+ * `Surface(onClick)`: one detector means one code path for "was this a tap or a
+ * hold", so a hold can never ALSO fire the tap that ended it (the same
+ * construction as the reader page-bar arrow). The repeat runs in the
+ * composition's own scope, so it dies with the card.
+ */
 @Composable
 private fun TileStepButton(glyph: String, label: String, ink: Color, onClick: () -> Unit) {
+    val repeater = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+    // Plain flag (not Compose state): nothing in composition reads it, it only
+    // tells the trailing tap whether the hold already did the work.
+    val held = remember { booleanArrayOf(false) }
+    var pressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.9f else 1f,
+        animationSpec = tween(110),
+        label = "tileStepPress"
+    )
     Surface(
-        onClick = onClick,
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-        modifier = Modifier.size(34.dp)
+        modifier = Modifier
+            .size(34.dp)
+            .scale(scale)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        pressed = true
+                        held[0] = false
+                        val job = repeater.launch {
+                            delay(TileStepHoldDelayMs)
+                            held[0] = true
+                            var interval = TileStepRepeatStartMs
+                            while (true) {
+                                onClick()
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                delay(interval)
+                                interval = (interval - TileStepRepeatAccelMs)
+                                    .coerceAtLeast(TileStepRepeatMinMs)
+                            }
+                        }
+                        try {
+                            // Suspends until the finger lifts (or the gesture is
+                            // cancelled) — which is what stops the metronome.
+                            tryAwaitRelease()
+                        } finally {
+                            job.cancel()
+                            pressed = false
+                        }
+                    },
+                    onTap = {
+                        if (!held[0]) {
+                            onClick()
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        }
+                    }
+                )
+            }
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CurioIcon(glyph, label, tint = ink.copy(alpha = 0.8f), size = 17.dp)
@@ -2112,3 +2181,13 @@ private const val MAX_TICKS = 48
  * clean fill (its chapter count is still stated under the bar).
  */
 private const val MAX_GAUGE_NOTCHES = 80
+
+// ── v412 — A HELD STEPPER RUNS, IT DOES NOT WALK ────────────────────────────
+/** How long a tile stepper must be held before it starts repeating. */
+private const val TileStepHoldDelayMs = 340L
+/** The first repeat's interval — one step every [TileStepRepeatStartMs]. */
+private const val TileStepRepeatStartMs = 160L
+/** The fastest the repeat gets; it never comes sooner than this. */
+private const val TileStepRepeatMinMs = 50L
+/** Shaved off the interval after every tick, so the count visibly accelerates. */
+private const val TileStepRepeatAccelMs = 16L

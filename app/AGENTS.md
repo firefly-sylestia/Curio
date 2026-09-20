@@ -9193,7 +9193,15 @@ only ever catches taps that mean "not in any of these".
   both counts (member: "there are a lot of duplicates … remove the top 2 … keep the
   last one with the +- button … make it one beautiful progress view"). The card is
   now: label + one action, the gauge, the two tiles, the footer rail. The finished
-  state keeps its single "Every chapter closed" line under the full gauge.
+  state keeps its single "Every chapter closed" line under the full gauge. **The
+  `TileStepButton` steppers repeat while held** — a tap moves one step, a hold past
+  `TileStepHoldDelayMs` starts an ACCELERATING repeat (`TileStepRepeatStartMs` down
+  to `TileStepRepeatMinMs`, shaving `TileStepRepeatAccelMs` a tick), one press away
+  from 300 pages or 100 chapters — and every step (tap and tick alike) plays a
+  `HapticFeedbackType.TextHandleMove` tick. Owned by one `detectTapGestures`
+  (`onPress` + `tryAwaitRelease`), never beside a `Surface(onClick)`, so a hold can
+  never also fire the tap that ended it — the same construction as `ReaderHoldButton`.
+  The press also drives a `0.9f` scale for touch feedback.
 - **THE PANTONE ACCENT IS APP-WIDE.** `curioRoseInk()` and
   `settingsCardChipTint()` now answer the Pantone palette first, so the icon
   chips, plate tints and ink accents across the app come back in the member's
