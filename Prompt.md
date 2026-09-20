@@ -225,6 +225,14 @@ files were the only ones missing one.
   status bar is gone), the page's v425 language added, and the file/page-count contract
   added to the chapters bullet. Committed with this file; NOT pushed (docs-only).
 
+## 6. Follow-up (this session) — the red CI lint
+
+The member pasted the failed `:app:lintRelease` log: `WrongConstant` at
+`PersonalExport.kt:446` — `setJustificationMode` must take `LineBreaker` constants,
+not `Layout` ones (same value, 1, inlined either way, but lint insists on the
+`LineBreaker` spelling). Fixed by importing `android.text.LineBreaker` and switching
+the call. Committed and pushed.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

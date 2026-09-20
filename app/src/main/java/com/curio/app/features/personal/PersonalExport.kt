@@ -12,6 +12,7 @@ import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.text.Layout
+import android.text.LineBreaker
 import android.text.SpannableString
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -443,7 +444,7 @@ private fun exportLayout(
         .setLineSpacing(0f, PDF_LINE_SPACING)
         .setIncludePad(false)
     if (block.align == PersonalAlign.JUSTIFY) {
-        builder.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD)
+        builder.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD)
     }
     return builder.build()
 }
