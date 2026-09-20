@@ -2,7 +2,6 @@ package com.curio.app.features.incursion
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,9 +31,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +65,10 @@ import com.curio.app.ui.components.CurioDropdownMenu
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCardShadow
+import com.curio.app.ui.theme.curioFillInk
+import com.curio.app.ui.theme.curioTintOn
+import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -302,14 +306,40 @@ private enum class IncursionFilter(val id: String, val label: String) {
  * a legend. These are held here rather than derived from the theme's accent
  * because they are SIX different facts, not six shades of one — a single accent
  * could only have said "decided" and "not decided".
+ *
+ * v425 — THEY ARE THE THEME'S OWN TONES NOW, not six fixed hexes. The old set
+ * was chosen against a flat light page, so on a named theme's night (and on the
+ * dark scheme's own plates) #3E7C58, #C2543F and the rest were the loudest ink
+ * on the page — half of "it doesn't match the app style at all" is a palette
+ * saying so. Each state keeps its own HUE (six facts stay six), but every one
+ * is read through the app's own tone discipline — the shape the named themes'
+ * own `accentFor` uses: a deeper, calmer ink by day, a lifted but muted one at
+ * night. [curioFillInk] is still what reads on a chip FILLED with one of these.
  */
-private fun statusInk(status: IncursionStore.Status): Color = when (status) {
-    IncursionStore.Status.WATCHED -> Color(0xFF3E7C58)
-    IncursionStore.Status.WATCHING -> Color(0xFFC2543F)
-    IncursionStore.Status.PLANNED -> Color(0xFF4A6E9C)
-    IncursionStore.Status.ON_HOLD -> Color(0xFFB4842E)
-    IncursionStore.Status.DROPPED -> Color(0xFF7A6E68)
-    IncursionStore.Status.UNWATCHED -> Color(0xFF8A857E)
+@Composable
+private fun statusInk(status: IncursionStore.Status): Color {
+    val dark = isCurioDarkTheme()
+    val hue = when (status) {
+        IncursionStore.Status.WATCHED -> 152f
+        IncursionStore.Status.WATCHING -> 18f
+        IncursionStore.Status.PLANNED -> 214f
+        IncursionStore.Status.ON_HOLD -> 40f
+        IncursionStore.Status.DROPPED -> 22f
+        IncursionStore.Status.UNWATCHED -> 30f
+    }
+    // A dropped row and an untouched one are both MUTED facts — they carry
+    // almost no hue, so they read as "nothing to see" beside the four that do.
+    val chroma = when (status) {
+        IncursionStore.Status.DROPPED -> if (dark) 0.14f else 0.16f
+        IncursionStore.Status.UNWATCHED -> 0.10f
+        else -> if (dark) 0.30f else 0.44f
+    }
+    val lightness = when {
+        status == IncursionStore.Status.UNWATCHED -> if (dark) 0.62f else 0.52f
+        dark -> 0.70f
+        else -> 0.36f
+    }
+    return fromHsl(hue, chroma, lightness)
 }
 
 // ── The header ──────────────────────────────────────────────────────────────
@@ -397,16 +427,42 @@ private fun IncursionHeader(
             )
         }
 
-        Spacer(Modifier.height(6.dp))
-        if (blurb.isNotBlank()) {
-            Text(
-                blurb,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        // v425 — THE PAGE'S HEAD IS A PLATE. The blurb and the one progress bar
+        // used to sit straight on the page, which is the one thing this app
+        // never does with a page's own summary: it is a card, on the app's own
+        // ladder ([curioTintOn] over the card step, the soft shadow, no drawn
+        // edge), and the name above it stays the page's title.
+        Spacer(Modifier.height(10.dp))
+        val headShape = RoundedCornerShape(24.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .curioCardShadow(headShape)
+                .clip(headShape)
+                .background(
+                    curioTintOn(
+                        MaterialTheme.colorScheme.surfaceContainerLow,
+                        accent,
+                        if (isCurioDarkTheme()) 0.10f else 0.06f
+                    )
+                )
+                .padding(horizontal = 14.dp, vertical = 12.dp)
+        ) {
+            if (blurb.isNotBlank()) {
+                Text(
+                    blurb,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(10.dp))
+            }
+            IncursionProgress(
+                watched = watched,
+                total = total,
+                accent = accent,
+                groupLabel = groupLabel
             )
         }
-        Spacer(Modifier.height(8.dp))
-        IncursionProgress(watched = watched, total = total, accent = accent, groupLabel = groupLabel)
         Spacer(Modifier.height(10.dp))
     }
 }
@@ -453,7 +509,10 @@ private fun IncursionProgress(watched: Int, total: Int, accent: Color, groupLabe
 private fun IconPill(glyph: String, description: String, onClick: () -> Unit) {
     Surface(
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+        // v425 — opaque, off the ladder: a control is a real plate, and a
+        // translucent disc over whatever is behind it is how a page starts to
+        // look like it was assembled from parts.
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier
             .size(38.dp)
             .clip(CircleShape)
@@ -486,10 +545,10 @@ private fun IncursionFilterRow(
     ) {
         IncursionFilter.entries.forEach { chip ->
             val on = chip == selected
+            val chipInk = settingsRoseAccent()
             Surface(
                 shape = RoundedCornerShape(50),
-                color = if (on) settingsRoseAccent()
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                color = if (on) chipInk else MaterialTheme.colorScheme.surfaceContainerHigh,
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
                     .clickable { if (!on) onSelect(chip) }
@@ -498,7 +557,11 @@ private fun IncursionFilterRow(
                     chip.label,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (on) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                    // The ink asks the FILL it sits on instead of wearing white
+                    // on whatever the accent happens to be — a named theme's
+                    // night accent is a light tone, and white on it vanished.
+                    color = if (on) curioFillInk(chipInk)
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
                 )
             }
@@ -587,16 +650,22 @@ private fun GroupHeader(
     // The block's own kind and name: "PHASE / Phase 1" for Marvel, "ERA 1 /
     // Original Trilogy" for a line that numbers its eras as well as naming them.
     val eyebrow = (group.label ?: studio.groupLabel).uppercase()
+    // v425 — the phase header is a CARD in the app's own language: the card
+    // step tinted with the page's accent, the soft shadow for its lift,
+    // and no drawn edge anywhere (the old wash over `surface` read as a
+    // painted band rather than as a plate).
+    val headerShape = RoundedCornerShape(24.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 14.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .curioCardShadow(headerShape)
+            .clip(headerShape)
             .background(
-                lerp(
-                    MaterialTheme.colorScheme.surface,
+                curioTintOn(
+                    MaterialTheme.colorScheme.surfaceContainerLow,
                     accent,
-                    if (isCurioDarkTheme()) 0.16f else 0.07f
+                    if (isCurioDarkTheme()) 0.10f else 0.06f
                 )
             )
             .padding(horizontal = 14.dp, vertical = 12.dp)
@@ -698,18 +767,20 @@ private fun PhaseStatusChip(
     onClick: () -> Unit
 ) {
     val ink = statusInk(status)
+    // v425 — a chip is a FILL, not an outline: the app gave up drawn edges
+    // ("no more outlines anywhere — a card is its fill, its radius and a soft
+    // shadow"), and these two were the last boxed rectangles on the page.
     Surface(
         shape = RoundedCornerShape(50),
         color = if (pressed) {
-            ink.copy(alpha = if (isCurioDarkTheme()) 0.26f else 0.15f)
+            curioTintOn(
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                ink,
+                if (isCurioDarkTheme()) 0.20f else 0.14f
+            )
         } else {
-            MaterialTheme.colorScheme.surface
+            MaterialTheme.colorScheme.surfaceContainerHigh
         },
-        border = BorderStroke(
-            1.dp,
-            if (pressed) ink.copy(alpha = 0.5f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-        ),
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
@@ -733,10 +804,14 @@ private fun PhaseStatusChip(
 /** Putting a phase back to "not watched" — offered only once something is set. */
 @Composable
 private fun PhaseClearChip(label: String, onClick: () -> Unit) {
+    // The same rule as its neighbours: a fill, never a boxed line.
     Surface(
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.35f)),
+        color = curioTintOn(
+            MaterialTheme.colorScheme.surfaceContainerLow,
+            MaterialTheme.colorScheme.error,
+            if (isCurioDarkTheme()) 0.20f else 0.12f
+        ),
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
@@ -766,12 +841,14 @@ private fun PhaseClearChip(label: String, onClick: () -> Unit) {
 private fun EntryRow(entry: IncursionEntry, onOpen: () -> Unit) {
     val status = IncursionStore.status(entry.storageKey)
     val ink = statusInk(status)
+    val rowShape = RoundedCornerShape(18.dp)
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = rowShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .curioCardShadow(rowShape)
+            .clip(rowShape)
             .clickable(onClick = onOpen)
     ) {
         Row(
@@ -977,67 +1054,75 @@ private fun IncursionGrid(
 private fun EntryTile(entry: IncursionEntry, onOpen: () -> Unit) {
     val status = IncursionStore.status(entry.storageKey)
     val ink = statusInk(status)
+    val tileShape = RoundedCornerShape(20.dp)
     Surface(
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = tileShape,
+        // v425 — the status is a whisper in the tile's own fill plus a dot
+        // beside the order, instead of a colour bar pinned across its top
+        // edge: a 3dp stripe is a rule drawn on a card, and this app's cards
+        // have not worn one since the outline pass.
+        color = if (status == IncursionStore.Status.UNWATCHED) {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        } else {
+            curioTintOn(
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                ink,
+                if (isCurioDarkTheme()) 0.10f else 0.06f
+            )
+        },
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .curioCardShadow(tileShape)
+            .clip(tileShape)
             .clickable(onClick = onOpen)
     ) {
-        Column {
-            // The status reads as a bar across the tile's top edge: a chip's
-            // words are illegible at this size, a colour is not.
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .background(ink)
-            )
-            Column(Modifier.padding(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "#${entry.orderLabel}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = settingsRoseAccent()
-                    )
-                    Spacer(Modifier.weight(1f))
-                    if (entry.essential) {
-                        CurioIcon(
-                            name = CurioIcons.Star,
-                            contentDescription = "Essential",
-                            tint = settingsRoseAccent(),
-                            size = 13.dp
-                        )
-                    }
-                }
-                Spacer(Modifier.height(6.dp))
+        Column(Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    entry.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    listOfNotNull(
-                        entry.year?.toString(),
-                        entry.typeLabel,
-                        status.takeIf { it != IncursionStore.Status.UNWATCHED }?.label
-                    ).joinToString(" · "),
+                    "#${entry.orderLabel}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (status == IncursionStore.Status.UNWATCHED) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    } else {
-                        ink
-                    },
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    fontWeight = FontWeight.Bold,
+                    color = settingsRoseAccent()
                 )
+                Spacer(Modifier.weight(1f))
+                if (status != IncursionStore.Status.UNWATCHED) {
+                    StatusDot(status = status, size = 8.dp)
+                    Spacer(Modifier.width(6.dp))
+                }
+                if (entry.essential) {
+                    CurioIcon(
+                        name = CurioIcons.Star,
+                        contentDescription = "Essential",
+                        tint = settingsRoseAccent(),
+                        size = 13.dp
+                    )
+                }
             }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                entry.title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                listOfNotNull(
+                    entry.year?.toString(),
+                    entry.typeLabel,
+                    status.takeIf { it != IncursionStore.Status.UNWATCHED }?.label
+                ).joinToString(" · "),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (status == IncursionStore.Status.UNWATCHED) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    ink
+                },
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -1052,73 +1137,155 @@ private fun IncursionDetailSheet(
 ) {
     val accent = settingsRoseAccent()
     val status = IncursionStore.status(entry.storageKey)
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val pillShape = RoundedCornerShape(50)
+
+    // v425 — A TITLE OPENS AS A SHEET, NOT A BOX. This was an `AlertDialog`:
+    // the app has ONE detail language — the sheet (a topic reveal, a book's own
+    // page, the feedback form) — and a boxed dialog put a second, foreign
+    // surface in front of a page that already had one, on the only screen where
+    // a title's synopsis is read out. The sheet gives it room instead of 420dp.
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
-            Column {
-                Text(
-                    entry.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    entryMeta(entry),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                entry.desc?.takeIf { it.isNotBlank() }?.let { desc ->
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // The head: the order number the page is about, the title, its meta
+            // line, and the essentials mark as a chip beside them.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(
+                            curioTintOn(
+                                MaterialTheme.colorScheme.surfaceContainerLow,
+                                accent,
+                                if (isCurioDarkTheme()) 0.18f else 0.12f
+                            )
+                        )
+                ) {
                     Text(
-                        desc,
-                        style = MaterialTheme.typography.bodyMedium,
+                        entry.orderLabel,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = accent
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        entry.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        entryMeta(entry),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                entry.prereq?.takeIf { it.isNotBlank() && it != "—" }?.let { prereq ->
+                if (entry.essential) {
+                    Surface(
+                        shape = pillShape,
+                        color = curioTintOn(
+                            MaterialTheme.colorScheme.surfaceContainerLow,
+                            accent,
+                            if (isCurioDarkTheme()) 0.18f else 0.12f
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Star,
+                                contentDescription = null,
+                                tint = accent,
+                                size = 12.dp
+                            )
+                            Spacer(Modifier.width(5.dp))
+                            Text(
+                                "Essential",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = accent
+                            )
+                        }
+                    }
+                }
+            }
+
+            entry.desc?.takeIf { it.isNotBlank() }?.let { desc ->
+                Text(
+                    desc,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            entry.prereq?.takeIf { it.isNotBlank() && it != "—" }?.let { prereq ->
+                Column {
                     Text(
                         "WATCH FIRST",
                         style = MaterialTheme.typography.labelSmall,
                         color = accent,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         prereq,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(Modifier.height(12.dp))
                 }
-                Text(
-                    "WHERE YOU ARE",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = accent,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(6.dp))
-                // Six rows, the current one ticked — the same picker the phase
-                // header's menu offers, so a title and a whole phase are marked
-                // the same way.
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    IncursionStore.Status.entries.forEach { option ->
-                        val on = option == status
+            }
+
+            Text(
+                "WHERE YOU ARE",
+                style = MaterialTheme.typography.labelSmall,
+                color = accent,
+                fontWeight = FontWeight.Bold
+            )
+            // Six rows, the current one ticked — the same states the phase
+            // header's own chips offer, so a title and a whole phase are marked
+            // the same way. Every row is a FILL in the app's language: no
+            // outlines, and only the chosen one wears its state's tone.
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                IncursionStore.Status.entries.forEach { option ->
+                    val on = option == status
+                    val ink = statusInk(option)
+                    val optionShape = RoundedCornerShape(16.dp)
+                    Surface(
+                        shape = optionShape,
+                        color = if (on) {
+                            curioTintOn(
+                                MaterialTheme.colorScheme.surfaceContainerLow,
+                                ink,
+                                if (isCurioDarkTheme()) 0.20f else 0.14f
+                            )
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerLow
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(optionShape)
+                            .clickable { onStatus(option) }
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { onStatus(option) }
-                                .background(
-                                    if (on) statusInk(option).copy(alpha = 0.14f) else Color.Transparent
-                                )
-                                .padding(horizontal = 10.dp, vertical = 9.dp)
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp)
                         ) {
                             StatusDot(status = option, size = 11.dp)
                             Spacer(Modifier.width(10.dp))
@@ -1126,14 +1293,14 @@ private fun IncursionDetailSheet(
                                 option.label,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (on) statusInk(option) else MaterialTheme.colorScheme.onSurface,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                             )
                             if (on) {
                                 CurioIcon(
                                     name = CurioIcons.Check,
                                     contentDescription = null,
-                                    tint = statusInk(option),
+                                    tint = ink,
                                     size = 16.dp
                                 )
                             }
@@ -1141,11 +1308,22 @@ private fun IncursionDetailSheet(
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Done") }
+
+            Surface(
+                onClick = onDismiss,
+                shape = pillShape,
+                color = accent,
+                contentColor = curioFillInk(accent),
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(
+                    "Done",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 11.dp)
+                )
+            }
         }
-    )
+    }
 }
 
 // ── The page's own nav bar ───────────────────────────────────────────────────

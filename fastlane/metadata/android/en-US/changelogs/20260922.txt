@@ -1,4 +1,8 @@
 FIX:
+- Incursion: the page reads as part of Curio — every state wears a theme tone (the six were fixed hexes, bright enough to be the loudest ink on a named theme's dark page), the phase headers, rows and tiles are cards (fill, radius, soft shadow) instead of tinted bands, the chips are fills rather than boxed lines, and a title opens in the sheet the rest of the app uses instead of a boxed dialog.
+- Incursion: the reveal that announces the unlock is a Curio card — it was white words on a black scrim under a filled accent disc, which read as a notice rather than as a secret, so it wears the theme's own ink and card and says what it is.
+
+FIX:
 - Support: a live feedback form greets you on Home without a trip through Settings — the form is published on the server and read with your own account, and that read ran before a cold start had restored the session (only the Online Mode, Privacy and Community screens did); the account is restored with the rest of the app's state at launch now, and a read made too early waits for it instead of giving up.
 - Appearance: the named themes' night is muted — Jade, Orchid, Ocean, Sand and Ember painted their page, their cards, their hero and their second and third fills with daylight chroma, so a page of Settings or Profile cards came out brighter than the app's own dark ladder and the hero read as a lit slab; every night fill carries its hue quietly now, the card ladder sits a shade lower, and the accent ink clears 4.5:1 on the top card step (it had missed).
 

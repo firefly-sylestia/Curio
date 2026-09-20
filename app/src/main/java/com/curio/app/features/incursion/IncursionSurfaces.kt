@@ -41,10 +41,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.curio.app.data.IncursionStore
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCardShadow
+import com.curio.app.ui.theme.curioTintOn
+import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.delay
 
 /**
@@ -80,6 +84,7 @@ fun IncursionUnlockReveal() {
         exit = fadeOut(tween(280))
     ) {
         val accent = settingsRoseAccent()
+        val dark = isCurioDarkTheme()
         // A slow breath behind the mark, so the reveal is alive rather than a
         // static card. One animation, three seconds — nothing to distract from
         // the words.
@@ -108,44 +113,73 @@ fun IncursionUnlockReveal() {
                         CircleShape
                     )
             )
+            // v425 — IT IS A CARD, IN THE APP'S OWN INK. The reveal used to be
+            // white words on a black scrim with a filled accent disc — which is
+            // an app-store notice, not a Curio page, and the member read the
+            // whole thing as one ("the activation overlay it shows upgrade it").
+            // It is now the card the app uses everywhere (the card step with the
+            // page's accent mixed into it, the soft shadow, no drawn edge), the
+            // theme's own ink for its words, and the mark in a tinted disc — so a
+            // secret reads as something Curio is telling you quietly.
+            val cardShape = RoundedCornerShape(28.dp)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .statusBarsPadding()
-                    .padding(horizontal = 34.dp)
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = accent,
-                    modifier = Modifier.size(62.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CurioIcon(
-                            name = CurioIcons.Hub,
-                            contentDescription = null,
-                            tint = Color.White,
-                            size = 30.dp
+                    .padding(horizontal = 26.dp)
+                    .fillMaxWidth()
+                    .curioCardShadow(cardShape)
+                    .clip(cardShape)
+                    .background(
+                        curioTintOn(
+                            MaterialTheme.colorScheme.surfaceContainerLow,
+                            accent,
+                            if (dark) 0.14f else 0.08f
                         )
-                    }
+                    )
+                    .padding(horizontal = 20.dp, vertical = 22.dp)
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(curioTintOn(MaterialTheme.colorScheme.surfaceContainerLow, accent, if (dark) 0.24f else 0.16f))
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Hub,
+                        contentDescription = null,
+                        tint = accent,
+                        size = 26.dp
+                    )
                 }
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(14.dp))
                 Text(
                     "INCURSION",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.White
+                    color = accent
                 )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    "The whole viewing order — Marvel, Sony and X-Men — is on your Home page now.",
+                    "The watching order is yours",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Marvel, Sony and X-Men, in the order they were meant to be seen. " +
+                        "The door is on your Home page, whenever you want it.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.86f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(16.dp))
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = Color.White.copy(alpha = 0.10f),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -163,7 +197,7 @@ fun IncursionUnlockReveal() {
                         Text(
                             "works in any search field",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.6f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
