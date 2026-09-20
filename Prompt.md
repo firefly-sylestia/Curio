@@ -35,6 +35,14 @@ from the state rather than from memory.
   `pageOffset`. New imports: `TransformOrigin`, `kotlin.math.abs`.
 - No Gradle in this environment — CI validates the compile.
 
+## 4b. CI fix (same session)
+
+CI failed on the two prior commits (`4f6c69ae`, `cfe99f7d`) with ONE root cause:
+`CategoryInk.kt:262` and `:269 — Unresolved reference 'contrast'`, because `contrast()`
+lived in the deleted `PantoneThemes.kt`. It is restored as `internal fun contrast(a, b)`
+in `CurioTheme.kt` (same package, plus the `luminance` import), which is where the
+category ink resolvers can reach it. Pushed as `f353b28d`.
+
 ## 5. Open notes
 
 - The effect is a DRAW transform only: layout, the pinch-zoom and the marks are untouched.
