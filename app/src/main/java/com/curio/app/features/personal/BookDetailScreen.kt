@@ -1048,9 +1048,12 @@ private fun lastPageOf(mark: com.curio.app.data.ReaderMarkEntity?, isPdf: Boolea
  *    can never be yanked by an edit here; a hand edit ahead of the reader
  *    simply shows as ahead until reading catches up.
  *
- * Page/Chapter layout: PAGES are the prominent measure (a bar of the whole
- * file with the page number on it), chapters the row beneath it (the file's
- * own chapter names when it has an outline).
+ * Page/Chapter layout: ONE gauge carries both measures (the fill is the page
+ * fraction, the chapter openings are notches inside its track), and the two
+ * tiles under it are the only places the chapter and the page are NAMED —
+ * v412 removed the headline and the count row that said the same pair twice
+ * more (member: "there are a lot of duplicates … remove the top 2 … make it
+ * one beautiful progress view").
  */
 @Composable
 private fun ProgressCard(
@@ -1090,53 +1093,23 @@ private fun ProgressCard(
             modifier = Modifier.fillMaxWidth()
         ) {
         Column(Modifier.padding(16.dp)) {
-            // ── THE HEADLINE: WHERE I AM, IN THE FILE'S OWN WORDS ──
+            // ── THE HEAD: ONE LABEL, ONE ACTION (v412) ────────────────────
+            // The card opened with the chapter name over "Page 87 of 312" —
+            // the SAME place the two tiles below state, in the SAME units, so
+            // the member read their position twice before reaching the
+            // controls and the card felt like three progress views stacked
+            // (member: "there are a lot of duplicates … remove the top 2").
+            // The headline is gone; only the label and its one action stay.
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        "READING PROGRESS",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.1.sp
-                        ),
-                        color = personalAccentInk().copy(alpha = 0.8f)
-                    )
-                    Spacer(Modifier.height(5.dp))
-                    // The chapter name is the PROMINENT line when the file
-                    // carries an outline ("The Count of Monte Cristo"),
-                    // because a chapter is what a reader says when asked where
-                    // they are; the page number is the precise answer beneath.
-                    val chapterLabel = when {
-                        finished -> "Finished"
-                        current <= 0 -> "Not started"
-                        chapterNames.isNotEmpty() ->
-                            chapterNames.getOrNull(current - 1)?.takeIf { it.isNotBlank() }
-                                ?: "Chapter $current"
-                        else -> "Chapter $current"
-                    }
-                    Text(
-                        chapterLabel,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontFamily = FrauncesFontFamily,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = ink,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        when {
-                            finished -> "Every chapter closed"
-                            pageCount > 0 && lastPage > 0 -> "Page $lastPage of $pageCount"
-                            pageCount > 0 -> "Not opened yet"
-                            total > 0 -> "Chapter $current of $total"
-                            else -> "Set how long the book is"
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ink.copy(alpha = 0.55f)
-                    )
-                }
+                Text(
+                    "READING PROGRESS",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.1.sp
+                    ),
+                    color = personalAccentInk().copy(alpha = 0.8f),
+                    modifier = Modifier.weight(1f)
+                )
                 if (finished) {
                     Surface(
                         onClick = { onFinished(false) },
@@ -1187,37 +1160,31 @@ private fun ProgressCard(
                     accent = accent,
                     ink = ink
                 )
-                Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        when {
-                            finished -> "Every chapter closed"
-                            total > 0 && current > 0 -> "Chapter $current of $total"
-                            total > 0 -> "$total chapters"
-                            else -> ""
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ink.copy(alpha = 0.55f)
-                    )
-                    if (pageCount > 0) {
-                        Spacer(Modifier.weight(1f))
-                        Text(
-                            "$pageCount pages",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = ink.copy(alpha = 0.55f)
-                        )
-                    }
-                }
             }
-            Spacer(Modifier.height(14.dp))
-            // ── THE CONTROLS — say where you are, or how long the book is. ──
-            // A hand move writes the BOOK ROW (currentChapter / currentPage)
-            // and leaves the reader's own memory alone, so the reader still
-            // opens where it was left and a move here can never yank the place
-            // they are really reading at (see this card's note on the two
-            // clocks). Hidden while finished: a finished book has read all of
-            // it, and "Reading again" is what un-closes the chapters.
-            if (!finished) {
+            if (finished) {
+                // The one place the finished state is said — the gauge is
+                // full and the action reads "Reading again" above it.
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Every chapter closed",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.55f)
+                )
+            } else {
+                // ── THE CONTROLS — say where you are, or how long the book is. ──
+                // A hand move writes the BOOK ROW (currentChapter / currentPage)
+                // and leaves the reader's own memory alone, so the reader still
+                // opens where it was left and a move here can never yank the
+                // place they are really reading at (see this card's note on the
+                // two clocks). Hidden while finished: a finished book has read
+                // all of it, and "Reading again" is what un-closes the
+                // chapters.
+                //
+                // v412 — and the row that repeated "Chapter 5 of 40 / 312
+                // pages" UNDER the bar is gone too: the tiles already carry
+                // both counts, so it was the same fact a third time (member:
+                // "remove the top 2 … keep the last one with the +- button").
+                Spacer(Modifier.height(14.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1226,14 +1193,12 @@ private fun ProgressCard(
                 )
                 Spacer(Modifier.height(12.dp))
                 // ── TWO TILES, THEN ONE QUIET SETTING (v411) ──
-                // The redesign ("please redesign its visual and options the
-                // im on chapter the book has that etc etc") splits the three
-                // identical rows by what they actually are: WHERE YOU ARE is
-                // two things you change while reading, so they get the space
-                // and the emphasis (a tile each, the chapter tile naming the
-                // CHAPTER and not just its number), while HOW LONG THE BOOK IS
-                // is a setting you touch once and sits below them in the quiet
-                // register.
+                // WHERE YOU ARE is two things you change while reading, so they
+                // get the space and the emphasis (a tile each, the chapter tile
+                // naming the CHAPTER and not just its number), while HOW LONG
+                // THE BOOK IS is a setting you touch once and sits below them
+                // in the quiet register (v412: a footer rail, not a third row
+                // that looked like another place you are).
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1264,15 +1229,65 @@ private fun ProgressCard(
                         )
                     }
                 }
-                Spacer(Modifier.height(14.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(Modifier.height(16.dp))
+                BookLengthRow(total = total, onTotal = onTotal, ink = ink)
+            }
+        }
+    }
+}
+
+/**
+ * v412 — HOW LONG THE BOOK IS, AS A QUIET FOOTER RAIL.
+ *
+ * The row used to read "This book has" against a chevron stepper with the number
+ * floating between the arrows — a THIRD control row on a card that had just
+ * drawn two, and one that borrowed the same shape as "I'm on chapter" (member:
+ * "change its view and style and design"). It is a footer now: an uppercase rail
+ * label on the left, and one compact pill on the right holding the count
+ * between its two ends, so the setting is unmistakably not a place you are.
+ */
+@Composable
+private fun BookLengthRow(
+    total: Int,
+    onTotal: (Int) -> Unit,
+    ink: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            "BOOK LENGTH",
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.1.sp
+            ),
+            color = ink.copy(alpha = 0.55f),
+            modifier = Modifier.weight(1f)
+        )
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.padding(4.dp)
+            ) {
+                TileStepButton(CurioIcons.Remove, "One fewer chapter", ink) {
+                    onTotal((total - 1).coerceAtLeast(0))
+                }
+                Box(Modifier.width(34.dp), contentAlignment = Alignment.Center) {
                     Text(
-                        "This book has",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                        color = ink.copy(alpha = 0.82f),
-                        modifier = Modifier.weight(1f)
+                        if (total > 0) "$total" else "—",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = ink
                     )
-                    ChapterStepper(count = total, onChange = onTotal, accent = accent, ink = ink)
+                }
+                TileStepButton(CurioIcons.Add, "One more chapter", ink) {
+                    onTotal((total + 1).coerceAtMost(999))
                 }
             }
         }
@@ -1348,10 +1363,9 @@ private fun ReadingGauge(
  *
  * The value is the PROMINENT line — a chapter is NAMED, not numbered, because
  * the name is what a reader says when asked where they are — and the count sits
- * under it. The stepper is two round buttons rather than the shared
- * [ChapterStepper]: the value is already said above them, and printing it a
- * second time between the arrows is exactly the duplication this card was
- * rebuilt to remove.
+ * under it. The stepper is two round buttons rather than a chevron rail: the
+ * value is already said above them, and printing it a second time between the
+ * arrows is exactly the duplication this card was rebuilt to remove.
  */
 @Composable
 private fun ProgressTile(

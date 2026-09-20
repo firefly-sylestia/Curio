@@ -58,6 +58,7 @@ ADD:
 - Your Curiosity: the constellation drawing is replaced by that same lane map — real tiles, a meter per lane, and a Cabinet door onto the lane you tap that opens the Cabinet filtered to it.
 
 FIX:
+- Books: the reading-progress card says where you are once — the chapter-name/page headline and the count row under the bar are gone, leaving the label, the bar and the two +/- tiles; the book-length setting is a quiet footer now.
 - Your Curiosity: four cards instead of six — streak with level, XP and journey stages on ONE card (one Quests door), the six brain dimensions as meters with only the weakest one's tip, the lane map, and the lifetime figures in one compact grid. The six tip paragraphs and the repeated lane list are gone.
 
 REMOVE:

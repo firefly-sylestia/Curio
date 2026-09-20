@@ -9185,8 +9185,15 @@ only ever catches taps that mean "not in any of these".
   openings as notches INSIDE the track (`chapterPages` is the 1-based page each
   chapter opens at; `MAX_GAUGE_NOTCHES` caps a 300-chapter file). The three
   identical stepper rows became two `ProgressTile`s — the things you change while
-  reading, with the chapter tile NAMING the chapter — plus one quiet "This book
-  has" row for the book's length.
+  reading, with the chapter tile NAMING the chapter — plus the book's length as a
+  quiet footer rail (`BookLengthRow`: an uppercase "BOOK LENGTH" label against one
+  compact stepper pill). **v412 then removed the two blocks that said the place a
+  second and third time** — the chapter-name/"Page N of M" headline and the
+  "Chapter X of Y · N pages" row under the bar — because the tiles already carry
+  both counts (member: "there are a lot of duplicates … remove the top 2 … keep the
+  last one with the +- button … make it one beautiful progress view"). The card is
+  now: label + one action, the gauge, the two tiles, the footer rail. The finished
+  state keeps its single "Every chapter closed" line under the full gauge.
 - **THE PANTONE ACCENT IS APP-WIDE.** `curioRoseInk()` and
   `settingsCardChipTint()` now answer the Pantone palette first, so the icon
   chips, plate tints and ink accents across the app come back in the member's
