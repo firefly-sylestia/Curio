@@ -19,6 +19,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -34,6 +35,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -524,6 +526,34 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
 
+    // THE BOOK'S OWN PRINTED PAGES (v389c) — resolved the same way a chapter is,
+    // because to the reader they are the same thing: a name for a place.
+    val printedPages: List<ReaderOutlineEntry> = when (val loaded = content) {
+        is ReaderContent.Text -> loaded.pages.map { entry ->
+            entry.copy(block = blockForEntry(loaded, entry))
+        }
+
+        else -> emptyList()
+    }
+
+    // ── THE BOOK'S OWN PAGE NUMBER (v422) ─────────────────────────────
+    //
+    // A reflowed book has no pages of its own, so the reader used to count its
+    // own screenfuls at the member — "Page 12 of 340", a number that changed
+    // with the type size and named nothing the book itself said (user report:
+    // "our page number is making the epub feels bad"). The book's own page list
+    // is the honest answer, and it is already resolved just above: the page the
+    // member is in is the last printed page at or before where they are. A book
+    // that prints no page numbers says nothing here rather than something false,
+    // and the page bar keeps its two arrows either way — the number was the
+    // thing that lied, not the way to turn the page.
+    //
+    // Declared HERE, above the bar that reads it, because a local function in
+    // Kotlin cannot reach a local declared later in the same body (the same
+    // reason [jumpToBlock] sits below its state).
+    fun printedPageAt(block: Int): String =
+        printedPages.lastOrNull { it.block in 0..block }?.title.orEmpty()
+
     val pageBar: ReaderPageBar? = when (val loaded = content) {
         is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
             ReaderPageBar(
@@ -559,10 +589,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
 
         is ReaderContent.Text -> if (
-            ReaderLook.textFlow == ReaderFlow.PAGED && !loaded.ownPages && textPageCount > 0
+            ReaderLook.textFlow == ReaderFlow.PAGED && textPageCount > 0
         ) {
+            // v422 — WHAT THE BOOK SAYS, NOT WHAT THE READER COUNTED. See
+            // [printedPageAt]: the label is the book's own printed page, and it
+            // is blank for a book that carries none.
             ReaderPageBar(
-                label = "Page ${textPager.currentPage + 1} of $textPageCount",
+                label = printedPageAt(liveTextBlock),
                 onPrev = {
                     askedByReader = true
                     scope.launch {
@@ -660,16 +693,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
         is ReaderContent.Pages -> pdfChapters.orEmpty()
         null -> emptyList()
-    }
-
-    // THE BOOK'S OWN PRINTED PAGES (v389c) — resolved the same way a chapter is,
-    // because to the reader they are the same thing: a name for a place.
-    val printedPages: List<ReaderOutlineEntry> = when (val loaded = content) {
-        is ReaderContent.Text -> loaded.pages.map { entry ->
-            entry.copy(block = blockForEntry(loaded, entry))
-        }
-
-        else -> emptyList()
     }
 
     // A JUMP ASKED FOR FROM OUTSIDE the reading surface — the chapters sheet, a
@@ -1394,6 +1417,11 @@ private fun PdfScrollReader(
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
+    // v422 — THE SIDEWAYS HALF OF A MAGNIFIED DOCUMENT. A page wider than the
+    // screen has to be reachable (see the frame maths below), so the column
+    // rides in a horizontal scroll of its own; a vertical drag still belongs to
+    // the column, because a vertical scroller ignores a sideways one.
+    val across = rememberScrollState()
 
     var restored by remember(bookId, document) { mutableStateOf(false) }
     LaunchedEffect(bookId, document, pageCount) {
@@ -1497,29 +1525,48 @@ private fun PdfScrollReader(
         //          is anchored at the fingers ([readerZoomedPan]). Nothing around
         //          it moves, so there is nothing to compensate for.
         //
-        // A magnified page is therefore a WINDOW onto that one page: drag to move
+        // A magnified page used to be a WINDOW onto one page: drag to move
         // around it, and when it runs out of room in the direction you are
         // dragging the drag is handed back and the column scrolls on — the rule
         // the member asked for ("it should page change only when it reaches the
         // page end and then on another swipe it does").
         //
-        // A zoom belongs to a FRAME, and this reader's frames are its page items,
-        // so a zoom left over from the paged flow (whose frame is the screen)
-        // starts again at nothing here.
+        // ── v422 — AND NOW THE WHOLE FILE IS WHAT GROWS ─────────────────
+        //
+        // One sheet swollen among its neighbours read as a mistake rather than
+        // a zoom (user report: "only one page zooms in in that place feels
+        // wrong"), so a pinch in the scrolling flow is the DOCUMENT's: every
+        // sheet is laid out at the magnified size, the column scrolls a bigger
+        // book, and the page under the fingers stays where it was instead of
+        // sliding out from under them. Nothing here grows a box per gesture, so
+        // there is still nothing to compensate for (see [readerZoomDocument]).
+        //
+        // A zoom left over from the paged flow belongs to a screen, and this
+        // reader's frames are its pages, so it is cleared as the column opens.
         LaunchedEffect(bookId, document) {
-            if (ReaderLook.pdfZoomPage == -1) {
-                ReaderLook.pdfZoom = 1f
-                ReaderLook.pdfPanX = 0f
-                ReaderLook.pdfPanY = 0f
-            }
+            ReaderLook.pdfZoom = 1f
+            ReaderLook.pdfPanX = 0f
+            ReaderLook.pdfPanY = 0f
+            ReaderLook.pdfZoomPage = -1
         }
 
+        // ── AND THE DOCUMENT IS WHAT THE ZOOM BELONGS TO (v422) ────────
+        //
+        // The factor every sheet is laid out at, read in the composition so the
+        // column re-lays out when a pinch changes it — and read from the ONE
+        // owner the scroll flow uses, the document itself (`-1`, the sentinel
+        // the paged flow leaves free because its frame is the screen).
+        val docZoom = if (ReaderLook.pdfZoomPage == -1) ReaderLook.pdfZoom else 1f
         LazyColumn(
             state = listState,
             modifier = Modifier
-                .fillMaxSize()
-                // A page wider than the screen is cut at the screen — never
-                // drawn over its neighbours, and never asked to scroll sideways.
+                // A magnified page is wider than the screen, so the column is as
+                // wide as its own sheet and the reader pans it sideways. The
+                // width is STATED rather than left to the content: a lazy list
+                // has to be handed a bounded width to lay out against.
+                .horizontalScroll(across)
+                .fillMaxHeight()
+                .width(pageWidth * docZoom + 28.dp)
                 .clipToBounds()
                 .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
             // ── AND THE SHEETS ARE SEPARATED (v403) ──────────────────────
@@ -1565,7 +1612,6 @@ private fun PdfScrollReader(
             // finger left them. (`requiredWidth` because these ARE the page's
             // measurements — the column's constraints describe the page at rest.)
             val aspect = bitmap?.let { it.width.toFloat() / it.height.toFloat() } ?: 0f
-            var pageBox by remember { mutableStateOf(IntSize.Zero) }
             // WHOSE ZOOM THIS IS. Read in the composition — it changes only when
             // a pinch starts or ends on a page, so this costs one recomposition
             // per pinch — and used by the DRAW lambda below, where the scale and
@@ -1575,10 +1621,15 @@ private fun PdfScrollReader(
             val mine = ReaderLook.pdfZoomPage == page
             Box(
                 modifier = Modifier
-                    .requiredWidth(pageWidth)
+                    // v422 — THE SHEET IS LAID OUT AT THE MAGNIFIED SIZE, and
+                    // that is the whole of the document zoom: the column measures
+                    // a bigger book, scrolls it, and every word layer measures
+                    // the frame it is given — so a sweep over a magnified page
+                    // lands on the word under the finger with no extra maths.
+                    .requiredWidth(pageWidth * docZoom)
                     .then(
-                        if (aspect > 0f) Modifier.requiredHeight(pageWidth / aspect)
-                        else Modifier.height(pageHeight)
+                        if (aspect > 0f) Modifier.requiredHeight(pageWidth / aspect * docZoom)
+                        else Modifier.height(pageHeight * docZoom)
                     )
                     // THE PAGE'S OWN EDGE IS THE END OF ITS ZOOM: clipped at its
                     // frame, a magnified page can never reach a neighbour — which
@@ -1597,17 +1648,17 @@ private fun PdfScrollReader(
                     )
                     .onSizeChanged {
                         container = it
-                        pageBox = it
                     }
                     .pinchToZoom(
                         // The page's shape, once the render lands: the gesture is
-                        // re-armed with it, so its room and its zoom come from the
-                        // page itself and not from a page that had not been drawn.
+                        // re-armed with it, so the zoom is measured on a page that
+                        // has actually been drawn.
                         key = aspect,
-                        zoomed = { ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f }
+                        zoomed = { ReaderLook.pdfZoomPage == -1 && ReaderLook.pdfZoom > 1.02f }
                     ) { zoom, drag, focus ->
-                        // One rule for both surfaces: see [readerZoomThisPage].
-                        readerZoomThisPage(page, pageBox, aspect, zoom, drag, focus)
+                        // v422 — one zoom for the whole file: see
+                        // [readerZoomDocument].
+                        readerZoomDocument(zoom, drag, listState, across)
                     }
                     // Keyed on the page's SHAPE as well as its number: the tap
                     // handler outlives the composition that armed it, and a
@@ -1615,7 +1666,7 @@ private fun PdfScrollReader(
                     .pointerInput(page, aspect) {
                         detectTapGestures(
                             onTap = { onTap() },
-                            onDoubleTap = { at -> readerDoubleTapZoom(page, pageBox, aspect, at) },
+                            onDoubleTap = { readerDoubleTapDocument() },
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
                     },
@@ -2723,13 +2774,17 @@ private fun ReaderChrome(
                                 palette = palette,
                                 step = pageBar.onPrev
                             )
-                            Text(
-                                pageBar.label,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = palette.ink.copy(alpha = 0.8f)
-                            )
+                            // v422 — a bar with no page to name is the two
+                            // arrows and nothing else.
+                            if (pageBar.label.isNotBlank()) {
+                                Text(
+                                    pageBar.label,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = palette.ink.copy(alpha = 0.8f)
+                                )
+                            }
                             ReaderHoldButton(
                                 glyph = CurioIcons.ChevronRight,
                                 label = "The next page",
@@ -5028,6 +5083,60 @@ private fun readerDrawnPage(box: IntSize, aspect: Float): Size {
  *     change only when it reaches the page end and then on another swipe it
  *     does").
  */
+/**
+ * v422 — THE WHOLE DOCUMENT'S ZOOM, for the reader that scrolls a column.
+ *
+ * The paged flow magnifies THE PAGE, which is the only page there is; the
+ * scrolling flow magnifies THE FILE, because one sheet swollen among its
+ * neighbours reads as a mistake rather than a zoom (user report: "only one page
+ * zooms in in that place feels wrong"). Nothing is anchored here and nothing
+ * needs to be: the magnification IS the layout, so the lazy column keeps the
+ * sheet the member was on exactly where they left it and simply grows it.
+ *
+ * The pan a two-finger drag carries is handed to the document's own two scrolls
+ * — one down the column, one across the sheet — and a single finger is left
+ * entirely to them, which is what [Offset.Zero] means: nothing taken, so the
+ * column owns the gesture and the page still turns on a swipe.
+ */
+private fun readerZoomDocument(
+    zoom: Float,
+    drag: Offset,
+    down: ScrollableState,
+    across: ScrollableState
+): Offset {
+    // ONE FINGER IS THE DOCUMENT'S SCROLL, not the zoom's: the pinch only
+    // reports a factor of its own for two.
+    if (zoom == 1f) return Offset.Zero
+    val owns = ReaderLook.pdfZoomPage == -1
+    val was = if (owns) ReaderLook.pdfZoom else 1f
+    val next = (was * zoom).coerceIn(1f, 4f)
+    // AT REST, AND ONLY AT REST — the same rule the page's own zoom learned in
+    // v406: the pan is thrown away only when there is no magnification left to
+    // pan, so an unzoom cannot snap a still-magnified page anywhere.
+    ReaderLook.pdfZoom = next
+    ReaderLook.pdfZoomPage = -1
+    ReaderLook.pdfPanX = 0f
+    ReaderLook.pdfPanY = 0f
+    if (drag != Offset.Zero) {
+        down.dispatchRawDelta(-drag.y)
+        across.dispatchRawDelta(-drag.x)
+    }
+    return drag
+}
+
+/**
+ * v422 — THE DOCUMENT'S ZOOM AT ONE POINT: a double tap in the scrolling flow
+ * takes the file in to read a line closely, and gives it back whole — the one
+ * way to magnify that needs no second finger (see [readerZoomDocument]).
+ */
+private fun readerDoubleTapDocument() {
+    val out = ReaderLook.pdfZoomPage == -1 && ReaderLook.pdfZoom > 1.02f
+    ReaderLook.pdfZoom = if (out) 1f else 2.2f
+    ReaderLook.pdfZoomPage = -1
+    ReaderLook.pdfPanX = 0f
+    ReaderLook.pdfPanY = 0f
+}
+
 private fun readerZoomThisPage(
     page: Int,
     box: IntSize,
