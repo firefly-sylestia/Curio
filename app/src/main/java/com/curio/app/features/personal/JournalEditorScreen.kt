@@ -55,6 +55,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -460,7 +461,14 @@ private fun MoodSelector(
             shape = RoundedCornerShape(50),
             // The pill wears the CHOSEN feeling's ink, so the collapsed state
             // and the options below it are visibly the same thing.
-            color = selected?.let { personalMoodInk(it).copy(alpha = 0.20f) }
+            //
+            // v412 — OPAQUE. This was a 20% TINT of the mood's ink, so the page
+            // showed straight through the pill and the chosen feeling read as a
+            // smudge rather than as a fill (member: "many of how did the day
+            // feel the mood pills are using transparent fills can u fix it").
+            // It is the mood ink MIXED INTO the journal's own raised paper now
+            // — the same colour story with nothing bleeding through.
+            color = selected?.let { lerp(journalPaperRaised(), personalMoodInk(it), 0.22f) }
                 ?: journalPaperRaised(),
             // v411 — the journal's own depth: a soft shadow, no hairline.
             modifier = Modifier.curioCardShadow(RoundedCornerShape(50), 2.dp)
@@ -558,7 +566,9 @@ private fun MoodOption(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = if (on) tint.copy(alpha = 0.20f)
+        // v412 — the picked chip is the mood ink mixed INTO the journal paper,
+        // never a translucent tint of it (see the mood pill's own note).
+        color = if (on) lerp(journalPaper(), tint, 0.22f)
         // v411 — the journal's own paper and depth (no hairline anywhere).
         else journalPaper(),
         modifier = modifier.curioCardShadow(RoundedCornerShape(14.dp), 1.5.dp)
@@ -570,7 +580,9 @@ private fun MoodOption(
         ) {
             Surface(
                 shape = CircleShape,
-                color = if (on) tint else tint.copy(alpha = 0.20f),
+                // v412 — the idle disc is the mood ink over the journal paper
+                // (opaque), not the chip's own tint of it.
+                color = if (on) tint else lerp(journalPaper(), tint, 0.20f),
                 modifier = Modifier.size(27.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

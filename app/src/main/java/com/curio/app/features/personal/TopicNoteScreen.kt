@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -228,7 +229,9 @@ private fun TopicHead(
     Surface(
         onClick = onChoose,
         shape = RoundedCornerShape(20.dp),
-        color = if (hasTopic) accent.copy(alpha = 0.16f)
+        // v412 — opaque: the tint is mixed into the card fill it sits on, so
+        // the page never shows through the row.
+        color = if (hasTopic) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.16f)
         else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -239,7 +242,7 @@ private fun TopicHead(
         ) {
             Surface(
                 shape = CircleShape,
-                color = if (hasTopic) accent.copy(alpha = 0.28f)
+                color = if (hasTopic) lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, 0.28f)
                 else MaterialTheme.colorScheme.surfaceContainerHigh,
                 modifier = Modifier.size(38.dp)
             ) {
@@ -358,7 +361,8 @@ private fun TopicNoteTopBar(
             Surface(
                 onClick = onOpenTopic,
                 shape = RoundedCornerShape(50),
-                color = personalAccent().copy(alpha = 0.20f)
+                // v412 — opaque, mixed into the card it sits on.
+                color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, personalAccent(), 0.20f)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
@@ -633,7 +637,8 @@ private fun PickerRow(
         ) {
             Surface(
                 shape = RoundedCornerShape(11.dp),
-                color = accent.copy(alpha = 0.22f),
+                // v412 — opaque, mixed into the card it sits on.
+                color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.22f),
                 modifier = Modifier.size(32.dp)
             ) {
                 Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {

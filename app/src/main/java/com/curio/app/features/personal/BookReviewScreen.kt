@@ -62,6 +62,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -914,7 +915,9 @@ private fun BookReviewEmpty(
     ) {
         Surface(
             shape = CircleShape,
-            color = accent.copy(alpha = 0.12f),
+            // v412 — opaque: the accent is mixed into the page instead of
+            // tinting it translucently.
+            color = lerp(MaterialTheme.colorScheme.background, accent, 0.12f),
             modifier = Modifier.size(54.dp)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

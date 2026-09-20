@@ -51,6 +51,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -248,7 +249,9 @@ private fun CreateEntryOption(
         ) {
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = accent.copy(alpha = 0.24f),
+                // v412 — opaque: the accent is mixed into the card fill instead
+                // of tinting it translucently.
+                color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.24f),
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
@@ -481,7 +484,8 @@ private fun EmptyDoorChip(
         ) {
             Surface(
                 shape = CircleShape,
-                color = accent.copy(alpha = 0.14f),
+                // v412 — opaque (see the disc above).
+                color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
                 modifier = Modifier.size(34.dp)
             ) {
                 Box(Modifier.size(34.dp), contentAlignment = Alignment.Center) {
@@ -511,7 +515,9 @@ private fun NewChip(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
-        color = accent.copy(alpha = 0.12f),
+        // v412 — opaque: the chip is the accent mixed into the card fill, never
+        // a translucent wash over the page.
+        color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.12f),
         modifier = Modifier
             .width(CHIP_WIDTH)
             .height(CHIP_HEIGHT)

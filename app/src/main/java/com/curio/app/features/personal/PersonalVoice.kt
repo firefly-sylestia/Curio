@@ -679,7 +679,7 @@ internal fun PersonalVoiceBar(
             // each peak of the voice is one rise and one fall of a single
             // stroke — the pulse a spoken sentence makes, not a shape mirrored
             // under itself. Two details keep it legible at 72 stored samples:
-            //  · the samples are BUCKETED (about 26 steps across the strip, the
+            //  · the samples are BUCKETED (about 18 steps across the strip, the
             //    loudest sample of each bucket wins), because a rise and a fall
             //    every 3dp is a fuzzy band rather than a wave;
             //  · a stable hand wobble (a hash of the sample's own index, never a
@@ -711,12 +711,24 @@ internal fun PersonalVoiceBar(
 
                 // The buckets — the loudest sample of each one — so the wave
                 // keeps the peaks of a fast passage without drawing every one.
-                val buckets = 26
+                // v412 — 18, not 26: at 26 a phone-width strip turns a rise and
+                // a fall every ~8dp, which reads as a fuzzy band rather than as
+                // the pulse of a sentence.
+                val buckets = 18
                 val perBucket = (count + buckets - 1) / buckets
                 val stepCount = (count + perBucket - 1) / perBucket
                 val span = (stepCount - 1).coerceAtLeast(1).toFloat()
 
-                val wave = Path()
+                // v412 — THE POINTS FIRST, THEN ONE SMOOTH STROKE THROUGH THEM.
+                //
+                // A hard `lineTo` at every step is a sawtooth: every peak is a
+                // corner and every corner is a spike, which at this stroke
+                // weight reads as a scribble rather than as a voice (member:
+                // "for the voice note graph in journal it looks so bad can u fix
+                // it please"). Each rise and fall is a CUBIC segment whose two
+                // control points sit at the midpoint between the steps, so the
+                // wave keeps its peaks but curves into them — a drawn pulse.
+                val points = ArrayList<Offset>(stepCount)
                 for (step in 0 until stepCount) {
                     val from = step * perBucket
                     val to = (from + perBucket).coerceAtMost(count)
@@ -729,21 +741,33 @@ internal fun PersonalVoiceBar(
                     val side = if (step % 2 == 0) -1f else 1f
                     val y = (mid + side * reach(loudest) + wobble(from))
                         .coerceIn(1f, size.height - 1f)
-                    if (step == 0) wave.moveTo(x, y) else wave.lineTo(x, y)
+                    points.add(Offset(x, y))
+                }
+                val wave = Path()
+                points.firstOrNull()?.let { first -> wave.moveTo(first.x, first.y) }
+                for (i in 1 until points.size) {
+                    val prev = points[i - 1]
+                    val point = points[i]
+                    val midX = (prev.x + point.x) / 2f
+                    wave.cubicTo(midX, prev.y, midX, point.y, point.x, point.y)
                 }
 
+                // v412 — HEAVIER INK. A 0.085 stroke of the page's ink at 60%
+                // is a hairline on parchment, which is what made the strip look
+                // weak; the line, its depth pass and its played part are all
+                // read at a weight that stands on the page now.
                 val stroke = Stroke(
-                    width = (size.height * 0.085f).coerceAtLeast(1.5f),
+                    width = (size.height * 0.11f).coerceAtLeast(1.8f),
                     cap = StrokeCap.Round,
                     join = StrokeJoin.Round
                 )
                 // ── DEPTH — the same line, a hair lower, drawn soft. ──
-                translate(top = size.height * 0.05f) {
-                    drawPath(wave, ink.copy(alpha = 0.16f), style = stroke)
+                translate(top = size.height * 0.06f) {
+                    drawPath(wave, ink.copy(alpha = 0.22f), style = stroke)
                 }
                 // ── THE WHOLE NOTE in the page's ink — and the part that has
                 // been HEARD in the note's own colour, cut at the playhead. ──
-                drawPath(wave, ink.copy(alpha = 0.60f), style = stroke)
+                drawPath(wave, ink.copy(alpha = 0.72f), style = stroke)
                 if (playedUpTo > 0f) {
                     clipRect(right = playedUpTo) {
                         drawPath(wave, accent, style = stroke)

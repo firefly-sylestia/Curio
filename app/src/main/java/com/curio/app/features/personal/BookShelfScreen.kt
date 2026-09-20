@@ -57,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -1130,7 +1131,9 @@ private fun ScanDoor(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) accent.copy(alpha = 0.22f)
+        // v412 — opaque: the selected door is the accent mixed into the
+        // unselected fill it replaces.
+        color = if (selected) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.22f)
         else MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Row(

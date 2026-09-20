@@ -4,7 +4,12 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -59,7 +64,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -1092,7 +1100,6 @@ private fun ProgressCard(
             total > 0 -> (current.toFloat() / total.toFloat()).coerceIn(0f, 1f)
             else -> 0f
         }
-        val percent = (fraction * 100f).toInt()
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -1133,7 +1140,9 @@ private fun ProgressCard(
                     Surface(
                         onClick = { onFinished(true) },
                         shape = RoundedCornerShape(50),
-                        color = accent.copy(alpha = 0.16f)
+                        // v412 — opaque: the accent is mixed into the card the
+                        // pill sits on, so the page never shows through it.
+                        color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.16f)
                     ) {
                         Text(
                             "Mark finished",
@@ -1157,7 +1166,6 @@ private fun ProgressCard(
             if (pageCount > 0 || total > 0) {
                 ReadingGauge(
                     fraction = fraction,
-                    percent = percent,
                     chapterStarts = chapterPages,
                     pageCount = pageCount,
                     // The notch is the CARD's own fill, so a chapter line reads
@@ -1316,13 +1324,36 @@ private fun BookLengthRow(
 @Composable
 private fun ReadingGauge(
     fraction: Float,
-    percent: Int,
     chapterStarts: List<Int>,
     pageCount: Int,
     notch: Color,
     accent: Color,
     ink: Color
 ) {
+    // ── THE FILL TRAVELS, AND THE BAR BREATHES (v412) ─────────────────────
+    //
+    // A held stepper writes a new fraction many times a second, and a bar that
+    // SNAPS to each one reads as broken rather than as progress — so the fill
+    // and the figure both resolve through their own animation and chase the
+    // number instead of jumping to it (member: "make the progress gauge animate
+    // smoothly as the held stepper moves the count"). On top of that a slow
+    // sheen drifts along the FILLED part while nothing is moving, so a bar at
+    // rest is alive rather than a dead rectangle ("and also a subtle idle
+    // animation, gradient style maybe").
+    val animated by animateFloatAsState(
+        targetValue = fraction.coerceIn(0f, 1f),
+        animationSpec = spring(dampingRatio = 0.88f, stiffness = 380f),
+        label = "gauge-fill"
+    )
+    val sheen by rememberInfiniteTransition(label = "gauge-idle").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2800, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "gauge-sheen"
+    )
     Row(verticalAlignment = Alignment.CenterVertically) {
         Canvas(
             modifier = Modifier
@@ -1331,13 +1362,39 @@ private fun ReadingGauge(
                 .clip(RoundedCornerShape(50))
                 .background(ink.copy(alpha = 0.09f))
         ) {
-            val filled = size.width * fraction.coerceIn(0f, 1f)
+            val filled = size.width * animated
+            // A GRADIENT, not a flat block: the fill runs from the accent into
+            // a lighter READING of the same accent, which is what makes a thin
+            // bar read as a lit metre instead of a painted strip. Both stops
+            // are opaque lerps (no alpha on a fill — the Pantone rule), so
+            // nothing shows through the bar.
+            val lift = lerp(accent, Color.White, 0.30f)
             if (filled > 0f) {
                 drawRoundRect(
-                    color = accent,
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(accent, lift),
+                        startX = 0f,
+                        endX = size.width
+                    ),
                     size = Size(filled, size.height),
                     cornerRadius = CornerRadius(size.height / 2f)
                 )
+                // The idle sheen, clipped to the FILL so it can only ever read
+                // as light travelling along the progress — never as a band
+                // crossing the empty track.
+                clipRect(right = filled) {
+                    val band = size.width * 0.22f
+                    val centre = -band + (size.width + band * 2f) * sheen
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(accent, lift, accent),
+                            startX = centre - band,
+                            endX = centre + band
+                        ),
+                        topLeft = Offset(centre - band, 0f),
+                        size = Size(band * 2f, size.height)
+                    )
+                }
             }
             if (pageCount > 1 && chapterStarts.size in 2..MAX_GAUGE_NOTCHES) {
                 val stroke = 1.5.dp.toPx()
@@ -1355,8 +1412,10 @@ private fun ReadingGauge(
             }
         }
         Spacer(Modifier.width(11.dp))
+        // The figure follows the bar rather than jumping with it, so a held
+        // stepper counts up smoothly instead of flickering.
         Text(
-            "$percent%",
+            "${(animated * 100f).toInt()}%",
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
             color = personalAccentInk()
         )

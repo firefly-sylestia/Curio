@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -572,7 +573,9 @@ private fun NothingWrittenYet(
     ) {
         Surface(
             shape = CircleShape,
-            color = accent.copy(alpha = 0.12f),
+            // v412 — opaque: the accent is mixed into the page instead of
+            // tinting it translucently.
+            color = lerp(MaterialTheme.colorScheme.background, accent, 0.12f),
             modifier = Modifier.size(54.dp)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -549,7 +550,9 @@ internal fun PersonalEmptyCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = personalAccent().copy(alpha = 0.24f),
+                // v412 — opaque: the accent is mixed into the journal paper
+                // rather than laid over it translucently.
+                color = lerp(journalPaper(), personalAccent(), 0.24f),
                 modifier = Modifier.size(52.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -57,6 +57,14 @@ ADD:
 - Home: the drawer is your brain — your streak, your level with its XP bar and your total knowledge, over a grid of your lanes, one card per lane with a meter that fills as you build there; tap a lane and its own figures open under it.
 - Your Curiosity: the constellation drawing is replaced by that same lane map — real tiles, a meter per lane, and a Cabinet door onto the lane you tap that opens the Cabinet filtered to it.
 
+FIX:
+- Journal: the voice note's wave is one smooth drawn pulse now instead of a thin sawtooth scribble.
+- Journal: the "How did the day feel?" pill and its mood chips are solid fills — the page no longer shows through them — and the same fix went to the other see-through chips, discs and pills across the journal, notes and books.
+- Appearance: the System theme option wears the half-lit contrast mark now, instead of the hand-drawn half-sun that read as a smudge.
+
+ADD:
+- Books: the reading-progress bar glides to its new place and counts up smoothly while you hold the +/-, and a slow sheen drifts along the filled part while it sits still.
+
 ADD:
 - Theme: a Pantone theme paints the WHOLE app now — Home and Profile banners, the page, the cards, the 36 lane colours, the error red, the streak gold and the mastery sage are all derived from your three Pantone numbers, with no coral, gold or lane hue left anywhere.
 

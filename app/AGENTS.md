@@ -9104,6 +9104,34 @@ only ever catches taps that mean "not in any of these".
   a Pantone theme paints the torn heroes, the option cards and their icons in
   its own three colours.
 
+### v412 — the gauge, the voice wave, the mood pills, the System glyph
+
+- **THE READING GAUGE ANIMATES.** `ReadingGauge` resolves its fill through
+  `animateFloatAsState` (spring 0.88/380) and prints the figure from the SAME
+  animated value, so a held stepper counts up smoothly instead of the bar
+  snapping many times a second. The `percent` parameter is GONE — the figure is
+  derived inside now, so the two can never disagree. The fill is a
+  `Brush.horizontalGradient(accent → lerp(accent, White, 0.30f))` and a slow
+  `rememberInfiniteTransition` sheen (2.8s, `clipRect`ed to the FILL so it can
+  only travel along the progress) drifts across it at rest. Every stop is an
+  opaque `lerp` — no alpha on a fill.
+- **THE MOOD PILLS (and their neighbours) ARE OPAQUE.** "How did the day feel"
+  wore a 20% TINT of the mood ink, so the journal's page showed through the
+  collapsed pill and the picked chip. All three surfaces now use
+  `lerp(<the surface it sits on>, tint, alpha)` — the mood pill and chip against
+  `journalPaperRaised()` / `journalPaper()`, and the same treatment swept across
+  the family: `TopicNoteScreen` (the topic row, its glyph disc, the open-topic
+  pill, the note disc), `PersonalHome` (both discs + `NewChip`),
+  `JournalListScreen`'s empty-disc, `BookShelfScreen`'s selected scan door,
+  `BookDetailScreen`'s "Mark finished" pill, and the two empty-state discs in
+  `ChapterScreen` / `BookReviewScreen`. **The rule: a fill is mixed into the
+  surface it sits on, never alpha-laid over it.**
+- **THE SYSTEM SEGMENT WEARS `CurioIcons.Contrast`.** `HalfCelestialGlyph` (the
+  hand-drawn half-sun/half-moon) was deleted: at 20dp it read as a smudge, and
+  the bundled `contrast` font glyph is the same half-lit circle drawn properly —
+  which is what the onboarding's System chip already wore (member: "for the
+  device in theme option change the icon please it looks bad").
+
 ### v412 — a Pantone theme paints the WHOLE app ("no other colors")
 
 - **THE BUG: Home and Profile had their OWN copies of the hero resolver.**
@@ -9216,10 +9244,16 @@ only ever catches taps that mean "not in any of these".
   prints — a print and the page under it are one paper.
 - **ONE WAVE IN A VOICE NOTE.** `PersonalVoiceBar` drew the voice's envelope
   TWICE (a mirrored pair of strokes, which is the "2 wave" the member called
-  out); it is ONE stroke now, bucketed to ~26 steps (the loudest sample of each
+  out); it is ONE stroke now, bucketed to ~18 steps (the loudest sample of each
   bucket wins) so a rise and a fall every 3dp cannot read as a fuzzy band, with a
-  soft under-stroke for depth. The strip stays backgroundless and shadowless
-  (v404's call — a recording is part of the writing, not a card in it).
+  soft under-stroke for depth. **v412 made the stroke a CURVE:** the points are
+  collected first and joined with `cubicTo` segments whose control points sit at
+  the midpoint between steps, so every peak is rounded rather than a sawtooth
+  corner, and the line, its depth pass and its played part all read at a heavier
+  weight (0.11 of the strip, ink 0.72) — at 0.085/0.60 the wave was a hairline
+  scribble on parchment (member: "the voice note graph in journal it looks so
+  bad"). The strip stays backgroundless and shadowless (v404's call — a
+  recording is part of the writing, not a card in it).
 - **THE BOOK'S PROGRESS CARD: ONE BAR, TWO TILES.** The card drew a page gauge
   AND a chapter tick row — two bars answering "how far" in two units. It is
   `ReadingGauge` now: one bar whose fill is the page fraction, with the chapter

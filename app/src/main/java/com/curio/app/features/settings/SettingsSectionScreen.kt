@@ -426,9 +426,10 @@ private fun AppearanceSection(highlightKey: String? = null) {
  * it proper toggle style which moves smoothly on switching". So: three icon
  * segments in one capsule, a filled thumb that SLIDES under the chosen one
  * (spring, no snap), no checkmarks, and the glyphs carry the labels (the sun
- * for Light, the crescent for Dark, and a drawn half-sun/half-moon for
- * System — the bundled icon subset has no such glyph, so [HalfCelestialGlyph]
- * draws it exactly like the two it sits between).
+ * for Light, the crescent for Dark, and the bundled `contrast` mark for
+ * System — v412 swapped the hand-drawn half-sun/half-moon for that font glyph,
+ * which is the same half-lit circle drawn properly and is what the onboarding's
+ * System chip already wore).
  */
 @Composable
 private fun ThemeModeSwitch(
@@ -515,7 +516,13 @@ private fun ThemeModeSwitch(
                     label = "System",
                     modifier = Modifier.weight(1f),
                     onClick = { onSelected(2) }
-                ) { tint -> HalfCelestialGlyph(tint = tint, iconSize = 20.dp) }
+                // v412 — the bundled `contrast` mark, the same glyph the
+                // onboarding's System chip has always worn. The hand-drawn
+                // half-sun/half-moon it replaces read as a smudge at 20dp
+                // (member: "for the device in theme option change the icon
+                // please it looks bad"), and the font glyph is a half-lit
+                // circle — the same idea, drawn properly.
+                ) { tint -> CurioIcon(CurioIcons.Contrast, "System", tint = tint, size = 20.dp) }
             }
         }
     }
@@ -549,67 +556,6 @@ private fun ThemeModeSegment(
             .clickable(onClickLabel = label, onClick = onClick)
     ) {
         glyph(ink)
-    }
-}
-
-/**
- * The half-sun / half-moon glyph for System (v411).
- *
- * Drawn rather than bundled: the icon subset carries a sun and a crescent and
- * nothing between them, and a “system follows your phone” choice deserves its
- * own mark. The left half is the sun (a quarter-disc with three short rays),
- * the right half the moon (a crescent cut from the same disc), so the glyph
- * reads as one circle made of both halves — the exact idea the member asked
- * for: "system gets half moon half sun style icon".
- */
-@Composable
-private fun HalfCelestialGlyph(
-    tint: Color,
-    /** Named [iconSize], never `size`: this function draws on a Canvas, where
-     *  `size` is DrawScope's own (see the compile-safety rules). */
-    iconSize: androidx.compose.ui.unit.Dp
-) {
-    Canvas(modifier = Modifier.size(iconSize)) {
-        val r = size.minDimension / 2f
-        val c = size.center
-        val stroke = r * 0.15f
-        // ── The sun half (left): a filled half disc plus three rays out of it.
-        val disc = androidx.compose.ui.geometry.Size(r * 1.30f, r * 1.30f)
-        val discTopLeft = Offset(c.x - r * 0.65f, c.y - r * 0.65f)
-        drawArc(
-            color = tint,
-            startAngle = 90f,
-            sweepAngle = 180f,
-            useCenter = true,
-            topLeft = discTopLeft,
-            size = disc
-        )
-        listOf(180f, 135f, 225f).forEach { angle ->
-            val rad = Math.toRadians(angle.toDouble())
-            val dx = kotlin.math.cos(rad).toFloat()
-            val dy = kotlin.math.sin(rad).toFloat()
-            drawLine(
-                color = tint,
-                start = Offset(c.x + dx * r * 0.76f, c.y + dy * r * 0.76f),
-                end = Offset(c.x + dx * r, c.y + dy * r),
-                strokeWidth = stroke,
-                cap = StrokeCap.Round
-            )
-        }
-        // ── The moon half (right): an OUTLINED half disc, a size down from the
-        // sun, so the two halves are told apart by more than their side. Drawn
-        // hollow (not punched out of a filled disc) on purpose: nothing here
-        // uses a blend mode or a transparent ink — the mark is pure stroke.
-        val moonR = r * 0.80f
-        drawArc(
-            color = tint,
-            startAngle = -90f,
-            sweepAngle = 180f,
-            useCenter = true,
-            topLeft = Offset(c.x - moonR * 0.72f, c.y - moonR * 0.72f),
-            size = androidx.compose.ui.geometry.Size(moonR * 1.44f, moonR * 1.44f),
-            style = Stroke(width = stroke)
-        )
     }
 }
 
