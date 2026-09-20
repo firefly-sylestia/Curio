@@ -10,9 +10,9 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import android.graphics.text.LineBreaker
 import android.net.Uri
 import android.text.Layout
-import android.text.LineBreaker
 import android.text.SpannableString
 import android.text.StaticLayout
 import android.text.TextPaint

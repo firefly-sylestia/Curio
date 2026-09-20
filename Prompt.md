@@ -230,8 +230,8 @@ files were the only ones missing one.
 The member pasted the failed `:app:lintRelease` log: `WrongConstant` at
 `PersonalExport.kt:446` — `setJustificationMode` must take `LineBreaker` constants,
 not `Layout` ones (same value, 1, inlined either way, but lint insists on the
-`LineBreaker` spelling). Fixed by importing `android.text.LineBreaker` and switching
-the call. Committed and pushed.
+`LineBreaker` spelling). Fixed by importing `android.graphics.text.LineBreaker` and
+switching the call. Committed and pushed.
 
 ## User prompts
 
