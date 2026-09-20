@@ -2001,9 +2001,26 @@ private fun TextPagedReader(
     // v394 — PAGES PINCH TOO (user report: "when im in pages i cant pinch to
     // zoom"): the same re-lay-the-type zoom the scroll carries, so a book read
     // as pages answers the two fingers like the same book read as a scroll.
+    //
+    // v426 — AND IT IS APPLIED IN STEPS, because of what a step COSTS here.
+    //
+    // `pages` is remembered on `ReaderLook.textScale` (see [paginateBlocks]
+    // below), so every single pinch event re-measured EVERY block in the book —
+    // which is the whole of the member's "lagging on pinch to zoom in epub".
+    // The zoom still drives the type size, but the gesture's own travel is now
+    // ACCUMULATED and only applied once it is worth seeing (a twentieth of the
+    // size), so a pinch costs a handful of re-lays instead of one per frame. A
+    // twentieth is below the eye's threshold on type, and the type still lands
+    // exactly where the fingers asked — just a beat behind them.
+    var held by remember { mutableStateOf(1f) }
     val pagerZoom = Modifier.pinchToZoom { zoom, _, _ ->
-        val next = (ReaderLook.textScale * zoom).coerceIn(0.8f, 2.6f)
-        if (next != ReaderLook.textScale) ReaderLook.textScale = next
+        val travelled = held * zoom
+        if (travelled >= 1.05f || travelled <= 0.95f) {
+            ReaderLook.textScale = (ReaderLook.textScale * travelled).coerceIn(0.8f, 2.6f)
+            held = 1f
+        } else {
+            held = travelled
+        }
         Offset.Zero
     }
 

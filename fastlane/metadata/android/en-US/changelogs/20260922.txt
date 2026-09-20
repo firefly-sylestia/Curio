@@ -1,3 +1,6 @@
+FIX:
+- Reading: a reflowable book's page flow pinches without the stutter — the type size is what the pinch changes, and every event re-measured every block in the book, so the pages are now re-laid only when the fingers have travelled far enough to be worth seeing (a twentieth of the size), which is a handful of passes per pinch instead of one per frame.
+
 ADD:
 - Books: manga, manhwa, manhua, comics and light novels are on your shelf now, each keeping its own name — pick the kind before you search and the same shelf, reader, chapters and progress you already have hold them, with the kind worn on the cover of its own card.
 - Books: the comics sources — MangaDex, AniList, MyAnimeList and Kitsu, all keyless, asked in order — bring a manga's own cover, author, synopsis and how long it is (volumes and chapters), because a books catalogue has never heard of it.
