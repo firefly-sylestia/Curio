@@ -187,8 +187,14 @@ this item first and chose "wire the key fields now, add them as optional keys".
    `TMDB_API_KEY`, `GOOGLE_BOOKS_API_KEY`, `LIBRARY_THING_API_KEY`, `COMIC_VINE_API_KEY`
    are already plumbed).
 2. **"Enable bottom sheet for more things in category"** — ambiguous; asked.
-3. **The feedback form should show whether or not Online mode is on** — read path still
-   requires Online mode + a session today (`FeedbackFormState.refresh`).
+3. **The feedback form should show whether or not Online mode is on** — and this one has a
+   hard constraint behind it: `supabase/schema.sql`'s `ff_select_live_or_team` policy is
+   `for select to authenticated`, so a live form is readable **only by a signed-in
+   member** — which only Online mode produces. There is no local copy of a form; it is
+   published on the server. So "show it regardless" is a real decision rather than a
+   tweak: (a) read it with the publishable key behind a PUBLIC read policy on live forms,
+   (b) sign in anonymously just to read it, or (c) keep Online mode as the gate and offer
+   an explicit "check for a new form" action that works with it off. Asked.
 
 **REMAINING:**
 
