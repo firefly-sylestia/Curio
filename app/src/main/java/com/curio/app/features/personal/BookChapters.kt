@@ -107,6 +107,31 @@ internal fun rememberBookChapters(book: PersonalBookEntity?): List<PersonalChapt
  * too: the moment a document is wired, the row is rewritten from it (see
  * `PersonalRepository.adoptDocumentFacts`).
  */
+/**
+ * v425 — HOW LONG THE FILE IS, whichever kind of file it is.
+ *
+ * The attach paths asked a PDF and nothing else, so a book whose own copy is an
+ * EPUB adopted its contents with no length at all: the page's progress card had
+ * nothing to count against and stayed on "Set how long the book is" for a file
+ * that knows exactly how long it is (member: "suppose it using epub for pages in
+ * detail screen it doesnt show the pages count from it").
+ *
+ * Every caller that reads a document's own facts goes through here now, so the
+ * two kinds are answered in one place and a third kind has one door to add.
+ * 0 when the file cannot say (a text file, a scanned book with no page list).
+ */
+internal fun documentPageCount(
+    context: android.content.Context,
+    document: String
+): Int {
+    val lower = document.lowercase()
+    return when {
+        lower.endsWith(".pdf") -> runCatching { pdfPageCount(context, document) }.getOrDefault(0)
+        lower.endsWith(".epub") -> runCatching { epubPageCount(document) }.getOrDefault(0)
+        else -> 0
+    }
+}
+
 internal fun documentChapters(
     context: android.content.Context,
     document: String
@@ -121,7 +146,7 @@ internal fun documentChapters(
         else -> emptyList()
     }
     if (outline.isEmpty()) return emptyList()
-    val lastPage = if (isPdf) pdfPageCount(context, document) else 0
+    val lastPage = documentPageCount(context, document)
     return outline.mapIndexed { index, entry ->
         val start = if (entry.isPage) entry.page else 0
         val end = if (start <= 0) 0 else {

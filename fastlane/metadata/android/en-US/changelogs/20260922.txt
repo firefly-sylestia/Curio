@@ -1,4 +1,7 @@
 FIX:
+- Books: a book whose own copy is an EPUB says how long it is — the attach path only ever asked a PDF, so an EPUB adopted its contents with no length at all and its page sat on "Set how long the book is" for a file that knows exactly how long it is; every kind of file answers its own page count now (an EPUB that carries its print edition's page-list is read out of that list).
+
+FIX:
 - Incursion: the page reads as part of Curio — every state wears a theme tone (the six were fixed hexes, bright enough to be the loudest ink on a named theme's dark page), the phase headers, rows and tiles are cards (fill, radius, soft shadow) instead of tinted bands, the chips are fills rather than boxed lines, and a title opens in the sheet the rest of the app uses instead of a boxed dialog.
 - Incursion: the reveal that announces the unlock is a Curio card — it was white words on a black scrim under a filled accent disc, which read as a notice rather than as a secret, so it wears the theme's own ink and card and says what it is.
 

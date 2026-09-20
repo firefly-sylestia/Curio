@@ -186,12 +186,17 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 .collect { value = it ?: ReaderMarkEntity(id = "", bookId = bookId, sourceKey = attachedDocument) }
         }
     }
-    // The file's own length, read off the document ONCE per book (a PDF's page
+    // The file's own length, read off the document ONCE per book (a file's page
     // count is a fact of the file, not of the session).
+    // v425 — AND AN EPUB HAS ONE TOO, when it was typeset: its page-list names
+    // every printed page, so a book whose own copy is an EPUB was showing no
+    // length at all while its file could say exactly how long it is (member:
+    // "suppose it using epub for pages in detail screen it doesnt show the pages
+    // count from it"). `documentPageCount` answers both kinds.
     val filePageCount by produceState(initialValue = 0, attachedDocument) {
-        if (attachedDocument.isBlank() || !isPdfDocument) return@produceState
+        if (attachedDocument.isBlank()) return@produceState
         withContext(Dispatchers.IO) {
-            value = runCatching { pdfPageCount(context, attachedDocument) }.getOrDefault(0)
+            value = runCatching { documentPageCount(context, attachedDocument) }.getOrDefault(0)
         }
     }
     // The page the member last read, in the file's own terms (0 when the book
@@ -351,11 +356,11 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                     // leaves what was fetched where it was.
                     runCatching {
                         val fromFile = documentChapters(context, path)
-                        val pages = if (path.lowercase().endsWith(".pdf")) {
-                            pdfPageCount(context, path)
-                        } else {
-                            0
-                        }
+                        // v425 — whichever kind of file it IS (see
+                        // `documentPageCount`): an EPUB that carries its print
+                        // edition's page list knows its own length too, and the
+                        // page asked a PDF alone before.
+                        val pages = documentPageCount(context, path)
                         PersonalRepositoryHolder.repo.adoptDocumentFacts(bookId, fromFile, pages)
                     }
                 }

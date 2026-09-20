@@ -275,6 +275,35 @@ private fun plain(html: String): String = html
 internal fun pdfPageCount(context: Context, document: String): Int =
     withPdfDocument(context, document) { loaded -> loaded.numberOfPages } ?: 0
 
+/**
+ * v425 — HOW LONG AN EPUB IS, OUT OF THE FILE.
+ *
+ * An EPUB is reflowable, so it prints no page numbers of its own — unless it was
+ * TYPESET, in which case its page-list names every one of the print edition's
+ * pages (see [epubPageList]) and the count is simply the last of them. The
+ * member's own copy is the only honest source for that number: a catalog's count
+ * belongs to its edition and a lookup's is a guess, which is exactly why a book
+ * whose FILE is an EPUB could show no length at all on its page — the page only
+ * ever asked a PDF (user report: "suppose it using epub for pages in detail
+ * screen it doesnt show the pages count from it").
+ *
+ * A page list whose labels are not numbers (a book that marks its pages in roman
+ * numerals, or with words) still answers with how many markers there are, and a
+ * book with no page-list answers 0 — the fetched count then stays where it was
+ * instead of being replaced by an invention.
+ */
+internal fun epubPageCount(document: String): Int {
+    val pages = runCatching { ZipFile(document).use { epubPageList(it) } }
+        .getOrDefault(emptyList())
+    if (pages.isEmpty()) return 0
+    val highest = pages.asSequence()
+        .mapNotNull { entry ->
+            entry.title.filter { it.isDigit() }.takeIf { it.isNotEmpty() }?.toIntOrNull()
+        }
+        .maxOrNull()
+    return highest ?: pages.size
+}
+
 internal fun pdfOutline(context: Context, document: String): List<ReaderOutlineEntry> =
     withPdfDocument(context, document) { loaded ->
         val outline = loaded.documentCatalog.documentOutline ?: return@withPdfDocument emptyList()

@@ -683,11 +683,10 @@ private fun AddBookSheet(
                             // PDF from the first frame.
                             runCatching {
                                 val fromFile = documentChapters(context, path)
-                                val pages = if (path.lowercase().endsWith(".pdf")) {
-                                    pdfPageCount(context, path)
-                                } else {
-                                    0
-                                }
+                                // v425 — every kind of file answers its own
+                                // length now, not just a PDF: see
+                                // `documentPageCount`.
+                                val pages = documentPageCount(context, path)
                                 PersonalRepositoryHolder.repo.adoptDocumentFacts(id, fromFile, pages)
                             }
                         }
