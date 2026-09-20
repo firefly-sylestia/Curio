@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
@@ -401,6 +402,21 @@ fun Modifier.curioCardShadow(shape: Shape, elevation: Dp = 5.dp): Modifier =
  */
 @Composable
 fun curioTintOn(base: Color, tint: Color, alpha: Float): Color = lerp(base, tint, alpha)
+
+/**
+ * WCAG contrast ratio between two opaque colors (1f..21f).
+ *
+ * v414 — moved here from the retired `PantoneThemes.kt`, which is where it used
+ * to live: the category ink resolvers in `CategoryInk.kt` (see [curioFillInk])
+ * depend on it, so it had to survive that file's deletion.
+ */
+internal fun contrast(a: Color, b: Color): Float {
+    val la = a.luminance()
+    val lb = b.luminance()
+    val hi = maxOf(la, lb)
+    val lo = minOf(la, lb)
+    return (hi + 0.05f) / (lo + 0.05f)
+}
 
 @Composable
 fun CurioTheme(
