@@ -21,6 +21,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -103,6 +104,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -1816,7 +1818,7 @@ private fun PdfScrollReader(
                             },
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
-                    },
+                    }
                     .onGloballyPositioned { coords -> where = coords.positionInRoot() },
                 contentAlignment = Alignment.Center
             ) {
@@ -3013,7 +3015,10 @@ private fun ReaderChrome(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .clickable(onClick = onToggleTapZones, onLongClick = onEditTapZones),
+                        .combinedClickable(
+                            onClick = onToggleTapZones,
+                            onLongClick = onEditTapZones
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(

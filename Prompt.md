@@ -117,6 +117,18 @@ attach drop, and `documentChapters`' chapter ranges. `BookDetailScreen`'s
 
 ## 5. Work log
 
+**Phase 0 — THE FAILED CI (before anything else).** The member's push carried a red build that
+had nothing to do with the v425 work: `BookReaderScreen.kt` and `PersonalCanvas.kt` called
+`coords.positionInRoot()` without importing it, which in this Compose version (BOM 2026.05.01)
+is a TOP-LEVEL extension in `androidx.compose.ui.layout` (`PersonalPage.kt` imports it for the
+same call, and `TopicShareCard` imports `positionInWindow` the same way). Two more real errors
+sat in the same Box: a stray COMMA after the `pointerInput { }` block (which split the modifier
+chain into a second argument — hence the "'infix' modifier is required on … onGloballyPositioned"
+and the cascade of `surfaceSize`/`surfaceOrigin`/`@Composable invocation` errors), and
+`Modifier.clickable(onLongClick = …)`, which is `combinedClickable`. Every
+`boundsIn*`/`positionIn*` call in the module was then checked against its imports — these two
+files were the only ones missing one.
+
 - **Phase 1 — the form and the night.** Done, committed, pushed (`f3604631`).
 - **Phase 2 — Incursion.** Done, committed, pushed (`33db4480`).
 - **Phase 3 — the file's own page count (Books).** Done, committed, pushed (`94e66bf9`).
