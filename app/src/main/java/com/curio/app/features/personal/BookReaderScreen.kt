@@ -2287,7 +2287,7 @@ private fun PageReader(
             // v424 — the surface a tap zone is measured against, and where it
             // starts in the window, so a tap inside a magnified sheet can be
             // said in the screen's own coordinates.
-            viewport = surfaceSize,
+            viewport = viewport,
             surfaceOrigin = surfaceOrigin,
             onScrolled = onScrolled,
             onLongPress = onLongPress,

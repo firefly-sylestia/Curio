@@ -47,14 +47,14 @@ import java.util.concurrent.ConcurrentHashMap
  * is not a browser** (verified against the same id the API itself returned,
  * 843px and 400px alike). A source whose pictures cannot be fetched would put a
  * broken plate on every work it won — worse than not asking it — so it is not
- * wired. See the museum note in `Prompt.md`.
+ * wired.
  */
 internal object MuseumFetch {
 
     private const val CLEVELAND = "https://openaccess-api.clevelandart.org/api/artworks/"
 
     /** The credit a Cleveland answer wears on a work's sheet. */
-    private const val MUSEUM = "The Cleveland Museum of Art"
+    internal const val MUSEUM = "The Cleveland Museum of Art"
 
     /** How many rows a search is allowed to read (a sheet is not a catalogue). */
     private const val SEARCH_ROWS = 8
@@ -62,10 +62,16 @@ internal object MuseumFetch {
     private val cache = ConcurrentHashMap<String, List<ClevelandWork>>()
     private val bioCache = ConcurrentHashMap<String, String>()
 
-    /** One work as Cleveland states it, in the few fields this app draws. */
+    /**
+     * One work as Cleveland states it, in the few fields this app draws. [bio]
+     * is the MAKER's own paragraph (the museum writes one per creator, not per
+     * work) and is kept here so a maker page can read it out of the same visit
+     * that listed their works.
+     */
     internal data class ClevelandWork(
         val title: String,
         val maker: String,
+        val bio: String,
         val date: String,
         val medium: String,
         /** The museum's own picture at a size a phone should hold. */
@@ -91,11 +97,10 @@ internal object MuseumFetch {
             val wanted = title.trim()
             if (wanted.isBlank()) return@withContext null
             val query = listOf(wanted, artist.trim()).filter { it.isNotBlank() }.joinToString(" ")
-            val rows = search(query, wanted)
+            val rows = search(query, firstTitle = wanted)
             rows.firstOrNull { row ->
-                normalise(row.title) == normalise(wanted) &&
-                    (artist.isBlank() || makerMatches(row.maker, artist))
-            } ?: rows.firstOrNull { normalise(row.title) == normalise(wanted) }
+                makerMatches(row.maker, artist)
+            } ?: rows.firstOrNull()
         }
 
     /**
@@ -132,11 +137,8 @@ internal object MuseumFetch {
         if (name.isBlank()) return@withContext null
         bioCache[name]?.let { return@withContext it.ifEmpty { null } }
         val text = runCatching {
-            val body = getJson(
-                "$CLEVELAND?q=${Uri.encode(name)}&limit=$SEARCH_ROWS&has_image=1" +
-                    "&fields=title,creators"
-            ) ?: return@runCatching ""
-            rows(body).firstOrNull { row -> makerMatches(row.maker, name) && row.bio.isNotBlank() }
+            search(name, firstTitle = null)
+                .firstOrNull { row -> makerMatches(row.maker, name) && row.bio.isNotBlank() }
                 ?.bio
                 .orEmpty()
         }.getOrDefault("")
@@ -150,7 +152,7 @@ internal object MuseumFetch {
      * One search, read into rows. [firstTitle] (when given) keeps only rows whose
      * own title relates to it, which is what a work lookup wants and a maker
      * lookup does not (a painter's list is whatever the museum holds, and their
-     * name is in the query).
+     * name is already in the query).
      */
     private fun search(query: String, firstTitle: String?): List<ClevelandWork> {
         val key = "$query|${firstTitle.orEmpty()}"
@@ -160,24 +162,24 @@ internal object MuseumFetch {
                 "$CLEVELAND?q=${Uri.encode(query)}&limit=$SEARCH_ROWS&has_image=1" +
                     "&fields=id,title,creation_date,technique,creators,images,url"
             ) ?: return emptyList()
-            rows(body)
-                .filter { row -> firstTitle == null || titleRelates(row.title, firstTitle) }
+            parse(body).filter { row -> firstTitle == null || titleRelates(row.title, firstTitle) }
         }.getOrDefault(emptyList())
         cache[key] = rows
         return rows
     }
 
-    /** Cleveland's `data` array as this app's own rows (no picture = no row). */
-    private fun rows(body: String): List<Row> = runCatching {
+    /** Cleveland's `data` array as this app's own rows (no title = no row). */
+    private fun parse(body: String): List<ClevelandWork> = runCatching {
         val data = JSONObject(body).optJSONArray("data") ?: JSONArray()
         (0 until data.length()).mapNotNull { index ->
             val row = data.optJSONObject(index) ?: return@mapNotNull null
             val title = row.optString("title").trim()
             if (title.isBlank()) return@mapNotNull null
-            Row(
+            val creator = firstCreator(row.optJSONArray("creators"))
+            ClevelandWork(
                 title = title,
-                maker = firstCreator(row.optJSONArray("creators"))?.optString("description").orEmpty(),
-                bio = firstCreator(row.optJSONArray("creators"))?.optString("biography").orEmpty(),
+                maker = creator?.optString("description").orEmpty(),
+                bio = creator?.optString("biography").orEmpty(),
                 date = row.optString("creation_date").trim(),
                 medium = row.optString("technique").trim(),
                 imageUrl = row.optJSONObject("images")
@@ -204,8 +206,11 @@ internal object MuseumFetch {
      */
     private fun makerMatches(creatorLine: String, maker: String): Boolean {
         val name = creatorLine.substringBefore('(').trim()
-        if (name.isBlank()) return false
         val wanted = maker.trim()
+        // A lookup with nobody to match against keeps every row; a lookup with a
+        // name keeps only that name's.
+        if (wanted.isBlank()) return name.isNotBlank()
+        if (name.isBlank()) return false
         return name.equals(wanted, ignoreCase = true) ||
             name.contains(wanted, ignoreCase = true) ||
             wanted.contains(name, ignoreCase = true)
@@ -228,17 +233,6 @@ internal object MuseumFetch {
         val shorter = minOf(a.length, b.length)
         return shorter * 10 >= longer * 7 && (a.contains(b) || b.contains(a))
     }
-
-    /** One Cleveland row, flattened (the raw creator objects are not kept). */
-    private data class Row(
-        val title: String,
-        val maker: String,
-        val bio: String,
-        val date: String,
-        val medium: String,
-        val imageUrl: String,
-        val pageUrl: String
-    )
 
     /** Minimal keyless GET — 8s timeout, best-effort, like every other door. */
     private fun getJson(urlString: String): String? = runCatching {
