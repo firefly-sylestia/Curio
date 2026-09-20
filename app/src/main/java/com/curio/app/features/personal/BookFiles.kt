@@ -121,6 +121,23 @@ internal data class DetectedBook(val title: String, val author: String)
  * name back as the title with no author. NOTHING here is trusted silently —
  * the caller shows the result in editable fields (see BookShelfScreen's import
  * confirmation) and only ever saves what the member confirms.
+ *
+ * ── v426 — WHAT A PUBLISHER'S FILE NAME ACTUALLY CARRIES ────────────────
+ *
+ * The member's note was that the guess is "still bad", and the shapes a
+ * PUBLISHED book arrives in are the reason: a store's own export is
+ * `The Odyssey - Homer (Penguin Classics, 1996).epub`, where the bracket is the
+ * publisher, the imprint and the year — facts about the EDITION, never part of
+ * the title — and a library's export can carry a second dash with the same
+ * litter after it (`Persuasion - Jane Austen - Penguin Classics`), which used to
+ * make the author read "Jane Austen - Penguin Classics". So the round bracket is
+ * now judged by WHAT IT NAMES ([NOISE_BRACKET]: a publisher, an imprint, an
+ * edition, a format, a site or a bare year) rather than by a short list of three
+ * sites, a zero-padded leading number is taken off, and a dash-separated TAIL
+ * that names one of those is dropped from whichever half it landed in.
+ *
+ * A square bracket is still a tag whatever it holds — a release group, a site, a
+ * quality — which is the one rule that has never needed refining.
  */
 internal fun detectBookFromFileName(rawName: String?): DetectedBook {
     if (rawName.isNullOrBlank()) return DetectedBook("", "")
@@ -134,20 +151,19 @@ internal fun detectBookFromFileName(rawName: String?): DetectedBook {
         // title would use a space.
         .replace('_', ' ')
         .replace('.', ' ')
-        // Bracketed noise: a release/site tag or a bare year/format marker.
+        // A square bracket is a tag, whatever it holds.
         .replace(Regex("\\[[^\\]]*\\]"), " ")
+        // A round bracket only when it names an EDITION rather than the book.
         .replace(Regex("\\(([^)]*)\\)")) { match ->
-            val inner = match.groupValues[1].lowercase()
-            val junk = listOf(
-                "z-lib", "zlib", "libgen", "annas", "anna's", "www.", "http",
-                ".com", ".org", ".net", "retail", "ocr", "scan", "epub", "pdf",
-                "mobi", "azw", "\\d+", "unabridged", "v\\d+"
-            ).any { Regex(it).containsMatchIn(inner) }
-            if (junk) " " else match.value
+            if (NOISE_BRACKET.containsMatchIn(match.groupValues[1])) " " else match.value
         }
         // A leading ISBN (with or without dashes) is a catalogue number, not a
         // title.
         .replace(Regex("^\\s*(97[89][- ]?)?\\d{9}[\\dXx][- ]*"), " ")
+        // …and so is a zero-padded track number (`01 - The Odyssey`). Only with
+        // a leading zero AND a space, so a title that IS a number keeps it:
+        // `07-Ghost` is a book, and stripping its head would rename it.
+        .replace(Regex("^\\s*0\\d{1,3}\\s+[-–—]\\s+"), " ")
         .replace(Regex("\\s+"), " ")
         .trim()
         .trim('-', '–', '—', ',', ':')
@@ -161,10 +177,12 @@ internal fun detectBookFromFileName(rawName: String?): DetectedBook {
     val split = Regex("\\s+[-–—]\\s+").find(cleaned)
         ?: Regex("(?i)\\s+by\\s+").find(cleaned)
     if (split != null) {
-        val left = cleaned.take(split.range.first)
-            .trim('-', '–', '—', ',', ' ', ':')
-        val right = cleaned.substring(split.range.last + 1)
-            .trim('-', '–', '—', ',', ' ', ':')
+        val left = dropTrailingEdition(
+            cleaned.take(split.range.first).trim('-', '–', '—', ',', ' ', ':')
+        )
+        val right = dropTrailingEdition(
+            cleaned.substring(split.range.last + 1).trim('-', '–', '—', ',', ' ', ':')
+        )
         if (left.isNotEmpty() && right.isNotEmpty()) {
             return DetectedBook(
                 title = tidyGuess(left),
@@ -172,7 +190,56 @@ internal fun detectBookFromFileName(rawName: String?): DetectedBook {
             )
         }
     }
-    return DetectedBook(tidyGuess(cleaned), "")
+    return DetectedBook(tidyGuess(dropTrailingEdition(cleaned)), "")
+}
+
+/**
+ * What a bracket, or a dash-separated tail, in a book's file name usually is:
+ * the publisher and its imprint, the edition, the format, the site it came from
+ * or the year — facts about the EDITION rather than about the book (the member's
+ * own report was that a publisher's export arrives with all of that still in its
+ * title). One regex, matched anywhere inside the part being judged, in the same
+ * shape the old three-site list had — just complete enough to catch what a store
+ * actually writes.
+ */
+private val NOISE_BRACKET = Regex(
+    "(?i)(" + listOf(
+        // Where it came from, and how it was released.
+        "z-?lib(rary)?", "libgen", "anna'?s?", "calibre", "epubor", "www\\.", "https?",
+        "\\.(com|org|net|cc|io|me|ru|xyz)\\b", "download", "torrent", "retail", "ocr",
+        "scann?ed?", "converted", "proof", "arc", "epub", "pdf", "mobi", "azw3?",
+        "fb2", "djvu", "cbz", "cbr", "kindle", "e-?book", "digital", "print",
+        "hardcover", "paperback", "boxed", "unabridged", "abridged",
+        // The edition, and the house that printed it.
+        "edition", "\\bed\\.?\\b", "\\bvol\\.", "volumes?", "series",
+        "press", "publish(er|ers|ing)?", "classics?", "library", "books?", "imprint",
+        "annotated", "illustrated", "translated", "translation", "revised", "reprint",
+        "omnibus", "complete", "collection", "works", "v\\d+",
+        // A year, or a bare volume/number marker.
+        "\\d{4}", "\\b\\d{1,3}\\b"
+    ).joinToString("|") + ")"
+)
+
+/**
+ * Takes off the dash-separated TAILS of a name that say where the book came
+ * from rather than what it is (`Jane Austen - Penguin Classics` → `Jane Austen`,
+ * `The Odyssey - Vintage Classics 1996` → `The Odyssey`).
+ *
+ * A tail is only dropped when [NOISE_BRACKET] recognises it, so a name that
+ * genuinely holds a dash — a title, a subtitle, an author with a hyphenated
+ * surname — is handed back exactly as it was, and the loop stops at the first
+ * tail it does not recognise rather than eating its way to the front.
+ */
+private fun dropTrailingEdition(value: String): String {
+    var out = value.trim()
+    while (true) {
+        val dashes = Regex("\\s+[-–—]\\s+").findAll(out).toList()
+        val cut = dashes.lastOrNull() ?: break
+        val tail = out.substring(cut.range.last + 1).trim()
+        if (cut.range.first <= 0 || tail.isEmpty() || !NOISE_BRACKET.containsMatchIn(tail)) break
+        out = out.take(cut.range.first).trim('-', '–', '—', ',', ' ', ':')
+    }
+    return out
 }
 
 /** The first letter leads; the rest of the name is left as the member's file
