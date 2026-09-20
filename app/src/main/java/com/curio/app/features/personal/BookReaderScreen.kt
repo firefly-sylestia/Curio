@@ -5338,35 +5338,14 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
             val top = heightPx * ReaderLook.zoneTopDepth
             val bottom = heightPx * (1f - ReaderLook.zoneBottomDepth)
             val hair = 1.dp.toPx()
-
-            fun band(from: Offset, to: Offset, edge: ReaderZoneEdge) {
-                drawRect(
-                    color = accent.copy(alpha = if (edge == chosen) 0.22f else 0.10f),
-                    topLeft = from,
-                    size = Size(
-                        (to.x - from.x).coerceAtLeast(0f),
-                        (to.y - from.y).coerceAtLeast(0f)
-                    )
-                )
-            }
-
-            fun rule(edge: ReaderZoneEdge, from: Offset, to: Offset) {
-                drawLine(
-                    color = accent.copy(alpha = if (edge == chosen) 0.85f else 0.45f),
-                    start = from,
-                    end = to,
-                    strokeWidth = hair
-                )
-            }
-
-            band(Offset.Zero, Offset(left, heightPx), ReaderZoneEdge.LEFT)
-            band(Offset(right, 0f), Offset(widthPx, heightPx), ReaderZoneEdge.RIGHT)
-            band(Offset(left, 0f), Offset(right, top), ReaderZoneEdge.TOP)
-            band(Offset(left, bottom), Offset(right, heightPx), ReaderZoneEdge.BOTTOM)
-            rule(ReaderZoneEdge.LEFT, Offset(left, 0f), Offset(left, heightPx))
-            rule(ReaderZoneEdge.RIGHT, Offset(right, 0f), Offset(right, heightPx))
-            rule(ReaderZoneEdge.TOP, Offset(left, top), Offset(right, top))
-            rule(ReaderZoneEdge.BOTTOM, Offset(left, bottom), Offset(right, bottom))
+            zoneBand(Offset.Zero, Offset(left, heightPx), ReaderZoneEdge.LEFT == chosen, accent)
+            zoneBand(Offset(right, 0f), Offset(widthPx, heightPx), ReaderZoneEdge.RIGHT == chosen, accent)
+            zoneBand(Offset(left, 0f), Offset(right, top), ReaderZoneEdge.TOP == chosen, accent)
+            zoneBand(Offset(left, bottom), Offset(right, heightPx), ReaderZoneEdge.BOTTOM == chosen, accent)
+            zoneRule(Offset(left, 0f), Offset(left, heightPx), ReaderZoneEdge.LEFT == chosen, accent, hair)
+            zoneRule(Offset(right, 0f), Offset(right, heightPx), ReaderZoneEdge.RIGHT == chosen, accent, hair)
+            zoneRule(Offset(left, top), Offset(right, top), ReaderZoneEdge.TOP == chosen, accent, hair)
+            zoneRule(Offset(left, bottom), Offset(right, bottom), ReaderZoneEdge.BOTTOM == chosen, accent, hair)
         }
 
         // ── AND A HANDLE PER EDGE, WHICH IS WHERE ITS DEPTH IS SET ──
@@ -5507,6 +5486,34 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
             }
         }
     }
+}
+
+/**
+ * v424 — ONE ZONE'S WASH, and the line that stands for its edge.
+ *
+ * File-level [DrawScope] extensions rather than local functions inside the
+ * editor's `Canvas` lambda, for the one reason that matters here: the receiver
+ * of a lambda is not reliably in scope inside a local declaration, so drawing
+ * helpers live beside the drawing they belong to.
+ */
+private fun DrawScope.zoneBand(from: Offset, to: Offset, lit: Boolean, accent: Color) {
+    drawRect(
+        color = accent.copy(alpha = if (lit) 0.22f else 0.10f),
+        topLeft = from,
+        size = Size(
+            (to.x - from.x).coerceAtLeast(0f),
+            (to.y - from.y).coerceAtLeast(0f)
+        )
+    )
+}
+
+private fun DrawScope.zoneRule(from: Offset, to: Offset, lit: Boolean, accent: Color, hair: Float) {
+    drawLine(
+        color = accent.copy(alpha = if (lit) 0.85f else 0.45f),
+        start = from,
+        end = to,
+        strokeWidth = hair
+    )
 }
 
 /**
