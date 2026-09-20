@@ -1,3 +1,7 @@
+FIX:
+- Support: a live feedback form greets you on Home without a trip through Settings — the form is published on the server and read with your own account, and that read ran before a cold start had restored the session (only the Online Mode, Privacy and Community screens did); the account is restored with the rest of the app's state at launch now, and a read made too early waits for it instead of giving up.
+- Appearance: the named themes' night is muted — Jade, Orchid, Ocean, Sand and Ember painted their page, their cards, their hero and their second and third fills with daylight chroma, so a page of Settings or Profile cards came out brighter than the app's own dark ladder and the hero read as a lit slab; every night fill carries its hue quietly now, the card ladder sits a shade lower, and the accent ink clears 4.5:1 on the top card step (it had missed).
+
 ADD:
 - Reading: the page's tap zones are yours to place — a tap on the SIDE of the screen turns the page now (both side edges stand the whole height, the head scrolls back and the foot goes on), and holding the Crop switch in the reader's foot opens the zones themselves: drag each edge's line where your thumb reaches, say what that edge does (back, on, a screenful either way, or nothing) and set how deep it stands.
 - Writing: a page's tools can copy the whole page — the new Copy tool selects the page and raises Android's own copy / select all bar right above the tools.

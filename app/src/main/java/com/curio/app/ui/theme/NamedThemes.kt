@@ -80,19 +80,33 @@ enum class CurioNamedTheme(
 
     // ── THE LIGHT ANCHORS ─────────────────────────────────────────────────
 
-    /** The page by day: a soft pastel of the theme's own hue. */
+    /**
+     * The page: a soft pastel of the theme's own hue by day, a rich but QUIET
+     * dark of it at night.
+     *
+     * v425 — THE NIGHT WENT MUTED. The dark page and everything above it wore
+     * daylight chroma (0.36 here, 0.34 on the card ladder) and the member read
+     * the result as "their card colors in settings, profile and many places,
+     * some are too bright in dark mode only". A night fill wants little chroma:
+     * the hue is legible at 0.30, and every point of chroma above that is
+     * brightness the dark did not ask for.
+     */
     fun pageFor(dark: Boolean): Color =
-        if (dark) tone(hue, 0.36f, 0.11f) else tone(hue, 0.38f, 0.93f)
+        if (dark) tone(hue, 0.30f, 0.10f) else tone(hue, 0.38f, 0.93f)
 
     /**
      * The hero fill (the torn banner, buttons, selected rails) — and the pair
      * to its ink is a measurement, not a taste: at 0.66 the light hero carries
-     * [bodyFor] over 4.5:1 at the brightest hue here (Jade, ≈ 6.5:1), and at
-     * 0.33 the dark hero carries the pale ink at over 4.5:1 there too
-     * (≈ 5.8:1), which is the hue that used to fail worst.
+     * [bodyFor] over 4.5:1 at the brightest hue here (Jade, ≈ 6.5:1).
+     *
+     * v425 — the NIGHT hero is a jewel, not a slab: 0.50 chroma at 0.33 was
+     * still "too bright" to the member (a lit, saturated block beside a deep
+     * page), so it drops to 0.36 chroma at 0.30. Measured against the pale ink
+     * it carries, that is 5.5:1 at Jade and 7.6:1 at Ember — better than the
+     * 4.2:1 the old tone managed at Jade, which was under the bar all along.
      */
     fun heroFor(dark: Boolean): Color =
-        if (dark) tone(hue, 0.50f, 0.33f) else tone(hue, 0.46f, 0.66f)
+        if (dark) tone(hue, 0.36f, 0.30f) else tone(hue, 0.46f, 0.66f)
 
     /** The ink that reads on [heroFor]. */
     fun onHeroFor(dark: Boolean): Color =
@@ -110,12 +124,17 @@ enum class CurioNamedTheme(
         // v423 — AND 0.78 WAS THE OTHER FAILURE: it cleared the contrast bar and
         // read as NEON on a deep page (member: "those new accnets are still bad
         // only is dark mode its too bright"). A night accent wants to be a
-        // JEWEL, not a highlight, so it drops to 0.69 with its chroma eased from
-        // 0.46 to 0.40 — still ≈4.8:1 on the deepest card step (the bar for small
-        // text is 4.5) because OKLab lightness is a cube root of luminance, and
-        // its LIGHT twin is untouched: the light page needed the deeper reading
-        // and still has it.
-        if (dark) tone(hue, 0.40f, 0.69f) else tone(hue, 0.52f, 0.34f)
+        // JEWEL, not a highlight, so it left 0.78 for 0.69.
+        //
+        // v425 — THE CHROMA WAS THE NEON, NOT THE LIGHTNESS. At 0.40 chroma the
+        // 0.69 accent was still the loudest thing on a page of muted cards, and
+        // it measured only 3.79–4.05:1 on the TOP card step — under the 4.5 bar
+        // on the one surface it is drawn on most. Chroma drops to 0.30 and
+        // lightness lands at 0.70, which is both quieter AND readable: 4.64:1
+        // (Orchid, the worst hue) to 5.08:1 (Jade) on that step, measured with
+        // [contrast]. Its LIGHT twin is untouched: the light page needed the
+        // deeper reading and still has it.
+        if (dark) tone(hue, 0.30f, 0.70f) else tone(hue, 0.52f, 0.34f)
 
     /** Body text on the page. */
     private fun bodyFor(dark: Boolean): Color =
@@ -179,33 +198,50 @@ enum class CurioNamedTheme(
 
     /**
      * The DARK twin: a deep JEWEL of the theme's hue (the member's choice — a
-     * rich dark, not a neutral near-black), cards stepping up it, and a lit
-     * jewel hero with a deep ink on it.
+     * rich dark, not a neutral near-black), cards stepping up it, and a deep
+     * jewel hero with a pale ink on it.
+     *
+     * v425 — THE WHOLE NIGHT IS MUTED. Everything below the page's hue used to
+     * be read at a chroma borrowed from daylight (0.46/0.44 on the second and
+     * third fills, 0.34 → 0.24 up the ladder, 0.42 on the primary container),
+     * and the result was a set of cards BRIGHTER than the scheme the app is
+     * tuned against: a named dark card topped out at HSL 0.30 while the app's
+     * own dark ladder tops out at #2C2C2C, more than twice its luminance —
+     * which is the member's "their card colors in settings, profile and many
+     * places, some are too bright in dark mode only … keep the colors muted".
+     *
+     * Two rules now hold every night fill down. The CHROMA is halved-and-then-
+     * some (a night tone carries its hue at ≤ 0.38, never at daylight's 0.46),
+     * and the LADDER sits lower with the same 0.03 stride, so a card is a quiet
+     * plate on a jewel page instead of a lit one. Light mode is untouched.
      */
     private fun darkScheme(): ColorScheme = darkColorScheme(
         primary = heroFor(true),
         onPrimary = onHeroFor(true),
-        primaryContainer = tone(hue, 0.42f, 0.22f),
-        onPrimaryContainer = tone(hue, 0.34f, 0.86f),
+        primaryContainer = tone(hue, 0.34f, 0.20f),
+        onPrimaryContainer = tone(hue, 0.32f, 0.88f),
 
         // v423 — the night's second and third fills are muted with the accent
         // (0.46/0.48 of lightness was the same neon on a deep page).
-        secondary = tone(second, 0.46f, 0.42f),
-        onSecondary = tone(second, 0.30f, 0.92f),
-        secondaryContainer = tone(second, 0.42f, 0.22f),
-        onSecondaryContainer = tone(second, 0.36f, 0.88f),
+        // v425 — chroma 0.36/0.34 at a lower lightness, and their inks are now
+        // MEASURED ([readableOn]) instead of assumed: at these fills white reads
+        // 4.97:1 at its worst (Sand's second), so white is what they carry.
+        secondary = tone(second, 0.36f, 0.34f),
+        onSecondary = readableOn(tone(second, 0.36f, 0.34f), bodyFor(true)),
+        secondaryContainer = tone(second, 0.34f, 0.20f),
+        onSecondaryContainer = tone(second, 0.32f, 0.88f),
 
-        tertiary = tone(third, 0.44f, 0.44f),
-        onTertiary = tone(third, 0.30f, 0.92f),
-        tertiaryContainer = tone(third, 0.42f, 0.22f),
-        onTertiaryContainer = tone(third, 0.34f, 0.88f),
+        tertiary = tone(third, 0.34f, 0.36f),
+        onTertiary = readableOn(tone(third, 0.34f, 0.36f), bodyFor(true)),
+        tertiaryContainer = tone(third, 0.32f, 0.20f),
+        onTertiaryContainer = tone(third, 0.30f, 0.88f),
 
         background = pageFor(true),
         onBackground = bodyFor(true),
 
         surface = pageFor(true),
         onSurface = bodyFor(true),
-        surfaceVariant = tone(hue, 0.28f, 0.16f),
+        surfaceVariant = tone(hue, 0.24f, 0.15f),
         onSurfaceVariant = tone(hue, 0.20f, 0.72f),
 
         // The night ladder: small, CALM steps up the jewel page (the stride the
@@ -218,19 +254,24 @@ enum class CurioNamedTheme(
         // steps at one chroma and 0.03 of lightness apart read as ONE shade of
         // theme, which is what a page of settings cards looked like. The stride
         // is wider and the chroma eases as the card climbs, so a page has planes.
-        surfaceContainerLowest = tone(hue, 0.34f, 0.14f),
-        surfaceContainerLow = tone(hue, 0.32f, 0.18f),
-        surfaceContainer = tone(hue, 0.30f, 0.22f),
-        surfaceContainerHigh = tone(hue, 0.27f, 0.26f),
-        surfaceContainerHighest = tone(hue, 0.24f, 0.30f),
+        // v425 — the whole ladder drops 0.045 of lightness and eases its chroma
+        // further (this is the member's settings/profile card complaint). The
+        // stride is unchanged at 0.03, so nesting is exactly as legible as it
+        // was — one shade calmer. The TOP step is what the accent ink is measured
+        // against; at 4.64:1 worst-case it clears the 4.5 bar there now.
+        surfaceContainerLowest = tone(hue, 0.24f, 0.135f),
+        surfaceContainerLow = tone(hue, 0.22f, 0.165f),
+        surfaceContainer = tone(hue, 0.20f, 0.195f),
+        surfaceContainerHigh = tone(hue, 0.18f, 0.225f),
+        surfaceContainerHighest = tone(hue, 0.16f, 0.255f),
 
-        error = tone(6f, 0.60f, 0.62f),
-        onError = tone(6f, 0.50f, 0.14f),
-        errorContainer = tone(6f, 0.45f, 0.28f),
-        onErrorContainer = tone(6f, 0.40f, 0.90f),
+        error = tone(6f, 0.50f, 0.60f),
+        onError = tone(6f, 0.46f, 0.14f),
+        errorContainer = tone(6f, 0.38f, 0.24f),
+        onErrorContainer = tone(6f, 0.36f, 0.88f),
 
-        outline = tone(hue, 0.28f, 0.34f),
-        outlineVariant = tone(hue, 0.26f, 0.24f),
+        outline = tone(hue, 0.24f, 0.30f),
+        outlineVariant = tone(hue, 0.22f, 0.20f),
         scrim = Color.Black
     )
 

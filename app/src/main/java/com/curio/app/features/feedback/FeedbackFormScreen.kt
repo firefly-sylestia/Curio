@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +54,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -88,6 +90,9 @@ object FeedbackFormState {
     /** One successful read is enough for a run; a failure may be retried. */
     private var fetched = false
 
+    /** True while a read is parked, waiting for the account's session. */
+    private var watching = false
+
     /** What THIS device has already answered, and what it never wants again. */
     private var answeredIds by mutableStateOf<Set<String>>(emptySet())
     private var hiddenIds by mutableStateOf<Set<String>>(emptySet())
@@ -113,11 +118,28 @@ object FeedbackFormState {
         open = false
     }
 
-    /** Reads the one published form. Silent when the member is offline. */
+    /**
+     * v425 — the read waits for the ACCOUNT, it does not give up on it.
+     *
+     * The form lives on the server and is read with the member's own token, so
+     * the read needs a restored session — and on a cold start the first
+     * composition happens a beat before the account has one ([OnlineAccount
+     * .restore] is a sandbox read plus a token refresh). The old read simply
+     * returned on a null token, and because nothing asked again, the card only
+     * turned up once some OTHER screen happened to enter and read it — which is
+     * exactly the member's "it only appears after I open it in Settings".
+     *
+     * So a read made too early now parks itself on the session and runs the
+     * moment one arrives; [watching] keeps it to one parked read.
+     */
     fun refresh(context: Context, force: Boolean = false) {
         loadFlags(context)
         if (!AppPreferences.isOnlineModeEnabled(context)) return
-        val token = OnlineAccount.state.session?.accessToken ?: return
+        val token = OnlineAccount.state.session?.accessToken
+        if (token == null) {
+            awaitAccount(context)
+            return
+        }
         if (!force && fetched) return
         loading = true
         scope.launch {
@@ -135,6 +157,22 @@ object FeedbackFormState {
                 }
             )
             loading = false
+        }
+    }
+
+    /**
+     * Parks one read until the account reports a session, then runs it. The
+     * application context is what is kept, so no activity is ever held.
+     */
+    private fun awaitAccount(context: Context) {
+        if (watching) return
+        watching = true
+        val app = context.applicationContext
+        scope.launch {
+            snapshotFlow { OnlineAccount.state.session?.accessToken }
+                .first { it != null }
+            watching = false
+            refresh(app)
         }
     }
 

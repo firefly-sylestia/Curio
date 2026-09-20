@@ -234,6 +234,16 @@ class MainActivity : ComponentActivity() {
         // Load the persisted quests/levels state (XP, journey, daily quests,
         // achievements) before any screen reads it.
         CurioQuests.seed(this)
+        // v425 — THE SIGNED-IN SESSION IS PART OF THE LAUNCH, not of whichever
+        // screen happens to be opened. [OnlineAccount.restore] was only ever
+        // called by the Online Mode / Privacy / Community screens, so on a cold
+        // start "signed in" was a state the app discovered late: the feedback
+        // form's read (which needs the member's own token) saw no account and
+        // stayed empty until a trip through Settings restored one. Restore is
+        // idempotent and keeps only the application context, so seeding it here
+        // simply means a returning member is signed in from the first frame —
+        // the same reason [SocialNotificationReceiver] calls it itself.
+        com.curio.app.data.supabase.OnlineAccount.restore(this)
         // v8.14 — the pet wakes on its own in the morning (and stays tucked
         // in at night); afternoon/evening launches keep asleep-until-tapped.
         CurioPet.wakeForMorning()
