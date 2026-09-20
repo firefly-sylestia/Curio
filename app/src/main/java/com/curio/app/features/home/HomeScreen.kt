@@ -180,6 +180,7 @@ import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.activeNamedTheme
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -2227,6 +2228,8 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
  */
 @Composable
 private fun homeReadableInk(fill: Color): Color {
+    // v420 — the ink on a named theme's hero is its own onPrimary pair.
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.onPrimary }
     // v223 — Material hero tears: readable ink on primaryContainer.
     if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
@@ -2243,6 +2246,8 @@ private fun homeReadableInk(fill: Color): Color {
 
 @Composable
 private fun homeRoseAccent(): Color {
+    // v420 — a named theme IS the hero: its own primary fill answers first.
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.primary }
     // v223 — "Material hero tears": when the Material theme AND this
     // option are both on, the torn hero wears the scheme's
     // primaryContainer instead of the app-default rose/azure (or a lane).

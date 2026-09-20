@@ -374,6 +374,9 @@ private fun Color.needsLightDeepInk(): Boolean = luminance() > 0.105f
 @Composable
 fun CurioCategory.categoryBackgroundWash(): Color {
     val background = MaterialTheme.colorScheme.background
+    // v420 — a NAMED theme paints its own page: no lane wash, so the theme's
+    // page colour is what the member actually sees.
+    activeNamedTheme()?.let { return background }
     // v185 — Material theme: M3 keeps page backgrounds NEUTRAL (the
     // multi-color guideline — surfaces stay neutral, one primary carries
     // the brand), so the category wash collapses to the scheme background.
@@ -406,6 +409,8 @@ fun CurioCategory.categoryBackgroundWash(): Color {
  */
 @Composable
 fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
+    // v420 — a named theme's cards are the scheme's own ladder.
+    activeNamedTheme()?.let { return base }
     // v185 — Material theme: neutral M3 surfaces (no per-category tint).
     if (materialThemeOn) return base
     if (!AppPreferences.tintWashEffective()) return base
@@ -433,6 +438,8 @@ fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfac
  */
 @Composable
 fun CurioCategory.notesSheetContainerColor(): Color {
+    // v420 — a named theme's sheets are its own dialog surface.
+    activeNamedTheme()?.let { return curioDialogContainerColor() }
     // v185 — Material theme: bottom sheets stay neutral M3 surfaces.
     if (materialThemeOn) return curioDialogContainerColor()
     if (!AppPreferences.tintWashEffective()) return curioDialogContainerColor()
@@ -459,6 +466,7 @@ fun CurioCategory.notesSheetContainerColor(): Color {
 @Composable
 fun CurioCategory.notesSheetContainerColorForCover(swatch: Color?): Color {
     if (swatch == null) return notesSheetContainerColor()
+    if (activeNamedTheme() != null) return notesSheetContainerColor()
     if (materialThemeOn) return notesSheetContainerColor()
     if (!AppPreferences.tintWashEffective()) return notesSheetContainerColor()
     if (isCurioDarkTheme()) {
@@ -499,6 +507,7 @@ data class CoverSheetPalette(
 @Composable
 fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette? {
     if (swatches == null) return null
+    if (activeNamedTheme() != null) return null
     if (materialThemeOn) return null
     if (!AppPreferences.tintWashEffective()) return null
     // Accent = the classic vibrant-family pick, kept ONLY when it actually
@@ -585,6 +594,8 @@ fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette
  */
 @Composable
 fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorScheme.surfaceContainerHigh): Color {
+    // v420 — the mood board keeps the named theme's own surface.
+    activeNamedTheme()?.let { return base }
     if (!AppPreferences.tintWashEnabledState) return base
     // v81 — dark mode: the mood board keeps its category tint even on the
     // pitch-black page via the dark surface shade.
@@ -608,6 +619,8 @@ fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorSche
  */
 @Composable
 fun CurioCategory.categoryChipSurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
+    // v420 — a named theme's chips are the scheme's own ladder.
+    activeNamedTheme()?.let { return base }
     // v185 — Material theme: neutral M3 chip surfaces.
     if (materialThemeOn) return base
     if (!AppPreferences.tintWashEffective()) return base

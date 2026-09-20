@@ -118,6 +118,7 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.activeNamedTheme
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CurioIcons
@@ -828,6 +829,9 @@ fun materialHeroTearsOn(): Boolean = AppPreferences.materialThemeState
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
+    // v420 — a named theme IS the hero: its own primary fill answers first,
+    // before the lane, the azure and the rose-wood.
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.primary }
     // v223 — "Material hero tears": when the Material theme AND this
     // option are both on, the torn hero wears the scheme's
     // primaryContainer instead of the app-default rose/azure (or a lane).
@@ -910,6 +914,8 @@ fun settingsAccentInk(): Color {
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable
 fun settingsReadableInk(fill: Color): Color {
+    // v420 — the ink on a named theme's hero is its own onPrimary pair.
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.onPrimary }
     // v223 — Material hero tears: readable ink on primaryContainer.
     if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
@@ -936,6 +942,9 @@ fun settingsReadableInk(fill: Color): Color {
  */
 @Composable
 fun settingsCardAccentInk(): Color {
+    // v420 — a named theme's option cards wear ITS accent ink, never the
+    // app's coral identity.
+    activeNamedTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
     // v78 — light Curio only (the Material/AMOLED rose fallback is gone
     // with those styles).
     heroLaneCategory()?.let { return it.categoryInk() }
@@ -967,6 +976,8 @@ internal fun navigateToSettingsSection(navController: NavController, entry: Sett
  */
 @Composable
 fun settingsCardChipTint(): Color {
+    // v420 — a named theme's own hero colour paints the icon chips.
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.primary }
     // v78 — light Curio only (the Material/AMOLED coral fallback is gone
     // with those styles).
     heroLaneCategory()?.let { return it.themedAccent() }
@@ -1603,7 +1614,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     // ONE door now: the Color theme sheet. The deep search points at that
     // row, so "material", "azure" and "hero" all still land in
     // Appearance — see the sheet's own keywords below.
-    SettingsDeepRow(CurioIcons.Palette, "Color theme", "Curio rose, Azure, Material or Adaptive Hero", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-color-theme"),
+    SettingsDeepRow(CurioIcons.Palette, "Color theme", "Curio rose, Azure, Material, Adaptive Hero or a named theme (Jade, Orchid, Ocean, Sand, Ember)", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-color-theme"),
     // ── Preferences (v26) — search engine, explore behavior, pet personality ──
     // v19 — which search engine the "Explore in browser" button opens.
     SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),

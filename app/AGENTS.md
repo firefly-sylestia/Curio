@@ -9142,6 +9142,47 @@ only ever catches taps that mean "not in any of these".
   a Pantone theme paints the torn heroes, the option cards and their icons in
   its own three colours.
 
+### v420 — the five NAMED THEMES (Jade, Orchid, Ocean, Sand, Ember)
+
+- **`CurioNamedTheme` (`ui/theme/NamedThemes.kt`) is a FULL theme, not an accent
+  swap.** Five entries, each built from ONE hue: they paint the page, the card
+  ladder, the hero/button fill, the second and third fills, the ink and the
+  error colour, and each ships a LIGHT scheme and a DARK twin (`schemeFor(dark)`).
+  Every tone is `tone(hue, sat, light)` — a reading of that one hue with the
+  theme's `second`/(`+38°`) and `third`/(`−46°`) adjacent hues for depth. No
+  second colour family is ever introduced.
+- **THE DARK TWIN IS A DEEP JEWEL (member's choice).** Not a neutral near-black:
+  the page is a rich, saturated dark of the theme's own hue (`tone(hue, 0.45,
+  0.12)`), cards step up it (0.16 → 0.28), and the hero is a LIT jewel tone
+  (`tone(hue, 0.60, 0.56)`) with a deep ink on it — the app's own dark language.
+- **THE LIGHT SCHEME FOLLOWS THE APP'S OWN RULE.** An airy page
+  (`tone(hue, 0.40, 0.93)`), a near-white card ladder that climbs ABOVE it
+  (0.995 → 0.86), a DEEP hero (`tone(hue, 0.50, 0.40)`), and a near-black body
+  ink carrying the hue (`tone(hue, 0.30, 0.18)`). Contrast bars: body ink ≥ 4.5:1
+  on the page and the deepest card, hero ink ≥ 4.5:1 on the hero (via
+  `readableOn`), accent ink ≥ 3:1 — re-measure with `contrast` if a tone moves.
+- **HOW IT IS WIRED.** `AppPreferences.NAMED_ID_PREFIX` (`named-`) + five ids in
+  `COLOR_THEMES`; `namedThemeId()` reads the stored id WITHOUT the data layer
+  importing the ui type (the same trick the retired Pantone prefix used).
+  `curioColorScheme()` returns `named.schemeFor(isCurioDarkTheme())` before the
+  paper flip. The shared heroes answer it first: `settingsRoseAccent` /
+  `homeRoseAccent` / `profileRoseAccent` → `MaterialTheme.colorScheme.primary`,
+  their ink helpers → `onPrimary`, `settingsCardAccentInk` → `accentFor`,
+  `settingsCardChipTint` → `primary`, `curioRoseInk` → `accentFor`. A named id
+  is neither Material nor a lane nor azure, so `setColorTheme` clears the three
+  legacy switches exactly as Curio rose does.
+- **A NAMED THEME'S PAGE WINS over the category wash.** `CategoryInk`'s page /
+  surface resolvers (`categoryBackgroundWash`, `categorySurface`,
+  `categoryChipSurface`, `categorySurfaceMoodBoard`) return the scheme's own
+  background/ladder and `notesSheetContainerColor` its dialog surface — so the
+  theme's page is what the member sees, not a lane tint. Lane ACCENTS
+  (`categoryInk`, `themedAccent`, `headerAccent`) are deliberately NOT collapsed:
+  lane chips keep their identity on a themed page.
+- **The sheet lists them** (`SettingsSectionScreen.colorThemeChoices`), each row
+  previewing its own page/hero/ink in the current mode; `colorThemeLabel` names
+  them. The Appearance Paper row greys out under a named theme (it paints its
+  own page).
+
 ### The Pantone tone ladder (v413) — RETIRED in v414, history only
 
 - **RETIRED.** `PantoneThemes.kt` no longer exists, so nothing below is live

@@ -112,6 +112,7 @@ import com.curio.app.ui.components.formatHour
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.CurioNamedTheme
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.fromHsl
@@ -582,6 +583,11 @@ private fun colorThemeLabel(id: String): String = when (id) {
     AppPreferences.COLOR_THEME_AZURE -> "Azure hero"
     AppPreferences.COLOR_THEME_MATERIAL -> "Material"
     AppPreferences.COLOR_THEME_LANE -> "Adaptive Hero"
+    AppPreferences.COLOR_THEME_JADE -> "Jade"
+    AppPreferences.COLOR_THEME_ORCHID -> "Orchid"
+    AppPreferences.COLOR_THEME_OCEAN -> "Ocean"
+    AppPreferences.COLOR_THEME_SAND -> "Sand"
+    AppPreferences.COLOR_THEME_EMBER -> "Ember"
     else -> "Curio"
 }
 
@@ -691,7 +697,7 @@ private fun ColorThemeSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "The app's page, hero and ink. Pastel colors and Category tint stay on the Appearance page.",
+                "The app's page, hero and ink — each with a dark twin. Pastel colors and Category tint stay on the Appearance page.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -806,6 +812,20 @@ private fun colorThemeChoices(): List<ColorThemeChoice> {
                 ink = ink
             )
         )
+        // v420 — THE NAMED THEMES. Five full themes, each previewing its own
+        // page, hero and ink in the mode the app is in (see `CurioNamedTheme`).
+        CurioNamedTheme.entries.forEach { named ->
+            add(
+                ColorThemeChoice(
+                    id = named.id,
+                    label = named.label,
+                    hint = named.hint,
+                    page = named.pageFor(dark),
+                    hero = named.heroFor(dark),
+                    ink = named.accentFor(dark)
+                )
+            )
+        }
     }
 }
 

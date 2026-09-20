@@ -288,8 +288,13 @@ fun isCurioDarkTheme(): Boolean = when (AppPreferences.themeModeState) {
  * progress accents that sit on cards/cream — the light-mode wash-out fix.
  */
 @Composable
-fun curioRoseInk(): Color =
-    if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
+fun curioRoseInk(): Color {
+    // v420 — a named theme's accent ink is one of its own tones, so every
+    // surface that asks for an accent ink (pills, plate tints, icon chips)
+    // comes back in the member's theme instead of coral.
+    activeNamedTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
+    return if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
+}
 
 /**
  * v20 — the brand butter as INK, theme-aware: bright ButterYellow on dark
@@ -334,9 +339,22 @@ fun isCurioDarkThemeForContext(context: Context): Boolean = when (AppPreferences
  * seeded baseline fallback): neutral surfaces, one primary, muted
  * category families (see [MaterialFamilies]).
  */
+/**
+ * v420 — the ACTIVE named theme, or null when the color theme is one of the
+ * app's own (Curio rose, Azure, Material, Adaptive Hero). A named theme brings
+ * its own palette (light and dark), so it answers before the Curio schemes.
+ */
+@Composable
+fun activeNamedTheme(): CurioNamedTheme? =
+    AppPreferences.namedThemeId()?.let { CurioNamedTheme.fromId(it) }
+
 @Composable
 fun curioColorScheme(): ColorScheme {
     if (materialThemeOn) return materialColorScheme()
+    // v420 — a named theme owns its own page, card ladder and dark twin, so it
+    // answers before the paper flip (which only ever describes Curio's own
+    // cream/white light pair).
+    activeNamedTheme()?.let { named -> return named.schemeFor(isCurioDarkTheme()) }
     if (isCurioDarkTheme()) return CurioDarkColorScheme
     // v409 — the paper flip: white page with cream cards (the shipped look),
     // or the reverse. Read reactively, so the switch repaints immediately.

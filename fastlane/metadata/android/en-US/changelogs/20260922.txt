@@ -23,6 +23,7 @@ FIX:
 
 ADD:
 - Appearance: one Color theme door — Curio rose, Azure, Material and Adaptive Hero, each its own row with a preview of the page, the hero and the ink it would paint. Pastel colors and Category tint stay on the page.
+- Appearance: five new named themes — Jade, Orchid, Ocean, Sand and Ember — each a full theme with its own page, cards, hero and a deep-jewel dark twin.
 - Appearance: Light, Dark and System are one sliding switch with a sun, a moon and a half-and-half mark — no checkmarks.
 - Home: one hero — the torn banner is taller and "Today's quest / Shuffle the deck" lives inside it now, under your figures, instead of a button parked below the seam.
 - Home: the drawer's lanes are a star map — a star per lane, its size and brightness its knowledge, its colour its own accent, joined into constellations; tap one and its own figures open below the map.

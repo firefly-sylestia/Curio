@@ -66,12 +66,31 @@ object AppPreferences {
      *  choice can be recognised and migrated to [COLOR_THEME_CURIO]. */
     private const val LEGACY_PANTONE_PREFIX = "pantone-"
 
+    /**
+     * v420 — THE NAMED THEMES. Five full themes (see `CurioNamedTheme`), each
+     * with its own page, card ladder, hero and dark twin. Every named id carries
+     * this prefix, so the stored id is recognised here without the data layer
+     * having to know the ui types. A named theme is "neither Material, nor a
+     * lane, nor the azure hero": like Curio rose it clears all three legacy
+     * switches. Its own palette comes from the scheme. */
+    const val NAMED_ID_PREFIX = "named-"
+    const val COLOR_THEME_JADE = "named-jade"
+    const val COLOR_THEME_ORCHID = "named-orchid"
+    const val COLOR_THEME_OCEAN = "named-ocean"
+    const val COLOR_THEME_SAND = "named-sand"
+    const val COLOR_THEME_EMBER = "named-ember"
+
     /** Every stored color-theme id, in the order the sheet lists them. */
     val COLOR_THEMES = listOf(
         COLOR_THEME_CURIO,
         COLOR_THEME_AZURE,
         COLOR_THEME_MATERIAL,
-        COLOR_THEME_LANE
+        COLOR_THEME_LANE,
+        COLOR_THEME_JADE,
+        COLOR_THEME_ORCHID,
+        COLOR_THEME_OCEAN,
+        COLOR_THEME_SAND,
+        COLOR_THEME_EMBER
     )
 
     private const val NAME = "curio_app_prefs"
@@ -2076,6 +2095,10 @@ object AppPreferences {
         heroBlueState = azure
         colorThemeState = next
     }
+
+    /** The active named theme's id, or null when the color theme is not one. */
+    fun namedThemeId(): String? =
+        colorThemeState.takeIf { it.startsWith(NAMED_ID_PREFIX) }
 
     /** Whether a *given* [mode] (not the currently stored one) resolves dark —
      *  used by the theme-switch reveal to detect a real light/dark change. */

@@ -144,6 +144,7 @@ import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.activeNamedTheme
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -1821,6 +1822,8 @@ private fun BoxScope.ProfileHeroSymbol(
  */
 @Composable
 private fun profileRoseAccent(): Color {
+    // v420 — a named theme IS the hero: its own primary fill answers first.
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.primary }
     // v223 — "Material hero tears": when the Material theme AND this
     // option are both on, the torn hero wears the scheme's
     // primaryContainer instead of the app-default rose/azure (or a lane).
@@ -1859,6 +1862,8 @@ private fun profileRoseAccent(): Color {
 /** Readable ink for content sitting on the rose banner (Home's helper). */
 @Composable
 private fun profileReadableInk(fill: Color): Color {
+    // v420 — the ink on a named theme's hero is its own onPrimary pair.
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.onPrimary }
     // v223 — Material hero tears: readable ink on primaryContainer.
     if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive

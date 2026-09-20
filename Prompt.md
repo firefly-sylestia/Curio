@@ -8,45 +8,59 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "the drawer graph is bad like othe previewus version was atleast better, do something
-> about it plaes its too symmetric"
+> "add some new accents colors, beautiful and also differnt omplimenting for dark ode. ne
+> accent names" → "not just accent colors but also they are proper theme"
 
-The member reversed the v414 direction on the Home drawer's lane star map: the ring-and-spoke
-lattice reads as too symmetric, and the earlier phyllotaxis scatter was better.
+Confirmed with the member via `ask_user`: add **five named FULL themes — Jade, Orchid,
+Ocean, Sand, Ember** — each with a **deep-jewel dark twin**, listed **in the existing
+Color theme sheet**.
 
 ## 2. Findings
 
-- `DrawerLaneStarMap` (HomeScreen.kt) drew: `starLattice(count)` → 1–3 orbits at even
-  radii, even angles per orbit, half-step phase on odd orbits; plus a grid of orbit
-  circles, `STAR_CHART_SPOKES` (12) spokes and a hub; plus `starRingLinks` (a closed
-  polygon per orbit).
-- Exactly that regularity was the complaint. `StarSlot(angle, radius)` + `starPoint(...)`
-  are the placement/hit-test pair and are worth keeping.
+- The Color theme system is `AppPreferences.colorThemeState` + `curioColorScheme()`
+  (Material → dark → White/Cream paper). The heroes and accent inks branch off
+  `materialHeroTearsOn()` / `heroLaneCategory()` / `heroBlueState`.
+- The retired Pantone themes had solved "a theme paints the whole app"; that machinery was
+  removed in v414, so a named theme now needs: a scheme, hero/ink resolvers, the sheet
+  rows, and a page that beats the category wash.
 
-## 3. What was built (v419)
+## 3. What was built (v420)
 
-- **`starScatter(count)`** replaces `starLattice`: the i-th star at the GOLDEN ANGLE
-  (2.3999632 rad) × i, radius `0.20 + 0.74 * sqrt((i + 0.55) / count)`, with a
-  deterministic 0..7 hashed wobble (`i * 2654435761L and 7`) on both angle and radius.
-  Deterministic; knowledge still only changes size/brightness.
-- **The grid is gone** — no orbit circles, no spokes, no hub; `STAR_CHART_SPOKES` and
-  `TWO_PI` deleted. A faint **`starDust(STAR_DUST_COUNT = 46)`** field (deterministic LCG,
-  unit space) gives the panel depth.
-- **`starLinks`** (nearest neighbour, unit-space `getDistanceSquared`) replaces
-  `starRingLinks`, so hairlines read as loose constellations.
-- `StarSlot` and `starPoint` are unchanged, so the tap target still matches the paint.
+- **`ui/theme/NamedThemes.kt`** — `CurioNamedTheme` enum (Jade 158°, Orchid 318°, Ocean
+  191°, Sand 36°, Ember 12°). Everything is `tone(hue, sat, light)`; `second` = hue+38°,
+  `third` = hue−46° for the scheme's 2nd/3rd fills. `schemeFor(dark)`:
+  - **light**: airy page `tone(hue,0.40,0.93)`, near-white card ladder 0.995→0.86 climbing
+    above it, deep hero `tone(hue,0.50,0.40)`, near-black body ink `tone(hue,0.30,0.18)`;
+  - **dark (deep jewel)**: page `tone(hue,0.45,0.12)`, cards 0.16→0.28, lit hero
+    `tone(hue,0.60,0.56)`, pale ink. `readableOn` picks white/the theme ink; `contrast` is
+    reused from `CurioTheme.kt`.
+- **`AppPreferences`** — `NAMED_ID_PREFIX` (`named-`), five ids in `COLOR_THEMES`,
+  `namedThemeId()` (no ui import in the data layer).
+- **`CurioTheme`** — `activeNamedTheme()`; `curioColorScheme()` returns
+  `named.schemeFor(isCurioDarkTheme())` before the paper flip; `curioRoseInk()` → `accentFor`.
+- **Heroes/inks** — `settingsRoseAccent` / `homeRoseAccent` / `profileRoseAccent` →
+  `primary`; their readable-ink helpers → `onPrimary`; `settingsCardAccentInk` →
+  `accentFor`; `settingsCardChipTint` → `primary`.
+- **`CategoryInk`** — the page/surface resolvers return the theme's own background/ladder
+  (so the theme's page shows instead of a lane wash); lane ACCENTS are left intact.
+- **Sheet** — `colorThemeChoices` appends the five rows (page/hero/ink previews),
+  `colorThemeLabel` names them, and the deep-search hint / sheet subtitle were updated.
 
 ## 4. Verification
 
-- Brace/paren balance 0/0 on `HomeScreen.kt`; no remaining `starLattice` / `starRingLinks`
-  / `TWO_PI` / `STAR_CHART_SPOKES` / `orbits` references; `cos` / `sin` already imported.
+- Brace/paren balance 0/0 on all 9 touched/new files; `activeNamedTheme` referenced from
+  Home/Profile/Settings/CategoryInk/CurioTheme.
+- CI on the prior two commits was checked: both had failed on the single `contrast()`
+  reference, fixed in `f353b28d` (moved into `CurioTheme.kt`).
 - No Gradle in this environment — CI validates the compile.
 
 ## 5. Open notes
 
-- `DrawerStarMapHeight` stays 254dp (v414); only the arrangement changed.
-- If the scatter is now TOO loose, the wobble constants (`0.055` angle, `0.011` radius)
-  and the `0.20 + 0.74 * sqrt(...)` spread are the two dials to tune.
+- Deep-jewel dark was the member's choice; the `tone(...)` calls in `darkScheme()` are the
+  dials to re-tune (page sat/light, hero light).
+- A named theme does NOT collapse the 36 lane accents (unlike the retired Pantone themes) —
+  lane chips keep their identity on a themed page. Say the word to collapse them.
+- `activeNamedThemeNow()` was not added: nothing non-composable needed it.
 
 ---
 
