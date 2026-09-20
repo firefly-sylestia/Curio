@@ -2002,25 +2002,28 @@ private fun TextPagedReader(
     // zoom"): the same re-lay-the-type zoom the scroll carries, so a book read
     // as pages answers the two fingers like the same book read as a scroll.
     //
-    // v426 — AND IT IS APPLIED IN STEPS, because of what a step COSTS here.
-    //
     // `pages` is remembered on `ReaderLook.textScale` (see [paginateBlocks]
     // below), so every single pinch event re-measured EVERY block in the book —
     // which is the whole of the member's "lagging on pinch to zoom in epub".
-    // The zoom still drives the type size, but the gesture's own travel is now
-    // ACCUMULATED and only applied once it is worth seeing (a twentieth of the
-    // size), so a pinch costs a handful of re-lays instead of one per frame. A
-    // twentieth is below the eye's threshold on type, and the type still lands
-    // exactly where the fingers asked — just a beat behind them.
-    var held by remember { mutableStateOf(1f) }
-    val pagerZoom = Modifier.pinchToZoom { zoom, _, _ ->
-        val travelled = held * zoom
-        if (travelled >= 1.05f || travelled <= 0.95f) {
-            ReaderLook.textScale = (ReaderLook.textScale * travelled).coerceIn(0.8f, 2.6f)
-            held = 1f
-        } else {
-            held = travelled
+    //
+    // v426 — SO IT MAGNIFIES LIVE, SETTLING AT THE END (the member's own choice:
+    // "live magnify, settle after"). The type size is what a reflowable book's
+    // pages are MADE of, so re-making them per event is the stutter itself —
+    // nothing is re-made while the fingers are down: the page is magnified in the
+    // DRAW phase (`graphicsLayer`, which costs nothing), and the type size is
+    // written ONCE when the fingers lift ([pinchToZoom]'s own `onEnd`). The
+    // magnify is handed back at that same moment, so the page the member is left
+    // with is the real page at its new size rather than a scaled copy of the old.
+    var magnify by remember { mutableStateOf(1f) }
+    val pagerZoom = Modifier.pinchToZoom(
+        onEnd = {
+            if (magnify != 1f) {
+                ReaderLook.textScale = (ReaderLook.textScale * magnify).coerceIn(0.8f, 2.6f)
+                magnify = 1f
+            }
         }
+    ) { zoom, _, _ ->
+        magnify = (magnify * zoom).coerceIn(0.6f, 3.2f)
         Offset.Zero
     }
 
@@ -2028,6 +2031,15 @@ private fun TextPagedReader(
         state = pagerState,
         modifier = Modifier
             .fillMaxSize()
+            // v426 — the live magnify of a pinch, drawn about the page's centre
+            // (the settle puts the type where it belongs, so the anchor only has
+            // to feel right while the fingers are down). The LAYOUT size is
+            // untouched, which is what `room` below paginates against — a page
+            // is measured at its real size, never at the magnified one.
+            .graphicsLayer {
+                scaleX = magnify
+                scaleY = magnify
+            }
             .then(pagerZoom)
             .onSizeChanged { room = it }
             .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
@@ -2128,7 +2140,19 @@ private fun paginateBlocks(
                 ).size.height + gap
             }.getOrDefault(with(density) { 26.dp.roundToPx() })
         }
-        if (used > 0 && used + needed > height) {
+        // ── v426 — A PAGE IS NEVER JUST A HEADING ──
+        //
+        // A heading is big type with margins of its own, so it can take most of a
+        // page — and then the paragraph it NAMES is what tips the pair over, which
+        // put the break exactly where it must not be: the heading alone on one
+        // sheet (an empty page with the app's own title on it, in the member's
+        // words: "the apps own title shows in a empty page") and the prose
+        // starting again on the next. A heading belongs WITH what it names, so
+        // while a page holds nothing but the heading the break waits, and the
+        // paragraph joins it even if the page runs a line or two past its own
+        // height — a page scrolls, and a turn is still a page.
+        val aloneIsAHeading = start == index - 1 && blocks.getOrNull(start)?.isHeading == true
+        if (used > 0 && used + needed > height && !aloneIsAHeading) {
             pages.add(start until index)
             start = index
             used = 0
@@ -5626,6 +5650,16 @@ private fun Modifier.pinchToZoom(
     key: Any? = Unit,
     zoomed: () -> Boolean = { false },
     /**
+     * v426 — THE GESTURE'S OWN END, for a surface that only wants to COMMIT its
+     * result once. A reflowable book's pages re-lay the whole text when the type
+     * size changes, so its pinch magnifies the page LIVE (a cheap draw-phase
+     * scale) and settles to a real type size when the fingers lift — which needs
+     * to know when that is, and this is the one honest place to say it (see the
+     * end of the gesture below). Null for every caller that has nothing to
+     * settle.
+     */
+    onEnd: (() -> Unit)? = null,
+    /**
      * @param zoom  the scale this event asks for.
      * @param pan   the drag this event carries, in the view's own pixels.
      * @param focus WHERE THE FINGERS ARE — the gesture's centroid at the
@@ -5714,6 +5748,8 @@ private fun Modifier.pinchToZoom(
                 last = null
             }
         } while (event.changes.any { it.pressed })
+        // The fingers are all up: whoever asked to settle does it now, once.
+        onEnd?.invoke()
     }
 }
 

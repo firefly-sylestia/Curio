@@ -113,6 +113,23 @@ confirmed with the member: always-on (no Settings toggle), all five kinds, those
 keyless sources (Comic Vine/publishers are the keyed doors, left out), and TMDB stays the
 source for the film/series basics it already fetches.
 
+**DONE (v426):**
+
+- **Title detection for files** — `detectBookFromFileName` hardened: a round bracket is now
+  judged by what it names (publisher, imprint, edition, format, site, year), a zero-padded
+  leading index comes off (but `07-Ghost` keeps its name), and a dash-separated tail that
+  names a publisher is dropped. Shapes were validated against the parser in Python before
+  committing. (`6f5023b5`)
+- **EPUB pinch lag + the empty page** — the pages were remembered on `ReaderLook.textScale`,
+  so every pinch event re-measured every block in the book (the stutter). The member chose
+  "live magnify, settle after": nothing is re-made while the fingers are down — the page is
+  scaled in the DRAW phase (`graphicsLayer`, layout size untouched so `paginateBlocks`'
+  `room` is never wrong) and the type size is written once in `pinchToZoom`'s new `onEnd`.
+  (`696a1c91`). The member's answer to the *view* half of that complaint was "the apps own
+  title shows in a empty page": a heading is big type with margins of its own, so the
+  paragraph it NAMES was what tipped the pair over and the break landed between the two.
+  `paginateBlocks` now holds the break while a page holds nothing but a heading.
+
 **REMAINING, in the member's own order:**
 
 1. **Series fetching + covers, and a detail sheet for a series** — the member wants a
@@ -122,12 +139,6 @@ source for the film/series basics it already fetches.
    artworks/artists/songs/films). Comic Vine and the publishers' APIs are the named keyed
    ones. A manga added BY HAND (the Type door) still cannot fetch its own cover — that is
    the enrichment door for comics, deliberately left out of v426's own guard.
-3. **EPUB in the page-swipe flow** — the side-by-side view is poor and a pinch zoom lags.
-4. **Title detection for files is still bad** — `detectBookFromFileName` keeps a bracketed
-   publisher/edition (`(Penguin Classics, 1996)`), and a name with two dashes splits its
-   author wrongly. The member chose "just harden it" (no examples given), so this is a
-   hardening pass: publisher/edition/format/year noise in brackets, a zero-padded leading
-   index, and an extra-dash tail that names a publisher.
 
 ## 5. Work log
 
@@ -146,6 +157,8 @@ files were the only ones missing one.
 - **Phase 1 — the form and the night.** Done, committed, pushed (`f3604631`).
 - **Phase 2 — Incursion.** Done, committed, pushed (`33db4480`).
 - **Phase 3 — the file's own page count (Books).** Done, committed, pushed (`94e66bf9`).
+- **Phase 4 — comics kinds, sources, title detection, EPUB pinch + the empty page.** Done,
+  committed, pushed (`bfb002ce`, `6f5023b5`, `696a1c91`, and the empty-page fix with them).
 - **DOX pass** — `app/AGENTS.md`: the Incursion section's tile description corrected (the
   status bar is gone), the page's v425 language added, and the file/page-count contract
   added to the chapters bullet. Committed with this file; NOT pushed (docs-only).

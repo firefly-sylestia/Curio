@@ -1,5 +1,6 @@
 FIX:
-- Reading: a reflowable book's page flow pinches without the stutter — the type size is what the pinch changes, and every event re-measured every block in the book, so the pages are now re-laid only when the fingers have travelled far enough to be worth seeing (a twentieth of the size), which is a handful of passes per pinch instead of one per frame.
+- Reading: a reflowable book's page flow never shows a sheet with nothing but a heading on it — a heading is big type with margins of its own, so the paragraph it names is what pushed the pair over the page and the break landed between the two; a page holding nothing but a heading keeps it company now.
+- Reading: a reflowable book's pinch magnifies the page live and settles when you let go — the type size is what these pages are MADE of, so the old zoom re-measured every block in the book on every event, which is the stutter; the page grows in the draw phase under your fingers and the type lands once, at the size you asked for.
 
 ADD:
 - Books: manga, manhwa, manhua, comics and light novels are on your shelf now, each keeping its own name — pick the kind before you search and the same shelf, reader, chapters and progress you already have hold them, with the kind worn on the cover of its own card.
