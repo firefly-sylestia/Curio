@@ -8853,11 +8853,14 @@ only ever catches taps that mean "not in any of these".
   (called from `onCreate`, before `setContent`), but a write from ANOTHER surface
   lands after a card composes — so the cached URL must key BOTH the `remember`
   seed and the `LaunchedEffect`, or the card re-fetches art the app already has.
-- **Orientation.** The app declares no `screenOrientation` anywhere, so the
-  reader already follows the device's rotation. `ReaderLook.pageUpright` is the
-  one standing choice: it sets `requestedOrientation` on the ACTIVITY (via
-  `Context.findActivity()`), and only while a PDF is open. Always restore
-  `SCREEN_ORIENTATION_UNSPECIFIED` on dispose.
+- **Orientation (v418).** The app declares no `screenOrientation` anywhere, so
+  the reader already follows the device's rotation. `ReaderLook.orientation` is
+  a real three-way `ReaderOrientation` (`AUTO` / `PORTRAIT` / `LANDSCAPE`), and
+  it is applied to the ACTIVITY (via `Context.findActivity()`) for BOTH kinds of
+  book — v406's `pageUpright` was a lone switch and only for a PDF, which is why
+  the member found no auto-rotation in either format. Always restore
+  `SCREEN_ORIENTATION_UNSPECIFIED` on dispose. The control lives in the "page"
+  (ink) sheet, labelled AUTO-ROTATE, and is offered for every book.
 - **Block drag has TWO axes now.** `PersonalRowDragState.dragBy(amountX,
   amountY, …)` — the vertical travel steps the list, the horizontal travel is
   INTENT only (`takeLeftCell`) and chooses which end of a print row a dropped
@@ -9266,15 +9269,25 @@ only ever catches taps that mean "not in any of these".
 
 ### v412 — the gauge, the voice wave, the mood pills, the System glyph
 
-- **THE READING GAUGE ANIMATES.** `ReadingGauge` resolves its fill through
-  `animateFloatAsState` (spring 0.88/380) and prints the figure from the SAME
-  animated value, so a held stepper counts up smoothly instead of the bar
-  snapping many times a second. The `percent` parameter is GONE — the figure is
-  derived inside now, so the two can never disagree. The fill is a
+- **THE READING GAUGE ANIMATES, AND IT IS A CONTROL (v418).** `ReadingGauge`
+  resolves its fill through `animateFloatAsState` and prints the figure from the
+  SAME animated value, so a held stepper counts up smoothly instead of the bar
+  snapping many times a second. The spec is a zero-length `tween` WHILE
+  `scrubbing` (the fill must sit under the finger), else spring 0.90/320. When
+  `onScrub` is non-null the bar is draggable/tappable: the card maps the 0..1
+  fraction to a page (when the file has pages) or a chapter and writes it through
+  the same overlay setters the tiles use (`setPageTo` / `setChapterTo`). The
+  KNOB is drawn inside the Canvas and only fades in for the touch (`knobAlpha` /
+  `knobScale`), never at rest — the touch target is a 28dp node with the 11dp
+  track drawn inside it. The `percent` parameter is GONE — the figure is derived
+  inside now, so the two can never disagree. The fill is a
   `Brush.horizontalGradient(accent → lerp(accent, White, 0.30f))` and a slow
-  `rememberInfiniteTransition` sheen (2.8s, `clipRect`ed to the FILL so it can
+  `rememberInfiniteTransition` sheen (3.4s, `clipRect`ed to the FILL so it can
   only travel along the progress) drifts across it at rest. Every stop is an
-  opaque `lerp` — no alpha on a fill.
+  opaque `lerp` — no alpha on a fill. **v418 — the band's ends fade to
+  TRANSPARENT (`Brush.horizontalGradient(colorStops = …)`), so its restart at
+  the left edge is invisible; the old hard-edged band jumped** (member: "the flow
+  animation is bad of it").
 - **THE MOOD PILLS (and their neighbours) ARE OPAQUE.** "How did the day feel"
   wore a 20% TINT of the mood ink, so the journal's page showed through the
   collapsed pill and the picked chip. All three surfaces now use
@@ -9457,6 +9470,18 @@ only ever catches taps that mean "not in any of these".
   `HapticFeedbackType.TextHandleMove` tick. Owned by one `detectTapGestures`
   (`onPress` + `tryAwaitRelease`), never beside a `Surface(onClick)`, so a hold can
   never also fire the tap that ended it — the same construction as `ReaderHoldButton`.
+  **v418 — the gauge is draggable (see "THE READING GAUGE ANIMATES, AND IT IS A
+  CONTROL" above) and the reader's chapter CONTENTS light the row the member is
+  in.** `ReaderContentsSection` takes `atIndex` and tints the entry at or before
+  the live place, so the contents read as an index to where you are rather than a
+  flat list (member: "better chapter & outline handling").
+- **v418 — the reader's flow switch settles, and its pages turn smoother.**
+  Scrolling ↔ Pages used to swap in one frame; the reading surface now fades and
+  lifts 16dp over 230ms when the flow (or the format, on first load) changes
+  (`flowKey` + an `Animatable`, applied with `graphicsLayer` on ONE instance, so
+  the two pagers are never composed at once). Both `HorizontalPager`s pass
+  `beyondViewportPageCount = 1`, so a turn's neighbour is already laid out instead
+  of painting from scratch mid-slide (member: "smoother page turns / scrolling").
   The press also drives a `0.9f` scale for touch feedback.
 - **THE PANTONE ACCENT IS APP-WIDE.** `curioRoseInk()` and
   `settingsCardChipTint()` now answer the Pantone palette first, so the icon

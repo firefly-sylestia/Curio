@@ -8,67 +8,62 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "remove the pntone theme, also the category tint option isnt working, for home etc after
-> the paper white page cream paage option, also do somethign bout the backgroud and the
-> card color issues, and use elevation also fix the rose theme its kinda feels off somehow"
+> "also along with +- for chapter chnage and page chnage make it possible to update the
+> progress with the progress bar too, dont show the knob always, but it appears when user
+> touches it, also the flow animation is bad of it, can u chnage it and then some more
+> improvement to pdf epub reader, also btw the auto roation wasnt working in pdf or ebud with
+> the option"
 
-Four asks plus delivery. Confirmed with the member via `ask_user` before editing:
+Confirmed with the member via `ask_user`:
 
-1. **Remove the Pantone themes — DELETE COMPLETELY.** Stored Pantone choice falls back to
-   Curio rose.
-2. **Category tint should tint Home/Profile by the last Spin lane when ON** (rose/cream when
-   OFF).
-3. **Soft shadows + clearer fill steps** for card/background separation.
-4. **Rose (Curio) theme: MORE VIBRANT / richer.**
+1. Make **the book card's gauge** (`BookDetailScreen`) draggable, knob only on touch.
+2. Rework **both** the gauge fill/sheen animation and the reader Scrolling↔Pages switch.
+3. Add **a real Auto-rotate option** (for both PDF and EPUB).
+4. Reader improvements: **better chapter & outline handling** + **smoother page turns/scrolling**.
 
 ## 2. Findings
 
-- **Pantone** was 3 themes in `ui/theme/PantoneThemes.kt`, woven through ~14 files:
-  `activePantoneTheme()` / `activePantoneThemeNow()` branches in `CurioTheme.kt`,
-  `CategoryInk.kt`, `CurioCategoryCard.kt`, `ExploreSessionService.kt`, Home/Profile/
-  Settings/Reveal screens; the `COLOR_THEME_PANTONE_*` ids + `PANTONE_ID_PREFIX` in
-  `AppPreferences.kt`; the Color theme sheet rows in `SettingsSectionScreen.kt`.
-- **Category tint** (`AppPreferences.tintWashEffective()` ↔ `categoryBackgroundWash()`)
-  only drove the category-washed screens (Spin/Cabinet/Reveal). Home fell straight to a
-  fixed rose lerp unless the *Adaptive Hero* theme was on, so the row looked dead there.
-  Profile used `heroPageBackground()` which also only took a lane under Adaptive Hero.
-- **Cards**: v411 made the light cream ladder deliberately subtle and relied on a 3dp
-  `curioCardShadow`; the member now reports the card/page separation is not reading.
-- **Rose**: `CurioColors.HomeRosewood` was nudged more vibrant in v413 (S 0.415 → 0.515)
-  and still "feels off".
+- `ReadingGauge` (BookDetailScreen) was read-only: an 11dp `Canvas` track, a spring fill
+  (0.88/380), and an idle sheen whose band had HARD edges and restarted at the left every
+  2.8s. The card's chapter/page `ProgressTile`s drive `chapterMove`/`pageMove` overlays.
+- The reader presented as a NavHost route in `MainActivity` (no orientation lock in the
+  manifest), so rotation is the window's. The only control was `ReaderLook.pageUpright`,
+  a lone Switch shown ONLY for `content is ReaderContent.Pages`.
+- The reader's flow switch swapped `ReaderFlow` in one frame; both `HorizontalPager`s
+  composed only the visible page.
+- `ReaderContentsSection` listed chapters flat, with no indication of the current chapter.
 
-## 3. What was built (v414)
+## 3. What was built (v418)
 
-- **Pantone removed completely.** `PantoneThemes.kt` deleted; every branch, import and
-  constant dropped; `COLOR_THEMES` is `CURIO/AZURE/MATERIAL/LANE`; `getColorTheme` migrates
-  a stored `pantone-*` id to `COLOR_THEME_CURIO` on read (kept `LEGACY_PANTONE_PREFIX` for
-  that one read). `curioTintOn` is now an unconditional opaque `lerp`.
-- **Category tint tints Home/Profile.** New `categoryTintLane()` in `SettingsHubScreen.kt`
-  (gated by the switch, reads the last single Spin lane, independent of Adaptive Hero);
-  `heroPageBackground()` now falls back to it, Home resolves its page through
-  `heroPageBackground(...)`. NOTE: because that resolver is shared, EVERY screen using
-  `heroPageBackground()` now takes the lane tint when the switch is ON — see §5 open item.
-- **Cards**: White-page light ladder re-pitched deeper (`surfaceContainerLow #FAF2E0` →
-  `Highest #E8D8B3`), `curioCardShadow` default elevation 3dp → 5dp with a hair more alpha.
-- **Rose**: `HomeRosewood` `#DC7482` (hue 352 unchanged, S 0.515 → 0.60, L eased to 0.659),
-  `HomeRosewoodDark` `#7D2C3B` matched; every derived pastel/wash/ink follows.
-- **Docs/changelog**: `app/AGENTS.md` sections marked RETIRED + the card-ladder/Paper notes
-  corrected; `20260922.txt` Pantone bullets dropped (never shipped — no REMOVE note) and
-  the three new FIX bullets added.
+- **The gauge is a control.** `ReadingGauge` takes an optional `onScrub: (Float) -> Unit`;
+  a 28dp touch node (track drawn inside) handles horizontal drag + press via two
+  `pointerInput` blocks. The card maps the 0..1 fraction to a page (`setPageTo`) or chapter
+  (`setChapterTo`) — the same overlay setters the tiles use. A knob is drawn in the Canvas
+  and only fades/scales in while `scrubbing` (`knobAlpha`/`knobScale`), never at rest.
+- **The fill tracks the finger** (zero-length tween while scrubbing, spring 0.90/320
+  otherwise) and the **sheen no longer jumps** — its ends fade to `Color.Transparent`, so
+  the restart is invisible (band 0.34, 3.4s).
+- **Real auto-rotate.** `ReaderOrientation` enum (`AUTO`/`PORTRAIT`/`LANDSCAPE`) replaces
+  `pageUpright`; the ACTIVITY takes `orientation.requested()`, applied to BOTH kinds of
+  book. The \"page\" (ink) sheet now shows an AUTO-ROTATE three-way control for every book.
+- **Flow switch settles.** The reading surface fades + lifts 16dp over 230ms on `flowKey`
+  change, applied with `graphicsLayer` to ONE instance (the two pagers are never composed
+  together). Both `HorizontalPager`s pass `beyondViewportPageCount = 1` (smoother turns).
+- **Chapter highlight.** `ReaderContentsSection` takes `atIndex` and tints the entry at or
+  before the live place.
 
 ## 4. Verification
 
-- Brace/paren balance checked 0/0 on all 15 touched Kotlin files (`TopicRevealScreen.kt`'s
-  +1 paren is pre-existing — confirmed against `HEAD`).
-- No `Gradle` in this environment — CI validates the compile.
+- Brace/paren balance 0/0 on both files; no `pageUpright`/`showUpright` refs remain.
+- Compose BOM `2026.05.01`, so `beyondViewportPageCount` and `colorStops`-gradients exist.
+- No Gradle in this environment — CI validates the compile.
 
-## 5. Open item to confirm with the member
+## 5. Open notes
 
-`heroPageBackground()` is the shared page resolver for ~25 screens (Support, Quests,
-Updates, Stats, Community, Recent, Cabinet, …). Tinting it by the last Spin lane when the
-Category tint switch is ON (default ON) means those pages now shift hue after a Spin under
-the default Curio rose theme too. If the member wants this scoped to Home/Profile ONLY, the
-lane branch should move out of `heroPageBackground` into a Home/Profile-only helper.
+- The reader's own \"Places\" progress bar was deliberately left read-only (the member
+  chose the book-card gauge only); easy to extend via the same `onScrub` hook if wanted.
+- `pageUpright` state was replaced outright, not migrated (the reader's look is process
+  state, not stored), so a member who had it on starts at AUTO.
 
 ---
 

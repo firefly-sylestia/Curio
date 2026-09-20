@@ -22,6 +22,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -104,6 +105,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -1147,6 +1149,25 @@ private fun ProgressCard(
                 onTotal(next)
             }
         }
+        // ── v418 — AN ABSOLUTE MOVE, FOR THE BAR ───────────────────────────
+        // The gauge reports a fraction; the card turns that into a PAGE (when
+        // the file has pages) or a CHAPTER and writes it through the same
+        // overlay the steppers use, so the bar and the tiles can never disagree.
+        val setPageTo: (Int) -> Unit = { target ->
+            val next = target.coerceIn(0, pageCount)
+            if (next != shownPage) {
+                pageMove = next
+                onPage?.invoke(next)
+            }
+        }
+        val setChapterTo: (Int) -> Unit = { target ->
+            val next = target.coerceAtLeast(0)
+                .coerceAtMost(if (shownTotal > 0) shownTotal else 999)
+            if (next != shownChapter) {
+                chapterMove = next
+                onChapter(next)
+            }
+        }
         // ── THE ONE MEASURE THE CARD IS ABOUT ──────────────────────────────
         // The honest fraction of the book: its own PAGES when there is a file
         // to count (a PDF), else the chapter run. Finished is full, always.
@@ -1236,7 +1257,17 @@ private fun ProgressCard(
                     // as a cut in the bar rather than another colour on it.
                     notch = MaterialTheme.colorScheme.surfaceContainerLow,
                     accent = accent,
-                    ink = ink
+                    ink = ink,
+                    // v418 — the bar is a control too: dragging it moves the
+                    // same place the tiles do. Pages win when the file counts
+                    // them (a PDF), else the chapter run. Nothing to move on a
+                    // finished book.
+                    onScrub = when {
+                        finished -> null
+                        pageCount > 0 -> { fraction -> setPageTo((fraction * pageCount).toInt()) }
+                        shownTotal > 0 -> { fraction -> setChapterTo((fraction * shownTotal).roundToInt()) }
+                        else -> null
+                    }
                 )
             }
             if (finished) {
@@ -1397,7 +1428,14 @@ private fun ReadingGauge(
     pageCount: Int,
     notch: Color,
     accent: Color,
-    ink: Color
+    ink: Color,
+    /**
+     * v418 — WHEN SET, THE BAR IS A CONTROL. A drag (or a tap) anywhere on the
+     * track reports the 0..1 fraction it landed on, so the member can move the
+     * reading place by the bar itself rather than only by the two tiles. Null
+     * keeps the bar read-only.
+     */
+    onScrub: ((Float) -> Unit)? = null
 ) {
     // ── THE FILL TRAVELS, AND THE BAR BREATHES (v412) ─────────────────────
     //
@@ -1409,16 +1447,45 @@ private fun ReadingGauge(
     // sheen drifts along the FILLED part while nothing is moving, so a bar at
     // rest is alive rather than a dead rectangle ("and also a subtle idle
     // animation, gradient style maybe").
+    // ── v418 — THE FILL TRACKS A FINGER, AND CHASES A NUMBER ─────────────
+    //
+    // While the bar is being scrubbed the fill must sit exactly under the
+    // finger, so the animation is a zero-length tween then; the moment the
+    // finger lifts it goes back to a soft spring for stepper moves. The KNOB
+    // is only on screen for the touch: it fades and scales in on press and out
+    // again on release (member: "dont show the knob always, but it appears when
+    // user touches it").
+    var scrubbing by remember { mutableStateOf(false) }
     val animated by animateFloatAsState(
         targetValue = fraction.coerceIn(0f, 1f),
-        animationSpec = spring(dampingRatio = 0.88f, stiffness = 380f),
+        animationSpec = if (scrubbing) {
+            tween(durationMillis = 0)
+        } else {
+            spring(dampingRatio = 0.90f, stiffness = 320f)
+        },
         label = "gauge-fill"
     )
+    val knobAlpha by animateFloatAsState(
+        targetValue = if (scrubbing) 1f else 0f,
+        animationSpec = tween(durationMillis = 160),
+        label = "gauge-knob-alpha"
+    )
+    val knobScale by animateFloatAsState(
+        targetValue = if (scrubbing) 1f else 0.55f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 520f),
+        label = "gauge-knob-scale"
+    )
+    // ── v418 — THE SHEEN NO LONGER JUMPS ───────────────────────────────
+    //
+    // The old band was a hard-edged gradient that restarted at the left edge, so
+    // every 2.8s a bright rectangle appeared from nowhere (member: "the flow
+    // animation is bad of it"). It now fades to TRANSPARENT at both ends, so
+    // the restart is invisible, and it rides a slower, even sweep.
     val sheen by rememberInfiniteTransition(label = "gauge-idle").animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2800, easing = LinearEasing),
+            animation = tween(durationMillis = 3400, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "gauge-sheen"
@@ -1459,11 +1526,50 @@ private fun ReadingGauge(
         Canvas(
             modifier = Modifier
                 .weight(1f)
-                .height(11.dp)
-                .clip(RoundedCornerShape(50))
-                .background(ink.copy(alpha = 0.09f))
+                // v418 — a taller node is the touch target; the track is drawn
+                // inside it. The bar was 11dp tall, which no finger can hold.
+                .height(28.dp)
+                .then(
+                    if (onScrub != null) {
+                        Modifier
+                            .pointerInput(onScrub) {
+                                detectHorizontalDragGestures(
+                                    onDragStart = { pos ->
+                                        scrubbing = true
+                                        onScrub((pos.x / size.width).coerceIn(0f, 1f))
+                                    },
+                                    onDragEnd = { scrubbing = false },
+                                    onDragCancel = { scrubbing = false },
+                                    onHorizontalDrag = { change, _ ->
+                                        change.consume()
+                                        onScrub((change.position.x / size.width).coerceIn(0f, 1f))
+                                    }
+                                )
+                            }
+                            .pointerInput(onScrub) {
+                                detectTapGestures(onPress = { pos ->
+                                    scrubbing = true
+                                    onScrub((pos.x / size.width).coerceIn(0f, 1f))
+                                    tryAwaitRelease()
+                                    scrubbing = false
+                                })
+                            }
+                    } else {
+                        Modifier
+                    }
+                )
         ) {
-            val filled = size.width * animated
+            val trackH = 11.dp.toPx()
+            val trackTop = (size.height - trackH) / 2f
+            val radius = CornerRadius(trackH / 2f)
+            // The empty track.
+            drawRoundRect(
+                color = ink.copy(alpha = 0.09f),
+                topLeft = Offset(0f, trackTop),
+                size = Size(size.width, trackH),
+                cornerRadius = radius
+            )
+            val filled = (size.width * animated).coerceIn(0f, size.width)
             // A GRADIENT, not a flat block: the fill runs from the accent into
             // a lighter READING of the same accent, which is what makes a thin
             // bar read as a lit metre instead of a painted strip. Both stops
@@ -1477,23 +1583,29 @@ private fun ReadingGauge(
                         startX = 0f,
                         endX = size.width
                     ),
-                    size = Size(filled, size.height),
-                    cornerRadius = CornerRadius(size.height / 2f)
+                    topLeft = Offset(0f, trackTop),
+                    size = Size(filled, trackH),
+                    cornerRadius = radius
                 )
                 // The idle sheen, clipped to the FILL so it can only ever read
                 // as light travelling along the progress — never as a band
-                // crossing the empty track.
-                clipRect(right = filled) {
-                    val band = size.width * 0.22f
+                // crossing the empty track. Its ENDS fade to transparent, so
+                // the restart at the left edge is invisible.
+                clipRect(left = 0f, top = trackTop, right = filled, bottom = trackTop + trackH) {
+                    val band = size.width * 0.34f
                     val centre = -band + (size.width + band * 2f) * sheen
                     drawRect(
                         brush = Brush.horizontalGradient(
-                            colors = listOf(accent, lift, accent),
+                            colorStops = arrayOf(
+                                0f to Color.Transparent,
+                                0.5f to lift.copy(alpha = 0.30f),
+                                1f to Color.Transparent
+                            ),
                             startX = centre - band,
                             endX = centre + band
                         ),
-                        topLeft = Offset(centre - band, 0f),
-                        size = Size(band * 2f, size.height)
+                        topLeft = Offset(centre - band, trackTop),
+                        size = Size(band * 2f, trackH)
                     )
                 }
             }
@@ -1528,9 +1640,25 @@ private fun ReadingGauge(
                 val mark = lerp(notch, accent, 0.30f * density)
                 val t = settle.value
                 if (leaving.isNotEmpty() && t < 1f) {
-                    drawGaugeMarks(leaving, alpha = 1f - t, stroke = stroke, color = mark)
+                    drawGaugeMarks(leaving, alpha = 1f - t, stroke = stroke, color = mark, top = trackTop, height = trackH)
                 }
-                drawGaugeMarks(settled, alpha = t, stroke = stroke, color = mark)
+                drawGaugeMarks(settled, alpha = t, stroke = stroke, color = mark, top = trackTop, height = trackH)
+            }
+            // ── v418 — THE KNOB, ONLY FOR THE TOUCH ────────────────────
+            if (knobAlpha > 0.01f) {
+                val knobR = 8.dp.toPx() * knobScale
+                val cx = filled.coerceIn(knobR, size.width - knobR)
+                val cy = size.height / 2f
+                drawCircle(
+                    color = accent.copy(alpha = knobAlpha),
+                    radius = knobR,
+                    center = Offset(cx, cy)
+                )
+                drawCircle(
+                    color = lift.copy(alpha = knobAlpha),
+                    radius = knobR * 0.42f,
+                    center = Offset(cx, cy)
+                )
             }
         }
         Spacer(Modifier.width(11.dp))
@@ -2442,7 +2570,10 @@ private fun DrawScope.drawGaugeMarks(
     marks: List<Float>,
     alpha: Float,
     stroke: Float,
-    color: Color
+    color: Color,
+    /** v418 — the TRACK's own band inside the taller touch node. */
+    top: Float,
+    height: Float
 ) {
     if (alpha <= 0.02f) return
     marks.forEach { at ->
@@ -2450,8 +2581,8 @@ private fun DrawScope.drawGaugeMarks(
         if (x > stroke && x < size.width - stroke) {
             drawLine(
                 color = color.copy(alpha = color.alpha * alpha),
-                start = Offset(x, 0f),
-                end = Offset(x, size.height),
+                start = Offset(x, top),
+                end = Offset(x, top + height),
                 strokeWidth = stroke
             )
         }

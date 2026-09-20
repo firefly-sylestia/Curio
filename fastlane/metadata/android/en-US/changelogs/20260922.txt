@@ -1,4 +1,8 @@
 FIX:
+- Reading: the progress bar on a book is a control now — drag or tap it to move the page (or chapter), and the knob only appears under your finger.
+- Reading: auto-rotate is a real three-way choice — Auto, Upright or Wide — for both PDF and EPUB; it used to be a PDF-only upright switch.
+- Reading: the Scrolling↔Pages switch settles in instead of flinching, and the progress bar's sheen no longer jumps back to the start.
+- Reading: smoother page turns — the next page is laid out ahead of the turn — and the chapter you are reading is lit in the contents.
 - Appearance: the Category tint switch now tints Home and Profile too — with it on, their page wears the lane you last picked on Spin; before it did nothing there unless Adaptive Hero was the active theme.
 - Appearance: cards read again — the light themes' card fill steps are clearer and the soft shadow lifts a card off the page at a deeper step.
 - Theme: the Curio rose is richer and less dusty — the same hue with more saturation, day and night twins together.

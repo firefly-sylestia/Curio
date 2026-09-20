@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -60,8 +62,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -497,26 +497,20 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         runCatching { PersonalRepositoryHolder.repo.setPage(bookId, livePageMark) }
     }
 
-    // ── THE PAGE FOLLOWS THE PHONE, UNLESS IT IS ASKED NOT TO (v406) ────
+    // ── THE PAGE FOLLOWS THE PHONE, UNLESS IT IS ASKED NOT TO (v406/v418) ──
     //
-    // The reader has no orientation of its own: the window turns and the page
-    // turns with it, which IS the horizontal mode a wide page wants and needs no
-    // layout of its own (member's choice: "just allow landscape"). What it also
-    // wants is a way OUT of it, for a member reading in bed: [ReaderLook
-    // .pageUpright] keeps a PDF's pages standing up. It is applied on the
-    // ACTIVITY, because the window is the activity's own, and only while a PDF
-    // is open, so a reflowable book is never held to one way up.
+    // AUTO is "turn with the phone": the window rotates and the page turns with
+    // it, which IS the horizontal mode a wide page wants and needs no layout of
+    // its own (member's choice: "just allow landscape"). The member can also
+    // hold the page UPRIGHT or WIDE while a book is open ([ReaderLook
+    // .orientation]), for reading in bed. It is applied on the ACTIVITY, because
+    // the window is the activity's own — and v418 applies it to BOTH kinds of
+    // book, since a reflowable book re-lays itself out at any width and can hold
+    // one just as well as a PDF can.
     val readerActivity = remember(context) { context.findActivity() }
-    LaunchedEffect(content, ReaderLook.pageUpright) {
+    LaunchedEffect(content, ReaderLook.orientation) {
         val act = readerActivity ?: return@LaunchedEffect
-        val lock = ReaderLook.pageUpright && content is ReaderContent.Pages
-        runCatching {
-            act.requestedOrientation = if (lock) {
-                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            } else {
-                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
-        }
+        runCatching { act.requestedOrientation = ReaderLook.orientation.requested() }
     }
     DisposableEffect(readerActivity) {
         onDispose {
@@ -687,10 +681,29 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         chrome = false
     }
 
+    // ── v418 — THE FLOW SWITCH SETTLES IN (member: "the flow animation is bad
+    // of it"). Scrolling ↔ Pages used to swap in one frame, which read as a
+    // flinch. The reading surface now fades and lifts a hair each time the flow
+    // (or the format, on first load) changes — a single instance, so the two
+    // pagers are never composed at once.
+    val flowKey = if (content is ReaderContent.Pages) {
+        ReaderLook.pageFlow.name
+    } else {
+        ReaderLook.textFlow.name
+    }
+    val flowFade = remember { Animatable(1f) }
+    LaunchedEffect(flowKey) {
+        flowFade.snapTo(0f)
+        flowFade.animateTo(1f, tween(durationMillis = 230, easing = FastOutSlowInEasing))
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(palette.paper)
+            .graphicsLayer {
+                alpha = flowFade.value
+                translationY = (1f - flowFade.value) * 16.dp.toPx()
+            }
             // A tap ANYWHERE brings the chrome back (and takes it away again):
             // this sits UNDER the words, so it never eats a long press meant for
             // a paragraph.
@@ -941,9 +954,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // v406 — the type size is a text book's business: a PDF page is a
             // picture of a page, and its own size is the pinch's.
             showType = content is ReaderContent.Text,
-            // …and how the page stands is a PDF's business: a reflowed book
-            // re-lays itself out and has nothing to stand up (see pageUpright).
-            showUpright = content is ReaderContent.Pages,
             onPick = { key -> ReaderLook.inkKey = key },
             onDismiss = { sheet = null }
         )
@@ -1782,7 +1792,11 @@ private fun TextPagedReader(
         // v394 — PAGES SIT FLUSH. A gutter between self-made pages read as one
         // book cut into cards (user report: "the pages are not continuosn
         // connected"); with no gap a turn is a slide of the paper itself.
-        pageSpacing = 0.dp
+        pageSpacing = 0.dp,
+        // v418 — THE NEXT PAGE IS ALREADY LAID OUT. Composing only the visible
+        // page meant a turn painted its neighbour from scratch mid-slide, which
+        // is the hitch a page turn used to show (member: "smoother page turns").
+        beyondViewportPageCount = 1
     ) { page ->
         val range = pages.getOrNull(page) ?: return@HorizontalPager
         Column(
@@ -2098,6 +2112,9 @@ private fun PageReader(
         // first (see [pinchToZoom]) and consumes it, and the pager's own slop
         // wait is cancelled by that consumption instead of racing it.
         modifier = Modifier.fillMaxSize(),
+        // v418 — keep the neighbouring page ready so a turn never paints from
+        // scratch mid-slide (see the reflowable pager above).
+        beyondViewportPageCount = 1,
         // v394 — the PDF's pages sit flush too: a scan read as pages is one
         // document being slid across, not a stack of cards with gaps between.
         pageSpacing = 0.dp
@@ -3007,8 +3024,6 @@ private fun ReaderInkSheet(
     palette: ReaderPalette,
     /** v406 — whether this book has a type size to set (a reflowable one does). */
     showType: Boolean,
-    /** v406 — whether this book has a way up to keep (a PDF page does). */
-    showUpright: Boolean,
     onPick: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -3088,45 +3103,45 @@ private fun ReaderInkSheet(
                 }
             }
 
-            // ── HOW THE PAGE STANDS (v406) ───────────────────────────
+            // ── HOW THE PAGE STANDS (v406 → v418) ───────────────────
             //
-            // Off is "turn with the phone" and is what the reader does by
-            // itself; on holds a PDF's pages upright while the book is open,
-            // for reading with the phone lying on its side (see
-            // [ReaderLook.pageUpright]). A reflowable book has no such choice
-            // and is not offered one.
-            if (showUpright) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            "KEEP THE PAGE UPRIGHT",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                letterSpacing = 1.1.sp,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = palette.accent
-                        )
-                        Text(
-                            if (ReaderLook.pageUpright) {
-                                "On: the page stays upright while this book is open."
-                            } else {
-                                "Off: the page turns with your phone."
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = palette.ink.copy(alpha = 0.6f)
-                        )
+            // A three-way choice now, offered for EVERY book: Auto follows the
+            // phone, Upright and Wide hold the page while the book is open (see
+            // [ReaderLook.orientation]). v406 offered a lone switch and only to
+            // a PDF, which is why the member found no auto-rotation in either
+            // format.
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "AUTO-ROTATE",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 1.1.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = palette.accent
+                )
+                Text(
+                    ReaderLook.orientation.detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = palette.ink.copy(alpha = 0.6f)
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ReaderOrientation.entries.forEach { option ->
+                        val active = option == ReaderLook.orientation
+                        Surface(
+                            onClick = { ReaderLook.orientation = option },
+                            shape = RoundedCornerShape(50),
+                            color = if (active) palette.accent else palette.ink.copy(alpha = 0.08f)
+                        ) {
+                            Text(
+                                option.label,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = if (active) palette.paper else palette.ink.copy(alpha = 0.75f),
+                                modifier = Modifier.padding(horizontal = 15.dp, vertical = 8.dp)
+                            )
+                        }
                     }
-                    Switch(
-                        checked = ReaderLook.pageUpright,
-                        onCheckedChange = { next -> ReaderLook.pageUpright = next },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = palette.accent,
-                            checkedTrackColor = palette.accent.copy(alpha = 0.4f),
-                            uncheckedThumbColor = palette.ink.copy(alpha = 0.55f),
-                            uncheckedTrackColor = palette.ink.copy(alpha = 0.12f),
-                            uncheckedBorderColor = palette.ink.copy(alpha = 0.2f)
-                        )
-                    )
                 }
             }
         }
@@ -3261,6 +3276,7 @@ private fun ReaderPlacesSheet(
                 pages = pages,
                 marks = kept,
                 palette = palette,
+                atIndex = atIndex,
                 onPickBlock = onPickBlock,
                 onPickPage = onPickPage,
                 onBookmarkHere = onBookmarkHere,
@@ -3601,6 +3617,8 @@ private fun ReaderContentsSection(
     pages: List<ReaderOutlineEntry>,
     marks: List<ReaderMarkEntity>,
     palette: ReaderPalette,
+    /** v418 — where the reader is RIGHT NOW, so the row they are in is lit. */
+    atIndex: Int?,
     onPickBlock: (Int) -> Unit,
     onPickPage: (Int) -> Unit,
     onBookmarkHere: (ReaderParagraph) -> Unit,
@@ -3608,6 +3626,17 @@ private fun ReaderContentsSection(
 ) {
     var showingPages by remember { mutableStateOf(false) }
     val entries = if (showingPages) pages else chapters
+    // ── v418 — THE CHAPTER YOU ARE IN IS LIT ───────────────────────────
+    // The contents used to read as a flat list however far in the member was;
+    // the row they are reading in now wears a tint of the accent (member:
+    // "better chapter & outline handling"). The entry is the LAST one at or
+    // before the live place, which is the chapter that place sits inside.
+    val currentEntry = atIndex?.let { key ->
+        entries.lastOrNull { entry ->
+            val at = if (entry.isPage) entry.page - 1 else entry.block
+            at in 0..key
+        }
+    }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         if (pages.isNotEmpty()) {
             Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -3634,12 +3663,13 @@ private fun ReaderContentsSection(
             entries.isNotEmpty() -> entries.forEach { entry ->
                 val openable = entry.block >= 0 || entry.isPage
                 val bookmark = readerContentsBookmark(marks, entry)
+                val isCurrent = entry === currentEntry
                 Surface(
                     onClick = {
                         if (entry.isPage) onPickPage(entry.page) else onPickBlock(entry.block)
                     },
                     shape = RoundedCornerShape(10.dp),
-                    color = palette.surface,
+                    color = if (isCurrent) palette.accent.copy(alpha = 0.14f) else palette.surface,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -3672,7 +3702,7 @@ private fun ReaderContentsSection(
                                 },
                                 fontWeight = if (entry.depth <= 1) FontWeight.SemiBold
                                 else FontWeight.Normal,
-                                color = palette.ink
+                                color = if (isCurrent) palette.accent else palette.ink
                             ),
                             maxLines = 2,
                             modifier = Modifier.weight(1f)
@@ -4658,17 +4688,35 @@ private object ReaderLook {
     var pageFlow by mutableStateOf(ReaderFlow.PAGED)
 
     /**
-     * v406 — HOW THE PAGE STANDS, and the only orientation choice the reader
-     * has.
+     * v418 — HOW THE PAGE STANDS. A real three-way choice now, and it applies to
+     * BOTH kinds of book.
      *
-     * OFF (the default) is "turn with the phone": the window rotates and a wide
-     * PDF page is read the way a wide page wants, which is the horizontal mode
-     * (member's choice: "just allow landscape", "auto detected"). ON keeps the
-     * page UPRIGHT while a PDF is open, for reading in bed with the phone lying
-     * on its side. It applies to a PDF only — a reflowable book re-lays itself
-     * out at any width, so it has nothing to stand up.
+     * v406 offered a single "keep the page upright" switch, and only for a PDF,
+     * so a reflowable book had no orientation control at all and the switch read
+     * as broken (member: "the auto rotation wasnt working in pdf or epub with the
+     * option"). The reader now takes the same tri-state every reader app does:
+     *
+     *  · [AUTO] follows the phone (the default, and what "auto rotation" means),
+     *  · [PORTRAIT] holds the page upright while this book is open (reading in
+     *    bed with the phone lying on its side),
+     *  · [LANDSCAPE] holds it wide.
+     *
+     * It is applied on the ACTIVITY, so it works whatever the format is.
      */
-    var pageUpright by mutableStateOf(false)
+    var orientation by mutableStateOf(ReaderOrientation.AUTO)
+}
+
+/** v418 — the reader's orientation choice (see [ReaderLook.orientation]). */
+private enum class ReaderOrientation(val label: String, val detail: String) {
+    AUTO("Auto", "The page turns with your phone."),
+    PORTRAIT("Upright", "The page stands up while this book is open."),
+    LANDSCAPE("Wide", "The page stays wide while this book is open.");
+
+    fun requested(): Int = when (this) {
+        AUTO -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        PORTRAIT -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+    }
 }
 
 /** The two ways a book can be laid out on screen. */
