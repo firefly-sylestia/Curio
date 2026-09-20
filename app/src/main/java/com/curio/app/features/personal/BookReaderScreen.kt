@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -444,6 +445,52 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // only known inside it, so that one reports `liveTextBlock`.
     var liveTextBlock by remember(bookId, document) { mutableIntStateOf(-1) }
 
+    // ── v422 — ONE STEP, FOR A TAP (see [ReaderLook.tapZones]) ────────
+    //
+    // A tap in a corner of the page, or in its head or foot, asks for the next
+    // thing rather than for the chrome: a page where the book has pages, a
+    // screenful where the book scrolls. It is the same step the page bar's own
+    // arrows take, so the two can never disagree about what "on" means.
+    fun stepPage(step: Int) {
+        askedByReader = true
+        when (val loaded = content) {
+            is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
+                val last = (loaded.pageCount - 1).coerceAtLeast(0)
+                scope.launch {
+                    pagerState.animateScrollToPage((pagerState.currentPage + step).coerceIn(0, last))
+                }
+            } else {
+                val last = (loaded.pageCount - 1).coerceAtLeast(0)
+                turnPageFromBar((shownPage + step).coerceIn(0, last))
+            }
+
+            is ReaderContent.Text -> if (ReaderLook.textFlow == ReaderFlow.PAGED) {
+                val last = (textPageCount - 1).coerceAtLeast(0)
+                scope.launch {
+                    textPager.animateScrollToPage((textPager.currentPage + step).coerceIn(0, last))
+                }
+            } else {
+                // A SCREENFUL, measured on the list itself and a little short of
+                // one, so the line the member was reading is still above the new
+                // first line rather than gone.
+                val screenful = listState.layoutInfo.viewportSize.height * 0.86f
+                scope.launch { listState.animateScrollBy(step * screenful) }
+            }
+
+            null -> Unit
+        }
+    }
+
+    // ── AND THE TAP ITSELF: a zone, or the chrome ────────────────────
+    //
+    // The corner is measured once, here, because the tap answers long after the
+    // composition it was armed in has gone.
+    val tapCorner = with(LocalDensity.current) { 72.dp.toPx() }
+    val onSurfaceTap: (Offset, IntSize) -> Unit = { at, size ->
+        val step = if (ReaderLook.tapZones) readerTapStep(at, size, tapCorner) else 0
+        if (step == 0) tapPage() else stepPage(step)
+    }
+
     val livePlace: ReaderLivePlace? = when (val loaded = content) {
         is ReaderContent.Text -> {
             val total = loaded.blocks.size
@@ -763,7 +810,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     onBlockShown = { liveTextBlock = it },
                     onLongPress = { marking = it },
                     chromeVisible = chrome,
-                    onTap = { tapPage() },
+                    onTap = onSurfaceTap,
                     onScrolled = { scrolling ->
                         // A scroll the READER asked for keeps the chrome (v405).
                         if (scrolling) {
@@ -809,7 +856,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                             isPage = true
                         )
                     },
-                    onTap = { tapPage() },
+                    onTap = onSurfaceTap,
                     onScrolled = { scrolling ->
                         // A scroll the READER asked for keeps the chrome (v405).
                         if (scrolling) {
@@ -851,6 +898,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     null -> Unit
                 }
             },
+            tapZones = ReaderLook.tapZones,
+            onToggleTapZones = { ReaderLook.tapZones = !ReaderLook.tapZones },
             onClose = { navController.popBackStack() },
             onSearch = {
                 searching = ReaderSearch().also { started ->
@@ -1186,7 +1235,7 @@ private fun TextReader(
     onBlockShown: (Int) -> Unit,
     onLongPress: (ReaderParagraph) -> Unit,
     chromeVisible: Boolean,
-    onTap: () -> Unit,
+    onTap: (Offset, IntSize) -> Unit,
     onScrolled: (Boolean) -> Unit,
     /** v389c — the live selection, when it belongs to this book's text. */
     selection: ReaderSelection?,
@@ -1325,7 +1374,7 @@ private fun TextReader(
             // THE PAGE ANSWERS A TAP. The blocks below answer their own (a long
             // press marks a passage, a tap puts the chrome back), and this one
             // catches the presses that land in the gaps between them.
-            .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
+            .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
         contentPadding = PaddingValues(
             start = 22.dp,
             end = 22.dp,
@@ -1403,7 +1452,7 @@ private fun PdfScrollReader(
     palette: ReaderPalette,
     bookId: String,
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
-    onTap: () -> Unit,
+    onTap: (Offset, IntSize) -> Unit,
     onScrolled: (Boolean) -> Unit,
     onLongPress: (Int) -> Unit,
     /** v389c — the live sweep, when it belongs to this page of the file. */
@@ -1568,7 +1617,7 @@ private fun PdfScrollReader(
                 .fillMaxHeight()
                 .width(pageWidth * docZoom + 28.dp)
                 .clipToBounds()
-                .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
+                .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
             // ── AND THE SHEETS ARE SEPARATED (v403) ──────────────────────
             //
             // The pages were stacked FLUSH (`spacedBy(0.dp)`), each one clipped
@@ -1665,7 +1714,7 @@ private fun PdfScrollReader(
                     // double tap has to measure the page it actually sees (v399).
                     .pointerInput(page, aspect) {
                         detectTapGestures(
-                            onTap = { onTap() },
+                            onTap = { at -> onTap(at, size) },
                             onDoubleTap = { readerDoubleTapDocument() },
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
@@ -1788,7 +1837,7 @@ private fun TextPagedReader(
     bookId: String,
     document: String,
     onLongPress: (ReaderParagraph) -> Unit,
-    onTap: () -> Unit,
+    onTap: (Offset, IntSize) -> Unit,
     /** v389c — the live selection, when it belongs to this book's text. */
     selection: ReaderSelection?,
     onSelect: (ReaderSelection) -> Unit,
@@ -1863,7 +1912,7 @@ private fun TextPagedReader(
             .fillMaxSize()
             .then(pagerZoom)
             .onSizeChanged { room = it }
-            .pointerInput(Unit) { detectTapGestures(onTap = { onTap() }) },
+            .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
         // v394 — PAGES SIT FLUSH. A gutter between self-made pages read as one
         // book cut into cards (user report: "the pages are not continuosn
         // connected"); with no gap a turn is a slide of the paper itself.
@@ -2058,7 +2107,7 @@ private fun PageReader(
     bookId: String,
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onLongPress: (Int) -> Unit,
-    onTap: () -> Unit,
+    onTap: (Offset, IntSize) -> Unit,
     onScrolled: (Boolean) -> Unit,
     flow: ReaderFlow,
     /** v389c — the live sweep, when it belongs to this page of the file. */
@@ -2288,7 +2337,7 @@ private fun PageReader(
                 }
                 .pointerInput(page, myAspect) {
                     detectTapGestures(
-                        onTap = { onTap() },
+                        onTap = { at -> onTap(at, size) },
                         // v399 — A DOUBLE TAP IS THE PINCH, AT ONE POINT: in to
                         // read a line closely, out to see the page whole again.
                         // It is anchored where it was tapped, like the pinch is,
@@ -2700,7 +2749,10 @@ private fun ReaderChrome(
     onPlaces: () -> Unit,
     pageBar: ReaderPageBar?,
     flowLabel: String,
-    onToggleFlow: () -> Unit
+    onToggleFlow: () -> Unit,
+    /** v422 — the page's own tap zones, and the small switch that governs them. */
+    tapZones: Boolean,
+    onToggleTapZones: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         // The HEAD carries the way out and what is being read — nothing else. A
@@ -2832,6 +2884,29 @@ private fun ReaderChrome(
                             if (flowLabel == ReaderFlow.PAGED.label) "Read as one scroll"
                             else "Read as pages",
                             tint = palette.ink.copy(alpha = 0.75f),
+                            size = 19.dp
+                        )
+                    }
+                }
+                // ── v422 — AND THE PAGE'S OWN TAP ZONES ──────────────
+                //
+                // On, the corners of the page turn it and its head and foot move
+                // the reading on; off, every tap is the one that brings the
+                // chrome back. It wears the accent while it is on, because a
+                // switch whose state cannot be read from the page it governs is
+                // a switch nobody flips (see [readerTapStep]).
+                Surface(
+                    onClick = onToggleTapZones,
+                    shape = CircleShape,
+                    color = Color.Transparent,
+                    modifier = Modifier.size(38.dp)
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            CurioIcons.Crop,
+                            if (tapZones) "A corner of the page turns it"
+                            else "Every tap brings the chrome back",
+                            tint = if (tapZones) palette.accent else palette.ink.copy(alpha = 0.75f),
                             size = 19.dp
                         )
                     }
@@ -4818,6 +4893,18 @@ private object ReaderLook {
      * It is applied on the ACTIVITY, so it works whatever the format is.
      */
     var orientation by mutableStateOf(ReaderOrientation.AUTO)
+
+    /**
+     * v422 — THE PAGE'S OWN TAP ZONES.
+     *
+     * A tap in a corner of the page turns it, and a tap in its head or foot
+     * moves the reading on by a screenful; a tap anywhere else is the one the
+     * reader has always had, the one that brings the chrome back. The reader
+     * that turns pages wants the first two and the reader that turns pages by
+     * accident wants them gone, which is why this is a switch in the reader's
+     * own foot rather than a rule (see [readerTapStep]).
+     */
+    var tapZones by mutableStateOf(true)
 }
 
 /** v418 — the reader's orientation choice (see [ReaderLook.orientation]). */
@@ -4944,6 +5031,34 @@ private fun pdfTint(
  *    the touch slop, so a TAP on a zoomed page still reaches the page (the
  *    chrome is raised by a tap, and a tap must not be eaten by its own jitter).
  */
+/**
+ * v422 — WHERE A TAP LANDED, when the reader's tap zones are on.
+ *
+ * The page's corners turn it, and its head and its foot move the reading on by
+ * a screenful; anywhere else is the tap that has always been there. A zone has
+ * to be big enough to hit without looking and small enough that the page is not
+ * all buttons — a corner is a square of [corner] a side and a band is a sixth
+ * of the surface — which is exactly why this is a switch in the reader's own
+ * foot and not a rule (see [ReaderLook.tapZones]).
+ *
+ * @return -1 the way back, +1 the way on, 0 for a tap that belongs to the page.
+ */
+private fun readerTapStep(at: Offset, size: IntSize, corner: Float): Int {
+    if (size.width <= 0 || size.height <= 0) return 0
+    val band = size.height * 0.16f
+    val head = at.y <= band
+    val foot = at.y >= size.height - band
+    val left = at.x <= corner
+    val right = at.x >= size.width - corner
+    return when {
+        left && (head || foot) -> -1
+        right && (head || foot) -> 1
+        head -> -1
+        foot -> 1
+        else -> 0
+    }
+}
+
 private fun Modifier.pinchToZoom(
     /**
      * What the gesture is bound to. A page whose SHAPE arrives after it was
