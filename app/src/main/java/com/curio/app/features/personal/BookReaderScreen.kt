@@ -18,6 +18,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -26,6 +27,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +44,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
@@ -98,6 +101,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -116,6 +120,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -447,10 +452,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
     // ── v422 — ONE STEP, FOR A TAP (see [ReaderLook.tapZones]) ────────
     //
-    // A tap in a corner of the page, or in its head or foot, asks for the next
-    // thing rather than for the chrome: a page where the book has pages, a
-    // screenful where the book scrolls. It is the same step the page bar's own
-    // arrows take, so the two can never disagree about what "on" means.
+    // A tap inside a zone asks for the next thing rather than for the chrome: a
+    // page where the book has pages, a screenful where the book scrolls. It is
+    // the same step the page bar's own arrows take, so the two can never disagree
+    // about what "on" means.
     fun stepPage(step: Int) {
         askedByReader = true
         when (val loaded = content) {
@@ -481,14 +486,52 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
 
+    // ── v424 — THE OTHER HALF OF A ZONE: A SCREENFUL ─────────────────
+    //
+    // A zone can ask for the READING to move on rather than for the page to turn,
+    // which is the same screenful the head and the foot have always moved — a
+    // little short of one, so the line the member was reading is still above the
+    // new first line rather than gone (see [ReaderZoneAction.scrolls]).
+    fun scrollPage(step: Int) {
+        askedByReader = true
+        val screenful = listState.layoutInfo.viewportSize.height * 0.86f
+        when (val loaded = content) {
+            is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
+                val last = (loaded.pageCount - 1).coerceAtLeast(0)
+                scope.launch {
+                    pagerState.animateScrollToPage((pagerState.currentPage + step).coerceIn(0, last))
+                }
+            } else {
+                scope.launch { listState.animateScrollBy(step * screenful) }
+            }
+
+            is ReaderContent.Text -> if (ReaderLook.textFlow == ReaderFlow.PAGED) {
+                val last = (textPageCount - 1).coerceAtLeast(0)
+                scope.launch {
+                    textPager.animateScrollToPage((textPager.currentPage + step).coerceIn(0, last))
+                }
+            } else {
+                scope.launch { listState.animateScrollBy(step * screenful) }
+            }
+
+            null -> Unit
+        }
+    }
+
     // ── AND THE TAP ITSELF: a zone, or the chrome ────────────────────
     //
-    // The corner is measured once, here, because the tap answers long after the
-    // composition it was armed in has gone.
-    val tapCorner = with(LocalDensity.current) { 72.dp.toPx() }
+    // The zone is measured against the SURFACE the member sees, so a tap on the
+    // side of the SCREEN answers even where the page under it is magnified and
+    // its own frame no longer spans what is on screen (v424 — the surfaces
+    // translate a tap inside a page before it gets here; see [readerZoneActionAt]).
     val onSurfaceTap: (Offset, IntSize) -> Unit = { at, size ->
-        val step = if (ReaderLook.tapZones) readerTapStep(at, size, tapCorner) else 0
-        if (step == 0) tapPage() else stepPage(step)
+        val action =
+            if (ReaderLook.tapZones) readerZoneActionAt(at, size) else ReaderZoneAction.OFF
+        when {
+            action == ReaderZoneAction.OFF -> tapPage()
+            action.scrolls -> scrollPage(action.step)
+            else -> stepPage(action.step)
+        }
     }
 
     val livePlace: ReaderLivePlace? = when (val loaded = content) {
@@ -769,10 +812,22 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         flowFade.snapTo(0f)
         flowFade.animateTo(1f, tween(durationMillis = 230, easing = FastOutSlowInEasing))
     }
+    // ── v424 — WHERE THE READER'S OWN SURFACE SITS, AND HOW BIG IT IS ──
+    //
+    // A tap zone belongs to the surface the member sees, and the scrolling PDF's
+    // frames sit on a document that can be wider than the screen — so a tap inside
+    // one of them reports the FRAME's own coordinates. Both facts are captured
+    // here, once, and handed to the surface below (see [PdfScrollReader]).
+    var surfaceOrigin by remember { mutableStateOf(Offset.Zero) }
+    var surfaceSize by remember { mutableStateOf(IntSize.Zero) }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(palette.paper)
+            .onGloballyPositioned { coords ->
+                surfaceOrigin = coords.positionInRoot()
+                surfaceSize = coords.size
+            }
             .graphicsLayer {
                 alpha = flowFade.value
                 translationY = (1f - flowFade.value) * 16.dp.toPx()
@@ -885,7 +940,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
 
         ReaderChrome(
-            visible = chrome,
+            visible = chrome && !ReaderLook.zonesEditing,
             title = book?.title.orEmpty().ifBlank { "Reader" },
             palette = palette,
             positionLabel = positionLabel,
@@ -900,6 +955,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             },
             tapZones = ReaderLook.tapZones,
             onToggleTapZones = { ReaderLook.tapZones = !ReaderLook.tapZones },
+            onEditTapZones = { ReaderLook.zonesEditing = true },
             onClose = { navController.popBackStack() },
             onSearch = {
                 searching = ReaderSearch().also { started ->
@@ -910,6 +966,23 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onInk = { sheet = ReaderSheet.INK },
             onPlaces = { sheet = ReaderSheet.PLACES }
         )
+
+        // ── v424 — AND THE ZONES' OWN EDITOR, ON THE PAGE ───────────────
+        //
+        // Drawn over everything (the chrome stands down while it is up, see the
+        // call above) because the lines it places have to be seen against the
+        // page they govern — and it takes every tap, so placing a line can never
+        // turn a page by accident.
+        AnimatedVisibility(
+            visible = ReaderLook.zonesEditing,
+            enter = fadeIn(tween(160)),
+            exit = fadeOut(tween(140))
+        ) {
+            ReaderTapZoneEditor(
+                palette = palette,
+                onDone = { ReaderLook.zonesEditing = false }
+            )
+        }
 
         // ── THE SELECTION'S BAR (v389c) ─────────────────────────────────
         //
@@ -1453,6 +1526,10 @@ private fun PdfScrollReader(
     bookId: String,
     onOpenedAt: (ReaderMarkEntity?) -> Unit,
     onTap: (Offset, IntSize) -> Unit,
+    /** v424 — the size of the screen the zones are measured on. */
+    viewport: IntSize,
+    /** v424 — where that screen starts, so a frame's own tap can be translated. */
+    surfaceOrigin: Offset,
     onScrolled: (Boolean) -> Unit,
     onLongPress: (Int) -> Unit,
     /** v389c — the live sweep, when it belongs to this page of the file. */
@@ -1617,7 +1694,15 @@ private fun PdfScrollReader(
                 .fillMaxHeight()
                 .width(pageWidth * docZoom + 28.dp)
                 .clipToBounds()
-                .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
+                // v424 — the two taps that land on the column ITSELF (the air
+                // between two sheets) are said in the screen's own space too: the
+                // column rides a horizontal scroll, so its x is the screen's x
+                // plus whatever has been panned away.
+                .pointerInput(viewport) {
+                    detectTapGestures(onTap = { at ->
+                        onTap(Offset(at.x - across.value, at.y), viewport)
+                    })
+                },
             // ── AND THE SHEETS ARE SEPARATED (v403) ──────────────────────
             //
             // The pages were stacked FLUSH (`spacedBy(0.dp)`), each one clipped
@@ -1645,6 +1730,9 @@ private fun PdfScrollReader(
             // finger on, and for every page already wearing a mark.
             var words by remember(document, page) { mutableStateOf<PdfPageText?>(null) }
             var container by remember { mutableStateOf(IntSize.Zero) }
+            // v424 — WHERE THIS SHEET SITS in the window, so a tap it answers can
+            // be said in the screen's own coordinates (see the tap handler below).
+            var where by remember { mutableStateOf(Offset.Zero) }
             val wanted = page in visiblePages ||
                 highlightsFor(marks, page).isNotEmpty()
             LaunchedEffect(document, page, wanted) {
@@ -1706,19 +1794,30 @@ private fun PdfScrollReader(
                         zoomed = { ReaderLook.pdfZoomPage == -1 && ReaderLook.pdfZoom > 1.02f }
                     ) { zoom, drag, focus ->
                         // v422 — one zoom for the whole file: see
-                        // [readerZoomDocument].
-                        readerZoomDocument(zoom, drag, listState, across)
+                        // [readerZoomDocument]. v424 — and the fingers' own place
+                        // is what the file grows ABOUT.
+                        readerZoomDocument(zoom, drag, focus, listState, across)
                     }
                     // Keyed on the page's SHAPE as well as its number: the tap
                     // handler outlives the composition that armed it, and a
                     // double tap has to measure the page it actually sees (v399).
-                    .pointerInput(page, aspect) {
+                    //
+                    // v424 — AND THE TAP IS TRANSLATED. A sheet's own frame is
+                    // the document's, not the screen's, so a tap on the SIDE of
+                    // the screen would be read as a point in the middle of a
+                    // magnified page and miss its zone. The frame's own place in
+                    // the window ([where]) is taken off, which is what makes the
+                    // side of the screen answer wherever the page happens to sit.
+                    .pointerInput(page, aspect, viewport) {
                         detectTapGestures(
-                            onTap = { at -> onTap(at, size) },
-                            onDoubleTap = { readerDoubleTapDocument() },
+                            onTap = { at -> onTap(at + where - surfaceOrigin, viewport) },
+                            onDoubleTap = { at ->
+                                readerDoubleTapDocument(at, listState, across)
+                            },
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
                     },
+                    .onGloballyPositioned { coords -> where = coords.positionInRoot() },
                 contentAlignment = Alignment.Center
             ) {
                 val drawn = bitmap
@@ -2131,6 +2230,11 @@ private fun PageReader(
             bookId = bookId,
             onOpenedAt = onOpenedAt,
             onTap = onTap,
+            // v424 — the surface a tap zone is measured against, and where it
+            // starts in the window, so a tap inside a magnified sheet can be
+            // said in the screen's own coordinates.
+            viewport = surfaceSize,
+            surfaceOrigin = surfaceOrigin,
             onScrolled = onScrolled,
             onLongPress = onLongPress,
             selection = selection,
@@ -2750,9 +2854,11 @@ private fun ReaderChrome(
     pageBar: ReaderPageBar?,
     flowLabel: String,
     onToggleFlow: () -> Unit,
-    /** v422 — the page's own tap zones, and the small switch that governs them. */
+    /** v422/v424 — the page's own tap zones, and the switch that governs them. */
     tapZones: Boolean,
-    onToggleTapZones: () -> Unit
+    onToggleTapZones: () -> Unit,
+    /** v424 — a HOLD on that switch opens the editor of where the zones sit. */
+    onEditTapZones: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         // The HEAD carries the way out and what is being read — nothing else. A
@@ -2890,26 +2996,33 @@ private fun ReaderChrome(
                 }
                 // ── v422 — AND THE PAGE'S OWN TAP ZONES ──────────────
                 //
-                // On, the corners of the page turn it and its head and foot move
-                // the reading on; off, every tap is the one that brings the
-                // chrome back. It wears the accent while it is on, because a
-                // switch whose state cannot be read from the page it governs is
-                // a switch nobody flips (see [readerTapStep]).
-                Surface(
-                    onClick = onToggleTapZones,
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    modifier = Modifier.size(38.dp)
+                // On, a tap near an edge of the screen acts and everything else
+                // brings the chrome back; off, every tap is the one that brings
+                // it back. It wears the accent while it is on, because a switch
+                // whose state cannot be read from the page it governs is a
+                // switch nobody flips (see [readerZoneActionAt]).
+                //
+                // v424 — AND A HOLD OPENS WHERE THEY SIT.
+                //
+                // An edge is a preference — how deep it reaches, and what its
+                // tap asks for — and a preference belongs on the surface it
+                // changes, not three screens away in Settings: holding this
+                // switch puts the zones' own lines on the page to be dragged
+                // (see [ReaderTapZoneEditor]).
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onToggleTapZones, onLongClick = onEditTapZones),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CurioIcon(
-                            CurioIcons.Crop,
-                            if (tapZones) "A corner of the page turns it"
-                            else "Every tap brings the chrome back",
-                            tint = if (tapZones) palette.accent else palette.ink.copy(alpha = 0.75f),
-                            size = 19.dp
-                        )
-                    }
+                    CurioIcon(
+                        CurioIcons.Crop,
+                        if (tapZones) "Tap zones on — hold to place them"
+                        else "Tap zones off — hold to place them",
+                        tint = if (tapZones) palette.accent else palette.ink.copy(alpha = 0.75f),
+                        size = 19.dp
+                    )
                 }
                 // WHERE THEY ARE, as a fact about the book rather than a
                 // sentence of advice: a reader does not need to be told to hold
@@ -4897,14 +5010,40 @@ private object ReaderLook {
     /**
      * v422 — THE PAGE'S OWN TAP ZONES.
      *
-     * A tap in a corner of the page turns it, and a tap in its head or foot
-     * moves the reading on by a screenful; a tap anywhere else is the one the
-     * reader has always had, the one that brings the chrome back. The reader
-     * that turns pages wants the first two and the reader that turns pages by
-     * accident wants them gone, which is why this is a switch in the reader's
-     * own foot rather than a rule (see [readerTapStep]).
+     * A tap near an edge acts, and a tap anywhere else is the one the reader has
+     * always had, the one that brings the chrome back. The reader that turns
+     * pages wants the zones and the reader that turns pages by accident wants
+     * them gone, which is why this is a switch in the reader's own foot rather
+     * than a rule (see [readerZoneActionAt]).
      */
     var tapZones by mutableStateOf(true)
+
+    /**
+     * v424 — AND THEY ARE THE MEMBER'S TO PLACE.
+     *
+     * The SIDES are the whole height of the surface and the head and the foot
+     * are the two bands between them, because a tap on the side of the SCREEN is
+     * what a reader reaches for — not a corner the eye has to aim at (member:
+     * "the side click to change page isnt working … not the page but side of
+     * screen"). Each edge says what its OWN tap does ([ReaderZoneAction]) and
+     * how deep it reaches ([zoneLeftDepth] and friends, as a share of the
+     * surface), and the places are edited ON the page by holding the switch
+     * above (see [ReaderTapZoneEditor]). The defaults are the reading the member
+     * described: both sides turn the page, the top scrolls back, the foot goes on.
+     */
+    var zoneLeft by mutableStateOf(ReaderZoneAction.BACK)
+    var zoneRight by mutableStateOf(ReaderZoneAction.FORWARD)
+    var zoneTop by mutableStateOf(ReaderZoneAction.SCROLL_BACK)
+    var zoneBottom by mutableStateOf(ReaderZoneAction.FORWARD)
+
+    /** How deep each edge reaches: a share of the WIDTH for a side, of the HEIGHT for a band. */
+    var zoneLeftDepth by mutableStateOf(ReaderZoneEdge.DEFAULT_SIDE)
+    var zoneRightDepth by mutableStateOf(ReaderZoneEdge.DEFAULT_SIDE)
+    var zoneTopDepth by mutableStateOf(ReaderZoneEdge.DEFAULT_BAND)
+    var zoneBottomDepth by mutableStateOf(ReaderZoneEdge.DEFAULT_BAND)
+
+    /** Whether the zone editor is up (a hold on the switch opens it — v424). */
+    var zonesEditing by mutableStateOf(false)
 }
 
 /** v418 — the reader's orientation choice (see [ReaderLook.orientation]). */
@@ -5032,30 +5171,419 @@ private fun pdfTint(
  *    chrome is raised by a tap, and a tap must not be eaten by its own jitter).
  */
 /**
- * v422 — WHERE A TAP LANDED, when the reader's tap zones are on.
+ * v424 — WHAT A TAP ON AN EDGE OF THE PAGE ASKS FOR.
  *
- * The page's corners turn it, and its head and its foot move the reading on by
- * a screenful; anywhere else is the tap that has always been there. A zone has
- * to be big enough to hit without looking and small enough that the page is not
- * all buttons — a corner is a square of [corner] a side and a band is a sixth
- * of the surface — which is exactly why this is a switch in the reader's own
- * foot and not a rule (see [ReaderLook.tapZones]).
+ * Two of these are the reader's oldest gestures (a page turn, and a screenful of
+ * the reading) and one of them is nothing at all, which is what makes an edge the
+ * member does not want a zone simply stop being one.
  *
- * @return -1 the way back, +1 the way on, 0 for a tap that belongs to the page.
+ * TURN and SCROLL are deliberately separate: where a book has pages a scroll is
+ * not possible and a turn is the only step there is, so the two meet there — but
+ * a scrolling flow has real pages to turn as well as a column to move, and which
+ * one an edge asks for is the member's choice, not the flow's.
  */
-private fun readerTapStep(at: Offset, size: IntSize, corner: Float): Int {
-    if (size.width <= 0 || size.height <= 0) return 0
-    val band = size.height * 0.16f
-    val head = at.y <= band
-    val foot = at.y >= size.height - band
-    val left = at.x <= corner
-    val right = at.x >= size.width - corner
+private enum class ReaderZoneAction(val label: String, val hint: String) {
+    BACK("Back", "The page before"),
+    FORWARD("On", "The next page"),
+    SCROLL_BACK("Scroll back", "A screenful the other way"),
+    SCROLL_FORWARD("Scroll on", "A screenful further on"),
+    OFF("Nothing", "The tap stays with the page");
+
+    /** -1 the way back, +1 the way on, 0 for a tap that belongs to the page. */
+    val step: Int
+        get() = when (this) {
+            BACK, SCROLL_BACK -> -1
+            FORWARD, SCROLL_FORWARD -> 1
+            OFF -> 0
+        }
+
+    /** Whether this edge moves the READING by a screenful instead of turning. */
+    val scrolls: Boolean get() = this == SCROLL_BACK || this == SCROLL_FORWARD
+}
+
+/**
+ * v424 — THE FOUR EDGES OF THE SURFACE, and where each one's own answers live.
+ *
+ * An edge owns an [ReaderZoneAction] and a DEPTH: the sides are measured across
+ * the width and stand the whole height, the head and the foot are measured down
+ * the height and sit between the sides (see [readerZoneActionAt]).
+ */
+private enum class ReaderZoneEdge(val label: String) {
+    LEFT("Left"),
+    RIGHT("Right"),
+    TOP("Top"),
+    BOTTOM("Bottom");
+
+    fun action(): ReaderZoneAction = when (this) {
+        LEFT -> ReaderLook.zoneLeft
+        RIGHT -> ReaderLook.zoneRight
+        TOP -> ReaderLook.zoneTop
+        BOTTOM -> ReaderLook.zoneBottom
+    }
+
+    fun setAction(action: ReaderZoneAction) {
+        when (this) {
+            LEFT -> ReaderLook.zoneLeft = action
+            RIGHT -> ReaderLook.zoneRight = action
+            TOP -> ReaderLook.zoneTop = action
+            BOTTOM -> ReaderLook.zoneBottom = action
+        }
+    }
+
+    fun depth(): Float = when (this) {
+        LEFT -> ReaderLook.zoneLeftDepth
+        RIGHT -> ReaderLook.zoneRightDepth
+        TOP -> ReaderLook.zoneTopDepth
+        BOTTOM -> ReaderLook.zoneBottomDepth
+    }
+
+    fun setDepth(value: Float) {
+        val safe = value.coerceIn(DEPTH_MIN, DEPTH_MAX)
+        when (this) {
+            LEFT -> ReaderLook.zoneLeftDepth = safe
+            RIGHT -> ReaderLook.zoneRightDepth = safe
+            TOP -> ReaderLook.zoneTopDepth = safe
+            BOTTOM -> ReaderLook.zoneBottomDepth = safe
+        }
+    }
+
+    /** A side reaches across; a band reaches down. */
+    val across: Boolean get() = this == LEFT || this == RIGHT
+
+    /** Measured from the left or the top, rather than from the right or the foot. */
+    val fromStart: Boolean get() = this == LEFT || this == TOP
+
+    companion object {
+        /** A side's share of the width, and a band's share of the height. */
+        const val DEFAULT_SIDE = 0.16f
+        const val DEFAULT_BAND = 0.14f
+
+        /** How shallow and how deep a zone may be made, as a share of the surface. */
+        const val DEPTH_MIN = 0.06f
+        const val DEPTH_MAX = 0.42f
+
+        /** What an edge does before the member has said otherwise. */
+        fun defaultAction(edge: ReaderZoneEdge): ReaderZoneAction = when (edge) {
+            LEFT -> ReaderZoneAction.BACK
+            RIGHT -> ReaderZoneAction.FORWARD
+            TOP -> ReaderZoneAction.SCROLL_BACK
+            BOTTOM -> ReaderZoneAction.FORWARD
+        }
+
+        /** How deep an edge is before the member has said otherwise. */
+        fun defaultDepth(edge: ReaderZoneEdge): Float =
+            if (edge.across) DEFAULT_SIDE else DEFAULT_BAND
+    }
+}
+
+/**
+ * v422/v424 — WHERE A TAP LANDED, when the reader's tap zones are on.
+ *
+ * The SIDES come first and stand the whole height of the surface, so a tap on the
+ * side of the screen always answers; the head and the foot are the two bands left
+ * between them. Every answer and every depth is the member's own (see
+ * [ReaderLook]); the point and the size are both in the SURFACE's coordinates,
+ * which is why a magnified sheet translates the taps it answers (v424 — see
+ * [PdfScrollReader]).
+ */
+private fun readerZoneActionAt(at: Offset, size: IntSize): ReaderZoneAction {
+    if (size.width <= 0 || size.height <= 0) return ReaderZoneAction.OFF
+    val left = size.width * ReaderLook.zoneLeftDepth
+    val right = size.width * (1f - ReaderLook.zoneRightDepth)
+    val top = size.height * ReaderLook.zoneTopDepth
+    val bottom = size.height * (1f - ReaderLook.zoneBottomDepth)
     return when {
-        left && (head || foot) -> -1
-        right && (head || foot) -> 1
-        head -> -1
-        foot -> 1
-        else -> 0
+        at.x <= left -> ReaderLook.zoneLeft
+        at.x >= right -> ReaderLook.zoneRight
+        at.y <= top -> ReaderLook.zoneTop
+        at.y >= bottom -> ReaderLook.zoneBottom
+        else -> ReaderZoneAction.OFF
+    }
+}
+
+/**
+ * v424 — THE TAP ZONES, AS A PLACE THE MEMBER CAN PUT THEM.
+ *
+ * The switch in the reader's foot turns the zones on and off; a HOLD on it opens
+ * this, which is the same page with the zones drawn on it: every edge is a wash
+ * with its own line, every line has a handle to drag (that is the edge's depth),
+ * the chosen edge wears the stronger wash, and the panel at the foot says what
+ * its tap asks for.
+ *
+ * An edge is placed by looking at the page it governs — which is why nothing
+ * here is a row in another screen (member: "let user adjust the positon or area
+ * by tap an holding the button").
+ */
+@Composable
+private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
+    val accent = palette.accent
+    val ink = palette.ink
+    var chosen by remember { mutableStateOf(ReaderZoneEdge.LEFT) }
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            // The page underneath must not answer while the zones are being
+            // placed: one tap here is one edit, never a page turn.
+            .pointerInput(Unit) { detectTapGestures { } }
+    ) {
+        val widthPx = constraints.maxWidth.toFloat()
+        val heightPx = constraints.maxHeight.toFloat()
+        val boxSize = IntSize(constraints.maxWidth, constraints.maxHeight)
+
+        // ── THE ZONES, DRAWN WHERE THEY ARE ─────────────────────────
+        Canvas(Modifier.fillMaxSize()) {
+            if (widthPx <= 0f || heightPx <= 0f) return@Canvas
+            val left = widthPx * ReaderLook.zoneLeftDepth
+            val right = widthPx * (1f - ReaderLook.zoneRightDepth)
+            val top = heightPx * ReaderLook.zoneTopDepth
+            val bottom = heightPx * (1f - ReaderLook.zoneBottomDepth)
+            val hair = 1.dp.toPx()
+
+            fun band(from: Offset, to: Offset, edge: ReaderZoneEdge) {
+                drawRect(
+                    color = accent.copy(alpha = if (edge == chosen) 0.22f else 0.10f),
+                    topLeft = from,
+                    size = Size(
+                        (to.x - from.x).coerceAtLeast(0f),
+                        (to.y - from.y).coerceAtLeast(0f)
+                    )
+                )
+            }
+
+            fun rule(edge: ReaderZoneEdge, from: Offset, to: Offset) {
+                drawLine(
+                    color = accent.copy(alpha = if (edge == chosen) 0.85f else 0.45f),
+                    start = from,
+                    end = to,
+                    strokeWidth = hair
+                )
+            }
+
+            band(Offset.Zero, Offset(left, heightPx), ReaderZoneEdge.LEFT)
+            band(Offset(right, 0f), Offset(widthPx, heightPx), ReaderZoneEdge.RIGHT)
+            band(Offset(left, 0f), Offset(right, top), ReaderZoneEdge.TOP)
+            band(Offset(left, bottom), Offset(right, heightPx), ReaderZoneEdge.BOTTOM)
+            rule(ReaderZoneEdge.LEFT, Offset(left, 0f), Offset(left, heightPx))
+            rule(ReaderZoneEdge.RIGHT, Offset(right, 0f), Offset(right, heightPx))
+            rule(ReaderZoneEdge.TOP, Offset(left, top), Offset(right, top))
+            rule(ReaderZoneEdge.BOTTOM, Offset(left, bottom), Offset(right, bottom))
+        }
+
+        // ── AND A HANDLE PER EDGE, WHICH IS WHERE ITS DEPTH IS SET ──
+        ReaderZoneEdge.entries.forEach { edge ->
+            ReaderZoneHandle(
+                edge = edge,
+                box = boxSize,
+                selected = edge == chosen,
+                accent = accent,
+                onSelect = { chosen = edge }
+            )
+        }
+
+        // ── THE PANEL: WHAT THE CHOSEN EDGE ASKS FOR, AND HOW DEEP ──
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = palette.paper.copy(alpha = 0.98f),
+            shadowElevation = 10.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Tap zones",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontFamily = FrauncesFontFamily,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = ink
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Surface(
+                        onClick = {
+                            ReaderZoneEdge.entries.forEach { edge ->
+                                edge.setAction(ReaderZoneEdge.defaultAction(edge))
+                                edge.setDepth(ReaderZoneEdge.defaultDepth(edge))
+                            }
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = accent.copy(alpha = 0.12f)
+                    ) {
+                        Text(
+                            "Reset",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = accent,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Surface(
+                        onClick = onDone,
+                        shape = RoundedCornerShape(50),
+                        color = accent.copy(alpha = 0.16f)
+                    ) {
+                        Text(
+                            "Done",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = accent,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 7.dp)
+                        )
+                    }
+                }
+                Text(
+                    if (ReaderLook.tapZones) "Drop the lines where your thumb reaches."
+                    else "The zones are off — turn them on with the switch in the reader's foot.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ink.copy(alpha = 0.7f)
+                )
+                // WHICH EDGE, then WHAT IT DOES.
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    ReaderZoneEdge.entries.forEach { edge ->
+                        ZoneChip(
+                            label = edge.label,
+                            live = edge == chosen,
+                            accent = accent,
+                            ink = ink,
+                            onClick = { chosen = edge }
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    ReaderZoneAction.entries.forEach { action ->
+                        ZoneChip(
+                            label = action.label,
+                            live = action == chosen.action(),
+                            accent = accent,
+                            ink = ink,
+                            onClick = { chosen.setAction(action) }
+                        )
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Depth",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = ink.copy(alpha = 0.75f)
+                    )
+                    Slider(
+                        value = chosen.depth(),
+                        onValueChange = { chosen.setDepth(it) },
+                        valueRange = ReaderZoneEdge.DEPTH_MIN..ReaderZoneEdge.DEPTH_MAX,
+                        colors = SliderDefaults.colors(
+                            thumbColor = accent,
+                            activeTrackColor = accent
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 12.dp)
+                    )
+                    Text(
+                        "${(chosen.depth() * 100f).roundToInt()}%",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontFeatureSettings = "tnum"
+                        ),
+                        color = ink.copy(alpha = 0.75f)
+                    )
+                }
+                Text(
+                    chosen.action().hint,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * v424 — ONE EDGE'S HANDLE: the line that edge stands on, and a grip to drag it.
+ *
+ * The depth is read and written through the edge itself rather than captured, so
+ * a drag can never compute against a value the composition has already replaced.
+ */
+@Composable
+private fun ReaderZoneHandle(
+    edge: ReaderZoneEdge,
+    box: IntSize,
+    selected: Boolean,
+    accent: Color,
+    onSelect: () -> Unit
+) {
+    if (box.width <= 0 || box.height <= 0) return
+    val density = LocalDensity.current
+    val across = edge.across
+    val longPx = with(density) { 44.dp.toPx() }
+    val thickPx = with(density) { 22.dp.toPx() }
+    val handleW = if (across) thickPx else longPx
+    val handleH = if (across) longPx else thickPx
+    val span = if (across) box.width.toFloat() else box.height.toFloat()
+    val x = if (across) {
+        (if (edge.fromStart) edge.depth() else 1f - edge.depth()) * box.width
+    } else {
+        box.width / 2f
+    }
+    val y = if (across) {
+        box.height / 2f
+    } else {
+        (if (edge.fromStart) edge.depth() else 1f - edge.depth()) * box.height
+    }
+    Box(
+        modifier = Modifier
+            .offset { IntOffset((x - handleW / 2f).roundToInt(), (y - handleH / 2f).roundToInt()) }
+            .size(
+                width = with(density) { handleW.toDp() },
+                height = with(density) { handleH.toDp() }
+            )
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) accent else accent.copy(alpha = 0.40f))
+            .clickable(onClick = onSelect)
+            .pointerInput(edge, box) {
+                detectDragGestures { change, drag ->
+                    change.consume()
+                    val travel = if (across) drag.x else drag.y
+                    val sign = if (edge.fromStart) 1f else -1f
+                    if (span > 0f) edge.setDepth(edge.depth() + sign * travel / span)
+                }
+            }
+    )
+}
+
+/** One choice in the zone editor's panel, in the app's own chip language. */
+@Composable
+private fun ZoneChip(
+    label: String,
+    live: Boolean,
+    accent: Color,
+    ink: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (live) accent.copy(alpha = 0.18f) else Color.Transparent
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = if (live) FontWeight.SemiBold else FontWeight.Normal
+            ),
+            color = if (live) accent else ink.copy(alpha = 0.7f),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+        )
     }
 }
 
@@ -5216,6 +5744,7 @@ private fun readerDrawnPage(box: IntSize, aspect: Float): Size {
 private fun readerZoomDocument(
     zoom: Float,
     drag: Offset,
+    focus: Offset,
     down: ScrollableState,
     across: ScrollableState
 ): Offset {
@@ -5225,6 +5754,27 @@ private fun readerZoomDocument(
     val owns = ReaderLook.pdfZoomPage == -1
     val was = if (owns) ReaderLook.pdfZoom else 1f
     val next = (was * zoom).coerceIn(1f, 4f)
+    // ── v424 — THE SHEET GROWS ABOUT THE FINGERS, NOT ABOUT ITS CORNER ──
+    //
+    // The magnification IS the layout (see above), so a sheet grows from its own
+    // top-left and the place the member pinched slides away from them as it
+    // grows — which is exactly the report this fixes (member: "its inaccurate
+    // zoom, it zooming from the corner, not zooming where i am zooming").
+    //
+    // The correction needs no measurement, only one fact: the sheet's size is
+    // PROPORTIONAL to the zoom, so the point under the fingers sits at
+    // `focus * z` from the sheet's own start. Holding it still therefore means
+    // scrolling the document by `focus * (z' - z)` in each direction — and since
+    // a pinch arrives as many small steps, the anchor holds for the whole
+    // gesture rather than sliding a little on every frame.
+    //
+    // `focus` is in the SHEET's coordinates (the gesture is armed on the sheet),
+    // and the two scrolls are the document's own, so no viewport is involved.
+    val ratio = if (was > 0f) next / was else 1f
+    if (ratio != 1f) {
+        down.dispatchRawDelta(focus.y * (ratio - 1f))
+        across.dispatchRawDelta(focus.x * (ratio - 1f))
+    }
     // AT REST, AND ONLY AT REST — the same rule the page's own zoom learned in
     // v406: the pan is thrown away only when there is no magnification left to
     // pan, so an unzoom cannot snap a still-magnified page anywhere.
@@ -5243,10 +5793,26 @@ private fun readerZoomDocument(
  * v422 — THE DOCUMENT'S ZOOM AT ONE POINT: a double tap in the scrolling flow
  * takes the file in to read a line closely, and gives it back whole — the one
  * way to magnify that needs no second finger (see [readerZoomDocument]).
+ *
+ * v424 — AND IT LANDS WHERE IT WAS TAPPED, by the same arithmetic the pinch
+ * uses: a double tap that magnified from the sheet's corner was the same
+ * complaint in its other form.
  */
-private fun readerDoubleTapDocument() {
-    val out = ReaderLook.pdfZoomPage == -1 && ReaderLook.pdfZoom > 1.02f
-    ReaderLook.pdfZoom = if (out) 1f else 2.2f
+private fun readerDoubleTapDocument(
+    at: Offset,
+    down: ScrollableState,
+    across: ScrollableState
+) {
+    val owns = ReaderLook.pdfZoomPage == -1
+    val out = owns && ReaderLook.pdfZoom > 1.02f
+    val was = if (owns) ReaderLook.pdfZoom else 1f
+    val next = if (out) 1f else 2.2f
+    val ratio = if (was > 0f) next / was else 1f
+    if (ratio != 1f) {
+        down.dispatchRawDelta(at.y * (ratio - 1f))
+        across.dispatchRawDelta(at.x * (ratio - 1f))
+    }
+    ReaderLook.pdfZoom = next
     ReaderLook.pdfZoomPage = -1
     ReaderLook.pdfPanX = 0f
     ReaderLook.pdfPanY = 0f

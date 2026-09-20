@@ -5,4 +5,6 @@
     <cache-path name="apk_downloads" path="downloads/" />
     <!-- ISBN scanner: temporary camera captures for barcode detection. -->
     <cache-path name="isbn_camera" path="isbn/" />
+    <!-- v424 — journal exports (PDF / text / Markdown) handed to the share sheet. -->
+    <cache-path name="personal_exports" path="exports/" />
 </paths>

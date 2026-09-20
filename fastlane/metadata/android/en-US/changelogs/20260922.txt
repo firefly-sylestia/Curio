@@ -1,5 +1,15 @@
 ADD:
-- Writing: two more looks for a voice note — Ribbon (the voice and its own mirror as one soft shape) and Beads (a dot per moment, each as big as the sound it stands for) — beside the four that were already there.
+- Reading: the page's tap zones are yours to place — a tap on the SIDE of the screen turns the page now (both side edges stand the whole height, the head scrolls back and the foot goes on), and holding the Crop switch in the reader's foot opens the zones themselves: drag each edge's line where your thumb reaches, say what that edge does (back, on, a screenful either way, or nothing) and set how deep it stands.
+- Writing: a page's tools can copy the whole page — the new Copy tool selects the page and raises Android's own copy / select all bar right above the tools.
+- Writing: a page exports as a file — PDF drawn on the page's own paper, ink and pens (its photos, voice notes and checkboxes with it), plus plain text, or Markdown that keeps the bold, italics and headings.
+- Writing: a seventh voice note look — Pill, the drawn pulse with its play mark in a wide pill button.
+
+FIX:
+- Writing: a voice note's quiet passages read quiet — every wave took its height almost straight from the sound, so a whisper drew like a shout; the reach is the square of the level now and a silence is a line.
+- Writing: a voice note's progress bead rides the wave's own line — it was snapped to the nearest peak, so between two peaks it drifted off the ink; it is drawn on the curve itself now.
+- Writing: the Ribbon look is a single drawn stroke instead of a filled mirror shape, and Beads are strung evenly on the centre line with one clear size for the sound.
+- Writing: the Minimal look's play mark is measured properly — a tall wedge sized for the whole button read off-balance inside its own ring.
+- Reading: a pinch in the scrolling PDF grows the file about your fingers — it used to magnify from the sheet's own corner, so the place you pinched slid away from you; a double tap lands where you tapped as well.
 
 FIX:
 - Appearance: a named theme's night accent is a jewel again instead of a highlight — Jade, Orchid, Ocean, Sand and Ember painted their icons, headings and small accents at 0.78 of lightness on a deep page, which cleared the contrast bar and still read as neon; they sit at 0.69 with the chroma eased, and the night's second and third fills are muted with them.

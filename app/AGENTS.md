@@ -9618,6 +9618,90 @@ rather than for the ink it has to carry.
   `v1.1.1 · build 20260922` over a 1.3.0 build; a `WhatsNewRelease.versionName`
   must match `versionName` in `app/build.gradle.kts`.
 
+## v424 — the reader's zones, the voice's ink, and a page that can leave
+
+- **THE READER'S TAP ZONES ARE THE MEMBER'S, AND THEY ARE THE SIDES.** `tapZones`
+  gates them; the places live in `ReaderLook` too (`zoneLeft` / `zoneRight` /
+  `zoneTop` / `zoneBottom` as a `ReaderZoneAction`, and `zoneLeftDepth` and
+  friends as a share of the surface). `readerZoneActionAt(at, size)` answers in
+  that order: the SIDES first, standing the whole HEIGHT (a tap on the side of
+  the SCREEN is what a reader reaches for — the v422 corners-only version left a
+  mid-height edge falling through to the page), then the head and the foot
+  between them. `ReaderZoneAction` is BACK / FORWARD / SCROLL_BACK /
+  SCROLL_FORWARD / OFF: TURN and SCROLL are separate on purpose — a scrolling
+  flow has both a column to move (`scrollPage`, a screenful) and pages to turn
+  (`stepPage`), and which one an edge asks for is the member's choice. Defaults:
+  left = BACK, right = FORWARD, top = SCROLL_BACK, bottom = FORWARD.
+- **THE TAP IS SAID IN THE SURFACE'S OWN COORDINATES.** The zones belong to the
+  screen, but a tap inside the scrolling PDF arrives in a SHEET's frame — so
+  `PdfScrollReader` takes `viewport` + `surfaceOrigin` (captured on the reader's
+  own Box) and each sheet translates its tap (`at + where - surfaceOrigin`); the
+  column's own handler takes off the horizontal pan instead. **Never test a zone
+  against a node's local point or size** — a magnified sheet is wider than the
+  screen and its frame is the document's, not the phone's.
+- **AND A HOLD ON THE SWITCH PLACES THEM.** `ReaderChrome`'s Crop button is a
+  `clickable(onClick, onLongClick)`; the hold raises `ReaderLook.zonesEditing`,
+  which composes `ReaderTapZoneEditor` over the page (the chrome stands down
+  while it is up, and the overlay takes every tap so placing a line can never
+  turn a page). The editor draws each edge where it is, gives every boundary a
+  draggable `ReaderZoneHandle` (that IS the depth), lets the chosen edge wear the
+  stronger wash, and keeps the four edges' actions, a depth slider and a Reset in
+  its own panel. A zone is placed by looking at the page it governs — never move
+  it into Settings.
+- **THE SCROLLING PDF'S PINCH GROWS THE FILE ABOUT THE FINGERS.**
+  `readerZoomDocument(zoom, drag, focus, down, across)` corrects by arithmetic
+  that needs no measurement: a sheet's size is proportional to the zoom, so the
+  point under the fingers sits at `focus * z` from the sheet's start and the
+  document is scrolled by `focus * (z' - z)` in both directions, per pinch step.
+  `readerDoubleTapDocument(at, down, across)` is the same rule at one point. The
+  v422 layout-is-the-zoom model stands; the anchor is what makes it feel like a
+  zoom rather than a corner grow.
+- **A VOICE NOTE'S INK FOLLOWS THE VOICE (`voiceReach`).** Every wave used to
+  read its samples nearly straight (a share of the band with an eighth-grade
+  floor), so a quiet passage drew like a loud one; the reach is now the SQUARE of
+  the level over `VOICE_FLOOR` (0.08). Deepen the curve rather than adding a
+  second dial — the pulse, the bars, the bubble, the ribbon and the beads all
+  read the same function.
+- **THE PROGRESS BEAD SITS ON THE CURVE (`pulsePointAt`).** The pulse's segments
+  put their control points at the midpoint between two vertices, which makes a
+  segment's x LINEAR in its parameter and its y the two vertices blended by
+  `(1-t)²(1+2t)` / `t²(3-2t)`; evaluating that is how the head rides the ink.
+  Never snap the head to a vertex again — that is the "dot does not follow the
+  wave" report.
+- **THE SHAPE LOOKS (v424).** `RIBBON` is ONE round-capped STROKE that runs out
+  along the voice and back down its own mirror (it was a closed, filled mirror
+  shape, which read as a blob). `BEADS` are EVEN — one slot per bead, measured
+  from its own centre, so nothing shifts when a passage gets loud, with the size
+  carrying the sound on one scale over a drawn wire; the heard run cuts where the
+  fraction says, which is what makes progress and beads agree.
+- **`PILL` IS A LOOK, NOT A SHAPE EVERY LOOK NEEDS.** `PersonalVoiceStyle` has
+  seven entries now, `drawsPulse` (HAND + PILL) picks the pulse drawing, and the
+  play treatment is chosen per look (`VoicePillControl` for PILL). A new look is
+  a new KEY plus a drawing plus a control — an existing key is never renamed.
+  `VoiceDrawnControl` measures its mark (height from the room it has, a wider
+  than tall triangle, a hair of optical lift, the stroke taken out of the size),
+  which is what "the minimal play button isnt accurate" was.
+- **A PAGE CAN COPY ITSELF, THROUGH ANDROID'S OWN BAR.** The dock's Copy tool
+  only asks: `PersonalEditorState.requestPageTextMenu()` sets a flag, and
+  `PersonalCanvas` answers it — `selectPage()`, then
+  `pageToolbar.showMenu(rect = the canvas's own foot, …)` with Copy and Select
+  all. The canvas publishes its bounds in root coordinates (`pageBounds`) because
+  the platform's floating bar is anchored there, which is what puts the bar ABOVE
+  the tools that opened it. Cut and Paste stay with the field's own bar — they
+  need a caret, and a page-wide selection has none.
+- **AND A PAGE CAN LEAVE (`features/personal/PersonalExport.kt`).** Always-on,
+  chosen from the dock's export menu: **PDF** drawn with Android's own
+  `PdfDocument` (A4 at 150dpi, the journal's paper/ink/accent, `StaticLayout`
+  paragraphs split across pages by line, marker pens as leading-margin spans,
+  photos with captions, voice notes with their wave and clock, a foot that names
+  and numbers the page) so the words are REAL TEXT in the file; **Text**; and
+  **Markdown** with the styling kept. Files land in `cacheDir/exports/` (the
+  `personal_exports` path in `res/xml/file_paths.xml` is what makes them
+  shareable) and leave through Android's sheet. The colours are resolved in the
+  composition (`rememberPersonalExporter`) and the write happens off the UI
+  thread. A new format is a new `PersonalExportFormat` entry plus its writer —
+  never a second exporter.
+
 ## Child DOX Index
 
 - [`CURIO_DATA_PLAN.md`](CURIO_DATA_PLAN.md) — Canonical **data layer** spec. Owns: category taxonomy expansion (6 → 10), `CurioTopic` + `ExploreAction` schema, JSON-on-disk canonical format, Room DB seed flow, image strategy (URL + Coil, no bundling), authoring pipeline (LLM-draft + human-review + smoke test), per-category rollout cadence (one category per PR, Music first). Read this BEFORE adding any topic data, category entry, or capture-format prompt.

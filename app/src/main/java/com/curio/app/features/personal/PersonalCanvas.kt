@@ -31,8 +31,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.material3.Surface
@@ -1640,6 +1642,30 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     fun clearPageSelection() {
         pageSelected = false
+        pageTextMenuRequest = false
+    }
+
+    /**
+     * v424 — THE DOCK'S COPY TOOL, AS A REQUEST THE CANVAS ANSWERS.
+     *
+     * The dock and the page's own floating bar are two different pieces of the
+     * tree (the bar is Android's, installed into `LocalTextToolbar` by the canvas
+     * and gone with it), so the tool ASKS rather than reaches: the canvas sees
+     * the request, selects the page and raises the platform's own bar above the
+     * tools. A flag rather than a callback because the request outlives the frame
+     * it was made in — the dock's button and the canvas are composed by different
+     * screens, and neither holds a reference to the other.
+     */
+    var pageTextMenuRequest by mutableStateOf(false)
+        private set
+
+    fun requestPageTextMenu() {
+        if (order.isEmpty()) return
+        pageTextMenuRequest = true
+    }
+
+    fun consumePageTextMenu() {
+        pageTextMenuRequest = false
     }
 
     /** Every row's words, top to bottom — what Copy puts on the clipboard. */
@@ -2723,9 +2749,50 @@ internal fun PersonalCanvas(
             }
         }
     }
+    // ── v424 — THE PAGE'S OWN COPY TOOL (the dock's Copy asks for this) ──
+    //
+    // It is not a clipboard write of its own: it SELECTS the page and asks
+    // Android for the one floating bar a member already knows — the bar with
+    // Copy and Select all on it — anchored at the page's own foot, so it stands
+    // ABOVE the tools that opened it instead of over the words (member: "add a
+    // full text copy option but for that it opens up the copy paste cut select
+    // all tool in the floating tool which stays above the tool when its active
+    // as floating tools"). Cut and Paste stay with the FIELD's own bar: they
+    // need a caret to act on, and a page-wide selection has none.
+    var pageBounds by remember { mutableStateOf(Rect.Zero) }
+    LaunchedEffect(state.pageTextMenuRequest) {
+        if (!state.pageTextMenuRequest) return@LaunchedEffect
+        state.selectPage()
+        state.consumePageTextMenu()
+        pageToolbar.showMenu(
+            rect = Rect(pageBounds.left, pageBounds.bottom, pageBounds.right, pageBounds.bottom + 1f),
+            onCopyRequested = {
+                val whole = state.pageText()
+                if (whole.isNotBlank()) clipboard.setText(AnnotatedString(whole))
+            },
+            onPasteRequested = null,
+            onCutRequested = null,
+            onSelectAllRequested = { state.selectPage() }
+        )
+    }
+
     CompositionLocalProvider(LocalTextToolbar provides pageToolbar) {
     Column(
-        modifier = modifier.clickable(enabled = enabled) { state.focusLastLine() },
+        modifier = modifier
+            .clickable(enabled = enabled) { state.focusLastLine() }
+            // The bar above is anchored to this page's own foot, so the canvas
+            // has to know where it is — read in the layout and written only when
+            // it has actually moved.
+            .onGloballyPositioned { coords ->
+                val origin = coords.positionInRoot()
+                val next = Rect(
+                    origin.x,
+                    origin.y,
+                    origin.x + coords.size.width,
+                    origin.y + coords.size.height
+                )
+                if (next != pageBounds) pageBounds = next
+            },
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         // v389d — CONSECUTIVE PRINTS SHARE A ROW.
@@ -4687,6 +4754,11 @@ internal fun PersonalToolDock(
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
     val active = state.activeFlags()
+    // ── v424 — AND THE PAGE'S EXPORT DOOR ───────────────────────────
+    //
+    // Resolved here rather than inside the tool, because the file a page leaves
+    // as has to wear THIS page's paper, ink and pens (see [PersonalExport]).
+    val exporter = rememberPersonalExporter(state)
     // The dock wears the app's own accent (the same one Home's hero uses), not
     // a hard rose — a member on the azure/hero-lane theme sees THEIR accent.
     val accent = personalAccent()
@@ -5052,6 +5124,58 @@ internal fun PersonalToolDock(
             ) {
                 CurioIcon(CurioIcons.Image, null, size = 18.dp)
             }
+            // ── v424 — THE PAGE'S OWN TWO TOOLS ──────────────────────────
+            //
+            // COPY is the PAGE's copy, not the line's: it hands the request to
+            // the canvas, which selects the whole page and raises Android's own
+            // floating bar above these tools (see the canvas's own effect). One
+            // bar for copy and select all, in the place a member already
+            // expects to find them.
+            PersonalToolButton(
+                label = "Copy the whole page",
+                active = state.pageSelected,
+                accent = accentInk, ink = ink,
+                onClick = { state.requestPageTextMenu() }
+            ) {
+                CurioIcon(CurioIcons.ContentCopy, null, size = 18.dp)
+            }
+            // EXPORT takes the page out as a file in its own look — the PDF the
+            // member asked for, its words, or Markdown that keeps the styling
+            // (see [PersonalExport]). Three shapes behind one door, because the
+            // question "what am I exporting as" is asked once, when the file is
+            // made, and never again.
+            Box {
+                val exportMenu = remember { CurioMenuToggle() }
+                PersonalToolButton(
+                    label = "Export this page",
+                    active = exporter.busy,
+                    accent = accentInk, ink = ink,
+                    onClick = { exportMenu.buttonClick() }
+                ) {
+                    CurioIcon(CurioIcons.Download, null, size = 18.dp)
+                }
+                DropdownMenu(
+                    expanded = exportMenu.open,
+                    onDismissRequest = { exportMenu.dismissed() },
+                    properties = MenuKeepKeyboardProperties
+                ) {
+                    PersonalExportFormat.entries.forEach { format ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    format.label,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                exportMenu.close()
+                                exporter.run(format)
+                            }
+                        )
+                    }
+                }
+            }
         }
         }
         }
@@ -5075,6 +5199,19 @@ internal fun PersonalToolDock(
                 state.setBlockText(historyLine, merged)
             },
             onDismiss = { historyOpen = false }
+        )
+    }
+    // A file that could not be written says so, rather than leaving the member
+    // wondering whether the page went anywhere.
+    val exportFailure = exporter.failure
+    if (exportFailure != null) {
+        AlertDialog(
+            onDismissRequest = exporter.dismissFailure,
+            title = { Text("Could not export") },
+            text = { Text(exportFailure) },
+            confirmButton = {
+                TextButton(onClick = exporter.dismissFailure) { Text("OK") }
+            }
         )
     }
 }

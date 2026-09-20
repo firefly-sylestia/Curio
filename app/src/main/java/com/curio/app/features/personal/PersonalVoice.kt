@@ -754,6 +754,12 @@ internal fun PersonalVoiceBar(
                 label = if (isPlaying) "Pause the voice note" else "Play the voice note",
                 onClick = { toggle() }
             )
+            // v424 — AND THE PILL, which is the same pulse with a wider mark.
+            PersonalVoiceStyle.PILL -> VoicePillControl(
+                playing = isPlaying,
+                label = if (isPlaying) "Pause the voice note" else "Play the voice note",
+                onClick = { toggle() }
+            )
             else -> Surface(
                 onClick = { toggle() },
                 shape = CircleShape,
@@ -824,8 +830,9 @@ internal fun PersonalVoiceBar(
             Canvas(Modifier.fillMaxSize()) {
                 if (samples.isEmpty()) return@Canvas
                 // v423 — EVERY LOOK BUT THE HAND-DRAWN ONE IS A SHAPE (see
-                // [drawVoiceWave]); HAND is the pulse.
-                if (style != PersonalVoiceStyle.HAND) {
+                // [drawVoiceWave]); HAND is the pulse. v424 — and PILL draws the
+                // same pulse with a different control (see [drawsPulse]).
+                if (!style.drawsPulse) {
                     drawVoiceWave(samples, progress, ink, accent, style)
                     return@Canvas
                 }
@@ -980,14 +987,43 @@ internal enum class PersonalVoiceStyle(val key: String, val label: String, val h
     BARS("bars", "Bars", "Rounded columns on a centre line, with a filled disc"),
     BUBBLE("bubble", "Bubble", "A voice message — mirrored bars in a tinted bubble"),
     MINIMAL("minimal", "Minimal", "One thin line and a dot, with an outlined mark"),
-    RIBBON("ribbon", "Ribbon", "A smooth ribbon, mirrored under its own line"),
-    BEADS("beads", "Beads", "A dot per moment, each as big as the sound it stands for");
+    RIBBON("ribbon", "Ribbon", "A single drawn ribbon, out along the voice and back"),
+    BEADS("beads", "Beads", "A bead per moment, strung evenly on the centre line"),
+    PILL("pill", "Pill", "The drawn pulse, with the play mark in a pill");
+
+    /**
+     * v424 — WHICH LOOKS WEAR THE DRAWN PULSE.
+     *
+     * [PILL] is a CONTROL's look, not a wave's: it pairs the pulse with a pill
+     * play mark, so the two looks that draw the pulse say so here instead of the
+     * drawing having to know about a button (see [drawVoicePulse]).
+     */
+    val drawsPulse: Boolean get() = this == HAND || this == PILL
 
     companion object {
         /** The stored key, or [HAND] — the look every earlier note already had. */
         fun fromKey(key: String?): PersonalVoiceStyle =
             entries.firstOrNull { it.key == key } ?: HAND
     }
+}
+
+/**
+ * v424 — HOW FAR THE INK REACHES FOR A LEVEL, and the whole difference between a
+ * whisper and a shout.
+ *
+ * Every wave used to read its samples nearly STRAIGHT (a share of the band, with
+ * a floor of about an eighth), so a quiet passage and a loud one looked much the
+ * same — which is what "when there is not much sound in wave the wave isnt subtle
+ * so its not clear differnt" is (member). The reach is the SQUARE of the level
+ * now: a whisper is a tenth of the room it used to take, a shout is all of it, and
+ * [VOICE_FLOOR] keeps a silence reading as a line rather than as a gap in the
+ * drawing.
+ */
+private const val VOICE_FLOOR = 0.08f
+
+private fun voiceReach(level: Float, bandHalf: Float): Float {
+    val loud = level.coerceIn(0f, 1f)
+    return bandHalf * (VOICE_FLOOR + (1f - VOICE_FLOOR) * loud * loud)
 }
 
 /**
@@ -1037,8 +1073,8 @@ private fun DrawScope.drawVoicePulse(
     // How far the voice reaches from the centre for a level. The floor keeps a
     // quiet passage reading as a voice rather than as a break in the line, and
     // the lift is what the band's own half-width can hold.
-    fun reach(level: Float): Float =
-        (level.coerceIn(0f, 1f) * 0.86f + 0.14f) * bandHalf
+    // v424 — and the reach is the voice's own scale (see [voiceReach]).
+    fun reach(level: Float): Float = voiceReach(level, bandHalf)
 
     val buckets = 18
     val perBucket = (count + buckets - 1) / buckets
@@ -1102,11 +1138,14 @@ private fun DrawScope.drawVoicePulse(
         // knob at all, which is what made the live meter look inaccurate
         // (member: "the floating recorder waves feels inaccurate with that
         // straight knob").
+        //
+        // v424 — AND IT SITS ON THE INK, NOT ON A VERTEX. The head used to be
+        // snapped to the nearest point of the drawing, so between two peaks it
+        // drifted off the curve it belonged to (member: "the progress small dot
+        // doesnt properly follow the waves"); [pulsePointAt] evaluates the
+        // segment instead (see [pulsePointAt]).
         if (progress < 0.995f) {
-            val bead = points.minByOrNull { point ->
-                val away = point.x - playedUpTo
-                away * away
-            }
+            val bead = pulsePointAt(points, playedUpTo)
             if (bead != null) {
                 val radius = (strokeWidth * 0.62f).coerceAtLeast(2f)
                 drawCircle(
@@ -1160,7 +1199,8 @@ private fun DrawScope.drawVoiceWave(
             val gap = (slot * 0.30f).coerceAtLeast(0.6f)
             val barW = (slot - gap).coerceAtLeast(1.2f)
             steps.forEachIndexed { index, level ->
-                val reach = level.coerceIn(0f, 1f) * bandHalf * 0.88f + bandHalf * 0.12f
+                // v424 — the voice's own scale (see [voiceReach]).
+                val reach = voiceReach(level, bandHalf)
                 val h = (reach * 2f).coerceAtLeast(2.4f)
                 val left = index * slot + gap / 2f
                 drawRoundRect(
@@ -1196,41 +1236,82 @@ private fun DrawScope.drawVoiceWave(
                 )
             }
         }
+        // ── v424 — THE RIBBON IS A STROKE, NOT A FILLED MIRROR ──────────
+        //
+        // It used to be a CLOSED SHAPE — the voice's envelope, its own mirror and
+        // a solid fill between them — which reads as a blob with a wave on top
+        // rather than as a ribbon, and the member took it back ("the ribbon style
+        // isnt greaat"). It is now ONE round-capped stroke that runs out along the
+        // top of the voice and back down its own mirror, so the note reads as
+        // DRAWN; the two halves are the same vertices, so the ribbon can never be
+        // lopsided, and the heard run is the same stroke cut at the head.
         PersonalVoiceStyle.RIBBON -> {
-            val steps = bucketLevels(samples, 34)
+            val steps = bucketLevels(samples, 30)
             val span = (steps.size - 1).coerceAtLeast(1).toFloat()
-            val tops = FloatArray(steps.size)
+            val strokes = (size.height * 0.075f).coerceAtLeast(1.4f)
+            val inset = strokes / 2f
+            val half = (bandHalf - inset).coerceAtLeast(1f)
+            val outline = ArrayList<Offset>(steps.size * 2)
             for (index in steps.indices) {
-                val reach = (steps[index].coerceIn(0f, 1f) * 0.86f + 0.14f) * bandHalf
-                tops[index] = bandMid - reach
+                val x = inset + (size.width - inset * 2f) * index / span
+                outline.add(Offset(x, bandMid - voiceReach(steps[index], half)))
             }
-            val path = Path()
-            path.moveTo(0f, tops[0])
-            for (index in 1 until steps.size) {
-                val x = size.width * index / span
-                val previous = size.width * (index - 1) / span
-                val midX = (previous + x) / 2f
-                path.cubicTo(midX, tops[index - 1], midX, tops[index], x, tops[index])
+            for (index in steps.indices.reversed()) {
+                val x = inset + (size.width - inset * 2f) * index / span
+                outline.add(Offset(x, bandMid + voiceReach(steps[index], half)))
             }
-            for (index in steps.size - 1 downTo 0) {
-                path.lineTo(size.width * index / span, bandMid + (bandMid - tops[index]))
+            val ribbon = Path()
+            outline.firstOrNull()?.let { first -> ribbon.moveTo(first.x, first.y) }
+            for (index in 1 until outline.size) {
+                val previous = outline[index - 1]
+                val point = outline[index]
+                val midX = (previous.x + point.x) / 2f
+                ribbon.cubicTo(midX, previous.y, midX, point.y, point.x, point.y)
             }
-            path.close()
-            drawPath(path, ink.copy(alpha = 0.26f))
+            ribbon.close()
+            val ribbonStroke = Stroke(
+                width = strokes,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+            drawPath(ribbon, ink.copy(alpha = 0.30f), style = ribbonStroke)
             if (progress > 0f) {
-                clipRect(right = played) { drawPath(path, accent.copy(alpha = 0.90f)) }
+                clipRect(right = played) {
+                    drawPath(ribbon, accent.copy(alpha = 0.95f), style = ribbonStroke)
+                }
             }
         }
+        // ── v424 — AND THE BEADS ARE EVEN ───────────────────────────────
+        //
+        // A bead used to carry its own radius out of the step, so a loud passage
+        // pushed its neighbours along and the strip's spacing said as much as its
+        // size did — and the heard run was cut at a plain fraction of the width
+        // while the beads were laid out inside a radius-shaped inset, which is
+        // exactly why the fill and the drawing disagreed (member: "beats design is
+        // bad too" · "for waves the progress small dot doesnt properly follow the
+        // waves"). Every bead now takes the SAME slot, measured from its own
+        // centre, so nothing moves when a passage gets loud — a bead's size alone
+        // carries the sound, on one clear scale — and the cut falls where the
+        // fraction says. The wire they are strung on is drawn, so a quiet bead
+        // still reads as a bead.
         PersonalVoiceStyle.BEADS -> {
-            val steps = bucketLevels(samples, 34)
-            val span = (steps.size - 1).coerceAtLeast(1).toFloat()
-            val maxRadius = (bandHalf * 0.92f).coerceAtLeast(1.4f)
-            val minRadius = (maxRadius * 0.22f).coerceAtLeast(0.9f)
+            val count = 26
+            val steps = bucketLevels(samples, count)
+            val slot = size.width / count
+            val room = (bandHalf * 0.92f).coerceAtLeast(1.4f)
+            val minRadius = (room * 0.16f).coerceAtLeast(0.9f)
+            drawLine(
+                color = ink.copy(alpha = 0.18f),
+                start = Offset(0f, bandMid),
+                end = Offset(size.width, bandMid),
+                strokeWidth = 1.dp.toPx()
+            )
             steps.forEachIndexed { index, level ->
-                val radius = minRadius + (maxRadius - minRadius) * level.coerceIn(0f, 1f)
-                val x = radius + (size.width - radius * 2f) * index / span
+                val loud = level.coerceIn(0f, 1f)
+                val radius = minRadius + (room - minRadius) * loud * loud
+                val x = slot * (index + 0.5f)
                 drawCircle(
-                    color = if (progress > 0f && x <= played) accent else ink.copy(alpha = 0.40f),
+                    color = if (progress > 0f && x <= played) accent else ink.copy(alpha = 0.42f),
                     radius = radius,
                     center = Offset(x, bandMid)
                 )
@@ -1242,7 +1323,8 @@ private fun DrawScope.drawVoiceWave(
             val slot = size.width / columns
             val barW = (slot * 0.52f).coerceAtLeast(1.6f)
             steps.forEachIndexed { index, level ->
-                val reach = (level.coerceIn(0f, 1f) * 0.86f + 0.14f) * bandHalf
+                // v424 — the voice's own scale (see [voiceReach]).
+                val reach = voiceReach(level, bandHalf)
                 val h = (reach * 2f).coerceAtLeast(3f)
                 val left = index * slot + (slot - barW) / 2f
                 drawRoundRect(
@@ -1256,6 +1338,39 @@ private fun DrawScope.drawVoiceWave(
         }
         else -> Unit
     }
+}
+
+/**
+ * v424 — THE POINT OF THE DRAWN PULSE AT [x].
+ *
+ * The pulse is a chain of CUBIC segments whose control points sit at the midpoint
+ * between two vertices, and that one fact gives both halves of the answer: the x
+ * along a segment is LINEAR in its parameter (so the parameter for an x is just
+ * how far across that segment the x is), and its y is the two vertices blended by
+ * `(1-t)²(1+2t)` and `t²(3-2t)`.
+ *
+ * Evaluating that is what puts the head bead ON the ink. The old head was snapped
+ * to the nearest VERTEX, so between two peaks the dot sat on the straight line
+ * between them while the ink curved away — the member's "the progress small dot
+ * doesnt properly follow the waves".
+ */
+private fun pulsePointAt(points: List<Offset>, x: Float): Offset? {
+    if (points.isEmpty()) return null
+    if (points.size == 1) return points.first()
+    if (x <= points.first().x) return points.first()
+    if (x >= points.last().x) return points.last()
+    for (index in 1 until points.size) {
+        val from = points[index - 1]
+        val to = points[index]
+        if (x > to.x) continue
+        val span = to.x - from.x
+        if (span <= 0f) return to
+        val t = ((x - from.x) / span).coerceIn(0f, 1f)
+        val blendFrom = (1f - t) * (1f - t) * (1f + 2f * t)
+        val blendTo = t * t * (3f - 2f * t)
+        return Offset(x, from.y * blendFrom + to.y * blendTo)
+    }
+    return points.last()
 }
 
 /**
@@ -1294,6 +1409,17 @@ private fun bucketLevels(samples: FloatArray, buckets: Int): FloatArray {
  * one. Either way the mark is a path in the WAVE'S OWN INK at the wave's own
  * weight, which is the whole point: a note drawn by hand should not have a
  * Material button parked in the middle of it.
+ *
+ * v424 — AND THE MARK IS MEASURED RATHER THAN GUESSED AT. The old one put a
+ * wedge between 28% and 72% of the box and 34% in from each side — TALLER than
+ * it was wide, and sized for the whole box rather than for the room the ring
+ * leaves — so a play mark inside a ring read as a small off-balance triangle
+ * (member: "the minimal play button isnt accurate in journal voice note"). The
+ * mark is now a real one: its height is the room it has, its width follows that
+ * (a play mark is never taller than it is wide), it carries a hair of optical
+ * lift to the right because a triangle's mass sits left of its own box, and the
+ * stroke is taken OUT of its size rather than added around it, so the mark can
+ * never look smaller than the circle drawn with it.
  */
 @Composable
 private fun VoiceDrawnControl(
@@ -1316,6 +1442,7 @@ private fun VoiceDrawnControl(
     ) {
         Canvas(Modifier.fillMaxSize()) {
             val stroke = (size.minDimension * 0.085f).coerceAtLeast(1.7f)
+            val room = size.minDimension - stroke * 2f
             if (ring != null) {
                 drawCircle(
                     color = ring,
@@ -1323,19 +1450,37 @@ private fun VoiceDrawnControl(
                     style = Stroke(stroke)
                 )
             }
-            val insetX = if (ring != null) 0.34f else 0.28f
-            val top = size.height * 0.28f
-            val bottom = size.height * 0.72f
+            // A play mark is WIDER than it is tall, and inside a ring it is the
+            // ring's own inner room that decides it.
+            val markHeight = room * if (ring != null) 0.52f else 0.60f
+            val markWidth = markHeight * 0.92f
+            val centreX = size.width / 2f + markWidth * 0.06f
+            val centreY = size.height / 2f
             if (playing) {
-                val left = size.width * 0.40f
-                val right = size.width * 0.60f
-                drawLine(tint, Offset(left, top), Offset(left, bottom), stroke, StrokeCap.Round)
-                drawLine(tint, Offset(right, top), Offset(right, bottom), stroke, StrokeCap.Round)
+                // Two bars with the same footprint as the mark they replace, so
+                // the control does not jump the moment it starts to sound.
+                val offset = markWidth * 0.24f
+                val top = centreY - markHeight / 2f
+                val bottom = centreY + markHeight / 2f
+                drawLine(
+                    tint,
+                    Offset(centreX - offset, top),
+                    Offset(centreX - offset, bottom),
+                    stroke,
+                    StrokeCap.Round
+                )
+                drawLine(
+                    tint,
+                    Offset(centreX + offset, top),
+                    Offset(centreX + offset, bottom),
+                    stroke,
+                    StrokeCap.Round
+                )
             } else {
                 val mark = Path().apply {
-                    moveTo(size.width * insetX, top)
-                    lineTo(size.width * (1f - insetX), (top + bottom) / 2f)
-                    lineTo(size.width * insetX, bottom)
+                    moveTo(centreX - markWidth / 2f, centreY - markHeight / 2f)
+                    lineTo(centreX + markWidth / 2f, centreY)
+                    lineTo(centreX - markWidth / 2f, centreY + markHeight / 2f)
                     close()
                 }
                 drawPath(
@@ -1344,6 +1489,42 @@ private fun VoiceDrawnControl(
                     style = Stroke(width = stroke, cap = StrokeCap.Round, join = StrokeJoin.Round)
                 )
             }
+        }
+    }
+}
+
+/**
+ * v424 — THE PLAY MARK IN A PILL.
+ *
+ * The member asked for the control as a pill as well as a disc ("for the waves
+ * add the play button as pill option too"), and the honest way to do that is a
+ * LOOK of its own rather than a shape every look has to be rewritten for: a look
+ * pairs a wave with a play treatment (see [PersonalVoiceStyle]), and this one
+ * pairs the drawn pulse with the pill — a wide, soft, filled control that reads
+ * as a button in the writing rather than as a small disc beside it.
+ */
+@Composable
+private fun VoicePillControl(
+    playing: Boolean,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = personalAccentInk(),
+        modifier = modifier
+            .size(width = 52.dp, height = 32.dp)
+            .semantics { contentDescription = label }
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CurioIcon(
+                if (playing) CurioIcons.Pause else CurioIcons.PlayArrow,
+                null,
+                tint = MaterialTheme.colorScheme.surface,
+                size = 20.dp
+            )
         }
     }
 }
@@ -1478,6 +1659,12 @@ private fun VoiceStylePreview(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             when (style) {
+                PersonalVoiceStyle.PILL -> Box(
+                    modifier = Modifier
+                        .size(width = 26.dp, height = 16.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(personalAccentInk())
+                )
                 PersonalVoiceStyle.HAND, PersonalVoiceStyle.MINIMAL -> VoiceDrawnControl(
                     playing = false,
                     tint = ink.copy(alpha = 0.80f),
@@ -1499,7 +1686,7 @@ private fun VoiceStylePreview(
             }
             Canvas(Modifier.weight(1f).height(18.dp)) {
                 if (samples.isEmpty()) return@Canvas
-                if (style == PersonalVoiceStyle.HAND) {
+                if (style.drawsPulse) {
                     drawVoicePulse(samples, 0.42f, ink, accent)
                 } else {
                     drawVoiceWave(samples, 0.42f, ink, accent, style)
