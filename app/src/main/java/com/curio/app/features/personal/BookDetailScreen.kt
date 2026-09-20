@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -68,6 +70,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
@@ -1223,6 +1226,11 @@ private fun ProgressCard(
                 ReadingGauge(
                     fraction = fraction,
                     chapterStarts = chapterPages,
+                    // v417 — THE COUNT THE CARD IS STATING (the overlay while a
+                    // stepper is moving, else the book's own), so a division is
+                    // drawn per chapter the member can see. Falls back to the
+                    // file's own list when no length has been set at all.
+                    chapterCount = if (shownTotal > 0) shownTotal else chapterPages.size,
                     pageCount = pageCount,
                     // The notch is the CARD's own fill, so a chapter line reads
                     // as a cut in the bar rather than another colour on it.
@@ -1384,6 +1392,8 @@ private fun BookLengthRow(
 private fun ReadingGauge(
     fraction: Float,
     chapterStarts: List<Int>,
+    /** v417 — the chapter count the card is stating (see [gaugeMarks]). */
+    chapterCount: Int,
     pageCount: Int,
     notch: Color,
     accent: Color,
@@ -1413,6 +1423,38 @@ private fun ReadingGauge(
         ),
         label = "gauge-sheen"
     )
+    // ── v417 — THE DIVISIONS FOLLOW THE COUNT THE CARD STATES ─────────────
+    //
+    // The notches were placed from the FILE's own outline alone, so a book with
+    // no file (or an EPUB whose outline carries names but no page ranges) drew
+    // no divisions at all, and a PDF kept the chapters it arrived with however
+    // many the member then set above them (member: "fix the chapter reading
+    // progress not showing accurate chapter counts when i add or remove chapter
+    // it doesnt update"). [gaugeMarks] answers in one of two ways now:
+    // PAGE-PLACED when the file's own ranges agree with the count on screen,
+    // otherwise EVEN divisions of that count — so adding a chapter adds its
+    // division and removing one takes it away, whatever the book is measured in.
+    val marks = remember(chapterStarts, chapterCount, pageCount) {
+        val raw = gaugeMarks(chapterStarts, chapterCount, pageCount)
+        // The stride that keeps a long book's bar a bar (v413): never more than
+        // about [GaugeMarkTarget] divisions, picked evenly from the run.
+        val stride = ((raw.size + GaugeMarkTarget - 1) / GaugeMarkTarget).coerceAtLeast(1)
+        if (stride == 1) raw else raw.filterIndexed { index, _ -> index % stride == 0 }
+    }
+    // The swap is a CROSSFADE, not a cut, and it rides the same 240ms the rest
+    // of the app's small moves use: the divisions that leave fade where they
+    // were while the new ones fade in where they now belong.
+    val settle = remember { Animatable(1f) }
+    var leaving by remember { mutableStateOf<List<Float>>(emptyList()) }
+    var settled by remember { mutableStateOf(marks) }
+    LaunchedEffect(marks) {
+        if (marks == settled) return@LaunchedEffect
+        leaving = settled
+        settled = marks
+        settle.snapTo(0f)
+        settle.animateTo(1f, tween(durationMillis = GaugeMarkSettleMs, easing = FastOutSlowInEasing))
+        leaving = emptyList()
+    }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Canvas(
             modifier = Modifier
@@ -1474,30 +1516,21 @@ private fun ReadingGauge(
             //   * a SOFTENING — it is mixed toward the fill as the count rises,
             //     so at high density it reads as light on the bar, not a cut
             //     through it.
-            if (pageCount > 1 && chapterStarts.size >= 2) {
-                val stride = (
-                    (chapterStarts.size + GaugeMarkTarget - 1) / GaugeMarkTarget
-                    ).coerceAtLeast(1)
-                val shown = if (stride == 1) {
-                    chapterStarts
-                } else {
-                    chapterStarts.filterIndexed { index, _ -> index % stride == 0 }
-                }
-                val density = (shown.size.toFloat() / GaugeMarkTarget.toFloat())
+            //
+            // v417 — AND THEY ARRIVE RATHER THAN APPEAR. A division that moves
+            // settles into its new place while its old place fades, so changing
+            // the length reads as the bar re-deciding instead of the bar
+            // flickering (member: "the animation is bad of it fix it").
+            if (settled.isNotEmpty()) {
+                val density = (settled.size.toFloat() / GaugeMarkTarget.toFloat())
                     .coerceIn(0f, 1f)
                 val stroke = (1.6f - 0.9f * density).dp.toPx()
                 val mark = lerp(notch, accent, 0.30f * density)
-                shown.forEach { start ->
-                    val at = (start - 1).toFloat() / (pageCount - 1).toFloat() * size.width
-                    if (at > stroke && at < size.width - stroke) {
-                        drawLine(
-                            color = mark,
-                            start = Offset(at, 0f),
-                            end = Offset(at, size.height),
-                            strokeWidth = stroke
-                        )
-                    }
+                val t = settle.value
+                if (leaving.isNotEmpty() && t < 1f) {
+                    drawGaugeMarks(leaving, alpha = 1f - t, stroke = stroke, color = mark)
                 }
+                drawGaugeMarks(settled, alpha = t, stroke = stroke, color = mark)
             }
         }
         Spacer(Modifier.width(11.dp))
@@ -2361,6 +2394,69 @@ private const val MAX_TICKS = 48
  * into a fence — see the gauge's own note.
  */
 private const val GaugeMarkTarget = 16
+
+/** v417 — how long the gauge's divisions take to settle into a new count. */
+private const val GaugeMarkSettleMs = 240
+
+/**
+ * v417 — WHERE THE GAUGE'S DIVISIONS GO, for the count it is stating.
+ *
+ * Two answers, and the first is the FILE's own truth:
+ *
+ *  * PAGE-PLACED when the file's outline knows a page for every chapter AND
+ *    that list is as long as the count on screen (the file and the card agree)
+ *    — the divisions then sit where the chapters really open. Out-of-range or
+ *    end-of-bar entries are dropped: the bar's own edges are not divisions.
+ *  * EVEN DIVISIONS of [chapterCount] otherwise — a book with no file, one
+ *    whose outline has names but no page ranges, and one whose length the
+ *    member has changed all still draw a division per chapter.
+ *
+ * Returns fractions of the track (0..1), before the gauge's own stride and
+ * thinning are applied.
+ */
+private fun gaugeMarks(
+    chapterStarts: List<Int>,
+    chapterCount: Int,
+    pageCount: Int
+): List<Float> {
+    val placed = chapterCount >= 2 &&
+        pageCount > 1 &&
+        chapterStarts.size == chapterCount &&
+        chapterStarts.all { it in 1..pageCount }
+    return if (placed) {
+        chapterStarts
+            .map { (it - 1).toFloat() / (pageCount - 1).toFloat() }
+            .filter { at -> at > 0f && at < 1f }
+    } else if (chapterCount >= 2) {
+        (1 until chapterCount).map { it.toFloat() / chapterCount.toFloat() }
+    } else {
+        emptyList()
+    }
+}
+
+/**
+ * Draws the gauge's divisions at [alpha] — the crossfade's two halves, so a
+ * mark that is leaving and one that is arriving are the same code path.
+ */
+private fun DrawScope.drawGaugeMarks(
+    marks: List<Float>,
+    alpha: Float,
+    stroke: Float,
+    color: Color
+) {
+    if (alpha <= 0.02f) return
+    marks.forEach { at ->
+        val x = at * size.width
+        if (x > stroke && x < size.width - stroke) {
+            drawLine(
+                color = color.copy(alpha = color.alpha * alpha),
+                start = Offset(x, 0f),
+                end = Offset(x, size.height),
+                strokeWidth = stroke
+            )
+        }
+    }
+}
 
 // ── v412 — A HELD STEPPER RUNS, IT DOES NOT WALK ────────────────────────────
 /** How long a tile stepper must be held before it starts repeating. */

@@ -25,7 +25,7 @@ import kotlin.math.abs
  *
  * 1. **A DARK TWIN PER THEME.** These are light palettes, but a member on
  *    dark mode must not lose their theme: [schemeFor] builds the dark side
- *    from the SAME three numbers — the page becomes a deep shade of its own
+ *    from the SAME three numbers — the page becomes a near-black of its own
  *    hue, the hero/card colour deepens but keeps its hue and saturation, and
  *    the ink lightens into a pale tint of itself. Nothing is invented from a
  *    neutral grey, so "Pantone Cream" is still creamy at night.
@@ -132,10 +132,17 @@ enum class PantoneTheme(
         ink = Color(0xFF5F62A1)
     );
 
-    /** The page for [dark]: the Pantone page by day, a deep shade of its OWN
-     *  hue by night — dark enough to read on, warm enough to still be this
-     *  theme rather than a neutral grey. */
-    fun pageFor(dark: Boolean): Color = if (!dark) page else page.at(0.115f, 0.20f)
+    /**
+     * The page for [dark]: the Pantone page by day, a near-BLACK shade of its
+     * own hue by night.
+     *
+     * v417 fitted the night side to the app's own dark language (whose page is
+     * pitch black, `#000000`, with everything above it stepping up in
+     * lightness): 0.115 was a warm brown-grey that read as a dim light theme
+     * rather than a night one, so the page sits at 0.075 now and the ladder
+     * above it starts lower to match.
+     */
+    fun pageFor(dark: Boolean): Color = if (!dark) page else page.at(0.075f, 0.22f)
 
     /** The hero — the Pantone hero number, and the theme's accent fill. */
     fun heroFor(dark: Boolean): Color = if (!dark) hero else hero.at(0.28f, 0.55f)
@@ -180,9 +187,9 @@ enum class PantoneTheme(
     // this one, where every step is a real, separable tone:
     //
     //        light                 role                       dark
-    //   page 0.720 (Pantone)   background                    0.115
+    //   page 0.720 (Pantone)   background                    0.075
     //                         surface                       same
-    //     —   the five-step card ladder —                     0.13 → 0.24
+    //     —   the five-step card ladder —                     0.10 → 0.20
     //   0.975 → 0.845          containers              (see schemes)
     //   ink  0.225             body ink          0.90 (pale tint of ink)
     //   ink  0.36              muted ink         0.68
@@ -382,15 +389,19 @@ enum class PantoneTheme(
 
         surface = pageFor(true),
         onSurface = bodyFor(true),
-        surfaceVariant = page.at(0.20f, 0.24f),
+        surfaceVariant = page.at(0.125f, 0.20f),
         onSurfaceVariant = mutedFor(true),
 
-        // The night ladder: the page, then three small steps up it.
-        surfaceContainerLowest = page.at(0.13f, 0.20f),
-        surfaceContainerLow = page.at(0.165f, 0.22f),
-        surfaceContainer = page.at(0.195f, 0.24f),
-        surfaceContainerHigh = page.at(0.21f, 0.26f),
-        surfaceContainerHighest = page.at(0.24f, 0.26f),
+        // The night ladder: the near-black page, then four small steps up it,
+        // 0.025 of lightness each — the stride the app's own dark scheme uses
+        // (`#121212` → `#2C2C2C`), read on this theme's hue. Small steps on
+        // purpose: a dark step that is easy to see in a screenshot is a plate
+        // that looks lit in the hand.
+        surfaceContainerLowest = page.at(0.10f, 0.20f),
+        surfaceContainerLow = page.at(0.125f, 0.20f),
+        surfaceContainer = page.at(0.15f, 0.22f),
+        surfaceContainerHigh = page.at(0.175f, 0.24f),
+        surfaceContainerHighest = page.at(0.20f, 0.26f),
 
         // Derived from the Pantone numbers, never the app's coral.
         error = errorFor(true),
@@ -398,9 +409,11 @@ enum class PantoneTheme(
         errorContainer = alert(lightness = 0.28f, saturation = 0.36f),
         onErrorContainer = alert(lightness = 0.88f, saturation = 0.30f),
 
-        outline = page.at(0.28f, 0.22f),
-        outlineVariant = page.at(0.22f, 0.22f),
-        scrim = ink.at(0.08f, 0.16f)
+        // No shadows exist on a page this dark, so these hairlines and the
+        // container steps ARE the separation (the app's own dark note).
+        outline = page.at(0.26f, 0.18f),
+        outlineVariant = page.at(0.16f, 0.18f),
+        scrim = ink.at(0.04f, 0.14f)
     )
 
     /** The alert reading of the warm number: a hue walked toward red (≤ 35°) so

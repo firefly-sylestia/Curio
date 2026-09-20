@@ -485,3 +485,8 @@ FIX:
 - Theme: the three Pantone themes are repainted — every card, sheet and plate is a light reading of the theme's own page now, instead of a deep block of the hero colour, so nothing under Pantone Terracotta is brick-red furniture any more.
 - Theme: each Pantone palette has a full set of tones — its hero is the accent again with a pale chip twin beside it, its second and third fills are the ink colour and the page colour at accent depth (no more three copies of the hero), and its gold, sage and delete red are read off that theme's own warmest, coolest and alert hue, so the streak flame is amber in every theme and never green.
 - Theme: the Pantone delete red is no longer Material's own pink — the error container and the page-dimming scrim come from the palette too.
+
+FIX:
+- Books: the reading-progress divisions follow the chapter count you set — a book with no file, or one whose contents carry names but no page ranges, now shows a division per chapter, adding or removing a chapter adds or takes one away, and the divisions settle into their new places instead of the bar flickering.
+- Theme: the Pantone palettes are fitted to dark mode — a near-black page in the theme's own hue, cards stepping up in the same small stride the app's own dark theme uses, and hairline separators to match.
+- Journal: Select all shows its tools — with the whole page selected the tool bar now lights what that page carries, whichever door it came through (the gesture, Android's own Select all, or Ctrl+A).

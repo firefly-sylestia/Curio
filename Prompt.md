@@ -8,96 +8,78 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "now lets fix pantone colors. all 3 are bad, dont use too deep colors for the cards or
-> backgroud, can u fix all of them see whats right, and chnage the hero etc on the basic of
-> the colors use new colors if needed. and do it all. fully revamp the hirarcy contrast etc
-> properly use more shades pallete per pantone theme"
+> "do a better ork best fitted for dark mode too. also with the gesture the select all works
+> but it doesnt show the tool also same as how the app gesture selects all i want similiar
+> select all for android select all too. also fix the chapter reading progress not showing
+> accurate chapter counts when i add or remove chapter it doesnt update ald the animation is
+> bad of it fix it push it all and watch cl after finish all."
 
-One target: `ui/theme/PantoneThemes.kt` and the scheme it hands to `CurioTheme`. The member
-authorised judgement ("see whats right", "use new colors if needed"), so the only plan step
-was the palette maths itself — done with a Python mirror of `toHsl`/`fromHsl`/`luminance` so
-every tone and every pair could be measured before it was written into Kotlin.
+Three separate fixes plus the usual delivery:
 
-The previous request (the empty Pages / My shelf doors) was committed as `966ec4c1` and left
-unpushed at the member's own instruction; it rides along with this commit.
+1. **The Pantone dark twin, fitted to dark mode.** The v413 night side (page 0.115, ladder
+   0.13–0.24) was a warm brown-grey that read as a dim light theme.
+2. **Select all should show its tools** — the gesture's page selection worked but the dock
+   said nothing about it, and Android's own Select all / Ctrl+A should behave the same way.
+3. **The reading gauge's chapter divisions** must follow the chapter count the card states
+   (they were placed from the file's outline alone, so adding/removing chapters changed
+   nothing and a file with no page ranges drew none at all), and the change must animate.
 
-## 2. What was wrong (findings)
+The previous request (the v413 Pantone light revamp) went out as `6fc10d8a`; CI was still
+running when this session opened.
 
-1. **The card ladder deepened the HERO.** v412's `surfaceContainer*` were `deepen(hero, 0.05…
-   0.15)`. Pantone Terracotta's hero (2350 U, `#9E483F`) therefore made every sheet, settings
-   card and journal block a deep brick red, each nested step darker — "too deep colors for the
-   cards". On Cream (`#B6CADF`) and Lime (`#CDD325`) it walked into grey-olive mud.
-   The hero was being asked to be both the page's furniture and the page's accent.
-2. **Three fills, one colour.** `primary`/`primaryContainer` were both the hero; v412's
-   `secondary` was the hero one step deeper. A chip and the button beside it were the same
-   colour.
-3. **Derived roles were picked by the wrong number.** `goldInkFor` off the HERO (Lime's hero is
-   a yellow-green → a green "amber" streak flame) and `sageInkFor` off the ink desaturated
-   (Terracotta's → a second brick). `errorFor` off the ink's hue (Lime's indigo → an
-   indigo "delete").
-4. **`errorContainer` / `onErrorContainer` / `scrim` were never set**, so they fell through to
-   Material's baseline palette — a PINK error container in a theme whose rule is "no other
-   colors". 11 + 9 + 1 call sites read those roles.
+## 2. What the code actually looked like (findings)
+
+- **`PantoneTheme.darkScheme`** — page `page.at(0.115f, 0.20f)`, containers 0.13 → 0.24,
+  outline 0.28/0.22. The app's own dark scheme (`CurioDarkColorScheme`) is a PITCH-BLACK page
+  with `#121212 → #2C2C2C` steps (0.025-rung stride) and BRIGHT inverse-style accents.
+- **`PersonalEditorState.activeFlags()`** (`PersonalCanvas.kt`) branched on `focusedId` and
+  the native selection only. `selectPage()` sets `pageSelected` and parks the caret at the end
+  of the page and never touches `selections`, so the dock reported the LAST ROW's caret style
+  while the whole page was selected. `toggle()` already had a `pageSelected` branch (masks on
+  every row, with an `allOn` rule); only the report was missing.
+- **`ReadingGauge`** took `chapterStarts = chapters.map { it.pageStart }` from
+  `rememberBookChapters`, i.e. the FILE's own outline. `chapterCount` (the count the card
+  states, `shownTotal` while a length stepper is held) never reached it, so: no page ranges →
+  no divisions at all, and a member-set length changed nothing. Marks were also redrawn from
+  scratch on every change (a cut, not a move).
 
 ## 3. What was built
 
-- **The ladder is the PAGE's own hue and it climbs:** `surfaceContainerLowest` 0.975, `Low`
-  0.945, `Mid` 0.915, `High` 0.882, `Highest` 0.845 (light) — cards separate from the page by
-  LIGHTNESS, the app's own rule, and nothing is a dark block. Night: 0.115 page, then 0.13 /
-  0.165 / 0.195 / 0.21 / 0.24 (small steps, because dark steps must be small).
-- **The hero is the accent again** with a PALE container twin: `primaryContainer` = hero at
-  0.90, `onPrimaryContainer` = hero at 0.28. `secondary` = the INK at accent depth (0.40) with
-  its own container twin; `tertiary` = the PAGE at accent depth (0.30). Night gets the
-  mirror set.
-- **Derived roles are picked, then walked:** `warm` = the most SATURATED number in the amber
-  band 15°–70° (Terracotta's page 40°/0.68 vs ink 28°/0.83 → the ink wins, it is the real
-  amber); `cool` = the coolest number; `goldInkFor` = warm at ink depth; `sageInkFor` = the
-  cool hue walked FORWARD toward 250° by ≤45° (shortest-path walking swung Terracotta back
-  through red into a brick — olive is the honest cool ink for an all-warm brief);
-  `errorFor` = the warm hue walked toward red by ≤35° (`alert()`), so Lime's delete is a deep
-  violet-red and not its indigo.
-- **`errorContainer` / `onErrorContainer` / `scrim` now come from the palette** (`alert()` at
-  0.90/0.26 light and 0.28/0.88 dark; scrim = the ink at 0.10 light / 0.08 dark).
-- **`warm`/`cool`/`coolHue` are `val`s computed once** with the enum, not per composition.
-- **Not changed, deliberately:** lane/category FILLS still resolve to the hero number
-  (`themedAccent`) — a lane card is a fill, not a plate, and it is the one place the palette is
-  allowed to be saturated (the app's own lane cards are 700-level deep). Also unchanged: the
-  no-alpha rule, the no-card-border rule, the pure-`at()` derivation (nothing outside the three
-  numbers is painted) and the ink ladder's role names, so no call site moved.
+- **Dark twin (v417).** Page `0.075` at sat 0.22 (a near-black carrying the hue), ladder
+  `0.10 / 0.125 / 0.15 / 0.175 / 0.20` (0.025 rungs, the app's own dark stride),
+  `surfaceVariant` 0.125, `outline` 0.26 / `outlineVariant` 0.16, `scrim` = ink @ 0.04. All
+  the bright roles are untouched (pale hero fill + deep ink on it, pale accent ink, bright
+  gold/sage/error) because that IS the app's dark language. Every pair re-measured ≥ 4.5:1
+  (see the table below).
+- **Select all shows its tools.** `activeFlags()` gains a `pageSelected` branch that answers
+  for the PAGE — a flag is active when every writing row carries it, the same rule `toggle`
+  uses — so all three doors (the gesture, the wrapped platform toolbar, Ctrl+A) light the dock
+  for the whole page. No behaviour was taken away from the one-field page: the platform's own
+  Select all still runs there (handles, cut, replace), and the native selection already covers
+  the whole entry, so the dock lights correctly on that path too.
+- **The gauge's divisions (v417).** New `gaugeMarks(chapterStarts, chapterCount, pageCount)`:
+  PAGE-PLACED when the file's ranges agree with the count on screen, else EVEN divisions of
+  that count; the call site passes `shownTotal` (else the file's list length) so a held length
+  stepper re-spaces the divisions live. The stride/thinning/softening from v413 still apply,
+  now over the resolved positions. The swap is a 240ms crossfade — `Animatable` + a
+  `DrawScope.drawGaugeMarks` that draws both halves — so divisions settle instead of snapping.
 
-## 4. The measured palette (light / dark, per theme)
+## 4. The dark palette, measured
 
-Every pair below cleared 4.5:1 on its own page AND on the deepest card step; container twins
-were checked against their own contents; white was checked on the light error fill.
-
-| role | Cream | Terracotta | Lime |
-|---|---|---|---|
-| page | `#F7E9C6` | `#F5E1C5` | `#FAF4D3` |
-| card ladder (5 steps) | `#F5F3EC` → `#E5DDCA` | `#F5F2EC` → `#E5DACA` | `#F5F4EC` → `#E5E1CA` |
-| body ink | `#3E353D` | `#4C3A27` | `#2A2C48` |
-| muted ink | `#5D505C` | `#6C5741` | `#41436C` |
-| accent (= the Pantone ink) | `#4D424C` | `#7C3831` (ink is orange, 1.74:1 → hero at 0.34) | `#5F62A1` |
-| hero + its words | `#B6CADF` / `#3E353D` | `#9E483F` / white | `#CDD325` / `#2A2C48` |
-| second fill | `#6E5E6C` | `#996833` | `#4B4E81` |
-| third fill | `#6F5B2A` | `#6F522A` | `#6F642A` |
-| gold | `#785B11` | `#784711` | `#786911` |
-| sage | `#3F3960` | `#536039` (olive) | `#3F3960` |
-| error | `#A53827` | `#A53827` | `#A54827` |
-| night page | `#232017` | `#231E17` | `#232117` |
-
-One named margin: Lime's indigo accent is 4.26:1 on the deepest nested step (0.845) — above the
-3:1 bar icons and large labels are held to, below the body-text bar — which is why the accent
-stays the real Pantone ink instead of deepening into a colour indistinguishable from body text.
+Ladder per theme at the new night values: page `#17150F` / `#17140F` / `#17160F`, cards
+`#1F1C14 → #403926` (Cream), `#1F1A14 → #403526` (Terracotta), `#1F1D14 → #403C26` (Lime);
+hairlines `#4E4736` / `#302C21`. Body ink 12.9–15.0:1 on the page and 8.6–9.6:1 on the
+DEEPEST card step, muted 5.6–6.6:1 on it, the accent 5.7–6.9:1, gold/sage 10–13:1, every
+container twin ≥ 5.5:1 against its own contents, the error pair ≥ 4.6:1.
 
 ## 5. Status
 
-- Implemented in `PantoneThemes.kt` (roles, both schemes, palette maths) + `app/AGENTS.md`
-  ("The Pantone tone ladder (v413)") + three FIX bullets in `20260922.txt`.
-- Brace/paren/bracket balance verified 0/0; no stale references to the removed private helpers
-  (`inkOn`, `paleInk`, `deepen`, `lift`, `shade`) anywhere in the app; all role function names
-  the rest of the app calls are unchanged.
+- Implemented in `PantoneThemes.kt`, `PersonalCanvas.kt`, `BookDetailScreen.kt`; docs
+  (`app/AGENTS.md`) and three FIX bullets in `20260922.txt` updated.
+- Brace/paren/bracket balance verified 0/0 on all three files; new imports
+  (`Animatable`, `FastOutSlowInEasing`, `DrawScope`) added.
 - No Gradle in this environment — CI validates the compile.
-- Pushed together with the held `966ec4c1`; CI watched and any failure fixed.
+- Committed, pushed, and CI watched on both this commit and the previous one.
 
 ---
 
@@ -107,4 +89,4 @@ stays the real Pantone ink instead of deepening into a colour indistinguishable 
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- (none — this request is logged above as §1–§4)
+- (none — this request is logged above as §1–§5)

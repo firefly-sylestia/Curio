@@ -1427,6 +1427,32 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /** The tools as the dock should light them right now. */
     fun activeFlags(): Int {
+        // ── v417 — A PAGE-WIDE SELECTION ANSWERS FOR THE PAGE ───────────
+        //
+        // Select all (the two-finger gesture, the platform's own Select all,
+        // Ctrl+A) sets `pageSelected`, and the dock then reports what the NEXT
+        // keypress would wear on the FOCUSED ROW — which `selectPage` parks at
+        // the end of the page. So the tools lit up for one line while the whole
+        // page was selected, which is exactly what a member saw: "the select
+        // all works but it doesnt show the tool". A flag reads active now when
+        // EVERY writing row carries it — the same rule [toggle] uses to decide
+        // what a page-wide tap means — so the dock says "the page is bold",
+        // "the page is bulleted", and one tap turns it off everywhere.
+        if (pageSelected) {
+            val rows = order.filter { id ->
+                blocks[id]?.let { !it.isPhoto && it.audio == null } == true
+            }
+            if (rows.isEmpty()) return armed
+            var flags = 0
+            ALL_FLAGS.forEach { flag ->
+                val on = rows.all { id ->
+                    val block = blocks[id] ?: return@all false
+                    maskCovers(mask(id), 0, block.text.length, flag)
+                }
+                if (on) flags = flags or flag
+            }
+            return flags or armed
+        }
         val id = focusedId ?: return armed
         val selection = selections[id]
         if (selection == null || selection.collapsed) {
