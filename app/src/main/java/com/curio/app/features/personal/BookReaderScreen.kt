@@ -133,6 +133,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -1445,6 +1446,26 @@ private fun PdfScrollReader(
         onPendingPageConsumed()
     }
 
+    // ── WHICH PAGES ARE ON SCREEN (v422) ──────────────────────────────
+    //
+    // A page's words are read when the page can be read — and in this flow that
+    // is every sheet the column is showing, not just the one it calls "first".
+    // Asking only for `firstVisibleItemIndex` left the sheet below it without a
+    // text layer: a hold on its words found nothing to sweep and fell back to
+    // the old "mark this page" press, which is why selecting in the scrolling
+    // flow felt broken. The column is tall enough to show a page and a half, so
+    // the page under the finger was frequently the second one.
+    //
+    // The window is published as a SET, and written only when the set of visible
+    // pages actually changes — never once per scroll frame, so dragging over the
+    // column does not recompose the pages it is passing.
+    var visiblePages by remember(document) { mutableStateOf(emptySet<Int>()) }
+    LaunchedEffect(listState, pageCount) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.map { it.index }.toSet() }
+            .distinctUntilChanged()
+            .collect { visiblePages = it }
+    }
+
     // ── ONE PAGE PER SCREEN, IN A COLUMN (v389c) ──────────────────────
     //
     // The column used to size every page by its WIDTH (`ContentScale.FillWidth`),
@@ -1522,12 +1543,13 @@ private fun PdfScrollReader(
                     runCatching { renderPdfPage(context, document, page) }.getOrNull()
                 }
             }
-            // The scrolling reader has no "current page" of its own — the one on
-            // screen is whichever the column is showing — so the words are read
-            // for THAT page, and for every page already wearing a mark.
+            // The scrolling reader has no "current page" of its own — the ones
+            // on screen are whichever the column is showing (`visiblePages`,
+            // v422) — so the words are read for every page the member can put a
+            // finger on, and for every page already wearing a mark.
             var words by remember(document, page) { mutableStateOf<PdfPageText?>(null) }
             var container by remember { mutableStateOf(IntSize.Zero) }
-            val wanted = page == listState.firstVisibleItemIndex ||
+            val wanted = page in visiblePages ||
                 highlightsFor(marks, page).isNotEmpty()
             LaunchedEffect(document, page, wanted) {
                 if (!wanted || words != null) return@LaunchedEffect
