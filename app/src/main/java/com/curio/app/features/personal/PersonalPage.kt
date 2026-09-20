@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -245,6 +246,17 @@ internal fun PersonalWritingPage(
     val editor = remember(entryId) {
         PersonalEditorState(doc).also { it.keepsChecklistRows = checklistFirst }
     }
+
+    // ── v413 — THE PAGE'S TEN HIDDEN TOOLS ───────────────────────────────────
+    // Read from the ONE bitmask preference, so a switch flipped on the Dev page
+    // is felt the next time a page opens (and a page already open never loses a
+    // tool mid-sentence). The date is resolved ONCE per page, which is what
+    // "today" means to a page you are writing on right now: the dated line a
+    // double-tap drops says the day the page was opened on. Both are cheap — a
+    // bit mask and a format — and both are read even when nothing is switched
+    // on, where the empty set makes every hook a no-op (see `journalGestures`).
+    val journalGestures = enabledJournalGestures()
+    val todayLine = remember { journalTodayLine() }
 
     // ── Voice notes (v389) ─────────────────────────────────────────────
     // The mic is a FLOATING button of the page's own, and while a note is being
@@ -777,7 +789,33 @@ internal fun PersonalWritingPage(
                             // the title and the words) hands the caret to the last
                             // line instead of needing the "Write…" placeholder to be
                             // hit exactly (user report).
-                            .clickable { editor.focusLastLine() }
+                            // ── v413 — THE BLANK SPACE'S OWN GESTURES ──────────
+                            // Two of the ten hidden tools live HERE rather than in
+                            // [journalGestures]: they are SINGLE-finger gestures,
+                            // and a single finger on this page belongs to the
+                            // caret, to selection and to the scroll — except on
+                            // the blank part, which is already a tap target of
+                            // its own (see the v389 note above). So the tap that
+                            // hands over the caret becomes a `combinedClickable`
+                            // that can also take a double-tap and a hold.
+                            //
+                            // With both extra callbacks null — every hidden tool
+                            // off — this is the clickable it replaces, bar for
+                            // bar: `combinedClickable` only arms a double-tap
+                            // timeout when it is actually given a double-tap.
+                            .combinedClickable(
+                                onClick = { editor.focusLastLine() },
+                                onDoubleClick = if (JournalGesture.BLANK_DOUBLE_TAP in journalGestures) {
+                                    { editor.runJournalGesture(JournalGesture.BLANK_DOUBLE_TAP, todayLine) }
+                                } else {
+                                    null
+                                },
+                                onLongClick = if (JournalGesture.BLANK_LONG_PRESS in journalGestures) {
+                                    { editor.runJournalGesture(JournalGesture.BLANK_LONG_PRESS, todayLine) }
+                                } else {
+                                    null
+                                }
+                            )
                             .padding(horizontal = 20.dp)
                             .widthIn(max = 680.dp)
                     ) {
@@ -796,7 +834,18 @@ internal fun PersonalWritingPage(
                         Column { aboveCanvas() }
                         PersonalCanvas(
                             state = editor,
-                            modifier = Modifier.fillMaxWidth(),
+                            // v413 — THE TEN HIDDEN TOOLS, ATTACHED HERE.
+                            // The recogniser sits on the writing canvas and takes
+                            // only MULTI-finger input (two fingers or more), which
+                            // is the one input a text field has no use for — so
+                            // with the whole section switched off this modifier
+                            // adds nothing at all (`journalGestures` returns the
+                            // modifier untouched when the set is empty).
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .journalGestures(journalGestures) { gesture ->
+                                    editor.runJournalGesture(gesture, todayLine, onSaveNow = { saveNow() })
+                                },
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
                             onTitlePosition = reportSectionLine
                         )

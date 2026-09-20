@@ -322,12 +322,21 @@ fun CommunityScreen(navController: NavController) {
     // v412b — the Social tab PUBLISHES ITS NAV ACCENT: it was the one bottom
     // tab that published none, so its active pill fell back to the theme's
     // secondaryContainer — in dark mode a butter wash with a pale-butter ink
-    // on top, which read as a yellow tab whose label was invisible. The
-    // page's own action accent (the theme-aware rose/azure/Pantone accent the
-    // wall's buttons already wear) fills the pill now. The accent is resolved
-    // IN COMPOSITION (curioDialogActionColor is @Composable; the effect's
-    // body is not) and the effect only re-runs when that value changes.
-    val socialNavAccent = curioDialogActionColor()
+    // on top, which read as a yellow tab whose label was invisible.
+    // v413 — AND IT PUBLISHES THE APP'S OWN ACCENT, NOT THE DIALOG INK.
+    // v412b filled the pill with `curioDialogActionColor()` — the accent at
+    // its ACTION depth (saturation 0.35–0.60 at lightness 0.36), which is
+    // right for a button's words and wrong for an indicator: the other three
+    // tabs publish a page FILL (Home's hero rose, Spin's deck lane, the
+    // Cabinet's filter lane), so their pills are soft pale accents with a deep
+    // ink, while the Social pill came out a heavy deep-pink slab wearing white
+    // text (member: "fix the social tab active indicator not following the app
+    // active indicator and its text color"). The theme's own primary IS the
+    // app's active accent — the same value every unpublished page and
+    // [curioActivePillFill]'s fallback use — so the pill and its label ink
+    // (pastelFillInk, the family's own pairing) now resolve like the other
+    // three. Resolved IN COMPOSITION because the effect's body is not.
+    val socialNavAccent = MaterialTheme.colorScheme.primary
     DisposableEffect(socialNavAccent) {
         CurioNavTint.publishSocialAccent(socialNavAccent)
         onDispose { CurioNavTint.publishSocialAccent(null) }

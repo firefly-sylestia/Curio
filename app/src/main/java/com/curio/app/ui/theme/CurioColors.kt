@@ -183,11 +183,22 @@ object CurioColors {
      * readable on it in non-pastel mode. Pastel mode (default) resolves
      * its airy pink pastel twin via [pastelAccent] — see HomeScreen's
      * hero fill.
+     *
+     * v413 — A TOUCH MORE VIBRANT (member: "did u chnage the curio rose color
+     * it kinda looks odd now somehow, if not then ignore or just make it a
+     * little more vibrant"). Nothing had moved it — #CF8B94 had been the rose
+     * since v7.36 — so this is the second half of that ask, done the only way
+     * that cannot break the family: THE HUE AND THE LIGHTNESS ARE UNTOUCHED
+     * (352°, L 0.678) and only the saturation steps up (0.415 → 0.515). Same
+     * rose, read a little more rose and a little less dusty; every ink, pastel
+     * twin, wash and blend above it is derived, so they all follow.
      */
-    val HomeRosewood     = Color(0xFFCF8B94)
+    val HomeRosewood     = Color(0xFFD7838E)
     /** v81 — the dark-mode torn-hero twin: the same rosewood hue at a deep,
-     *  slightly desaturated lightness (a NEW SHADE of the same spectrum). */
-    val HomeRosewoodDark = Color(0xFF6E3A44)
+     *  slightly desaturated lightness (a NEW SHADE of the same spectrum).
+     *  v413 — the light twin's vibrancy step, matched (0.310 → 0.405) so the
+     *  day and night roses stay the one spectrum at their own lightness. */
+    val HomeRosewoodDark = Color(0xFF76323F)
     // v27l — the optional sky-azure hero variant: a brighter, fresher azure
     // (the Science/Sky hue at sky-300-ish saturation, held a touch softer
     // than neon).

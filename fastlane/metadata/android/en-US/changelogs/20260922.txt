@@ -459,3 +459,11 @@ ADD:
 FIX:
 - Books: the +/- on a book's reading progress takes every tap again — each step re-proposed the value the card was showing when it first appeared, so the count stuck at one until the card was rebuilt; it now follows your finger, a hold keeps running, and the bar moves with it.
 - Appearance: the Paper option is live under Adaptive Hero — a lane only tints the page wash and the banner, so the cream/white flip still has its effect there instead of being greyed out.
+
+ADD:
+- Writing: ten hidden writing tools you make with a gesture — bring back a removed row, move the page's alignment, carry the line you are writing up or down, give it a list mark or the next mark, take the whole page, change its writing face, save on the spot, and drop today's date in as a heading. Each one is a switch of its own on the Dev page, off until you choose it, with the gesture and what it does written under it.
+
+FIX:
+- Social: the Social tab's active indicator matches the rest of the bar now — it wore the accent at its button depth (a heavy deep-pink slab), and now wears the app's own accent like the other three tabs, with the label ink to match.
+- Books: the reading-progress card holds its height while the chapter name changes — a longer chapter grew the tile and pushed the card down, so two lines are reserved for the name.
+- Theme: the Curio rose is a touch more vibrant — the same hue and lightness, a little more saturation, so it reads less dusty in the banner, the hero and everything derived from it.

@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.features.personal.JournalGestureTool
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -371,6 +372,48 @@ fun ExperimentsScreen(navController: NavController) {
                         "Change mode, pane and corners of placed widgets in-app"
                     ) {
                         navController.navigate(com.curio.app.navigation.CurioRoutes.GLASS_WIDGET_EDITOR) { launchSingleTop = true }
+                    }
+                }
+            }
+            // v413 — THE JOURNAL'S HIDDEN GESTURES. Ten writing tools that
+            // have no button anywhere: each is a gesture made on the page
+            // while the hand is already there, and each is its OWN switch so it
+            // can be met one at a time (member: "add some gesture double tap
+            // etc function extra tools hidden one for journal editing. 10
+            // differnt action add them as experiment options in journal with
+            // each explained so i would know, add the option in dev
+            // experiment"). The row's title is what it is for and its subtitle
+            // says the gesture first, then what it does — nothing here is on
+            // until it is chosen.
+            item { SettingsSectionHeading("Journal gestures") }
+            item {
+                // The mask is read as Compose state, so a switch redraws the
+                // instant it is flipped (and the summary line with it) — the
+                // stored preference is the same number, so nothing re-reads it.
+                val gestureMask = AppPreferences.journalGestureToolsState
+                val gestureCount = JournalGestureTool.entries.count { gestureMask and it.bit != 0 }
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        SettingsOptionInfoRow(
+                            CurioIcons.Info,
+                            "Hidden writing tools",
+                            if (gestureCount == 0) {
+                                "None switched on. Each of the ten is a gesture you make on the writing side of a journal, a book review or a topic note — the line under each switch says the gesture first, then what it does."
+                            } else {
+                                "$gestureCount of ${JournalGestureTool.entries.size} switched on. They work on the writing side of a journal, a book review and a topic note."
+                            }
+                        )
+                        CurioSettingsDivider()
+                        JournalGestureTool.entries.forEachIndexed { index, tool ->
+                            if (index > 0) CurioSettingsDivider()
+                            ExperimentSwitchRow(
+                                title = tool.label,
+                                subtitle = tool.explanation,
+                                checked = gestureMask and tool.bit != 0
+                            ) { wanted ->
+                                AppPreferences.setJournalGestureToolEnabled(context, tool.bit, wanted)
+                            }
+                        }
                     }
                 }
             }

@@ -1522,6 +1522,15 @@ private fun ProgressTile(
                 fontWeight = FontWeight.SemiBold
             ),
             color = ink,
+            // v413 — TWO LINES ARE ALWAYS RESERVED, EVEN FOR A ONE-LINE NAME.
+            // A chapter title wraps to whatever it needs, so stepping onto a
+            // long one grew this tile and pushed the whole card down (member:
+            // "the reading progress im on capter card shifts when a longer
+            // chapter comes"). Holding the height at the two lines a long name
+            // may take means the card never moves while the name changes under
+            // it; a name that still does not fit is ellipsized rather than
+            // allowed to grow.
+            minLines = 2,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
