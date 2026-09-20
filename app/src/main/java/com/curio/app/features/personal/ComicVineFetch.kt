@@ -170,7 +170,7 @@ internal object ComicVineFetch {
             year = string("start_year")?.filter { it.isDigit() }?.take(4)?.toIntOrNull() ?: 0,
             issues = string("count_of_issues")?.toIntOrNull() ?: 0,
             description = description,
-            coverUrl = coverUrl(),
+            coverUrl = coverUrl().orEmpty(),
             credits = credits()
         )
     }
