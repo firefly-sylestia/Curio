@@ -129,6 +129,34 @@ internal object BookCatalog {
         return titled.first()
     }
 
+    /**
+     * v413 — A FEW BOOKS TO START WITH.
+     *
+     * Home's My-shelf row, when the shelf is EMPTY, offers three books from
+     * Curio's own catalog instead of a button that says "no books yet" (member:
+     * "for the empty states of the my shelf door … for books show 3 book
+     * suggestions"). The catalog is the right source on purpose: it is offline,
+     * it is Curio's own curated ~800, every one of them brings a real chapter
+     * list and a real page count with it, and a suggestion that turns out to be
+     * wanted is ONE tap from being a book on the shelf (see
+     * [com.curio.app.data.PersonalBookEntity.catalogId]).
+     *
+     * The pick is SEEDED BY THE DAY: the same three all day, so the row cannot
+     * reshuffle under a finger mid-tap, and a different three tomorrow, so an
+     * untouched shelf keeps offering something new rather than the same three
+     * forever. Deliberately NOT random per composition — a strip that changes
+     * every time it is looked at reads as a glitch, not as a suggestion.
+     */
+    suspend fun suggestions(count: Int = 3): List<Hit> {
+        val all = library() ?: return emptyList()
+        if (all.isEmpty() || count <= 0) return emptyList()
+        val seed = System.currentTimeMillis() / MILLIS_PER_DAY
+        return all.shuffled(kotlin.random.Random(seed)).take(count)
+    }
+
+    /** One day, in milliseconds — the clock the suggestions are seeded by. */
+    private const val MILLIS_PER_DAY = 86_400_000L
+
     /** Letters and digits only, lowercased — so "The Iliad" and "the iliad:"
      *  are the same title. */
     private fun normalise(value: String): String =

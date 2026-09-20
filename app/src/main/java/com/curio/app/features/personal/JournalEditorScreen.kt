@@ -71,6 +71,7 @@ import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMood
 import com.curio.app.data.wordCount
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.PendingJournalDay
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioCardShadow
@@ -114,7 +115,16 @@ fun JournalEditorScreen(
     // title. The document and every write path belong to the core.
     var title by remember { mutableStateOf("") }
     var mood by remember { mutableStateOf<PersonalMood?>(null) }
-    var dateMillis by remember { mutableLongStateOf(startOfToday()) }
+    // v413 — THE DAY IT OPENS ON IS TODAY, unless the member arrived from a
+    // DAY they picked: Home's empty Pages row offers the last three days as
+    // chips ("Today", "Yesterday", the day before), and a chip that opened
+    // today's page would quietly disagree with its own label. The pending day
+    // is consumed here, once; a SAVED page overrides it below with the date it
+    // was actually written on, which is why the stash can be taken before the
+    // load without ever lying about an existing entry.
+    var dateMillis by remember {
+        mutableLongStateOf(PendingJournalDay.take() ?: startOfToday())
+    }
     var showDatePicker by remember { mutableStateOf(false) }
     var pickerForDate by remember { mutableLongStateOf(startOfToday()) }
     val titleFocusRequester = remember { FocusRequester() }

@@ -8,125 +8,109 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "lets add some gesture double tap etc function extra tools hidden one for journal editing.
-> 10 differnt action add them as experiment options in journal with each explained so i
-> would know, add the option in dev experiment. dont ask me just add them do some research.
-> and finish it and then watch cl fix it then dont watch just give me more suggestions by
-> using ask user, also did u chnage the curio rose color it kinda looks odd now somehow, if
-> not then ignore or just make it a little more vibrant, also fix the social tab active
-> indicator not follwoing the app active indicator and its text color. fix it also the
-> reading progress im on capter card shifts when a longer chapter comes can u fix that too.
-> so its better. push the previous after finishing too."
+> "now for the mepty staes of the my shelf door and pages door instead of new buun show like
+> today, yesterday or day before date and say write down somethign about them, and for books
+> show 3 book suggestions. dont push it yet"
 
-Five parts: (a) ten hidden gesture tools for journal editing, behind explained Dev-page
-switches; (b) the Social tab's active indicator and its label ink; (c) the "I'm on chapter"
-tile shifting on a long chapter name; (d) the Curio rose's vibrancy; (e) push the previous
-batch. Then watch CI, fix what it finds, and end with suggestions (via `ask_user`).
+Home's two door rows (`Pages` and `My shelf`), when their list is empty, stop offering a
+"New"-style chip and offer subjects instead: the last three days for Pages, three books for
+the shelf. **Committed but NOT pushed** — the member's own instruction.
+
+The previous request (the fifteen hidden journal gestures and the gauge's chapter divisions)
+was already committed and pushed as `00d8fac0` before this one started; the tree was clean on
+arrival.
 
 ## 2. What the code actually looked like (findings)
 
-### (b) The Social tab's indicator
-- The bottom bar publishes a per-page accent (`CurioNavTint`): Home publishes its hero fill,
-  Spin its deck lane, the Cabinet its filter lane — so those three pills are soft pale
-  accents with a deep label ink (`curioActivePillFill` calms the accent in light mode;
-  `curioActivePillInk` pairs it).
-- `CommunityScreen` published **`curioDialogActionColor()`** — the accent at its ACTION depth
-  (saturation 0.35–0.60, lightness 0.36). Right for a button's words, wrong for an
-  indicator: the Social pill came out a heavy deep-pink slab wearing white text.
-
-### (c) The chapter tile
-- `ProgressTile`'s value `Text` was `maxLines = 2` with **no reserved height**, so a chapter
-  name that wrapped to two lines grew the tile and pushed the whole card down as you stepped.
-
-### (d) The rose
-- `CurioColors.HomeRosewood = 0xFFCF8B94` — **untouched since v7.36** (git blame: last moved
-  in `64674b0e`, before this work). Nothing in this session's changes altered it, so the
-  member's "make it a little more vibrant" half of the ask applies.
-
-### (a) The journal's hidden gestures
-- The editor is `PersonalEditorState` (PersonalCanvas.kt, ~5,500 lines) with a deep but
-  largely PUBLIC API — the dock's own calls. There was no gesture layer at all, and no
-  Experiments section for one.
-- `PersonalCanvas`'s root is `modifier.clickable(enabled) { state.focusLastLine() }`, and the
-  writing column has its own `.clickable { editor.focusLastLine() }` for the blank space.
-
-### (e) Previous batch
-- Committed as `4a507791` (reading-progress steppers + lane stats graph + Paper under
-  Adaptive Hero); nothing was pushed yet.
+- `PersonalHome.kt` → `PersonalChipsRow` builds both door rows. Each door, when its list was
+  empty, emitted ONE `EmptyDoorChip`:
+  - Pages: `glyph = Add, label = "No pages yet", caption = "Start your first one"` →
+    `onWrite` (Home's writing sheet).
+  - My shelf: `glyph = Add, label = "No books yet", caption = "Open the shelf"` →
+    navigate to `CurioRoutes.BOOKS` — the same shelf the row already is.
+- `EmptyDoorChip` is `CHIP_WIDTH` 96dp × `CHIP_HEIGHT` 118dp: a 34dp accent disc, a label and
+  a two-line caption — so a replacement chip has an exact shape to match.
+- The journal page seeds its day with `startOfToday()` (`JournalEditorScreen` line ~117) and
+  overrides it from the stored row when one exists; the route carries an entry id and nothing
+  else, and `PendingCabinetFilter` was the house pattern for out-of-band handoff.
+- `startOfToday()` / `shiftDay(millis, days)` are `internal` in `JournalEditorScreen.kt` (same
+  package), and a journal day is a calendar day at local midnight.
+- `BookCatalog` (Curio's own `BOOKS` lane, ~800 curated books) already exposes `library()`,
+  `search()`, `book()`, `bestMatch()` — and every `Hit` carries the real cover, the page
+  count and the REAL chapter list. It had no "give me a few" door.
+- Creating a book from the shelf's add flow is `addBook(...)` — a LOCAL fun inside
+  `BookShelfScreen` (it needs that screen's scope, context and file-import path), so it is
+  not reusable; `TopicRevealScreen` and `IsbnScannerScreen` each write their own
+  `PersonalBookEntity` + `saveBook` inline instead.
+- `BookChip` reads only `title`, `author` and `coverUrl` off the entity it is given, so a
+  throwaway entity can draw a book that is not on the shelf yet.
 
 ## 3. What was done
 
-### (a) `PersonalGestures.kt` — ten tools, one recogniser (NEW file)
-- **The catalogue** `JournalGestureTool` — ten entries, each with its own bit, label,
-  two-line explanation (gesture first, then action) and the `JournalGesture` it runs:
-  bring back a removed row (2-finger tap) · page alignment (2-finger double-tap) · carry the
-  line up / down (2-finger swipe up/down) · list mark (2-finger swipe left) · take the whole
-  page (2-finger swipe right) · save on the spot (3-finger swipe down) · cycle the line's
-  mark (3-finger swipe up) · a dated heading (double-tap the blank space) · the line's
-  writing face (hold the blank space).
-- **The storage**: ONE int bitmask (`AppPreferences.journalGestureToolsState`,
-  `KEY_JOURNAL_GESTURES`), with `journalGestureTools` / `isJournalGestureToolEnabled` /
-  `setJournalGestureToolEnabled` — so a new tool is a new enum entry, not a new preference.
-- **The recogniser**: one `awaitEachGesture` loop in `Modifier.journalGestures`. It counts
-  fingers, follows the centre, and reads a tap from the centre's whole journey (a wander is
-  not a tap) and a swipe from where it ended (the direction it left in). It reads in
-  `PointerEventPass.Initial` and consumes only once two fingers are down; `enabled.isEmpty()`
-  returns the modifier untouched, so with the section off nothing changes at all.
-- **Single-finger tools ride the blank space** (`combinedClickable` on the writing column,
-  extra callbacks null unless their tool is on) — a finger on the writing belongs to the
-  caret, the selection and the scroll.
-- **The actions** are `PersonalEditorState.runJournalGesture`, on the editor's own public API,
-  so a gesture can do nothing a button cannot and auto-save sees ordinary writing. Saving is
-  the one exception (the page owns the row and the debounce), handed back as `onSaveNow`.
-- **The Dev page**: a new "Journal gestures" section in `ExperimentsScreen`, one
-  `ExperimentSwitchRow` per tool (label + its explanation), with a summary line reading "N of
-  10 switched on", all off until chosen.
+### Pages door — the last three days
+- The empty row now leads with a new `EmptyDoorLead` — "Nothing here yet" over "Write down
+  something about one of these days." — sized and centred like a chip (158dp × 118dp), no
+  button of its own.
+- Then three `EmptyDoorChip`s from `emptyDayChips()`: **Today**, **Yesterday** and the day
+  before (named by its WEEKDAY, e.g. "Tuesday", caption the date, e.g. "18 September"), each
+  with the `CalendarToday` glyph.
+- Each chip stashes its own local midnight in **`PendingJournalDay`** (new object in
+  `CurioRoutes.kt`, modelled on `PendingCabinetFilter`) and navigates to
+  `journalEditor(PERSONAL_NEW)`; the journal's date seed now reads
+  `PendingJournalDay.take() ?: startOfToday()`, so the page opens ON the day the chip said.
+  A saved page still overrides it with the date it was written on.
 
-### (b) The Social indicator (`CommunityScreen`)
-- Publishes `MaterialTheme.colorScheme.primary` — the app's own accent, the same value every
-  unpublished page and `curioActivePillFill`'s fallback use — instead of the dialog action
-  ink. The pill and its label ink (`pastelFillInk`) now resolve like the other three tabs.
+### My shelf door — three book suggestions
+- The empty row leads the same way ("Nothing here yet" / "Pick one to start with.") and then
+  draws **three real books** from the catalog with the ordinary `BookChip` cover chip.
+- New `BookCatalog.suggestions(count = 3)`: shuffles the catalog with a **seed from the
+  current day**, so the three are stable all day (a strip that reshuffles under a finger
+  reads as a glitch) and fresh tomorrow.
+- Tapping one calls the new `shelveSuggestion(hit)` — a `PersonalBookEntity` with the
+  catalog's title, author, cover, page count, `catalogId` and `chapterCount`, stamped with
+  `createdAtMillis`/`updatedAtMillis` so it sorts as the newest book — then navigates to the
+  book's own page. A `shelving` flag guards the write, since a double tap would shelve the
+  same book twice; the empty state lasts exactly as long as that write (both rows read the
+  same flow).
+- The suggestion list is read only while the shelf IS empty (`produceState(…, books.isEmpty())`),
+  so a member with books never pays for the catalog parse.
 
-### (c) The chapter tile (`BookDetailScreen`)
-- `minLines = 2` on the value text: two lines are always reserved, so stepping onto a long
-  name no longer moves the card; a name that still overflows is ellipsized.
+### Cleanup
+- `PersonalChipsRow`'s `onWrite` parameter had exactly one caller — the chip that was just
+  replaced — so it is deleted along with the argument at Home's call site, rather than left
+  behind as a dead one. The writing sheet keeps its real door: Home's floating "+"
+  (`PersonalCreateLauncher` → `writeSheetOpen`).
 
-### (d) The rose (`CurioColors`)
-- `HomeRosewood` 0xFFCF8B94 → **0xFFD7838E** and `HomeRosewoodDark` 0xFF6E3A44 → **0xFF76323F**:
-  hue (352°) and lightness untouched, saturation 0.415 → 0.515 / 0.310 → 0.405. Same rose,
-  less dusty; every ink, pastel twin, wash and blend above them is derived, so all follow.
-
-Docs + notes: a new `PersonalGestures` bullet in `app/AGENTS.md` (the ten tools, the one
-recogniser, the pointer-pass and consumption rules, the two documented reaches);
-two changelog groups (one ADD, three FIX) appended to `20260922.txt`.
+Docs + notes: a new bullet in `app/AGENTS.md` (what an empty row offers, `PendingJournalDay`,
+the day-seeded suggestions, the guard flag, the deleted parameter) and a changelog group
+(two ADD, one FIX).
 
 ## 4. Decisions
 
-- **No ask_user for the gestures** — the member's instruction was explicit ("dont ask me just
-  add them"). Every tool is still OFF by default behind its own explained switch, which is
-  what the house rule for an experiment requires, and is what makes "just add them" safe.
-- **Two fingers or more in the recogniser, single-finger tools on the blank space.** A text
-  field legitimately owns one finger; taking that away would break typing, the caret and the
-  scroll. Multi-finger input is the one thing it has no use for.
-- **The honest reaches are written on the rows**: alignment is the PAGE's in this app (all
-  four dock buttons call the same `setAlign`), and a MARKER dresses a list row (so cycling
-  marks gives the line a bullet with it). A gesture that over-promised would read as broken.
-- **The rose was nudged in saturation only** — hue and lightness identical, both twins moved
-  together — because the member's complaint was that it "looks odd", not that it was the
-  wrong colour: the family rule is that a hero's inks, pastel twin and washes are all derived
-  from it, so a hue or lightness move would have rippled everywhere.
-- **The Social pill publishes the theme accent, not a bespoke social colour.** The bar's rule
-  is "the page's accent, calmed"; the app's own accent is what a page without a lane has.
+- **"Day before" is named by its weekday.** The member wrote "day before"; at a 96dp chip
+  with `labelLarge` type, "Day before yesterday" either wraps or shrinks, and the weekday plus
+  the date under it says the same thing more precisely. Flagged here in case they want the
+  literal words.
+- **The lead-in line is not a button.** The sentence the member asked for ("write down
+  something about them") is a lead-in to the three days, and the chips under it are the
+  actions — a text that also navigated would be a second, invisible door.
+- **Three days, not "the last three days you have nothing for".** Days are a fixed, learnable
+  set (Today / Yesterday / the day before) and match how a diary is written backwards from;
+  scanning the store for empty days would make the row's meaning depend on data.
+- **Suggestions come from Curio's own catalog, not Open Library.** It is offline, curated, and
+  every book arrives with a real chapter list and page count — which is what makes a
+  one-tap suggestion become a *complete* book on the shelf rather than a stub to enrich later.
+- **Day-seeded, not per-composition random.** Stable under a finger, new each day.
+- **The `onWrite` parameter was removed rather than kept.** A dead parameter on a shared
+  composable is worse than a smaller signature; the write sheet's primary door is untouched.
+- No ask_user: the member's instruction was explicit about both rows and about the push.
 
 ## 5. Status
 
 - Implemented; brace/paren balance verified (0/0) on every edited file. No Gradle in this
   environment, so CI validates the compile.
-- The previous batch (`4a507791`) and this one were pushed together on the member's ask.
-- Open, from the member's own list: CI is watched once and any failure fixed; then the next
-  step is the member's own suggestions, asked with `ask_user`.
-- Known, pre-existing, deliberately untouched: under **Material + pastel mode** a single lane
-  keeps the device colour without the category accent foot.
+- **Committed, NOT pushed** (member: "dont push it yet") — the tree is one commit ahead.
+- Open: push when the member asks; CI then validates it together with the next change.
 
 ---
 

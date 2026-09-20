@@ -8865,8 +8865,30 @@ only ever catches taps that mean "not in any of these".
   cell shown in the air is not the cell that is taken.
 - **Home's doors need an empty row.** A `LazyRow` draws nothing when its source
   is empty, so a first-time Home collapsed both door strips to the door alone.
-  Each door emits an `EmptyDoorChip` at `CHIP_WIDTH` × `CHIP_HEIGHT` when its
-  list is empty, so the strip keeps its shape and offers the first step.
+  Each door emits chips at `CHIP_WIDTH` × `CHIP_HEIGHT` when its list is empty,
+  so the strip keeps its shape and offers the first step.
+- **v413 — AND WHAT AN EMPTY ROW OFFERS IS A SUBJECT, NOT A BUTTON.** The
+  empty state used to be ONE `EmptyDoorChip` that said what was missing and
+  opened a door to somewhere else ("No pages yet / Start your first one" → the
+  writing sheet; "No books yet / Open the shelf" → the shelf this row already
+  is). The Pages row now leads with `EmptyDoorLead` ("Nothing here yet / Write
+  down something about one of these days.") and three `EmptyDoorChip`s from
+  `emptyDayChips()` — **Today, Yesterday and the day before, the third named by
+  its WEEKDAY** (at a chip's width "Day before yesterday" would wrap or shrink;
+  the date under it says when) — each opening the journal ON ITS OWN DAY. The
+  shelf row leads the same way and then offers **three real books from
+  `BookCatalog.suggestions(3)`**, drawn with the ordinary `BookChip` cover and
+  shelved on tap by `shelveSuggestion` (the catalog's page count, its REAL
+  chapter list and its `catalogId`, so the book page can read them back
+  offline). **The day rides out of band: `PendingJournalDay`** (see
+  `CurioRoutes.kt` — a route argument would have to be threaded through every
+  caller of `journalEditor`), consumed once in the journal's date seed, where a
+  SAVED page still overrides it with the date it was written on. `suggestions`
+  is **seeded by the day** (same three all day, fresh tomorrow) and is only read
+  while the shelf is actually empty; a `shelving` flag guards the write, since a
+  double tap would otherwise shelve the same book twice. `PersonalChipsRow`'s
+  `onWrite` parameter is GONE with its only caller — the writing sheet keeps its
+  real door, Home's floating "+".
 - **What's New is GATED, not scheduled (v406).** It used to be a
   `LaunchedEffect(Unit)` that navigated to the `WHATS_NEW` route 700ms after the
   app settled, and the boot routes (SPLASH, ONBOARDING) counted as a quiet start

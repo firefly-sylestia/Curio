@@ -473,3 +473,10 @@ ADD:
 
 FIX:
 - Books: the reading gauge keeps its chapter divisions however long the book is — a forty-chapter file turned the track into a picket fence and a longer one drew no divisions at all, so the marks are now thinned toward a fixed rhythm, losing weight and mixing into the fill as the count climbs.
+
+ADD:
+- Home: an empty Pages row offers your last three days — Today, Yesterday and the day before — each opening a journal page ON that day, under a line asking you to write down something about one of them.
+- Home: an empty My shelf row offers three books from Curio's own catalog, with their real covers; one tap puts the book on your shelf and opens it. The three change each day.
+
+FIX:
+- Home: the empty doors no longer offer a button that leads somewhere else — the "No pages yet" chip and the "No books yet" chip are gone, replaced by the days and the books themselves.

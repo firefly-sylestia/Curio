@@ -43,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.Alignment
@@ -60,7 +61,12 @@ import androidx.navigation.NavController
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.data.newPersonalBookId
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.PendingJournalDay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -280,15 +286,21 @@ private fun CreateEntryOption(
 }
 
 /**
- * The Home row: what the member is writing, as chips. The first chip is
- * always the way in ("New"), then the newest journals, then the books being
- * read, then a door to the full journal list — a fixed-height row that never
+ * The Home row: what the member is writing, as chips — the newest journals under
+ * the Pages door, the books under My shelf — a fixed-height row that never
  * reflows as the library grows.
+ *
+ * v413 — NO `onWrite` PARAMETER ANY MORE. It existed for the empty state's one
+ * chip ("No pages yet / Start your first one", which opened the writing sheet),
+ * and that chip is a row of days now, each opening the journal on its own date.
+ * The writing sheet keeps its real door: Home's floating "+"
+ * (`PersonalCreateLauncher` → `writeSheetOpen`), which is where a member actually
+ * starts a page. The parameter was deleted with its only caller rather than left
+ * behind as a dead one.
  */
 @Composable
 fun PersonalChipsRow(
     navController: NavController,
-    onWrite: () -> Unit,
     /**
      * v389d — THE PAGE'S OWN BACKDROP, for the doors' plate.
      *
@@ -316,6 +328,27 @@ fun PersonalChipsRow(
     }
     val ink = MaterialTheme.colorScheme.onBackground
 
+    // ── v413 — WHAT A DOOR OFFERS WHEN ITS ROW IS EMPTY ─────────────────
+    //
+    // The shelf's three suggestions come from Curio's OWN book catalog (offline,
+    // curated, and every one of them carries a real chapter list and page
+    // count) and are read only while the shelf is actually empty — a member with
+    // books never pays for the parse. One flag guards the write: a second tap
+    // while the first is still landing would shelve the same book twice, and the
+    // empty state lasts exactly as long as that write.
+    val scope = rememberCoroutineScope()
+    var shelving by remember { mutableStateOf(false) }
+    val suggestedBooks by produceState(
+        initialValue = emptyList<BookCatalog.Hit>(),
+        books.isEmpty()
+    ) {
+        if (books.isEmpty()) {
+            value = withContext(Dispatchers.IO) {
+                runCatching { BookCatalog.suggestions(3) }.getOrDefault(emptyList())
+            }
+        }
+    }
+
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         PinnedDoorRow(
             backdrop = backdrop,
@@ -337,13 +370,40 @@ fun PersonalChipsRow(
             // doors and its list so when user opens the page for the first time
             // those place feels empty"). The door now offers the first step
             // itself, at a chip's own size, so the row keeps its shape.
+            //
+            // ── v413 — AND THE FIRST STEP IS A DAY, NOT A BUTTON ──
+            //
+            // It used to be one chip that read "No pages yet / Start your
+            // first one" and opened the writing sheet — a button in a row of
+            // chips (member: "for the empty states of the my shelf door and
+            // pages door instead of new button show like today, yesterday or
+            // day before date and say write down something about them"). The
+            // row now offers the LAST THREE DAYS as chips — Today, Yesterday
+            // and the day before — each opening the journal ON ITS OWN DAY (see
+            // `PendingJournalDay`), with the line that asks for the writing in
+            // front of them. A day is a subject; "no pages yet" is only an
+            // absence.
             if (journals.isEmpty()) {
-                item("empty-journals") {
+                item("empty-journals-lead") {
+                    EmptyDoorLead(
+                        title = "Nothing here yet",
+                        caption = "Write down something about one of these days."
+                    )
+                }
+                items(items = emptyDayChips(), key = { it.millis }) { day ->
                     EmptyDoorChip(
-                        glyph = CurioIcons.Add,
-                        label = "No pages yet",
-                        caption = "Start your first one",
-                        onClick = onWrite
+                        glyph = CurioIcons.CalendarToday,
+                        label = day.label,
+                        caption = day.caption,
+                        onClick = {
+                            // The day rides out of band (a journal route carries
+                            // an entry id and nothing else), and the page
+                            // consumes it as it seeds its own date.
+                            PendingJournalDay.request(day.millis)
+                            navController.navigate(
+                                CurioRoutes.journalEditor(CurioRoutes.PERSONAL_NEW)
+                            ) { launchSingleTop = true }
+                        }
                     )
                 }
             }
@@ -371,14 +431,49 @@ fun PersonalChipsRow(
             }
         ) {
             // The shelf's own first step, for the same reason as the row above.
+            //
+            // ── v413 — AND IT IS A BOOK, NOT A BUTTON ──
+            //
+            // "No books yet / Open the shelf" was a door inside a door — it led
+            // to the same shelf this row already is (member: "for books show 3
+            // book suggestions"). The row now offers three real books out of
+            // Curio's own catalog, drawn with the same cover chip a shelved book
+            // wears, and one tap shelves it and opens it. The catalog is why
+            // this is possible offline: every one of its ~800 books arrives
+            // with its real chapter list, its page count and its own cover.
             if (books.isEmpty()) {
-                item("empty-books") {
-                    EmptyDoorChip(
-                        glyph = CurioIcons.Add,
-                        label = "No books yet",
-                        caption = "Open the shelf",
-                        onClick = {
-                            navController.navigate(CurioRoutes.BOOKS) { launchSingleTop = true }
+                item("empty-books-lead") {
+                    EmptyDoorLead(
+                        title = "Nothing here yet",
+                        caption = "Pick one to start with."
+                    )
+                }
+                items(items = suggestedBooks, key = { it.topicId }) { hit ->
+                    BookChip(
+                        book = PersonalBookEntity(
+                            id = "",
+                            title = hit.title,
+                            author = hit.author,
+                            coverUrl = hit.coverUrl
+                        ),
+                        onClick = pick@{
+                            // One tap, one book: the shelf's own row (and this
+                            // row's empty state) disappears the moment the write
+                            // lands, because both read the same flow. The label
+                            // is explicit (and named differently from the flag it
+                            // guards) so the early return can never be read as
+                            // returning from something else.
+                            if (shelving) return@pick
+                            shelving = true
+                            scope.launch {
+                                val id = runCatching { shelveSuggestion(hit) }.getOrNull()
+                                shelving = false
+                                if (id != null) {
+                                    navController.navigate(CurioRoutes.bookDetail(id)) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
                         }
                     )
                 }
@@ -507,6 +602,118 @@ private fun EmptyDoorChip(
             )
         }
     }
+}
+
+/**
+ * v413 — THE LINE THAT ASKS FOR THE WRITING.
+ *
+ * An empty door's row used to open with a chip that said what was MISSING
+ * ("No pages yet / Start your first one"); it now opens with the member's own
+ * last three days as chips (see [emptyDayChips]) and this line in front of them,
+ * because a row of three dates with nothing said about them reads as a list of
+ * dates rather than as an invitation (member: "show like today, yesterday or day
+ * before date and say write down something about them").
+ *
+ * It is sized and centred like the chips beside it — a lead-in, not a heading —
+ * and it carries no button of its own: the chips under it are the actions.
+ */
+@Composable
+private fun EmptyDoorLead(title: String, caption: String) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    Column(
+        modifier = Modifier
+            .width(LEAD_WIDTH)
+            .height(CHIP_HEIGHT),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = ink
+        )
+        Spacer(Modifier.height(3.dp))
+        Text(
+            caption,
+            style = MaterialTheme.typography.labelSmall,
+            color = ink.copy(alpha = 0.55f),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+/** The lead-in's measure — wider than a chip, so its sentence sets in 2–3 short
+ *  lines beside the dates rather than in a column of single words. */
+private val LEAD_WIDTH = 158.dp
+
+/** One day an empty Pages row offers: the moment it stands for, its name and
+ *  the date itself. */
+private data class EmptyDoorDay(
+    val millis: Long,
+    val label: String,
+    val caption: String
+)
+
+/**
+ * v413 — THE LAST THREE DAYS, as the first thing an empty Pages row offers.
+ *
+ * Today, yesterday and the day before — the three days anyone can still say
+ * something about, and the three a diary is actually written backwards from.
+ * The third is named by its WEEKDAY rather than as "day before yesterday": at a
+ * chip's width the two words that say when it was are the weekday and the date
+ * under it, and "Day before yesterday" would either wrap or shrink to fit.
+ *
+ * Each chip carries its own local midnight, which is what the journal page
+ * stores for a day (`startOfToday`/`shiftDay` — a journal day is a calendar day).
+ */
+private fun emptyDayChips(now: Long = startOfToday()): List<EmptyDoorDay> {
+    val locale = java.util.Locale.getDefault()
+    val date = java.text.SimpleDateFormat("d MMMM", locale)
+    val weekday = java.text.SimpleDateFormat("EEEE", locale)
+    return listOf(0L, 1L, 2L).map { daysAgo ->
+        val millis = shiftDay(now, -daysAgo)
+        EmptyDoorDay(
+            millis = millis,
+            label = when (daysAgo) {
+                0L -> "Today"
+                1L -> "Yesterday"
+                else -> weekday.format(java.util.Date(millis))
+            },
+            caption = date.format(java.util.Date(millis))
+        )
+    }
+}
+
+/**
+ * v413 — SHELVE A SUGGESTED BOOK, AND OPEN IT.
+ *
+ * The write is the same row the shelf's own add flow makes for a catalog book —
+ * title, author, cover, the catalog's page count and its REAL chapter list, and
+ * the `catalogId` that lets the book's page read those chapters, its synopsis and
+ * its ranges back out of Curio's own JSON offline. Nothing here is a guess:
+ * every field comes from the catalog entry the member just tapped.
+ *
+ * `createdAtMillis`/`updatedAtMillis` are stamped here so the new book sorts
+ * into the shelf as the newest thing in it (the store keeps a zero it is given,
+ * but a book added now belongs at the head of a "what you are reading" row).
+ */
+private suspend fun shelveSuggestion(hit: BookCatalog.Hit): String {
+    val id = newPersonalBookId()
+    val now = System.currentTimeMillis()
+    PersonalRepositoryHolder.repo.saveBook(
+        PersonalBookEntity(
+            id = id,
+            title = hit.title,
+            author = hit.author,
+            coverUrl = hit.coverUrl,
+            totalChapters = hit.chapterCount,
+            pageCount = hit.pageCount,
+            catalogId = hit.topicId,
+            createdAtMillis = now,
+            updatedAtMillis = now
+        )
+    )
+    return id
 }
 
 @Composable

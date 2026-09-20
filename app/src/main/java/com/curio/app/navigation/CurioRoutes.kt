@@ -80,6 +80,38 @@ object PendingCabinetFilter {
 }
 
 /**
+ * v413 — WHICH DAY A NEW JOURNAL PAGE OPENS ON.
+ *
+ * A journal page starts on today ([startOfToday] in the journal editor), which
+ * is the right answer for "write something" and the wrong one for a day the
+ * member PICKED before arriving: Home's empty Pages row offers the last three
+ * days as chips, and a chip that opened today's page would silently disagree
+ * with its own label.
+ *
+ * A plain stash rather than a route argument, for the reason
+ * [PendingCabinetFilter] is one: the journal route already carries an entry id
+ * ("new", or a saved row's), and a second argument there would have to be
+ * threaded through every caller of `journalEditor`. The page consumes it once,
+ * in the same `remember` that seeds its date, and only a NEW page's seed reads
+ * it — a saved page keeps the date it was written on.
+ */
+object PendingJournalDay {
+    private var dateMillis: Long? = null
+
+    /** Stashes the day the next new journal page should open on. */
+    fun request(millis: Long) {
+        dateMillis = millis
+    }
+
+    /** Consumes the pending day, if any. */
+    fun take(): Long? {
+        val millis = dateMillis ?: return null
+        dateMillis = null
+        return millis
+    }
+}
+
+/**
  * Out-of-band handoff for the "Done exploring" notification action.
  *
  * The action's broadcast receiver tears the session down and launches

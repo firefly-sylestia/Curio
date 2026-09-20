@@ -1127,7 +1127,6 @@ fun HomeScreen(navController: NavController) {
             // small fixed-shape chips that open straight into their pages.
             PersonalChipsRow(
                 navController = navController,
-                onWrite = { writeSheetOpen = true },
                 // The doors' plate has to be the paint this page is actually
                 // wearing (a lane wash, or Home's own rose tint), or it shows as
                 // a pale rectangle across the row (see PinnedDoorRow).
