@@ -1078,14 +1078,33 @@ private fun DrawScope.drawVoicePulse(
         clipRect(right = playedUpTo) {
             drawPath(wave, accent, style = stroke)
         }
-        // The playhead spans the band, so it can never be clipped either.
-        drawLine(
-            color = accent,
-            start = Offset(playedUpTo, bandTop - halfStroke * 0.5f),
-            end = Offset(playedUpTo, bandBottom + halfStroke * 0.5f),
-            strokeWidth = 2f.dp.toPx(),
-            cap = StrokeCap.Round
-        )
+        // ── v423 — THE PROGRESS RIDES THE WAVE ────────────────────────
+        //
+        // The head of the heard run was a straight bar across the band, which is
+        // not part of a hand-drawn line and read as a knob bolted onto it
+        // (member: "the progress straight knob in the wave"). It is a BEAD now —
+        // a dot of the note's own ink sitting ON the line, at the step the head
+        // has actually reached — and it is drawn ONLY while there is somewhere
+        // left to go: a note played to its end, and a recording in progress
+        // (whose strip has been "heard" all the way to its own front), wear no
+        // knob at all, which is what made the live meter look inaccurate
+        // (member: "the floating recorder waves feels inaccurate with that
+        // straight knob").
+        if (progress < 0.995f) {
+            val bead = points.minByOrNull { point ->
+                val away = point.x - playedUpTo
+                away * away
+            }
+            if (bead != null) {
+                val radius = (strokeWidth * 0.62f).coerceAtLeast(2f)
+                drawCircle(
+                    color = ink.copy(alpha = 0.22f),
+                    radius = radius,
+                    center = Offset(bead.x, bead.y + depthDrop)
+                )
+                drawCircle(color = accent, radius = radius, center = bead)
+            }
+        }
     }
 }
 

@@ -74,7 +74,6 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingJournalDay
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import androidx.navigation.NavController
 import java.time.Instant
@@ -480,8 +479,11 @@ private fun MoodSelector(
             // — the same colour story with nothing bleeding through.
             color = selected?.let { lerp(journalPaperRaised(), personalMoodInk(it), 0.22f) }
                 ?: journalPaperRaised(),
-            // v411 — the journal's own depth: a soft shadow, no hairline.
-            modifier = Modifier.curioCardShadow(RoundedCornerShape(50), 2.dp)
+            // v423 — NO DEPTH ON THE FEELING. The pill and the six chips under
+            // it wear a shadow no more: a mood is a choice on the page, not a
+            // card lying on it (member: "remove the shadow from the how did the
+            // day feel").
+            modifier = Modifier
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -581,7 +583,7 @@ private fun MoodOption(
         color = if (on) lerp(journalPaper(), tint, 0.22f)
         // v411 — the journal's own paper and depth (no hairline anywhere).
         else journalPaper(),
-        modifier = modifier.curioCardShadow(RoundedCornerShape(14.dp), 1.5.dp)
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 9.dp),
