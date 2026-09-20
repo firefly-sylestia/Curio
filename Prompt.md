@@ -130,15 +130,34 @@ source for the film/series basics it already fetches.
   paragraph it NAMES was what tipped the pair over and the break landed between the two.
   `paginateBlocks` now holds the break while a page holds nothing but a heading.
 
-**REMAINING, in the member's own order:**
+**DONE (v426b — wider providers and scraping doors, this session):** the member picked
+this item first and chose "wire the key fields now, add them as optional keys".
+
+- **`ComicVineFetch.kt`** — the KEYED comics door, `COMIC_VINE_API_KEY` (optional: env +
+  `buildConfigField` + `.env.example` + both workflows). Asked FIRST for a `COMIC` and LAST
+  for a manga. Its `status_code` is read from the JSON, not the HTTP code (an invalid key
+  answers **401 with a valid body** — verified live), and requests are paced 1.1s apart for
+  the free key's own 1/second rule. Returns a `Volume` turned into `MangaFetch.Hit`.
+- **Marvel and DC keys: deliberately NOT wired.** Marvel's developer API was DISCONTINUED
+  (announced 2025; its keys answer nothing by 2026) and DC never published one; Marvel's
+  scheme also wanted a private key inside the APK. Comic Vine carries both publishers.
+- **`StandardEbooksFetch.kt`** — keyless, the door that answers for a CLASSIC: its OPDS feed
+  (`/feeds/opds/all?query=…&per-page=5`) read for title/author/summary/cover. **Verified
+  live**: Middlemarch, Moby-Dick, Great Expectations, Crime and Punishment and The Odyssey
+  all resolved with the right author and a real cover, and a manga title correctly returned
+  nothing. Added as a `BookCoverFetch.BookCoverProvider` (STANDARD_EBOOKS), to the reveal's
+  live fallback, and as `BookEnrichment`'s description door of last resort.
+- **The by-hand gap** — `BookEnrichment.comicsPass` asks `MangaFetch` for a comics row's own
+  kind and fills ONLY what is empty (cover, author, synopsis, length). `PersonalKinds`
+  gained `isComicBook` / `asksComicSources`, which every routing decision now asks; a
+  `COMIC` searched in the shelf keeps its kind (it used to be saved as a plain book) and
+  falls back to Open Library only when the comics sources answered nothing.
+
+**REMAINING:**
 
 1. **Series fetching + covers, and a detail sheet for a series** — the member wants a
    series' own covers fetched and its details opened in the SAME bottom sheet the topic
    reveal uses, with the lookup adding information while the stored ones stay.
-2. **More providers / more scraping doors** (books, and per the member's answer also
-   artworks/artists/songs/films). Comic Vine and the publishers' APIs are the named keyed
-   ones. A manga added BY HAND (the Type door) still cannot fetch its own cover — that is
-   the enrichment door for comics, deliberately left out of v426's own guard.
 
 ## 5. Work log
 

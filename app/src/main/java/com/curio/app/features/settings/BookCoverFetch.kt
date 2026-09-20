@@ -43,13 +43,22 @@ object BookCoverFetch {
 
     /** Cover providers the hub offers, ordered BEST-FIRST (v356): iTunes is
      *  the default keyless ebook search; Open Library is the pure title-cover
-     *  fallback; LibraryThing needs a free key (LIBRARY_THING_API_KEY) and
+     *  fallback; Standard Ebooks (v426b) is the keyless public-domain door,
+     *  the one that answers for a classic; LibraryThing needs a free key
+     *  (LIBRARY_THING_API_KEY) and
      *  resolves covers via ISBN. v371 — Google Books was REMOVED as a cover
      *  source (its keyless volume search rarely returns a usable thumbnail);
      *  it still powers the ★ ratings + ISBN lookups in the background. */
     enum class BookCoverProvider(val label: String, val description: String) {
         ITUNES("iTunes", "Keyless ebook search"),
         OPEN_LIBRARY("Open Library", "Title covers · keyless"),
+        // v426b — the public-domain door (keyless). Standard Ebooks publishes a
+        // real cover, a one-line summary and a blurb for every classic it
+        // typesets, and it is the only one of these providers that answers for
+        // a nineteenth-century novel: iTunes is a shop that very often has none
+        // of them, and Open Library's title endpoint serves a 1×1 placeholder
+        // for a great many. See [StandardEbooksFetch].
+        STANDARD_EBOOKS("Standard Ebooks", "Classics · keyless"),
         LIBRARY_THING("LibraryThing", "ISBN covers · free key")
     }
 
@@ -117,6 +126,8 @@ object BookCoverFetch {
             BookCoverProvider.ITUNES -> itunesThumbnail(bookName, author)
             BookCoverProvider.OPEN_LIBRARY ->
                 "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
+            BookCoverProvider.STANDARD_EBOOKS ->
+                standardEbooksCover(bookName, author)
             BookCoverProvider.LIBRARY_THING -> libraryThingCover(bookName, author)
         }
     }
@@ -200,6 +211,20 @@ object BookCoverFetch {
         val isbn = resolveIsbn(title, author) ?: return null
         return "https://covers.librarything.com/devkey/$key/large/isbn/$isbn"
     }
+
+    /**
+     * v426b — STANDARD EBOOKS' own cover for a title, or null when it does not
+     * have the book (which is most books: its library is public domain only).
+     *
+     * The lookup is its OPDS feed's own search — keyless, and the same one
+     * [com.curio.app.features.personal.StandardEbooksFetch] uses for a blurb —
+     * and the matching is strict, so a query that finds nothing real answers
+     * null rather than somebody else's classic.
+     */
+    private fun standardEbooksCover(title: String, author: String?): String? =
+        com.curio.app.features.personal.StandardEbooksFetch.find(title, author)
+            ?.coverUrl
+            ?.takeIf { it.isNotBlank() }
 
     /** First ISBN (ISBN-13 preferred) from a keyless Google Books search. */
     private fun resolveIsbn(title: String, author: String?): String? {
@@ -357,6 +382,11 @@ object BookCoverFetch {
             BookCoverProvider.ITUNES -> itunesThumbnail(book.name, book.byline)?.let { candidates.add(it) }
             BookCoverProvider.OPEN_LIBRARY ->
                 candidates.add("https://covers.openlibrary.org/b/title/${Uri.encode(book.name)}-M.jpg")
+            // v426b — the public-domain door: a REAL cover for a classic, which
+            // is the one thing iTunes' ebook shop and Open Library's title
+            // endpoint both routinely fail to produce for one.
+            BookCoverProvider.STANDARD_EBOOKS ->
+                standardEbooksCover(book.name, book.byline)?.let { candidates.add(it) }
             BookCoverProvider.LIBRARY_THING -> libraryThingCover(book.name, book.byline)?.let { candidates.add(it) }
         }
         for (url in candidates) {

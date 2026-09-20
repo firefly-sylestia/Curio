@@ -63,6 +63,21 @@ object PersonalKinds {
     fun isComics(kind: String): Boolean =
         kind == MANGA || kind == MANHWA || kind == MANHUA || kind == LIGHT_NOVEL
 
+    /**
+     * v426b — True for the kinds a COMICS DATABASE answers for. [isComics] is
+     * the MANGA family (its four keyless catalogues are the ones that hold them);
+     * a Western [COMIC] belongs to the same world through a different door —
+     * Comic Vine, which is the database that holds a volume of *Watchmen* or
+     * *Saga*, and which the keyless manga catalogues have never heard of. The
+     * distinction is kept because the ROUTING differs: a manga asks its four
+     * keyless sources FIRST and Comic Vine last, while a comic asks Comic Vine
+     * first (see [com.curio.app.features.personal.MangaFetch.search]).
+     */
+    fun isComicBook(kind: String): Boolean = kind == COMIC
+
+    /** True for every kind a comics source is the right place to look for. */
+    fun asksComicSources(kind: String): Boolean = isComics(kind) || isComicBook(kind)
+
     /** The kind id for a stored value, falling back to [BOOK] for anything new. */
     fun idOf(value: String?): String =
         all.firstOrNull { it.equals(value?.trim(), ignoreCase = true) } ?: BOOK

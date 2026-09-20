@@ -3246,6 +3246,10 @@ private fun BookCoverPoster(
         if (bookFetchConsent && !liveFallbackDone && exhausted) {
             val providers = listOf(
                 com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.ITUNES,
+                // v426b — the public-domain door, between the shop and the keyed
+                // ISBN provider: a classic that iTunes' ebook search does not
+                // carry (which is most of them) has a real cover here, keyless.
+                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.STANDARD_EBOOKS,
                 com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.LIBRARY_THING
             )
             var url: String? = null

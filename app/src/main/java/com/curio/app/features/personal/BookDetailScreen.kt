@@ -291,7 +291,11 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 report.learned.isNotEmpty() ->
                     "Found " + report.learned.joinToString(", ") + "."
                 report.needsConsent ->
-                    "Book lookups are off in Settings — turn them on to search Open Library."
+                    // v426b — the message names the right catalogue: a manga or
+                    // a comic is never looked up in Open Library.
+                    if (com.curio.app.data.PersonalKinds.asksComicSources(current.kind))
+                        "Lookups are off in Settings — turn them on to search the comics sources."
+                    else "Book lookups are off in Settings — turn them on to search Open Library."
                 else -> "Nothing more found for this book."
             }
         }
@@ -756,7 +760,15 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 item("synopsis") {
                     SynopsisCard(
                         synopsis = about,
-                        source = if (catalogSynopsis.isNotBlank()) "Curio catalog" else "Open Library",
+                        // v426b — the credit line names the source that really
+                        // answered: a manga or a comic's about-text came from its
+                        // own comics sources, never from a books catalogue.
+                        source = when {
+                            catalogSynopsis.isNotBlank() -> "Curio catalog"
+                            com.curio.app.data.PersonalKinds.asksComicSources(current.kind) ->
+                                "the comics sources"
+                            else -> "Open Library"
+                        },
                         // v389 — while the member is WRITING, the description is
                         // folded to a line: it is a thing to read, not a thing
                         // to scroll past on the way to their own words. Tap it

@@ -1,3 +1,8 @@
+ADD:
+- Books: a manga, comic, manhwa or light novel added BY HAND finds its own cover now — a row you typed in (or that came out of a file name) had never been through a search, so it kept a blank plate and no about-text forever; it is handed to the sources its own kind belongs to and everything the row is missing is filled in, with nothing it already has ever replaced.
+- Books: a Comic searches the comics sources now, not a books catalogue — Comic Vine is the door that holds Marvel's and DC's volumes both, and it brings a volume's own cover, publisher, year and how many issues it runs to (it is a free key, so it is asked only when the key is set; without one the search falls back to Open Library exactly as before).
+- Books: Standard Ebooks joins the cover sources — the keyless door that actually answers for a classic, where the ebook shop often has no nineteenth-century novel at all and Open Library's title cover is very often a 1×1 placeholder; it also brings the one-line summary the about-text falls back to.
+
 FIX:
 - Reading: a reflowable book's page flow never shows a sheet with nothing but a heading on it — a heading is big type with margins of its own, so the paragraph it names is what pushed the pair over the page and the break landed between the two; a page holding nothing but a heading keeps it company now.
 - Reading: a reflowable book's pinch magnifies the page live and settles when you let go — the type size is what these pages are MADE of, so the old zoom re-measured every block in the book on every event, which is the stutter; the page grows in the draw phase under your fingers and the type lands once, at the size you asked for.

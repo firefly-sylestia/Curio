@@ -854,7 +854,7 @@ private fun AddBookSheet(
                         // A manga's own unit is the volume as often as the
                         // chapter, so the question says so rather than asking a
                         // light novel how many chapters it has.
-                        if (PersonalKinds.isComics(kind)) "How many chapters or volumes?"
+                        if (PersonalKinds.asksComicSources(kind)) "How many chapters or volumes?"
                         else "How many chapters?",
                         style = MaterialTheme.typography.bodyMedium,
                         color = ink.copy(alpha = 0.7f),
@@ -938,6 +938,13 @@ private fun AddBookSheet(
                     // Read BEFORE the coroutine starts, so a kind tapped while
                     // the search is in flight cannot relabel its own results.
                     val comics = PersonalKinds.isComics(kind)
+                    // v426b — a WESTERN COMIC asks the comics sources too, and
+                    // for the same reason a manga does: the catalogue that holds
+                    // a volume of *Watchmen* is Comic Vine, not Open Library. It
+                    // keeps the books catalogue as its FALLBACK though — Open
+                    // Library really does carry trade paperbacks and graphic
+                    // novels, and a keyless build has no Comic Vine at all.
+                    val comicBook = PersonalKinds.isComicBook(kind)
                     val wanted = kind
                     scope.launch {
                         // CURIOS'S OWN CATALOG FIRST, for a BOOK: instant,
@@ -948,16 +955,19 @@ private fun AddBookSheet(
                         val local = if (comics) emptyList()
                         else withContext(Dispatchers.IO) { BookCatalog.search(text) }
                         catalogHits = local
-                        // …THEN the wider sources. A book or a comic goes to
-                        // Open Library; a manga, manhwa, manhua or light novel
-                        // goes to the COMICS sources ([MangaFetch], keyless, in
-                        // order: AniList, MangaDex, MAL, Kitsu). A failure only
-                        // matters when nothing else answered, so an offline
-                        // phone still gets a useful sentence instead of an
-                        // apology.
+                        // …THEN the wider sources. A plain book goes to Open
+                        // Library; a manga, manhwa, manhua or light novel goes
+                        // to the COMICS sources ([MangaFetch] — its keyless four
+                        // in order, AniList → MangaDex → MAL → Kitsu); and a
+                        // WESTERN COMIC (v426b) asks those same sources with
+                        // Comic Vine FIRST, falling back to Open Library only
+                        // when they answer nothing, so a keyless build keeps
+                        // exactly what it had. A failure only matters when
+                        // nothing else answered, so an offline phone still gets
+                        // a useful sentence instead of an apology.
                         val remote = withContext(Dispatchers.IO) {
-                            if (comics) {
-                                MangaFetch.search(text, wanted)?.map { found ->
+                            if (comics || comicBook) {
+                                val viaComics = MangaFetch.search(text, wanted)?.map { found ->
                                     BookHit(
                                         title = found.title,
                                         author = found.author,
@@ -968,6 +978,8 @@ private fun AddBookSheet(
                                         source = found.source
                                     )
                                 }
+                                if (comicBook && viaComics.isNullOrEmpty()) searchOpenLibrary(text)
+                                else viaComics
                             } else {
                                 searchOpenLibrary(text)
                             }
@@ -1075,7 +1087,11 @@ private fun AddBookSheet(
                                 author = hit.author,
                                 cover = hit.coverUrl,
                                 chapters = hit.chapters.takeIf { it > 0 } ?: hit.volumes,
-                                kind = if (PersonalKinds.isComics(kind)) kind
+                                // v426b — the COMIC kind is carried onto the row
+                                // too (it used to be saved as a plain book, so a
+                                // comic added from a search lost the one label
+                                // the member had just chosen for it).
+                                kind = if (PersonalKinds.asksComicSources(kind)) kind
                                 else PersonalKinds.BOOK
                             )
                         }
@@ -1130,7 +1146,7 @@ private fun AddBookSheet(
             }
             if (searched && !searching && !failed && hits.isEmpty() && catalogHits.isEmpty()) {
                 Text(
-                    if (PersonalKinds.isComics(kind))
+                    if (PersonalKinds.asksComicSources(kind))
                         "Nothing found in the comics sources. Add it yourself instead."
                     else "Nothing in the catalogue. Add the book yourself instead.",
                     style = MaterialTheme.typography.bodySmall,
@@ -1145,7 +1161,7 @@ private fun AddBookSheet(
                 hits = emptyList()
             }) {
                 Text(
-                    if (PersonalKinds.isComics(kind)) "Add it myself" else "Add the book myself",
+                    if (PersonalKinds.asksComicSources(kind)) "Add it myself" else "Add the book myself",
                     color = accent
                 )
             }

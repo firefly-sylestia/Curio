@@ -90,6 +90,24 @@ val tmdbEscaped: String = envTmdbApiKey
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// v426 — OPTIONAL Comic Vine API key (free for non-commercial use): the KEYED
+// door for WESTERN COMICS, and the one that actually answers for them — it
+// holds Marvel's and DC's volumes both, asked by name, with the cover, the
+// publisher, the year and how many issues a volume runs to. It is the door the
+// member asked for under "comic vine (needs a free key)", and it is the ONLY
+// one: Marvel's own developer API was discontinued (its keys answered nothing
+// by 2026) and DC never published one, so a publisher key here would be a door
+// onto a closed room. Comic Vine restricts the free key to non-commercial use
+// and 200 requests per resource per hour, which is why it is asked only when a
+// comics kind is on the shelf and only once per row.
+//  https://comicvine.gamespot.com/api/
+// Unset = the keyless manga sources keep doing the work exactly as before.
+val envComicVineApiKey: String? = System.getenv("COMIC_VINE_API_KEY")?.trim()?.takeIf { it.isNotEmpty() }
+val cvkEscaped: String = envComicVineApiKey
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Supabase Android client configuration. The URL and publishable/anon key are
 // safe for a public client; the service-role key must never be shipped here.
 val envSupabaseUrl: String? = System.getenv("SUPABASE_URL")?.trim()?.takeIf { it.isNotEmpty() }
@@ -165,6 +183,11 @@ android {
         // v389f — optional TMDB key: film/anime artwork and facts, and the
         // episode list of a title that maps to a show. Empty string otherwise.
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbEscaped\"")
+
+        // v426 — optional Comic Vine key: the comics sources ask it first for a
+        // Western comic and last for a manga; empty string otherwise (the
+        // keyless cascade is unchanged, and no request is ever made without it).
+        buildConfigField("String", "COMIC_VINE_API_KEY", "\"$cvkEscaped\"")
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrlEscaped\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKeyEscaped\"")
 

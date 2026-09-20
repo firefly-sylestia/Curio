@@ -41,6 +41,20 @@ import java.util.concurrent.TimeUnit
  *     and all three are held to the same floor: fewer than three titled rows is
  *     not a chapter list.
  *
+ *  4. STANDARD EBOOKS (v426b), for the one kind of book every door above
+ *     answers badly: a CLASSIC. iTunes' ebook search is a shop that often has no
+ *     nineteenth-century novel at all, and Open Library's about-text for one is
+ *     frequently absent — while Standard Ebooks publishes a summary and a blurb
+ *     for every book it typesets, keyless ([StandardEbooksFetch]). Asked only
+ *     when the about-text is still blank after everything above.
+ *
+ *  5. A COMICS ROW ASKS ITS OWN SOURCES (v426b). A manga, manhwa, manhua, light
+ *     novel or comic is not in any of the four doors above — a search of a books
+ *     catalogue for a volume of a long series answers with a study guide about
+ *     it — so a row of a comics kind is handed back to [MangaFetch] instead
+ *     (see [comicsPass]), which is what finally gives a manga or comic added BY
+ *     HAND its cover, author, synopsis and length.
+ *
  * Everything here is best-effort: a failure leaves the book exactly as it was,
  * and nothing is fetched at all without consent.
  */
@@ -83,8 +97,8 @@ internal object BookEnrichment {
         // as its own source gave it (its cover, its synopsis and its chapter
         // count came from [MangaFetch] when it was added) instead of being
         // "enriched" with another book's facts.
-        if (PersonalKinds.isComics(book.kind)) {
-            return EnrichReport(book = book, learned = emptyList(), needsConsent = false)
+        if (PersonalKinds.asksComicSources(book.kind)) {
+            return comicsPass(book)
         }
 
         catalogMatch(updated)?.let { matched ->
@@ -163,6 +177,25 @@ internal object BookEnrichment {
             }
         }
 
+        // v426b — THE PUBLIC-DOMAIN DOOR, for the one kind of book every
+        // catalogue above answers badly: a classic. iTunes' ebook search is a
+        // shop that very often has no nineteenth-century novel at all, and Open
+        // Library's about-text for one is frequently missing entirely — while
+        // Standard Ebooks publishes a real summary and blurb for every book it
+        // typesets, keyless. Asked only when the about-text is STILL blank
+        // after everything above, so a modern book never costs a request.
+        if (wantDescription && updated.synopsis.isBlank()) {
+            val entry = withContext(Dispatchers.IO) {
+                runCatching {
+                    StandardEbooksFetch.find(updated.title, updated.author)
+                }.getOrNull()
+            }
+            entry?.description?.takeIf { it.length >= MIN_DESCRIPTION }?.let { text ->
+                updated = updated.copy(synopsis = text)
+                learned += "the description"
+            }
+        }
+
         return EnrichReport(
             book = updated,
             learned = learned,
@@ -170,6 +203,67 @@ internal object BookEnrichment {
                 updated.catalogId.isBlank() &&
                 !AppPreferences.bookFetchEnabledState
         )
+    }
+
+    /**
+     * v426b — A COMICS ROW ASKS ITS OWN SOURCES, and asks them for what the row
+     * is MISSING.
+     *
+     * The books doors below are wrong for a manga or a comic (a search of Open
+     * Library for a volume of a long series answers with a study guide about it),
+     * which is why this used to return the row untouched. That was right about the
+     * doors and wrong about the row: a manga or a comic added BY HAND — its own
+     * title typed, or read out of a file name — never went through a search at
+     * all, so it kept a blank plate and no about-text forever (the member's own
+     * note: "a manga added BY HAND still cannot fetch its own cover").
+     *
+     * So the row is handed back to the sources it actually belongs to
+     * ([MangaFetch] — its keyless four, and Comic Vine for a Western comic, asked
+     * for its own kind), and the FIRST entry that really matches the row's title
+     * fills in whatever the row does not have.
+     *
+     * ── NOTHING IS EVER OVERWRITTEN ────────────────────────────────────
+     * Every field is filled only while it is EMPTY: the cover the member chose
+     * (or the one a search already found), the synopsis they wrote into, the
+     * chapter count of the edition they are reading — all of it stays exactly as
+     * it is. A pass adds; it never replaces.
+     */
+    private suspend fun comicsPass(book: PersonalBookEntity): EnrichReport {
+        if (book.title.isBlank()) {
+            return EnrichReport(book = book, learned = emptyList(), needsConsent = false)
+        }
+        if (!AppPreferences.bookFetchEnabledState) {
+            return EnrichReport(book = book, learned = emptyList(), needsConsent = true)
+        }
+        val wanted = normalise(book.title)
+        val found = withContext(Dispatchers.IO) {
+            runCatching { MangaFetch.search(book.title, book.kind) }.getOrNull()
+        }?.let { hits ->
+            hits.firstOrNull { normalise(it.title) == wanted } ?: hits.firstOrNull()
+        } ?: return EnrichReport(book = book, learned = emptyList(), needsConsent = false)
+
+        val learned = mutableListOf<String>()
+        var updated = book
+        if (updated.coverUrl.isBlank() && found.coverUrl.isNotBlank()) {
+            updated = updated.copy(coverUrl = found.coverUrl)
+            learned += "the cover"
+        }
+        if (updated.author.isBlank() && found.author.isNotBlank()) {
+            updated = updated.copy(author = found.author)
+            learned += "the author"
+        }
+        if (updated.synopsis.isBlank() && found.description.isNotBlank()) {
+            updated = updated.copy(synopsis = found.description)
+            learned += "the description"
+        }
+        // A comics row counts in CHAPTERS (a manga's own unit is its chapter),
+        // and volume counts are only used when the source gave no chapter count.
+        val length = if (found.chapters > 0) found.chapters else found.volumes
+        if (updated.totalChapters <= 0 && length > 0) {
+            updated = updated.copy(totalChapters = length)
+            learned += if (found.chapters > 0) "$length chapters" else "$length volumes"
+        }
+        return EnrichReport(book = updated, learned = learned, needsConsent = false)
     }
 
     /** What ONE Open Library visit learned — any of the three may be absent. */

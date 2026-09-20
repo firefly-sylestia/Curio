@@ -25,10 +25,9 @@ import java.util.concurrent.TimeUnit
  *
  * Every source here answers WITHOUT a key or an account, so the shelf works on a
  * fresh install with nothing to configure (the member's own answer on sources:
- * MangaDex, AniList, Jikan and Kitsu are keyless; Comic Vine and the publishers'
- * own APIs are the keyed doors, deliberately left out of this cascade). They are
- * asked IN ORDER and the first one that answers with anything wins, because each
- * is a different database rather than a different page of the same one:
+ * MangaDex, AniList, Jikan and Kitsu are keyless). They are asked IN ORDER and
+ * the first one that answers with anything wins, because each is a different
+ * database rather than a different page of the same one:
  *
  *  1. **AniList** (`graphql.anilist.co`) — the widest cover set, and the only one
  *     that knows a light novel is a NOVEL rather than a comic.
@@ -37,6 +36,22 @@ import java.util.concurrent.TimeUnit
  *  3. **Jikan** (`api.jikan.moe`) — MyAnimeList's own database, which is gently
  *     rate-limited (about three requests a second), which is why it is not first.
  *  4. **Kitsu** (`kitsu.io/api/edge`) — a last, generous fallback.
+ *
+ * ── AND THE KEYED DOOR, FOR THE KIND THE KEYLESS FOUR CANNOT ANSWER ─────
+ *
+ * v426b — a WESTERN COMIC ([PersonalKinds.COMIC]). The four catalogues above
+ * are Japanese and Korean
+ * databases: a volume of *Watchmen*, *Saga* or *The Sandman* comes back empty
+ * from every one of them. So this cascade gained [ComicVineFetch] — the
+ * member's own "comic vine (needs a free key)" — and it is asked **FIRST** for
+ * a Comic and **LAST** for a manga (a manga's own databases know it better than
+ * a Western comics wiki does, while a comic's own wiki is the only thing that
+ * has ever heard of it).
+ *
+ * Marvel's and DC's own APIs are NOT here on purpose: Marvel's was discontinued
+ * (its keys answer nothing), DC never published one, and Marvel's scheme wanted
+ * a private key shipped in the APK — which is not a private key. Comic Vine
+ * carries both publishers, named on every volume.
  *
  * Nothing is ever trusted blindly: a hit is shown in the sheet with what was
  * found and the member taps it, exactly like the books side.
@@ -78,12 +93,22 @@ internal object MangaFetch {
      */
     internal fun search(query: String, kind: String): List<Hit>? {
         val wanted = kind.trim().lowercase()
-        val sources = listOf<(String) -> List<Hit>?>(
+        // v426b — THE KEYED DOOR GOES WHERE IT BELONGS, NOT AT THE END.
+        // A Western comic asks Comic Vine first: it is the only source of the
+        // five that holds one, and asking a Japanese manga catalogue first
+        // spends four requests to be told nothing. A manga asks it last, because
+        // its own databases know it better (and its cover set is wider).
+        val comicVine: (String) -> List<Hit>? = { text ->
+            ComicVineFetch.search(text)?.map { volume -> volume.asHit() }
+        }
+        val keyless = listOf<(String) -> List<Hit>?>(
             { text -> aniList(text, wanted) },
             ::mangaDex,
             ::jikan,
             ::kitsu
         )
+        val comicVineFirst = wanted == PersonalKinds.COMIC
+        val sources = if (comicVineFirst) listOf(comicVine) + keyless else keyless + comicVine
         var reached = false
         for (source in sources) {
             val found = runCatching { source(query) }.getOrNull() ?: continue

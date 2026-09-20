@@ -167,6 +167,12 @@ jobs:
           # really a show) from TMDB first; unset stays on the keyless
           # providers (iTunes, TVMaze, Jikan).
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          # v426 — optional: free Comic Vine key (non-commercial use). When
+          # present it is baked into BuildConfig.COMIC_VINE_API_KEY and the
+          # comics sources ask it FIRST for a Comic and LAST for a manga, so a
+          # Western comic resolves its own cover, publisher, year and issue
+          # count; unset stays on the keyless comics sources.
+          COMIC_VINE_API_KEY: ${{ secrets.COMIC_VINE_API_KEY }}
           # Supabase (account sign-in + Online Mode backend). The project URL
           # and the publishable/anon key are PUBLIC client credentials and are
           # baked into BuildConfig; the service-role key must NEVER be added
