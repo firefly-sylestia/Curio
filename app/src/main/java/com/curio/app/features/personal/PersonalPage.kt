@@ -60,6 +60,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -138,6 +139,19 @@ internal data class PersonalPageMeta(
     val topicName: String = "",
     val categoryId: String = ""
 )
+
+// ── v413 — THE UNDO GESTURE'S CLOCK AND DEPTH ──────────────────────────────
+/**
+ * How long a change waits before it is worth remembering on its own. Typing a
+ * sentence is many changes a second and ONE thing the writer did, so the ring
+ * takes a snapshot at most this often: an undo takes back a thought, not a
+ * letter. It doubles as the ceiling on how much a single undo can lose —
+ * under a second of writing.
+ */
+private const val UndoIntervalMs = 900L
+
+/** How many moments the page can step back through. */
+private const val UndoDepth = 20
 
 /**
  * Renders the page. NOTHING here is a "save" button: the entry writes itself to
@@ -247,7 +261,7 @@ internal fun PersonalWritingPage(
         PersonalEditorState(doc).also { it.keepsChecklistRows = checklistFirst }
     }
 
-    // ── v413 — THE PAGE'S TEN HIDDEN TOOLS ───────────────────────────────────
+    // ── v413 — THE PAGE'S FIFTEEN HIDDEN TOOLS ───────────────────────────────
     // Read from the ONE bitmask preference, so a switch flipped on the Dev page
     // is felt the next time a page opens (and a page already open never loses a
     // tool mid-sentence). The date is resolved ONCE per page, which is what
@@ -257,6 +271,48 @@ internal fun PersonalWritingPage(
     // on, where the empty set makes every hook a no-op (see `journalGestures`).
     val journalGestures = enabledJournalGestures()
     val todayLine = remember { journalTodayLine() }
+
+    // ── v413 — THE CLIPBOARD, AND THE PAGE'S OWN UNDO RING ──────────────
+    //
+    // The gesture tools for copying and pasting need the clipboard, which only
+    // a composable can reach, and undo needs a memory of what the page looked
+    // like before the last change. Both belong to the PAGE rather than the
+    // editor state: the editor is a plain state holder with no way to talk to
+    // Android, and the page is already the thing that owns `doc`, the save and
+    // the load — the same shape the save gesture uses.
+    //
+    // The ring is pushed from the editor's own change callback (one line up),
+    // so every door into the document is covered: typing, the dock, a photo, a
+    // voice note and the gestures alike. It is COALESCED — one snapshot per
+    // [UndoIntervalMs] at most — so an undo takes back a thought instead of a
+    // letter, and it holds [UndoDepth] of them — about a page's worth of
+    // changes at a few hundred bytes each.
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    val undoBefore = remember(entryId) { mutableStateListOf<PersonalDoc>() }
+    var undoPushedAt by remember(entryId) { mutableLongStateOf(0L) }
+
+    /** Keep the document as it was, at most once per [UndoIntervalMs]. */
+    fun rememberForUndo(before: PersonalDoc) {
+        val now = System.currentTimeMillis()
+        if (now - undoPushedAt < UndoIntervalMs) return
+        undoPushedAt = now
+        undoBefore.add(before)
+        while (undoBefore.size > UndoDepth) undoBefore.removeAt(0)
+    }
+
+    /** Step the page back one remembered moment. */
+    fun undoLastChange() {
+        val previous = undoBefore.removeLastOrNull() ?: return
+        editor.replace(previous)
+        // `replace` deliberately does NOT announce a change (it is the LOAD
+        // door), so the page's own document is set here — otherwise the canvas
+        // would show the older page while the save pipeline still held the
+        // newer one, and the next save would write the undone words back.
+        doc = previous
+        // And the undo itself is not a step back can be taken again from: the
+        // clock is set now, so no snapshot of the pre-undo page is kept.
+        undoPushedAt = System.currentTimeMillis()
+    }
 
     // ── Voice notes (v389) ─────────────────────────────────────────────
     // The mic is a FLOATING button of the page's own, and while a note is being
@@ -295,7 +351,13 @@ internal fun PersonalWritingPage(
 
     BackHandler(enabled = liveVoice != null) { leave() }
     SideEffect {
-        editor.onDocChanged = { updated -> doc = updated }
+        editor.onDocChanged = { updated ->
+            // v413 — WHAT THE DOCUMENT WAS BEFORE THIS CHANGE, for the undo
+            // gesture (see the ring above). Read here, in the one callback every
+            // edit passes through, so nothing can slip past it.
+            rememberForUndo(doc)
+            doc = updated
+        }
     }
 
     // ── Load the page ──────────────────────────────────────────────────
@@ -844,7 +906,16 @@ internal fun PersonalWritingPage(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .journalGestures(journalGestures) { gesture ->
-                                    editor.runJournalGesture(gesture, todayLine, onSaveNow = { saveNow() })
+                                    editor.runJournalGesture(
+                                        gesture = gesture,
+                                        today = todayLine,
+                                        onSaveNow = { saveNow() },
+                                        onUndo = { undoLastChange() },
+                                        onCopy = { copied ->
+                                            clipboard.setText(androidx.compose.ui.text.AnnotatedString(copied))
+                                        },
+                                        onPaste = { clipboard.getText()?.text }
+                                    )
                                 },
                             onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
                             onTitlePosition = reportSectionLine

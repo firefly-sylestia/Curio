@@ -375,7 +375,7 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                 }
             }
-            // v413 — THE JOURNAL'S HIDDEN GESTURES. Ten writing tools that
+            // v413 — THE JOURNAL'S HIDDEN GESTURES. Fifteen writing tools that
             // have no button anywhere: each is a gesture made on the page
             // while the hand is already there, and each is its OWN switch so it
             // can be met one at a time (member: "add some gesture double tap
@@ -398,7 +398,7 @@ fun ExperimentsScreen(navController: NavController) {
                             CurioIcons.Info,
                             "Hidden writing tools",
                             if (gestureCount == 0) {
-                                "None switched on. Each of the ten is a gesture you make on the writing side of a journal, a book review or a topic note — the line under each switch says the gesture first, then what it does."
+                                "None switched on. Each of the ${JournalGestureTool.entries.size} is a gesture you make on the writing side of a journal, a book review or a topic note — the line under each switch says the gesture first, then what it does."
                             } else {
                                 "$gestureCount of ${JournalGestureTool.entries.size} switched on. They work on the writing side of a journal, a book review and a topic note."
                             }

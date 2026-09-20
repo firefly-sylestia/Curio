@@ -1373,7 +1373,8 @@ private fun BookLengthRow(
  * file's own pages when there are pages to count, else the chapter run), and
  * the chapter openings are drawn INSIDE the track as notches — so the structure
  * of the book and the position in it share one bar instead of being told on two
- * ([MAX_GAUGE_NOTCHES] keeps a 300-chapter file from drawing 300 hairlines).
+ * ([GaugeMarkTarget] keeps a 300-chapter file from drawing 300 hairlines, and
+ * thins the marks as the count climbs so the bar never becomes a fence).
  *
  * [chapterStarts] are the 1-based pages the chapters open at (empty for a file
  * whose outline carries names but no ranges — an EPUB from the catalogue), and
@@ -1454,13 +1455,43 @@ private fun ReadingGauge(
                     )
                 }
             }
-            if (pageCount > 1 && chapterStarts.size in 2..MAX_GAUGE_NOTCHES) {
-                val stroke = 1.5.dp.toPx()
-                chapterStarts.forEach { start ->
+            // ── v413 — THE DIVISIONS STAY A BAR ─────────────────────────
+            //
+            // One mark per chapter at a fixed weight turned a long book's
+            // track into a picket fence: at forty chapters the bar stopped
+            // reading as one bar and became a row of slats, and past the old
+            // cap of [MAX_GAUGE_NOTCHES] it drew NONE at all — the bar broke
+            // off rather than thinning out (member: "the progress view
+            // division by chapter when chapters are too much it look ugly the
+            // progress breaks with no fluidity continuation").
+            //
+            // Three rules keep it continuous at any chapter count:
+            //   * a STRIDE — never more than [GaugeMarkTarget] marks are drawn,
+            //     picked evenly from the chapter list, so 300 chapters read as
+            //     a rhythm instead of a block;
+            //   * a THINNING — the mark loses weight as the count rises
+            //     (1.6dp → 0.7dp), so the track keeps its edges;
+            //   * a SOFTENING — it is mixed toward the fill as the count rises,
+            //     so at high density it reads as light on the bar, not a cut
+            //     through it.
+            if (pageCount > 1 && chapterStarts.size >= 2) {
+                val stride = (
+                    (chapterStarts.size + GaugeMarkTarget - 1) / GaugeMarkTarget
+                    ).coerceAtLeast(1)
+                val shown = if (stride == 1) {
+                    chapterStarts
+                } else {
+                    chapterStarts.filterIndexed { index, _ -> index % stride == 0 }
+                }
+                val density = (shown.size.toFloat() / GaugeMarkTarget.toFloat())
+                    .coerceIn(0f, 1f)
+                val stroke = (1.6f - 0.9f * density).dp.toPx()
+                val mark = lerp(notch, accent, 0.30f * density)
+                shown.forEach { start ->
                     val at = (start - 1).toFloat() / (pageCount - 1).toFloat() * size.width
                     if (at > stroke && at < size.width - stroke) {
                         drawLine(
-                            color = notch,
+                            color = mark,
                             start = Offset(at, 0f),
                             end = Offset(at, size.height),
                             strokeWidth = stroke
@@ -2321,7 +2352,15 @@ private const val MAX_TICKS = 48
  * chapters and start reading as a texture, so a very long file simply gets the
  * clean fill (its chapter count is still stated under the bar).
  */
-private const val MAX_GAUGE_NOTCHES = 80
+/**
+ * v413 — HOW MANY DIVISIONS THE GAUGE EVER DRAWS.
+ *
+ * It was a CAP with an all-or-nothing rule (80, and past it the bar drew no
+ * divisions at all). It is a TARGET now: any chapter count is thinned down to
+ * about this many marks, so the bar always keeps its divisions and never turns
+ * into a fence — see the gauge's own note.
+ */
+private const val GaugeMarkTarget = 16
 
 // ── v412 — A HELD STEPPER RUNS, IT DOES NOT WALK ────────────────────────────
 /** How long a tile stepper must be held before it starts repeating. */

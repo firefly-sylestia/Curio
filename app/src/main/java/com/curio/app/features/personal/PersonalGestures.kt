@@ -14,13 +14,15 @@ import kotlin.math.abs
 /**
  * v413 — THE JOURNAL'S HIDDEN GESTURES.
  *
- * Ten writing tools with no button anywhere: each one is a GESTURE you make on
+ * FIFTEEN writing tools with no button anywhere: each one is a GESTURE you make on
  * the page, and each is a switch of its own on the Dev page so the member can
  * meet them one at a time and read what it does before switching it on
  * (member: "lets add some gesture double tap etc function extra tools hidden
  * one for journal editing. 10 differnt action add them as experiment options in
  * journal with each explained so i would know, add the option in dev
- * experiment").
+ * experiment", then "not just these but things like undo copy select all", which
+ * added the editing commands — undo, copy a line, copy the page, paste and
+ * delete a line).
  *
  * WHY THERE IS NO BUTTON: the tool dock is already a row of eleven, and every
  * one of these is something a writer does WHILE the hand is on the page — you
@@ -45,8 +47,13 @@ internal enum class JournalGesture {
     TWO_FINGER_SWIPE_DOWN,
     TWO_FINGER_SWIPE_LEFT,
     TWO_FINGER_SWIPE_RIGHT,
+    THREE_FINGER_TAP,
+    THREE_FINGER_DOUBLE_TAP,
     THREE_FINGER_SWIPE_UP,
     THREE_FINGER_SWIPE_DOWN,
+    THREE_FINGER_SWIPE_LEFT,
+    THREE_FINGER_SWIPE_RIGHT,
+    FOUR_FINGER_TAP,
     /** Single-finger: the page's BLANK space only (see [JournalGestureTool.DATE_LINE]). */
     BLANK_DOUBLE_TAP,
     /** Single-finger: the page's BLANK space only (see [JournalGestureTool.CYCLE_FACE]). */
@@ -56,8 +63,9 @@ internal enum class JournalGesture {
 /**
  * One switchable hidden tool: the gesture, the action it runs, and the sentence
  * that explains it on the Dev page. [bit] is the bit this tool owns in
- * [AppPreferences.journalGestureToolsState] — one int for all ten, so the Dev
- * page can grow a row without a new preference each time.
+ * [AppPreferences.journalGestureToolsState] — one int for the whole set, so the
+ * Dev page can grow a row without a new preference each time (the mask is 32
+ * bits wide, so there is room for another seventeen).
  */
 internal enum class JournalGestureTool(
     val bit: Int,
@@ -108,7 +116,7 @@ internal enum class JournalGestureTool(
     ),
     PAGE_SELECT(
         bit = 1 shl 5,
-        label = "Take the whole page",
+        label = "Select all on the page",
         how = "Two fingers, swipe right",
         what = "Selects everything on the page (and a second swipe lets it go), so a tool then applies to the whole entry — all of it bold, all of it quoted.",
         gesture = JournalGesture.TWO_FINGER_SWIPE_RIGHT
@@ -140,6 +148,41 @@ internal enum class JournalGestureTool(
         how = "Press and hold the blank part of the page",
         what = "Moves the line the caret is in through the app's four writing faces — the page's own hand, sans, mono and display — so a quotation or a title can be set apart without the font menu.",
         gesture = JournalGesture.BLANK_LONG_PRESS
+    ),
+    UNDO(
+        bit = 1 shl 10,
+        label = "Undo the last change",
+        how = "Three fingers, tap",
+        what = "Steps the page back to how it was a moment ago — the whole page, not one word — up to the last twenty moments. Typing in a burst counts as one moment, so an undo takes back a thought, not a letter.",
+        gesture = JournalGesture.THREE_FINGER_TAP
+    ),
+    COPY_LINE(
+        bit = 1 shl 11,
+        label = "Copy the line you are in",
+        how = "Three fingers, double-tap",
+        what = "Puts that one paragraph on the clipboard, ready to use anywhere else. Nothing on the page changes — the caret only has to be in the line.",
+        gesture = JournalGesture.THREE_FINGER_DOUBLE_TAP
+    ),
+    COPY_PAGE(
+        bit = 1 shl 12,
+        label = "Copy the whole page",
+        how = "Three fingers, swipe right",
+        what = "Puts everything you have written here on the clipboard and leaves it selected, so what was taken is the thing you can see.",
+        gesture = JournalGesture.THREE_FINGER_SWIPE_RIGHT
+    ),
+    PASTE(
+        bit = 1 shl 13,
+        label = "Paste under the caret",
+        how = "Three fingers, swipe left",
+        what = "Drops the clipboard in as fresh writing under the line you are in — one line per line it was copied as — and leaves the caret in the last of them.",
+        gesture = JournalGesture.THREE_FINGER_SWIPE_LEFT
+    ),
+    DELETE_LINE(
+        bit = 1 shl 14,
+        label = "Delete the line you are in",
+        how = "Four fingers, tap",
+        what = "Takes the line out of the page. Nothing is lost for good: the same floating \"Row removed\" pill appears with an Undo, exactly as if the row had been swiped away.",
+        gesture = JournalGesture.FOUR_FINGER_TAP
     );
 
     /** The switch's second line on the Dev page: the gesture, then the action. */
@@ -207,9 +250,13 @@ internal fun Modifier.journalGestures(
     if (enabled.isEmpty()) return this
     return this.pointerInput(enabled) {
         // Remembered across gestures: the second tap of a double-tap has to
-        // know where and when the first one was.
+        // know where and when the first one was. One slot PER FINGER COUNT — a
+        // two-finger tap must never count as the first half of a three-finger
+        // double-tap.
         var lastTapAt = 0L
         var lastTapPosition = Offset.Zero
+        var lastThreeTapAt = 0L
+        var lastThreeTapPosition = Offset.Zero
         awaitEachGesture {
             val first = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
             val start = first.position
@@ -250,32 +297,45 @@ internal fun Modifier.journalGestures(
             val net = (centre - start).getDistance()
             val still = travel <= GestureTapSlopPx && held <= GestureTapMaxMs
             val far = net >= GestureSwipeMinPx
-            if (still && peakFingers == 2 && JournalGesture.TWO_FINGER_DOUBLE_TAP in enabled &&
-                endedAt - lastTapAt <= GestureDoubleTapMs &&
-                (start - lastTapPosition).getDistance() <= GestureTapSlopPx
-            ) {
-                lastTapAt = 0L
-                onGesture(JournalGesture.TWO_FINGER_DOUBLE_TAP)
-                return@awaitEachGesture
-            }
             if (still) {
+                val secondOf = when (peakFingers) {
+                    2 -> JournalGesture.TWO_FINGER_DOUBLE_TAP
+                    3 -> JournalGesture.THREE_FINGER_DOUBLE_TAP
+                    else -> null
+                }
+                val tappedAt = if (peakFingers == 3) lastThreeTapAt else lastTapAt
+                val tappedWhere = if (peakFingers == 3) lastThreeTapPosition else lastTapPosition
+                if (secondOf != null && secondOf in enabled &&
+                    endedAt - tappedAt <= GestureDoubleTapMs &&
+                    (start - tappedWhere).getDistance() <= GestureTapSlopPx
+                ) {
+                    if (peakFingers == 3) lastThreeTapAt = 0L else lastTapAt = 0L
+                    onGesture(secondOf)
+                    return@awaitEachGesture
+                }
                 if (peakFingers == 2) {
                     lastTapAt = endedAt
                     lastTapPosition = start
                 }
-                val tap = if (peakFingers >= 3) null else JournalGesture.TWO_FINGER_TAP
-                // A three-finger tap is nobody's tool yet: it is swallowed so a
-                // stray third finger cannot fall back to the two-finger one.
+                if (peakFingers == 3) {
+                    lastThreeTapAt = endedAt
+                    lastThreeTapPosition = start
+                }
+                // A FOUR-finger tap is the last count with a tool of its own,
+                // and anything beyond it is swallowed: a stray finger must
+                // never fall back to the tap the count below it owns.
+                val tap = when (peakFingers) {
+                    2 -> JournalGesture.TWO_FINGER_TAP
+                    3 -> JournalGesture.THREE_FINGER_TAP
+                    4 -> JournalGesture.FOUR_FINGER_TAP
+                    else -> null
+                }
                 if (tap != null && tap in enabled) onGesture(tap)
                 return@awaitEachGesture
             }
             val horizontal = abs(centre.x - start.x) >= abs(centre.y - start.y)
             val gesture = when {
                 !far -> null
-                peakFingers >= 3 && !horizontal && centre.y < start.y ->
-                    JournalGesture.THREE_FINGER_SWIPE_UP
-                peakFingers >= 3 && !horizontal && centre.y > start.y ->
-                    JournalGesture.THREE_FINGER_SWIPE_DOWN
                 peakFingers == 2 && !horizontal && centre.y < start.y ->
                     JournalGesture.TWO_FINGER_SWIPE_UP
                 peakFingers == 2 && !horizontal && centre.y > start.y ->
@@ -284,6 +344,14 @@ internal fun Modifier.journalGestures(
                     JournalGesture.TWO_FINGER_SWIPE_LEFT
                 peakFingers == 2 && horizontal && centre.x > start.x ->
                     JournalGesture.TWO_FINGER_SWIPE_RIGHT
+                peakFingers == 3 && !horizontal && centre.y < start.y ->
+                    JournalGesture.THREE_FINGER_SWIPE_UP
+                peakFingers == 3 && !horizontal && centre.y > start.y ->
+                    JournalGesture.THREE_FINGER_SWIPE_DOWN
+                peakFingers == 3 && horizontal && centre.x < start.x ->
+                    JournalGesture.THREE_FINGER_SWIPE_LEFT
+                peakFingers == 3 && horizontal && centre.x > start.x ->
+                    JournalGesture.THREE_FINGER_SWIPE_RIGHT
                 else -> null
             }
             if (gesture != null && gesture in enabled) onGesture(gesture)
@@ -301,14 +369,18 @@ internal fun Modifier.journalGestures(
  * never do something the buttons cannot, and the page's auto-save sees it as
  * ordinary writing.
  *
- * [onSaveNow] is the one action the editor cannot do for itself: saving is the
- * page's business (it owns the row and the debounce), so the save gesture is
- * handed back up to the caller.
+ * A few actions cannot be the editor's own, and are handed back up: SAVING (the
+ * page owns the row and the debounce), UNDO (the page owns the ring of previous
+ * documents), and the CLIPBOARD (only a composable can reach
+ * `LocalClipboardManager`, and the editor must stay a plain state holder).
  */
 internal fun PersonalEditorState.runJournalGesture(
     gesture: JournalGesture,
     today: String,
-    onSaveNow: () -> Unit = {}
+    onSaveNow: () -> Unit = {},
+    onUndo: () -> Unit = {},
+    onCopy: (String) -> Unit = {},
+    onPaste: () -> String? = { null }
 ) {
     when (gesture) {
         JournalGesture.TWO_FINGER_TAP -> restoreRemovedRow()
@@ -322,7 +394,31 @@ internal fun PersonalEditorState.runJournalGesture(
         JournalGesture.THREE_FINGER_SWIPE_UP -> cycleLineMarker()
         JournalGesture.BLANK_DOUBLE_TAP -> insertTitleLine(today)
         JournalGesture.BLANK_LONG_PRESS -> cycleLineFace()
+        // ── v413 — THE COMMANDS ──────────────────────────────────────────
+        // Undo, copy, copy-all and paste are CLIPBOARD and PAGE business, so
+        // the editor only says WHAT the caret is on or WHAT to insert; the
+        // page decides how to reach the clipboard and the undo ring.
+        JournalGesture.THREE_FINGER_TAP -> onUndo()
+        JournalGesture.THREE_FINGER_DOUBLE_TAP ->
+            focusedLine()?.let { line -> onCopy(line) }
+        JournalGesture.THREE_FINGER_SWIPE_RIGHT -> {
+            // Select it AND copy it: a copy you cannot see reads as a guess.
+            selectPage()
+            onCopy(pageText())
+        }
+        JournalGesture.THREE_FINGER_SWIPE_LEFT ->
+            onPaste()?.takeIf { it.isNotBlank() }?.let { clipped -> insertPlainText(clipped) }
+        // Delete is `removeRow`, not `removeBlock`, on purpose: it is the one
+        // that hands the removed line to the floating Undo pill, so a four-
+        // finger tap can always be taken back.
+        JournalGesture.FOUR_FINGER_TAP -> focusedId?.let { line -> removeRow(line) }
     }
+}
+
+/** The words of the line the caret is in, when there are any. */
+private fun PersonalEditorState.focusedLine(): String? {
+    val id = focusedId ?: return null
+    return text(id).takeIf { it.isNotBlank() }
 }
 
 /** The line the caret is in, as a position on the page, or null. */

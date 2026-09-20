@@ -467,3 +467,9 @@ FIX:
 - Social: the Social tab's active indicator matches the rest of the bar now — it wore the accent at its button depth (a heavy deep-pink slab), and now wears the app's own accent like the other three tabs, with the label ink to match.
 - Books: the reading-progress card holds its height while the chapter name changes — a longer chapter grew the tile and pushed the card down, so two lines are reserved for the name.
 - Theme: the Curio rose is a touch more vibrant — the same hue and lightness, a little more saturation, so it reads less dusty in the banner, the hero and everything derived from it.
+
+ADD:
+- Writing: five more hidden gesture tools for editing — undo the last change (three-finger tap), copy the line you are in (three-finger double-tap), copy the whole page and select it (three-finger swipe right), paste the clipboard under the caret (three-finger swipe left) and delete the line you are in with the Undo pill ready (four-finger tap). Each is its own switch on the Dev page.
+
+FIX:
+- Books: the reading gauge keeps its chapter divisions however long the book is — a forty-chapter file turned the track into a picket fence and a longer one drew no divisions at all, so the marks are now thinned toward a fixed rhythm, losing weight and mixing into the fill as the count climbs.

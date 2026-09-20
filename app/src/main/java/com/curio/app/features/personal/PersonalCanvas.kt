@@ -2527,6 +2527,46 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         onDocChanged(doc())
     }
 
+    /**
+     * v413 — PLAIN WORDS AT THE CARET, ONE LINE EACH (the paste gesture).
+     *
+     * The insertion rules are [insertTitleLine]'s — after the line the caret is
+     * in, or at the end of the writing when there is no caret — with the one
+     * difference that makes it a PASTE rather than a heading: the words carry NO
+     * FLAG_TITLE runs, so they arrive as the prose they were copied as.
+     *
+     * A clipboard string is usually several lines, and a page is one block per
+     * line, so the text is SPLIT: pasting three sentences puts three lines in,
+     * not one block that has newlines hidden inside it (a block's text is a
+     * line — see the page's own model). The caret lands at the end of the last
+     * line inserted, which is where a paste leaves you in any editor.
+     */
+    fun insertPlainText(clipped: String) {
+        if (clipped.isEmpty()) return
+        // Named `clipped`, never `text`: this class has a `text(id)` member, and
+        // a parameter of that name would shadow the very call used below.
+        val lines = clipped.replace("\r\n", "\n").replace('\r', '\n').split('\n')
+        val after = focusedId?.let { order.indexOf(it) }?.takeIf { it >= 0 }
+            ?: order.indexOfLast { id -> !(blocks[id]?.isPhoto ?: false) }
+        var at = if (after < 0) order.size else (after + 1).coerceAtMost(order.size)
+        lines.forEach { line ->
+            val block = PersonalBlock(id = newBlockId(), text = line)
+            order.add(at, block.id)
+            blocks[block.id] = block
+            masks[block.id] = runsToMask(line.length, block.runs)
+            at++
+        }
+        val last = order.getOrNull((at - 1).coerceAtLeast(0))
+        if (last != null) {
+            caret = PersonalCaret(last, text(last).length)
+            focusedId = last
+        }
+        // Pasted words are already written, so nothing is armed for what is
+        // typed next — the same rule a picked chapter name follows.
+        armed = 0
+        onDocChanged(doc())
+    }
+
     /** Focus + caret request the canvas consumes on its next frame. */
     fun requestCaret(id: String, index: Int = 0) {
         caret = PersonalCaret(id, index)
