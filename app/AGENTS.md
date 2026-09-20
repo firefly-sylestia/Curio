@@ -9178,7 +9178,7 @@ only ever catches taps that mean "not in any of these".
   app's own rose banner does. Contrast bars: body ink ≥ 4.5:1 on the page and the
   deepest card, hero ink ≥ 4.5:1 on the hero (via `readableOn`), accent ink ≥
   3:1 on the page — re-measure with `contrast` if a tone moves. The dark accent
-  ink is `tone(hue, 0.46, 0.78)`; at 0.72 it came out around 4.2:1 on the deepest
+  ink is `tone(hue, 0.40, 0.69)` — **v423, because 0.78 cleared the contrast bar and read as NEON on a deep page** ("those new accnets are still bad only is dark mode its too bright"); 0.69 with the chroma eased still clears 4.5:1 there, and the night's `secondary`/`tertiary` fills are muted with it (0.42 / 0.44 of lightness). **v423 also made the card ladders STRIDES WITH VARIED CHROMA** (light 0.14→0.30, dark 0.34→0.24 climbing, lightness 0.995→0.85 / 0.14→0.30) — five steps at one chroma 0.03 of lightness apart is why every settings card read as the same shade of the same theme; at 0.72 it came out around 4.2:1 on the deepest
   card step, which is what "the button and texts blend" was.
 - **HOW IT IS WIRED.** `AppPreferences.NAMED_ID_PREFIX` (`named-`) + five ids in
   `COLOR_THEMES`; `namedThemeId()` reads the stored id WITHOUT the data layer

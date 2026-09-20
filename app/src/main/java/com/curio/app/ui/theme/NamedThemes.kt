@@ -105,8 +105,17 @@ enum class CurioNamedTheme(
     fun accentFor(dark: Boolean): Color =
         // v421 — the dark accent was 0.72, which on the deepest card step came
         // out around 4.2:1 — under the bar, and the member read the result as
-        // "the button and texts blend". 0.78 clears 5:1 on that same step.
-        if (dark) tone(hue, 0.46f, 0.78f) else tone(hue, 0.52f, 0.34f)
+        // "the button and texts blend".
+        //
+        // v423 — AND 0.78 WAS THE OTHER FAILURE: it cleared the contrast bar and
+        // read as NEON on a deep page (member: "those new accnets are still bad
+        // only is dark mode its too bright"). A night accent wants to be a
+        // JEWEL, not a highlight, so it drops to 0.69 with its chroma eased from
+        // 0.46 to 0.40 — still ≈4.8:1 on the deepest card step (the bar for small
+        // text is 4.5) because OKLab lightness is a cube root of luminance, and
+        // its LIGHT twin is untouched: the light page needed the deeper reading
+        // and still has it.
+        if (dark) tone(hue, 0.40f, 0.69f) else tone(hue, 0.52f, 0.34f)
 
     /** Body text on the page. */
     private fun bodyFor(dark: Boolean): Color =
@@ -146,11 +155,17 @@ enum class CurioNamedTheme(
         // The card ladder climbs ABOVE the page (the app's own rule): a card is
         // lighter than the page it sits on, and each nesting step descends back
         // toward it. Nothing here is ever a dark block.
-        surfaceContainerLowest = tone(hue, 0.16f, 0.995f),
-        surfaceContainerLow = tone(hue, 0.20f, 0.975f),
-        surfaceContainer = tone(hue, 0.22f, 0.945f),
-        surfaceContainerHigh = tone(hue, 0.24f, 0.905f),
-        surfaceContainerHighest = tone(hue, 0.26f, 0.86f),
+        // v423 — A LADDER, NOT A WASH. The five steps were 0.03 of lightness
+        // apart on one hue at one chroma, which is why every card on a page read
+        // as the same shade of the same theme (member: "why every elements gets
+        // the same shades of that theme specaily those settings cards"). Each
+        // step now has its own stride AND its own chroma — calmer and paler as it
+        // climbs — so nesting reads as planes rather than as one flat plate.
+        surfaceContainerLowest = tone(hue, 0.14f, 0.995f),
+        surfaceContainerLow = tone(hue, 0.18f, 0.972f),
+        surfaceContainer = tone(hue, 0.22f, 0.940f),
+        surfaceContainerHigh = tone(hue, 0.26f, 0.900f),
+        surfaceContainerHighest = tone(hue, 0.30f, 0.850f),
 
         error = tone(6f, 0.62f, 0.42f),
         onError = Color.White,
@@ -173,12 +188,14 @@ enum class CurioNamedTheme(
         primaryContainer = tone(hue, 0.42f, 0.22f),
         onPrimaryContainer = tone(hue, 0.34f, 0.86f),
 
-        secondary = tone(second, 0.52f, 0.46f),
+        // v423 — the night's second and third fills are muted with the accent
+        // (0.46/0.48 of lightness was the same neon on a deep page).
+        secondary = tone(second, 0.46f, 0.42f),
         onSecondary = tone(second, 0.30f, 0.92f),
         secondaryContainer = tone(second, 0.42f, 0.22f),
         onSecondaryContainer = tone(second, 0.36f, 0.88f),
 
-        tertiary = tone(third, 0.50f, 0.48f),
+        tertiary = tone(third, 0.44f, 0.44f),
         onTertiary = tone(third, 0.30f, 0.92f),
         tertiaryContainer = tone(third, 0.42f, 0.22f),
         onTertiaryContainer = tone(third, 0.34f, 0.88f),
@@ -197,11 +214,15 @@ enum class CurioNamedTheme(
         // lower than the light ladder's and the hue saturates less hard: at the
         // top of the old ladder the deepest card sat close enough to a bright
         // accent ink that the two read as one smudge.
-        surfaceContainerLowest = tone(hue, 0.30f, 0.15f),
-        surfaceContainerLow = tone(hue, 0.30f, 0.18f),
-        surfaceContainer = tone(hue, 0.30f, 0.21f),
-        surfaceContainerHigh = tone(hue, 0.30f, 0.24f),
-        surfaceContainerHighest = tone(hue, 0.30f, 0.27f),
+        // v423 — the same ladder rule as the light twin (see its own note): five
+        // steps at one chroma and 0.03 of lightness apart read as ONE shade of
+        // theme, which is what a page of settings cards looked like. The stride
+        // is wider and the chroma eases as the card climbs, so a page has planes.
+        surfaceContainerLowest = tone(hue, 0.34f, 0.14f),
+        surfaceContainerLow = tone(hue, 0.32f, 0.18f),
+        surfaceContainer = tone(hue, 0.30f, 0.22f),
+        surfaceContainerHigh = tone(hue, 0.27f, 0.26f),
+        surfaceContainerHighest = tone(hue, 0.24f, 0.30f),
 
         error = tone(6f, 0.60f, 0.62f),
         onError = tone(6f, 0.50f, 0.14f),

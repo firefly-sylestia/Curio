@@ -2,6 +2,10 @@ ADD:
 - Writing: two more looks for a voice note — Ribbon (the voice and its own mirror as one soft shape) and Beads (a dot per moment, each as big as the sound it stands for) — beside the four that were already there.
 
 FIX:
+- Appearance: a named theme's night accent is a jewel again instead of a highlight — Jade, Orchid, Ocean, Sand and Ember painted their icons, headings and small accents at 0.78 of lightness on a deep page, which cleared the contrast bar and still read as neon; they sit at 0.69 with the chroma eased, and the night's second and third fills are muted with them.
+- Appearance: a named theme's cards are a ladder, not one shade — the five card steps sat 0.03 of lightness apart on one hue at one chroma, so every card on a page (Settings especially) read as the same shade of the same theme; each step now has its own stride and its own chroma, in both twins.
+
+FIX:
 - Writing: a voice note's progress rides the wave — the head of the heard run was a straight bar across the strip, which read as a knob bolted onto a hand-drawn line (and sat at the far edge of the live recorder's own meter); it is a bead of the wave's ink now, drawn only while there is somewhere left to go.
 - Writing: the Bubble look is a voice message — the hand-drawn line inside the bubble is the mirrored bars a message is drawn with, and the bubble's foot corner is cut so it reads as a message rather than as a box.
 - Journals: "How did the day feel?" lost its shadow — the mood pill and its six chips are a choice on the page, not cards lying on it.
