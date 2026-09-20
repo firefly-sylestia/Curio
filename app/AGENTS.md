@@ -9482,6 +9482,15 @@ only ever catches taps that mean "not in any of these".
   the two pagers are never composed at once). Both `HorizontalPager`s pass
   `beyondViewportPageCount = 1`, so a turn's neighbour is already laid out instead
   of painting from scratch mid-slide (member: "smoother page turns / scrolling").
+- **v419 — THE PDF PAGE TURN HAS MOTION.** Each PDF page wears a `graphicsLayer`
+  that reads its own distance from the settle point and applies a small slide
+  (0.10 of a width), a 9° `rotationY` about its OUTER edge (`transformOrigin`),
+  a 4.5% shrink, a light fade and a long `cameraDistance` (24× density — the
+  default 8× curls too sharply). Deliberately small: a turn should read as paper
+  being carried across, not a spinning card. The offset is read INSIDE the layer
+  lambda (`currentPageOffsetFraction`), so a swipe invalidates the layer and not
+  the composition — do not hoist it into composition, that recomposes every page
+  on every frame.
   The press also drives a `0.9f` scale for touch feedback.
 - **THE PANTONE ACCENT IS APP-WIDE.** `curioRoseInk()` and
   `settingsCardChipTint()` now answer the Pantone palette first, so the icon

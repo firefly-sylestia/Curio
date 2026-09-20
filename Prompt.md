@@ -8,62 +8,38 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "also along with +- for chapter chnage and page chnage make it possible to update the
-> progress with the progress bar too, dont show the knob always, but it appears when user
-> touches it, also the flow animation is bad of it, can u chnage it and then some more
-> improvement to pdf epub reader, also btw the auto roation wasnt working in pdf or ebud with
-> the option"
-
-Confirmed with the member via `ask_user`:
-
-1. Make **the book card's gauge** (`BookDetailScreen`) draggable, knob only on touch.
-2. Rework **both** the gauge fill/sheen animation and the reader Scrolling↔Pages switch.
-3. Add **a real Auto-rotate option** (for both PDF and EPUB).
-4. Reader improvements: **better chapter & outline handling** + **smoother page turns/scrolling**.
+> "Add page-turn motion polish to the PDF pager (a subtle slide/curl)" — a follow-up to the
+> v418 reader work, chosen from the suggested next steps.
 
 ## 2. Findings
 
-- `ReadingGauge` (BookDetailScreen) was read-only: an 11dp `Canvas` track, a spring fill
-  (0.88/380), and an idle sheen whose band had HARD edges and restarted at the left every
-  2.8s. The card's chapter/page `ProgressTile`s drive `chapterMove`/`pageMove` overlays.
-- The reader presented as a NavHost route in `MainActivity` (no orientation lock in the
-  manifest), so rotation is the window's. The only control was `ReaderLook.pageUpright`,
-  a lone Switch shown ONLY for `content is ReaderContent.Pages`.
-- The reader's flow switch swapped `ReaderFlow` in one frame; both `HorizontalPager`s
-  composed only the visible page.
-- `ReaderContentsSection` listed chapters flat, with no indication of the current chapter.
+- The PDF reader is the second `HorizontalPager` in `BookReaderScreen.kt` (`PageReader`).
+  Its pages are **flush and full-bleed** (`pageSpacing = 0.dp`), so a swipe was two stills
+  swapping with nothing travelling between them.
+- Each page box already carries its own pinch/zoom `graphicsLayer` (owned by the page that
+  asked for the zoom); the outer page `Box` was plain.
 
-## 3. What was built (v418)
+## 3. What was built (v419)
 
-- **The gauge is a control.** `ReadingGauge` takes an optional `onScrub: (Float) -> Unit`;
-  a 28dp touch node (track drawn inside) handles horizontal drag + press via two
-  `pointerInput` blocks. The card maps the 0..1 fraction to a page (`setPageTo`) or chapter
-  (`setChapterTo`) — the same overlay setters the tiles use. A knob is drawn in the Canvas
-  and only fades/scales in while `scrubbing` (`knobAlpha`/`knobScale`), never at rest.
-- **The fill tracks the finger** (zero-length tween while scrubbing, spring 0.90/320
-  otherwise) and the **sheen no longer jumps** — its ends fade to `Color.Transparent`, so
-  the restart is invisible (band 0.34, 3.4s).
-- **Real auto-rotate.** `ReaderOrientation` enum (`AUTO`/`PORTRAIT`/`LANDSCAPE`) replaces
-  `pageUpright`; the ACTIVITY takes `orientation.requested()`, applied to BOTH kinds of
-  book. The \"page\" (ink) sheet now shows an AUTO-ROTATE three-way control for every book.
-- **Flow switch settles.** The reading surface fades + lifts 16dp over 230ms on `flowKey`
-  change, applied with `graphicsLayer` to ONE instance (the two pagers are never composed
-  together). Both `HorizontalPager`s pass `beyondViewportPageCount = 1` (smoother turns).
-- **Chapter highlight.** `ReaderContentsSection` takes `atIndex` and tints the entry at or
-  before the live place.
+- Each PDF page now wears an outer `graphicsLayer` driven by its own distance from the
+  settle point: a **0.10-of-a-width slide**, a **9° `rotationY`** about the page's OUTER
+  edge (`transformOrigin`), a **4.5% shrink**, a light fade (`0.22` at full offset) and a
+  long `cameraDistance` (`24f * density`, vs the default 8× which curls too sharply).
+- The offset is read **inside the layer lambda** (`pagerState.currentPage - page +
+  currentPageOffsetFraction`), never hoisted into composition — so a swipe invalidates the
+  layer, not the composition. Hoisting it would recompose every page on every frame.
 
 ## 4. Verification
 
-- Brace/paren balance 0/0 on both files; no `pageUpright`/`showUpright` refs remain.
-- Compose BOM `2026.05.01`, so `beyondViewportPageCount` and `colorStops`-gradients exist.
+- Brace/paren balance 0/0 on `BookReaderScreen.kt`; no leftover composition-level
+  `pageOffset`. New imports: `TransformOrigin`, `kotlin.math.abs`.
 - No Gradle in this environment — CI validates the compile.
 
 ## 5. Open notes
 
-- The reader's own \"Places\" progress bar was deliberately left read-only (the member
-  chose the book-card gauge only); easy to extend via the same `onScrub` hook if wanted.
-- `pageUpright` state was replaced outright, not migrated (the reader's look is process
-  state, not stored), so a member who had it on starts at AUTO.
+- The effect is a DRAW transform only: layout, the pinch-zoom and the marks are untouched.
+- The reflowable TEXT pager was left as-is (the ask named the PDF pager). The same layer
+  drops in there if wanted.
 
 ---
 

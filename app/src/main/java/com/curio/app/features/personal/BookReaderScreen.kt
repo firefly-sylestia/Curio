@@ -90,6 +90,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -136,6 +137,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import java.util.Locale
 import java.util.zip.ZipFile
@@ -2119,6 +2121,18 @@ private fun PageReader(
         // document being slid across, not a stack of cards with gaps between.
         pageSpacing = 0.dp
     ) { page ->
+        // ── v419 — A TURN HAS MOTION ─────────────────────────────────────
+        //
+        // The PDF's pages sat FLUSH and full-bleed, so a swipe was two stills
+        // swapping with nothing travelling between them (member: "add page-turn
+        // motion polish to the PDF pager (a subtle slide/curl)"). Each page now
+        // reads its own distance from the settle point and slides, tilts and
+        // eases back as the turn runs — the outgoing page trails a little behind
+        // and shrinks, the incoming one rises to meet the finger. It is a DRAW
+        // transform only: layout, the pinch and the marks are untouched. The
+        // offset is read INSIDE the layer lambda (see below), never in
+        // composition, so a swipe invalidates the layer instead of recomposing
+        // every page on every frame.
         val bitmap by produceState<Bitmap?>(null, document, page) {
             value = withContext(Dispatchers.IO) {
                 runCatching { renderPdfPage(context, document, page) }.getOrNull()
@@ -2155,6 +2169,29 @@ private fun PageReader(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                // ── v419 — THE PAGE-TURN LAYER ───────────────────────────
+                // Kept deliberately SMALL so a turn reads as paper being carried
+                // across, not a spinning card: a tenth of a width of slide, a
+                // 9° tilt, a 4.5% shrink and a light fade at the far edge, hung
+                // on the OUTER edge of the moving page (`transformOrigin`) and
+                // softened by a long camera so the tilt has no sharp curl.
+                .graphicsLayer {
+                    val off = (
+                        (pagerState.currentPage - page) +
+                            pagerState.currentPageOffsetFraction
+                        ).coerceIn(-1f, 1f)
+                    val away = abs(off)
+                    translationX = -off * size.width * 0.10f
+                    scaleX = 1f - away * 0.045f
+                    scaleY = 1f - away * 0.045f
+                    rotationY = off * 9f
+                    alpha = 1f - away * 0.22f
+                    transformOrigin = TransformOrigin(
+                        pivotFractionX = if (off >= 0f) 0f else 1f,
+                        pivotFractionY = 0.5f
+                    )
+                    cameraDistance = 24f * density
+                }
                 .onSizeChanged {
                     container = it
                     // The box being magnified is exactly what the pager gives
