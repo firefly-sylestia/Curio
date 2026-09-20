@@ -53,6 +53,9 @@ internal object MuseumFetch {
 
     private const val CLEVELAND = "https://openaccess-api.clevelandart.org/api/artworks/"
 
+    /** The credit a Cleveland answer wears on a work's sheet. */
+    private const val MUSEUM = "The Cleveland Museum of Art"
+
     /** How many rows a search is allowed to read (a sheet is not a catalogue). */
     private const val SEARCH_ROWS = 8
 
@@ -68,7 +71,9 @@ internal object MuseumFetch {
         /** The museum's own picture at a size a phone should hold. */
         val imageUrl: String,
         /** The work's page at the museum. */
-        val pageUrl: String
+        val pageUrl: String,
+        /** Which museum holds it — the credit line a work's sheet wears. */
+        val museum: String = MUSEUM
     )
 
     /**

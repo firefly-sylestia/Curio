@@ -153,6 +153,43 @@ this item first and chose "wire the key fields now, add them as optional keys".
   `COMIC` searched in the shelf keeps its kind (it used to be saved as a plain book) and
   falls back to Open Library only when the comics sources answered nothing.
 
+**DONE (v426b, art & music widening, this session):**
+
+- **`MuseumFetch.kt` — the Cleveland Museum of Art (keyless).** `work()` for the
+  artwork sheet, `worksBy()` for a maker's own list, `makerBio()` for the museum's prose
+  about a maker Wikipedia has no article for. Wired into `ArtworkFetch.artwork()` (now
+  Met ∥ Cleveland ∥ Wikipedia, merged Met → Cleveland → Wikipedia) and `worksBy` (Cleveland
+  appended after the Met's, deduped). Verified live: `{info, data:[…]}`, `_web.jpg` 200
+  image/jpeg 232 KB. **Its `artist=` parameter does NOT filter** (asked for Monet, got
+  Copley/Bellows/Eakins) — filtering happens here, on the `creators[]` line.
+- **`SongArtFetch` — the album side's second door.** MusicBrainz RECORDING search → the
+  release it sits on → Cover Art Archive `front-500`, behind MusicBrainz's own 1/second +
+  real-User-Agent rules, asked only when iTunes found nothing.
+
+**Doors checked and REJECTED, with the reason (so nobody re-tries them):**
+
+- **Art Institute of Chicago** — keyless and lovely, but its `iiif_url` images answer **403
+  to a non-browser client** (the same id the API returned; 843px and 400px alike).
+- **Deezer** — its search endpoints are **blocked anonymously**: `data: []` with
+  `total: 83` (verified on `/search/album?q=…`, `/search?q=…`). Single-resource reads
+  (`/album/{id}`) still work, but a search door needs search.
+- **Audius** — works keyless, but it is an independent-artist catalogue: "daft punk"
+  answered with other people's remixes, so it would put the wrong cover on a mainstream
+  album. A wrong cover is worse than none.
+- **LRCLIB** — keyless and working (lyrics + duration). NOT wired: lyrics are a NEW kind of
+  content on the song sheet, so it needs the member's word rather than arriving as a side
+  effect of an artwork pass. Offered as a follow-up.
+
+**STILL PENDING from the member's own message:**
+
+1. **More API KEYS for art / music / other lanes** — needs their pick of which keyed source
+   to wire (Rijksmuseum, Smithsonian, Harvard, Europeana, Discogs, Last.fm are all keyed;
+   `TMDB_API_KEY`, `GOOGLE_BOOKS_API_KEY`, `LIBRARY_THING_API_KEY`, `COMIC_VINE_API_KEY`
+   are already plumbed).
+2. **"Enable bottom sheet for more things in category"** — ambiguous; asked.
+3. **The feedback form should show whether or not Online mode is on** — read path still
+   requires Online mode + a session today (`FeedbackFormState.refresh`).
+
 **REMAINING:**
 
 1. **Series fetching + covers, and a detail sheet for a series** — the member wants a

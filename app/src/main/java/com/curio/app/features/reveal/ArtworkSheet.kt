@@ -134,21 +134,37 @@ object ArtworkFetch {
         // painting's sheet waited for the SUM of both round trips (user: "the
         // painting artworks loading was so slow"). In parallel the wait is the
         // slower of the two, and each source still fails alone.
-        val (met, wiki) = coroutineScope {
+        // v426b — AND CLEVELAND IS ASKED WITH THEM. It is the third door for a
+        // WORK (the Met's catalogue is one museum's; Cleveland's is another's,
+        // opened without a key), and it is the only source that can fill in a
+        // painting the Met does not hold at all — which used to leave the sheet
+        // reading an encyclopedia article about the painting instead of a
+        // museum's own record of it. The three run together, so the wait is
+        // still the slowest of them rather than their sum.
+        val (met, cleveland, wiki) = coroutineScope {
             val metJob = async { runCatching { metObject(title, artist) }.getOrNull() }
+            val clevelandJob = async { runCatching { MuseumFetch.work(title, artist) }.getOrNull() }
             val wikiJob = async { runCatching { wikiSummary(title, artist) }.getOrNull() }
-            metJob.await() to wikiJob.await()
+            Triple(metJob.await(), clevelandJob.await(), wikiJob.await())
         }
-        if (met == null && wiki == null) return@withContext null
+        if (met == null && cleveland == null && wiki == null) return@withContext null
         val merged = ArtworkInfo(
-            title = met?.title?.takeIf { it.isNotBlank() } ?: title.trim(),
-            artist = met?.artist.orEmpty(),
-            date = met?.date.orEmpty(),
-            medium = met?.medium.orEmpty(),
-            museum = met?.museum.orEmpty(),
-            imageUrl = met?.imageUrl?.takeIf { it.isNotBlank() } ?: wiki?.imageUrl.orEmpty(),
+            title = met?.title?.takeIf { it.isNotBlank() }
+                ?: cleveland?.title?.takeIf { it.isNotBlank() }
+                ?: title.trim(),
+            // The Met answers attributed; Cleveland is the second museum's own
+            // record; Wikipedia supplies the prose, not the facts.
+            artist = met?.artist.orEmpty().ifBlank { cleveland?.maker.orEmpty() },
+            date = met?.date.orEmpty().ifBlank { cleveland?.date.orEmpty() },
+            medium = met?.medium.orEmpty().ifBlank { cleveland?.medium.orEmpty() },
+            museum = met?.museum.orEmpty().ifBlank { cleveland?.museum.orEmpty() },
+            imageUrl = met?.imageUrl?.takeIf { it.isNotBlank() }
+                ?: cleveland?.imageUrl?.takeIf { it.isNotBlank() }
+                ?: wiki?.imageUrl.orEmpty(),
             summary = wiki?.summary.orEmpty(),
-            pageUrl = met?.pageUrl?.takeIf { it.isNotBlank() } ?: wiki?.pageUrl.orEmpty()
+            pageUrl = met?.pageUrl?.takeIf { it.isNotBlank() }
+                ?: cleveland?.pageUrl?.takeIf { it.isNotBlank() }
+                ?: wiki?.pageUrl.orEmpty()
         )
         cache[key] = merged
         merged
@@ -170,7 +186,7 @@ object ArtworkFetch {
         if (limit >= MAKER_LIMIT) makerCache[name]?.let { return@withContext it }
         val resolved = runCatching {
             val ids = metIds(name, artistScoped = true).take(limit)
-            ids.mapNotNull { id ->
+            val fromMet = ids.mapNotNull { id ->
                 val objectJson = getJson("$MET/objects/$id") ?: return@mapNotNull null
                 val row = runCatching { JSONObject(objectJson) }.getOrNull() ?: return@mapNotNull null
                 val title = row.optString("title").trim()
@@ -183,6 +199,18 @@ object ArtworkFetch {
                         .ifBlank { row.optString("primaryImage") }
                 )
             }
+            // v426b — THE SECOND MUSEUM, and the works the Met simply does not
+            // hold. Cleveland answers with its own attributed rows (asked here
+            // because its own `artist` parameter does NOT filter — see
+            // [MuseumFetch]), so an artist's or painter's page is no longer
+            // empty just because the Met happens to hold nothing by them.
+            // The Met's own hits come first; Cleveland fills the rest of the
+            // list, and a work both museums hold stays one row.
+            val fromCleveland = runCatching { MuseumFetch.worksBy(name, limit) }
+                .getOrDefault(emptyList())
+            (fromMet + fromCleveland)
+                .distinctBy { it.title.trim().lowercase() }
+                .take(limit)
         }.getOrDefault(emptyList())
         if (limit >= MAKER_LIMIT) makerCache[name] = resolved
         resolved
@@ -220,7 +248,27 @@ object ArtworkFetch {
         val person = maker.trim()
         if (person.isBlank()) return@withContext null
         makerInfoCache[person]?.let { return@withContext it }
-        val record = runCatching { wikiPerson(person) }.getOrNull() ?: return@withContext null
+        // v426b — WIKIPEDIA FIRST, AND THE MUSEUM'S OWN WORDS WHEN THERE IS NO
+        // ARTICLE. Cleveland writes a real paragraph about the makers it holds,
+        // which is what gives an artist or painter page words when Wikipedia has
+        // no page for them at all (the same gap this file's Met-first rule left
+        // open for a maker the Met does not hold either).
+        val record = runCatching { wikiPerson(person) }.getOrNull()
+            ?: runCatching {
+                MuseumFetch.makerBio(person)
+                    ?.takeIf { it.length >= MIN_SUMMARY }
+                    ?.let { bio ->
+                        MakerInfo(
+                            name = person,
+                            summary = bio,
+                            // The biography carries no picture; the card's own
+                            // fallbacks (their works, then their books) stand.
+                            portraitUrl = "",
+                            pageUrl = ""
+                        )
+                    }
+            }.getOrNull()
+            ?: return@withContext null
         makerInfoCache[person] = record
         record
     }
