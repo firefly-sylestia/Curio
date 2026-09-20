@@ -663,8 +663,8 @@ private fun StatsDoorChip(
 ) {
     val tint = accent ?: MaterialTheme.colorScheme.primary
     val base = MaterialTheme.colorScheme.surfaceContainerHighest
-    // v411 — a Pantone theme's chip is SOLID (the accent mixed into the
-    // surface) and wears NO card border; every other theme is unchanged.
+    // v411 — the chip is SOLID (the accent mixed into the surface) and wears
+    // NO card border.
     val fill = if (accent != null) curioTintOn(base, tint, 0.16f) else base
     Surface(
         onClick = onClick,

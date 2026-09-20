@@ -118,7 +118,6 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.activePantoneTheme
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CurioIcons
@@ -780,14 +779,39 @@ fun heroLaneCategory(): CurioCategory? {
 }
 
 /**
- * The shared-hero family's page background: the Spin lane's category wash
- * when "Hero follows Spin lane" is on (the Cabinet's page language), else
- * [default] — so screens that never wore a tint keep their exact current
- * look until the toggle is flipped.
+ * v414 — the lane the CATEGORY TINT switch tints Home/Profile pages with: the
+ * single lane last picked on Spin, independent of the "Adaptive Hero" theme
+ * (which owns the HERO fill, not the page tint). Returns null when the tint
+ * switch is off, so an OFF switch keeps Home/Profile on their rose/cream page.
+ *
+ * Before v414 the Category tint row only drove the category-washed screens
+ * (Spin, Reveal, Cabinet); on Home it looked dead because Home's page falls
+ * back to the rose lerp unless the Adaptive Hero theme is on — this is the
+ * gate that makes the switch work there (member: "the category tint option
+ * isnt working, for home etc").
  */
 @Composable
-fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): Color =
-    heroLaneCategory()?.categoryBackgroundWash() ?: default
+fun categoryTintLane(): CurioCategory? {
+    if (!AppPreferences.tintWashEffective()) return null
+    val context = LocalContext.current
+    val lane = runCatching { AppPreferences.getLastSpinCategories(context).singleOrNull() }
+        .getOrNull() ?: return null
+    return runCatching { CurioCategories.byId(lane) }.getOrNull()
+}
+
+/**
+ * The shared-hero family's page background: the Spin lane's category wash
+ * when "Hero follows Spin lane" is on (the Cabinet's page language), else the
+ * CATEGORY TINT lane's wash when that switch is on, else [default] — so
+ * screens that never wore a tint keep their exact current look until a toggle
+ * is flipped.
+ */
+@Composable
+fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): Color {
+    heroLaneCategory()?.let { return it.categoryBackgroundWash() }
+    categoryTintLane()?.let { return it.categoryBackgroundWash() }
+    return default
+}
 
 /**
  * v223/v3xx51 — whether the torn shared heroes wear the Material theme's
@@ -804,10 +828,6 @@ fun materialHeroTearsOn(): Boolean = AppPreferences.materialThemeState
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
-    // v411 — a PANTONE theme's hero is one of the three colours the member
-    // specified (P 109-10 U / 2350 U / P 163-8 C), light twin by day and its
-    // own dark twin at night — the theme IS the hero, so it answers first.
-    activePantoneTheme()?.let { return it.heroFor(isCurioDarkTheme()) }
     // v223 — "Material hero tears": when the Material theme AND this
     // option are both on, the torn hero wears the scheme's
     // primaryContainer instead of the app-default rose/azure (or a lane).
@@ -890,9 +910,6 @@ fun settingsAccentInk(): Color {
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable
 fun settingsReadableInk(fill: Color): Color {
-    // v411 — the ink on a Pantone hero: the theme's own readable pair (the
-    // Pantone ink where it reads on the fill, a tint of it where it does not).
-    activePantoneTheme()?.let { return it.onHeroFor(isCurioDarkTheme()) }
     // v223 — Material hero tears: readable ink on primaryContainer.
     if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
@@ -919,10 +936,6 @@ fun settingsReadableInk(fill: Color): Color {
  */
 @Composable
 fun settingsCardAccentInk(): Color {
-    // v411 — a Pantone theme's option cards wear ITS ink (icons and headings
-    // in the Pantone colour, deepened where that colour cannot read on the
-    // page), never the app's coral identity.
-    activePantoneTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
     // v78 — light Curio only (the Material/AMOLED rose fallback is gone
     // with those styles).
     heroLaneCategory()?.let { return it.categoryInk() }
@@ -954,10 +967,6 @@ internal fun navigateToSettingsSection(navController: NavController, entry: Sett
  */
 @Composable
 fun settingsCardChipTint(): Color {
-    // v411 — a Pantone theme's own hero colour comes first, so the icon chips
-    // and the small controls on a card are painted in the member's Pantone
-    // rather than in coral (see the app-wide note on `curioRoseInk`).
-    activePantoneTheme()?.let { return it.heroFor(isCurioDarkTheme()) }
     // v78 — light Curio only (the Material/AMOLED coral fallback is gone
     // with those styles).
     heroLaneCategory()?.let { return it.themedAccent() }
@@ -1592,10 +1601,9 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.Contrast, "Paper", "White page with cream cards, or the reverse", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-paper"),
     // v411 — the three old rows (Material theme / Hero / Adaptive Hero) are
     // ONE door now: the Color theme sheet. The deep search points at that
-    // row, so "material", "azure", "pantone" and "hero" all still land in
+    // row, so "material", "azure" and "hero" all still land in
     // Appearance — see the sheet's own keywords below.
-    SettingsDeepRow(CurioIcons.Palette, "Color theme", "Curio, Azure, Material, Adaptive or one of the Pantone themes", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-color-theme"),
-    SettingsDeepRow(CurioIcons.Palette, "Pantone theme", "Cream, Terracotta or Lime — real Pantone colours", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-color-theme"),
+    SettingsDeepRow(CurioIcons.Palette, "Color theme", "Curio rose, Azure, Material or Adaptive Hero", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-color-theme"),
     // ── Preferences (v26) — search engine, explore behavior, pet personality ──
     // v19 — which search engine the "Explore in browser" button opens.
     SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),

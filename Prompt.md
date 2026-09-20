@@ -8,78 +8,67 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> "do a better ork best fitted for dark mode too. also with the gesture the select all works
-> but it doesnt show the tool also same as how the app gesture selects all i want similiar
-> select all for android select all too. also fix the chapter reading progress not showing
-> accurate chapter counts when i add or remove chapter it doesnt update ald the animation is
-> bad of it fix it push it all and watch cl after finish all."
+> "remove the pntone theme, also the category tint option isnt working, for home etc after
+> the paper white page cream paage option, also do somethign bout the backgroud and the
+> card color issues, and use elevation also fix the rose theme its kinda feels off somehow"
 
-Three separate fixes plus the usual delivery:
+Four asks plus delivery. Confirmed with the member via `ask_user` before editing:
 
-1. **The Pantone dark twin, fitted to dark mode.** The v413 night side (page 0.115, ladder
-   0.13–0.24) was a warm brown-grey that read as a dim light theme.
-2. **Select all should show its tools** — the gesture's page selection worked but the dock
-   said nothing about it, and Android's own Select all / Ctrl+A should behave the same way.
-3. **The reading gauge's chapter divisions** must follow the chapter count the card states
-   (they were placed from the file's outline alone, so adding/removing chapters changed
-   nothing and a file with no page ranges drew none at all), and the change must animate.
+1. **Remove the Pantone themes — DELETE COMPLETELY.** Stored Pantone choice falls back to
+   Curio rose.
+2. **Category tint should tint Home/Profile by the last Spin lane when ON** (rose/cream when
+   OFF).
+3. **Soft shadows + clearer fill steps** for card/background separation.
+4. **Rose (Curio) theme: MORE VIBRANT / richer.**
 
-The previous request (the v413 Pantone light revamp) went out as `6fc10d8a`; CI was still
-running when this session opened.
+## 2. Findings
 
-## 2. What the code actually looked like (findings)
+- **Pantone** was 3 themes in `ui/theme/PantoneThemes.kt`, woven through ~14 files:
+  `activePantoneTheme()` / `activePantoneThemeNow()` branches in `CurioTheme.kt`,
+  `CategoryInk.kt`, `CurioCategoryCard.kt`, `ExploreSessionService.kt`, Home/Profile/
+  Settings/Reveal screens; the `COLOR_THEME_PANTONE_*` ids + `PANTONE_ID_PREFIX` in
+  `AppPreferences.kt`; the Color theme sheet rows in `SettingsSectionScreen.kt`.
+- **Category tint** (`AppPreferences.tintWashEffective()` ↔ `categoryBackgroundWash()`)
+  only drove the category-washed screens (Spin/Cabinet/Reveal). Home fell straight to a
+  fixed rose lerp unless the *Adaptive Hero* theme was on, so the row looked dead there.
+  Profile used `heroPageBackground()` which also only took a lane under Adaptive Hero.
+- **Cards**: v411 made the light cream ladder deliberately subtle and relied on a 3dp
+  `curioCardShadow`; the member now reports the card/page separation is not reading.
+- **Rose**: `CurioColors.HomeRosewood` was nudged more vibrant in v413 (S 0.415 → 0.515)
+  and still "feels off".
 
-- **`PantoneTheme.darkScheme`** — page `page.at(0.115f, 0.20f)`, containers 0.13 → 0.24,
-  outline 0.28/0.22. The app's own dark scheme (`CurioDarkColorScheme`) is a PITCH-BLACK page
-  with `#121212 → #2C2C2C` steps (0.025-rung stride) and BRIGHT inverse-style accents.
-- **`PersonalEditorState.activeFlags()`** (`PersonalCanvas.kt`) branched on `focusedId` and
-  the native selection only. `selectPage()` sets `pageSelected` and parks the caret at the end
-  of the page and never touches `selections`, so the dock reported the LAST ROW's caret style
-  while the whole page was selected. `toggle()` already had a `pageSelected` branch (masks on
-  every row, with an `allOn` rule); only the report was missing.
-- **`ReadingGauge`** took `chapterStarts = chapters.map { it.pageStart }` from
-  `rememberBookChapters`, i.e. the FILE's own outline. `chapterCount` (the count the card
-  states, `shownTotal` while a length stepper is held) never reached it, so: no page ranges →
-  no divisions at all, and a member-set length changed nothing. Marks were also redrawn from
-  scratch on every change (a cut, not a move).
+## 3. What was built (v414)
 
-## 3. What was built
+- **Pantone removed completely.** `PantoneThemes.kt` deleted; every branch, import and
+  constant dropped; `COLOR_THEMES` is `CURIO/AZURE/MATERIAL/LANE`; `getColorTheme` migrates
+  a stored `pantone-*` id to `COLOR_THEME_CURIO` on read (kept `LEGACY_PANTONE_PREFIX` for
+  that one read). `curioTintOn` is now an unconditional opaque `lerp`.
+- **Category tint tints Home/Profile.** New `categoryTintLane()` in `SettingsHubScreen.kt`
+  (gated by the switch, reads the last single Spin lane, independent of Adaptive Hero);
+  `heroPageBackground()` now falls back to it, Home resolves its page through
+  `heroPageBackground(...)`. NOTE: because that resolver is shared, EVERY screen using
+  `heroPageBackground()` now takes the lane tint when the switch is ON — see §5 open item.
+- **Cards**: White-page light ladder re-pitched deeper (`surfaceContainerLow #FAF2E0` →
+  `Highest #E8D8B3`), `curioCardShadow` default elevation 3dp → 5dp with a hair more alpha.
+- **Rose**: `HomeRosewood` `#DC7482` (hue 352 unchanged, S 0.515 → 0.60, L eased to 0.659),
+  `HomeRosewoodDark` `#7D2C3B` matched; every derived pastel/wash/ink follows.
+- **Docs/changelog**: `app/AGENTS.md` sections marked RETIRED + the card-ladder/Paper notes
+  corrected; `20260922.txt` Pantone bullets dropped (never shipped — no REMOVE note) and
+  the three new FIX bullets added.
 
-- **Dark twin (v417).** Page `0.075` at sat 0.22 (a near-black carrying the hue), ladder
-  `0.10 / 0.125 / 0.15 / 0.175 / 0.20` (0.025 rungs, the app's own dark stride),
-  `surfaceVariant` 0.125, `outline` 0.26 / `outlineVariant` 0.16, `scrim` = ink @ 0.04. All
-  the bright roles are untouched (pale hero fill + deep ink on it, pale accent ink, bright
-  gold/sage/error) because that IS the app's dark language. Every pair re-measured ≥ 4.5:1
-  (see the table below).
-- **Select all shows its tools.** `activeFlags()` gains a `pageSelected` branch that answers
-  for the PAGE — a flag is active when every writing row carries it, the same rule `toggle`
-  uses — so all three doors (the gesture, the wrapped platform toolbar, Ctrl+A) light the dock
-  for the whole page. No behaviour was taken away from the one-field page: the platform's own
-  Select all still runs there (handles, cut, replace), and the native selection already covers
-  the whole entry, so the dock lights correctly on that path too.
-- **The gauge's divisions (v417).** New `gaugeMarks(chapterStarts, chapterCount, pageCount)`:
-  PAGE-PLACED when the file's ranges agree with the count on screen, else EVEN divisions of
-  that count; the call site passes `shownTotal` (else the file's list length) so a held length
-  stepper re-spaces the divisions live. The stride/thinning/softening from v413 still apply,
-  now over the resolved positions. The swap is a 240ms crossfade — `Animatable` + a
-  `DrawScope.drawGaugeMarks` that draws both halves — so divisions settle instead of snapping.
+## 4. Verification
 
-## 4. The dark palette, measured
+- Brace/paren balance checked 0/0 on all 15 touched Kotlin files (`TopicRevealScreen.kt`'s
+  +1 paren is pre-existing — confirmed against `HEAD`).
+- No `Gradle` in this environment — CI validates the compile.
 
-Ladder per theme at the new night values: page `#17150F` / `#17140F` / `#17160F`, cards
-`#1F1C14 → #403926` (Cream), `#1F1A14 → #403526` (Terracotta), `#1F1D14 → #403C26` (Lime);
-hairlines `#4E4736` / `#302C21`. Body ink 12.9–15.0:1 on the page and 8.6–9.6:1 on the
-DEEPEST card step, muted 5.6–6.6:1 on it, the accent 5.7–6.9:1, gold/sage 10–13:1, every
-container twin ≥ 5.5:1 against its own contents, the error pair ≥ 4.6:1.
+## 5. Open item to confirm with the member
 
-## 5. Status
-
-- Implemented in `PantoneThemes.kt`, `PersonalCanvas.kt`, `BookDetailScreen.kt`; docs
-  (`app/AGENTS.md`) and three FIX bullets in `20260922.txt` updated.
-- Brace/paren/bracket balance verified 0/0 on all three files; new imports
-  (`Animatable`, `FastOutSlowInEasing`, `DrawScope`) added.
-- No Gradle in this environment — CI validates the compile.
-- Committed, pushed, and CI watched on both this commit and the previous one.
+`heroPageBackground()` is the shared page resolver for ~25 screens (Support, Quests,
+Updates, Stats, Community, Recent, Cabinet, …). Tinting it by the last Spin lane when the
+Category tint switch is ON (default ON) means those pages now shift hue after a Spin under
+the default Curio rose theme too. If the member wants this scoped to Home/Profile ONLY, the
+lane branch should move out of `heroPageBackground` into a Home/Profile-only helper.
 
 ---
 

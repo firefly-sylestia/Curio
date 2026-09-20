@@ -56,8 +56,8 @@ internal fun personalIconTint(accent: Color): Color = settingsAccentInk()
  * journal is where Curio's writing happens, and it was dressed in the app's
  * generic container steps — the same fill as a settings row, on the same flat
  * elevation. It has its own paper now: a WARM parchment that carries a whisper
- * of the member's own accent ([personalAccent], so it follows a Pantone theme, a
- * lane-following hero or the rose without knowing which), rather than the
+ * of the member's own accent ([personalAccent], so it follows a lane-following
+ * hero or the rose without knowing which), rather than the
  * neutral cream every other card wears.
  *
  * It answers DARK mode with a warm near-black instead of a grey one, because ink

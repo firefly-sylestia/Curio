@@ -90,26 +90,31 @@ private val CurioWhitePageLightScheme = lightColorScheme(
     // without an outline on every box. Contrast for the ink only improves:
     // every fill moved away from it.
     //
-    // v411 — A SUBTLER CREAM, AND THE SHADOW CARRIES THE EDGE. The member:
-    // "with white pages they look good, just the cream color is too much maybe
-    // subtle cream, and also soft shadow no border just shadow instead of
-    // borders". So the ladder is pitched lighter (the card is a whisper of
-    // cream, not a tan plate) and no card draws a hairline any more —
-    // `curioCardEdgeColor` answers "no border" for EVERY theme now, and the
-    // soft shadow ([curioCardShadow]) is what lifts a card off the page.
-    // The steps still climb evenly, which is what keeps nesting legible.
+    // v411 — THE SHADOW CARRIES THE EDGE. The member: "with white pages they
+    // look good, just the cream color is too much maybe subtle cream, and also
+    // soft shadow no border just shadow instead of borders". So no card draws a
+    // hairline any more — `curioCardEdgeColor` answers "no border" for EVERY
+    // theme now, and the soft shadow ([curioCardShadow]) is what lifts a card
+    // off the page.
+    //
+    // v414 — CLEARER STEPS. v411's cream went a shade too subtle to read as a
+    // card at all (member: "do somethng bout the background and the card color
+    // issues, and use elevation"), so the ladder is re-pitched a touch deeper
+    // (still a soft cream, never a tan plate) and the shadow step went to 5dp:
+    // the FILL gives the card its plane and the SHADOW gives it its lift. The
+    // steps still climb evenly, which is what keeps nesting legible.
     background = Color(0xFFFFFFFF),
     onBackground = CurioColors.DeepPlum,
 
     surface                  = Color(0xFFFFFFFF),
     onSurface                = CurioColors.DeepPlum,
-    surfaceVariant           = Color(0xFFF7F0E2),
+    surfaceVariant           = Color(0xFFF5ECDA),
     onSurfaceVariant         = CurioColors.DeepPlum.copy(alpha = 0.75f),
     surfaceContainerLowest   = Color(0xFFFFFFFF),
-    surfaceContainerLow      = Color(0xFFFCF7EC),
-    surfaceContainer         = Color(0xFFF7F0E2),
-    surfaceContainerHigh     = Color(0xFFF2E8D5),
-    surfaceContainerHighest  = Color(0xFFECE1C8),
+    surfaceContainerLow      = Color(0xFFFAF2E0),
+    surfaceContainer         = Color(0xFFF4EAD4),
+    surfaceContainerHigh     = Color(0xFFEEE1C4),
+    surfaceContainerHighest  = Color(0xFFE8D8B3),
 
     error             = CurioColors.WarmCoralRed,
     onError           = CurioColors.CreamWhite,
@@ -282,18 +287,8 @@ fun isCurioDarkTheme(): Boolean = when (AppPreferences.themeModeState) {
  * progress accents that sit on cards/cream — the light-mode wash-out fix.
  */
 @Composable
-fun curioRoseInk(): Color {
-    // v411/v412 — APP-WIDE: under a Pantone theme the brand's "rose ink" role
-    // IS that theme's own ink (the Pantone colour, deepened where it cannot
-    // read), so every surface that asks for an accent ink — pills, plate
-    // tints, icon chips, the journal's own headings — comes back in the
-    // member's Pantone colours instead of coral. v412 extended the same rule
-    // to the two roles that were still holding their own identity (the gold
-    // and sage inks below) and to the 36 lane accents (see `CategoryInk.kt`):
-    // "I want all of them to get the colors no other colors".
-    activePantoneTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
-    return if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
-}
+fun curioRoseInk(): Color =
+    if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
 
 /**
  * v20 — the brand butter as INK, theme-aware: bright ButterYellow on dark
@@ -301,13 +296,8 @@ fun curioRoseInk(): Color {
  * light background). Gold twin of [curioRoseInk].
  */
 @Composable
-fun curioGoldInk(): Color {
-    // v412 — a Pantone theme derives it from its OWN hero number (see
-    // `PantoneTheme.goldInkFor`), so the streak flame and the XP figures are
-    // painted from the member's brief rather than from the brand butter.
-    activePantoneTheme()?.let { return it.goldInkFor(isCurioDarkTheme()) }
-    return if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.GoldInk
-}
+fun curioGoldInk(): Color =
+    if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.GoldInk
 
 /**
  * v20 — the soft sage as INK, theme-aware: soft Sage on dark surfaces, deep
@@ -315,12 +305,8 @@ fun curioGoldInk(): Color {
  * "done"/mastered icons, text and progress accents.
  */
 @Composable
-fun curioSageInk(): Color {
-    // v412 — the Pantone twin of the gold branch above, derived from the
-    // theme's ink number (see `PantoneTheme.sageInkFor`).
-    activePantoneTheme()?.let { return it.sageInkFor(isCurioDarkTheme()) }
-    return if (isCurioDarkTheme()) CurioColors.Sage else CurioColors.SageInk
-}
+fun curioSageInk(): Color =
+    if (isCurioDarkTheme()) CurioColors.Sage else CurioColors.SageInk
 
 /**
  * Non-composable dark check for services/workers — mirrors
@@ -350,12 +336,6 @@ fun isCurioDarkThemeForContext(context: Context): Boolean = when (AppPreferences
 @Composable
 fun curioColorScheme(): ColorScheme {
     if (materialThemeOn) return materialColorScheme()
-    // v411 — a PANTONE theme brings its own palette (and its own dark twin),
-    // so it answers before the Curio schemes: the paper flip below only ever
-    // describes Curio's own cream/white page pair. (`let` is inline, so this
-    // early return leaves the composable — and it keeps the chain readable:
-    // an `?.let` branch cannot sit mid-`if/else if`.)
-    activePantoneTheme()?.let { pantone -> return pantone.schemeFor(isCurioDarkTheme()) }
     if (isCurioDarkTheme()) return CurioDarkColorScheme
     // v409 — the paper flip: white page with cream cards (the shipped look),
     // or the reverse. Read reactively, so the switch repaints immediately.
@@ -364,35 +344,13 @@ fun curioColorScheme(): ColorScheme {
 }
 
 /**
- * v411 — the ACTIVE Pantone theme, or null when the color theme is one of the
- * app's own (Curio rose, azure, Material, Adaptive Hero). Everything that has
- * to paint a Pantone — the scheme above, the shared torn heroes, the sheet's
- * previews — asks this one question instead of re-reading the pref.
- */
-@Composable
-fun activePantoneTheme(): PantoneTheme? = activePantoneThemeNow()
-
-/**
- * v412 — the NON-COMPOSABLE twin of [activePantoneTheme], for the paths that
- * cannot read composition state: the category watermark map is built inside a
- * `remember` calculation lambda (`@DisallowComposableCalls`), so its
- * non-composable resolvers ([CurioCategory.categoryInkFor] /
- * [CurioCategory.themedAccentFor]) ask this instead. The read still happens
- * during composition at the call sites that ARE composable, so the theme
- * change still repaints them.
- */
-fun activePantoneThemeNow(): PantoneTheme? =
-    AppPreferences.pantoneThemeId()?.let { id -> PantoneTheme.fromId(id) }
-
-/**
  * v411 — NO CARD BORDER, IN ANY THEME.
  *
- * This started as the Pantone-only rule ("dont use any border for cards"), and
- * the member then asked for it everywhere: "soft shadow no border just shadow
- * instead of borders". So a card's edge is now its OWN FILL — every border/
- * `BorderStroke` site that asks this helper paints an edge of exactly the card's
- * colour, which is no border to see — and what separates a card from the page is
- * the fill step plus the soft shadow ([curioCardShadow]).
+ * The member's direction ("soft shadow no border just shadow instead of
+ * borders") is the whole card language: a card's edge is its OWN FILL — every
+ * border/`BorderStroke` site that asks this helper paints an edge of exactly the
+ * card's colour, which is no border to see — and what separates a card from the
+ * page is the fill step plus the soft shadow ([curioCardShadow]).
  *
  * The signature still takes [fill] and still returns a COLOUR on purpose:
  * `Surface(border = …)` and `Modifier.border(…)` call sites keep their exact
@@ -417,33 +375,32 @@ fun curioCardEdgeColor(fill: Color): Color = fill
  * DARK MODE IS UNTOUCHED: its plates step up from a black page and already wear
  * the theme's own glow ([curioDarkGlow]); a shadow there is invisible anyway.
  * So this returns the modifier unchanged at night.
+ *
+ * v414 — THE SHADOW CARRIES THE ELEVATION. The default step is a touch deeper
+ * (3dp → 5dp) with a hair more alpha, so a card visibly LIFTS off the page
+ * instead of relying on a near-invisible cream step alone.
  */
 @Composable
-fun Modifier.curioCardShadow(shape: Shape, elevation: Dp = 3.dp): Modifier =
+fun Modifier.curioCardShadow(shape: Shape, elevation: Dp = 5.dp): Modifier =
     if (isCurioDarkTheme()) this
     else shadow(
         elevation = elevation,
         shape = shape,
         clip = false,
-        ambientColor = CurioColors.DeepPlum.copy(alpha = 0.10f),
-        spotColor = CurioColors.DeepPlum.copy(alpha = 0.14f)
+        ambientColor = CurioColors.DeepPlum.copy(alpha = 0.12f),
+        spotColor = CurioColors.DeepPlum.copy(alpha = 0.17f)
     )
 
 /**
- * v411 — A TINT, RESOLVED SOLIDLY UNDER A PANTONE THEME.
+ * v411 — A TINT, RESOLVED SOLIDLY ON [base].
  *
- * The member's second rule for the new accents ("dont use transparent
- * colors"): nothing in those themes may be a see-through layer. Most of the
- * app tints by alpha (`accent.copy(alpha = 0.16f)`) because it composites over
- * an opaque surface and reads fine — but on a Pantone page a translucent chip
- * lets the page colour through, which is exactly the muddiness the rule is
- * about. So callers ask for the tint through here: a Pantone theme gets the
- * tint MIXED INTO [base] with [lerp] (opaque, no bleed-through), and every
- * other theme keeps the alpha it has always used.
+ * Callers ask for an accent tint through here so it composites over an opaque
+ * surface; the tint is MIXED INTO [base] with [lerp] (opaque, no bleed-through)
+ * rather than layered as an alpha. v414 — the Pantone branch that used to make
+ * this theme-dependent is gone; every theme now mixes solidly.
  */
 @Composable
-fun curioTintOn(base: Color, tint: Color, alpha: Float): Color =
-    if (activePantoneTheme() != null) lerp(base, tint, alpha) else tint.copy(alpha = alpha)
+fun curioTintOn(base: Color, tint: Color, alpha: Float): Color = lerp(base, tint, alpha)
 
 @Composable
 fun CurioTheme(

@@ -187,18 +187,22 @@ object CurioColors {
      * v413 — A TOUCH MORE VIBRANT (member: "did u chnage the curio rose color
      * it kinda looks odd now somehow, if not then ignore or just make it a
      * little more vibrant"). Nothing had moved it — #CF8B94 had been the rose
-     * since v7.36 — so this is the second half of that ask, done the only way
-     * that cannot break the family: THE HUE AND THE LIGHTNESS ARE UNTOUCHED
-     * (352°, L 0.678) and only the saturation steps up (0.415 → 0.515). Same
-     * rose, read a little more rose and a little less dusty; every ink, pastel
+     * since v7.36 — so that pass stepped the saturation up (0.415 → 0.515).
+     *
+     * v414 — RICHER STILL. v413's nudge did not land (member again: "fix the
+     * rose theme it kinda feels off somehow"), so the saturation takes a
+     * second, larger step (0.515 → 0.60) while the HUE STAYS AT 352° and the
+     * lightness only eases down (0.678 → 0.659) to keep it from going candy.
+     * It reads as a live rose now instead of a dusty one; every ink, pastel
      * twin, wash and blend above it is derived, so they all follow.
      */
-    val HomeRosewood     = Color(0xFFD7838E)
+    val HomeRosewood     = Color(0xFFDC7482)
     /** v81 — the dark-mode torn-hero twin: the same rosewood hue at a deep,
      *  slightly desaturated lightness (a NEW SHADE of the same spectrum).
-     *  v413 — the light twin's vibrancy step, matched (0.310 → 0.405) so the
-     *  day and night roses stay the one spectrum at their own lightness. */
-    val HomeRosewoodDark = Color(0xFF76323F)
+     *  v414 — matched to the light twin's second vibrancy step (0.405 → 0.48)
+     *  so the day and night roses stay the one spectrum at their own
+     *  lightness. */
+    val HomeRosewoodDark = Color(0xFF7D2C3B)
     // v27l — the optional sky-azure hero variant: a brighter, fresher azure
     // (the Science/Sky hue at sky-300-ish saturation, held a touch softer
     // than neon).

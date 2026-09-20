@@ -1,27 +1,28 @@
 FIX:
+- Appearance: the Category tint switch now tints Home and Profile too — with it on, their page wears the lane you last picked on Spin; before it did nothing there unless Adaptive Hero was the active theme.
+- Appearance: cards read again — the light themes' card fill steps are clearer and the soft shadow lifts a card off the page at a deeper step.
+- Theme: the Curio rose is richer and less dusty — the same hue with more saturation, day and night twins together.
 - Appearance: the Color theme sheet's pick survives its own close — the write was riding a coroutine scoped to the sheet, so dismissing the sheet cancelled it before it landed; the scope now outlives the sheet, and the reveal expands from the row you tapped.
 - Social: the bottom bar's Social tab wears the app's accent instead of the butter fallback — dark mode painted the tab yellow-on-yellow (a yellow pill with a yellow label, hence the invisible text), and the no-accent fallback is fixed for every page after it.
-- Appearance: the Paper option grays itself out where it can't act — dark mode and the Material, Adaptive Hero and Pantone themes paint their own pages, so the row is disabled with a line saying why instead of a switch that silently did nothing; the stored choice comes back on a light Curio or Azure theme.
+- Appearance: the Paper option grays itself out where it can't act — dark mode and the Material theme paint their own pages, so the row is disabled with a line saying why instead of a switch that silently did nothing; the stored choice comes back on a light Curio or Azure theme.
 - Appearance: picking a theme in the Color theme sheet takes — the reveal coroutine lived in the sheet's own scope, so closing the sheet cancelled the pref write mid-flight and the app repainted nothing; the write now survives the close.
 - Home: the Shuffle-the-deck dice shows again in dark mode — the disc is near-white and its glyph wore the banner's near-white ink, so the dice vanished into its own button; the glyph now wears the ink that reads on the disc itself.
-- Social: dark mode's filled accents are readable again — the active filter chip, the accent pills, the unread badge, your own chat bubbles, the send button and every moderation tab kept hard-coded white ink on what is a bright pale accent at night, so their words and icons vanished only in the dark; the ink now asks the fill it sits on and reads on the rose, azure and Pantone accents alike.
+- Social: dark mode's filled accents are readable again — the active filter chip, the accent pills, the unread badge, your own chat bubbles, the send button and every moderation tab kept hard-coded white ink on what is a bright pale accent at night, so their words and icons vanished only in the dark; the ink now asks the fill it sits on and reads on the rose and azure accents alike.
 - Cards: no more outlines anywhere — a card is its fill, its radius and a soft shadow now, so nothing reads as a drawn box (the cream is subtler with it, and the chapter and page controls on a book step in the same language).
 - Journal: its own paper — a warm page carrying a whisper of your theme instead of the app's flat cream — and its pages, cards and mood chips lift with the same soft shadow.
 - Journal: a voice note is ONE drawn wave — it was drawn twice, a mirror pair, which read as two waves folded together; the single pulse now sits on the page with a soft under-stroke behind it.
 - Books: one progress bar instead of two — the page gauge and the chapter tick row are one bar now, with each chapter's opening drawn inside its track.
 - Books: the chapter and page controls are two tiles you change while reading (the chapter one names the chapter) with how long the book is stated quietly beneath them.
 - What's New: the page shows the version this build really is.
-- Themes: a Pantone theme's colour now reaches the whole app — the icon chips, plate tints and accent inks follow it, not just the page and the hero.
 
 ADD:
-- Appearance: one Color theme door — Curio rose, Azure, Material, Adaptive Hero and three Pantone themes (Cream, Terracotta, Lime), each its own row with a preview of the page, the hero and the ink it would paint. Pastel colors and Category tint stay on the page.
+- Appearance: one Color theme door — Curio rose, Azure, Material and Adaptive Hero, each its own row with a preview of the page, the hero and the ink it would paint. Pastel colors and Category tint stay on the page.
 - Appearance: Light, Dark and System are one sliding switch with a sun, a moon and a half-and-half mark — no checkmarks.
 - Home: one hero — the torn banner is taller and "Today's quest / Shuffle the deck" lives inside it now, under your figures, instead of a button parked below the seam.
 - Home: the drawer's lanes are a star map — a star per lane, its size and brightness its knowledge, its colour its own accent, joined into constellations; tap one and its own figures open below the map.
 - Reading: hold a page arrow to keep turning — a tap still turns one page, holding turns them until you let go.
 
 FIX:
-- Theme: a Pantone theme is solid — never a see-through fill and never a border on a card — and each one has a dark twin built from its own three colours.
 - Home: the greeting is one line and the type is bigger — "Welcome back" over your name, the name at 40sp — and the "A fresh mix of ideas, picked for you" line under Today's quest is gone.
 - Books: a chapter move takes the page with it — picking a chapter lands the page on the page that chapter opens at, so the two steppers agree in both directions.
 - Books: the book's progress follows your reading — the reader writes the page it is showing back onto the book, so a PDF reopens where you actually stopped; a hand-set page can no longer outlive it by being written to the book later.
@@ -72,10 +73,8 @@ ADD:
 - Books: the reading-progress bar glides to its new place and counts up smoothly while you hold the +/-, and a slow sheen drifts along the filled part while it sits still.
 
 ADD:
-- Theme: a Pantone theme paints the WHOLE app now — Home and Profile banners, the page, the cards, the 36 lane colours, the error red, the streak gold and the mastery sage are all derived from your three Pantone numbers, with no coral, gold or lane hue left anywhere.
 
 FIX:
-- Theme: the Home and Profile heroes wear your Pantone colours now. They had their own copy of the hero rule and never read the Pantone palette, so they stayed rose while Settings and the Cabinet wore your three colours.
 
 ADD:
 - Books: hold the +/- on a book's reading progress and the count runs — a tap moves one step, a hold speeds up the longer you keep it, with a tick you can feel at every step.
@@ -482,11 +481,7 @@ FIX:
 - Home: the empty doors no longer offer a button that leads somewhere else — the "No pages yet" chip and the "No books yet" chip are gone, replaced by the days and the books themselves.
 
 FIX:
-- Theme: the three Pantone themes are repainted — every card, sheet and plate is a light reading of the theme's own page now, instead of a deep block of the hero colour, so nothing under Pantone Terracotta is brick-red furniture any more.
-- Theme: each Pantone palette has a full set of tones — its hero is the accent again with a pale chip twin beside it, its second and third fills are the ink colour and the page colour at accent depth (no more three copies of the hero), and its gold, sage and delete red are read off that theme's own warmest, coolest and alert hue, so the streak flame is amber in every theme and never green.
-- Theme: the Pantone delete red is no longer Material's own pink — the error container and the page-dimming scrim come from the palette too.
 
 FIX:
 - Books: the reading-progress divisions follow the chapter count you set — a book with no file, or one whose contents carry names but no page ranges, now shows a division per chapter, adding or removing a chapter adds or takes one away, and the divisions settle into their new places instead of the bar flickering.
-- Theme: the Pantone palettes are fitted to dark mode — a near-black page in the theme's own hue, cards stepping up in the same small stride the app's own dark theme uses, and hairline separators to match.
 - Journal: Select all shows its tools — with the whole page selected the tool bar now lights what that page carries, whichever door it came through (the gesture, Android's own Select all, or Ctrl+A).

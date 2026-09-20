@@ -137,6 +137,7 @@ import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
 import com.curio.app.data.openSearchUrl
 import com.curio.app.features.settings.heroLaneCategory
+import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
@@ -178,7 +179,6 @@ import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
-import com.curio.app.ui.theme.activePantoneTheme
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
@@ -189,7 +189,6 @@ import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.headerAccent
@@ -301,21 +300,19 @@ fun HomeScreen(navController: NavController) {
     // language) when the toggle is on; otherwise Home stays on the soft
     // rose-tinted background with the rose/azure hero. (The v27u Home tint
     // experiments were removed — this is their always-clean successor.)
-    val laneCat = heroLaneCategory()
-    // v412 — under a Pantone theme the page wears the Pantone page with a
-    // whisper of the Pantone hero (never the last Spin lane's wash — "no other
-    // colors"). Every other screen's page already resolves this way
-    // (`heroPageBackground` + the theme's own `categoryBackgroundWash`, both of
-    // which collapse to the Pantone page), so Home stays in that family.
-    val homeBg = if (laneCat != null && activePantoneTheme() == null) {
-        laneCat.categoryBackgroundWash()
-    } else {
+    // v414 — Home's page resolves through the shared `heroPageBackground`: the
+    // Adaptive Hero lane's wash first, else the CATEGORY TINT lane's wash (when
+    // that Appearance switch is on and a lane was last picked on Spin), else the
+    // soft rose-tinted default. Before v414 Home ignored the Category tint row
+    // entirely — it fell straight to the rose lerp unless Adaptive Hero was on,
+    // which is why the switch looked dead here.
+    val homeBg = heroPageBackground(
         androidx.compose.ui.graphics.lerp(
             MaterialTheme.colorScheme.background,
             settingsRoseAccent(),
             0.10f
         )
-    }
+    )
     // The hero + sticky top-bar pills share the SAME resolved fill (the
     // lane-aware homeRoseAccent below) so the menu/profile pills match the
     // quest hero in every mode.
@@ -2230,12 +2227,6 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
  */
 @Composable
 private fun homeReadableInk(fill: Color): Color {
-    // v412 — a Pantone theme's hero is one of ITS three colours, so the ink on
-    // it is the theme's own readable pair. This resolver was the bug: it never
-    // asked the Pantone palette, so Home's banner stayed rose/azure/lane while
-    // Settings and the Cabinet wore the member's Pantone (member: "the home
-    // profile hero etc they dont get the pantone colors why?").
-    activePantoneTheme()?.let { return it.onHeroFor(isCurioDarkTheme()) }
     // v223 — Material hero tears: readable ink on primaryContainer.
     if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
@@ -2252,10 +2243,6 @@ private fun homeReadableInk(fill: Color): Color {
 
 @Composable
 private fun homeRoseAccent(): Color {
-    // v412 — a Pantone theme IS the hero: its own Pantone fill answers first,
-    // before the lane, the azure and the rose-wood (the same ordering
-    // `settingsRoseAccent` has always used).
-    activePantoneTheme()?.let { return it.heroFor(isCurioDarkTheme()) }
     // v223 — "Material hero tears": when the Material theme AND this
     // option are both on, the torn hero wears the scheme's
     // primaryContainer instead of the app-default rose/azure (or a lane).

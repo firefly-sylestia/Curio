@@ -40,10 +40,8 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.activePantoneTheme
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -102,10 +100,7 @@ fun CurioCategoryCard(
     // so tapping a tile made it read DARKER than the idle tint — the exact
     // complaint. The selected crown is now the full-saturation researched
     // accent melting into the page: brighter and more vivid, never darker.
-    // v412 — the bloom is the PANTONE hero under a Pantone theme, never the
-    // raw lane accent (the same rule `themedAccent`/`headerAccent` carry, read
-    // directly here because this crown wants the UN-dercalmed fill).
-    val saturated = activePantoneTheme()?.heroFor(isCurioDarkTheme()) ?: category.accent
+    val saturated = category.accent
     val selectedGradient = listOf(
         saturated,
         lerp(saturated, MaterialTheme.colorScheme.background, 0.30f)

@@ -113,7 +113,6 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LocalCurioThemeTransition
-import com.curio.app.ui.theme.PantoneTheme
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
@@ -364,11 +363,10 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // untouched: its page is black and its plates step up from it.
         // v412 — GRAYED OUT WHERE IT HAS NO EFFECT: the paper flip only ever
         // describes Curio's own cream/white light pair (see curioColorScheme),
-        // so on dark mode — or under Material or a Pantone theme, which paint
-        // their own page pair — the row is disabled with a line saying why,
-        // instead of a control that silently does nothing. The stored choice
-        // is kept, so returning to a light paper theme restores exactly what
-        // was picked.
+        // so on dark mode — or under the Material theme, which paints its own
+        // page pair — the row is disabled with a line saying why, instead of a
+        // control that silently does nothing. The stored choice is kept, so
+        // returning to a light paper theme restores exactly what was picked.
         // v413 — ADAPTIVE HERO KEEPS ITS PAPER: the greyed-out set used to
         // include it, but a lane only tints the PAGE WASH and the torn hero —
         // the card ladder under them is still the scheme's own cream/white
@@ -542,8 +540,8 @@ private fun ThemeModeSegment(
     selected: Boolean,
     accent: Color,
     muted: Color,
-    /** The capsule's own fill — the colour the muted ink is resolved against
-     *  when a Pantone theme wants it solid ([curioTintOn]). */
+    /** The capsule's own fill — the colour the muted ink is mixed into
+     *  ([curioTintOn]). */
     base: Color,
     label: String,
     modifier: Modifier = Modifier,
@@ -567,7 +565,7 @@ private fun ThemeModeSegment(
 }
 
 /** One color-theme entry as the sheet shows it: the id the pref stores, the
- *  name, the Pantone reference (or a plain hint), and the three colours the
+ *  name, a plain hint, and the three colours the
  *  row previews — page, hero/cards, ink. */
 private data class ColorThemeChoice(
     val id: String,
@@ -584,9 +582,6 @@ private fun colorThemeLabel(id: String): String = when (id) {
     AppPreferences.COLOR_THEME_AZURE -> "Azure hero"
     AppPreferences.COLOR_THEME_MATERIAL -> "Material"
     AppPreferences.COLOR_THEME_LANE -> "Adaptive Hero"
-    AppPreferences.COLOR_THEME_PANTONE_CREAM -> "Pantone Cream"
-    AppPreferences.COLOR_THEME_PANTONE_TERRACOTTA -> "Pantone Terracotta"
-    AppPreferences.COLOR_THEME_PANTONE_LIME -> "Pantone Lime"
     else -> "Curio"
 }
 
@@ -652,9 +647,9 @@ private fun ColorThemeSwatch(choice: ColorThemeChoice) {
  *
  * One row per theme, each with its own colours shown before it is picked —
  * the member's ask ("it shows its preview with a hint of colors and each theme
- * gets a row"). The four app themes preview the accent they would paint the
- * hero with; the three Pantone themes preview their own page/hero/ink triple.
- * Picking one writes the pref (and the legacy switches in step) and closes.
+ * gets a row"). Each theme previews the accent it would paint the hero with,
+ * so a row's swatches are a real hint of what picking it does. Picking one
+ * writes the pref (and the legacy switches in step) and closes.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -696,7 +691,7 @@ private fun ColorThemeSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "The app's page, hero and ink — Pantone themes included. Pastel colors and Category tint stay on the Appearance page.",
+                "The app's page, hero and ink. Pastel colors and Category tint stay on the Appearance page.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -758,10 +753,9 @@ private fun ColorThemeSheet(
 /**
  * Every color theme the sheet offers, with the three colours each one paints.
  *
- * The Pantone entries read their own palette from [PantoneTheme]; the four app
- * entries preview the accent that theme would give the shared hero (the rose
- * or azure twin, the Material container, the lane accent), so a row's swatches
- * are a real hint of what picking it does rather than a decoration.
+ * Each entry previews the accent that theme would give the shared hero (the
+ * rose or azure twin, the Material container, the lane accent), so a row's
+ * swatches are a real hint of what picking it does rather than a decoration.
  */
 @Composable
 private fun colorThemeChoices(): List<ColorThemeChoice> {
@@ -812,18 +806,6 @@ private fun colorThemeChoices(): List<ColorThemeChoice> {
                 ink = ink
             )
         )
-        PantoneTheme.entries.forEach { theme ->
-            add(
-                ColorThemeChoice(
-                    id = theme.id,
-                    label = theme.label,
-                    hint = "Pantone " + theme.reference,
-                    page = theme.pageFor(dark),
-                    hero = theme.heroFor(dark),
-                    ink = theme.accentFor(dark)
-                )
-            )
-        }
     }
 }
 

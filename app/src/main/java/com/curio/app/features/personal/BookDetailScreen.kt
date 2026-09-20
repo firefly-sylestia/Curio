@@ -1467,8 +1467,8 @@ private fun ReadingGauge(
             // A GRADIENT, not a flat block: the fill runs from the accent into
             // a lighter READING of the same accent, which is what makes a thin
             // bar read as a lit metre instead of a painted strip. Both stops
-            // are opaque lerps (no alpha on a fill — the Pantone rule), so
-            // nothing shows through the bar.
+            // are opaque lerps (no alpha on a fill), so nothing shows through
+            // the bar.
             val lift = lerp(accent, Color.White, 0.30f)
             if (filled > 0f) {
                 drawRoundRect(

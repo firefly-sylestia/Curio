@@ -8528,7 +8528,8 @@ app/src/main/java/com/curio/app/
 ### The card ladder — a WHITE page with CREAM cards (v409; the reverse is one switch away)
 - **LIGHT MODE'S PAGE IS WHITE (`CurioWhitePageLightScheme`, the default) and every CARD, TILE, SHEET, TAB, FIELD and DIALOG is CREAM**, stepped deeper as it nests: `surfaceContainerLowest` = white (a dialog — the scrim separates it), `surfaceContainerLow` = **A CARD**, `surfaceContainer` = a block inside a card, `surfaceContainerHigh` = a pill/chip inside one, `surfaceContainerHighest` = the anchor step. `background` = white, `surfaceVariant` = cream.
 - **`AppPreferences.paperCreamCardsState` (`Appearance ▸ Paper`: "White page" / "Cream page") chooses which surface leads.** OFF selects `CurioCreamPageLightScheme` — the pre-v409 pair the member had first asked for: the cream page (`CurioColors.SoftCream`) with WHITE cards, the ladder climbing above the page. Both are the same rule (a card separates from its page by LIGHTNESS, never by a tint of it) read in two directions; nothing outside `CurioTheme.kt` has to know which one is on. It is a visible Appearance option on purpose — do not bury it behind a hidden flag, and do not delete either scheme while the switch exists.
-- **Which themes keep the Paper row LIVE (v413).** The flip applies whenever `curioColorScheme()` reaches its last line, which is every LIGHT theme except the two that return early: **Material** (`materialColorScheme()`) and a **Pantone** theme (`pantone.schemeFor`). So `paperApplies` = not dark AND (Curio rose OR Azure OR **Adaptive Hero**). Adaptive Hero was in the greyed-out set until v413 and that was wrong: a lane only tints the PAGE WASH (`heroPageBackground()` → `categoryBackgroundWash()`) and the torn hero — the card ladder underneath is still the scheme's own cream/white pair, so the flip has a real, visible effect there (member: "for color theme of adaptive hero dont gray out the paper option"). Dark mode and the two early-return themes stay disabled with the line that says why, and the stored choice is always kept.
+- **Which themes keep the Paper row LIVE (v413).** The flip applies whenever `curioColorScheme()` reaches its last line, which is every LIGHT theme except the one that returns early: **Material** (`materialColorScheme()`). So `paperApplies` = not dark AND (Curio rose OR Azure OR **Adaptive Hero**). Adaptive Hero was in the greyed-out set until v413 and that was wrong: a lane only tints the PAGE WASH (`heroPageBackground()` → `categoryBackgroundWash()`) and the torn hero — the card ladder underneath is still the scheme's own cream/white pair, so the flip has a real, visible effect there (member: "for color theme of adaptive hero dont gray out the paper option"). Dark mode and the early-return theme stay disabled with the line that says why, and the stored choice is always kept.
+- **v414 — the light ladder is pitched deeper and the shadow step went to 5dp.** v411's cream was a shade too subtle to read as a card at all (member: "do somethng bout the background and the card color issues, and use elevation"); the White-page scheme's container steps are re-pitched (`surfaceContainerLow #FAF2E0` → `Highest #E8D8B3`) and `Modifier.curioCardShadow`'s default elevation is 5dp. The FILL gives the card its plane, the SHADOW gives it its lift. Keep both in step when tuning.
 - **Dark mode is not flipped.** Its page is pitch black and its plates step UP through `#121212 → #161616 → #1C1C1C → #242424 → #2C2C2C`; that is the same rule in the dark's own language.
 - **Why the flip:** v408 put white cards on the member's cream page; the member's direction is "home about a white app background as the main, but cream cards reverse of what we did". The complaint that started all of this was cards dissolving into the page ("the background and the cards and tabs some were blending too much … the journals in the home screen the preview of them get the background color and blends") — the fix is the SEPARATION, not which colour wins.
 - **Cards resolve their fill through the SCHEME, never through a literal.** The v408 sweep turned ~25 light-branch card fills into `Color.White` literals; v409 made them `MaterialTheme.colorScheme.surfaceContainerLow` (a card) or `surfaceContainer` (a block INSIDE a card), because a literal cannot follow the Paper switch. If you add a card, take a ladder token on both branches — `if (dark) surfaceContainerHigh else Color.White` is the shape to avoid.
@@ -9094,11 +9095,19 @@ only ever catches taps that mean "not in any of these".
 
 ## One color-theme door, one home hero, a star map, and the reader's page (v411)
 
-### The color theme is ONE choice, and the Pantone palettes have their own rules
+### The color theme is ONE choice
 
+- **v414 — THE THREE PANTONE THEMES WERE REMOVED.** `PantoneThemes.kt` is
+  deleted, `activePantoneTheme()` / `activePantoneThemeNow()` are gone, and
+  every branch they fed is back to the app's own palette (the schemes, the
+  shared heroes, `CategoryInk.kt`'s resolvers, the reveal pill, the notification
+  tint, the category card's selected crown, `curioRoseInk` / `curioGoldInk` /
+  `curioSageInk`). `COLOR_THEMES` is `CURIO` / `AZURE` / `MATERIAL` / `LANE`, and
+  a stored `pantone-*` id migrates to `COLOR_THEME_CURIO` on read
+  (`LEGACY_PANTONE_PREFIX` in `AppPreferences.kt`). Everything below that still
+  mentions Pantone is history — do not re-add it.
 - **`AppPreferences.colorThemeState` is the one fact** (`COLOR_THEME_CURIO` /
-  `_AZURE` / `_MATERIAL` / `_LANE` / `_PANTONE_CREAM` / `_PANTONE_TERRACOTTA` /
-  `_PANTONE_LIME`). `setColorTheme` writes it AND keeps the three legacy
+  `_AZURE` / `_MATERIAL` / `_LANE`). `setColorTheme` writes it AND keeps the three legacy
   switches (`materialThemeState`, `heroBlueState`, `heroFollowLaneState`) in
   step, because every other surface still reads those — the legacy keys are not
   dead, they are one choice expressed the way the rest of the app already asks
@@ -9130,8 +9139,11 @@ only ever catches taps that mean "not in any of these".
   a Pantone theme paints the torn heroes, the option cards and their icons in
   its own three colours.
 
-### The Pantone tone ladder (v413) — cards climb ABOVE the page, never below it
+### The Pantone tone ladder (v413) — RETIRED in v414, history only
 
+- **RETIRED.** `PantoneThemes.kt` no longer exists, so nothing below is live
+  guidance. The app's own card ladder lives in `CurioTheme.kt`. Kept as a record
+  of the v413 design only.
 - **WHAT WAS WRONG (member: "all 3 are bad, dont use too deep colors for the
   cards or background … use more shades palette per pantone theme").** v412
   built the card ladder by DEEPENING THE HERO five times: on Pantone Terracotta
@@ -9280,8 +9292,10 @@ only ever catches taps that mean "not in any of these".
   which is what the onboarding's System chip already wore (member: "for the
   device in theme option change the icon please it looks bad").
 
-### v412 — a Pantone theme paints the WHOLE app ("no other colors")
+### v412 — a Pantone theme paints the WHOLE app ("no other colors") — RETIRED in v414
 
+- **RETIRED.** All the branches described here were deleted in v414 (see "The
+  color theme is ONE choice" above). History only.
 - **THE BUG: Home and Profile had their OWN copies of the hero resolver.**
   `homeRoseAccent()` / `profileRoseAccent()` (and `homeReadableInk` /
   `profileReadableInk`) fell straight through to rose / azure / the last Spin
@@ -9377,8 +9391,8 @@ only ever catches taps that mean "not in any of these".
   unconditionally (it used to be the Pantone-only rule), and the soft warm
   `Modifier.curioCardShadow(shape, elevation)` — a DeepPlum-tinted low-alpha
   shadow, applied BEFORE the fill, a no-op in dark where the theme's glow does
-  the work — is what separates a card from its page. `outlineVariant` still
-  draws DIVIDERS. Applied at: `CurioSettingsCard`, `SettingsOptionCard`,
+  the work — is what separates a card from its page. Its default step is 5dp
+  since v414 (was 3dp). `outlineVariant` still draws DIVIDERS. Applied at: `CurioSettingsCard`, `SettingsOptionCard`,
   `StatsCard`, `StatsDoorChip`, the settings rail tab / quick-tool chip / search
   card, the lane tile (selected only), and the journal's own cards.
 - **THE CREAM IS SUBTLER.** `CurioWhitePageLightScheme`'s card ladder was pitched
