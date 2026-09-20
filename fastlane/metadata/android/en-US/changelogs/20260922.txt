@@ -1,3 +1,7 @@
+ADD:
+- Books: manga, manhwa, manhua, comics and light novels are on your shelf now, each keeping its own name — pick the kind before you search and the same shelf, reader, chapters and progress you already have hold them, with the kind worn on the cover of its own card.
+- Books: the comics sources — MangaDex, AniList, MyAnimeList and Kitsu, all keyless, asked in order — bring a manga's own cover, author, synopsis and how long it is (volumes and chapters), because a books catalogue has never heard of it.
+
 FIX:
 - Books: a book whose own copy is an EPUB says how long it is — the attach path only ever asked a PDF, so an EPUB adopted its contents with no length at all and its page sat on "Set how long the book is" for a file that knows exactly how long it is; every kind of file answers its own page count now (an EPUB that carries its print edition's page-list is read out of that list).
 

@@ -104,16 +104,30 @@ attach drop, and `documentChapters`' chapter ranges. `BookDetailScreen`'s
 
 ## 4. Still open (the rest of this request — BOOKS)
 
+**DONE (v426, this session):** manga / manhwa / manhua / comics / light novels as shelf
+KINDS — `PersonalKinds` + `personal_books.kind` (`MIGRATION_20_21`, default `book`), a kind
+picker in `AddBookSheet` asked BEFORE the search, `MangaFetch` (keyless cascade: AniList →
+MangaDex → Jikan → Kitsu), the kind worn on the shelf card's cover, and `BookEnrichment`
+bailing out for a comics kind so a manga is never "enriched" with a book's facts. Choices
+confirmed with the member: always-on (no Settings toggle), all five kinds, those four
+keyless sources (Comic Vine/publishers are the keyed doors, left out), and TMDB stays the
+source for the film/series basics it already fetches.
+
+**REMAINING, in the member's own order:**
+
 1. **Series fetching + covers, and a detail sheet for a series** — the member wants a
    series' own covers fetched and its details opened in the SAME bottom sheet the topic
    reveal uses, with the lookup adding information while the stored ones stay.
-2. **Manga / manhwa / comics as book KINDS**, with full-kind reading.
-3. **More providers / more ways to fetch and scrape** (books and, per the member's answer,
-   artworks/artists/songs/films too).
-4. **EPUB in the page-swipe flow** — the side-by-side view is poor and a pinch zoom lags.
-5. **Title detection for files is still bad** — `detectBookFromFileName` keeps a bracketed
+2. **More providers / more scraping doors** (books, and per the member's answer also
+   artworks/artists/songs/films). Comic Vine and the publishers' APIs are the named keyed
+   ones. A manga added BY HAND (the Type door) still cannot fetch its own cover — that is
+   the enrichment door for comics, deliberately left out of v426's own guard.
+3. **EPUB in the page-swipe flow** — the side-by-side view is poor and a pinch zoom lags.
+4. **Title detection for files is still bad** — `detectBookFromFileName` keeps a bracketed
    publisher/edition (`(Penguin Classics, 1996)`), and a name with two dashes splits its
-   author wrongly. NEEDS THE MEMBER'S OWN EXAMPLES before guessing.
+   author wrongly. The member chose "just harden it" (no examples given), so this is a
+   hardening pass: publisher/edition/format/year noise in brackets, a zero-padded leading
+   index, and an extra-dash tail that names a publisher.
 
 ## 5. Work log
 

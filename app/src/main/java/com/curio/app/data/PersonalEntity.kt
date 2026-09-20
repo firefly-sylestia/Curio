@@ -165,7 +165,18 @@ data class PersonalBookEntity(
      * synopsis through [catalogId]. The column itself has been in the schema
      * since migration 16 → 17; this is the row finally reading it.
      */
-    val synopsis: String = ""
+    val synopsis: String = "",
+    /**
+     * v426 — WHAT KIND OF THING THIS IS ([PersonalKinds]).
+     *
+     * The member asked for manga, manhwa, manhua, comics and light novels on
+     * the shelf, and asked for them to keep their OWN name rather than be
+     * filed as books: "keep them as manga or whatever they are called, but add
+     * them to be able to add in my shelf". It is a STRING on purpose — see
+     * [PersonalKinds]'s own note — and a row written before this column reads
+     * as [PersonalKinds.BOOK] (the migration's default).
+     */
+    val kind: String = PersonalKinds.BOOK
 ) {
     /** 0f..1f reading progress, 0 when the length is unknown. */
     val progress: Float

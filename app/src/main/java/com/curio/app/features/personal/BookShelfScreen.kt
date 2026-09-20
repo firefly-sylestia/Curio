@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -72,6 +74,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalBookEntity
+import com.curio.app.data.PersonalKinds
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.newPersonalBookId
 import com.curio.app.features.cabinet.CabinetCoverCache
@@ -362,6 +365,29 @@ private fun BookShelfCard(
                     }
                 }
             }
+            // v426 — WHAT IT IS, ON ITS OWN COVER. A manga says Manga, a manhwa
+            // says Manhwa, a light novel says so: the member asked for these to
+            // keep their own name rather than be filed as books, and a cover is
+            // where a glance at a shelf always lands. A plain book wears none —
+            // the absence is the label.
+            if (book.kind != PersonalKinds.BOOK) {
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(6.dp)
+                ) {
+                    Text(
+                        PersonalKinds.label(book.kind),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = ink,
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                    )
+                }
+            }
         }
         Spacer(Modifier.height(8.dp))
         Box(
@@ -517,7 +543,13 @@ internal fun BookCover(
 private data class BookHit(
     val title: String,
     val author: String,
-    val coverUrl: String
+    val coverUrl: String,
+    /** v426 — what the COMICS sources bring with a hit: how long it is, in the
+     *  source's own units, plus its own words for the synopsis. */
+    val chapters: Int = 0,
+    val volumes: Int = 0,
+    val description: String = "",
+    val source: String = ""
 )
 
 /**
@@ -614,6 +646,11 @@ private fun AddBookSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var query by remember { mutableStateOf("") }
+    // v426 — WHICH KIND IS BEING ADDED. Chosen BEFORE the search, because the
+    // question changes the sources: "book" asks Curio's own lane and Open
+    // Library, while a manga/manhwa/manhua/light novel asks AniList, MangaDex,
+    // MAL and Kitsu ([MangaFetch]) — a manga is simply not in a books catalogue.
+    var kind by remember { mutableStateOf(PersonalKinds.BOOK) }
     var hits by remember { mutableStateOf<List<BookHit>>(emptyList()) }
     // The hits from Curio's OWN catalog, kept apart from the network ones: they
     // carry a chapter list and a page count, they never fail, and they lead.
@@ -636,6 +673,8 @@ private fun AddBookSheet(
         chapters: Int,
         catalogId: String = "",
         pages: Int = 0,
+        /** v426 — the row's own kind ([PersonalKinds]); a book unless said. */
+        kind: String = PersonalKinds.BOOK,
         /** A file the member picked while adding (Import a file) — COPIED into
          *  the app's own storage, never kept as the picker's URI. */
         document: Uri? = null
@@ -655,7 +694,8 @@ private fun AddBookSheet(
                             totalChapters = chapters.coerceAtLeast(0),
                             currentChapter = 0,
                             catalogId = catalogId,
-                            pageCount = pages.coerceAtLeast(0)
+                            pageCount = pages.coerceAtLeast(0),
+                            kind = PersonalKinds.idOf(kind)
                         )
                     )
                     // v389 — the picked file belongs on the book's OWN column.
@@ -811,7 +851,11 @@ private fun AddBookSheet(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        "How many chapters?",
+                        // A manga's own unit is the volume as often as the
+                        // chapter, so the question says so rather than asking a
+                        // light novel how many chapters it has.
+                        if (PersonalKinds.isComics(kind)) "How many chapters or volumes?"
+                        else "How many chapters?",
                         style = MaterialTheme.typography.bodyMedium,
                         color = ink.copy(alpha = 0.7f),
                         modifier = Modifier.weight(1f)
@@ -821,7 +865,7 @@ private fun AddBookSheet(
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     TextButton(onClick = { manual = false }) { Text("Search instead") }
                     TextButton(onClick = {
-                        addBook(manualTitle, manualAuthor, "", manualChapters)
+                        addBook(manualTitle, manualAuthor, "", manualChapters, kind = kind)
                     }) { Text("Add to shelf", color = personalAccentInk()) }
                 }
                 return@Column
@@ -832,6 +876,49 @@ private fun AddBookSheet(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Import an EPUB, PDF, or text file")
+            }            // ── v426 — WHAT IS BEING ADDED ─────────────────────────────
+            //
+            // One row of kinds, beside the search it changes: a manga's cover,
+            // author and length live in the comics sources and a book's live in
+            // Open Library, so the question has to be asked before the search
+            // rather than after it. Every kind stays a SHELF row (the member's
+            // own ask: "keep them as manga or whatever they are called, but add
+            // them to be able to add in my shelf") — this only decides where the
+            // facts come from and what the row calls itself.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
+            ) {
+                PersonalKinds.all.forEach { option ->
+                    val on = option == kind
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = if (on) accent else MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable {
+                                kind = option
+                                // The last search answered for the OLD kind, so
+                                // its hits are cleared rather than left sitting
+                                // under a label they do not belong to.
+                                hits = emptyList()
+                                catalogHits = emptyList()
+                                searched = false
+                                failed = false
+                            }
+                    ) {
+                        Text(
+                            PersonalKinds.label(option),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (on) personalAccentInk()
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                        )
+                    }
+                }
             }
 
             BookField(
@@ -846,17 +933,45 @@ private fun AddBookSheet(
                     if (text.isEmpty()) return@BookField
                     searching = true
                     failed = false
+
+
+                    // Read BEFORE the coroutine starts, so a kind tapped while
+                    // the search is in flight cannot relabel its own results.
+                    val comics = PersonalKinds.isComics(kind)
+                    val wanted = kind
                     scope.launch {
-                        // CURIOS'S OWN CATALOG FIRST: instant, offline, and the
-                        // only source that also carries the chapter list — so
-                        // the book arrives with its real table of contents.
-                        val local = withContext(Dispatchers.IO) { BookCatalog.search(text) }
+                        // CURIOS'S OWN CATALOG FIRST, for a BOOK: instant,
+                        // offline, and the only source that also carries the
+                        // chapter list — so the book arrives with its real table
+                        // of contents. A manga is not in it, so a comics kind
+                        // asks nobody but its own sources.
+                        val local = if (comics) emptyList()
+                        else withContext(Dispatchers.IO) { BookCatalog.search(text) }
                         catalogHits = local
-                        // …THEN the wider catalogue, for anything Curio does not
-                        // have. Its failure only matters when the app's own
-                        // shelf came up empty, so an offline phone still gets a
-                        // useful answer instead of an apology.
-                        val remote = withContext(Dispatchers.IO) { searchOpenLibrary(text) }
+                        // …THEN the wider sources. A book or a comic goes to
+                        // Open Library; a manga, manhwa, manhua or light novel
+                        // goes to the COMICS sources ([MangaFetch], keyless, in
+                        // order: AniList, MangaDex, MAL, Kitsu). A failure only
+                        // matters when nothing else answered, so an offline
+                        // phone still gets a useful sentence instead of an
+                        // apology.
+                        val remote = withContext(Dispatchers.IO) {
+                            if (comics) {
+                                MangaFetch.search(text, wanted)?.map { found ->
+                                    BookHit(
+                                        title = found.title,
+                                        author = found.author,
+                                        coverUrl = found.coverUrl,
+                                        chapters = found.chapters,
+                                        volumes = found.volumes,
+                                        description = found.description,
+                                        source = found.source
+                                    )
+                                }
+                            } else {
+                                searchOpenLibrary(text)
+                            }
+                        }
                         searching = false
                         searched = true
                         failed = remote == null && local.isEmpty()
@@ -951,7 +1066,18 @@ private fun AddBookSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .clickable {
-                            addBook(hit.title, hit.author, hit.coverUrl, 0)
+                            // v426 — a comics hit brings its own length and its
+                            // own kind with it, so the row lands on the shelf
+                            // already saying what it is (a volume count is what
+                            // a manga's progress is measured in).
+                            addBook(
+                                title = hit.title,
+                                author = hit.author,
+                                cover = hit.coverUrl,
+                                chapters = hit.chapters.takeIf { it > 0 } ?: hit.volumes,
+                                kind = if (PersonalKinds.isComics(kind)) kind
+                                else PersonalKinds.BOOK
+                            )
                         }
                         .padding(vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -983,13 +1109,30 @@ private fun AddBookSheet(
                                 maxLines = 1
                             )
                         }
+                        // What the comics sources add over a bare result: which
+                        // database answered, and how long the series is.
+                        val facts = listOfNotNull(
+                            hit.volumes.takeIf { it > 0 }?.let { "$it volumes" },
+                            hit.chapters.takeIf { it > 0 }?.let { "$it chapters" },
+                            hit.source.takeIf { it.isNotBlank() }
+                        ).joinToString(" · ")
+                        if (facts.isNotBlank()) {
+                            Text(
+                                facts,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = accent.copy(alpha = 0.85f),
+                                maxLines = 1
+                            )
+                        }
                     }
                     CurioIcon(CurioIcons.Add, "Add ${hit.title}", tint = accent, size = 18.dp)
                 }
             }
             if (searched && !searching && !failed && hits.isEmpty() && catalogHits.isEmpty()) {
                 Text(
-                    "Nothing in the catalogue. Add the book yourself instead.",
+                    if (PersonalKinds.isComics(kind))
+                        "Nothing found in the comics sources. Add it yourself instead."
+                    else "Nothing in the catalogue. Add the book yourself instead.",
                     style = MaterialTheme.typography.bodySmall,
                     color = ink.copy(alpha = 0.62f)
                 )
@@ -1001,7 +1144,10 @@ private fun AddBookSheet(
                 catalogHits = emptyList()
                 hits = emptyList()
             }) {
-                Text("Add the book myself", color = accent)
+                Text(
+                    if (PersonalKinds.isComics(kind)) "Add it myself" else "Add the book myself",
+                    color = accent
+                )
             }
         }
     }

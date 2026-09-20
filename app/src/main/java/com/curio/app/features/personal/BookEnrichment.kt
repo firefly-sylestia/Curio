@@ -4,6 +4,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalChapter
 import com.curio.app.data.PersonalChapterCodec
+import com.curio.app.data.PersonalKinds
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +72,20 @@ internal object BookEnrichment {
     suspend fun enrich(book: PersonalBookEntity): EnrichReport {
         val learned = mutableListOf<String>()
         var updated = book
+
+        // v426 — A MANGA IS NOT ASKED OF A BOOKS CATALOGUE.
+        //
+        // Every door below belongs to the books world: Curio's own lane (~800
+        // printed books), Open Library's table of contents, its page count and
+        // its description. A manga, manhwa, manhua or light novel is in none of
+        // them — a search there for a volume of a long series answers with a
+        // study guide about it, or with nothing — so a comics row is left exactly
+        // as its own source gave it (its cover, its synopsis and its chapter
+        // count came from [MangaFetch] when it was added) instead of being
+        // "enriched" with another book's facts.
+        if (PersonalKinds.isComics(book.kind)) {
+            return EnrichReport(book = book, learned = emptyList(), needsConsent = false)
+        }
 
         catalogMatch(updated)?.let { matched ->
             updated = matched
