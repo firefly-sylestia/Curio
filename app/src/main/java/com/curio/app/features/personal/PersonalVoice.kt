@@ -1073,6 +1073,14 @@ internal enum class PersonalVoiceStyle(val key: String, val label: String, val h
  */
 private const val VOICE_FLOOR = 0.08f
 
+/**
+ * v440 — THE SHORTEST CANVAS A VOICE WAVE IS DRAWN ON, in raw pixels (a dp)
+ * independent value on purpose: this is a guard against a canvas with NO room, not
+ * a design measurement. Below it the wave's band cannot hold a stroke and its own
+ * ink would be off the edges (see [drawVoicePulse]).
+ */
+private const val MIN_WAVE_HEIGHT_PX = 12f
+
 private fun voiceReach(level: Float, bandHalf: Float): Float {
     val loud = level.coerceIn(0f, 1f)
     return bandHalf * (VOICE_FLOOR + (1f - VOICE_FLOOR) * loud)
@@ -1110,13 +1118,27 @@ internal fun DrawScope.drawVoicePulse(
 ) {
     val count = samples.size
     if (count == 0) return
+    // ── v440 — A WAVE WITH NO ROOM IS NOT DRAWN, AND THAT IS THE FIX FOR A CRASH ──
+    //
+    // The member's crash report: *"Cannot coerce value to an empty range: maximum
+    // -0.9 is less than minimum 0.9"*, thrown DURING DRAW (`dispatchDraw` in the
+    // stack). Those two numbers are this function's own: the stroke is floored at
+    // 1.8dp so `bandTop` is 0.9, and `bandBottom` is `size.height - halfStroke -
+    // depthDrop` — so on a canvas whose height is nil or a pixel, the band CLOSES
+    // and inverts, and `.coerceIn(bandTop, bandBottom)` throws on the empty range.
+    //
+    // A row that has not been measured yet reports exactly that size for a frame, so
+    // this is a real state and not a fanciful one. Two guards, both cheap: a canvas
+    // with no room is left alone, and the band can never close even if a caller
+    // hands in something tiny.
+    if (size.height < MIN_WAVE_HEIGHT_PX || size.width < 8f) return
     val strokeWidth = (size.height * 0.11f).coerceAtLeast(1.8f)
     val halfStroke = strokeWidth / 2f
     val depthDrop = size.height * 0.06f
     val bandLeft = halfStroke
     val bandRight = size.width - halfStroke
     val bandTop = halfStroke
-    val bandBottom = size.height - halfStroke - depthDrop
+    val bandBottom = (size.height - halfStroke - depthDrop).coerceAtLeast(bandTop + 1f)
     val bandMid = (bandTop + bandBottom) / 2f
     val bandHalf = ((bandBottom - bandTop) / 2f).coerceAtLeast(1f)
     val playedUpTo = bandLeft + (bandRight - bandLeft) * progress

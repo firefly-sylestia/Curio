@@ -79,7 +79,6 @@ import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -163,7 +162,19 @@ fun JournalListScreen(navController: NavController) {
     // The member's own pick (*"'First page of the day' preference (today's page vs
     // the last one you opened)"*), resolved in one place so the floating "+" and
     // the empty state's own action can never disagree about it.
-    val journalDoor = rememberJournalDoor(navController)
+    //
+    // ── v440b — AND TODAY'S OWN PAGE IS ALREADY IN HAND ─────────────
+    //
+    // The list HAS every journal (it is the query it is drawn from), so the page
+    // for today is a lookup in memory rather than a second trip to the database.
+    // That matters: the first cut of this door asked the database before navigating
+    // and the journal took a beat to open (member: *"journal opening is clanky
+    // too"*) — a door has to answer on the tap.
+    val todayEntryId = remember(journals) {
+        val today = startOfToday()
+        journals.firstOrNull { page -> page.dateMillis == today }?.id
+    }
+    val journalDoor = rememberJournalDoor(navController, todayEntryId)
     var moodFilter by remember { mutableStateOf<PersonalMood?>(null) }
     var colourFilter by remember { mutableIntStateOf(JOURNAL_ANY_COLOUR) }
     var lengthFilter by remember { mutableStateOf(JournalLength.ANY) }
@@ -836,29 +847,25 @@ private fun JournalSearchPill(
  * day is still blank. **The last page you opened** returns to the piece you left
  * half-written.
  *
- * The lookup is the query the list itself already collects (`observeJournals`), so
- * nothing new reads the database and no column was added. It runs in the door's
- * own coroutine — the door is an onClick, which is NOT a composable scope, so the
- * context is hoisted above it (the v439 rule) and the work is dispatched off the
- * main thread.
+ * **TODAY'S PAGE IS HANDED IN, NOT FETCHED** ([todayEntryId]) — the journalling list
+ * already holds every page it draws, so the lookup is a scan of a list in memory and
+ * the door navigates on the tap. **A door that awaits a query is a door that feels
+ * broken**: the first cut of this asked the database first and the journal took a beat
+ * to open (member: *"journal opening is clanky too"*). The context is hoisted above the
+ * lambda because the door is an onClick and a lambda is not a composable scope (the
+ * v439 rule).
  */
 @Composable
-internal fun rememberJournalDoor(navController: NavController): () -> Unit {
+internal fun rememberJournalDoor(
+    navController: NavController,
+    /** Today's journal page, when one exists — a scan of the list, never a query. */
+    todayEntryId: String? = null
+): () -> Unit {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    return remember(navController) {
+    return remember(navController, todayEntryId) {
         {
             if (AppPreferences.isJournalOpenToday(context)) {
-                scope.launch {
-                    val today = startOfToday()
-                    val page = runCatching {
-                        PersonalRepositoryHolder.repo.observeJournals().first()
-                            .firstOrNull { entry ->
-                                entry.dateMillis == today && !entry.isTodo && !entry.hasTopic
-                            }
-                    }.getOrNull()
-                    openJournal(navController, page?.id ?: CurioRoutes.PERSONAL_NEW)
-                }
+                openJournal(navController, todayEntryId ?: CurioRoutes.PERSONAL_NEW)
             } else {
                 openJournal(
                     navController,

@@ -979,6 +979,109 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         chrome = false
     }
 
+    // ── v440 — READING IT ALOUD (see [ReaderSpeaker]) ──────────────────
+    //
+    // The member, from the settings list: *"Read-aloud: a speed and voice picker"*
+    // and, asked what it reads, *"The visible page, then follow on."*
+    //
+    // So the driver below does exactly that and nothing cleverer: it starts at what
+    // the member is LOOKING AT (`liveTextBlock` for a reflowable book, the page on
+    // screen for a PDF), feeds the voice a chunk at a time, and — because a finished
+    // chunk is the only signal that says the reader is still listening — hands the
+    // reader on to the next one from the moment the previous finishes, to the end of
+    // the book.
+    //
+    // Three rules it keeps, and each of them is a bug that does not happen:
+    //  · **ONE CURSOR, TWO MEANINGS.** A reflowable book's index is a BLOCK and a
+    //    PDF's is a PAGE; the cursor is the same state because the flow already says
+    //    which one it is (see [content]).
+    //  · **THE CURSOR IS MOVED BY THE CALLBACK, NEVER BY THE EFFECT.** The effect is
+    //    keyed on the cursor, so moving it there would queue the next chunk twice —
+    //    once as it launched and once when the key changed.
+    //  · **A PAGE WITH NOTHING TO SAY IS STEPPED OVER, NOT STUCK ON.** A PDF of
+    //    plates has pages with no words on them; the driver moves to the next one
+    //    instead of going quiet (and stops at the book's own end).
+    var speaking by remember(bookId, document) { mutableStateOf(false) }
+    var speakCursor by remember(bookId, document) { mutableIntStateOf(-1) }
+    // The engine is a service binding, so it is brought up when the member ASKS for
+    // the voice and released the moment the reader closes — never merely because a
+    // book was opened (see [ReaderSpeaker.prepare]).
+    DisposableEffect(bookId, document) {
+        onDispose {
+            ReaderSpeaker.release()
+        }
+    }
+    val startSpeaking = {
+        val at = when (val loaded = content) {
+            is ReaderContent.Pages -> livePlace?.index ?: shownPage
+            is ReaderContent.Text -> liveTextBlock
+            null -> 0
+        }
+        speakCursor = at.coerceAtLeast(0)
+        ReaderSpeaker.prepare(context)
+        speaking = true
+        Unit
+    }
+    LaunchedEffect(speaking, speakCursor) {
+        if (!speaking) return@LaunchedEffect
+        when (val loaded = content) {
+            is ReaderContent.Text -> {
+                val blocks = loaded.blocks
+                if (blocks.isEmpty()) {
+                    speaking = false
+                    return@LaunchedEffect
+                }
+                val from = speakCursor.coerceIn(0, blocks.size - 1)
+                var next = from
+                val said = buildString {
+                    while (next < blocks.size && next - from < SPEAK_BLOCKS &&
+                        length < SPEAK_CHARS
+                    ) {
+                        val block = blocks[next]
+                        next += 1
+                        if (block.text.isNotBlank()) append(block.text).append(' ')
+                    }
+                }.trim()
+                if (said.isBlank()) {
+                    speaking = false
+                    return@LaunchedEffect
+                }
+                // The page follows the voice, which is the whole of "then follow on".
+                jumpToBlock(from)
+                val after = next
+                ReaderSpeaker.say(
+                    text = said,
+                    speed = ReaderLook.speakSpeed,
+                    voiceName = ReaderLook.speakVoice
+                ) { speakCursor = after }
+            }
+
+            is ReaderContent.Pages -> {
+                val page = speakCursor.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
+                // A page's words cost a parse of the file's own text layer, so it is
+                // read off the main thread — the same door the search and the marks
+                // read through.
+                val said = withContext(Dispatchers.IO) {
+                    runCatching { extractPdfPageText(context, document, page) }
+                        .getOrNull()?.text.orEmpty()
+                }.trim()
+                val after = page + 1
+                if (said.isBlank()) {
+                    if (after < loaded.pageCount) speakCursor = after else speaking = false
+                } else {
+                    jumpToPage(page)
+                    ReaderSpeaker.say(
+                        text = said,
+                        speed = ReaderLook.speakSpeed,
+                        voiceName = ReaderLook.speakVoice
+                    ) { speakCursor = after }
+                }
+            }
+
+            null -> speaking = false
+        }
+    }
+
     // ── v418 — THE FLOW SWITCH SETTLES IN (member: "the flow animation is bad
     // of it"). Scrolling ↔ Pages used to swap in one frame, which read as a
     // flinch. The reading surface now fades and lifts a hair each time the flow
@@ -1187,6 +1290,19 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             footHidden = scrubOpen,
             // v439 — the motion lock is a PDF's control (see [ReaderChrome]).
             pdf = content is ReaderContent.Pages,
+            // v440 — the voice's own pill, and the reader's own driver behind it:
+            // pausing stops the engine as well as the driver, so a resumed tap starts
+            // from where the member IS rather than finishing a stale sentence (the
+            // driver's `QUEUE_FLUSH` is the other half of that).
+            speaking = speaking,
+            onToggleSpeak = {
+                if (speaking) {
+                    speaking = false
+                    ReaderSpeaker.stop()
+                } else {
+                    startSpeaking()
+                }
+            },
             search = searching,
             onClose = { navController.popBackStack() },
             onSearch = {
@@ -3661,6 +3777,15 @@ private fun ReaderChrome(
      * pill would be a control over nothing (see [ReaderLook.motionLock]).
      */
     pdf: Boolean = false,
+    /**
+     * v440 — WHETHER A VOICE IS READING THIS BOOK (see [ReaderSpeaker]).
+     *
+     * Passed in rather than read here because the voice belongs to the SCREEN: this
+     * component draws the pill, the reader owns the cursor and the engine.
+     */
+    speaking: Boolean = false,
+    /** The speak pill's own door; null leaves the pill out entirely. */
+    onToggleSpeak: (() -> Unit)? = null,
     /** v431 — while the search bar is up the head hands its row over to it. */
     search: ReaderSearch?,
     onClose: () -> Unit,
@@ -3845,6 +3970,74 @@ private fun ReaderChrome(
                 .padding(end = 12.dp, bottom = 78.dp)
         ) {
             ReaderMotionLockPill(palette)
+        }
+
+        // ── v440 — AND THE VOICE, ABOVE THE FOOT'S LEFT CORNER ────────────
+        //
+        // The motion lock's own mirror: same 40dp pill, same floor, the other
+        // corner, so the two never fight for a thumb. **It stays up while the chrome
+        // is away** ([speaking] counts, not only [visible]) — the chrome hides itself
+        // as the voice follows the book on, and a pause control that vanished with it
+        // would leave the member with no way to stop the reading except closing the
+        // book. It still obeys `footHidden`: while the page slider is up, that strip
+        // of the page belongs to the slider.
+        if (onToggleSpeak != null) {
+            AnimatedVisibility(
+                visible = (visible || speaking) && !footHidden,
+                enter = CurioMotion.popArrive(),
+                exit = CurioMotion.popLeave(),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .navigationBarsPadding()
+                    .padding(start = 12.dp, bottom = 78.dp)
+            ) {
+                ReaderSpeakPill(palette = palette, speaking = speaking, onToggle = onToggleSpeak)
+            }
+        }
+    }
+}
+
+/**
+ * v440 — THE VOICE'S OWN PILL: play, or pause.
+ *
+ * One glyph and no words, like the motion lock beside it, and for the same reason: a
+ * pill that floats over a page the member is reading says what it is with its shape.
+ * It wears the accent while it is reading, so "is it still going" is answerable at a
+ * glance from across the room — which is the only way it is ever asked.
+ */
+@Composable
+private fun ReaderSpeakPill(palette: ReaderPalette, speaking: Boolean, onToggle: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (speaking) lerp(palette.surface, palette.accent, 0.30f) else palette.surface,
+        shadowElevation = 8.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .height(40.dp)
+                .clip(RoundedCornerShape(50))
+                .curioPressClickable(
+                    pressedScale = 0.92f,
+                    onClickLabel = if (speaking) "Stop reading aloud" else "Read this page aloud",
+                    onClick = onToggle
+                )
+                .padding(horizontal = 13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CurioIcon(
+                if (speaking) CurioIcons.Pause else CurioIcons.PlayArrow,
+                null,
+                tint = if (speaking) palette.ink else palette.accent,
+                size = 18.dp
+            )
+            Text(
+                if (speaking) "Reading" else "Listen",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = palette.ink.copy(alpha = 0.85f)
+            )
         }
     }
 }
@@ -4722,8 +4915,21 @@ private fun ReaderSheetFrame(
      * places sheets keep a real panel's floor now ([ReaderPlacesSheet] passes it),
      * while a sheet that genuinely has one line to say (a dictionary entry, the
      * mark sheet) still wraps and stays small.
+     *
+     * ── v440 — AND "STAYS SMALL" WAS WRONG, SO EVERY SHEET HAS A FLOOR NOW ──
+     *
+     * The member, after living with it: *"the 3 dot buttom sheet is so small same
+     * for the discounary buttom sheet"*. A wrap-sized panel under a page the member
+     * was reading does not read as "exactly as big as it needs" — it reads as a
+     * strip that appeared at the foot of the screen, and both sheets they named are
+     * short by nature (six tiles; one word and its senses). The floor is the whole
+     * answer: **every reader sheet keeps 45% of the screen**, which is what the
+     * member asked for in the first place ("the height stays half of the screen"),
+     * and a sheet with more to say still grows to the 60% cap and scrolls inside it.
+     * Pass a different fraction for a specific sheet; pass 0 only if a sheet is ever
+     * meant to be a strip.
      */
-    minHeightFraction: Float = 0f,
+    minHeightFraction: Float = 0.45f,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -7620,6 +7826,23 @@ internal object ReaderLook {
     var dictionary by mutableStateOf(ReaderDictionarySource.WIKTIONARY)
 
     /**
+     * v440 — HOW FAST IT READS, AND IN WHOSE VOICE (see [ReaderSpeaker]).
+     *
+     * The member's own pick (*"Read-aloud: a speed and voice picker"*). Both are
+     * READING preferences and are remembered with the rest of the look: a member who
+     * needs a slower voice on a book needs it on the next book too. The VOICE is held
+     * by its engine-assigned NAME ("en-us-x-sfg#female_1-local") rather than an index,
+     * because a phone that adds or reorders its voices would otherwise silently change
+     * which one the member reads in.
+     *
+     * The SPEAKING state itself is NOT here: whether a voice is mid-sentence is a fact
+     * about this visit to this screen, not a preference — a book that reopened with the
+     * voice already talking would be an ambush (see the reader's own driver).
+     */
+    var speakSpeed by mutableStateOf(1f)
+    var speakVoice by mutableStateOf("")
+
+    /**
      * v439 — LOW POWER READING, AND IT IS ON FROM THE START.
      *
      * The member: *"in pdf reader, a high charge save turns on which makes the
@@ -7699,12 +7922,26 @@ internal object ReaderLook {
         dimAuto.toString(),
         // v440 — and which dictionary the lookups go to (the v434 rule).
         dictionary.key,
+        speakSpeed.toString(),
+        speakVoice,
         lowPower.toString(),
         // v439 — the motion lock MUST be in here, or it saves all of the other
         // fields and silently forgets this one (the v434 rule).
         motionLock.toString()
     ).joinToString("|")
 }
+
+/**
+ * v440 — HOW MUCH OF A BOOK GOES TO THE VOICE AT ONCE.
+ *
+ * A few paragraphs, or a screenful of characters, whichever comes first: the engine
+ * is told one piece and reports when it is finished (see the reader's driver), so
+ * this is the size of the step the reader takes between utterances. Too small and
+ * the gap between chunks is audible; too large and the pause lands a page after the
+ * member tapped it.
+ */
+private const val SPEAK_BLOCKS = 4
+private const val SPEAK_CHARS = 900
 
 /**
  * v434 — how the lines sit in their column (see [ReaderLook.justify]).
@@ -7753,6 +7990,8 @@ internal object ReaderLookStore {
     private const val LOW_POWER = "reader_low_power"
     private const val DIM_AUTO = "reader_dim_auto"
     private const val DICTIONARY = "reader_dictionary"
+    private const val SPEAK_SPEED = "reader_speak_speed"
+    private const val SPEAK_VOICE = "reader_speak_voice"
     private const val MOTION_LOCK = "reader_motion_lock"
 
     /**
@@ -7789,6 +8028,9 @@ internal object ReaderLookStore {
             ReaderLook.dictionary = ReaderDictionarySource.fromKey(
                 prefs.getString(DICTIONARY, ReaderLook.dictionary.key)
             )
+            ReaderLook.speakSpeed = prefs.getFloat(SPEAK_SPEED, ReaderLook.speakSpeed)
+                .coerceIn(0.5f, 2.5f)
+            ReaderLook.speakVoice = prefs.getString(SPEAK_VOICE, ReaderLook.speakVoice).orEmpty()
             ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
             ReaderLook.motionLock = prefs.getBoolean(MOTION_LOCK, ReaderLook.motionLock)
         }
@@ -7816,6 +8058,8 @@ internal object ReaderLookStore {
                 .putFloat(DIM, ReaderLook.dim)
                 .putBoolean(DIM_AUTO, ReaderLook.dimAuto)
                 .putString(DICTIONARY, ReaderLook.dictionary.key)
+                .putFloat(SPEAK_SPEED, ReaderLook.speakSpeed)
+                .putString(SPEAK_VOICE, ReaderLook.speakVoice)
                 .putBoolean(LOW_POWER, ReaderLook.lowPower)
                 .putBoolean(MOTION_LOCK, ReaderLook.motionLock)
                 .putBoolean(MARK, true)
@@ -9691,9 +9935,16 @@ private fun renderPdfPage(
         val bitmap = Bitmap.createBitmap(
             (page.width * scale).toInt().coerceAtLeast(1),
             height,
-            // v439 — a page of a book is opaque: an alpha channel here is a
-            // quarter of the bitmap spent on nothing (see [lowPower]).
-            if (lowPower) Bitmap.Config.RGB_565 else Bitmap.Config.ARGB_8888
+            // ── ARGB_8888, ALWAYS, AND THIS IS NOT A STYLE CHOICE (v440) ───
+            //
+            // v439 tried to save the bitmap's alpha channel in low power by
+            // rendering into RGB_565. **`PdfRenderer.Page.render` accepts nothing
+            // but ARGB_8888** — any other config throws — so "Cooler" stopped
+            // rendering pages at all (member: *"pdf isnt loading now in cooler"*).
+            // The saving that IS real is the SCALE below (the upscale cap) and
+            // `beyondViewportPageCount`; the config must stay what the framework
+            // demands. Do not make this conditional again.
+            Bitmap.Config.ARGB_8888
         )
         bitmap.eraseColor(android.graphics.Color.WHITE)
         page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
