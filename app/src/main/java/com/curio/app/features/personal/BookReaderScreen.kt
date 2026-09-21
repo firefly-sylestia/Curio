@@ -3599,9 +3599,18 @@ private fun ReaderChrome(
  * whatever the display cut-out claims, plus this floor. A cut-out device gets
  * the cut-out's height, everything else gets a real margin, and neither case
  * depends on insets that are deliberately switched off.
+ *
+ * `@Composable`, and that is not decoration: `WindowInsets.Companion.displayCutout`
+ * is a **@Composable getter** in this Compose version (it reads a composition-local
+ * insets object rather than a plain value), so a plain `Modifier` extension that
+ * touched it is a compile error — "functions which invoke @Composable functions
+ * must be marked with the @Composable annotation". Every call site is inside a
+ * `@Composable` body, which is why the annotation belongs here and not on the
+ * insets read alone.
  */
 private val ReaderChromeTopFloor = 18.dp
 
+@Composable
 private fun Modifier.readerChromeTopInset(): Modifier = this
     .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
     .padding(top = ReaderChromeTopFloor)
