@@ -565,6 +565,10 @@ FIX:
 - Books: the reading-progress divisions follow the chapter count you set — a book with no file, or one whose contents carry names but no page ranges, now shows a division per chapter, adding or removing a chapter adds or takes one away, and the divisions settle into their new places instead of the bar flickering.
 - Journal: Select all shows its tools — with the whole page selected the tool bar now lights what that page carries, whichever door it came through (the gesture, Android's own Select all, or Ctrl+A).
 
+FIX:
+- Writing: an exported page's pictures keep the size they wear on the page — every print was decoded at the page's own measure and scaled only until it fitted, so a picture set to Small or to a portrait frame left the journal as a page-wide photograph; the print's own share is the box now, a low-resolution picture fills its box instead of printing as a stamp, and the picture keeps its own aspect.
+- Appearance: the Color theme sheet answers the touch — the picked row's wash animates in instead of snapping on after the paint, and both the sheet's rows and the Color theme door squish deeper than the section rows do.
+
 ADD:
 - Writing: the page's copy tool opens a text bar — Cut, Copy, Paste and Undo with the arrows that say how much of the page is in hand (the reach starts as the whole page and the arrows trim it, All rows takes it in one tap), instead of Android's select-all menu.
 - Writing: a picture that ended up a line away from its row comes back to it — two prints with nothing but air between them are one row again, and the air is left out of the drawing, so the row a page was meant to have is the row it shows.

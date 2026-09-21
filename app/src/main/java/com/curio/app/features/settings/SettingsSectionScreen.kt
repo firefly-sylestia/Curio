@@ -593,13 +593,15 @@ private fun ColorThemeRow(onClick: () -> Unit) {
     val swatch = colorThemeChoices().firstOrNull { it.id == current }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(13.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .curioPressClickable(pressedScale = 0.985f, onClick = onClick)
-            .padding(vertical = 8.dp)
-    ) {
-        SettingsOptionIconTile(CurioIcons.Palette, isCurioDarkTheme())
+        horizontalArrangement = Arrangement.spacedBy(13.dp),                    modifier = Modifier
+                        .fillMaxWidth()
+                        // v427 — the door squishes like the sheet's own rows, so
+                        // the touch that opens the picker and the touch inside it
+                        // are the same gesture.
+                        .curioPressClickable(pressedScale = 0.972f, onClick = onClick)
+                        .padding(vertical = 8.dp)
+                ) {
+                    SettingsOptionIconTile(CurioIcons.Palette, isCurioDarkTheme())
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Color theme",
@@ -678,7 +680,7 @@ private fun ColorThemeSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 28.dp),
+                .padding(bottom = 22.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
@@ -704,18 +706,28 @@ private fun ColorThemeSheet(
                 var rowBounds by remember { mutableStateOf(Rect.Zero) }
                 // v427 — a TIGHTER ROW: the sheet is a list of nine, so every
                 // row gives back the air it was not using (see the padding).
+                //
+                // AND THE LIVE ROW CHANGES ITS MIND IN PLACE. The picked row's
+                // wash used to SNAP on the instant the pref landed; it animates
+                // now, so picking a theme reads as one move (the row lights, then
+                // the page reveals) instead of a flicker followed by a paint.
+                val rowFill by animateColorAsState(
+                    targetValue = if (live) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f)
+                                  else Color.Transparent,
+                    animationSpec = tween(220),
+                    label = "color-theme-row"
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .onGloballyPositioned { rowBounds = it.boundsInWindow() }
                         .clip(RoundedCornerShape(18.dp))
-                        .background(
-                            if (live) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f)
-                            else Color.Transparent
-                        )
-                        .curioPressClickable(pressedScale = 0.985f, onClick = {
+                        .background(rowFill)
+                        // A deeper squish than the section rows wear: this is a
+                        // picker, and the finger should feel it take the choice.
+                        .curioPressClickable(pressedScale = 0.965f, onClick = {
                             if (!live) {
                                 // The whole scheme repaints, so the transition is
                                 // FORCED (like the Material toggle's used to be):

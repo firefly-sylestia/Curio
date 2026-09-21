@@ -488,11 +488,25 @@ private fun drawExportLayout(run: PdfRun, layout: StaticLayout, gap: Float) {
 private fun drawExportPhoto(context: Context, run: PdfRun, block: PersonalBlock, ink: Int) {
     val uri = block.photo?.let { raw -> runCatching { Uri.parse(raw) }.getOrNull() } ?: return
     val bitmap = decodeExportBitmap(context, uri, run.contentWidth) ?: return
+    // v427 — THE PRINT KEEPS THE SIZE THE PAGE GAVE IT.
+    //
+    // Every print was decoded at the page's OWN measure and scaled down only
+    // until it fitted, so a picture the member had set to Small, or to a portrait
+    // frame, left the journal as a page-wide photograph — the member's "the pdf
+    // isnt accurate, it doesnt show exactly as the journal view have". The box is
+    // the print's own share of the measure now ([PersonalPhotoSize]'s fraction —
+    // the same number the canvas splits a row of prints with), and the picture
+    // keeps its own aspect inside that box, so nothing is distorted and a Small
+    // print reads as small on paper exactly as it does on the page.
+    //
+    // The old clamp at 1f is gone with it: a small bitmap had to stay small, so a
+    // low-resolution picture printed as a stamp no matter which size it wore.
+    val size = PersonalPhotoSize.fromKey(block.photoSize)
+    val boxWidth = (run.contentWidth.toFloat() * size.fraction).coerceAtLeast(1f)
     val maxHeight = (run.bottom() - PDF_MARGIN) * 0.68f
     val scale = minOf(
-        run.contentWidth.toFloat() / bitmap.width.toFloat(),
-        maxHeight / bitmap.height.toFloat(),
-        1f
+        boxWidth / bitmap.width.toFloat(),
+        maxHeight / bitmap.height.toFloat()
     )
     val drawnWidth = bitmap.width * scale
     val drawnHeight = bitmap.height * scale
