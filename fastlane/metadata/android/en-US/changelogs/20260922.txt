@@ -1,4 +1,10 @@
 FIX:
+- Reading: a sheet scrolls and shuts on a swipe from anywhere — the reader's sheets wrap their content up to 60% of the screen, the body is the one scroll inside them (a short sheet is no longer half-empty paper), and dragging down anywhere collapses the sheet instead of only the handle doing it.
+- Reading: long-press to select works while a PDF is magnified — the page's own one-finger pan claimed the drag from its first move and cancelled the sweep, so the words under a held finger could report nothing.
+- Reading: the hold dock carries the selection tools — a passage chosen by holding a page offers the dictionary and Share, the same doors a swept selection has.
+- Reading: the appearance sheet is the reader's own capsule language — the switches are animated segmented pills (reading mode, how the page stands, keep-awake), the layout rows are one A−/slider/A+ shape, and a PDF finally has a ZOOM slider where a reflowable book has its type size.
+- Reading: the ⋯ menu is six capsule tiles — big glyph, small name — Share, Gestures and Settings instead of the longer labels, with a count badge where a door has a count.
+- Reading: the gesture editor gets out of the way — an eye takes the washes off the page, the depth slider is on demand and hides the washes while it is dragged, and a tap on the page picks the zone it landed in.
 - Writing: the journal's tool dock is compact and grouped — style, alignment and copy sit behind one door each that expands inside the dock itself, and a tool that is on reads as lit.
 - Writing: the copy tool floats as its own box — four arrow pills, an undo and cut/copy/paste icons, a select-all button and a cross to close it — with the reach arrows in the corners and the voice note door out of the way while it is up.
 - Writing: picking a word works on its own again — the letter reach opens from the row you are writing in, without having to take a row first.
@@ -7,6 +13,9 @@ FIX:
 - Settings: the sub-pages' quick tools row and its suggestions are gone.
 
 ADD:
+- Reading: the look you choose is remembered — paper, typeface, type size, leading, margins, paragraph spacing, alignment, orientation, keeping the screen awake and the night dim all come back after a restart.
+- Reading: appearance and reading settings gained the layout controls — line spacing, page margins, paragraph spacing, ragged or justified lines, keeping the screen awake and a night dim that washes the paper without touching the tools.
+- Reading: a reflowable book's page is measured at the leading and margins you set, so its pages break where the page will really end.
 - Writing: a journal's paper can take the colour you gave that day — a switch in the colour sheet beside the colour, kept with the page, so the whole page reads in your colour and the words stay readable on it.
 - Incursion: the list can be ordered — the viewing order, title, year or runtime, each the other way round with one tap, and a list that is not in viewing order leaves its phase headings behind.
 

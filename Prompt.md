@@ -8,153 +8,142 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> now a similiar pass for the journal dock tools capcule look, and lets make it more compact,
-> collapse the B I U s and font into one toggle and no dont make it drop down but the option
-> smoothly expands in that dock when its tapped, an dsimiliar geouping for other tools keep
-> this collape style and for format chnag eit from ddrop down to this colapse style but not
-> for the bullet point, and advcance for the copy and download, also the copy floating layout,
-> make the arrow proper pills in the corner hide the voice note opyion when copy tools are on,
-> and add a cross button to close the option box, dont show the nothing picker or 6 out of 6
-> row text its no need, also instead of all rows use text select all or just the icon of
-> select all, also fix the line selection, without all select i cant select only word by word,
-> fix it, and instead of cut copy paste use its icon, and for undo the undo icon, make it
-> better, also fix the paint the page too not working, also fix the selected hihgligh color of
-> the tool it slooks bad make them proper icons, also make the today and eye pen pill more
-> capsule like and same for the how did the day feel same capsule style as now they ae too
-> thing, use one unified capsule style, so they look good. also from the settings sub pages
-> remove the quick row and its usggestions.
+> now back to reader buttom sheet the buttom sheet isnt scrollable and its not able to close
+> with swipe so fix these, and then for apperance buttom sheet, use proper pill shapes, instead
+> of toggle use proper 2 opton style with animation, in apperance its missing, the text size or
+> zoom slider, for epub remove the horizontal page toggle, and add more proper apperance
+> settings, and in the 3 dot ui, use proper pill shape grid with just capsulepills in a 6 grid
+> with huge icon and a small text below instead of share a passage just share, reading settings
+> to settings, tap zones to gestures
+> properly understand what the design is then confirm it, its gonna use a similiar design system
+> to samsung less text and toggle but more icon based button style and proper visual consistency
+> also extend this to settings and suggest more settings and also the tap p zone edit let user
+> hide the overlay so they can see what they are doing and only overlay the slider when they
+> adjust and hide the overlay when they use the slider so they can see what they are chnaging
+> and selecting one tap zone should switch its area, nd also the highligh doesnt work like when
+> im zoomed in and i try to ta and hol dto select it doesnt work and the dock that appears after
+> i tap and hold well it doesnt have the tools we had before tfor selections.
+> https://github.com/firefly-sylestia/Curio/commit/2b01fd06e8b3efad773b1861210737622b87b950 before
+> this commit too
 
-The journal dock pass (§24 below, asked twice before and parked twice) — done this session.
+## 2. Findings — the reader as it stands
 
-## 2. Findings
+All of this lives in `app/src/main/java/com/curio/app/features/personal/BookReaderScreen.kt`
+(8.3k lines) plus `ReaderSettingsScreen.kt`.
 
-The dock already had most of its parts; the pass was about SHAPE and reach:
+### 2.1 The bottom sheet (`ReaderSheetFrame`, ~4050)
 
-- **The dock's tools were a flat crowd** — B / I / U / S, the size pair, the alignment
-  tool, the bullet, the pen, marker, face and export tools all on one row, each opening a
-  DROPDOWN where it had options. The member wants doors that expand INSIDE the dock
-  ("no dont make it drop down but the option smoothly expands in that dock when its
-  tapped"), grouped: style together, format off its dropdown, copy + download together
-  ("advance for the copy and download"), the bullet keeping its own menu
-  ("but not for the bullet point").
-- **The copy box was a dock-attached strip**, not the floating box with pill arrows,
-  icon actions, a ✕ and no "x out of 6" caption the member drew. And its reach had a
-  real FAULT: the letter axis would not open until a ROW had been picked, so without
-  "select all" no word could be taken ("without all select i cant select only word by
-  word, fix it").
-- **"Paint the page too" was wiring with no paint** — the v430 flag and its
-  `LocalJournalPagePaint` existed, but the reading/writing surfaces still asked the
-  THEME for their paper, so the switch did nothing the eye could see.
-- **The page's three capsules (Today, eye/pen, mood) were three thinnesses** of the
-  same idea; the member wants ONE capsule.
-- **The settings sub-pages' QUICK TOOLS row** (a band of deep links under the chips,
-  with rotating suggestions) is not wanted on the sub-pages.
+- A hand-rolled sheet: scrim + a `Surface` fixed at `maxHeight * 0.5f`, a handle + title that
+  are the ONLY drag target (`detectVerticalDragGestures` on the header `Column`), and a body
+  `Box.weight(1f)` holding `content()`.
+- The body DOES scroll where the caller wraps it in `verticalScroll` (`ReaderPlacesSheet`,
+  `ReaderAppearanceSheet`) — but `ReaderMenuSheet` is a bare `Column`, so it clips instead of
+  scrolling. Nothing scrolls the SHEET itself and nothing scrolls when the finger is in the
+  body: **swipe-to-close only works from the handle/title strip**, which is the "not able to
+  close with swipe" report.
+- The fixed half-screen height leaves dead space on short content and clips tall content.
 
-The earlier reader double-tap / chrome work of this session (§25) shipped first; see the
-request log at the foot for what it did. This session's build is the journal dock.and a single big step cannot be relied on to get either.)
+### 2.2 The appearance sheet (`ReaderAppearanceSheet`, ~4180)
 
-**(c) The tools.** `detectTapGestures` reads a gesture whose changes all go up in ONE event
-as a tap. A pinch ends exactly like that (both fingers lifted within a frame, batched into
-one pointer event), and NO tap detector in the reader asked whether the gesture had been a
-zoom — so every pinch ended by tapping the page it was made on: the chrome toggled (tools
-come and go), and a lift near a side edge turned the page instead (the same lift read as a
-zone tap). The chrome's own appear/leave was a bare cross-fade, which reads as a flinch
-rather than a tool arriving.
+- Text size: A− / slider / A+ (only for reflowable text; absent for a PDF — that is the
+  "missing text size / zoom slider").
+- Typeface: three flat pills (Lora / Fraunces / Sans).
+- Page: five 14dp-rounded swatch tiles + a `+` tile (not pill/capsule).
+- Two `Switch` rows: "Auto-rotate" (flips between AUTO and PORTRAIT — a switch cannot say
+  "wide") and "Horizontal pages" (`paged`, i.e. ReaderFlow).
+- `ReaderSettingsScreen` repeats all of it as full-width rows plus a three-way orientation
+  pill row and the tap-zone switch + "Place the zones" row.
 
-## 3. What was built
+### 2.3 The ⋯ menu (`ReaderMenuSheet`, ~3840)
 
-**The dock's groups are expanding doors** (`PersonalDockGroup`, the dock's `openGroup`):
-STYLE holds B / I / U / S and the size pair behind one door, FORMAT holds the alignments
-(moved off their dropdown), EXPORT holds copy + download; the bullet keeps its own menu.
-One group open at a time, `animateContentSize` doing the expanding in the dock row itself,
-and a door lit while its group is open (or its tool is on).
+- Six full-width rounded-50 rows with a small glyph + text + optional trailing: Notes,
+  Highlights, Dictionary, **Share a passage**, **Tap zones** (trailing ON/OFF, long-press
+  opens the editor), **Reading settings**. The member wants a 6-tile grid of capsule pills —
+  big icon, small label under it — and the labels shortened: Share, Gestures, Settings.
 
-**The copy box is a floating card** (`PageCopyBox` and its `ReachPill` / `ActionPill` /
-`CopyChip`): four arrow pills (rows ↑↓, letters ←→, dimming at their axis' end), select-all
-as a single chip (the bundled glyph subset has no `select_all`, so it is the word), cut /
-copy / undo as icons (`content_cut` is absent from the subset too — the `cut` glyph is
-used; `content_paste` is absent, so paste keeps its word), a ✕ to close, the scope picker
-row and the voice-note door hidden while it is up, and no "x out of 6" caption anywhere.
+### 2.4 Tap zones (`ReaderTapZoneEditor`, ~6645) + `readerZoneActionAt`
 
-**Word-by-word works with no row picked**: the letter axis opens from the row the caret is
-in (a caret IS in a row), so `nudgePageLetters` no longer waits for `nudgePageRows`.
+- The editor draws all four zone washes + rules over the page, four drag handles, and a
+  bottom panel with Reset / Done, an edge chip row, an action chip row, and a always-visible
+  Depth slider. The overlay is always on (no way to see the page), the slider is always up,
+  and a zone is chosen with chips — not by touching the zone on the page.
 
-**"Paint the page too" paints**: all three paper surfaces (reading, writing canvas, dock)
-read `LocalJournalPagePaint` now, and the dock's export resolves the page's paint for a
-shared file.
+### 2.5 Selection / highlight
 
-**A lit tool reads as lit**: one selected style built once (`PersonalToolButton`) — filled
-disc, `onPrimary` glyph, pressed animation.
+- Reflowable text: `ReaderParagraphBlock` uses `detectDragGesturesAfterLongPress` → live
+  `ReaderSelection` → `ReaderSelectionBar` (inks, note, bookmark, dictionary, more, clear).
+- PDF: `PdfPageTextLayer` uses `detectDragGesturesAfterLongPress` in the layer's own space;
+  a press more than 1.5 lines from any type (or on a page with no text layer) falls back to
+  `onLongPress(page)` → the whole-page **Mark this passage** sheet.
+- Presses on the PAGE (not the text layer) also go to `marking` → `ReaderMarkSheet`, which
+  has inks + chapter highlight + note + bookmark + remove, but NOT the selection toolbar
+  (no dictionary, no share, no more). That is the "dock after tap-and-hold has no selection
+  tools".
+- Zoomed PDF: the text layer is inside the page's `graphicsLayer` scale/translation while its
+  gesture reads `liveWidth` (the UNZOOMED fitted width) and container-space offsets, and the
+  outer surface's one-finger pan / double-tap handlers compete for the drag — the reason a
+  hold while zoomed selects nothing.
 
-**One capsule for the page's three pills**: `JournalCapsule` in `PersonalTheme.kt` (height,
-shape, end padding shared), worn by the Today pill, the eye/pen switch and the mood capsule.
+## 3. Design proposed (to confirm before building)
 
-**The settings sub-pages lost their quick row**: the QUICK TOOLS band and its suggestions
-are gone from `SettingsHubScreen`; the hub's own rows are untouched.
+A **Samsung-Notes/Books-style reader chrome**: fewer words, icon-first controls, one capsule
+language everywhere, and animated segmented controls instead of switches.
 
-**Docs:** a v433 section in `app/AGENTS.md`, six FIX bullets in
-`fastlane/metadata/android/en-US/changelogs/20260922.txt`.
+1. **Sheet** — keep the reader's own paper/typography, but: body scrolls (wrap every sheet's
+   body in a scroll, and make the drag belong to the sheet: a downward drag anywhere drags
+   the sheet once its content is at the top), swipe-down-anywhere closes, height caps at ~60%
+   instead of a fixed half so short content is not half-empty paper.
+2. **Appearance** — capsule section pills; a **Text size** slider for reflowable books and a
+   **Zoom** slider for a PDF (both present, contextual); typeface as three capsule pills;
+   paper as capsule swatches; the two switches replaced by **animated segmented pills**
+   (2-option for reading mode / book flow, 3-option for how the page stands).
+3. **The ⋯ grid** — a 6-tile grid of capsule tiles, big glyph + small label:
+   Notes · Highlights · Dictionary · Share · Gestures · Settings.
+4. **Gestures editor** — an eye toggle to hide the zone overlay so the page is visible, the
+   depth slider only shown while adjusting (and the overlay hidden while it is used), and a
+   tap inside a zone on the page selects that zone.
+5. **Selection** — long-press-to-sweep must work while a PDF is zoomed, and the long-press
+   dock (the mark sheet) must carry the full selection toolbar (inks, note, bookmark,
+   dictionary, share, more, clear).
+6. **Reading settings** — same capsule/segmented language, plus the extra settings the member
+   asked me to suggest (see the confirmation questions).
 
-*(The reader work below shipped earlier this session, in §25's commits — kept for the log.)*
+## 4. Confirmed, then built
 
-**A correction made after the layout it needs exists** (`ReaderZoomAsk`, `zoomAskOf`, and the
-`zoomAsk` effect in `PdfScrollReader`): what crosses a double tap's zoom is the tapped
-point's **share of its own sheet** — index, fraction, the sheet's old height, the tap's
-viewport y and the scale ratio — and the scroll is corrected only once the column has been
-laid out at the new size (it waits for the sheet to report a NEW height, three frames at
-most, then `scrollToItem(index, fraction · newSize − viewportY)`). The sideways half stays
-synchronous: a scroll state is a plain number and the content's width settles itself. A tap
-in the air between two sheets belongs to the nearest one; a tap whose ideal offset would be
-negative lands the sheet's head at the top edge.
+The design was put to the member BEFORE any edit (four questions) and all four answers are in the
+build:
 
-**A pinch is not a tap** (`ReaderTouch`): the flag is set on the second finger down inside
-`pinchToZoom` and cleared on the next gesture's `awaitFirstDown(requireUnconsumed = false)`
-— the one place that hears every gesture in the reader, whichever surface it starts on. The
-guards sit where the taps actually arrive: `onSurfaceTap` (which covers the tap ZONES too),
-the chrome's own background tap, and both double-tap doors (`readerDoubleTapDocument`,
-`readerDoubleTapZoom`). Mid-gesture panic is impossible by construction — the pinch already
-consumes every multi-finger event, which is also what cancels the tap detectors' long-press
-path — and the flag self-heals on the next down even if a surface is disposed mid-gesture.
+1. **Epub flow** — "keep it as an animated 2-option segment in both places": the `Horizontal
+   pages` switch is gone from the appearance sheet AND the settings page, replaced by an animated
+   `ReaderSegmentRow` (Scrolling / Pages).
+2. **New settings** — all of them: line spacing, page margins, text alignment, paragraph spacing,
+   keep the screen awake, night dim, and **remembering them across restarts**.
+3. **Sheet height** — "wrap content, cap at ~60% of the screen", with the body the one scroll and a
+   swipe from anywhere collapsing it.
+4. **Gesture select** — "tapping a zone on the page selects that edge" (`zoneEdgeAt`).
 
-**The chrome moves now** (`ReaderChrome`): the head pill settles down from above and the foot
-pill rises from below (`slideInVertically`/`slideOutVertically` at 240/200ms on top of the
-180/150ms fade).
+What landed, file by file:
 
-**And it never leaves on its own.** Asked directly, the member confirmed the auto-hide WAS the
-"appear and disapper": v406's 4.2s countdown is REMOVED. The chrome now leaves only when it is
-told to — `tapPage()`, a scroll of the member's own (`onScrolled`, still guarded by
-`askedByReader` so a turn or a jump the READER asked for keeps it), a selection, or a jump from
-a mark or chapter. That is the v389 spec the member wrote in the first place.
-
-**Docs:** a v432 section in `app/AGENTS.md` (both rules to keep, named), and three FIX
-bullets in `fastlane/metadata/android/en-US/changelogs/20260922.txt`.
-
-## 4. Still open
-
-- Nothing named in the prompt is open. The next items the member named for the SOURCE
-  work — **Openverse, Art Institute of Chicago, OpenAlex + Crossref, NASA image library,
-  iNaturalist** — are still NOT built.
-- The commit's CI run is checked ONCE before the next push (see the CI rule); if it has
-  FAILED, the errors are fixed and pushed before anything else.
-
-## Instruction changes (this session)
-
-- **A CI run is never watched** (member: *"no need to check the compile while its runnning always kep
-  working and answer me and only check if its running or failed if running continue to work if failed
-  just before pushing fix and push then asnwer me"*). Root `AGENTS.md` gained a
-  **"👀 NEVER WAIT ON A CI RUN"** section, compile-safety rule 9 was rewritten to match (a pushed fix
-  is checked ONCE, before the next push, never idled on), and a short "CI Discipline" note sits above
-  the Prompt.md section. The one moment a run MUST be looked at is just before a push.
+- `BookReaderScreen.kt` — `ReaderSheetFrame` (wrap + cap + one body scroll + `NestedScrollConnection`
+  pull + 150ms settle); `ReaderLook`'s six new fields and `ReaderLookStore` (prefs, `reader_look_v434`);
+  the persistence/keep-awake effects and the night-dim wash in the reader body; the rebuilt
+  `ReaderAppearanceSheet` (zoom for a PDF, capsules, segments, the layout rows); the ⋯ menu as a
+  six-tile capsule grid (`ReaderMenuTile`); `ReaderSegmentRow` / `ReaderSliderRow` / `ReaderAlignRow` /
+  `ReaderAlignGlyph` / `ReaderEyeGlyph` / `ReaderSegment`; the rebuilt `ReaderTapZoneEditor` (eye,
+  on-demand depth that hides the washes, tap-to-pick); `ReaderTouch.selecting` + the `zoomed =` gates;
+  the mark dock's dictionary + Share doors (`dictionarySeed`); leading/margins/spacing/alignment applied
+  in `ReaderParagraphBlock`, both text surfaces and `paginateBlocks`/`pagedTextStyle`.
+- `ReaderSettingsScreen.kt` — the complete twin of the appearance sheet, on the same components, with
+  the three-way orientation segment and a Gestures section.
+- `CurioIcons.kt` — `Subject`, `AutoStories`, `Bedtime`, `Nightlight` (each checked against the bundled
+  font's glyph table; `crop_portrait` and every `format_align_*` are NOT in it, which is why the
+  alignment and the eye are drawn).
 
 ## Checks run
 
-- One `gh run list` per decision, never a wait loop (see the new rule above). The run for this
-  session's own push (`493f95b2`) was `in_progress` when it was checked, so the work carried on.
-- No Gradle command was run: this environment forbids compile / build / lint (`AGENTS.md`).
-  The five CI errors were read out of the failed run's log (`gh run view --log`) and fixed
-  one by one; every other API touched (`withFrameNanos`, `slideOutVertically`,
-  `LazyListState.scrollToItem`, `layoutInfo.visibleItemsInfo`) was checked against the
-  Compose BOM (2026.05.01) and is used elsewhere in this file's own imports.
+- No Gradle command: this environment forbids compile / build / lint (`AGENTS.md`).
+- Research was read-only: the reader file's sheet frame, chrome pills, ⋯ sheet, appearance
+  sheet, zones editor, selection bar, settings page and both selection gesture paths.
 
 ## User prompts
 
@@ -162,16 +151,12 @@ bullets in `fastlane/metadata/android/en-US/changelogs/20260922.txt`.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§25 — the double tap, and the tools' appear/disappear (done, this session).** The CI-repair
-  half of it is in the same commit: the v431 reader pass would not compile on origin.
-- **§24 — the journal dock pass (done, this session — asked 2026-09-21, delivered in this
-  session's commit).** The dock's groups are expanding doors (style / format / export),
-  the copy box floats with pill arrows, icon actions, select-all and a ✕, the letter reach
-  opens without a row picked, "paint the page too" paints, the lit tool reads as lit, the
-  page's three pills share one capsule, and the settings sub-pages lost their quick row.
-  (Full wording preserved in §1 above.)
-- **§23 — the reader redesign + the vertical-PDF zoom (done, and shipped in §25's commit).**
-  Compiles now; the next items the member named for the source work — **Openverse, Art
-  Institute of Chicago, OpenAlex + Crossref, NASA image library, iNaturalist** — are still
-  NOT built.
+- **§26 — the reader chrome pass (done, this session).** Sheet scroll + swipe-close from
+  anywhere; appearance as capsule/segmented controls with text size AND a PDF's zoom; the ⋯ menu
+  as a six-capsule grid (Share / Gestures / Settings); the Gestures editor's eye, on-demand depth
+  and tap-a-zone-to-select; zoomed long-press selection; the hold dock carrying the dictionary and
+  Share; six new look settings, persisted. Design confirmed by four questions before any edit.
+- **§25 — the double tap, and the tools' appear/disappear (done).**
+- **§24 — the journal dock pass (done).**
+- **§23 — the reader redesign + the vertical-PDF zoom (done).**
 - (empty slot)

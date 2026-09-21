@@ -14,10 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,41 +32,53 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.theme.CurioIcons
+import kotlin.math.roundToInt
 
 /**
- * v431 — THE READING SETTINGS, AS A PAGE OF ITS OWN.
+ * v434 — THE READING SETTINGS, AS A PAGE OF ITS OWN.
  *
  * The member asked for it in their own words — "settings gets its own screen" —
  * and asked for the one thing that makes it belong here rather than in the app's
  * settings family: *"dont use settings style use the reader style ui for it"*. So
  * it is a full screen of the READER's own paper, its own ink, its own type and its
- * own pills: a page of the book's world that happens to be about the book.
+ * own capsules: a page of the book's world that happens to be about the book.
  *
- * It is reachable two ways and it is the SAME composable both times:
+ * Reachable two ways, and it is the SAME composable both times:
  *
  *  · from the reader's ⋯ menu, where it opens OVER the book so back puts the
  *    member on the page they were reading (see the reader body), and
- *  · as a destination of its own for the settings side — wired on the Dev page
- *    for now, which is where the member asked for it.
+ *  · as a destination of its own for the settings side — wired on the Dev page.
  *
- * WHAT IS HERE, AND WHY IT IS NOT ALL IN THE APPEARANCE SHEET: the sheet is the
- * quick door the member described (type size, face, paper, two switches). This is
- * the COMPLETE one — every reader preference in one scroll, including the two that
- * have no switch of their own: WHERE the page stands (the three-way orientation,
- * which a single switch cannot say) and the page's TAP ZONES with their own
- * placement editor.
+ * ── v434 — IT IS THE APPEARANCE SHEET'S COMPLETE TWIN NOW ───────────────
+ *
+ * The two shared one vocabulary but not one voice: the sheet used `Switch`es and
+ * the page used full-width pill rows. Both now use the SAME components — the
+ * animated [ReaderSegmentRow] for every either/or (or three-way) choice, the
+ * [ReaderSliderRow] for every size, the capsule swatches for the paper — so a
+ * setting learned in one place is the same shape in the other (member: "use a
+ * similar design system to samsung … proper visual consistency also extend this
+ * to settings").
+ *
+ * WHAT IS HERE, AND WHY: the sheet is the quick door (the few things a reader
+ * changes while reading); this is the COMPLETE one — every reader preference in
+ * one scroll, including the ones the sheet has no room for, the three-way
+ * orientation, the page's own gestures, and the settings the member asked for by
+ * name (line spacing, margins, paragraph spacing, alignment, keeping the screen
+ * awake, and the night dim).
  */
 @Composable
 internal fun ReaderSettingsScreen(
     palette: ReaderPalette,
     /** Whether a type size and a face mean anything for what is open. */
     showType: Boolean,
+    /** v434 — whether a PDF is open, for the ZOOM row it needs instead. */
+    showZoom: Boolean = false,
     /** Whether the reading is being read as PAGES right now. */
     paged: Boolean,
     onTogglePaged: () -> Unit,
     /** False when no book is open, so there are no zones to place. */
     canPlaceZones: Boolean = false,
-    onEditTapZones: (() -> Unit)? = null,
+    onGestures: (() -> Unit)? = null,
     onBack: () -> Unit
 ) {
     var moreInks by remember { mutableStateOf(false) }
@@ -78,8 +89,6 @@ internal fun ReaderSettingsScreen(
             .statusBarsPadding()
     ) {
         // ── THE HEAD, IN THE READER'S OWN PILL ──────────────────────────
-        // The same shape the reader itself wears, because this page IS the reader
-        // — one step further in.
         Surface(
             shape = RoundedCornerShape(50),
             color = palette.surface,
@@ -117,7 +126,7 @@ internal fun ReaderSettingsScreen(
                 .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // ── THE PAPER ───────────────────────────────────────────────
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -145,126 +154,169 @@ internal fun ReaderSettingsScreen(
                 }
             }
 
-            // ── THE TYPE ────────────────────────────────────────────────
+            // ── THE TYPE, or the PDF's zoom ─────────────────────────────
             if (showType) {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     ReaderSettingsSection("Type", palette)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ReaderStepperButton(CurioIcons.TextDecrease, "Smaller type", palette) {
-                            ReaderLook.textScale =
-                                (ReaderLook.textScale - 0.08f).coerceIn(0.8f, 2.6f)
+                    ReaderSliderRow(
+                        label = "Text size",
+                        value = ReaderLook.textScale,
+                        range = 0.8f..2.6f,
+                        step = 0.08f,
+                        valueLabel = "${(ReaderLook.textScale * 100f).roundToInt()}%",
+                        palette = palette,
+                        onValue = { next -> ReaderLook.textScale = next.coerceIn(0.8f, 2.6f) },
+                        leadingGlyph = CurioIcons.TextDecrease,
+                        leadingLabel = "Smaller type",
+                        trailingGlyph = CurioIcons.TextIncrease,
+                        trailingLabel = "Larger type"
+                    )
+                    ReaderSegmentRow(
+                        segments = ReaderTypeFace.entries.map { ReaderSegment(it.label) },
+                        selectedIndex = ReaderTypeFace.entries.indexOf(
+                            ReaderTypeFace.of(ReaderLook.typeFace)
+                        ),
+                        palette = palette,
+                        onSelect = { at ->
+                            ReaderTypeFace.entries.getOrNull(at)?.let { ReaderLook.typeFace = it.key }
                         }
-                        Slider(
-                            value = ReaderLook.textScale,
-                            onValueChange = { next ->
-                                ReaderLook.textScale = next.coerceIn(0.8f, 2.6f)
-                            },
-                            valueRange = 0.8f..2.6f,
-                            modifier = Modifier.weight(1f),
-                            colors = SliderDefaults.colors(
-                                thumbColor = palette.accent,
-                                activeTrackColor = palette.accent,
-                                inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
-                            )
-                        )
-                        ReaderStepperButton(CurioIcons.TextIncrease, "Larger type", palette) {
-                            ReaderLook.textScale =
-                                (ReaderLook.textScale + 0.08f).coerceIn(0.8f, 2.6f)
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ReaderTypeFace.entries.forEach { face ->
-                            val live = ReaderLook.typeFace == face.key
-                            Surface(
-                                onClick = { ReaderLook.typeFace = face.key },
-                                shape = RoundedCornerShape(50),
-                                color = if (live) palette.accent else palette.ink.copy(alpha = 0.07f),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    face.label,
-                                    style = TextStyle(
-                                        fontFamily = readerTypeFamily(face.key),
-                                        fontSize = 15.sp,
-                                        fontWeight = if (live) FontWeight.SemiBold
-                                        else FontWeight.Normal
-                                    ),
-                                    color = if (live) palette.paper else palette.ink.copy(alpha = 0.8f),
-                                    maxLines = 1,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 10.dp)
-                                )
-                            }
-                        }
-                    }
+                    )
+                }
+            } else if (showZoom) {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    ReaderSettingsSection("Zoom", palette)
+                    ReaderSliderRow(
+                        label = "Page zoom",
+                        value = ReaderLook.pdfZoom,
+                        range = 1f..4f,
+                        step = 0.25f,
+                        valueLabel = "${(ReaderLook.pdfZoom * 100f).roundToInt()}%",
+                        palette = palette,
+                        onValue = { next -> ReaderLook.pdfZoom = next.coerceIn(1f, 4f) },
+                        leadingGlyph = CurioIcons.Remove,
+                        leadingLabel = "Zoom out",
+                        trailingGlyph = CurioIcons.Add,
+                        trailingLabel = "Zoom in"
+                    )
                 }
             }
 
-            // ── HOW THE PAGE STANDS ─────────────────────────────────────
+            // ── HOW THE BOOK IS LAID OUT ────────────────────────────────
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                ReaderSettingsSection("How the page stands", palette)
-                // THE THREE-WAY CHOICE, which is why this page exists as well as
-                // the sheet's two switches: a switch can say "auto or not", it
-                // cannot say "auto, upright or wide" (see [ReaderOrientation]).
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ReaderOrientation.entries.forEach { option ->
-                        val live = ReaderLook.orientation == option
-                        Surface(
-                            onClick = { ReaderLook.orientation = option },
-                            shape = RoundedCornerShape(50),
-                            color = if (live) palette.accent else palette.ink.copy(alpha = 0.07f),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                option.label,
-                                style = TextStyle(
-                                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = if (live) palette.paper else palette.ink.copy(alpha = 0.75f),
-                                maxLines = 1,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp)
-                            )
-                        }
-                    }
-                }
-                ReaderSwitchRow(
-                    label = "Horizontal pages",
-                    on = paged,
+                ReaderSettingsSection("Reading mode", palette)
+                ReaderSegmentRow(
+                    segments = ReaderFlow.entries.map { ReaderSegment(it.label, it.modeGlyph()) },
+                    selectedIndex = if (paged) 1 else 0,
                     palette = palette,
-                    onToggle = onTogglePaged
+                    onSelect = { if ((it == 1) != paged) onTogglePaged() }
+                )
+
+                ReaderSettingsSection("How the page stands", palette)
+                ReaderSegmentRow(
+                    segments = ReaderOrientation.entries.map {
+                        ReaderSegment(it.label, it.orientationGlyph())
+                    },
+                    selectedIndex = ReaderOrientation.entries.indexOf(ReaderLook.orientation),
+                    palette = palette,
+                    onSelect = { at ->
+                        ReaderOrientation.entries.getOrNull(at)?.let { ReaderLook.orientation = it }
+                    }
                 )
             }
 
-            // ── THE PAGE'S OWN TAP ZONES ────────────────────────────────
+            // ── THE WORDS' OWN LAYOUT ───────────────────────────────────
+            if (showType) {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    ReaderSettingsSection("Lines", palette)
+                    ReaderSliderRow(
+                        label = "Line spacing",
+                        value = ReaderLook.lineSpacing,
+                        range = 0.85f..1.6f,
+                        step = 0.05f,
+                        valueLabel = "${(ReaderLook.lineSpacing * 100f).roundToInt()}%",
+                        palette = palette,
+                        onValue = { next -> ReaderLook.lineSpacing = next.coerceIn(0.85f, 1.6f) },
+                        leadingGlyph = CurioIcons.Remove,
+                        leadingLabel = "Tighter lines",
+                        trailingGlyph = CurioIcons.Add,
+                        trailingLabel = "Looser lines"
+                    )
+                    ReaderSliderRow(
+                        label = "Page margins",
+                        value = ReaderLook.pageMargin,
+                        range = 10f..40f,
+                        step = 2f,
+                        valueLabel = "${ReaderLook.pageMargin.roundToInt()} dp",
+                        palette = palette,
+                        onValue = { next -> ReaderLook.pageMargin = next.coerceIn(10f, 40f) },
+                        leadingGlyph = CurioIcons.Remove,
+                        leadingLabel = "Narrower margins",
+                        trailingGlyph = CurioIcons.Add,
+                        trailingLabel = "Wider margins"
+                    )
+                    ReaderSliderRow(
+                        label = "Paragraph spacing",
+                        value = ReaderLook.paraSpacing,
+                        range = 0.6f..2f,
+                        step = 0.1f,
+                        valueLabel = "${(ReaderLook.paraSpacing * 100f).roundToInt()}%",
+                        palette = palette,
+                        onValue = { next -> ReaderLook.paraSpacing = next.coerceIn(0.6f, 2f) },
+                        leadingGlyph = CurioIcons.Remove,
+                        leadingLabel = "Closer paragraphs",
+                        trailingGlyph = CurioIcons.Add,
+                        trailingLabel = "Further paragraphs"
+                    )
+                    ReaderAlignRow(palette)
+                }
+            }
+
+            // ── THE SCREEN ──────────────────────────────────────────────
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                ReaderSettingsSection("Screen", palette)
+                ReaderSegmentRow(
+                    segments = listOf(
+                        ReaderSegment("Awake", CurioIcons.Lightbulb),
+                        ReaderSegment("Let it sleep", CurioIcons.Bedtime)
+                    ),
+                    selectedIndex = if (ReaderLook.keepScreenOn) 0 else 1,
+                    palette = palette,
+                    onSelect = { at -> ReaderLook.keepScreenOn = at == 0 }
+                )
+                ReaderSliderRow(
+                    label = "Night dim",
+                    value = ReaderLook.dim,
+                    range = 0f..0.6f,
+                    step = 0.05f,
+                    valueLabel = if (ReaderLook.dim <= 0f) "Off"
+                    else "${(ReaderLook.dim / 0.6f * 100f).roundToInt()}%",
+                    palette = palette,
+                    onValue = { next -> ReaderLook.dim = next.coerceIn(0f, 0.6f) },
+                    leadingGlyph = CurioIcons.DarkMode,
+                    leadingLabel = "Less dim",
+                    trailingGlyph = CurioIcons.Nightlight,
+                    trailingLabel = "More dim"
+                )
+            }
+
+            // ── THE PAGE'S OWN GESTURES ─────────────────────────────────
             if (canPlaceZones) {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    ReaderSettingsSection("Tap zones", palette)
-                    ReaderSwitchRow(
-                        label = "A tap on an edge acts",
-                        on = ReaderLook.tapZones,
+                    ReaderSettingsSection("Gestures", palette)
+                    ReaderSegmentRow(
+                        segments = listOf(
+                            ReaderSegment("On", CurioIcons.Check),
+                            ReaderSegment("Off", CurioIcons.Close)
+                        ),
+                        selectedIndex = if (ReaderLook.tapZones) 0 else 1,
                         palette = palette,
-                        onToggle = { ReaderLook.tapZones = !ReaderLook.tapZones }
+                        onSelect = { at -> ReaderLook.tapZones = at == 0 }
                     )
-                    // WHERE they sit and WHAT they do, on the page itself: a zone
-                    // is something the member has to see against the words it
-                    // governs (see [ReaderTapZoneEditor]).
+                    // WHERE they sit and WHAT they do, on the page itself: a
+                    // gesture is something the member has to see against the words
+                    // it governs (see [ReaderTapZoneEditor]).
                     Surface(
-                        onClick = { onEditTapZones?.invoke() },
+                        onClick = { onGestures?.invoke() },
                         shape = RoundedCornerShape(50),
                         color = palette.ink.copy(alpha = 0.06f),
                         modifier = Modifier.fillMaxWidth()
@@ -277,10 +329,10 @@ internal fun ReaderSettingsScreen(
                             Box(
                                 modifier = Modifier
                                     .size(10.dp)
-                                    .background(palette.accent, RoundedCornerShape(50))
+                                    .background(palette.accent, CircleShape)
                             )
                             Text(
-                                "Place the zones",
+                                "Place the gestures",
                                 style = TextStyle(
                                     fontFamily = readerTypeFamily(ReaderLook.typeFace),
                                     fontSize = 15.sp,

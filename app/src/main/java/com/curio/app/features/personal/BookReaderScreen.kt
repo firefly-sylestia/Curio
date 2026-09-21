@@ -8,9 +8,11 @@ import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -47,6 +49,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -109,6 +112,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -134,6 +140,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -155,6 +162,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -280,6 +288,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // thing: words), so the bar that acts on it is drawn once, and either
     // surface simply reports what the finger swept.
     var selection by remember { mutableStateOf<ReaderSelection?>(null) }
+    // v434 — WHAT THE DICTIONARY OPENS ON when it was asked for from the mark
+    // dock rather than from a sweep (see [ReaderMarkSheet]). A sweep hands its
+    // own word over instead (see the dictionary sheet's `initial`).
+    var dictionarySeed by remember { mutableStateOf("") }
 
     /**
      * v389 — THE PAGE IS THE SWITCH.
@@ -309,6 +321,27 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     }
 
     val palette = readerPalette(ReaderLook.inkKey)
+
+    // ── v434 — THE LOOK IS REMEMBERED, AND THE SCREEN IS TOLD TO STAY ───
+    //
+    // Two small effects, and both belong to the READER rather than to the page:
+    // the preferences are the member's own (loaded once on the way in, written
+    // once per settling change — see [ReaderLookStore]), and "keep the screen
+    // awake" is a flag on the view the reader is drawn in, so it can never
+    // outlive the reading.
+    val lookContext = LocalContext.current.applicationContext
+    LaunchedEffect(Unit) { ReaderLookStore.load(lookContext) }
+    LaunchedEffect(Unit) {
+        snapshotFlow { ReaderLook.rememberKey() }
+            .distinctUntilChanged()
+            .debounce(400)
+            .collect { ReaderLookStore.save(lookContext) }
+    }
+    val readerView = LocalView.current
+    DisposableEffect(readerView, ReaderLook.keepScreenOn) {
+        readerView.keepScreenOn = ReaderLook.keepScreenOn
+        onDispose { readerView.keepScreenOn = false }
+    }
 
     // ── HOW THIS BOOK FLOWS ──────────────────────────────────────────────
     // The PAGED text flow lays the book out itself, so the page count is the
@@ -1058,6 +1091,20 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             }
         }
 
+        // ── v434 — AND THE NIGHT DIM, OVER THE PAPER ───────────────────
+        //
+        // A wash of black over the reading — never over the chrome, because a
+        // tool you cannot see is a tool you cannot find — and it takes no
+        // pointer input of its own, so a tap still reaches the page it is
+        // dimming (see [ReaderLook.dim]).
+        if (ReaderLook.dim > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = ReaderLook.dim))
+            )
+        }
+
         ReaderChrome(
             visible = chrome && !ReaderLook.zonesEditing,
             title = book?.title.orEmpty().ifBlank { "Reader" },
@@ -1323,6 +1370,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // v406 — the type size and the face are a text book's business: a PDF
             // page is a picture of a page, and its own size is the pinch's.
             showType = content is ReaderContent.Text,
+            // v434 — and that is exactly why a PDF gets a ZOOM row in its place.
+            showZoom = content is ReaderContent.Pages,
             paged = when (content) {
                 is ReaderContent.Pages -> ReaderLook.pageFlow == ReaderFlow.PAGED
                 is ReaderContent.Text -> ReaderLook.textFlow == ReaderFlow.PAGED
@@ -1419,9 +1468,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             palette = palette,
             notes = keptMarks.count { it.isNote },
             highlights = keptMarks.count { it.markKind == ReaderMarkKind.HIGHLIGHT },
-            tapZones = ReaderLook.tapZones,
-            onToggleTapZones = { ReaderLook.tapZones = !ReaderLook.tapZones },
-            onEditTapZones = {
+            gesturesOn = ReaderLook.tapZones,
+            onGestures = {
                 sheet = null
                 ReaderLook.zonesEditing = true
             },
@@ -1450,11 +1498,16 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // ── THE DICTIONARY ───────────────────────────────────────────
         ReaderSheet.DICTIONARY -> ReaderDictionarySheet(
             palette = palette,
-            // A selection that IS one word arrives ready to look up; anything
-            // else arrives empty and waits for the member to type (see
-            // [ReaderSelectionBar]).
-            initial = selection?.text?.trim()?.takeIf { !it.contains(' ') }.orEmpty(),
-            onDismiss = { sheet = null }
+            // A selection that IS one word arrives ready to look up; otherwise
+            // the seed the mark dock left (see [dictionarySeed]) or an empty
+            // field waiting for the member to type (see [ReaderSelectionBar]).
+            initial = dictionarySeed.ifBlank {
+                selection?.text?.trim()?.takeIf { !it.contains(' ') }.orEmpty()
+            },
+            onDismiss = {
+                sheet = null
+                dictionarySeed = ""
+            }
         )
 
         null -> Unit
@@ -1520,6 +1573,31 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 }
                 marking = null
             },
+            // ── v434 — AND THE TWO THE SELECTION BAR ALWAYS HAD ─────────
+            //
+            // The member: "the dock that appears after i tap and hold well it
+            // doesnt have the tools we had before for selections". A passage
+            // chosen by holding a page is the same passage a sweep chooses, so
+            // its dock offers the same doors: the dictionary (seeded from the
+            // first real word of the passage) and sharing the words themselves.
+            onDictionary = {
+                dictionarySeed = paragraph.text
+                    .split(' ', '\n', '\t')
+                    .firstOrNull { part -> part.trim().any { it.isLetter() } }
+                    .orEmpty()
+                    .trim('\u201C', '\u201D', '"', ',', '.', ';', ':', '(', ')', '\'', '\u2019')
+                marking = null
+                sheet = ReaderSheet.DICTIONARY
+            },
+            onShare = {
+                marking = null
+                shareReaderPlace(
+                    context,
+                    book?.title.orEmpty(),
+                    positionLabel,
+                    paragraph.text
+                )
+            },
             onRemove = { existing ->
                 scope.launch {
                     withContext(Dispatchers.IO) {
@@ -1568,6 +1646,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         ReaderSettingsScreen(
             palette = palette,
             showType = content is ReaderContent.Text,
+            showZoom = content is ReaderContent.Pages,
             paged = when (content) {
                 is ReaderContent.Pages -> ReaderLook.pageFlow == ReaderFlow.PAGED
                 is ReaderContent.Text -> ReaderLook.textFlow == ReaderFlow.PAGED
@@ -1586,7 +1665,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // The zones' lines belong on the PAGE, so the page has to be the
             // thing on screen: the settings step out of the way and the editor
             // comes up over the words it governs (see [ReaderTapZoneEditor]).
-            onEditTapZones = {
+            onGestures = {
                 readerSettingsOpen = false
                 ReaderLook.zonesEditing = true
             },
@@ -1761,9 +1840,10 @@ private fun TextReader(
             // press marks a passage, a tap puts the chrome back), and this one
             // catches the presses that land in the gaps between them.
             .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
+        // v434 — the side air is the MEMBER's now (see [ReaderLook.pageMargin]).
         contentPadding = PaddingValues(
-            start = 22.dp,
-            end = 22.dp,
+            start = ReaderLook.pageMargin.dp,
+            end = ReaderLook.pageMargin.dp,
             top = if (chromeVisible) 76.dp else 34.dp,
             bottom = if (chromeVisible) 96.dp else 56.dp
         ),
@@ -2106,7 +2186,11 @@ private fun PdfScrollReader(
                 // nothing page-shaped left in the arithmetic.
                 .pinchToZoom(
                     key = document,
-                    zoomed = { ReaderLook.pdfZoomPage == -1 && ReaderLook.pdfZoom > 1.02f }
+                    // v434 — AND A SWEEP OUTRANKS THE PAN (see [ReaderTouch.selecting]).
+                    zoomed = {
+                        ReaderLook.pdfZoomPage == -1 && ReaderLook.pdfZoom > 1.02f &&
+                            !ReaderTouch.selecting
+                    }
                 ) { zoom, drag, focus ->
                     readerZoomDocument(
                         zoom = zoom,
@@ -2380,7 +2464,16 @@ private fun TextPagedReader(
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     var room by remember { mutableStateOf(IntSize.Zero) }
-    val pages = remember(content.blocks, room, ReaderLook.textScale) {
+    // v434 — the break follows EVERY look setting that can change a measurement:
+    // the type size, the leading, the margins and the paragraph gap.
+    val pages = remember(
+        content.blocks,
+        room,
+        ReaderLook.textScale,
+        ReaderLook.lineSpacing,
+        ReaderLook.pageMargin,
+        ReaderLook.paraSpacing
+    ) {
         paginateBlocks(content.blocks, room, ReaderLook.textScale, measurer, density)
     }
 
@@ -2482,13 +2575,12 @@ private fun TextPagedReader(
         // is the hitch a page turn used to show (member: "smoother page turns").
         beyondViewportPageCount = 1
     ) { page ->
-        val range = pages.getOrNull(page) ?: return@HorizontalPager
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp, vertical = 24.dp)
-        ) {
+        val range = pages.getOrNull(page) ?: return@HorizontalPager            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = ReaderLook.pageMargin.dp, vertical = 24.dp)
+            ) {
             range.forEach { index ->
                 val block = content.blocks.getOrNull(index) ?: return@forEach
                 val highlight = marks.firstOrNull { it.isHighlight && it.positionIndex == index }
@@ -2544,7 +2636,10 @@ private fun paginateBlocks(
     density: Density
 ): List<IntRange> {
     if (blocks.isEmpty()) return emptyList()
-    val side = with(density) { PAGE_SIDE_PADDING.roundToPx() }
+    // v434 — THE MEMBER'S OWN MARGINS. The break has to be measured against the
+    // column the member will actually read, or a wider page would still break
+    // where the old margins did (see [ReaderLook.pageMargin]).
+    val side = with(density) { (ReaderLook.pageMargin * 2f).dp.roundToPx() }
     val vertical = with(density) { PAGE_VERTICAL_PADDING.roundToPx() }
     val width = room.width - side
     val height = room.height - vertical
@@ -2554,7 +2649,7 @@ private fun paginateBlocks(
     var start = 0
     var used = 0
     blocks.forEachIndexed { index, block ->
-        val gap = with(density) { 2.dp.roundToPx() }
+        val gap = with(density) { (2.dp * ReaderLook.paraSpacing).roundToPx() }
         val needed = if (block.imagePath != null) {
             // A picture's height is not known until it is decoded, so a page's
             // worth is estimated from the width — the same guess the page's own
@@ -2608,34 +2703,36 @@ private fun pagedTextStyle(block: ReaderBlock, scale: Float): TextStyle {
     }
     // v431 — ONE FAMILY FOR THE WHOLE PAGE (see the note in [ReaderParagraphBlock]).
     val family = readerTypeFamily(ReaderLook.typeFace)
+    // v434 — AND THE MEMBER'S OWN LEADING, because a page is measured at the
+    // height it will really be drawn at (see [ReaderLook.lineSpacing]).
+    val leading = ReaderLook.lineSpacing
     return when (level) {
         1 -> TextStyle(
             fontFamily = family,
             fontSize = (23f * scale).sp,
-            lineHeight = (31f * scale).sp,
+            lineHeight = (31f * scale * leading).sp,
             fontWeight = FontWeight.SemiBold
         )
         2 -> TextStyle(
             fontFamily = family,
             fontSize = (20f * scale).sp,
-            lineHeight = (27f * scale).sp,
+            lineHeight = (27f * scale * leading).sp,
             fontWeight = FontWeight.SemiBold
         )
         3 -> TextStyle(
             fontFamily = family,
             fontSize = (18f * scale).sp,
-            lineHeight = (26f * scale).sp,
+            lineHeight = (26f * scale * leading).sp,
             fontWeight = FontWeight.Bold
         )
         else -> TextStyle(
             fontFamily = family,
             fontSize = (17f * scale).sp,
-            lineHeight = (29f * scale).sp
+            lineHeight = (29f * scale * leading).sp
         )
     }
 }
 
-private val PAGE_SIDE_PADDING = 44.dp
 private val PAGE_VERTICAL_PADDING = 60.dp
 
 /**
@@ -2918,7 +3015,10 @@ private fun PageReader(
                 // ahead of the pager's own scroll (see the pager's comment).
                 .pinchToZoom(
                     key = page to myAspect,
-                    zoomed = { ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f }
+                    zoomed = {
+                        ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f &&
+                            !ReaderTouch.selecting
+                    }
                 ) { zoom, drag, focus ->
                     // One rule for both surfaces: see [readerZoomThisPage].
                     readerZoomThisPage(page, viewport.value, myAspect, zoom, drag, focus)
@@ -3082,35 +3182,40 @@ private fun ReaderParagraphBlock(
     // writing hand sets the WHOLE page and a heading stays a heading because its
     // size and weight say so.
     val family = readerTypeFamily(ReaderLook.typeFace)
+    // v434 — THE MEMBER'S OWN LEADING AND ALIGNMENT (see [ReaderLook.lineSpacing]
+    // and [ReaderLook.justify]). A heading keeps ragged lines whatever the body
+    // does: justified display type is never what a book does.
+    val leading = ReaderLook.lineSpacing
+    val align = if (ReaderLook.justify && level == 0) TextAlign.Justify else TextAlign.Start
     val body = when (level) {
         1 -> TextStyle(
             fontFamily = family,
             fontSize = (23f * scale).sp,
-            lineHeight = (31f * scale).sp,
+            lineHeight = (31f * scale * leading).sp,
             fontWeight = FontWeight.SemiBold,
             color = palette.ink
         )
         2 -> TextStyle(
             fontFamily = family,
             fontSize = (20f * scale).sp,
-            lineHeight = (27f * scale).sp,
+            lineHeight = (27f * scale * leading).sp,
             fontWeight = FontWeight.SemiBold,
             color = palette.ink
         )
         3 -> TextStyle(
             fontFamily = family,
             fontSize = (18f * scale).sp,
-            lineHeight = (26f * scale).sp,
+            lineHeight = (26f * scale * leading).sp,
             fontWeight = FontWeight.Bold,
             color = palette.ink
         )
         else -> TextStyle(
             fontFamily = family,
             fontSize = (17f * scale).sp,
-            lineHeight = (29f * scale).sp,
+            lineHeight = (29f * scale * leading).sp,
             color = palette.ink
         )
-    }
+    }.copy(textAlign = align)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -3133,7 +3238,11 @@ private fun ReaderParagraphBlock(
                         }
                         .padding(start = 11.dp, top = 4.dp, bottom = 4.dp)
                 } else {
-                    Modifier.padding(vertical = if (block.isHeading) 12.dp else 6.dp)
+                    // v434 — the member's own paragraph gap (see [ReaderLook.paraSpacing]).
+                    Modifier.padding(
+                        vertical = (if (block.isHeading) 12.dp else 6.dp) *
+                            ReaderLook.paraSpacing
+                    )
                 }
             )
     ) {
@@ -3828,22 +3937,29 @@ private fun ReaderScrubberSheet(
 }
 
 /**
- * v431 — THE ⋯ MENU: EVERY OTHER DOOR, EACH ITS OWN ROUNDED PILL.
+ * v434 — THE ⋯ MENU: SIX CAPSULE DOORS IN A GRID, GLYPH FIRST.
  *
- * The member's own list of what belongs behind the three dots — notes,
- * highlights, the dictionary, share, settings — with the tap-zones switch moved
- * here out of the foot bar, and with no Search row at all, because the top-right
- * icon is the reader's one search ("add it in the 3dot menu remove the search as
- * search already got the optin in top right").
+ * The member redrew this page in their own words: "use proper pill shape grid
+ * with just capsulepills in a 6 grid with huge icon and a small text below
+ * instead of share a passage just share, reading settings to settings, tap zones
+ * to gestures". So the six rows are six TILES — a big glyph and the shortest name
+ * that still says what it does — in two rows of three, which is also what makes
+ * a door reachable with a thumb instead of a careful aim.
+ *
+ * The names are the member's: Share (not "Share a passage"), Gestures (not "Tap
+ * zones") and Settings (not "Reading settings"). A door that leads somewhere with
+ * a count wears it as a small mark on the corner of its glyph, and Gestures wears
+ * a lit mark while the zones are on, so the grid still answers "are they on?"
+ * without a word of state.
  */
 @Composable
 private fun ReaderMenuSheet(
     palette: ReaderPalette,
     notes: Int,
     highlights: Int,
-    tapZones: Boolean,
-    onToggleTapZones: () -> Unit,
-    onEditTapZones: () -> Unit,
+    /** v434 — whether the page's zones answer a tap (the Gestures tile's mark). */
+    gesturesOn: Boolean,
+    onGestures: () -> Unit,
     onNotes: () -> Unit,
     onHighlights: () -> Unit,
     onDictionary: () -> Unit,
@@ -3854,98 +3970,117 @@ private fun ReaderMenuSheet(
     ReaderSheetFrame("More in this book", palette, onDismiss) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(9.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            ReaderMenuRow(
-                glyph = CurioIcons.Note,
-                label = "Notes",
-                palette = palette,
-                trailing = if (notes > 0) "$notes" else "",
-                onClick = onNotes
+            ReaderTileRow(
+                tiles = listOf(
+                    ReaderTile(CurioIcons.Note, "Notes", notes, false, onNotes),
+                    ReaderTile(CurioIcons.FormatHighlight, "Highlights", highlights, false, onHighlights),
+                    ReaderTile(CurioIcons.MenuBook, "Dictionary", 0, false, onDictionary)
+                ),
+                palette = palette
             )
-            ReaderMenuRow(
-                glyph = CurioIcons.FormatHighlight,
-                label = "Highlights",
-                palette = palette,
-                trailing = if (highlights > 0) "$highlights" else "",
-                onClick = onHighlights
-            )
-            ReaderMenuRow(
-                glyph = CurioIcons.MenuBook,
-                label = "Dictionary",
-                palette = palette,
-                onClick = onDictionary
-            )
-            ReaderMenuRow(
-                glyph = CurioIcons.Share,
-                label = "Share a passage",
-                palette = palette,
-                onClick = onShare
-            )
-            // The zones' switch, moved off the foot bar: the reading it governs is
-            // the page, and a HOLD opens where the lines sit ([ReaderTapZoneEditor]).
-            ReaderMenuRow(
-                glyph = CurioIcons.Crop,
-                label = "Tap zones",
-                palette = palette,
-                trailing = if (tapZones) "ON" else "OFF",
-                onClick = onToggleTapZones,
-                onLongClick = onEditTapZones
-            )
-            ReaderMenuRow(
-                glyph = CurioIcons.Settings,
-                label = "Reading settings",
-                palette = palette,
-                onClick = onSettings
+            ReaderTileRow(
+                tiles = listOf(
+                    ReaderTile(CurioIcons.Share, "Share", 0, false, onShare),
+                    ReaderTile(CurioIcons.Crop, "Gestures", 0, gesturesOn, onGestures),
+                    ReaderTile(CurioIcons.Settings, "Settings", 0, false, onSettings)
+                ),
+                palette = palette
             )
         }
     }
 }
 
-/** One door of the ⋯ menu, as a rounded pill of its own. */
+/** v434 — one door of the ⋯ grid: its glyph, its name, and its mark. */
+private class ReaderTile(
+    val glyph: String,
+    val label: String,
+    val count: Int,
+    /** A lit mark for a state (the zones) rather than a count. */
+    val lit: Boolean,
+    val onClick: () -> Unit
+)
+
+/** One row of the ⋯ grid, three capsules wide. */
 @Composable
-private fun ReaderMenuRow(
-    glyph: String,
-    label: String,
+private fun ReaderTileRow(tiles: List<ReaderTile>, palette: ReaderPalette) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        tiles.forEach { tile ->
+            ReaderMenuTile(tile = tile, palette = palette, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+/**
+ * A TILE: a capsule with a big glyph over a short name.
+ *
+ * Big glyph, small name, no other furniture — the member's "less text … more icon
+ * based button style". The count (or the state dot) sits in the glyph's own
+ * corner rather than as a trailing word, which is what keeps the tile quiet.
+ */
+@Composable
+private fun ReaderMenuTile(
+    tile: ReaderTile,
     palette: ReaderPalette,
-    onClick: () -> Unit,
-    trailing: String = "",
-    onLongClick: (() -> Unit)? = null
+    modifier: Modifier = Modifier
 ) {
     Surface(
+        onClick = tile.onClick,
         shape = RoundedCornerShape(50),
         color = palette.ink.copy(alpha = 0.06f),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(50))
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick ?: {}
-            )
+        modifier = modifier.height(94.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CurioIcon(glyph, null, tint = palette.accent, size = 19.dp)
-            Text(
-                label,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                color = palette.ink,
-                maxLines = 1,
-                modifier = Modifier.weight(1f)
-            )
-            if (trailing.isNotBlank()) {
-                Text(
-                    trailing,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        letterSpacing = 0.8.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = palette.accent
-                )
+            Box {
+                CurioIcon(tile.glyph, null, tint = palette.accent, size = 30.dp)
+                when {
+                    tile.count > 0 -> Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 7.dp, y = (-4).dp)
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(palette.accent),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "${tile.count}",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = palette.paper,
+                            maxLines = 1
+                        )
+                    }
+
+                    tile.lit -> Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 4.dp, y = (-2).dp)
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(palette.accent)
+                    )
+                }
             }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                tile.label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = palette.ink.copy(alpha = 0.78f),
+                maxLines = 1
+            )
         }
     }
 }
@@ -4027,20 +4162,24 @@ private fun ReaderHoldButton(
 }
 
 /**
- * v431 — A READER'S SHEET: STABLE, HALF THE SCREEN, AND DRAGGABLE SHUT.
+ * v434 — A READER'S SHEET: AS TALL AS IT NEEDS, SCROLLABLE, AND DRAGGABLE SHUT.
  *
  * The member asked for a real bottom sheet ("make the ui smooth stbale buttom
  * sheet which smoothly collapse or anything the height stays half of the
- * screen"). It is built here rather than borrowed from Material 3 on purpose:
- * the reader runs with the system bars hidden, and a dialog-backed sheet brings
- * its own window back over the page. So this is the same idea, hand-made —
+ * screen"), and then for the two things it was missing ("the buttom sheet isnt
+ * scrollable and its not able to close with swipe so fix these"). It is built
+ * here rather than borrowed from Material 3 on purpose: the reader runs with the
+ * system bars hidden, and a dialog-backed sheet brings its own window back over
+ * the page. So this is the same idea, hand-made —
  *
- *  · the height is FIXED at half the screen, whatever is inside it, so a long
- *    list scrolls inside the sheet instead of growing it and a short one is not
- *    a sliver;
- *  · it rises on a tween and the scrim fades with it;
- *  · the handle and the title are the DRAG TARGET, which is how a sheet is
- *    closed — the body is left alone so the content can scroll under the finger.
+ *  · the height WRAPS its content and stops at 60% of the screen, so a short
+ *    sheet is not half-empty paper and a tall one scrolls its own words;
+ *  · ONE scroll lives here, in the body — callers pass plain content and never
+ *    wrap it in their own (a scroll inside a scroll is a scroll nobody can use);
+ *  · a downward drag ANYWHERE moves the sheet: the body takes it while it can
+ *    still scroll up and the leftover moves the sheet ([pull]), so the swipe the
+ *    member reached for works from the content and not just from the handle;
+ *  · it rises on a tween and the scrim fades with it.
  *
  * `appear` and `drag` are read in a deferred `offset`/`graphicsLayer` lambda, so
  * a drag or an opening animation is a LAYOUT pass and never a recomposition of
@@ -4062,15 +4201,74 @@ private fun ReaderSheetFrame(
     var drag by remember { mutableFloatStateOf(0f) }
     // The drag that means "shut", in the sheet's own pixels.
     val dismissPull = remember(density) { with(density) { 108.dp.toPx() } }
+    val body = rememberScrollState()
     fun close() {
         scope.launch {
             appear.animateTo(0f, tween(durationMillis = 180))
             onDismiss()
         }
     }
+    /** Put the sheet back where it was — unless the pull was far enough to shut it. */
+    fun settle() {
+        if (drag > dismissPull) {
+            close()
+            return
+        }
+        if (drag <= 0f) return
+        scope.launch {
+            val anim = Animatable(drag)
+            anim.animateTo(0f, tween(durationMillis = 180)) { drag = value }
+        }
+    }
+    // ── v434 — THE BODY SCROLLS FIRST, AND THE SHEET GOES NEXT ─────────
+    //
+    // The sheet used to be shut by dragging the HANDLE strip only, which nobody
+    // reaches for — the member's report was exact ("its not able to close with
+    // swipe"). A downward drag anywhere belongs to the sheet now, and it is the
+    // body's until the reading has no more to give: the scrollable content takes
+    // the drag while it can still scroll up, and only the leftover moves the
+    // sheet. That split is the one thing a `NestedScrollConnection` is for, and
+    // it is built here — rather than borrowed from Material 3 — so the sheet
+    // keeps the reader's own paper, ink and type.
+    val pull = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                if (available.y > 0f) {
+                    drag = (drag + available.y).coerceAtLeast(0f)
+                    return Offset(0f, available.y)
+                }
+                if (available.y < 0f && drag > 0f) {
+                    // The finger is on its way back UP with the sheet part-way
+                    // down: it closes the sheet before it scrolls anything.
+                    val take = available.y.coerceAtLeast(-drag)
+                    drag += take
+                    return Offset(0f, take)
+                }
+                return Offset.Zero
+            }
+        }
+    }
+    // A body drag has no "end" of its own to hang the settle on, and the nested
+    // scroll's own stop callback is not in the API this reader builds against —
+    // so the leftover drag settles once the finger has stopped moving for a
+    // moment, which is also what makes a slow, deliberate drag feel anchored.
+    LaunchedEffect(Unit) {
+        snapshotFlow { drag }.debounce(150).collect { settle() }
+    }
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val sheetHeight = maxHeight * 0.5f
-        val sheetHeightPx = with(density) { sheetHeight.toPx() }
+        // ── v434 — AS TALL AS IT NEEDS, UP TO A CAP ─────────────────────
+        //
+        // A fixed half-screen left a short sheet half empty and gave a long one
+        // a body that had nowhere to scroll. The sheet now WRAPS its content and
+        // stops at 60% of the screen; anything past that scrolls inside it, and
+        // the swipe above shuts it from the body. (Member's choice: "wrap
+        // content, cap at ~60%.")
+        val cap = maxHeight * 0.6f
+        val capPx = with(density) { cap.toPx() }
         // THE SCRIM: a wash, not a wall — the page stays legible under it.
         Box(
             modifier = Modifier
@@ -4086,13 +4284,16 @@ private fun ReaderSheetFrame(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(sheetHeight)
+                .heightIn(max = cap)
                 .offset {
                     IntOffset(
                         0,
-                        (drag + (1f - appear.value) * sheetHeightPx).roundToInt()
+                        (drag + (1f - appear.value) * capPx).roundToInt()
                     )
                 }
+                // The body's over-scroll and the sheet's own drag are one
+                // gesture (see [pull]).
+                .nestedScroll(pull)
                 // THE SHEET SWALLOWS A TAP, so tapping INSIDE it never dismisses
                 // it: the scrim below is a sibling, and a tap nothing in the sheet
                 // claims would reach it and shut the sheet the member is using.
@@ -4100,9 +4301,9 @@ private fun ReaderSheetFrame(
                 // it, so this only eats the taps on the sheet's own blank paper.
                 .pointerInput(Unit) { detectTapGestures { } }
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // THE HANDLE AND THE TITLE ARE THE DRAG TARGET (see the note
-                // above): the body below belongs to the content's own scroll.
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // THE HANDLE AND THE TITLE ARE STILL A DRAG TARGET of their own
+                // — the body has the nested scroll now, and the head has this.
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -4146,22 +4347,30 @@ private fun ReaderSheetFrame(
                     )
                 }
                 Spacer(Modifier.height(12.dp))
-                Box(
+                // ── THE BODY SCROLLS (v434) ─────────────────────────────
+                //
+                // One scroll lives here and nowhere else, so a short sheet is
+                // short and a tall one scrolls its own words instead of clipping
+                // them — and so the nested scroll above has exactly one child to
+                // hear. Callers pass plain content; they no longer wrap it.
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .weight(1f, fill = false)
                         .navigationBarsPadding()
                         .padding(horizontal = 18.dp)
+                        .verticalScroll(body)
                 ) {
                     content()
                 }
+                Spacer(Modifier.height(4.dp))
             }
         }
     }
 }
 
 /**
- * v431 — APPEARANCE: THE TYPE, ITS FACE, THE PAPER, AND THE TWO SWITCHES.
+ * v434 — APPEARANCE: THE WHOLE LOOK, IN THE READER'S OWN CAPSULE LANGUAGE.
  *
  * The member's own list, in their own order ("one with appearncae with A- A+ witha
  * slider to adjust the text size, below the font option only 3 in a row then
@@ -4169,18 +4378,34 @@ private fun ReaderSheetFrame(
  * then belo 2 toggle with one auto rotate and another ith the horizontal
  * option"). Five swatches is what fits a phone at a comfortable tap size; the
  * sixth tile unfolds the tuned papers instead of crowding them (see
- * [ReaderSkin.extra]) — so the row the member asked for is the row they get, and
- * the papers they did not name are one tap further on.
+ * [ReaderSkin.extra]).
+ *
+ * ── WHAT v434 CHANGED, AND WHY ─────────────────────────────────────────
+ *
+ *  · A PDF HAS A SIZE CONTROL NOW. The type row is a reflowable book's, and a
+ *    PDF's size is its own zoom — so a PDF gets a ZOOM slider in the same slot
+ *    (member: "in apperance its missing, the text size or zoom slider").
+ *  · THE SWITCHES ARE SEGMENTS. "Auto-rotate" was a switch that could only say
+ *    auto-or-not (and so could never reach "wide"), and "Horizontal pages" was
+ *    a switch for a question with two named answers. Both are now animated
+ *    segmented pills — the member's own direction ("instead of toggle use proper
+ *    2 opton style with animation").
+ *  · AND THE REST OF THE LOOK IS HERE: the leading, the margins, the paragraph
+ *    gap, the alignment, keeping the screen awake and the night dim. They are
+ *    the member's own list of what a reader expects (see [ReaderLook]).
  *
  * The type controls are a REFLOWABLE book's business: a PDF page is a picture of
- * a page, and its own size is the pinch's (v406). They are simply absent for a
- * PDF rather than present and inert.
+ * a page. They are absent for a PDF rather than present and inert, and the layout
+ * rows (leading, margins, paragraphs, alignment) go with them.
  */
 @Composable
 private fun ReaderAppearanceSheet(
     palette: ReaderPalette,
+    /** Whether a type size (and the layout controls) mean anything here. */
     showType: Boolean,
-    /** v431 — whether this book is being read as PAGES, for the second switch. */
+    /** v434 — whether this is a PDF, for the ZOOM slider it needs instead. */
+    showZoom: Boolean,
+    /** v431 — whether this book is being read as PAGES, for the mode segment. */
     paged: Boolean,
     onTogglePaged: () -> Unit,
     onDismiss: () -> Unit
@@ -4188,70 +4413,61 @@ private fun ReaderAppearanceSheet(
     var moreInks by remember { mutableStateOf(false) }
     ReaderSheetFrame("Appearance", palette, onDismiss) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // ── THE ONE SIZE CONTROL THIS PAGE HAS (v434) ───────────────
+            //
+            // A reflowable book's size is its TYPE, and a PDF's is its ZOOM —
+            // and only one of the two exists for any given book. It used to be
+            // absent for a PDF entirely, which is the member's "in apperance its
+            // missing, the text size or zoom slider".
             if (showType) {
-                ReaderSheetLabel("Text size", palette)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ReaderStepperButton(CurioIcons.TextDecrease, "Smaller type", palette) {
-                        ReaderLook.textScale = (ReaderLook.textScale - 0.08f).coerceIn(0.8f, 2.6f)
-                    }
-                    Slider(
-                        value = ReaderLook.textScale,
-                        onValueChange = { next -> ReaderLook.textScale = next.coerceIn(0.8f, 2.6f) },
-                        valueRange = 0.8f..2.6f,
-                        modifier = Modifier.weight(1f),
-                        colors = SliderDefaults.colors(
-                            thumbColor = palette.accent,
-                            activeTrackColor = palette.accent,
-                            inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
-                        )
-                    )
-                    ReaderStepperButton(CurioIcons.TextIncrease, "Larger type", palette) {
-                        ReaderLook.textScale = (ReaderLook.textScale + 0.08f).coerceIn(0.8f, 2.6f)
-                    }
-                }
-
-                ReaderSheetLabel("Typeface", palette)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ReaderTypeFace.entries.forEach { face ->
-                        val live = ReaderLook.typeFace == face.key
-                        Surface(
-                            onClick = { ReaderLook.typeFace = face.key },
-                            shape = RoundedCornerShape(50),
-                            color = if (live) palette.accent else palette.ink.copy(alpha = 0.07f),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                face.label,
-                                style = TextStyle(
-                                    fontFamily = readerTypeFamily(face.key),
-                                    fontSize = 15.sp,
-                                    fontWeight = if (live) FontWeight.SemiBold else FontWeight.Normal
-                                ),
-                                color = if (live) palette.paper else palette.ink.copy(alpha = 0.8f),
-                                maxLines = 1,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp)
-                            )
-                        }
-                    }
-                }
+                ReaderSliderRow(
+                    label = "Text size",
+                    value = ReaderLook.textScale,
+                    range = 0.8f..2.6f,
+                    step = 0.08f,
+                    valueLabel = "${(ReaderLook.textScale * 100f).roundToInt()}%",
+                    palette = palette,
+                    onValue = { next -> ReaderLook.textScale = next.coerceIn(0.8f, 2.6f) },
+                    leadingGlyph = CurioIcons.TextDecrease,
+                    leadingLabel = "Smaller type",
+                    trailingGlyph = CurioIcons.TextIncrease,
+                    trailingLabel = "Larger type"
+                )
+            } else if (showZoom) {
+                ReaderSliderRow(
+                    label = "Zoom",
+                    value = ReaderLook.pdfZoom,
+                    range = 1f..4f,
+                    step = 0.25f,
+                    valueLabel = "${(ReaderLook.pdfZoom * 100f).roundToInt()}%",
+                    palette = palette,
+                    onValue = { next -> ReaderLook.pdfZoom = next.coerceIn(1f, 4f) },
+                    leadingGlyph = CurioIcons.Remove,
+                    leadingLabel = "Zoom out",
+                    trailingGlyph = CurioIcons.Add,
+                    trailingLabel = "Zoom in"
+                )
             }
 
+            // ── THE TYPE ────────────────────────────────────────────────
+            if (showType) {
+                ReaderSheetLabel("Typeface", palette)
+                ReaderSegmentRow(
+                    segments = ReaderTypeFace.entries.map { ReaderSegment(it.label) },
+                    selectedIndex = ReaderTypeFace.entries.indexOf(
+                        ReaderTypeFace.of(ReaderLook.typeFace)
+                    ),
+                    palette = palette,
+                    onSelect = { at ->
+                        ReaderTypeFace.entries.getOrNull(at)?.let { ReaderLook.typeFace = it.key }
+                    }
+                )
+            }
+
+            // ── THE PAPER ───────────────────────────────────────────────
             ReaderSheetLabel("Page", palette)
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -4275,27 +4491,119 @@ private fun ReaderAppearanceSheet(
                 }
             }
 
-            ReaderSwitchRow(
-                label = "Auto-rotate",
-                on = ReaderLook.orientation == ReaderOrientation.AUTO,
+            // ── HOW THE BOOK IS LAID OUT (v434) ─────────────────────────
+            //
+            // The two `Switch`es are gone. A switch can say "this or not"; the
+            // page wants "which of these", which is a segment — and the member
+            // asked for it in both places ("keep it as an animated 2-option
+            // segment in both places"). A PDF keeps the pair because a picture
+            // of a page can be scrolled or turned; a reflowable book says it
+            // too, because that is where the member expects it.
+            ReaderSheetLabel("Reading mode", palette)
+            ReaderSegmentRow(
+                segments = ReaderFlow.entries.map { ReaderSegment(it.label, it.modeGlyph()) },
+                selectedIndex = if (paged) 1 else 0,
                 palette = palette,
-                onToggle = {
-                    ReaderLook.orientation =
-                        if (ReaderLook.orientation == ReaderOrientation.AUTO) {
-                            ReaderOrientation.PORTRAIT
-                        } else {
-                            ReaderOrientation.AUTO
-                        }
+                onSelect = { if ((it == 1) != paged) onTogglePaged() }
+            )
+
+            ReaderSheetLabel("How the page stands", palette)
+            ReaderSegmentRow(
+                segments = ReaderOrientation.entries.map {
+                    ReaderSegment(it.label, it.orientationGlyph())
+                },
+                selectedIndex = ReaderOrientation.entries.indexOf(ReaderLook.orientation),
+                palette = palette,
+                onSelect = { at ->
+                    ReaderOrientation.entries.getOrNull(at)?.let { ReaderLook.orientation = it }
                 }
             )
-            ReaderSwitchRow(
-                label = "Horizontal pages",
-                on = paged,
+
+            // ── THE WORDS' OWN LAYOUT, for a reflowable book only ───────
+            if (showType) {
+                ReaderSliderRow(
+                    label = "Line spacing",
+                    value = ReaderLook.lineSpacing,
+                    range = 0.85f..1.6f,
+                    step = 0.05f,
+                    valueLabel = "${(ReaderLook.lineSpacing * 100f).roundToInt()}%",
+                    palette = palette,
+                    onValue = { next -> ReaderLook.lineSpacing = next.coerceIn(0.85f, 1.6f) },
+                    leadingGlyph = CurioIcons.Remove,
+                    leadingLabel = "Tighter lines",
+                    trailingGlyph = CurioIcons.Add,
+                    trailingLabel = "Looser lines"
+                )
+                ReaderSliderRow(
+                    label = "Page margins",
+                    value = ReaderLook.pageMargin,
+                    range = 10f..40f,
+                    step = 2f,
+                    valueLabel = "${ReaderLook.pageMargin.roundToInt()} dp",
+                    palette = palette,
+                    onValue = { next -> ReaderLook.pageMargin = next.coerceIn(10f, 40f) },
+                    leadingGlyph = CurioIcons.Remove,
+                    leadingLabel = "Narrower margins",
+                    trailingGlyph = CurioIcons.Add,
+                    trailingLabel = "Wider margins"
+                )
+                ReaderSliderRow(
+                    label = "Paragraph spacing",
+                    value = ReaderLook.paraSpacing,
+                    range = 0.6f..2f,
+                    step = 0.1f,
+                    valueLabel = "${(ReaderLook.paraSpacing * 100f).roundToInt()}%",
+                    palette = palette,
+                    onValue = { next -> ReaderLook.paraSpacing = next.coerceIn(0.6f, 2f) },
+                    leadingGlyph = CurioIcons.Remove,
+                    leadingLabel = "Closer paragraphs",
+                    trailingGlyph = CurioIcons.Add,
+                    trailingLabel = "Further paragraphs"
+                )
+                ReaderSheetLabel("Lines", palette)
+                ReaderAlignRow(palette)
+            }
+
+            // ── AND THE NIGHT'S TWO (v434) ────────────────────────────
+            ReaderSheetLabel("Screen", palette)
+            ReaderSegmentRow(
+                segments = listOf(
+                    ReaderSegment("Awake", CurioIcons.Lightbulb),
+                    ReaderSegment("Let it sleep", CurioIcons.Bedtime)
+                ),
+                selectedIndex = if (ReaderLook.keepScreenOn) 0 else 1,
                 palette = palette,
-                onToggle = onTogglePaged
+                onSelect = { at -> ReaderLook.keepScreenOn = at == 0 }
+            )
+            ReaderSliderRow(
+                label = "Night dim",
+                value = ReaderLook.dim,
+                range = 0f..0.6f,
+                step = 0.05f,
+                valueLabel = if (ReaderLook.dim <= 0f) "Off"
+                else "${(ReaderLook.dim / 0.6f * 100f).roundToInt()}%",
+                palette = palette,
+                onValue = { next -> ReaderLook.dim = next.coerceIn(0f, 0.6f) },
+                leadingGlyph = CurioIcons.DarkMode,
+                leadingLabel = "Less dim",
+                trailingGlyph = CurioIcons.Nightlight,
+                trailingLabel = "More dim"
             )
         }
     }
+}
+
+/** v434 — the glyph a flow wears in the reading-mode segment. */
+internal fun ReaderFlow.modeGlyph(): String = when (this) {
+    ReaderFlow.SCROLL -> CurioIcons.Subject
+    ReaderFlow.PAGED -> CurioIcons.AutoStories
+}
+
+/** v434 — the glyph an orientation wears in its segment. */
+internal fun ReaderOrientation.orientationGlyph(): String = when (this) {
+    ReaderOrientation.AUTO -> CurioIcons.AspectRatio
+    ReaderOrientation.PORTRAIT -> CurioIcons.Crop
+    ReaderOrientation.LANDSCAPE -> CurioIcons.Fullscreen
 }
 
 /** A section's name inside a reader sheet. The only furniture a sheet needs. */
@@ -4390,37 +4698,242 @@ internal fun ReaderMoreInkTile(
     }
 }
 
-/** One of the two switches, on the reader's own paper. */
+/** v434 — one choice of a [ReaderSegmentRow]. */
+internal data class ReaderSegment(val label: String, val glyph: String? = null)
+
+/**
+ * v434 — AN ANIMATED SEGMENTED PILL: THE READER'S REPLACEMENT FOR A SWITCH.
+ *
+ * A `Switch` says one thing (this or not). The reader's choices are almost never
+ * that shape — a book is scrolled or turned, a page stands auto, upright or wide,
+ * the screen is kept awake or allowed to sleep — so every one of them is a SEGMENT
+ * the member picks from, with the selected pill SLIDING between its options rather
+ * than blinking (the member's own design direction: "instead of toggle use proper
+ * 2 opton style with animation", and "similar design system to samsung, less text
+ * and toggle but more icon based button style").
+ *
+ * The thumb is moved in the LAYOUT phase (the `offset` lambda), so a slide never
+ * recomposes the labels; only their ink animates, which is why the two run in
+ * step on a cheap frame.
+ */
 @Composable
-internal fun ReaderSwitchRow(
-    label: String,
-    on: Boolean,
+internal fun ReaderSegmentRow(
+    segments: List<ReaderSegment>,
+    selectedIndex: Int,
     palette: ReaderPalette,
-    onToggle: () -> Unit
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    if (segments.isEmpty()) return
+    val index = selectedIndex.coerceIn(0, segments.size - 1)
+    val slide = animateFloatAsState(
+        targetValue = index.toFloat(),
+        animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
+        label = "readerSegmentSlide"
+    )
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.ink.copy(alpha = 0.06f),
+        modifier = modifier.fillMaxWidth()
     ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-            color = palette.ink,
-            modifier = Modifier.weight(1f)
-        )
-        Switch(
-            checked = on,
-            onCheckedChange = { onToggle() },
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = palette.paper,
-                checkedTrackColor = palette.accent,
-                checkedBorderColor = palette.accent,
-                uncheckedThumbColor = palette.ink.copy(alpha = 0.55f),
-                uncheckedTrackColor = palette.ink.copy(alpha = 0.10f),
-                uncheckedBorderColor = palette.ink.copy(alpha = 0.22f)
+        BoxWithConstraints(modifier = Modifier.height(46.dp)) {
+            val each = maxWidth / segments.size
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset((slide.value * each.toPx()).roundToInt(), 0) }
+                    .width(each)
+                    .fillMaxHeight()
+                    .padding(3.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(palette.accent)
             )
-        )
+            Row(modifier = Modifier.fillMaxSize()) {
+                segments.forEachIndexed { at, segment ->
+                    val live = at == index
+                    val ink = animateColorAsState(
+                        targetValue = if (live) palette.paper else palette.ink.copy(alpha = 0.72f),
+                        animationSpec = tween(durationMillis = 200),
+                        label = "readerSegmentInk"
+                    )
+                    Surface(
+                        onClick = { onSelect(at) },
+                        shape = RoundedCornerShape(50),
+                        color = Color.Transparent,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            segment.glyph?.let { glyph ->
+                                CurioIcon(glyph, null, tint = ink.value, size = 15.dp)
+                                Spacer(Modifier.width(5.dp))
+                            }
+                            Text(
+                                segment.label,
+                                style = TextStyle(
+                                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                                    fontSize = 13.sp,
+                                    fontWeight = if (live) FontWeight.SemiBold else FontWeight.Medium
+                                ),
+                                color = ink.value,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * v434 — ONE LOOK SETTING: ITS NAME, HOW BIG IT IS, AND THE TWO DISCS THAT STEP IT.
+ *
+ * The A−/slider/A+ row the member asked for, generalised so every size-like
+ * setting in the reader (the type, a PDF's zoom, the leading, the margins, the
+ * paragraph gap and the night dim) is the SAME control in the same place. One
+ * shape, learned once.
+ */
+@Composable
+internal fun ReaderSliderRow(
+    label: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    step: Float,
+    valueLabel: String,
+    palette: ReaderPalette,
+    onValue: (Float) -> Unit,
+    leadingGlyph: String,
+    leadingLabel: String,
+    trailingGlyph: String,
+    trailingLabel: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                label,
+                style = TextStyle(
+                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = palette.ink
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                valueLabel,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = palette.accent
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            ReaderStepperButton(leadingGlyph, leadingLabel, palette) {
+                onValue((value - step).coerceIn(range.start, range.endInclusive))
+            }
+            Slider(
+                value = value.coerceIn(range.start, range.endInclusive),
+                onValueChange = { next -> onValue(next.coerceIn(range.start, range.endInclusive)) },
+                valueRange = range,
+                modifier = Modifier.weight(1f),
+                colors = SliderDefaults.colors(
+                    thumbColor = palette.accent,
+                    activeTrackColor = palette.accent,
+                    inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
+                )
+            )
+            ReaderStepperButton(trailingGlyph, trailingLabel, palette) {
+                onValue((value + step).coerceIn(range.start, range.endInclusive))
+            }
+        }
+    }
+}
+
+/**
+ * v434 — THE ALIGNMENT GLYPH, DRAWN (three rules, ragged or flush).
+ *
+ * The bundled font carries none of the `format_align_*` ligatures, so a named
+ * icon here would render as a blank pill — the reason the four alignments
+ * elsewhere in Curio are drawn too.
+ */
+/**
+ * v434 — THE TWO LINE-ALIGNMENT DOORS, in the reader's own capsule language.
+ *
+ * A pair rather than a [ReaderSegmentRow] because both glyphs are DRAWN (see
+ * [ReaderAlignGlyph]) and a segment only carries a named icon.
+ */
+@Composable
+internal fun ReaderAlignRow(palette: ReaderPalette, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ReaderAlign.entries.forEach { option ->
+            val live = ReaderLook.justify == option.justified
+            Surface(
+                onClick = { ReaderLook.justify = option.justified },
+                shape = RoundedCornerShape(50),
+                color = if (live) palette.accent else palette.ink.copy(alpha = 0.07f),
+                modifier = Modifier.weight(1f)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    ReaderAlignGlyph(
+                        justified = option.justified,
+                        tint = if (live) palette.paper else palette.ink.copy(alpha = 0.78f)
+                    )
+                    Spacer(Modifier.width(7.dp))
+                    Text(
+                        option.label,
+                        style = TextStyle(
+                            fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = if (live) palette.paper else palette.ink.copy(alpha = 0.78f),
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun ReaderAlignGlyph(justified: Boolean, tint: Color, iconSize: Dp = 18.dp) {
+    Canvas(modifier = Modifier.size(iconSize)) {
+        val stroke = this.size.height * 0.11f
+        val widths = if (justified) listOf(1f, 1f, 1f) else listOf(1f, 0.62f, 0.86f)
+        val gap = this.size.height / (widths.size * 2f - 1f)
+        widths.forEachIndexed { at, share ->
+            val y = gap / 2f + at * gap * 2f
+            drawLine(
+                color = tint,
+                start = Offset(0f, y),
+                end = Offset(this.size.width * share, y),
+                strokeWidth = stroke,
+                cap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
+        }
     }
 }
 
@@ -4461,7 +4974,10 @@ private fun ReaderDictionarySheet(
         looking = false
     }
     ReaderSheetFrame("Dictionary", palette, onDismiss) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        // v434 — wrap-sized, because the sheet's own body scrolls now (see
+        // [ReaderSheetFrame]); a `weight(1f)` here would have measured to
+        // nothing inside that scroll.
+        Column(modifier = Modifier.fillMaxWidth()) {
             Surface(
                 shape = RoundedCornerShape(50),
                 color = palette.ink.copy(alpha = 0.06f),
@@ -4513,16 +5029,16 @@ private fun ReaderDictionarySheet(
             val list = senses
             when {
                 looking -> Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = palette.accent, modifier = Modifier.size(22.dp))
                 }
 
-                list == null -> Box(Modifier.fillMaxWidth().weight(1f))
+                list == null -> Box(Modifier.fillMaxWidth())
 
                 list.isEmpty() -> Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.TopStart
                 ) {
                     Text(
@@ -4533,10 +5049,7 @@ private fun ReaderDictionarySheet(
                 }
 
                 else -> Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState()),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     list.forEach { sense ->
@@ -4692,11 +5205,11 @@ private fun ReaderPlacesSheet(
         }
     }
     ReaderSheetFrame(title, palette, onDismiss) {
+        // v434 — no scroll of its own: the SHEET's body is the one scroll now,
+        // so this sheet cannot end up with a scroll inside a scroll (see
+        // [ReaderSheetFrame]).
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (withProgress) {
@@ -5454,6 +5967,10 @@ private fun ReaderMarkSheet(
     onHighlightChapter: (() -> Unit)?,
     onNote: () -> Unit,
     onBookmark: () -> Unit,
+    /** v434 — the selection bar's own dictionary door, on the same passage. */
+    onDictionary: () -> Unit,
+    /** v434 — and its share door, handing on the words themselves. */
+    onShare: () -> Unit,
     onRemove: (ReaderMarkEntity) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -5519,6 +6036,20 @@ private fun ReaderMarkSheet(
                 label = "Bookmark this place",
                 palette = palette,
                 onClick = onBookmark
+            )
+            // v434 — THE PASSAGE IS A PASSAGE, whichever way it was chosen: the
+            // same two doors the swept selection has (see the reader body).
+            ReaderSheetAction(
+                glyph = CurioIcons.MenuBook,
+                label = "Look a word up",
+                palette = palette,
+                onClick = onDictionary
+            )
+            ReaderSheetAction(
+                glyph = CurioIcons.Share,
+                label = "Share this passage",
+                palette = palette,
+                onClick = onShare
             )
             existing.forEach { mark ->
                 ReaderSheetAction(
@@ -5855,6 +6386,10 @@ private fun PdfPageTextLayer(
             .pointerInput(page) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = { start ->
+                        // v434 — THE SWEEP OWNS THIS GESTURE (see [ReaderTouch]).
+                        // Said before anything else, so a hold on the margin (the
+                        // dock) is not panned out from under the finger either.
+                        ReaderTouch.selecting = true
                         val words = liveText.value ?: return@detectDragGesturesAfterLongPress
                         // v389d — THE MARGIN, NOT THE WORDS. A press only keeps
                         // the old "hold to mark the whole page" meaning when it
@@ -5896,7 +6431,9 @@ private fun PdfPageTextLayer(
                         if (at < 0) return@detectDragGesturesAfterLongPress
                         report(anchor, at)
                     },
-                    onDragEnd = { }
+                    // The page may have this gesture back the moment it ends.
+                    onDragEnd = { ReaderTouch.selecting = false },
+                    onDragCancel = { ReaderTouch.selecting = false }
                 )
             }
     ) {
@@ -6360,6 +6897,157 @@ internal object ReaderLook {
 
     /** Whether the zone editor is up (a hold on the switch opens it — v424). */
     var zonesEditing by mutableStateOf(false)
+
+    /**
+     * v434 — AND THE REST OF THE PAGE'S LOOK, the settings a reader adjusts by
+     * eye rather than by word: the leading, the side air, the gap between
+     * paragraphs, whether the lines are justified, whether the screen is kept
+     * awake, and how far the paper is dimmed for reading in the dark.
+     *
+     * They are the same kind of choice as the ink and the typeface — a reading
+     * preference, not a preference about one book — so they follow the member
+     * from book to book and are REMEMBERED across restarts (see
+     * [ReaderLookStore]).
+     */
+    var lineSpacing by mutableStateOf(1f)
+    var pageMargin by mutableStateOf(22f)
+    var paraSpacing by mutableStateOf(1f)
+    var justify by mutableStateOf(false)
+    var keepScreenOn by mutableStateOf(false)
+    var dim by mutableStateOf(0f)
+
+    /**
+     * v434 — EVERYTHING THE MEMBER CHOSE, as one string, for the store.
+     *
+     * Read inside a `snapshotFlow`, so every field below is tracked and the write
+     * happens once per settling change rather than once per slider pixel (see the
+     * reader body).
+     */
+    fun rememberKey(): String = listOf(
+        inkKey,
+        typeFace,
+        textScale.toString(),
+        textFlow.name,
+        pageFlow.name,
+        orientation.name,
+        tapZones.toString(),
+        lineSpacing.toString(),
+        pageMargin.toString(),
+        paraSpacing.toString(),
+        justify.toString(),
+        keepScreenOn.toString(),
+        dim.toString()
+    ).joinToString("|")
+}
+
+/**
+ * v434 — how the lines sit in their column (see [ReaderLook.justify]).
+ *
+ * The glyph is DRAWN rather than named ([CurioIcon]): the bundled Material
+ * Symbols subset carries none of the `format_align_*` ligatures — the four
+ * alignments elsewhere in Curio are drawn for exactly that reason — so a named
+ * icon here would render as a blank pill.
+ */
+internal enum class ReaderAlign(val label: String, val justified: Boolean) {
+    LEFT("Ragged", false),
+    JUSTIFIED("Justified", true);
+
+    companion object {
+        fun of(justify: Boolean): ReaderAlign = if (justify) JUSTIFIED else LEFT
+    }
+}
+
+/**
+ * v434 — THE READER'S LOOK, REMEMBERED.
+ *
+ * The reader's preferences used to live for the process only: every restart put
+ * the page back to paper and 1.0× type, and a member who reads in sepia at 1.4×
+ * had to say so again every morning (member's own ask: "Remember all of these
+ * across restarts"). One prefs file — the same `curio_prefs` the rest of the app
+ * uses — and one value per field, so a single unreadable row can never take the
+ * others down with it.
+ */
+internal object ReaderLookStore {
+    private const val PREFS = "curio_prefs"
+    private const val MARK = "reader_look_v434"
+
+    private const val INK = "reader_ink"
+    private const val FACE = "reader_face"
+    private const val SCALE = "reader_text_scale"
+    private const val FLOW_TEXT = "reader_text_flow"
+    private const val FLOW_PAGE = "reader_page_flow"
+    private const val ORIENT = "reader_orientation"
+    private const val ZONES = "reader_tap_zones"
+    private const val LEADING = "reader_line_spacing"
+    private const val MARGIN = "reader_page_margin"
+    private const val PARA = "reader_para_spacing"
+    private const val JUSTIFY = "reader_justify"
+    private const val KEEP_ON = "reader_keep_screen_on"
+    private const val DIM = "reader_dim"
+
+    /**
+     * Read once, on the way into a reader. Does nothing at all on a fresh install:
+     * the object's own defaults ARE the answer then, and the mark is only written
+     * on the first save.
+     */
+    fun load(context: Context) {
+        val prefs = runCatching {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        }.getOrNull() ?: return
+        if (!prefs.contains(MARK)) return
+        runCatching {
+            ReaderLook.inkKey = prefs.getString(INK, ReaderLook.inkKey) ?: ReaderLook.inkKey
+            ReaderLook.typeFace = prefs.getString(FACE, ReaderLook.typeFace) ?: ReaderLook.typeFace
+            ReaderLook.textScale = prefs.getFloat(SCALE, ReaderLook.textScale).coerceIn(0.8f, 2.6f)
+            ReaderLook.textFlow = flowOf(prefs.getString(FLOW_TEXT, null), ReaderLook.textFlow)
+            ReaderLook.pageFlow = flowOf(prefs.getString(FLOW_PAGE, null), ReaderLook.pageFlow)
+            ReaderLook.orientation = orientationOf(
+                prefs.getString(ORIENT, null),
+                ReaderLook.orientation
+            )
+            ReaderLook.tapZones = prefs.getBoolean(ZONES, ReaderLook.tapZones)
+            ReaderLook.lineSpacing = prefs.getFloat(LEADING, ReaderLook.lineSpacing)
+                .coerceIn(0.85f, 1.6f)
+            ReaderLook.pageMargin = prefs.getFloat(MARGIN, ReaderLook.pageMargin)
+                .coerceIn(10f, 40f)
+            ReaderLook.paraSpacing = prefs.getFloat(PARA, ReaderLook.paraSpacing)
+                .coerceIn(0.6f, 2f)
+            ReaderLook.justify = prefs.getBoolean(JUSTIFY, ReaderLook.justify)
+            ReaderLook.keepScreenOn = prefs.getBoolean(KEEP_ON, ReaderLook.keepScreenOn)
+            ReaderLook.dim = prefs.getFloat(DIM, ReaderLook.dim).coerceIn(0f, 0.6f)
+        }
+    }
+
+    /** The whole look, written as one commit so a half-saved page never exists. */
+    fun save(context: Context) {
+        val prefs = runCatching {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        }.getOrNull() ?: return
+        runCatching {
+            prefs.edit()
+                .putString(INK, ReaderLook.inkKey)
+                .putString(FACE, ReaderLook.typeFace)
+                .putFloat(SCALE, ReaderLook.textScale)
+                .putString(FLOW_TEXT, ReaderLook.textFlow.name)
+                .putString(FLOW_PAGE, ReaderLook.pageFlow.name)
+                .putString(ORIENT, ReaderLook.orientation.name)
+                .putBoolean(ZONES, ReaderLook.tapZones)
+                .putFloat(LEADING, ReaderLook.lineSpacing)
+                .putFloat(MARGIN, ReaderLook.pageMargin)
+                .putFloat(PARA, ReaderLook.paraSpacing)
+                .putBoolean(JUSTIFY, ReaderLook.justify)
+                .putBoolean(KEEP_ON, ReaderLook.keepScreenOn)
+                .putFloat(DIM, ReaderLook.dim)
+                .putBoolean(MARK, true)
+                .apply()
+        }
+    }
+
+    private fun flowOf(key: String?, fallback: ReaderFlow): ReaderFlow =
+        ReaderFlow.entries.firstOrNull { it.name == key } ?: fallback
+
+    private fun orientationOf(key: String?, fallback: ReaderOrientation): ReaderOrientation =
+        ReaderOrientation.entries.firstOrNull { it.name == key } ?: fallback
 }
 
 /** v418 — the reader's orientation choice (see [ReaderLook.orientation]). */
@@ -6646,12 +7334,32 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
     val accent = palette.accent
     val ink = palette.ink
     var chosen by remember { mutableStateOf(ReaderZoneEdge.LEFT) }
+    // ── v434 — THE OVERLAY GETS OUT OF THE WAY (member's own instruction) ──
+    //
+    // "let user hide the overlay so they can see what they are doing and only
+    // overlay the slider when they adjust and hide the overlay when they use the
+    // slider so they can see what they are chnaging". So: an eye on the panel
+    // takes the washes off entirely, and the depth slider takes them off for as
+    // long as it is being dragged. The GRIPS stay either way, because they are
+    // the handles the member is placing, not the thing covering the page.
+    var showOverlay by remember { mutableStateOf(true) }
+    var showDepth by remember { mutableStateOf(false) }
+    var draggingDepth by remember { mutableStateOf(false) }
+    val washesUp = showOverlay && !draggingDepth
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            // The page underneath must not answer while the zones are being
-            // placed: one tap here is one edit, never a page turn.
-            .pointerInput(Unit) { detectTapGestures { } }
+            // ── A TAP ON THE PAGE PICKS ITS ZONE (v434) ────────────────
+            //
+            // The page underneath must not answer while the gestures are being
+            // placed — one tap here is one edit and never a page turn — and the
+            // edit it IS is the obvious one: whichever edge the finger landed in
+            // becomes the edge being edited, and a tap in the middle picks the
+            // nearest edge to it (member: "selecting one tap zone should switch
+            // its area").
+            .pointerInput(Unit) {
+                detectTapGestures { at -> chosen = zoneEdgeAt(at, size) }
+            }
     ) {
         val widthPx = constraints.maxWidth.toFloat()
         val heightPx = constraints.maxHeight.toFloat()
@@ -6659,7 +7367,7 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
 
         // ── THE ZONES, DRAWN WHERE THEY ARE ─────────────────────────
         Canvas(Modifier.fillMaxSize()) {
-            if (widthPx <= 0f || heightPx <= 0f) return@Canvas
+            if (widthPx <= 0f || heightPx <= 0f || !washesUp) return@Canvas
             val left = widthPx * ReaderLook.zoneLeftDepth
             val right = widthPx * (1f - ReaderLook.zoneRightDepth)
             val top = heightPx * ReaderLook.zoneTopDepth
@@ -6693,17 +7401,17 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .padding(horizontal = 12.dp, vertical = 12.dp),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(28.dp),
             color = palette.paper.copy(alpha = 0.98f),
             shadowElevation = 10.dp
         ) {
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(9.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Tap zones",
+                        "Gestures",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontFamily = FrauncesFontFamily,
                             fontWeight = FontWeight.Bold
@@ -6711,6 +7419,22 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                         color = ink
                     )
                     Spacer(Modifier.weight(1f))
+                    // THE EYE: the page, without the washes (see [washesUp]).
+                    Surface(
+                        onClick = { showOverlay = !showOverlay },
+                        shape = CircleShape,
+                        color = if (showOverlay) accent.copy(alpha = 0.14f)
+                        else ink.copy(alpha = 0.07f),
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            ReaderEyeGlyph(
+                                open = showOverlay,
+                                tint = if (showOverlay) accent else ink.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
                     Surface(
                         onClick = {
                             ReaderZoneEdge.entries.forEach { edge ->
@@ -6745,8 +7469,12 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                     }
                 }
                 Text(
-                    if (ReaderLook.tapZones) "Drop the lines where your thumb reaches."
-                    else "The zones are off — turn them on with the switch in the reader's foot.",
+                    when {
+                        !ReaderLook.tapZones ->
+                            "The gestures are off — turn them on in Reading settings."
+                        showOverlay -> "Tap a zone on the page to pick it, then say what it does."
+                        else -> "The washes are off — the page is clear to read."
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = ink.copy(alpha = 0.7f)
                 )
@@ -6779,30 +7507,63 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                         )
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "Depth",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = ink.copy(alpha = 0.75f)
-                    )
+                // ── THE DEPTH, ON DEMAND (v434) ────────────────────────
+                //
+                // It used to stand here always, taking a row of a panel that
+                // floats over the very lines it governs. It is a capsule now: a
+                // tap opens it, and while it is dragged the washes come off the
+                // page so the member can see the edge move against real words.
+                Surface(
+                    onClick = { showDepth = !showDepth },
+                    shape = RoundedCornerShape(50),
+                    color = if (showDepth) accent.copy(alpha = 0.14f) else ink.copy(alpha = 0.06f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        CurioIcon(CurioIcons.Tune, null, tint = accent, size = 17.dp)
+                        Text(
+                            "Depth",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = ink.copy(alpha = 0.8f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            "${(chosen.depth() * 100f).roundToInt()}%",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontFeatureSettings = "tnum"
+                            ),
+                            color = accent
+                        )
+                    }
+                }
+                AnimatedVisibility(
+                    visible = showDepth,
+                    enter = fadeIn(tween(160)) + slideInVertically { -it / 3 },
+                    exit = fadeOut(tween(120))
+                ) {
                     Slider(
                         value = chosen.depth(),
-                        onValueChange = { chosen.setDepth(it) },
+                        onValueChange = {
+                            // The page is what the member is aiming at, so the
+                            // washes step out of the way for the drag itself.
+                            draggingDepth = true
+                            chosen.setDepth(it)
+                        },
+                        onValueChangeFinished = { draggingDepth = false },
                         valueRange = ReaderZoneEdge.DEPTH_MIN..ReaderZoneEdge.DEPTH_MAX,
                         colors = SliderDefaults.colors(
                             thumbColor = accent,
-                            activeTrackColor = accent
+                            activeTrackColor = accent,
+                            inactiveTrackColor = ink.copy(alpha = 0.15f)
                         ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 12.dp)
-                    )
-                    Text(
-                        "${(chosen.depth() * 100f).roundToInt()}%",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontFeatureSettings = "tnum"
-                        ),
-                        color = ink.copy(alpha = 0.75f)
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 Text(
@@ -6811,6 +7572,68 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                     color = ink.copy(alpha = 0.6f)
                 )
             }
+        }
+    }
+}
+
+/**
+ * v434 — WHICH EDGE A TAP PICKED: its zone if the tap was inside one, otherwise
+ * the edge the finger was nearest (see [ReaderTapZoneEditor]).
+ *
+ * The same arithmetic the tap itself uses ([readerZoneActionAt]), so picking an
+ * edge and triggering it can never disagree about where the edge is.
+ */
+private fun zoneEdgeAt(at: Offset, size: IntSize): ReaderZoneEdge {
+    if (size.width <= 0 || size.height <= 0) return ReaderZoneEdge.LEFT
+    val left = size.width * ReaderLook.zoneLeftDepth
+    val right = size.width * (1f - ReaderLook.zoneRightDepth)
+    val top = size.height * ReaderLook.zoneTopDepth
+    val bottom = size.height * (1f - ReaderLook.zoneBottomDepth)
+    return when {
+        at.x <= left -> ReaderZoneEdge.LEFT
+        at.x >= right -> ReaderZoneEdge.RIGHT
+        at.y <= top -> ReaderZoneEdge.TOP
+        at.y >= bottom -> ReaderZoneEdge.BOTTOM
+        else -> listOf(
+            ReaderZoneEdge.LEFT to at.x,
+            ReaderZoneEdge.RIGHT to (size.width - at.x),
+            ReaderZoneEdge.TOP to at.y,
+            ReaderZoneEdge.BOTTOM to (size.height - at.y)
+        ).minBy { it.second }.first
+    }
+}
+
+/**
+ * v434 — AN EYE, DRAWN (the bundled font has `visibility_off` but no `visibility`).
+ *
+ * Open: the lash and the pupil. Closed: the lash and a strike through it — the
+ * same two states every eye toggle in the world has.
+ */
+@Composable
+internal fun ReaderEyeGlyph(open: Boolean, tint: Color, iconSize: Dp = 20.dp) {
+    Canvas(modifier = Modifier.size(iconSize)) {
+        val stroke = this.size.height * 0.09f
+        drawOval(
+            color = tint,
+            topLeft = Offset(0f, this.size.height * 0.24f),
+            size = Size(this.size.width, this.size.height * 0.52f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
+        )
+        if (open) {
+            drawCircle(
+                color = tint,
+                radius = this.size.height * 0.14f,
+                center = center,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
+            )
+        } else {
+            drawLine(
+                color = tint,
+                start = Offset(this.size.width * 0.16f, this.size.height * 0.84f),
+                end = Offset(this.size.width * 0.84f, this.size.height * 0.16f),
+                strokeWidth = stroke,
+                cap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
         }
     }
 }
@@ -6938,6 +7761,18 @@ private fun ZoneChip(
  */
 internal object ReaderTouch {
     var multi by mutableStateOf(false)
+
+    /**
+     * v434 — A SWEEP IS IN FLIGHT.
+     *
+     * A long press on a magnified PDF page opens a word sweep, and the page's
+     * own one-finger PAN claims every drag from its first move (see
+     * [pinchToZoom]) — which cancelled the sweep before it could report a
+     * single word (member: "when im zoomed in and i try to tap and hold to
+     * select it doesnt work"). The sweep says so here the moment its long press
+     * fires, and the pan stands down for the rest of the gesture.
+     */
+    var selecting by mutableStateOf(false)
 }
 
 private fun Modifier.pinchToZoom(

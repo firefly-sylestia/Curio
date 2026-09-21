@@ -130,6 +130,15 @@ object CurioIcons {
     const val Image = "image"
     const val Fullscreen = "fullscreen"
     const val AspectRatio = "aspect_ratio"
+    // v434 — the reader's own sheet vocabulary. Every one of these was checked
+    // against the bundled font's glyph table before it was named here (see the
+    // "HOW TO CHECK" note below): `subject`, `auto_stories`, `bedtime` and
+    // `nightlight` are all PRESENT, while `crop_portrait` and the whole
+    // `format_align_*` family are NOT.
+    const val Subject = "subject"
+    const val AutoStories = "auto_stories"
+    const val Bedtime = "bedtime"
+    const val Nightlight = "nightlight"
     const val PhotoSizeSelectLarge = "photo_size_select_large"
     const val PlayArrow = "play_arrow"
     const val TravelExplore = "travel_explore"
