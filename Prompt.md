@@ -458,6 +458,8 @@ printable one it shipped with.
   under the words when the print carries one. Both lines are cut to the PRINT's own measure
   (one line, then an ellipsis), as the page cuts them.
 
+### Done — committed as `adcd4012` (the type from the canvas) and `341ca04c` (the facsimile)
+
 ### Verification
 
 - Brace/paren/bracket balance 0/0/0 on both touched files; every new constant checked for a
