@@ -78,7 +78,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
@@ -3226,17 +3229,31 @@ private fun DrawerLaneStarMap(
                     0.5f
                 )
                 val joined = pickedIndex == link.first || pickedIndex == link.second
-                drawLine(
+                // ── v428b — THE JOIN LEANS (member: "in drawer make the pattern
+                //    straight lines a little curvy just a little"). A
+                //    constellation is drawn by hand and a hand bows, so each
+                //    hairline is a SHALLOW arc rather than a segment: the control
+                //    point is pushed off the midpoint's perpendicular by a few
+                //    percent of the span, capped in dp — a join across the sky is
+                //    barely bowed, and a short one is not a squiggle. The side is
+                //    fixed by the pair's own indices, so the drawing is identical
+                //    on every recomposition and through the whole light-up. ──
+                val bow = minOf(span * 0.10f, 6.dp.toPx())
+                val side = if ((link.first + link.second) % 2 == 0) 1f else -1f
+                val control = (from + to) / 2f + Offset(-dir.y, dir.x) * (bow * side)
+                val hair = Path().apply {
+                    moveTo(from.x, from.y)
+                    quadraticBezierTo(control.x, control.y, to.x, to.y)
+                }
+                drawPath(
+                    path = hair,
                     color = lerp(page, hue, if (joined) 0.22f else 0.13f),
-                    start = from,
-                    end = to,
-                    strokeWidth = 2.6.dp.toPx()
+                    style = Stroke(width = 2.6.dp.toPx(), cap = StrokeCap.Round)
                 )
-                drawLine(
+                drawPath(
+                    path = hair,
                     color = lerp(page, hue, if (joined) 0.48f else 0.32f),
-                    start = from,
-                    end = to,
-                    strokeWidth = 1.dp.toPx()
+                    style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
             // ── The stars. ──

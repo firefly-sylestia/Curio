@@ -1,4 +1,17 @@
 ADD:
+- Incursion: a title's own description, rating, runtime and genres are looked up where the row carries none — one network of four sources (TMDB, OMDb, Wikipedia, Comic Vine), each on a short leash, with the facts the source states shown as small pills under the text.
+- Incursion: a title nothing else could dress finds its art in OMDb, Wikipedia or Comic Vine — the doors behind the app's own keyless ones.
+- Books: Google Books is asked for a book's page count and its blurb as well as its chapters, and a book whose about-text every catalogue is missing is read out of its Wikipedia article.
+
+FIX:
+- Incursion: a series' episode guide loads, and the season you are looking at is the season it reads — the keyed and keyless doors are asked at the same time instead of one waiting out the other, so a guide arrives in a second rather than never.
+- Incursion: the watch button is an eye — a hairline eye until you have watched a title, filled in your accent once you have; a play mark read as an instruction to play rather than as "I have seen this".
+- Incursion: rows and titles stop waiting on a source that is not answering — every provider in a chain is held to a short budget, so a dead key can no longer stall a page for half a minute (TMDB's read alone could take 24 seconds).
+- Books: ISBN covers are served by Open Library, because LibraryThing's own host refuses every app with a 403 (Cloudflare) whatever key is set; the key still turns the row on, and the same ISBNs now resolve.
+- Home: the drawer's star map joins its stars with gently bowed lines instead of straight ones.
+- Reading: a PDF's zoom in the scrolling reader holds the exact page point under your fingers wherever you are in the file — it was correcting as if you were always on the first page, so a pinch deep in a book grew it about a point near the top.
+
+ADD:
 - Share card: the Signature design is a hand-drawn sketchbook page, one per category — warm paper, a wobbly pen outline, pencil shading, washi tape and a doodle of its own, titled in the app's own handwriting.
 - Post: the share card is edited with the same card editor the topic reveal opens, from a door on the post's own preview, and the shape switch (3:4 or 9:16) sits right there with it.
 

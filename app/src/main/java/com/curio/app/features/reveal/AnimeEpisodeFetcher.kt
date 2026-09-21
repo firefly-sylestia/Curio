@@ -172,7 +172,11 @@ object AnimeEpisodeFetcher {
     private fun clean(animeName: String): String =
         animeName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
 
-    /** Minimal keyless GET — 8s timeout, one retry on Jikan's 429. */
+    /**
+     * Minimal keyless GET, one retry on Jikan's 429 — on a SHORT budget (v429),
+     * because this door answers `504` from its own gateway on some days and a
+     * fallback may not be the reason a guide waits (see [AnimePosterFetch]).
+     */
     private fun httpGet(urlString: String): String? = runCatching {
         var attempt = 0
         while (attempt < 2) {
@@ -180,8 +184,8 @@ object AnimeEpisodeFetcher {
             val conn = URL(urlString).openConnection() as HttpURLConnection
             try {
                 conn.requestMethod = "GET"
-                conn.connectTimeout = 8_000
-                conn.readTimeout = 8_000
+                conn.connectTimeout = 4_000
+                conn.readTimeout = 5_000
                 conn.setRequestProperty("Accept", "application/json")
                 when (conn.responseCode) {
                     200 -> return@runCatching conn.inputStream

@@ -177,13 +177,20 @@ object AnimePosterFetch {
         return wa.any { it in wb }
     }
 
-    /** Minimal keyless GET — 8s timeout, best-effort. Jikan has rate limits (3 req/s). */
+    /**
+     * Minimal keyless GET, best-effort — on a SHORT budget (v429). Jikan has rate
+     * limits (3 req/s), and it also has days when it answers nothing at all: its
+     * own gateway returned `504` on every live check from this repo, so this door
+     * is a fallback's fallback and may never be the reason a poster waits. Four
+     * seconds to connect and five to read, where it used to take eight each with a
+     * retry on top (thirty-two seconds of latency for one unavailable source).
+     */
     private fun httpGet(urlString: String): String? = runCatching {
         val conn = URL(urlString).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
+            conn.connectTimeout = 4_000
+            conn.readTimeout = 5_000
             conn.setRequestProperty("User-Agent", "Curio/1.0")
             val code = conn.responseCode
             if (code == 429) {
@@ -192,8 +199,8 @@ object AnimePosterFetch {
                 conn.disconnect()
                 val retry = URL(urlString).openConnection() as HttpURLConnection
                 retry.requestMethod = "GET"
-                retry.connectTimeout = 8000
-                retry.readTimeout = 8000
+                retry.connectTimeout = 4_000
+                retry.readTimeout = 5_000
                 retry.setRequestProperty("User-Agent", "Curio/1.0")
                 if (retry.responseCode == 200) {
                     retry.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }

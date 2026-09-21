@@ -1765,6 +1765,23 @@ private fun PdfScrollReader(
             // recomposing the column. The GESTURE asks the same question live
             // instead, because a handler outlives the composition that armed it.
             val mine = ReaderLook.pdfZoomPage == page
+            // ── v428b — HOW MUCH SHEET SITS ABOVE THE FINGERS ──────────────
+            //
+            // The document zoom's anchor is said in the DOCUMENT's own terms
+            // (see [readerZoomDocument]): a pinch has to keep the point it
+            // grabbed still, and what sits above that point is every sheet
+            // BEFORE this one — each of them laid out at the magnified size, so
+            // the term grows with the zoom and with the page number.
+            //
+            // Sheets in a scrollable PDF share a shape, so this sheet's own
+            // magnified height is the honest measure of the ones above it: the
+            // arithmetic needs no scroll position, no layout read-back and no
+            // assumption about which sheets are on screen, which is exactly why
+            // it can be computed here, once, from the page's own geometry.
+            val sheetsAbovePx = with(LocalDensity.current) {
+                val one = if (aspect > 0f) pageWidth / aspect * docZoom else pageHeight * docZoom
+                (one * page).toPx()
+            }
             Box(
                 modifier = Modifier
                     // v422 — THE SHEET IS LAID OUT AT THE MAGNIFIED SIZE, and
@@ -1804,8 +1821,17 @@ private fun PdfScrollReader(
                     ) { zoom, drag, focus ->
                         // v422 — one zoom for the whole file: see
                         // [readerZoomDocument]. v424 — and the fingers' own place
-                        // is what the file grows ABOUT.
-                        readerZoomDocument(zoom, drag, focus, listState, across)
+                        // is what the file grows ABOUT. v428b — said in document
+                        // terms, so "the fingers' own place" is right wherever in
+                        // the file they are.
+                        readerZoomDocument(
+                            zoom = zoom,
+                            drag = drag,
+                            focus = focus,
+                            sheetsAbove = sheetsAbovePx,
+                            down = listState,
+                            across = across
+                        )
                     }
                     // Keyed on the page's SHAPE as well as its number: the tap
                     // handler outlives the composition that armed it, and a
@@ -1821,7 +1847,7 @@ private fun PdfScrollReader(
                         detectTapGestures(
                             onTap = { at -> onTap(at + where - surfaceOrigin, viewport) },
                             onDoubleTap = { at ->
-                                readerDoubleTapDocument(at, listState, across)
+                                readerDoubleTapDocument(at, sheetsAbovePx, listState, across)
                             },
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
@@ -5808,19 +5834,47 @@ private fun readerDrawnPage(box: IntSize, aspect: Float): Size {
  * The paged flow magnifies THE PAGE, which is the only page there is; the
  * scrolling flow magnifies THE FILE, because one sheet swollen among its
  * neighbours reads as a mistake rather than a zoom (user report: "only one page
- * zooms in in that place feels wrong"). Nothing is anchored here and nothing
- * needs to be: the magnification IS the layout, so the lazy column keeps the
- * sheet the member was on exactly where they left it and simply grows it.
+ * zooms in in that place feels wrong"). The magnification IS the layout, so the
+ * lazy column keeps the sheet the member was on where they left it and simply
+ * grows it.
  *
  * The pan a two-finger drag carries is handed to the document's own two scrolls
  * — one down the column, one across the sheet — and a single finger is left
  * entirely to them, which is what [Offset.Zero] means: nothing taken, so the
  * column owns the gesture and the page still turns on a swipe.
+ *
+ * ── v428b — AND THE ANCHOR IS SAID IN THE DOCUMENT'S OWN TERMS ──────────
+ *
+ * v424 held the fingers' place using `focus` alone — the distance from the TOP
+ * OF THE SHEET the gesture is armed on. That is the whole of the anchor only for
+ * the FIRST sheet, because what sits between a finger and the top of the file is
+ * every sheet before it. On page 30 the correction was therefore short by the
+ * height of the 29 sheets above the member's finger — the document drifted and
+ * the file grew about a point far away, which is exactly the report v428b
+ * answers (member: "for pdf in vertical scrolling the zoom is still a little
+ * inaccurate and glitchy … its zooming at the top").
+ *
+ * The arithmetic, in the four measurements that exist:
+ *
+ *   the sheet's top sits at  T(i) = pad + i·gap + i·h·z   (only `i·h·z` scales)
+ *   the fingers sit at       Y = T(i) - scroll + focus.y
+ *   so holding that point still needs  scroll' - scroll = (i·h·z + focus.y)·(r-1)
+ *
+ * `i·h·z` is [sheetsAbove] — the magnified heights of the sheets above, handed
+ * in by the sheet itself (whose own height is their measure: sheets in a
+ * scrollable PDF share a shape). The padding and the gaps between sheets drop
+ * out of it by construction, because they do not scale with the zoom — which is
+ * also why the term is not simply "where the sheet is in the scroll".
+ *
+ * The horizontal axis needs none of this: there is one sheet across, so its left
+ * edge never moves and the fingers' own x is the whole of the anchor.
  */
 private fun readerZoomDocument(
     zoom: Float,
     drag: Offset,
     focus: Offset,
+    /** The magnified heights of the sheets ABOVE this one, in pixels. */
+    sheetsAbove: Float,
     down: ScrollableState,
     across: ScrollableState
 ): Offset {
@@ -5830,25 +5884,18 @@ private fun readerZoomDocument(
     val owns = ReaderLook.pdfZoomPage == -1
     val was = if (owns) ReaderLook.pdfZoom else 1f
     val next = (was * zoom).coerceIn(1f, 4f)
-    // ── v424 — THE SHEET GROWS ABOUT THE FINGERS, NOT ABOUT ITS CORNER ──
+    // ── v424/v428b — THE SHEET GROWS ABOUT THE FINGERS, NOT ABOUT ITS CORNER ──
     //
-    // The magnification IS the layout (see above), so a sheet grows from its own
-    // top-left and the place the member pinched slides away from them as it
-    // grows — which is exactly the report this fixes (member: "its inaccurate
-    // zoom, it zooming from the corner, not zooming where i am zooming").
+    // The sheet's size is PROPORTIONAL to the zoom, so a point that sits `d`
+    // below the top of the file is `d·z` from it once the file is magnified —
+    // and since a pinch arrives as many small steps, the anchor holds for the
+    // whole gesture rather than sliding a little on every frame.
     //
-    // The correction needs no measurement, only one fact: the sheet's size is
-    // PROPORTIONAL to the zoom, so the point under the fingers sits at
-    // `focus * z` from the sheet's own start. Holding it still therefore means
-    // scrolling the document by `focus * (z' - z)` in each direction — and since
-    // a pinch arrives as many small steps, the anchor holds for the whole
-    // gesture rather than sliding a little on every frame.
-    //
-    // `focus` is in the SHEET's coordinates (the gesture is armed on the sheet),
+    // `focus` is in the SHEET's coordinates (the gesture is armed on the sheet)
     // and the two scrolls are the document's own, so no viewport is involved.
     val ratio = if (was > 0f) next / was else 1f
     if (ratio != 1f) {
-        down.dispatchRawDelta(focus.y * (ratio - 1f))
+        down.dispatchRawDelta((sheetsAbove + focus.y) * (ratio - 1f))
         across.dispatchRawDelta(focus.x * (ratio - 1f))
     }
     // AT REST, AND ONLY AT REST — the same rule the page's own zoom learned in
@@ -5873,9 +5920,14 @@ private fun readerZoomDocument(
  * v424 — AND IT LANDS WHERE IT WAS TAPPED, by the same arithmetic the pinch
  * uses: a double tap that magnified from the sheet's corner was the same
  * complaint in its other form.
+ *
+ * v428b — with the same [sheetsAbove] term the pinch carries, so a double tap on
+ * page 30 opens the page the member tapped instead of somewhere near the top of
+ * the file.
  */
 private fun readerDoubleTapDocument(
     at: Offset,
+    sheetsAbove: Float,
     down: ScrollableState,
     across: ScrollableState
 ) {
@@ -5885,7 +5937,7 @@ private fun readerDoubleTapDocument(
     val next = if (out) 1f else 2.2f
     val ratio = if (was > 0f) next / was else 1f
     if (ratio != 1f) {
-        down.dispatchRawDelta(at.y * (ratio - 1f))
+        down.dispatchRawDelta((sheetsAbove + at.y) * (ratio - 1f))
         across.dispatchRawDelta(at.x * (ratio - 1f))
     }
     ReaderLook.pdfZoom = next

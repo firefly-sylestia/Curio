@@ -101,6 +101,8 @@ add_provider "Google Books" GOOGLE_BOOKS_API_KEY
 add_provider "LibraryThing" LIBRARY_THING_API_KEY
 add_provider "Spotify" SPOTIFY_CLIENT_ID
 add_provider "TMDB" TMDB_API_KEY TMDB_READ_TOKEN
+add_provider "OMDb" OMDB_API_KEY
+add_provider "Comic Vine" COMIC_VINE_API_KEY
 add_provider "Supabase" SUPABASE_URL
 add_provider "Account site" CURIO_AUTH_SITE_URL
 [ -n "$providers" ] || providers="none (keyless build)"

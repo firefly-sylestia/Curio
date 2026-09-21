@@ -54,6 +54,12 @@ import java.util.concurrent.ConcurrentHashMap
  *  2. **The keyless pair** — [FilmPosterFetch] for a film, [SeriesPosterFetch] for
  *     a series — which is the same free-first chain the reveal uses (iTunes, then
  *     TVMaze, then TMDB by name).
+ *  3. **The last net (v429)** — [IncursionSources.artwork]: OMDb's poster,
+ *     Wikipedia's lead image and Comic Vine's cover, all three raced, reached only
+ *     when nothing above could dress the row. They are asked AFTER the free pair
+ *     on purpose — they are keyed doors with daily and hourly allowances, so they
+ *     are spent on the rows a free door could not answer rather than on every row
+ *     that scrolls past.
  *
  * Two project rules hold it:
  *
@@ -91,13 +97,18 @@ internal object IncursionPosters {
         // incursion movies or series"). A FILM wants its year, because that is
         // what tells the 2010 poster from the 1980 one; a show does not, and every
         // door now strips such suffixes anyway ([stripNaming]).
-        val resolved = byId ?: if (isSeries) {
+        val byName = if (isSeries) {
             SeriesPosterFetch.resolvePosterUrl(entry.title)
         } else {
             FilmPosterFetch.resolvePosterUrl(
                 entry.year?.takeIf { it > 0 }?.let { "${entry.title} ($it)" } ?: entry.title
             )
         }
+        // v429 — AND WHAT IS LEFT WHEN NOTHING FREE CAN DRESS IT: OMDb's poster,
+        // Wikipedia's article image and Comic Vine's cover, raced (see
+        // [IncursionSources.artwork]). A row lands here only after a TMDB id and
+        // the whole keyless chain have had their turn.
+        val resolved = byId ?: byName ?: IncursionSources.artwork(entry)
         cache[key] = resolved.orEmpty()
         return resolved
     }

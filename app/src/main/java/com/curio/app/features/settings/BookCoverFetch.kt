@@ -59,7 +59,12 @@ object BookCoverFetch {
         // of them, and Open Library's title endpoint serves a 1×1 placeholder
         // for a great many. See [StandardEbooksFetch].
         STANDARD_EBOOKS("Standard Ebooks", "Classics · keyless"),
-        LIBRARY_THING("LibraryThing", "ISBN covers · free key")
+        // v429 — THE NAME IS KEPT, THE HOST IS NOT. LibraryThing's own covers
+        // host refuses every app client (see [libraryThingCover]), so this row's
+        // answers are served by OPEN LIBRARY's ISBN door instead — same ISBN, a
+        // host that answers. The label says what the member gets rather than
+        // naming a host this app cannot reach.
+        LIBRARY_THING("ISBN covers", "LibraryThing's host blocks apps · served by Open Library")
     }
 
     /** Resolves cover URL candidates for a book. v360 — the last VERIFIED
@@ -198,18 +203,30 @@ object BookCoverFetch {
     }
 
     /**
-     * v356 — LibraryThing covers (the best quality for ISBN-resolvable
-     * books), but ISBN-based and key-gated: covers.librarything.com/devkey/
-     * {key}/large/isbn/{isbn}. Resolution is a keyless Google Books volume
-     * search for the ISBN, then the cover URL. Returns null when no key is
-     * configured or no ISBN can be found, so the caller falls through to the
-     * next provider (and the hub hides the row entirely without a key).
+     * v429 — THE ISBN ROAD, SERVED BY A HOST THAT ANSWERS.
+     *
+     * v356 asked LibraryThing's own covers host with the free developer key:
+     * `covers.librarything.com/devkey/{key}/large/isbn/{isbn}`. **That host
+     * refuses this app**, and the member hit it head-on — *"library thing, it
+     * gives http 403 text/html error"*. It is a Cloudflare JS challenge, so
+     * EVERY request from a native client is answered `403 text/html` with
+     * "Just a moment…", whatever User-Agent it sends: a browser can pass the
+     * challenge by running the script, an APK cannot, and no key changes that.
+     * (Checked live: the same ISBN through `covers.openlibrary.org/b/isbn/…`
+     * answers `200 image/jpeg`.)
+     *
+     * So the ISBN resolution is kept — it was never the broken part — and the
+     * COVER is taken from Open Library's ISBN door: same book, same quality
+     * class of scan, a host that serves an app. The key stays wired (it gates
+     * the row, exactly as before, so a build without it behaves identically) and
+     * the provider's own name is kept for stored preferences; only the URL a
+     * member receives changed.
      */
     private fun libraryThingCover(title: String, author: String?): String? {
-        val key = com.curio.app.BuildConfig.LIBRARY_THING_API_KEY
+        com.curio.app.BuildConfig.LIBRARY_THING_API_KEY
             .takeIf { it.isNotBlank() } ?: return null
         val isbn = resolveIsbn(title, author) ?: return null
-        return "https://covers.librarything.com/devkey/$key/large/isbn/$isbn"
+        return "https://covers.openlibrary.org/b/isbn/$isbn-L.jpg"
     }
 
     /**

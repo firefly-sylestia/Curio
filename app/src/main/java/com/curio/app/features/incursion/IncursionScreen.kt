@@ -2,6 +2,7 @@ package com.curio.app.features.incursion
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -47,8 +48,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -1154,9 +1159,32 @@ private fun EntryRow(
  *
  * A round button the size of the row's own chip, wearing the page's accent when
  * the row is watched and the plate's quiet fill when it is not, so a list can be
- * read down its right-hand edge for "what have I still got". Its glyph changes
- * with the state (a check while it is done), which is what makes the second tap
- * read as UNDO rather than as the same action twice.
+ * read down its right-hand edge for "what have I still got". Its mark changes
+ * with the state, which is what makes the second tap read as UNDO rather than as
+ * the same action twice.
+ *
+ * ── v429 — THE MARK IS AN EYE, AND IT IS DRAWN, NOT TYPED ────────────────
+ *
+ * Two reports built this. First the mark went missing — `CurioIcons.Visibility`,
+ * whose ligature is NOT in the bundled Material Symbols subset (`visibility_off`
+ * is there, `visibility` is not; measured against
+ * `material_symbols_outlined.ttf`), so the button drew with nothing in it
+ * ("the icon is invalid and not showing"). It was drawn by hand next, as a PLAY
+ * TRIANGLE — which the member rejected on sight ("the watch button in incursion
+ * ui is not right"): a play mark is an instruction to PLAY something, and this
+ * button's whole job is to say the title has been SEEN. An eye is the mark that
+ * means watching, so it is an eye:
+ *
+ *  · **unwatched** — a hairline eye: two shallow arcs meeting at the corners,
+ *    with a small pupil between them;
+ *  · **watched** — the same eye FILLED in the page's accent, its pupil punched
+ *    out in the button's own colour (the pupil is a hole in the almond, not a
+ *    second shape on top of it), so the state reads at a glance down a list.
+ *
+ * Drawn rather than typed for the reason the first report taught: a glyph the
+ * font may or may not carry is a butt on that can vanish on a font update, and
+ * this app already draws its own marks wherever the subset is thin (B / I / U / S,
+ * the four alignments).
  */
 @Composable
 private fun WatchButton(
@@ -1166,17 +1194,24 @@ private fun WatchButton(
     onClick: () -> Unit
 ) {
     val shape = CircleShape
+    // The button's own fill, kept in a value because the pupil is punched out in
+    // exactly this colour (see below).
+    val plate = MaterialTheme.colorScheme.surfaceContainerHigh
+    val fill = if (watched) {
+        curioTintOn(
+            plate,
+            accent,
+            if (isCurioDarkTheme()) 0.30f else 0.18f
+        )
+    } else {
+        plate
+    }
+    // Read OUT here: the mark is drawn in a DrawScope lambda, and a theme read
+    // belongs to the composition that owns the button.
+    val markInk = if (watched) accent else MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
         shape = shape,
-        color = if (watched) {
-            curioTintOn(
-                MaterialTheme.colorScheme.surfaceContainerHigh,
-                accent,
-                if (isCurioDarkTheme()) 0.30f else 0.18f
-            )
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        },
+        color = fill,
         modifier = Modifier
             .size(34.dp)
             .clip(shape)
@@ -1186,12 +1221,38 @@ private fun WatchButton(
             )
     ) {
         Box(contentAlignment = Alignment.Center) {
-            CurioIcon(
-                name = if (watched) CurioIcons.Check else CurioIcons.Visibility,
-                contentDescription = if (watched) "Watched" else "Mark watched",
-                tint = if (watched) accent else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 17.dp
-            )
+            Canvas(modifier = Modifier.size(18.dp)) {
+                val stroke = 1.7f.dp.toPx()
+                val w = size.width
+                val h = size.height
+                val left = w * 0.06f
+                val right = w * 0.94f
+                val middle = h * 0.50f
+                if (watched) {
+                    val almond = Path().apply {
+                        moveTo(left, middle)
+                        quadraticBezierTo(w * 0.50f, h * 0.10f, right, middle)
+                        quadraticBezierTo(w * 0.50f, h * 0.90f, left, middle)
+                        close()
+                    }
+                    drawPath(almond, markInk)
+                    // The pupil: the button's own fill, so it reads as a hole in
+                    // the filled eye rather than as a dot resting on it.
+                    drawCircle(fill, radius = w * 0.13f, center = Offset(w * 0.50f, middle))
+                } else {
+                    val lid = Path().apply {
+                        moveTo(left, middle)
+                        quadraticBezierTo(w * 0.50f, h * 0.12f, right, middle)
+                    }
+                    val floor = Path().apply {
+                        moveTo(left, middle)
+                        quadraticBezierTo(w * 0.50f, h * 0.88f, right, middle)
+                    }
+                    drawPath(lid, markInk, style = Stroke(width = stroke, cap = StrokeCap.Round))
+                    drawPath(floor, markInk, style = Stroke(width = stroke, cap = StrokeCap.Round))
+                    drawCircle(markInk, radius = w * 0.115f, center = Offset(w * 0.50f, middle))
+                }
+            }
         }
     }
 }
@@ -1525,7 +1586,26 @@ private fun IncursionDetailSheet(
     var guide by remember(entry.storageKey) { mutableStateOf(SeriesEpisodeFetcher.cached(entry.title)) }
     var guideOpen by remember(entry.storageKey) { mutableStateOf(false) }
     LaunchedEffect(entry.storageKey) {
-        if (series && guide == null) guide = SeriesEpisodeFetcher.fetchForAny(entry.title)
+        // v429 — THE SEASON IS PASSED IN. A row is "Loki S2": the guide it wants
+        // is that season's, and the hint lets a keyed door read ONE season
+        // instead of walking four (the walk was most of the wait the member saw
+        // as a guide that never loaded). The keyless door ignores it and answers
+        // with the whole show, which is exactly what the series lane shows.
+        if (series && guide == null) {
+            guide = SeriesEpisodeFetcher.fetchForAny(entry.title, season = entry.season)
+        }
+    }
+    // ── v429 — WHAT THE DOORS ADD TO THE ROW ────────────────────────────────
+    //
+    // The member: *"for incursion ui the movie posters description doesnt
+    // fetch, use all the avalabel api"*. Upstream's own `desc` is present on some
+    // rows and absent on many, so the sheet reads its record either way: the
+    // chain in [IncursionSources] answers with a description where the row has
+    // none and with the facts it gathered on the way (the rating, the runtime,
+    // the genres), each door budgeted and the chain memoised per row.
+    var record by remember(entry.storageKey) { mutableStateOf<IncursionSources.Record?>(null) }
+    LaunchedEffect(entry.storageKey) {
+        record = IncursionSources.record(entry)
     }
     val pillShape = RoundedCornerShape(50)
     // The note is edited locally and written after a pause, not on every
@@ -1634,20 +1714,67 @@ private fun IncursionDetailSheet(
                 }
             }
 
-            entry.desc?.takeIf { it.isNotBlank() }?.let { desc ->
+            // v429 — THE ROW'S OWN WORDS FIRST, THE FETCHED ONES BEHIND THEM.
+            //
+            // `entry.desc` is upstream's own synopsis and it is the app's voice
+            // for this title, so it always wins; the chain's answer fills in
+            // where the catalogue said nothing. Under the text sits what the
+            // doors stated from the API that the row itself does not carry —
+            // the community rating, the runtime, the genres — as the app's own
+            // quiet pills, and only the facts that are actually there.
+            val about = entry.desc?.takeIf { it.isNotBlank() } ?: record?.description
+            val facts = record
+            if (about != null || facts != null) {
                 Column {
-                    Text(
-                        "ABOUT",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = accent,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(5.dp))
-                    Text(
-                        desc,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    if (about != null) {
+                        Text(
+                            "ABOUT",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = accent,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(5.dp))
+                        Text(
+                            about,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    val factsPills = buildList {
+                        if (facts != null && facts.rating > 0f) {
+                            add("★ " + String.format(java.util.Locale.US, "%.1f", facts.rating))
+                        }
+                        if (facts != null && facts.runtime > 0 && entry.runtime == null) {
+                            add("${facts.runtime} min")
+                        }
+                        if (facts != null && facts.rated.isNotBlank() && entry.ageRating.isNullOrBlank()) {
+                            add(facts.rated)
+                        }
+                        if (facts != null && facts.genres.isNotEmpty()) {
+                            add(facts.genres.take(3).joinToString(" · "))
+                        }
+                    }
+                    if (factsPills.isNotEmpty()) {
+                        Spacer(Modifier.height(if (about != null) 9.dp else 0.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            factsPills.forEach { pill ->
+                                Surface(
+                                    shape = pillShape,
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                                ) {
+                                    Text(
+                                        pill,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

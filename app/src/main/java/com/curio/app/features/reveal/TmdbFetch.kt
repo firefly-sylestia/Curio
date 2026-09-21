@@ -8,6 +8,7 @@ import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 
 /**
@@ -55,6 +56,19 @@ object TmdbFetch {
 
     /** How much of the cast a sheet shows — the top-billed few. */
     private const val CAST_ROWS = 6
+
+    /**
+     * v429 — HOW LONG ONE TITLE'S FACTS MAY TAKE, all reads included.
+     *
+     * [facts] is three reads in a row (a film search, then a show search, then the
+     * detail) and [showEpisodes] adds a season per season on top of that, so the
+     * chain's own arithmetic — not any single read — is what the member measured
+     * when they reported *"tmdb no answer 24060 ms"*. A door that is a fallback
+     * behind the keyless ones must never be the reason a sheet waits, so the whole
+     * read is bounded here: past this budget TMDB answers "nothing", the caller
+     * moves on to the next door, and the blocking socket dies on its own timeout.
+     */
+    private const val FACTS_BUDGET_MS = 9_000L
 
     /**
      * v428 — THE TWO CREDENTIALS, READ THE WAY TMDB DOCUMENTS THEM.
@@ -133,6 +147,17 @@ object TmdbFetch {
      */
     private val episodeCache = ConcurrentHashMap<String, List<SeriesEpisode>>()
 
+    /**
+     * v429 — AND ONE SEASON'S OWN LIST, kept apart from the whole-show one.
+     *
+     * A caller that already knows WHICH season it wants (an Incursion row reads
+     * "Loki S2") can be answered with one read instead of four, and caching that
+     * answer under the bare title would hand a truncated list to the next caller
+     * that wanted the whole show — hence a cache of its own, keyed by title AND
+     * season (`"loki#S2"`).
+     */
+    private val seasonCache = ConcurrentHashMap<String, List<SeriesEpisode>>()
+
     /** The poster for a film (or a show), or null when there is no answer. */
     suspend fun posterUrl(title: String): String? =
         facts(title)?.posterUrl?.takeIf { it.isNotBlank() }
@@ -181,7 +206,9 @@ object TmdbFetch {
         val name = clean(title)
         if (name.isBlank()) return@withContext null
         factsCache[name]?.let { return@withContext it }
-        val resolved = runCatching { movieFacts(name) ?: showFacts(name) }.getOrNull()
+        val resolved = runCatching {
+            withTimeoutOrNull(FACTS_BUDGET_MS) { movieFacts(name) ?: showFacts(name) }
+        }.getOrNull()
         if (resolved != null) factsCache[name] = resolved
         resolved
     }
@@ -193,25 +220,31 @@ object TmdbFetch {
      * a caller can tell "this is a film, show its facts" from "this is a show
      * whose episodes could not be read".
      */
-    suspend fun showEpisodes(title: String): List<SeriesEpisode>? = withContext(Dispatchers.IO) {
-        if (!isConfigured) return@withContext null
-        val name = clean(title)
-        if (name.isBlank()) return@withContext null
-        episodeCache[name]?.let { return@withContext it.ifEmpty { null } }
-        val record = facts(name)
-        val showId = record?.showId ?: 0
-        if (showId <= 0) {
-            episodeCache[name] = emptyList()
-            return@withContext null
+    suspend fun showEpisodes(title: String, season: Int? = null): List<SeriesEpisode>? =
+        withContext(Dispatchers.IO) {
+            if (!isConfigured) return@withContext null
+            val name = clean(title)
+            if (name.isBlank()) return@withContext null
+            // v429 — ONE SEASON WHEN THE CALLER KNOWS WHICH ONE (see [seasonCache]).
+            val hint = season?.takeIf { it > 0 }
+            val key = if (hint == null) name else "$name#S$hint"
+            val store = if (hint == null) episodeCache else seasonCache
+            store[key]?.let { return@withContext it.ifEmpty { null } }
+            val record = facts(name)
+            val showId = record?.showId ?: 0
+            if (showId <= 0) {
+                store[key] = emptyList()
+                return@withContext null
+            }
+            val seasons = record?.seasonCount ?: 0
+            val episodes = runCatching { readShowEpisodes(showId, seasons, hint) }
+                .getOrDefault(emptyList())
+            store[key] = episodes
+            // A show whose list came back empty reads as "no show" to the caller —
+            // which is the safe direction: the film sheet it then opens still shows
+            // the work's own record, where an empty episode sheet would show nothing.
+            episodes.ifEmpty { null }
         }
-        val seasons = record?.seasonCount ?: 0
-        val episodes = runCatching { readShowEpisodes(showId, seasons) }.getOrDefault(emptyList())
-        episodeCache[name] = episodes
-        // A show whose list came back empty reads as "no show" to the caller —
-        // which is the safe direction: the film sheet it then opens still shows
-        // the work's own record, where an empty episode sheet would show nothing.
-        episodes.ifEmpty { null }
-    }
 
     // ── films ───────────────────────────────────────────────────────────────
 
@@ -267,11 +300,19 @@ object TmdbFetch {
         )
     }
 
-    /** Read a show's episodes, season by season, up to [SEASON_CAP]. */
-    private fun readShowEpisodes(showId: Int, seasonCount: Int): List<SeriesEpisode> {
-        val seasons = if (seasonCount > 0) seasonCount.coerceAtMost(SEASON_CAP) else 1
+    /**
+     * Read a show's episodes, season by season, up to [SEASON_CAP] — or just
+     * [only], when the caller already knows which season it is showing (v429).
+     */
+    private fun readShowEpisodes(showId: Int, seasonCount: Int, only: Int? = null): List<SeriesEpisode> {
+        val seasons = if (only != null && only > 0) {
+            listOf(only)
+        } else {
+            val count = if (seasonCount > 0) seasonCount.coerceAtMost(SEASON_CAP) else 1
+            (1..count).toList()
+        }
         val out = ArrayList<SeriesEpisode>()
-        for (season in 1..seasons) {
+        for (season in seasons) {
             val body = getJson("/tv/$showId/season/$season") ?: continue
             val row = runCatching { JSONObject(body) }.getOrNull() ?: continue
             val list = row.optJSONArray("episodes") ?: continue
@@ -395,8 +436,11 @@ object TmdbFetch {
         val conn = URL(url).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
-            conn.connectTimeout = 8_000
-            conn.readTimeout = 8_000
+            // v429 — THE SHORT BUDGET A DOOR IN A CHAIN IS ALLOWED (see
+            // [FACTS_BUDGET_MS]): this used to be 8s to connect and 8s to read,
+            // which three calls deep is the 24-second wait the member measured.
+            conn.connectTimeout = 3_500
+            conn.readTimeout = 5_000
             conn.setRequestProperty("Accept", "application/json")
             // "Authorization: Bearer ACCESS_TOKEN" — the docs' own header, and
             // the one form of authentication TMDB accepts on v3 and v4 alike.

@@ -123,6 +123,20 @@ val cvkEscaped: String = envComicVineApiKey
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// v428b — OPTIONAL OMDb API key (free tier: 1,000 requests/day): the SECOND
+// keyed door for a FILM or a SERIES, asked by name when TMDB has nothing for the
+// title. It is the one that answers a *description* request where the keyless
+// doors state no plot at all (iTunes' film catalogue returned nothing outright
+// by 2026, and TVMaze is a television database), and it carries a real poster
+// (Amazon's large form), the IMDb rating, the runtime and the genres too.
+//  https://www.omdbapi.com/apikey.aspx
+// Unset = nothing changes: TMDB, then the keyless cascade, exactly as before.
+val envOmdbApiKey: String? = System.getenv("OMDB_API_KEY")?.trim()?.takeIf { it.isNotEmpty() }
+val omdbEscaped: String = envOmdbApiKey
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Supabase Android client configuration. The URL and publishable/anon key are
 // safe for a public client; the service-role key must never be shipped here.
 val envSupabaseUrl: String? = System.getenv("SUPABASE_URL")?.trim()?.takeIf { it.isNotEmpty() }
@@ -206,6 +220,11 @@ android {
         // Western comic and last for a manga; empty string otherwise (the
         // keyless cascade is unchanged, and no request is ever made without it).
         buildConfigField("String", "COMIC_VINE_API_KEY", "\"$cvkEscaped\"")
+
+        // v428b — optional OMDb key: a film/series description and poster of
+        // last resort, asked by name; empty string otherwise (no request is ever
+        // made without it, and the keyless cascade is unchanged).
+        buildConfigField("String", "OMDB_API_KEY", "\"$omdbEscaped\"")
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrlEscaped\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKeyEscaped\"")
 

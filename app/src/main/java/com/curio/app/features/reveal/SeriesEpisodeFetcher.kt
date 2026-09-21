@@ -6,7 +6,10 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 
 /**
@@ -30,6 +33,15 @@ object SeriesEpisodeFetcher {
     /** v410 — the MAPPED list per show, the shape the screens render (raw JSON
      *  cannot seed a sheet, and mapping it again per open was the reload). */
     private val seriesCache = ConcurrentHashMap<String, List<SeriesEpisode>>()
+
+    /**
+     * v429 — WHAT [fetchForAny] ANSWERED, including an empty answer.
+     *
+     * The same convention the lists above keep, and for the same reason: a sheet
+     * that opened once on a title with no guide must not re-run the whole chain
+     * — two doors and their budgets — every time it opens again.
+     */
+    private val anyCache = ConcurrentHashMap<String, List<SeriesEpisode>>()
 
     /**
      * Enrich [episodes] with TVMaze metadata. Returns the same list with
@@ -184,11 +196,48 @@ object SeriesEpisodeFetcher {
      * answer that means "no show here", which is what tells the caller to show a
      * film's own facts instead.
      */
-    suspend fun fetchForAny(title: String): List<SeriesEpisode> = withContext(Dispatchers.IO) {
-        val viaTmdb = TmdbFetch.showEpisodes(title)
-        if (viaTmdb != null && viaTmdb.isNotEmpty()) return@withContext viaTmdb
-        fetchAll(title)
-    }
+    suspend fun fetchForAny(title: String, season: Int? = null): List<SeriesEpisode> =
+        withContext(Dispatchers.IO) {
+            val key = clean(title)
+            if (key.isBlank()) return@withContext emptyList()
+            anyCache[key]?.let { return@withContext it }
+            // ── v429 — THE TWO DOORS RACE, AND BOTH ARE BOUNDED ────────────
+            //
+            // This is the call behind the member's report that a series' episode
+            // guide "doesn't load" in Incursion. The cause was arithmetic: the
+            // keyed door went first, on its own, with a budget of 8s to connect
+            // and 8s to read PER READ — a search, then a detail, then up to four
+            // seasons — so a title whose keyed door was dead spent every one of
+            // those budgets before the keyless door that actually had the answer
+            // was even asked (the same 24-second stack the member measured on
+            // TMDB). Now both are asked AT ONCE, each inside its own budget, and
+            // the keyed answer wins when it has one. A title with no season hint
+            // is unchanged in meaning: TMDB first if it answers, TVMaze otherwise.
+            val raced = coroutineScope {
+                val keyed = async {
+                    runCatching { withTimeoutOrNull(DOOR_BUDGET_MS) { TmdbFetch.showEpisodes(title, season) } }
+                        .getOrNull()
+                }
+                val keyless = async {
+                    runCatching { withTimeoutOrNull(DOOR_BUDGET_MS) { fetchAll(title) } }.getOrNull()
+                }
+                val first = keyed.await()
+                val second = keyless.await()
+                when {
+                    !first.isNullOrEmpty() -> first
+                    !second.isNullOrEmpty() -> second
+                    else -> emptyList()
+                }
+            }
+            anyCache[key] = raced
+            raced
+        }
+
+    /**
+     * How long EITHER door may take before the other one's answer is the answer.
+     * Both run at once, so this bounds the pair rather than adding to it.
+     */
+    private const val DOOR_BUDGET_MS = 7_000L
 
     /** Look up the TVMaze show ID by name. Returns null on miss. */
     private fun lookupShowId(title: String): Int? {
@@ -202,11 +251,15 @@ object SeriesEpisodeFetcher {
         }
     }
 
-    /** Minimal synchronous HTTP GET — runs on IO. */
+    /**
+     * Minimal synchronous HTTP GET — runs on IO, on a SHORT budget (v429): this
+     * door is one of two racing for the same answer, so it may never be the
+     * reason the pair waits.
+     */
     private fun httpGet(urlStr: String): String? = try {
         val conn = URL(urlStr).openConnection() as HttpURLConnection
-        conn.connectTimeout = 8_000
-        conn.readTimeout = 8_000
+        conn.connectTimeout = 4_000
+        conn.readTimeout = 5_000
         conn.setRequestProperty("Accept", "application/json")
         if (conn.responseCode == 200) conn.inputStream.bufferedReader().use { it.readText() }
         else null

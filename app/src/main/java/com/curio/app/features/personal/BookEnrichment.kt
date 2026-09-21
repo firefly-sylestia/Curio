@@ -5,6 +5,7 @@ import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalChapter
 import com.curio.app.data.PersonalChapterCodec
 import com.curio.app.data.PersonalKinds
+import com.curio.app.features.reveal.WikipediaSummary
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
@@ -192,6 +193,54 @@ internal object BookEnrichment {
             }
             entry?.description?.takeIf { it.length >= MIN_DESCRIPTION }?.let { text ->
                 updated = updated.copy(synopsis = text)
+                learned += "the description"
+            }
+        }
+
+        // ── v429 — GOOGLE BOOKS, ASKED FOR EVERYTHING IT STATES ──────────
+        //
+        // The member: *"wire google book fetching for chapters etc. if nothing
+        // returns use more fallbacks"*. Google Books was reached for ONE question
+        // (a table of contents) and only through Crossref; its volume record
+        // states the page count and the publisher's own blurb as well, which is
+        // precisely what a book added by hand is missing. It is asked once,
+        // inside this single visit, for whatever is STILL empty — and it stays
+        // key-gated, because its anonymous endpoint is a shared daily quota that
+        // answers `429 Quota exceeded` (checked live from this repo) and a
+        // request answered with an error is worse than no request.
+        if ((wantPages && updated.pageCount <= 0) ||
+            (wantDescription && updated.synopsis.isBlank())
+        ) {
+            googleBooksVolume(updated.title, updated.author)?.let { volume ->
+                if (wantPages && updated.pageCount <= 0 && volume.pages > 0) {
+                    updated = updated.copy(pageCount = volume.pages)
+                    learned += "${volume.pages} pages"
+                }
+                if (wantDescription && updated.synopsis.isBlank()) {
+                    volume.description.takeIf { it.length >= MIN_DESCRIPTION }?.let { text ->
+                        updated = updated.copy(synopsis = text)
+                        learned += "the description"
+                    }
+                }
+            }
+        }
+
+        // ── v429 — AND THE ENCYCLOPAEDIA LAST ────────────────────────────
+        //
+        // When every catalogue above has answered nothing, the book is usually one
+        // they file under a DIFFERENT name than the shelf holds — which is exactly
+        // the miss a search over an encyclopaedia fixes. Wikipedia is the widest
+        // net of the set, keyless, and its article for a novel states the plot in
+        // prose; `Kind.BOOK` is what keeps "Dune" from being answered with the
+        // FILM's article.
+        if (wantDescription && updated.synopsis.isBlank()) {
+            val text = withContext(Dispatchers.IO) {
+                runCatching {
+                    WikipediaSummary.extract(updated.title, null, WikipediaSummary.Kind.BOOK)
+                }.getOrNull()
+            }
+            text?.takeIf { it.length >= MIN_DESCRIPTION }?.let { found ->
+                updated = updated.copy(synopsis = found)
                 learned += "the description"
             }
         }
@@ -526,7 +575,30 @@ internal object BookEnrichment {
      */
     private suspend fun googleBooksChapters(
         title: String, author: String
-    ): List<PersonalChapter>? {
+    ): List<PersonalChapter>? = googleBooksVolume(title, author)?.chapters
+
+    /**
+     * v429 — WHAT ONE GOOGLE BOOKS VOLUME STATES, for every question it can
+     * answer: the table of contents, the printed page count and the publisher's
+     * blurb. The record is read ONCE per book (see the pass above), so the three
+     * questions cost one request rather than three.
+     */
+    private data class GoogleVolume(
+        val chapters: List<PersonalChapter>?,
+        val pages: Int,
+        val description: String
+    )
+
+    /**
+     * One Google Books search for a title, best-effort, key-gated.
+     *
+     * The KEY IS REQUIRED on purpose (see [googleBooksChapters]): the anonymous
+     * endpoint answers `429 Quota exceeded … Queries per day`, so a keyless build
+     * makes no request here and the failover chain above is what it always was.
+     */
+    private suspend fun googleBooksVolume(
+        title: String, author: String
+    ): GoogleVolume? {
         if (title.isBlank()) return null
         if (com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY.isBlank()) return null
         if (!AppPreferences.bookFetchEnabledState) return null
@@ -544,29 +616,32 @@ internal object BookEnrichment {
                 val url = "https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3" +
                     "&key=$key"
                 val json = getJson(url) ?: return@runCatching null
+                val wanted = normalise(title)
                 val items = json.asJsonObject.array("items")
-                for (item in items) {
-                    val vol = (item as? JsonObject)?.getAsJsonObject("volumeInfo")
-                        ?: continue
-                    val toc = vol.getAsJsonArray("tableOfContents")
-                        ?: continue
-                    val chapters = toc.mapNotNull { entry ->
-                        val name = runCatching { entry.asString }.getOrDefault("")
-                        if (name.isBlank()) null
-                        else PersonalChapter(
-                            number = 0,
-                            title = name,
-                            pageStart = 0,
-                            pageEnd = 0
-                        )
-                    }
-                    if (chapters.size >= MIN_CHAPTERS) {
-                        return@runCatching chapters.mapIndexed { i, ch ->
-                            ch.copy(number = i + 1)
-                        }
+                    .mapNotNull { (it as? JsonObject)?.getAsJsonObject("volumeInfo") }
+                // The closest title first: a search for a common word can lead
+                // with a different book entirely, and its page count and blurb
+                // would then be attached to this one.
+                val ranked = items.sortedByDescending { vol ->
+                    val name = normalise(vol.str("title"))
+                    when {
+                        name == wanted -> 2
+                        name.contains(wanted) || wanted.contains(name) -> 1
+                        else -> 0
                     }
                 }
-                null
+                val best = ranked.firstOrNull() ?: return@runCatching null
+                val chapters = best.getAsJsonArray("tableOfContents")?.mapNotNull { entry ->
+                    val name = runCatching { entry.asString }.getOrDefault("")
+                    if (name.isBlank()) null
+                    else PersonalChapter(number = 0, title = name, pageStart = 0, pageEnd = 0)
+                }?.takeIf { it.size >= MIN_CHAPTERS }
+                    ?.mapIndexed { i, ch -> ch.copy(number = i + 1) }
+                GoogleVolume(
+                    chapters = chapters,
+                    pages = best.str("pageCount").toIntOrNull()?.takeIf { it > 0 } ?: 0,
+                    description = best.str("description").trim()
+                )
             }.getOrNull()
         }
     }

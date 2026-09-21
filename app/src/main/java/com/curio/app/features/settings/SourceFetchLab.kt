@@ -502,7 +502,15 @@ internal object SourceFetchCatalog {
                 id = "librarything",
                 label = "LibraryThing",
                 group = "Books",
-                note = "A cover by ISBN, for a book the shops do not draw",
+                // v429 — WHAT THIS ROW WILL SAY, MEASURED. The covers host sits
+                // behind a Cloudflare JS challenge, so an app-time request (any
+                // User-Agent) answers `403 text/html` with "Just a moment…" and
+                // no native client can pass it. The probe is kept — the member
+                // can see the 403 for themselves rather than take a note's word —
+                // but the note names the truth, and the book covers resolve
+                // through Open Library's ISBN door instead (its row is above).
+                note = "A cover by ISBN — BLOCKED for apps: its host answers 403 " +
+                    "(Cloudflare) to every non-browser client; Open Library is the door that works",
                 where = "features/settings/BookCoverFetch.kt",
                 keyName = "LIBRARY_THING_API_KEY",
                 probe = {
@@ -596,6 +604,21 @@ internal object SourceFetchCatalog {
                 }
             ),
 
+            SourceFetchSource(
+                id = "omdb",
+                label = "OMDb",
+                group = "Screen",
+                note = "A film's or a series' plot, poster, IMDb rating and runtime, by name",
+                where = "features/reveal/OmdbFetch.kt · features/incursion/IncursionSources.kt",
+                keyName = "OMDB_API_KEY",
+                probe = {
+                    probeRequest(
+                        "https://www.omdbapi.com/?apikey=${BuildConfig.OMDB_API_KEY}" +
+                            "&t=" + encoded("Inception") + "&plot=short&r=json&type=movie"
+                    )
+                }
+            ),
+
             // ── Anime & manga ───────────────────────────────────────────────
             SourceFetchSource(
                 id = "anilist",
@@ -619,7 +642,14 @@ internal object SourceFetchCatalog {
                 id = "jikan",
                 label = "Jikan (MyAnimeList)",
                 group = "Anime & manga",
-                note = "An anime's own records, and the manga fallback",
+                // v429 — HONEST ABOUT WHAT WAS MEASURED. Jikan answered `504`
+                // from MyAnimeList's own gateway on every attempt from here, for
+                // the member and for this repo — a server-side failure, not a
+                // missing key. The app must therefore treat this door as one that
+                // may not answer at all: it is asked on a short budget and behind
+                // it sit AniList and iTunes, which is why an anime still resolves
+                // on a day Jikan is down.
+                note = "An anime's own records, and the manga fallback — measured 504 from its own gateway",
                 where = "features/reveal/AnimePosterFetch.kt · AnimeEpisodeFetcher.kt · MangaFetch.kt",
                 probe = {
                     probeRequest(

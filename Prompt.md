@@ -1086,10 +1086,78 @@ backed by reading the code and by the brace/paren balance checker, nothing more.
 - Every call site of the two things this pass changed shape (the sheet's aspect, the hub's design list)
   was re-read after the edit.
 
+## 20. Request — the dead keys, OMDb, Google Books, the episode guides, the watch mark, the drawer's lines, the PDF's zoom
+
+**The ask (member):** *"these api keys are not working, library thing, it gives http 403 text/html
+error, tmdb no answer 24060 ms, jokan my animelist http 504 application/json, these erorr, also add
+omdb key for fethcing if any doeasnt fetch, the wacth button in incursion ui is not right, wire
+google book fetching for chapters etc if nothing resturns use more fallbacks, for incursion ui the
+movie posters decsription doesnt fetch, use all the avalabel pai also i added cmoicvine api too mybe
+use that for incursio with more fallbacks, the series for incusrion also doesnt load episode guides
+use the same on the category series uses with its ui, all other api works so add proper fallback for
+things that didnt fetch for artworks et everything, also do what else we can fetch from the api that
+we are not fetching. then in drawer ake the pattern straight lines a little curvy just a littlr, and
+for pdf in vertical scrolling the zoom is still a little inaccurate and glitchy fix it its zooming at
+the top."*
+
+Asked and answered: **the watch button's mark** — a play triangle was the wrong idea; the member
+chose **an eye** (outline when unwatched, filled/lit once watched).
+
+### Findings (measured, not assumed)
+
+- **LibraryThing's covers host refuses apps.** `covers.librarything.com` is behind a Cloudflare JS
+  challenge: every request, any User-Agent, answers `403 text/html` ("Just a moment…") — a native
+  client cannot pass it and no key changes that. The same ISBN through
+  `covers.openlibrary.org/b/isbn/…` answers `200 image/jpeg`.
+- **The 24-second TMDB stall was arithmetic, not a key.** `TmdbFetch.facts()` is a film search, a
+  show search and a detail read; `showEpisodes()` adds a season each; every read allowed 8s to
+  connect and 8s to answer. Three reads deep that is the member's own measurement.
+- **Jikan answers `504` from its own gateway** (MyAnimeList's), so it is a door that may not answer
+  at all — it needs a short budget and real doors behind it, not a retry loop.
+- **`SeriesEpisodeFetcher.fetchForAny` ran its two doors in SEQUENCE** (keyed first, each with its
+  own long budget first), which is why a series' guide "doesn't load" in Incursion.
+- **The scrolling PDF's anchor was right only for the first sheet** (see the app/AGENTS.md note):
+  `focus` alone omits every sheet above the one being pinched.
+
+### What was built
+
+1. **OMDb** — new `features/reveal/OmdbFetch.kt` (plot, poster, rating, runtime, genres, IMDb id)
+   + `OMDB_API_KEY` in `app/build.gradle.kts`, BOTH workflows, `.env.example`, `build-summary.sh`,
+   `.github/AGENTS.md`, and an `omdb` row in the Dev source lab.
+2. **Wikipedia as ONE shared door** — new `features/reveal/WikipediaSummary.kt` (page, prose, lead
+   image, `Kind` bracket rules), used by Incursion's rows AND the shelf's book enrichment.
+3. **Incursion's own chain** — new `features/incursion/IncursionSources.kt`: `record()` (description
+   + facts) and `artwork()` (last-resort posters), staged and raced, consent-gated, memoised with
+   misses; the sheet draws the fetched description and its facts as pills; `IncursionPosters`
+   reaches the new nets after its keyless pair; `ComicVineFetch.movie(query)` makes the comics key
+   useful for a film line.
+4. **Episode guides** — `fetchForAny(title, season)` races TMDB and TVMaze under short budgets, a
+   season hint reads one season instead of four, and Incursion passes the row's own season.
+5. **Fail fast everywhere it matters** — TMDB 3.5s/5s + a whole-read cap, TVMaze 4s/5s, the Jikan
+   doors 4s/5s/7s-call, every Incursion door on a 6s cap, every raced door on a 7s cap.
+6. **Books** — `googleBooksVolume` answers chapters AND page count AND blurb from one read;
+   `WikipediaSummary` is the last net for a book's about-text; ISBN covers are served by Open
+   Library's ISBN door with LibraryThing's host named honestly (hub label + source lab note).
+7. **The watch mark is an eye** (drawn: hairline arcs + pupil, or a filled almond with the pupil
+   punched out in the button's fill).
+8. **The drawer's constellations bow** — shallow quadratic joins, `min(span*0.10, 6dp)`, side fixed
+   by the pair's indices.
+9. **The scrolling PDF's zoom** — `sheetsAbove` (= `page * <one sheet's magnified height>`) threaded
+   into `readerZoomDocument` and `readerDoubleTapDocument`; the anchor is `(sheetsAbove + focus.y) *
+   (ratio - 1)`, so padding and inter-sheet gaps drop out by construction.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on all eleven touched Kotlin files (character scanner, string- and
+  comment-aware).
+- Every changed call site re-read after its edit (the sheet's guide call, the poster chain, both
+  zoom anchors, the lab's rows, the cover provider).
+- **CI compiles it — that is the only build gate in this environment** (no Gradle allowed here).
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- (none — §19 is built and committed, waiting for the member's word to push)
+- (none — §20 is built and pushed with the rest of this batch)

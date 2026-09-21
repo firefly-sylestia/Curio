@@ -76,11 +76,18 @@ internal object MangaFetch {
 
     private val jsonMedia = "application/json; charset=utf-8".toMediaType()
 
+    /**
+     * v429 — a SHORT budget, because this client is the one an anime's doors
+     * share and Jikan can answer `504` from its own gateway: a cascade of four
+     * sources at eight seconds each is thirty-two seconds for one cover, which is
+     * what a member experiences as "it never loads". Ten seconds for the whole
+     * call, a source at a time.
+     */
     private val http: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(8, TimeUnit.SECONDS)
-            .readTimeout(8, TimeUnit.SECONDS)
-            .callTimeout(10, TimeUnit.SECONDS)
+            .connectTimeout(4, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .callTimeout(7, TimeUnit.SECONDS)
             .build()
     }
 

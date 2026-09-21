@@ -114,6 +114,47 @@ internal object ComicVineFetch {
         return results.mapNotNull { element -> element.asJsonObject.volume() }
     }
 
+    /**
+     * One FILM or SHOW, as Comic Vine files it.
+     *
+     * v429 — the second resource this object asks, added for the member's own
+     * request (*"i added comicvine api too mybe use that for incursion"*). Comic
+     * Vine's film catalogue is a real one — a comic adaptation's entry is often
+     * longer and more precise than a general database's — so it is the last net
+     * under an Incursion row's description and artwork, the door reached when
+     * TMDB, OMDb and Wikipedia have all been empty.
+     *
+     * It is a SEARCH, not a detail read: a row knows a title, not Comic Vine's
+     * own id, so the best name match wins — the same shape [search] uses for a
+     * volume. Null means "could not be asked" (no key, dead line, exhausted
+     * allowance) and an empty title means asked and nothing there.
+     */
+    internal fun movie(query: String): Movie? {
+        val wanted = query.trim()
+        if (!available || wanted.isBlank()) return null
+        val url = "$HOST/search/" +
+            "?api_key=${BuildConfig.COMIC_VINE_API_KEY}" +
+            "&format=json" +
+            "&resources=movie" +
+            "&limit=5" +
+            "&query=${encode(wanted)}" +
+            "&field_list=id,name,deck,description,image,release_date"
+        val payload = get(url) ?: return null
+        if (payload.status() != 1) return null
+        val results = payload.getAsJsonArray("results") ?: return null
+        val rows = results.mapNotNull { element -> element.asJsonObject.movie() }
+        return rows.firstOrNull { it.title.equals(wanted, ignoreCase = true) }
+            ?: rows.firstOrNull()
+    }
+
+    /** A film or a show, in this app's own words. */
+    internal data class Movie(
+        val title: String,
+        val year: Int,
+        val description: String,
+        val coverUrl: String
+    )
+
     // ── The shared plumbing ────────────────────────────────────────────────
 
     /**
@@ -172,6 +213,19 @@ internal object ComicVineFetch {
             description = description,
             coverUrl = coverUrl().orEmpty(),
             credits = credits()
+        )
+    }
+
+    /** One film search result as this app's own [Movie]. */
+    private fun JsonObject.movie(): Movie? {
+        val name = string("name")?.trim().orEmpty()
+        if (name.isBlank()) return null
+        return Movie(
+            title = name,
+            year = string("release_date")?.take(4)?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
+            description = plainText(string("deck")?.takeIf { it.isNotBlank() }
+                ?: string("description")),
+            coverUrl = coverUrl().orEmpty()
         )
     }
 

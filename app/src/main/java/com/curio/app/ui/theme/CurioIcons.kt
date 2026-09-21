@@ -90,10 +90,6 @@ object CurioIcons {
     const val Lock = "lock"
     const val VisibilityOff = "visibility_off"
 
-    /** v428 — the open eye. The bundled subset carries `visibility` (checked in
-     *  `material_symbols_outlined.ttf`, so it is a real ligature and needs no
-     *  [safeGlyphName] remap) — the mark a "mark this watched" button wears. */
-    const val Visibility = "visibility"
     const val PushPin = "push_pin"
     const val Crop = "crop"
     const val Share = "share"
@@ -121,7 +117,10 @@ object CurioIcons {
     const val FormatBold = "format_bold"
     const val FormatItalic = "format_italic"
     const val FormatUnderline = "format_underlined"
-    const val FormatStrikethrough = "format_strikethrough"
+
+    // `format_strikethrough` is NOT in the bundled subset (measured — see
+    // [safeGlyphName]'s note on how to check), so there is deliberately no
+    // constant for it: the strike tool draws its own struck-A instead.
     const val FormatHighlight = "format_color_fill"
     const val FormatText = "text_fields"
     const val TextIncrease = "text_increase"
@@ -241,6 +240,29 @@ val JournalMood.glyph: String
         JournalMood.OVERWHELMED -> CurioIcons.MoodOverwhelmed
     }
 
+/**
+ * A GLYPH NAME THAT IS NOT IN THE BUNDLED FONT RENDERS AS NOTHING — OR AS THE
+ * WORD ITSELF.
+ *
+ * HOW TO CHECK, INSTEAD OF GUESSING (this is not theoretical: `visibility` was
+ * added on the strength of a guess and the member got a watch button with no
+ * mark in it — "the icon is invalid and not showing"):
+ *
+ * ```
+ * python3 - <<'PY'
+ * data = open("app/src/main/res/font/material_symbols_outlined.ttf", "rb").read()
+ * ...print(token-in-data-with-non-identifier-neighbours)
+ * PY
+ * ```
+ *
+ * The name lives in the font's own glyph-name table, so a byte search for the
+ * token bounded by non-identifier bytes is the answer. Measured facts from that
+ * check (2026-09): `visibility_off`, `check`, `play_arrow`, `done`, `task_alt`,
+ * `movie`, `theaters`, `smart_display`, `favorite`, `notes`, `edit_note` and
+ * `arrow_forward` are PRESENT; `visibility`, `reel`, `lock` and
+ * `format_strikethrough` are NOT. Anything absent must be drawn ([CurioIcon]'s
+ * callers do this for B / I / U / S and the four alignments) or remapped here.
+ */
 private fun safeGlyphName(name: String): String = when (name) {
     // These were introduced by the social layer after the last font subset.
     // Remap to glyphs known to exist in Curio's bundled font so social icons
