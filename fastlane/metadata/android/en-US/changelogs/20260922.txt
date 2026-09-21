@@ -722,6 +722,8 @@ FIX:
 - Writing: a bullet sits level with its words — every mark was centred on the line's own box, which sits below where the eye reads a line of text.
 - Reading: the reader's sheets leave quickly, and the notes and highlights lists keep a real panel's height instead of shrinking to a strip.
 - Reading: the ⋯ menu is smaller, and opening the search merges with the book's name in one movement instead of two panels changing places.
+- Reading: the way out of a book is a pill of its own beside the book's name, and the reader's controls press back when you touch them.
+- Reading: low power reading, on by default — pages are drawn at your screen's own size, the next page is no longer prepared in advance, and pictures the book left behind are cleared as you close it, so a long read costs less heat and less cache.
 
 FIX:
 - Reading: one word gets the whole selection bar back — highlighting a single word used to offer only the dictionary, so the pens, the note, the bookmark and Share had to wait for a longer sweep.

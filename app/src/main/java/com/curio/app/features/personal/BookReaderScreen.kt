@@ -162,12 +162,15 @@ import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.ReaderMarkEntity
 import com.curio.app.data.ReaderMarkKind
 import com.curio.app.data.newReaderMarkId
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
 import com.curio.app.ui.theme.isCurioDarkTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -388,6 +391,24 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     DisposableEffect(readerView, ReaderLook.keepScreenOn) {
         readerView.keepScreenOn = ReaderLook.keepScreenOn
         onDispose { readerView.keepScreenOn = false }
+    }
+    // ── v439 — AND IT LEAVES NOTHING BEHIND (see [ReaderLook.lowPower]) ────
+    //
+    // The pictures an EPUB copies out of its archive live in `cacheDir/book-images`
+    // and stayed there until Android felt like reclaiming them. That is exactly
+    // the "app cache is huge" a member notices in their own settings, and while
+    // low power reading is on the reader clears it as it closes. Off screen and on
+    // a background thread, because deleting a folder is not something a page turn
+    // should wait for — and only ever the reader's OWN folder, so nothing else the
+    // app has cached is touched (the book re-copies what it needs next time it is
+    // opened, which is the whole reason this folder is a cache rather than data).
+    DisposableEffect(lookContext, ReaderLook.lowPower) {
+        onDispose {
+            if (!ReaderLook.lowPower) return@onDispose
+            CoroutineScope(Dispatchers.IO).launch {
+                imageDir(lookContext).listFiles()?.forEach { runCatching { it.delete() } }
+            }
+        }
     }
 
     // ── HOW THIS BOOK FLOWS ──────────────────────────────────────────────
@@ -1222,8 +1243,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // turn a page by accident.
         AnimatedVisibility(
             visible = ReaderLook.zonesEditing,
-            enter = fadeIn(tween(160)),
-            exit = fadeOut(tween(140))
+            // v439 — a full-area overlay: a bare fade on the shared clock.
+            enter = CurioMotion.arriveFade(),
+            exit = CurioMotion.leaveFade()
         ) {
             ReaderTapZoneEditor(
                 palette = palette,
@@ -1241,8 +1263,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         if (swept != null && swept.text.isNotBlank() && sheet == null) {
             AnimatedVisibility(
                 visible = true,
-                enter = fadeIn(tween(160)) + slideInVertically { it / 3 },
-                exit = fadeOut(tween(140)),
+                // v439 — the selection bar is a floating pill off the page's
+                // bottom edge: one arrival, like the foot it replaces.
+                enter = CurioMotion.pillArrive(),
+                exit = CurioMotion.pillLeave(),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
@@ -1308,8 +1332,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         val run = scrubber
         AnimatedVisibility(
             visible = scrubOpen && run != null,
-            enter = fadeIn(tween(170)) + slideInVertically(tween(210)) { height -> height },
-            exit = fadeOut(tween(130)) + slideOutVertically(tween(160)) { height -> height },
+            enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
+                slideInVertically(
+                    tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
+                ) { height -> -CurioMotion.settle(height) },
+            exit = fadeOut(tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)) +
+                slideOutVertically(
+                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)
+                ) { height -> -CurioMotion.settle(height) },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
@@ -1725,8 +1755,12 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // stays the thing being set up and back puts the page exactly where it was.
     AnimatedVisibility(
         visible = readerSettingsOpen,
-        enter = fadeIn(tween(180)) + slideInVertically { it / 8 },
-        exit = fadeOut(tween(150))
+        // v439 — a full-screen page over the book, so it RISES rather than
+        // settling: a sixth of the screen would read as a bounce for something
+        // this tall, and a fade alone would ignore where it came from.
+        enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
+            slideInVertically(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)) { it / 8 },
+        exit = CurioMotion.leaveFade()
     ) {
         ReaderSettingsScreen(
             palette = palette,
@@ -2304,9 +2338,11 @@ private fun PdfScrollReader(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
         items(count = pageCount, key = { page -> "pdf-page-$page" }) { page ->
-            val bitmap by produceState<Bitmap?>(null, document, page) {
+            val bitmap by produceState<Bitmap?>(null, document, page, ReaderLook.lowPower) {
                 value = withContext(Dispatchers.IO) {
-                    runCatching { renderPdfPage(context, document, page) }.getOrNull()
+                    runCatching {
+                        renderPdfPage(context, document, page, ReaderLook.lowPower)
+                    }.getOrNull()
                 }
             }
             // The scrolling reader has no "current page" of its own — the ones
@@ -2658,7 +2694,12 @@ private fun TextPagedReader(
         // v418 — THE NEXT PAGE IS ALREADY LAID OUT. Composing only the visible
         // page meant a turn painted its neighbour from scratch mid-slide, which
         // is the hitch a page turn used to show (member: "smoother page turns").
-        beyondViewportPageCount = 1
+        //
+        // v439 — UNLESS LOW POWER READING IS ON, in which case the neighbour is
+        // exactly the cost that setting exists to remove: a second full render, a
+        // second text extraction and a second set of marks for a page the member
+        // may never turn to (see [ReaderLook.lowPower]).
+        beyondViewportPageCount = if (ReaderLook.lowPower) 0 else 1
     ) { page ->
         val range = pages.getOrNull(page) ?: return@HorizontalPager
         Column(
@@ -3008,8 +3049,9 @@ private fun PageReader(
         // wait is cancelled by that consumption instead of racing it.
         modifier = Modifier.fillMaxSize(),
         // v418 — keep the neighbouring page ready so a turn never paints from
-        // scratch mid-slide (see the reflowable pager above).
-        beyondViewportPageCount = 1,
+        // scratch mid-slide (see the reflowable pager above); v439 — stood down
+        // while low power reading is on, for the same reason.
+        beyondViewportPageCount = if (ReaderLook.lowPower) 0 else 1,
         // v394 — the PDF's pages sit flush too: a scan read as pages is one
         // document being slid across, not a stack of cards with gaps between.
         pageSpacing = 0.dp
@@ -3026,9 +3068,11 @@ private fun PageReader(
         // offset is read INSIDE the layer lambda (see below), never in
         // composition, so a swipe invalidates the layer instead of recomposing
         // every page on every frame.
-        val bitmap by produceState<Bitmap?>(null, document, page) {
+        val bitmap by produceState<Bitmap?>(null, document, page, ReaderLook.lowPower) {
             value = withContext(Dispatchers.IO) {
-                runCatching { renderPdfPage(context, document, page) }.getOrNull()
+                runCatching {
+                    renderPdfPage(context, document, page, ReaderLook.lowPower)
+                }.getOrNull()
             }
         }
         // THE SHAPE OF THIS PAGE (v403), read from its own render: it is what
@@ -3592,12 +3636,16 @@ private fun ReaderChrome(
         // rather than as the head leaving (see the search block below).
         AnimatedVisibility(
             visible = visible && search == null,
-            enter = fadeIn(tween(220, easing = LinearOutSlowInEasing)) +
-                slideInVertically(tween(260, easing = FastOutSlowInEasing)) { -it / 6 },
-            exit = fadeOut(tween(160)) +
-                slideOutVertically(tween(200, easing = FastOutSlowInEasing)) { -it / 6 } +
+            enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
+                slideInVertically(
+                    tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
+                ) { height -> CurioMotion.settle(height) },
+            exit = fadeOut(tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)) +
+                slideOutVertically(
+                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)
+                ) { height -> CurioMotion.settle(height) } +
                 shrinkHorizontally(
-                    tween(200, easing = FastOutSlowInEasing),
+                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit),
                     shrinkTowards = Alignment.End,
                     clip = false
                 ),
@@ -3630,15 +3678,15 @@ private fun ReaderChrome(
         // merge and smooth morphe").
         AnimatedVisibility(
             visible = search != null,
-            enter = fadeIn(tween(180, easing = LinearOutSlowInEasing)) +
+            enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
                 expandHorizontally(
-                    tween(220, easing = FastOutSlowInEasing),
+                    tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter),
                     expandFrom = Alignment.End,
                     clip = false
                 ),
-            exit = fadeOut(tween(140, easing = FastOutLinearInEasing)) +
+            exit = fadeOut(tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)) +
                 shrinkHorizontally(
-                    tween(200, easing = FastOutSlowInEasing),
+                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter),
                     shrinkTowards = Alignment.End,
                     clip = false
                 ),
@@ -3677,8 +3725,18 @@ private fun ReaderChrome(
         //   · ⋯          — notes, highlights, the dictionary, share and settings.
         AnimatedVisibility(
             visible = visible && !footHidden,
-            enter = fadeIn(tween(180)) + slideInVertically(tween(240)) { it / 2 },
-            exit = fadeOut(tween(150)) + slideOutVertically(tween(200)) { it / 2 },
+            // v439 — ONE ARRIVAL (see [CurioMotion]): a fade on the enter clock
+            // plus this pill's own six-of-height drift from the edge it lives on.
+            // It used to travel HALF ITS HEIGHT, which is the one place in the
+            // reader whose motion read as a slide rather than a settle.
+            enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
+                slideInVertically(
+                    tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
+                ) { height -> -CurioMotion.settle(height) },
+            exit = fadeOut(tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)) +
+                slideOutVertically(
+                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)
+                ) { height -> -CurioMotion.settle(height) },
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             ReaderBottomPill(
@@ -3764,6 +3822,34 @@ private fun ReaderTopPill(
             .readerChromeTopInset()
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
+        // ── v439 — WAY OUT IS ITS OWN PILL ────────────────────────────────
+        //
+        // The member: *"for pill use pill for th eback button its own pill"*.
+        // The way out was the first glyph INSIDE the name capsule, so the one
+        // control a member reaches for without looking shared its fill with a
+        // label — and the two had to be the same width no matter which was
+        // needed. It is a 50dp circle of its own now, the same object as the
+        // search door at the other end, so the head reads as three pills of one
+        // family: out, the book's name, and search.
+        Surface(
+            onClick = onClose,
+            shape = CircleShape,
+            color = palette.surface,
+            shadowElevation = 10.dp,
+            modifier = Modifier.size(50.dp)
+        ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CurioIcon(
+                    CurioIcons.ArrowBack,
+                    "Close the reader",
+                    tint = palette.ink.copy(alpha = 0.85f),
+                    size = 21.dp
+                )
+            }
+        }
+        // The book's name keeps the middle: it is the one thing in this row that
+        // is a LABEL rather than a door, so it takes the room the two circles
+        // leave and ellipsises inside it.
         Surface(
             shape = RoundedCornerShape(50),
             color = palette.surface,
@@ -3773,10 +3859,9 @@ private fun ReaderTopPill(
             Row(
                 modifier = Modifier
                     .height(50.dp)
-                    .padding(horizontal = 5.dp),
+                    .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ReaderChromeButton(CurioIcons.ArrowBack, "Close the reader", palette) { onClose() }
                 Text(
                     title,
                     style = TextStyle(
@@ -3871,17 +3956,23 @@ private fun RowScope.ReaderPillButton(
     palette: ReaderPalette,
     onClick: () -> Unit
 ) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = Color.Transparent,
+    // v439 — and the foot's glyphs press like the rest of the chrome: the foot
+    // is where a member's thumb lands without looking, so it is the one row that
+    // must answer a press while the page is still moving under it (see
+    // [curioPressClickable]).
+    Box(
         modifier = Modifier
             .weight(1f)
             .height(46.dp)
+            .clip(RoundedCornerShape(50))
+            .curioPressClickable(
+                pressedScale = 0.88f,
+                onClickLabel = label,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.8f), size = 21.dp)
-        }
+        CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.8f), size = 21.dp)
     }
 }
 
@@ -4365,15 +4456,28 @@ internal fun ReaderChromeButton(
     palette: ReaderPalette,
     onClick: () -> Unit
 ) {
-    Surface(
-        onClick = onClick,
-        shape = CircleShape,
-        color = Color.Transparent,
-        modifier = Modifier.size(38.dp)
+    // ── v439 — THE READER PRESSES BACK ────────────────────────────────
+    //
+    // The member's own pick: *"Press feedback everywhere"*. A reader's chrome
+    // was a row of controls that answered a tap with nothing but the thing they
+    // did — on a surface that hides its own chrome, that is a tap a member makes
+    // twice because the first one looked like it missed. This is the reader's
+    // ONE control (the head, the search bar and the foot are all built from it),
+    // so the feedback lands everywhere at once, and it is the app's own press
+    // helper rather than a second one written here (see [curioPressClickable]):
+    // the same dip, the same haptic every other Curio control gives.
+    Box(
+        modifier = Modifier
+            .size(38.dp)
+            .clip(CircleShape)
+            .curioPressClickable(
+                pressedScale = 0.86f,
+                onClickLabel = label,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.75f), size = 19.dp)
-        }
+        CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.75f), size = 19.dp)
     }
 }
 
@@ -4481,11 +4585,22 @@ private fun ReaderSheetFrame(
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     val appear = remember { Animatable(0f) }
+    // ── v439 — AND THE SHEET LEAVES BY ITS OWN HEIGHT ────────────────────
+    //
+    // The member: *"still the pdf reader buttom sheet close is weirdly slow
+    // looking"*. It was travelling `(1 - appear) * capPx` where `capPx` is 60% of
+    // THE SCREEN — so a five-row sheet, which is 200dp tall, slid more than twice
+    // its own height to leave, and the slow-looking part was all that empty
+    // travel below it. It is measured now and leaves by exactly its own height.
+    //
+    // (The cap stays as the fallback for the one frame before measurement, when
+    // there is no height to travel by yet.)
+    var measuredHeight by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
-        // v437 — FAST. See [close]: a sheet is a tool on the way to the page, and
-        // the member's report was that it took about a second to get out of the
-        // way ("the drop downs of each is slo, lie it takes a secdond to close").
-        appear.animateTo(1f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
+        appear.animateTo(
+            1f,
+            tween(durationMillis = CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
+        )
     }
     var drag by remember { mutableFloatStateOf(0f) }
     // The drag that means "shut", in the sheet's own pixels.
@@ -4501,7 +4616,10 @@ private fun ReaderSheetFrame(
      */
     fun close() {
         scope.launch {
-            appear.animateTo(0f, tween(durationMillis = 120, easing = FastOutLinearInEasing))
+            appear.animateTo(
+                0f,
+                tween(durationMillis = CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)
+            )
             onDismiss()
         }
     }
@@ -4514,7 +4632,7 @@ private fun ReaderSheetFrame(
         if (drag <= 0f) return
         scope.launch {
             val anim = Animatable(drag)
-            anim.animateTo(0f, tween(durationMillis = 140, easing = FastOutSlowInEasing)) {
+            anim.animateTo(0f, tween(durationMillis = CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)) {
                 drag = value
             }
         }
@@ -4558,7 +4676,7 @@ private fun ReaderSheetFrame(
     // v437 — AND THE SETTLE IS QUICK: 150ms of waiting was a tenth of a second the
     // member spent watching a sheet sit half-way down before it decided.
     LaunchedEffect(Unit) {
-        snapshotFlow { drag }.debounce(80).collect { settle() }
+        snapshotFlow { drag }.debounce(CurioMotion.SETTLE_DEBOUNCE_MS).collect { settle() }
     }
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // ── v434 — AS TALL AS IT NEEDS, UP TO A CAP ─────────────────────
@@ -4571,6 +4689,9 @@ private fun ReaderSheetFrame(
         val cap = maxHeight * 0.6f
         val floor = maxHeight * minHeightFraction
         val capPx = with(density) { cap.toPx() }
+        // What the sheet actually travels: its own height once it has one (see
+        // the note on [measuredHeight]), the cap until then.
+        val travel = if (measuredHeight > 0) measuredHeight.toFloat() else capPx
         // THE SCRIM: a wash, not a wall — the page stays legible under it.
         Box(
             modifier = Modifier
@@ -4587,10 +4708,11 @@ private fun ReaderSheetFrame(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .heightIn(min = floor, max = cap)
+                .onSizeChanged { measuredHeight = it.height }
                 .offset {
                     IntOffset(
                         0,
-                        (drag + (1f - appear.value) * capPx).roundToInt()
+                        (drag + (1f - appear.value) * travel).roundToInt()
                     )
                 }
                 // The body's over-scroll and the sheet's own drag are one
@@ -7226,6 +7348,34 @@ internal object ReaderLook {
     var dim by mutableStateOf(0f)
 
     /**
+     * v439 — LOW POWER READING, AND IT IS ON FROM THE START.
+     *
+     * The member: *"in pdf reader, a high charge save turns on which makes the
+     * app cache and background usage very low in reder so the phone doesnt
+     * heat"*. Reading is the one screen a member can sit on for an hour, and it
+     * was spending more than the words cost:
+     *
+     *  · Every PDF page was rendered as a full-screen ARGB_8888 bitmap with an
+     *    alpha channel nothing composites against, up to THREE TIMES the screen's
+     *    own width — pixels that are never displayed, held while the page is on
+     *    screen. On ([lowPower]) they are RGB_565 and the upscale stops at 1.5×.
+     *  · The pager kept the neighbouring page composed (`beyondViewportPageCount
+     *    = 1`) so a turn never painted from scratch — a second full-size bitmap,
+     *    a second text extraction and a second set of highlight overlays, for a
+     *    page the member may never look at. On, the pager composes the page it
+     *    shows and nothing else.
+     *  · The pictures an EPUB copies out of its archive are written to
+     *    `cacheDir/book-images` and stayed there until Android felt like
+     *    reclaiming them. On, the reader prunes that folder as it closes.
+     *
+     * It is a REAL toggle rather than a hidden flag, in the reader's own Screen
+     * section: a member on a tablet with a charger attached may well prefer the
+     * sharper page, and "it got blurrier and I could not turn it off" is not a
+     * trade a reading app gets to make for someone (see [ReaderLookStore]).
+     */
+    var lowPower by mutableStateOf(true)
+
+    /**
      * v434 — EVERYTHING THE MEMBER CHOSE, as one string, for the store.
      *
      * Read inside a `snapshotFlow`, so every field below is tracked and the write
@@ -7245,7 +7395,8 @@ internal object ReaderLook {
         paraSpacing.toString(),
         justify.toString(),
         keepScreenOn.toString(),
-        dim.toString()
+        dim.toString(),
+        lowPower.toString()
     ).joinToString("|")
 }
 
@@ -7293,6 +7444,7 @@ internal object ReaderLookStore {
     private const val JUSTIFY = "reader_justify"
     private const val KEEP_ON = "reader_keep_screen_on"
     private const val DIM = "reader_dim"
+    private const val LOW_POWER = "reader_low_power"
 
     /**
      * Read once, on the way into a reader. Does nothing at all on a fresh install:
@@ -7324,6 +7476,7 @@ internal object ReaderLookStore {
             ReaderLook.justify = prefs.getBoolean(JUSTIFY, ReaderLook.justify)
             ReaderLook.keepScreenOn = prefs.getBoolean(KEEP_ON, ReaderLook.keepScreenOn)
             ReaderLook.dim = prefs.getFloat(DIM, ReaderLook.dim).coerceIn(0f, 0.6f)
+            ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
         }
     }
 
@@ -7347,6 +7500,7 @@ internal object ReaderLookStore {
                 .putBoolean(JUSTIFY, ReaderLook.justify)
                 .putBoolean(KEEP_ON, ReaderLook.keepScreenOn)
                 .putFloat(DIM, ReaderLook.dim)
+                .putBoolean(LOW_POWER, ReaderLook.lowPower)
                 .putBoolean(MARK, true)
                 .apply()
         }
@@ -7854,8 +8008,8 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                 }
                 AnimatedVisibility(
                     visible = showDepth,
-                    enter = fadeIn(tween(160)) + slideInVertically { -it / 3 },
-                    exit = fadeOut(tween(120))
+                    enter = CurioMotion.pillArrive(fromTop = true),
+                    exit = CurioMotion.pillLeave(fromTop = true)
                 ) {
                     Slider(
                         value = chosen.depth(),
@@ -9000,11 +9154,29 @@ private fun pdfPageCount(context: android.content.Context, value: String, file: 
     }
 }
 
-/** Renders ONE page of a PDF at screen resolution. */
+/**
+ * Renders ONE page of a PDF at screen resolution.
+ *
+ * [lowPower] is the member's own choice (see [ReaderLook.lowPower]) and it is
+ * about the two things that actually cost a phone heat while reading: the number
+ * of PIXELS a page is drawn into, and whether those pixels carry an alpha
+ * channel that nothing on this surface ever composites against.
+ *
+ *  · **full detail** — ARGB_8888, up to [MAX_PDF_RENDER_SCALE] times the
+ *    screen's width.
+ *  · **low power** — RGB_565 (half the bytes per pixel to write, hold and
+ *    upload, which is the whole of the difference on a page of black type on
+ *    white) and no upscale past [LOW_POWER_PDF_RENDER_SCALE]. Past that the page
+ *    is being drawn into pixels the screen cannot show.
+ *
+ * The renderer itself does the same work either way: a page is still
+ * `RENDER_MODE_FOR_DISPLAY`, and the text and the marks are untouched.
+ */
 private fun renderPdfPage(
     context: android.content.Context,
     value: String,
-    index: Int
+    index: Int,
+    lowPower: Boolean = false
 ): Bitmap {
     val file = localFile(value)
     val descriptor = if (file != null) {
@@ -9029,12 +9201,14 @@ private fun renderPdfPage(
         // not being displayed anyway.
         val screenWidth = context.resources.displayMetrics.widthPixels.coerceAtLeast(320)
         val scale = (screenWidth.toFloat() / page.width.coerceAtLeast(1))
-            .coerceIn(1f, MAX_PDF_RENDER_SCALE)
+            .coerceIn(1f, if (lowPower) LOW_POWER_PDF_RENDER_SCALE else MAX_PDF_RENDER_SCALE)
         val height = (page.height * scale).toInt().coerceAtLeast(1)
         val bitmap = Bitmap.createBitmap(
             (page.width * scale).toInt().coerceAtLeast(1),
             height,
-            Bitmap.Config.ARGB_8888
+            // v439 — a page of a book is opaque: an alpha channel here is a
+            // quarter of the bitmap spent on nothing (see [lowPower]).
+            if (lowPower) Bitmap.Config.RGB_565 else Bitmap.Config.ARGB_8888
         )
         bitmap.eraseColor(android.graphics.Color.WHITE)
         page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
@@ -9052,6 +9226,14 @@ private fun renderPdfPage(
  * reader never gets to look at.
  */
 private const val MAX_PDF_RENDER_SCALE = 3f
+
+/**
+ * v439 — how far a page may be scaled up while low power reading is on (see
+ * [ReaderLook.lowPower]). The screen's own width is 1×; half again is headroom
+ * for the moment a page is magnified a little, and past it the extra pixels are
+ * drawn and uploaded for nobody.
+ */
+private const val LOW_POWER_PDF_RENDER_SCALE = 1.5f
 
 /**
  * WHICH BLOCK AN OUTLINE ENTRY OPENS (v389c).

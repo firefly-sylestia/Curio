@@ -303,6 +303,34 @@ internal fun ReaderSettingsScreen(
                 )
             }
 
+            // ── v439 — WHAT THE READING COSTS ───────────────────────────
+            //
+            // The member: *"in pdf reader, a high charge save turns on which makes
+            // the app cache and background usage very low in reder so the phone
+            // doesnt heat"*.
+            //
+            // It is a two-option row rather than a switch on purpose [see
+            // ReaderLook.lowPower]: the choice is not "do a thing or not" but
+            // WHICH WAY the reader spends — a cooler page and a shorter cache, or
+            // the sharpest page the screen can take with its neighbour already
+            // rendered. A switch would have made the second one the odd state.
+            //
+            // Both segments are glyphs this screen already draws
+            // ([CurioIcons.Lightbulb] above), so nothing is promised here that the
+            // bundled icon subset might not carry.
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                ReaderSettingsSection("Power", palette)
+                ReaderSegmentRow(
+                    segments = listOf(
+                        ReaderSegment("Cooler", CurioIcons.Lightbulb),
+                        ReaderSegment("Sharpest", CurioIcons.AutoAwesome)
+                    ),
+                    selectedIndex = if (ReaderLook.lowPower) 0 else 1,
+                    palette = palette,
+                    onSelect = { at -> ReaderLook.lowPower = at == 0 }
+                )
+            }
+
             // ── THE PAGE'S OWN GESTURES ─────────────────────────────────
             if (canPlaceZones) {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {

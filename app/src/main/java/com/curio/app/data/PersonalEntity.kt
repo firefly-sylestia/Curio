@@ -86,10 +86,16 @@ data class PersonalNoteEntity(
      * beside the colour it is about, and it defaults to false: every journal
      * written before this existed keeps its theme's parchment, exactly as it did.
      *
-     * When it is true, `journalPaper()` takes the page's colour at a real tint
-     * and `journalInk()` answers for the result — a coloured page the member's
-     * own ink cannot read on would be a prettiness that cost them their writing
-     * (see [com.curio.app.features.personal.JournalPagePaint]).
+     * v438 — THE SWITCH IS WITHDRAWN, THE COLUMN IS NOT. When it was true,
+     * `journalPaper()` took the page's colour at a real tint and `journalInk()`
+     * answered for the result; the member has since rolled that back ("ykw remove
+     * the paint th epage so the journal tools etc dont get the color"), because a
+     * paper tinted off a colour wheel left the ink drawn on it at a contrast
+     * nothing had measured. The colour lives on the journal's DOORS now.
+     *
+     * The field is kept so the column round-trips at its default — dropping a
+     * Room column is a migration, and this is the same treatment
+     * `profiles.avatar_style` got when the portrait picker went. Nothing sets it.
      */
     val pagePainted: Boolean = false
 ) {

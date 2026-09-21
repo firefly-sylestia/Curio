@@ -82,6 +82,7 @@ import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
 import kotlinx.coroutines.CoroutineScope
@@ -575,8 +576,9 @@ fun BookReviewScreen(
             // adjust it").
             PersonalFloatingLayer(
                 visible = editing && liveVoice == null,
-                enter = fadeIn(tween(180)) + scaleIn(tween(220), initialScale = 0.80f),
-                exit = fadeOut(tween(120)) + scaleOut(tween(160), targetScale = 0.80f),
+                // v439 — a free-floating control: the POP (see [CurioMotion]).
+                enter = CurioMotion.popArrive(),
+                exit = CurioMotion.popLeave(),
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(start = 18.dp, bottom = 12.dp)
@@ -592,8 +594,8 @@ fun BookReviewScreen(
             // give: a marker in the member's own review.
             PersonalFloatingLayer(
                 visible = editing,
-                enter = fadeIn(tween(160)) + slideInVertically(tween(200)) { it / 2 },
-                exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { it / 2 },
+                enter = CurioMotion.pillArrive(),
+                exit = CurioMotion.pillLeave(),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 16.dp, bottom = 10.dp)
@@ -700,8 +702,8 @@ fun BookReviewScreen(
         // moment for bold — and the capsule takes the page's bottom.
         AnimatedVisibility(
             visible = editing && liveVoice == null,
-            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
-            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
@@ -719,8 +721,8 @@ fun BookReviewScreen(
 
         AnimatedVisibility(
             visible = editing && liveVoice != null,
-            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
-            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(

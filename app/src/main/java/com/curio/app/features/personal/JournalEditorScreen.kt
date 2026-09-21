@@ -75,6 +75,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingJournalDay
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -409,14 +410,22 @@ private fun JournalTopBar(
                     AnimatedContent(
                         targetState = dateMillis,
                         transitionSpec = {
+                            // v439 — the date stepping to the next day keeps its
+                            // DIRECTION (forward up, back down), which is the one
+                            // thing worth differing about; its clock is the shared
+                            // one (see [CurioMotion]).
                             val forward = targetState > initialState
                             val enter = if (forward) 1 else -1
                             (
-                                fadeIn(tween(200)) +
-                                    slideInVertically(tween(240)) { height -> enter * height / 2 }
+                                CurioMotion.arriveFade() +
+                                    slideInVertically(
+                                        tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
+                                    ) { height -> enter * CurioMotion.settle(height) }
                                 ) togetherWith (
-                                fadeOut(tween(140)) +
-                                    slideOutVertically(tween(180)) { height -> -enter * height / 2 }
+                                CurioMotion.leaveFade() +
+                                    slideOutVertically(
+                                        tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)
+                                    ) { height -> -enter * CurioMotion.settle(height) }
                                 )
                         },
                         label = "journal-date"

@@ -98,6 +98,7 @@ import com.curio.app.data.newNoteId
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -704,23 +705,23 @@ internal fun PersonalWritingPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                // ── v433 — AND THE PAGE'S OWN PAPER IS THIS BOX ──────────────
+                // ── v433, v439 — THE PAGE'S OWN PAPER ────────────────────────
                 //
-                // "Paint the page too" had nothing to paint on: the colour
-                // reached the prints, the mood chips and the export, while the
-                // surface the words actually stand on asked the THEME for its
-                // background — so the switch was on and the page never changed
-                // (member: "fix the paint the page too not working"). The paper
-                // here is [journalPaper], which IS the theme's own parchment
-                // until the page paints itself: an unpainted page is unchanged
-                // to the pixel, and a painted one is painted all the way behind
-                // the words. The head and the dock are deliberately left out —
-                // they are the app's furniture, and they would come out
-                // unreadable over a paper dark enough to be a choice.
-                .background(
-                    journalPaper()
-                    else MaterialTheme.colorScheme.background
-                )
+                // The surface the words stand on is [journalPaper] — the
+                // journal's warm parchment, a hair toward the journal's own
+                // colour.
+                //
+                // v439 — AND IT IS NO LONGER THE MEMBER'S CHOSEN PAGE COLOUR.
+                // "Paint the page too" is withdrawn (member: *"ykw remove the
+                // paint th epage so the journal tools etc dont get the color
+                // they sty like before only th epreview get sthe color"*). A
+                // paper tinted off a colour wheel left the ink drawn on it, and
+                // every surface beside it, at contrasts nothing had measured —
+                // words faded into the fill. The colour lives on the DOORS now
+                // ([journalDoorAccent]: the journal list's spine, Home's journal
+                // chip, the palette tool in the dock) and on the preview, which is
+                // what a member picking a colour is actually looking at.
+                .background(journalPaper())
                 // The writing area's own top edge, in the window: the line a
                 // heading has to have gone above to be pinned (see
                 // `pinnedSection`).
@@ -755,7 +756,7 @@ internal fun PersonalWritingPage(
             AnimatedContent(
                 targetState = editing,
                 transitionSpec = {
-                    fadeIn(tween(190)) togetherWith fadeOut(tween(150))
+                    CurioMotion.arriveFade() togetherWith CurioMotion.leaveFade()
                 },
                 label = "personal-page-mode",
                 modifier = Modifier.fillMaxSize()
@@ -859,8 +860,9 @@ internal fun PersonalWritingPage(
             // undo of it never move a line of the page.
             PersonalFloatingLayer(
                 visible = editing && removedRow != null,
-                enter = fadeIn(tween(160)) + slideInVertically(tween(200)) { height -> height / 2 },
-                exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> height / 2 },
+                // v439 — ONE ARRIVAL (see [CurioMotion.pillArrive]).
+                enter = CurioMotion.pillArrive(),
+                exit = CurioMotion.pillLeave(),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 6.dp)
@@ -889,8 +891,9 @@ internal fun PersonalWritingPage(
             // recording anyone asked for.
             PersonalFloatingLayer(
                 visible = editing && liveVoice == null && !editor.pageEditBarOpen,
-                enter = fadeIn(tween(180)) + scaleIn(tween(220), initialScale = 0.80f),
-                exit = fadeOut(tween(120)) + scaleOut(tween(160), targetScale = 0.80f),
+                // v439 — the free-floating control: the POP, not a slide.
+                enter = CurioMotion.popArrive(),
+                exit = CurioMotion.popLeave(),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp, bottom = 16.dp)
@@ -950,8 +953,10 @@ internal fun PersonalWritingPage(
         // cross on the box is what puts it away (see [PersonalPageEditBar]).
         AnimatedVisibility(
             visible = editing && editor.pageEditBarOpen,
-            enter = fadeIn(tween(160)) + slideInVertically(tween(200)) { height -> height / 3 },
-            exit = fadeOut(tween(120)) + slideOutVertically(tween(150)) { height -> height / 3 },
+            // v439 — the copy box is a pill like any other (it grows UP out of the
+            // dock's own edge, so it arrives with the same settle).
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
@@ -981,8 +986,8 @@ internal fun PersonalWritingPage(
         AnimatedVisibility(
             visible = editing && liveVoice == null && !dockScrolledAway &&
                 !editor.pageEditBarOpen,
-            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
-            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
@@ -1003,8 +1008,8 @@ internal fun PersonalWritingPage(
 
         AnimatedVisibility(
             visible = editing && liveVoice != null,
-            enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
-            exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
@@ -1228,8 +1233,9 @@ internal fun PersonalPinnedLine(
     val badgeInk = lerp(MaterialTheme.colorScheme.onSurface, accent, 0.55f)
     AnimatedVisibility(
         visible = label.isNotBlank(),
-        enter = fadeIn(tween(170)) + slideInVertically(tween(220)) { height -> -height / 2 },
-        exit = fadeOut(tween(120)) + slideOutVertically(tween(160)) { height -> -height / 2 },
+        // v439 — the pinned line hangs from the TOP edge of the writing area.
+        enter = CurioMotion.pillArrive(fromTop = true),
+        exit = CurioMotion.pillLeave(fromTop = true),
         modifier = modifier
     ) {
         Surface(
@@ -1282,13 +1288,10 @@ internal fun PersonalPinnedLine(
                     AnimatedContent(
                         targetState = label,
                         transitionSpec = {
-                            (
-                                fadeIn(tween(180)) +
-                                    slideInVertically(tween(200)) { height -> height / 2 }
-                                ) togetherWith (
-                                fadeOut(tween(120)) +
-                                    slideOutVertically(tween(150)) { height -> -height / 2 }
-                                )
+                            // v439 — the heading's own name changing, inside the
+                            // pill it is written on (it comes from BELOW, the way
+                            // the writing it belongs to moves).
+                            CurioMotion.pillArrive() togetherWith CurioMotion.pillLeave()
                         },
                         label = "personal-pinned-line"
                     ) { shown ->

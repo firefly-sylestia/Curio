@@ -190,7 +190,25 @@ The member answered five questions; every decision below is theirs, not a guess.
 **Do these in this order**, because the first two are migrations and a half-done
 migration is worse than none (it is the same "animations are still bad" report).
 
+**STATUS (v439): 7.1 DONE, 7.2 DONE, 7.3 PARTLY DONE, 7.4 and 7.5 and 7.6 NOT BUILT.**
+What landed: the token set (as an EXTENSION of the existing public `CurioMotion`,
+never a rewrite — read 7.1's warning below), `pillArrive()/pillLeave()/popArrive()/
+popLeave()` spent across the reader's head, foot, search, scrubber, selection bar and
+settings page and across the journal's undo pill, mic, copy box, dock, voice capsule
+and pinned line, plus press feedback on `ReaderChromeButton` and `ReaderPillButton`
+(the two controls the reader is actually built from). Still open: 7.4's one
+pill/dock language (the copy box is still two rows), 7.5's one empty state, and 7.6's
+motion lock + Zoom slider removal.
+
 ### 7.1 One motion token set (do FIRST — everything else refers to it)
+
+**READ THIS BEFORE TOUCHING IT: `ui/theme/CurioMotion.kt` ALREADY EXISTS AND IS
+PUBLIC.** It holds `Springs.*`, `Durations.*`, `ConfettiParticleCount` and
+`MinSpinTurns`, which ~30 call sites across `CurioAnimations`, `CurioNavHost`,
+`CurioConfetti`, `CurioPressFeedback` and the card components compile against. v439
+extended it; a `write_file` here is how the file got briefly destroyed. Check
+`git status` shows `M` (not `??`) before writing a file you believe is new.
+
 
 A single place (suggested: `ui/theme/CurioMotion.kt`) holding named durations and
 easings — enter (~220ms, `FastOutSlowInEasing`), exit (~140ms, `FastOutLinearInEasing`),
@@ -264,6 +282,8 @@ the drawing. A tap must still turn the page.
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
+
+- **§32 — "continue and still the pdf reader buttom sheet close is weirdly slow ... do the motion token set and one arrival for every floating pill ... and in pdf reader, a high charge save turns on" (DONE, v439).** Built: the sheet close now travels its OWN height (the "weirdly slow" was 60%-of-screen travel on a 200dp sheet, not the clock — see `app/AGENTS.md` v439); the pill clock added to `CurioMotion` and spent across the reader's and journal's floating furniture; the back button is its own 50dp circle pill; press feedback on the reader's two control builders; and **low power reading** (`ReaderLook.lowPower`, on by default, a real "Power" row in the reader's settings — RGB_565 pages, a 1.5× upscale cap, `beyondViewportPageCount = 0`, and `cacheDir/book-images` pruned as the reader closes). **Also fixed the red build that was pushed as `147a2516`**: `PersonalPage.kt:722` had an orphan `else MaterialTheme.colorScheme.background` left by v438's edit — the file's own paper is `journalPaper()`. No SQL change for anything in either round.
 
 - **§31 — the reader's polish round two (PARTLY DONE, plan in §7).** Done from it: back
   no longer exits the reader (`BackHandler`), the settings head wears the reader's top

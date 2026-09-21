@@ -1,7 +1,23 @@
 package com.curio.app.ui.theme
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 /**
  * Curio's motion design tokens — see Curio design contract section 0.5.
@@ -44,6 +60,15 @@ import androidx.compose.animation.core.spring
  *  - [Durations.Confetti]     — 600ms (reward burst lifetime)
  *  - [Durations.ConfettiLong] — 1200ms (extended burst for save success)
  *  - [Durations.RevealHold]   — 400ms (pause after landing before nav to Reveal)
+ *
+ * v439 — AND THE PILL CLOCK IS THE SECOND HALF OF THIS FILE (see
+ * [ENTER_MS]/[EXIT_MS] and [settle]). The springs above answer "how does a
+ * thing that is already MOVING settle"; these answer "how does a thing that
+ * appears COME and GO", which the floating furniture of the reading and
+ * writing surfaces needed and did not have — every pill carried its own
+ * numbers, which is what produced the member's report *"the animations are
+ * still bad"*: not that any one of them was wrong, but that a pill arriving in
+ * 180ms beside one arriving in 220ms has no shared language.
  */
 object CurioMotion {
 
@@ -162,4 +187,145 @@ object CurioMotion {
     /** Number of full rotations per Spin (per section 5: 3 to 5). */
     const val MinSpinTurns: Int = 3
     const val MaxSpinTurns: Int = 5
+
+    // ── THE PILL CLOCK (v439) ───────────────────────────────────────────────
+    //
+    // What the reading and writing surfaces' floating furniture is built from:
+    // the reader's head, foot, search and page scrubber, the journal's dock,
+    // copy box, undo pill, mic and pinned line, and the sheets they open.
+    //
+    // THREE RULES, and they are rules rather than preferences:
+    //
+    //  1. **No floating surface invents its own milliseconds.** A duration
+    //     written as a literal next to a pill is a bug — add a token instead.
+    //  2. **Enter is slower than exit, always.** On the way in the member is
+    //     deciding; on the way out the system is getting out of the way. That
+    //     asymmetry is why an exit never reads as slow even when it is not
+    //     short — and it is the reason a member can say a sheet closes
+    //     "weirdly slow" while it is objectively fast: the travel was the
+    //     problem, not the clock (a short sheet used to slide the full screen
+    //     cap — see `ReaderSheetFrame`).
+    //  3. **Travel is proportional to the thing that moves.** See [settle].
+
+    /**
+     * What arrives. 220ms on a slow-in/slow-out curve: long enough to read as
+     * movement, short enough that a member tapping a tool never waits for it.
+     */
+    const val ENTER_MS = 220L
+
+    /**
+     * What leaves. A faster verdict, on the curve that spends its travel early —
+     * a thing on its way out should be gone by the time the eye looks for it.
+     */
+    const val EXIT_MS = 140L
+
+    /**
+     * A change worth watching: a panel growing under a row, a page's colour
+     * settling, a chip becoming a bar. Only for something the member is looking
+     * AT while it happens; never for a tool arriving.
+     */
+    const val EMPHASIS_MS = 320L
+
+    /** The tick under a press, and the settle of a drag that let go — short
+     *  enough to feel mechanical rather than animated. */
+    const val TICK_MS = 90L
+
+    /**
+     * The pause a drag waits before it decides whether it was a throw or a
+     * nudge. Long enough that a deliberate slow drag is never cut off, short
+     * enough that a flick is answered at once.
+     */
+    const val SETTLE_DEBOUNCE_MS = 80L
+
+    /** Arriving: no dead start, no hard stop. */
+    val Enter: Easing = FastOutSlowInEasing
+
+    /** Leaving: immediate, then out of the way. */
+    val Exit: Easing = FastOutLinearInEasing
+
+    /** A soft hand-off — used where something fades IN as a tool is put away. */
+    val Soften: Easing = LinearOutSlowInEasing
+
+    /** A panel growing in place, and something meant to be watched change. */
+    val Emphasis: Easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
+
+    /**
+     * How far a floating pill drifts as it arrives, as a FRACTION of its own
+     * height — the reader's head has settled this way since v437, and it is what
+     * makes a pill look like it came from the edge it lives on without travelling
+     * far enough to read as a slide.
+     *
+     * A fraction rather than a dp count on purpose: the app's pills are 42dp,
+     * 46dp, 50dp and 58dp tall, and one fixed nudge would be a jump for the
+     * tallest and invisible on the shortest.
+     */
+    const val SETTLE_FRACTION = 1f / 6f
+
+    /** That drift as an `IntOffset`, for a `slideIn/OutVertically` lambda. */
+    fun settle(heightPx: Int): Int = -(heightPx * SETTLE_FRACTION).toInt()
+
+    /** The same drift as a [Dp], for a surface that measures in dp. */
+    fun settle(height: Dp): Dp = height * SETTLE_FRACTION
+
+    // ── AND THE SPECS THEMSELVES ────────────────────────────────────────────
+    //
+    // Rule 1 above is only enforceable if the token set can be SPENT in one
+    // step: a surface that has to hand-build `fadeIn(tween(220, Enter)) +
+    // slideInVertically(…)` will eventually hand-build it slightly differently.
+    // These four factories are the whole vocabulary of the app's floating
+    // furniture, and a pill's arrival is written as `pillArrive()`. Nothing here
+    // holds state — each call builds a fresh spec — so they are safe to share.
+
+    /** A bare fade in, on the enter clock (a scrim, a wash, a night dim). */
+    fun arriveFade(): EnterTransition =
+        fadeIn(tween(ENTER_MS.toInt(), easing = Soften))
+
+    /** A bare fade out, on the exit clock. */
+    fun leaveFade(): ExitTransition =
+        fadeOut(tween(EXIT_MS.toInt(), easing = Exit))
+
+    /**
+     * ONE ARRIVAL: a floating pill comes in by fading on the enter clock while
+     * drifting a sixth of its own height from the edge it lives on.
+     *
+     * [fromTop] is which edge that is — the reader's head and its search bar come
+     * down from above, the foot, the scrubber, the journal's dock and every pill
+     * that grows out of the page come up from below. `settle` is negative, so the
+     * bottom edge negates it.
+     */
+    fun pillArrive(fromTop: Boolean = false): EnterTransition =
+        arriveFade() + slideInVertically(
+            tween(ENTER_MS.toInt(), easing = Enter)
+        ) { height -> if (fromTop) settle(height) else -settle(height) }
+
+    /** And it leaves the same way, on the exit clock. */
+    fun pillLeave(fromTop: Boolean = false): ExitTransition =
+        leaveFade() + slideOutVertically(
+            tween(EXIT_MS.toInt(), easing = Enter)
+        ) { height -> if (fromTop) settle(height) else -settle(height) }
+
+    /**
+     * The POP — the second arrival, for a round control that has no edge to come
+     * from because it floats free over the page: the journal's mic, the marks
+     * bubble, a reward. It grows from [POP_SCALE] rather than travelling, so a
+     * button that appears under the member's thumb does not look like it slid in
+     * from nowhere in particular.
+     */
+    fun popArrive(): EnterTransition =
+        arriveFade() +
+            scaleIn(
+                tween(ENTER_MS.toInt(), easing = Enter),
+                initialScale = POP_SCALE
+            )
+
+    /** And it leaves the same way. */
+    fun popLeave(): ExitTransition =
+        leaveFade() +
+            scaleOut(
+                tween(EXIT_MS.toInt(), easing = Enter),
+                targetScale = POP_SCALE
+            )
+
+    /** How small a popping control starts and ends (a knob, not a dot). */
+    const val POP_SCALE = 0.80f
 }

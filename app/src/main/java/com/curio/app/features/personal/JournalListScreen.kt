@@ -60,6 +60,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
@@ -431,13 +432,10 @@ internal fun PersonalHeader(
         AnimatedContent(
             targetState = titleRevealed,
             transitionSpec = {
-                (
-                    fadeIn(tween(230)) +
-                        slideInVertically(tween(270)) { height -> -height / 3 }
-                    ) togetherWith (
-                    fadeOut(tween(150)) +
-                        slideOutVertically(tween(190)) { height -> -height / 3 }
-                    )
+                // v439 — the head's title rolling up into it is the same arrival
+                // as every other floating pill (see [CurioMotion]).
+                CurioMotion.pillArrive(fromTop = true) togetherWith
+                    CurioMotion.pillLeave(fromTop = true)
             },
             label = "personal-header-roll",
             modifier = Modifier.weight(1f)
