@@ -368,19 +368,36 @@ Asked via `ask_user`:
    per line. The row's heights also never agree (`PORTRAIT` 232 vs `HALF` 128 +
    `SMALL` 100 + an 8dp gap = 236 beside it).
 
-### Plan (one commit each, in this order)
+### Done — committed as `4684a687` and pushed
 
-1. The merge bugs — the row builder learns to let a print / voice note rejoin the run it
-   belongs to, and `mergeWithPrevious` stops treating a photo or a voice note above as a
-   wall (5 + 6 in the list above share this code).
-2. The stack sizes — one reading of a size per cell (the shape decides the WIDTH share, the
-   size decides the HEIGHT), with the three's tall frame leading and a four's lines
-   agreeing.
-3. The text bar — Cut / Copy / Paste / Undo / Select all, with the arrow-grown selection
-   the member described.
-4. The pickers — the Color theme sheet + the Light/Dark/System capsule + the two 2-option
-   rows: tighter, premium, real press motion, less copy, no em dashes.
-5. The PDF — close the parity gap between `PersonalExport`'s drawing and the journal view.
+1. **The merge bugs.** Both row passes (the editor's and the read view's) now step over a
+   blank row that is nobody's place (`printRowGapSteppable` — no words, no voice note, no
+   caret, no selection), so a print that ended up a line away from its row rejoins it, and
+   the blank air is left out of the drawing. The two passes still agree.
+2. **The stack sizes.** A three's upright frame now leads (it takes at least the widest
+   print beside it, where a Portrait frame used to get 34% against 0.62 + 0.44), each
+   stacked print takes its OWN share of its column, and a print beside the writing takes
+   the share its own size says (`printBesideShare`, capped at half) instead of a fixed 42%
+   — editor and read view both.
+3. **The text bar.** `PersonalEditorState` gained the page-selection state
+   (`pageRange`, `selectWholePage`, `grow`/`shrink`, `pageSelectionText`, `cut`, `copy`,
+   `pastePageText`, `undoPageEdit` with a stack of closures, and `RemovedPageRow` so a cut
+   can be undone whole); `PersonalPageEditBar` + `PageTextChip` render it in the dock's own
+   row (the dock's Crossfade gained the `pageEditBarOpen` branch, the copy door toggles it).
+   Undo is the BAR's own last actions, and the code says so out loud.
+4. **The pickers (first half).** The two 2-option rows wear the app's own sliding capsule
+   (a row that can disable an option falls back to `SettingsOptionSegmentedRow`, where
+   those states work); the Color theme sheet lost its second sentence, its em dash and its
+   spare air.
+
+### Still open from this batch
+
+- **The pickers' second half** — the deeper "compact & premium" pass and the missing
+  press/reveal motion on the Color theme sheet's nine rows (the sheet's rows already squish
+  on press; the reveal is on pick, not on touch).
+- **The PDF.** `PersonalExport` draws the page by hand, and its drawing has to be brought
+  in line with what `PersonalCanvas` / `PersonalPhotoBlock` / `PersonalVoice` put on
+  screen — a bigger job than the four above, and the one item of the batch not landed.
 
 ## User prompts
 
