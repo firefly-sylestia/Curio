@@ -32,9 +32,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+// The sheet's own page is a `PdfDocument` page — an `android.graphics.Canvas` —
+// and the page's drawing is a Compose `DrawScope`, so BOTH canvases are in this
+// file. The Compose one is named (see the wave in [drawExportVoice]).
+import androidx.compose.ui.graphics.Canvas as ComposeCanvas
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
@@ -1370,16 +1380,27 @@ private fun drawExportVoice(
         // The strip is scaled the way the sheet measures everything (one canvas
         // dp, one sheet unit), so the page's own dp-based geometry lands at the
         // paper's size. Progress is 0 — a printed note has not been played.
+        //
+        // v427 — THE WAVE IS DRAWN INTO ITS OWN BITMAP AND THEN LAID ON THE
+        // PAGE, because the two canvases here are different TYPES: the page's
+        // own drawing is a Compose `DrawScope`, and a `PdfDocument` page is an
+        // `android.graphics.Canvas` — and `CanvasDrawScope.draw` takes the
+        // first. The strip is rendered at the sheet's own measure into an
+        // `ImageBitmap` (the same bridge the community avatars use, see
+        // `SocialNotifications`' avatar cache: `Canvas(image)` +
+        // `CanvasDrawScope`), then blitted where the strip belongs. No API is
+        // asked for that the page does not already draw with.
         val stripTop = centreY - strip / 2f
         val width = waveRight - waveLeft
-        canvas.save()
-        canvas.translate(waveLeft, stripTop)
-        val scope = androidx.compose.ui.graphics.drawscope.CanvasDrawScope()
-        scope.draw(
-            density = androidx.compose.ui.unit.Density(PDF_UNITS_PER_SP),
-            layoutDirection = androidx.compose.ui.unit.LayoutDirection.Ltr,
-            canvas = canvas,
-            size = androidx.compose.ui.geometry.Size(width, strip)
+        val waveImage = ImageBitmap(
+            width.toInt().coerceAtLeast(1),
+            strip.toInt().coerceAtLeast(1)
+        )
+        CanvasDrawScope().draw(
+            density = Density(PDF_UNITS_PER_SP),
+            layoutDirection = LayoutDirection.Ltr,
+            canvas = ComposeCanvas(waveImage),
+            size = Size(width, strip)
         ) {
             if (style.drawsPulse) {
                 drawVoicePulse(samples, 0f, Color(ink), Color(accent))
@@ -1387,7 +1408,12 @@ private fun drawExportVoice(
                 drawVoiceWave(samples, 0f, Color(ink), Color(accent), style)
             }
         }
-        canvas.restore()
+        canvas.drawBitmap(
+            waveImage.asAndroidBitmap(),
+            waveLeft,
+            stripTop,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
+        )
     }
     canvas.drawText(clock, run.right(), centreY + clockPaint.textSize * 0.36f, clockPaint)
     run.advance(rowHeight + 22f)

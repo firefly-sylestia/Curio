@@ -703,6 +703,18 @@ block on the sheet and is a separate question from the frame.
   and every `PDF_PRINT_BAND` / `PDF_PRINT_FRAME` use is one of the five intended ones.
 - No Gradle in this environment — CI compiles it (per `AGENTS.md`).
 
+### CI fix on top (the same file)
+
+`compileReleaseKotlin` failed at `PersonalExport.kt:1359` — "actual type is
+android.graphics.Canvas, but androidx.compose.ui.graphics.Canvas was expected": the voice
+note's wave (v427, the pass before this one) handed the PAGE's canvas to a
+`CanvasDrawScope`, and the two canvas TYPES are different — the page's own drawing is a
+Compose `DrawScope`, a `PdfDocument` page is an `android.graphics.Canvas`. Compose's
+`Canvas` is imported as `ComposeCanvas` and the wave is drawn into an `ImageBitmap` at the
+sheet's own measure (`Canvas(image)` + `CanvasDrawScope`, the bridge
+`SocialNotifications`' avatar cache already uses) and blitted onto the page — no API asked
+for that the page does not already draw with.
+
 ### Note for the member
 
 §11's row runner had already been pushed when this arrived, so if the rows are STILL not
