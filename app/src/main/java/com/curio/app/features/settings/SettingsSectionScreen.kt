@@ -128,7 +128,7 @@ import kotlinx.coroutines.launch
 
 /** Settings destination selected from the compact hub. */
 enum class SettingsPage(val title: String, val subtitle: String) {
-    APPEARANCE("Appearance", "Theme, tint, and color mood"),
+    APPEARANCE("Appearance", "Theme, tint and mood"),
     // v26 — Preferences: the behavioral settings that aren't about how the
     // app LOOKS — search engine, explore sessions and the floating bubble,
     // the pet's chatter/games personality, and (v27) every notification
@@ -679,7 +679,7 @@ private fun ColorThemeSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 28.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
                 "Color theme",
@@ -689,16 +689,21 @@ private fun ColorThemeSheet(
                 ),
                 color = MaterialTheme.colorScheme.onSurface
             )
+            // v427 — ONE LINE. The sheet's own blurb was two sentences that told
+            // the member what the page under it already says (member: "too many
+            // texts and erm dashes").
             Text(
-                "The app's page, hero and ink — each with a dark twin. Pastel colors and Category tint stay on the Appearance page.",
+                "Page, hero and ink",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
             choices.forEach { choice ->
                 val live = choice.id == current
                 // The reveal expands from the row that was tapped.
                 var rowBounds by remember { mutableStateOf(Rect.Zero) }
+                // v427 — a TIGHTER ROW: the sheet is a list of nine, so every
+                // row gives back the air it was not using (see the padding).
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -723,7 +728,7 @@ private fun ColorThemeSheet(
                             }
                             onDismiss()
                         })
-                        .padding(horizontal = 10.dp, vertical = 10.dp)
+                        .padding(horizontal = 9.dp, vertical = 7.dp)
                 ) {
                     ColorThemeSwatch(choice)
                     Column(modifier = Modifier.weight(1f)) {
@@ -789,7 +794,7 @@ private fun colorThemeChoices(): List<ColorThemeChoice> {
             ColorThemeChoice(
                 id = AppPreferences.COLOR_THEME_MATERIAL,
                 label = "Material",
-                hint = "Proper Material 3 colours — one primary, neutral surfaces, muted categories",
+                hint = "Material 3: one primary, neutral surfaces",
                 page = page,
                 hero = MaterialTheme.colorScheme.primaryContainer,
                 ink = MaterialTheme.colorScheme.onPrimaryContainer
@@ -1310,6 +1315,22 @@ private fun DataSection(navController: NavController, highlightKey: String? = nu
     }
 }
 
+/**
+ * v427 — A TWO-OPTION ROW, IN C U R I O'S OWN SWITCH.
+ *
+ * The member: ".in stack those sizes options are not accurate" was a journal
+ * report, but the settings half of the same complaint — "redesign the 2 option
+ * choosing things … more compact & premium" — was the Glyph backdrop and Paper
+ * rows, which were wearing Material's `SegmentedButton` (a tall outlined box that
+ * reads as a stock control on a page of hand-made cards).
+ *
+ * A two-option row is the SAME question the theme switch asks (one of two), so
+ * it answers with the same control: a soft capsule with a filled thumb that
+ * SLIDES under the choice, the live label in the accent ink and the other in the
+ * muted ink. The icons, the disabled states and the hint line stay the shared
+ * row's business — a row that can disable an option (or is off entirely) falls
+ * back to [SettingsOptionSegmentedRow], where those states already work.
+ */
 @Composable
 private fun CompactSegmentedRow(
     icon: String? = null,
@@ -1321,7 +1342,81 @@ private fun CompactSegmentedRow(
     disabledHint: String? = null,
     onSelected: (Int) -> Unit
 ) {
-    SettingsOptionSegmentedRow(icon, title, labels, selectedIndex, enabled, disabledIndices, disabledHint, onSelected = onSelected)
+    if (!enabled || disabledIndices.isNotEmpty() || labels.size != 2 || disabledHint != null) {
+        SettingsOptionSegmentedRow(icon, title, labels, selectedIndex, enabled, disabledIndices, disabledHint, onSelected = onSelected)
+        return
+    }
+    val dark = isCurioDarkTheme()
+    val accent = settingsCardAccentInk()
+    val trackFill = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                    else MaterialTheme.colorScheme.surfaceContainer
+    val thumbFill = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, if (dark) 0.26f else 0.14f)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(13.dp)
+        ) {
+            SettingsOptionIconTile(icon, dark)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(42.dp)
+                .clip(CircleShape)
+                .background(trackFill)
+        ) {
+            val picked = selectedIndex.coerceIn(0, 1)
+            val half = maxWidth / 2
+            val offset by animateDpAsState(
+                targetValue = half * picked,
+                animationSpec = spring(dampingRatio = 0.80f, stiffness = 340f),
+                label = "option-thumb"
+            )
+            Box(
+                modifier = Modifier
+                    .offset(x = offset)
+                    .padding(3.dp)
+                    .width(half - 6.dp)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(thumbFill)
+            )
+            Row(modifier = Modifier.fillMaxSize()) {
+                labels.forEachIndexed { index, label ->
+                    val live = index == picked
+                    val ink by animateColorAsState(
+                        targetValue = if (live) accent else curioTintOn(trackFill, MaterialTheme.colorScheme.onSurfaceVariant, 0.85f),
+                        animationSpec = tween(200),
+                        label = "option-ink"
+                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(CircleShape)
+                            .clickable(onClickLabel = label) { onSelected(index) }
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = ink
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable

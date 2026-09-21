@@ -1690,6 +1690,166 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         .joinToString("\n") { it.text }
         .trimEnd()
 
+    // ── v427 — THE PAGE'S TEXT BAR ─────────────────────────────────────────
+    //
+    // The member: "in journal the copy tools selects all but i wanted it to open
+    // a tool ith cut copy paste undo tool … select all copy button cut copy paste
+    // starts a selection with arrow tools to go how much select then action done
+    // with cut copy or paste, extra select all button as well".
+    //
+    // So the dock's copy door opens a BAR on the page instead of Android's own
+    // menu: the arrows set how much of the page is in the selection, one row at
+    // a time, and Cut, Copy, Paste and Undo act on what they have picked. Tap Cut
+    // or Copy with nothing picked and the bar OFFERS THE WHOLE PAGE first — the
+    // arrow is how the member then trims it — which is the two-tap flow they
+    // described rather than a menu that decides the reach for them.
+    var pageEditBarOpen by mutableStateOf(false)
+        private set
+
+    /** The bar's reach: a run of rows by index. EMPTY = nothing picked yet. */
+    var pageRange by mutableStateOf(IntRange.EMPTY)
+        private set
+
+    /**
+     * UNDO IS THE BAR'S OWN. Each bar action remembers how to put the page back
+     * the way it found it (a cut remembers every row it took, whole), newest
+     * last, and only the bar's actions push onto it — a per-keystroke undo is a
+     * different tool, and pretending otherwise would be a lie about what the
+     * button does.
+     */
+    private val pageUndo = ArrayDeque<() -> Unit>()
+
+    /** One row the bar took away, kept whole (its words, its mask and where it
+     *  sat) so Undo can put it back exactly where it was. */
+    private class RemovedPageRow(
+        val index: Int,
+        val id: String,
+        val block: PersonalBlock,
+        val mask: IntArray,
+        val selection: TextRange?
+    )
+
+    fun togglePageEditBar() {
+        pageEditBarOpen = !pageEditBarOpen
+        if (!pageEditBarOpen) pageRange = IntRange.EMPTY
+    }
+
+    fun closePageEditBar() {
+        pageEditBarOpen = false
+        pageRange = IntRange.EMPTY
+    }
+
+    /** The whole page, as the selection (the bar's own Select all). */
+    fun selectWholePage() {
+        pageRange = if (order.isEmpty()) IntRange.EMPTY else 0..order.lastIndex
+    }
+
+    /** One row more on each end of the reach — the arrow that says "more". */
+    fun growPageSelection() {
+        if (order.isEmpty()) return
+        if (pageRange.isEmpty) {
+            selectWholePage()
+            return
+        }
+        pageRange = (pageRange.first - 1).coerceAtLeast(0)..
+            (pageRange.last + 1).coerceAtMost(order.lastIndex)
+    }
+
+    /** One row less, off the end of the reach — the arrow that says "less". */
+    fun shrinkPageSelection() {
+        val range = pageRange
+        if (range.isEmpty) return
+        pageRange = if (range.first >= range.last) IntRange.EMPTY else range.first..(range.last - 1)
+    }
+
+    /** How many rows the bar is holding — what the arrows count out loud. */
+    val pageSelectionCount: Int
+        get() = if (pageRange.isEmpty) 0 else pageRange.last - pageRange.first + 1
+
+    private fun selectedRowIds(): List<String> =
+        if (pageRange.isEmpty) emptyList() else pageRange.mapNotNull { order.getOrNull(it) }
+
+    /** The selection's words, top to bottom (a print or a voice note holds none). */
+    fun pageSelectionText(): String = selectedRowIds()
+        .mapNotNull { blocks[it] }
+        .filter { !it.isPhoto && it.audio == null }
+        .joinToString("\n") { it.text }
+        .trim('\n')
+
+    private fun rememberPageUndo(undo: () -> Unit) {
+        if (pageUndo.size >= 8) pageUndo.removeFirst()
+        pageUndo.addLast(undo)
+    }
+
+    val canUndoPageEdit: Boolean get() = pageUndo.isNotEmpty()
+
+    fun undoPageEdit() {
+        pageUndo.removeLastOrNull()?.invoke()
+    }
+
+    /** Copy: the selection's words, and the page is left exactly as it is. */
+    fun copyPageSelection(): String = pageSelectionText()
+
+    /** Cut: the selection's words go back to the caller (the clipboard) and its
+     *  ROWS leave the page — prints and voice notes included, because the member
+     *  picked them. */
+    fun cutPageSelection(): String {
+        val ids = selectedRowIds()
+        if (ids.isEmpty()) return ""
+        val text = pageSelectionText()
+        val removed = ids.mapNotNull { id ->
+            val block = blocks[id] ?: return@mapNotNull null
+            RemovedPageRow(order.indexOf(id), id, block, mask(id), selections[id])
+        }
+        rememberPageUndo {
+            removed.sortedBy { row -> row.index }.forEach { row ->
+                order.add(row.index.coerceAtMost(order.size), row.id)
+                blocks[row.id] = row.block
+                masks[row.id] = row.mask
+                row.selection?.let { selections[row.id] = it }
+            }
+            pageRange = IntRange.EMPTY
+            onDocChanged(doc())
+        }
+        ids.forEach { id ->
+            order.remove(id)
+            blocks.remove(id)
+            masks.remove(id)
+            selections.remove(id)
+            compositions.remove(id)
+        }
+        pageRange = IntRange.EMPTY
+        onDocChanged(doc())
+        return text
+    }
+
+    /** Paste: every line of [text] arrives as its own row, under the selection
+     *  (or at the foot of the page when nothing is picked). */
+    fun pastePageText(text: String) {
+        if (text.isEmpty()) return
+        val at = if (pageRange.isEmpty) order.size
+                 else (pageRange.last + 1).coerceAtMost(order.size)
+        val created = ArrayList<String>(4)
+        rememberPageUndo {
+            created.forEach { id ->
+                order.remove(id)
+                blocks.remove(id)
+                masks.remove(id)
+            }
+            pageRange = IntRange.EMPTY
+            onDocChanged(doc())
+        }
+        text.split('\n').forEachIndexed { offset, line ->
+            val block = PersonalBlock(id = newBlockId(), text = line)
+            order.add((at + offset).coerceAtMost(order.size), block.id)
+            blocks[block.id] = block
+            masks[block.id] = emptyMask(line.length)
+            created.add(block.id)
+        }
+        pageRange = IntRange.EMPTY
+        onDocChanged(doc())
+    }
+
     fun toggle(flag: Int) {
         if (pageSelected) {
             // A page-wide selection means the tool applies to the ROWS, not to
@@ -2847,11 +3007,26 @@ internal fun PersonalCanvas(
                 // alone: the run only forms when two or more stand together.
                 if (first?.isPhoto == true) {
                     val run = ArrayList<String>()
+                    // v427 — THE BLANK LINES THE RUN STEPS OVER.
+                    //
+                    // A run only ever formed from CONSECUTIVE prints, so a print
+                    // that ended up on a line of its own — a press of Enter
+                    // between two pictures, the empty line a carried print leaves
+                    // behind, a row the member nudged apart — could never rejoin
+                    // the older line it belonged to (member: "a photo of a
+                    // different line fails to merge with a older line"). Two
+                    // prints with nothing but AIR between them are one row; the
+                    // air is collected here and left out of the drawing pass, the
+                    // same way the row's later cells are.
+                    val gaps = ArrayList<String>()
                     var j = i
                     while (j < ids.size && run.size < PRINT_ROW_LIMIT) {
                         val member = state.block(ids[j])
                         if (member?.isPhoto == true) {
                             run.add(ids[j])
+                            j += 1
+                        } else if (member != null && printRowGapSteppable(state, ids[j])) {
+                            gaps.add(ids[j])
                             j += 1
                         } else {
                             break
@@ -2860,6 +3035,7 @@ internal fun PersonalCanvas(
                     if (run.size > 1) {
                         printRows[run.first()] = run
                         run.drop(1).forEach { groupSkips.add(it) }
+                        gaps.forEach { groupSkips.add(it) }
                         i = j
                         continue
                     }
@@ -3156,7 +3332,9 @@ internal fun PersonalCanvas(
                             verticalAlignment = Alignment.Top,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Box(Modifier.weight(0.42f)) {
+                            // v427 — the pair's split is the PRINT'S OWN SIZE
+                            // (see [printBesideShare]).
+                            Box(Modifier.weight(printBesideShare(state.photoSize(id)))) {
                                 PersonalMovableBlock(
                                     id = id, index = index, state = state,
                                     drag = rowDrag, enabled = enabled,
@@ -3204,7 +3382,9 @@ internal fun PersonalCanvas(
                             }
                             Box(
                                 modifier = Modifier
-                                    .weight(0.58f)
+                                    // v427 — the writing keeps the rest of the
+                                    // measure, whatever share the print took.
+                                    .weight(1f - printBesideShare(state.photoSize(id)))
                                     // The drag's own arithmetic counts a slot's
                                     // height, so the line beside the print has
                                     // to report the height it actually takes.
@@ -3783,6 +3963,20 @@ internal fun personalPrintHeight(size: PersonalPhotoSize): Dp = when (size) {
     PersonalPhotoSize.SMALL -> 100.dp
 }
 
+/**
+ * v427 — THE SHARE A PRINT TAKES BESIDE THE WRITING.
+ *
+ * The print-beside-a-line pair used a fixed column (0.42 / 0.58) whatever size
+ * the print was, so the size the member picked for it changed nothing they could
+ * see in that pair — the third face of "in stack those sizes options are not
+ * accurate" (a Small beside the writing and a Small portrait beside it were the
+ * same width). The column is the print's OWN share now, capped at half so the
+ * writing always keeps at least half the measure: Small 44/56, Small portrait
+ * 36/64, Half and up an even half.
+ */
+private fun printBesideShare(size: PersonalPhotoSize): Float =
+    size.fraction.coerceIn(0.30f, 0.50f)
+
 // ── ONE ROW OF PRINTS (v396) ──────────────────────────────────────────────
 //
 // Consecutive prints used to pair up — two at a time, and only ever two. The
@@ -3801,6 +3995,27 @@ internal fun personalPrintHeight(size: PersonalPhotoSize): Dp = when (size) {
 
 /** How many prints one row holds before the next row starts. */
 private const val PRINT_ROW_LIMIT = 4
+
+/**
+ * v427 — IS THIS ROW JUST AIR BETWEEN TWO PRINTS?
+ *
+ * True for a blank text row that is nobody's place: no words, no voice note, the
+ * caret is not in it and nothing is selected in it. A print run may step over
+ * one of those, which is what lets two pictures that ended up a line apart come
+ * back together as the row they were meant to be — and what keeps the run from
+ * swallowing a line the member is actually writing in, or a blank line they just
+ * put their caret in to type.
+ *
+ * The read view runs its own version of the rule (it has no caret and no
+ * selection), so the two passes never disagree about which pictures are one row.
+ */
+private fun printRowGapSteppable(state: PersonalEditorState, id: String): Boolean {
+    val block = state.block(id) ?: return false
+    if (block.isPhoto || block.isAudio) return false
+    if (block.text.isNotBlank()) return false
+    if (id == state.focusedId) return false
+    return state.selection(id) == null
+}
 
 /** The row's own gap — the pair's gap, shared by every shape. */
 private val PRINT_ROW_GAP = 8.dp
@@ -3865,22 +4080,38 @@ private fun PersonalPrintArrangement(
     if (ids.size == 3) {
         val tall = ids.firstOrNull { PersonalPhotoSize.isUpright(sizeOf(it)) } ?: ids[0]
         val stacked = ids.filterNot { it == tall }
+        // v427 — THE FRAME LEADS, AND THE TWO STACKED KEEP THEIR OWN WIDTHS.
+        //
+        // The split used to be the frame's own fraction against the SUM of the
+        // two stacked ones, which inverted the shape the three is named for: a
+        // Portrait frame (0.54) beside Half + Small (0.62 + 0.44 = 1.06) came
+        // out at 34 % of the measure, so the two "stacked beside it" were each
+        // WIDER than the frame the member had asked to make the tall one
+        // (member: "in stack those sizes options are not accurate, fix the size
+        // accuracy in stacks of 2 3 4"). The frame now takes at least as much
+        // room as the widest print beside it — so it reads as the frame of the
+        // shape — and each stacked print takes its OWN share of its column
+        // instead of the column's whole width, which is what made a Small and a
+        // Half beside it come out the same size.
+        val stackedShare = stacked.maxOf { weightOf(it) }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP),
             verticalAlignment = Alignment.Top
         ) {
-            Box(Modifier.weight(weightOf(tall))) {
+            Box(Modifier.weight(maxOf(weightOf(tall), stackedShare))) {
                 cell(tall, heightOf(tall), Modifier.fillMaxWidth())
             }
             Column(
-                modifier = Modifier.weight(
-                    stacked.sumOf { weightOf(it).toDouble() }.toFloat().coerceAtLeast(0.3f)
-                ),
+                modifier = Modifier.weight(stackedShare),
                 verticalArrangement = Arrangement.spacedBy(PRINT_ROW_GAP)
             ) {
                 stacked.forEach { id ->
-                    cell(id, heightOf(id), Modifier.fillMaxWidth())
+                    cell(
+                        id,
+                        heightOf(id),
+                        Modifier.fillMaxWidth(weightOf(id) / stackedShare)
+                    )
                 }
             }
         }
@@ -4314,11 +4545,18 @@ internal fun PersonalDocView(
             // are one row (see the editor's pass for why the rule changed).
             if (first.isPhoto) {
                 val run = ArrayList<String>()
+                // v427 — the same AIR rule as the editor's pass (see there): a
+                // run steps over the blank lines between its prints, so the two
+                // passes keep agreeing about which pictures are one row.
+                val gaps = ArrayList<String>()
                 var j = i
                 while (j < blocks.size && run.size < PRINT_ROW_LIMIT) {
                     val member = blocks[j]
                     if (member.isPhoto) {
                         run.add(member.id)
+                        j += 1
+                    } else if (!member.isAudio && member.text.isBlank()) {
+                        gaps.add(member.id)
                         j += 1
                     } else {
                         break
@@ -4327,6 +4565,7 @@ internal fun PersonalDocView(
                 if (run.size > 1) {
                     printRows[run.first()] = run
                     run.drop(1).forEach { groupSkips.add(it) }
+                    gaps.forEach { groupSkips.add(it) }
                     i = j
                     continue
                 }
@@ -4689,10 +4928,15 @@ internal fun PersonalDocView(
                         verticalAlignment = Alignment.Top,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Box(Modifier.weight(0.42f)) {
+                        // v427 — the print's own share of the row, exactly as
+                        // the editor splits it (see [printBesideShare]).
+                        val printShare = printBesideShare(
+                            PersonalPhotoSize.fromKey(block.photoSize)
+                        )
+                        Box(Modifier.weight(printShare)) {
                             renderPrint(block, null, Modifier.fillMaxWidth())
                         }
-                        Box(Modifier.weight(0.58f)) {
+                        Box(Modifier.weight(1f - printShare)) {
                             // A quote's panels reach into the gap above and below
                             // to meet their quoted neighbour, which is the column's
                             // business, not a pair's — the line beside a print
@@ -4760,6 +5004,123 @@ private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
  * bottom of an `imePadding()` column), so the tools are always under the
  * writer's thumb while the words stay above the keys.
  */
+/**
+ * v427 — THE PAGE'S TEXT BAR.
+ *
+ * What the dock's copy door opens now (see [PersonalEditorState.pageEditBarOpen]
+ * and [PersonalToolDock]): the page's own cut / copy / paste / undo, with the
+ * arrows that say HOW MUCH of the page is in hand.
+ *
+ * The flow is the member's own, in their words: "cut copy paste starts a
+ * selection with arrow tools to go how much select then action done with cut
+ * copy or paste, extra select all button as well". So Cut or Copy with nothing
+ * picked does not act — it OFFERS the whole page and lets the arrows trim the
+ * reach ("◀ 4 of 12 rows ▶"), and the second tap is the one that does it. All
+ * rows is the one-tap select-everything the member also asked for, and Done puts
+ * the writing tools back.
+ *
+ * Undo is the bar's own last actions (see the state's own note) — it is not a
+ * keystroke undo, and nothing here pretends it is.
+ */
+@Composable
+private fun PersonalPageEditBar(
+    state: PersonalEditorState,
+    accent: Color,
+    ink: Color
+) {
+    val clipboard = LocalClipboardManager.current
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val picked = state.pageSelectionCount
+    val rows = state.blockIds.size
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 7.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp)
+    ) {
+        // ── THE REACH ───────────────────────────────────────────────────
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            PageTextChip("◀", enabled = picked > 0, accent = ink) {
+                state.shrinkPageSelection()
+            }
+            Text(
+                text = if (picked == 0) "Nothing picked" else "$picked of $rows rows",
+                style = MaterialTheme.typography.labelSmall,
+                color = muted,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            PageTextChip("▶", enabled = picked < rows, accent = ink) {
+                state.growPageSelection()
+            }
+            PageTextChip("All rows", accent = ink) { state.selectWholePage() }
+            PageTextChip("Done", accent = accent) { state.closePageEditBar() }
+        }
+        // ── THE ACTIONS ─────────────────────────────────────────────────
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            PageTextChip("Cut", enabled = rows > 0, accent = accent) {
+                if (picked == 0) {
+                    state.selectWholePage()
+                } else {
+                    val text = state.cutPageSelection()
+                    if (text.isNotEmpty()) clipboard.setText(AnnotatedString(text))
+                }
+            }
+            PageTextChip("Copy", enabled = rows > 0, accent = accent) {
+                if (picked == 0) {
+                    state.selectWholePage()
+                } else {
+                    val text = state.copyPageSelection()
+                    if (text.isNotEmpty()) {
+                        clipboard.setText(AnnotatedString(text))
+                        state.closePageEditBar()
+                    }
+                }
+            }
+            PageTextChip("Paste", accent = accent) {
+                val text = clipboard.getText()?.text.orEmpty()
+                if (text.isNotEmpty()) state.pastePageText(text)
+            }
+            PageTextChip("Undo", enabled = state.canUndoPageEdit, accent = accent) {
+                state.undoPageEdit()
+            }
+        }
+    }
+}
+
+/** One word of [PersonalPageEditBar] — a bare label in the page's own inks, so
+ *  the bar reads as the dock's language (a row of small words) rather than as a
+ *  second toolbar with its own furniture. */
+@Composable
+private fun PageTextChip(
+    label: String,
+    accent: Color,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+        color = if (enabled) accent
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .clickable(enabled = enabled, onClickLabel = label, onClick = onClick)
+            .padding(horizontal = 11.dp, vertical = 8.dp)
+    )
+}
+
 @Composable
 internal fun PersonalToolDock(
     state: PersonalEditorState,
@@ -4827,7 +5188,13 @@ internal fun PersonalToolDock(
             animationSpec = tween(durationMillis = 180),
             label = "personalDockTools"
         ) { writingCaptionId ->
-        if (writingCaptionId != null) {
+        // v427 — THE PAGE'S TEXT BAR takes the dock's own row while it is open:
+        // the tools the member is NOT using step aside for the ones they just
+        // asked for, in the place their thumb already is (see
+        // [PersonalPageEditBar]). A caption still wins while its caret is in it.
+        if (state.pageEditBarOpen) {
+            PersonalPageEditBar(state = state, accent = accentInk, ink = ink)
+        } else if (writingCaptionId != null) {
             PersonalCaptionTools(
                 state = state,
                 captionId = writingCaptionId,
@@ -5147,10 +5514,13 @@ internal fun PersonalToolDock(
             // bar for copy and select all, in the place a member already
             // expects to find them.
             PersonalToolButton(
-                label = "Copy the whole page",
-                active = state.pageSelected,
+                label = "Page text tools: cut, copy, paste, undo",
+                // v427 — the door opens the page's own TEXT BAR (see
+                // [PersonalPageEditBar]) instead of Android's select-all menu:
+                // the member asked for cut, copy, paste and undo on the page.
+                active = state.pageEditBarOpen,
                 accent = accentInk, ink = ink,
-                onClick = { state.requestPageTextMenu() }
+                onClick = { state.togglePageEditBar() }
             ) {
                 CurioIcon(CurioIcons.ContentCopy, null, size = 18.dp)
             }
