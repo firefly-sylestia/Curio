@@ -6,6 +6,7 @@ FIX:
 - Writing: the text bar shows what it is holding — its reach washes the picked rows on the page, where it counted "4 of 12 rows" while the page showed nothing.
 
 ADD:
+- Dev page: a source-fetch lab — one fixed question per content source (the twenty the app fetches from, grouped by lane), each showing its status, how long it took, how big the answer was, a one-line reading of it and the raw payload itself; a keyed source says which key this build is missing instead of failing, and Run all asks them one at a time.
 - Writing: the text bar's reach goes letter by letter — Letters mode picks a run of characters inside the line with the arrows moving it a letter at a time, All letters takes the whole line, and Cut, Copy and Paste act on exactly those characters.
 
 FIX:

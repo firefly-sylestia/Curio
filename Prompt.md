@@ -604,6 +604,54 @@ bubble, and the voice strip's tap-to-seek — nothing on paper can be scrubbed.
 source") is still NOT built — it is a new surface, so it needs the new-feature question
 (Dev-page section, or out of the app) before it is written.
 
+## 12. Request — the Dev settings source-fetch lab, for every content source
+
+**The ask (member):** *"Build the Dev settings source-fetch lab for every content source"*
+(the original wording was *"add a api test fetching in dev settings"*, answered
+"Every content source" — it had been owed for two batches and is NOW BUILT).
+
+**Answers taken before implementing** (ask_user): **A section on the Dev page** (no switch of
+its own — the Dev page is already the gated surface) · **Both, on one screen** (the summary
+first, the raw payload folded under it) · **Fixed test queries only** (no editable query box).
+
+**What changed** — `features/settings/SourceFetchLab.kt` (new) + one `item { … }` in the Dev
+page (`ExperimentsScreen.kt`), first on the page:
+
+- **It asks the ENDPOINTS, not the app's fetchers.** Every fetcher returns a parsed type and
+  throws the payload away, so a lab built on them could only ever say "it worked". Each entry
+  builds the SAME URL the app's own file builds and names that file (`where`) so drift is
+  findable: `ArtworkSheet.kt` (Met, Wikipedia), `MuseumFetch.kt` (Cleveland), `AlbumArtFetch` /
+  `SongArtFetch` (iTunes, MusicBrainz, Cover Art Archive), `ExploreSearch.kt` (Spotify),
+  `BookEnrichment.kt` / `BookCoverFetch.kt` (Open Library, its covers, Google Books,
+  LibraryThing, Crossref), `StandardEbooksFetch.kt`, `ComicVineFetch.kt`, `SeriesEpisodeFetcher`
+  / `SeriesPosterFetch` (TVmaze), `TmdbFetch.kt`, `MangaFetch.kt` (AniList GraphQL POST,
+  Jikan, Kitsu, MangaDex).
+- **Twenty sources**, grouped Artwork / Music / Books / Screen / Anime & manga, each with one
+  fixed query the service is known to answer (a famous painting, album, book, series, manga).
+- **A run reports** the HTTP status, the milliseconds, the bytes, the content type, a one-line
+  reading of the payload (`describePayload` — counts, the first array's shape and the first
+  result's own field names, a source's own `errors[]` for GraphQL, "an HTML page, not an
+  answer" when a door is blocked) and the body itself, folded under it (20 000 chars, then a
+  truncation note). An image door counts bytes instead of keeping a megabyte of noise.
+- **A keyed door says so**: `keyName` names the `BuildConfig` value the app itself would use,
+  and a build without it shows "Needs X — not set in this build" with the button disabled —
+  a 401 would be a fact about the build, not about the source. Spotify runs the client-credentials
+  token step `ExploreSearch` runs. Google Books is keyless here (its key is optional there).
+- **Run all** is sequential with a 400 ms pause (MusicBrainz asks for one request a second),
+  and every probe is on demand: nothing persists, nothing fires by itself.
+
+**Noted, on purpose:** the lab duplicates URLs rather than reaching into the fetchers' private
+builders, which is the honest cost of showing raw payloads; the `where` on every entry and the
+`app/AGENTS.md` entry are what keep that duplication checkable.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on both touched files (the character scanner).
+- An import/usage sweep over the new file: every symbol used is imported or same-package
+  (`SettingsSectionHeading`, `SettingsOptionCard`, `CurioSettingsDivider`); Kotlin builtins
+  (`ByteArray`, `Charsets`, `Regex`) and `android.util.Base64` (fully qualified) need none.
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

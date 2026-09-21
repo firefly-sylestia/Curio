@@ -118,6 +118,16 @@ fun ExperimentsScreen(navController: NavController) {
             // already gone (3D shuffle button always on, Pastel crown depth
             // passed), and v24 removed the Layout & input section.
 
+            // v427 — THE SOURCE-FETCH LAB (member's request: "add a api test
+            // fetching in dev settings", and — asked which sources — "Every
+            // content source"). It sits FIRST on this page because it is the one
+            // section here that answers a question rather than changing the app:
+            // one fixed query per content source, with the raw answer under it.
+            // See SourceFetchLab.kt for the contract (the URLs are the app's own,
+            // a keyed door says so instead of firing a 401, and nothing is
+            // persisted).
+            item { SourceFetchLabSection() }
+
             // v293 — LIQUID GLASS + PILL GLOW moved here from Appearance.
             item { SettingsSectionHeading("Liquid glass") }
             item {
