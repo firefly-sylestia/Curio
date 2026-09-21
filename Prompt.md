@@ -90,8 +90,19 @@ bullets in `fastlane/metadata/android/en-US/changelogs/20260922.txt`.
   session ended before any edit and the tree was clean at `17bef96c`. It is logged in the User
   prompts slot below.
 
+## Instruction changes (this session)
+
+- **A CI run is never watched** (member: *"no need to check the compile while its runnning always kep
+  working and answer me and only check if its running or failed if running continue to work if failed
+  just before pushing fix and push then asnwer me"*). Root `AGENTS.md` gained a
+  **"👀 NEVER WAIT ON A CI RUN"** section, compile-safety rule 9 was rewritten to match (a pushed fix
+  is checked ONCE, before the next push, never idled on), and a short "CI Discipline" note sits above
+  the Prompt.md section. The one moment a run MUST be looked at is just before a push.
+
 ## Checks run
 
+- One `gh run list` per decision, never a wait loop (see the new rule above). The run for this
+  session's own push (`493f95b2`) was `in_progress` when it was checked, so the work carried on.
 - No Gradle command was run: this environment forbids compile / build / lint (`AGENTS.md`).
   The five CI errors were read out of the failed run's log (`gh run view --log`) and fixed
   one by one; every other API touched (`withFrameNanos`, `slideOutVertically`,

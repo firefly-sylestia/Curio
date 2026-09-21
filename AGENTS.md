@@ -61,6 +61,27 @@ agent, who asks the user.
 
 **Reason:** The development environment (IDX/workspace) does not have the full Android SDK, NDK, or build tools configured. Running these commands will fail. All compilation and build validation is handled by CI (GitHub Actions) on push.
 
+### 👀 NEVER WAIT ON A CI RUN — ASK WHETHER IT IS GOING, AND CARRY ON (user directive, 2026-09-21)
+
+**Do NOT sit and watch a CI run.** While a run is `in_progress`, keep working:
+answer the member, do the next item on the plan, start the next fix. Watching a
+build burns the session and delivers nothing.
+
+Check a run only to make a DECISION, and only with a single quick call
+(`gh run list --limit 3`):
+
+1. **The run is `in_progress`** → say so only if it is what was asked, and carry
+   on with the work. Do not poll it again in the same task.
+2. **The run has `failed`** → read its errors (`gh run view <id> --log-failed`),
+   fix them, PUSH the fix, and then answer the member. The one moment a run must
+   be looked at is just before a push, so a red build never becomes the pushed
+   state twice in a row.
+3. **The run is `success`** → nothing to do; keep working.
+
+Answering the member NEVER waits on CI. If a fix was just pushed and the run is
+still going, say what was pushed and what it addresses — the result is the next
+session's business, or this session's if the member asks.
+
 ### 🛡️ COMPILE-SAFETY RULES (read before ANY edit)
 
 These rules were derived from actual CI compilation failures. Every error was avoidable. Follow these rules to prevent repeating them.
@@ -105,10 +126,11 @@ definition file**. Do not assume parameter names from memory.
    never to property getters. Use `@Composable fun foo(): Type` not
    `val foo: Type @Composable get()`.
 
-9. **VERIFY ONE-CYCLE** — After pushing a CI fix, wait for the CI result.
-   If the CI log shows NEW errors in files you didn't touch, the previous
-   fix may have been incomplete. Do not assume a commit is final until CI
-   passes.
+9. **VERIFY ONE-CYCLE** — a pushed CI fix is checked ONCE, not watched
+   (see "NEVER WAIT ON A CI RUN" above): look at the run when a decision
+   needs it — before the next push — and read the FAILED log for errors in
+   files you did not touch, because a previous fix may have been
+   incomplete. Never idle on a run that is still going.
 
 10. **TEST SMOKE** — For entity/data-layer changes, the
     `DevFullAppTestRunner` in Developer Settings can verify constructors,
@@ -200,6 +222,11 @@ Rules:
 Note: settings-gating is about *how* an experiment ships, not *whether* to
 commit it — the **DO COMMIT AND PUSH AFTER EVERY FIX** rule above still
 applies to settings-gated experiments.
+
+## CI Discipline (short form)
+
+One quick `gh run list` per decision; never a wait loop. Running → keep working.
+Failed → fix, push, then answer. Answering the member never waits on CI.
 
 ## Prompt.md — Research & Analysis Tracking
 
