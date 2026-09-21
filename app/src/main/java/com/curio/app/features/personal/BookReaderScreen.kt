@@ -2582,7 +2582,8 @@ private fun TextPagedReader(
         // is the hitch a page turn used to show (member: "smoother page turns").
         beyondViewportPageCount = 1
     ) { page ->
-        val range = pages.getOrNull(page) ?: return@HorizontalPager            Column(
+        val range = pages.getOrNull(page) ?: return@HorizontalPager
+        Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
