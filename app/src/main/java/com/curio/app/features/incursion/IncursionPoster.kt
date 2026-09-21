@@ -36,6 +36,10 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.isCurioDarkTheme
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * v427 — THE ART ON AN INCURSION ROW.
@@ -77,15 +81,41 @@ internal object IncursionPosters {
     /** `storageKey → poster URL` (`""` = asked, nothing there). */
     private val cache = ConcurrentHashMap<String, String>()
 
-    /** The poster for a row, or null when there is none to be had. */
+    /**
+     * The poster for a row, or null when there is none to be had.
+     *
+     * ── v430 — EVERY DOOR AT ONCE, AND THE FIRST ANSWER WINS ────────────────
+     *
+     * The chain used to be SEQUENTIAL: TMDB by id, then the row's own kind, then
+     * the last net, each waiting out the one before it. The member's report is
+     * what that arithmetic produces — *"in incursion page the series etc movie
+     * poster still doesnt load fast, why not fetch uses all services and whover
+     * gives the first success wins … movies dont even load"* — because a film's
+     * keyless leg could spend half a minute guessing at Wikipedia while TVMaze
+     * and OMDb sat unasked behind it.
+     *
+     * So all of them are now started TOGETHER and the FIRST SUCCESS is the answer:
+     *
+     *  1. **TMDB by id**, both kinds (the row knows its own number, so this is the
+     *     most precise read of the set);
+     *  2. **the row's own door** — [SeriesPosterFetch] for a show (TVMaze first,
+     *     which is keyless and answers in one short request), [FilmPosterFetch] for
+     *     a film (the shared Wikipedia door first as of v430);
+     *  3. **the last net** ([IncursionSources.artwork]) — OMDb's poster, Wikipedia's
+     *     lead image and Comic Vine's cover;
+     *  4. **the row's kind's OTHER door by name** — a film is also tried as a show
+     *     and a show as a film, because upstream has filed both kinds under the
+     *     wrong catalogue (a TV film, a cinema cut of a series; "the movie series
+     *     fetching" of a title that is one on one line and the other on the next).
+     *
+     * Nothing here is on a long lease: the whole race is bounded by
+     * [POSTER_BUDGET_MS], so a row the doors cannot dress shows its plate and stops
+     * asking rather than holding anything back.
+     */
     suspend fun resolve(entry: IncursionEntry): String? {
         val key = entry.storageKey
         cache[key]?.let { remembered -> return remembered.ifEmpty { null } }
         val isSeries = entry.type.lowercase() == "series"
-        val byId = entry.tmdbId?.takeIf { it > 0 }?.let { id ->
-            TmdbFetch.posterUrlById(id, isShow = isSeries)
-                ?: TmdbFetch.posterUrlById(id, isShow = !isSeries)
-        }
         // v428 — A SERIES IS ASKED FOR BY ITS OWN NAME, WITHOUT THE SEASON OR THE
         // YEAR.
         //
@@ -97,21 +127,70 @@ internal object IncursionPosters {
         // incursion movies or series"). A FILM wants its year, because that is
         // what tells the 2010 poster from the 1980 one; a show does not, and every
         // door now strips such suffixes anyway ([stripNaming]).
-        val byName = if (isSeries) {
-            SeriesPosterFetch.resolvePosterUrl(entry.title)
-        } else {
-            FilmPosterFetch.resolvePosterUrl(
-                entry.year?.takeIf { it > 0 }?.let { "${entry.title} ($it)" } ?: entry.title
-            )
-        }
-        // v429 — AND WHAT IS LEFT WHEN NOTHING FREE CAN DRESS IT: OMDb's poster,
-        // Wikipedia's article image and Comic Vine's cover, raced (see
-        // [IncursionSources.artwork]). A row lands here only after a TMDB id and
-        // the whole keyless chain have had their turn.
-        val resolved = byId ?: byName ?: IncursionSources.artwork(entry)
+        val filmName =
+            entry.year?.takeIf { it > 0 }?.let { "${entry.title} ($it)" } ?: entry.title
+        val doors: List<suspend () -> String?> = listOf(
+            {
+                entry.tmdbId?.takeIf { it > 0 }?.let { id ->
+                    TmdbFetch.posterUrlById(id, isShow = isSeries)
+                        ?: TmdbFetch.posterUrlById(id, isShow = !isSeries)
+                }
+            },
+            {
+                if (isSeries) SeriesPosterFetch.resolvePosterUrl(entry.title)
+                else FilmPosterFetch.resolvePosterUrl(filmName)
+            },
+            {
+                if (isSeries) FilmPosterFetch.resolvePosterUrl(filmName)
+                else SeriesPosterFetch.resolvePosterUrl(entry.title)
+            },
+            { IncursionSources.artwork(entry) }
+        )
+        val resolved = firstSuccess(POSTER_BUDGET_MS, doors)
         cache[key] = resolved.orEmpty()
         return resolved
     }
+
+    /**
+     * THE FIRST DOOR TO ANSWER WITH SOMETHING, with the rest of them cancelled the
+     * moment one does.
+     *
+     * This is deliberately NOT [IncursionSources.race], which awaits every door in
+     * PREFERENCE order before picking: that is right for a description (the best
+     * written synopsis should win even if a worse one arrived first) and wrong for
+     * a poster, where the member's own words are "whoever gives the first success
+     * wins" — a plate that fills in two seconds beats a better URL that arrives at
+     * twenty.
+     *
+     * The whole race is bounded: a row no door can dress gives up at
+     * [budgetMs] rather than leaving four requests running behind a list.
+     */
+    private suspend fun firstSuccess(
+        budgetMs: Long,
+        doors: List<suspend () -> String?>
+    ): String? = coroutineScope {
+        val answers = Channel<String>(Channel.UNLIMITED)
+        val jobs = doors.map { door ->
+            launch {
+                val got = runCatching { withTimeoutOrNull(DOOR_BUDGET_MS) { door() } }.getOrNull()
+                if (!got.isNullOrBlank()) answers.send(got)
+            }
+        }
+        val winner = withTimeoutOrNull(budgetMs) { answers.receive() }
+        jobs.forEach { it.cancel() }
+        winner
+    }
+
+    /** How long ONE door may take before the race moves on without it. */
+    private const val DOOR_BUDGET_MS = 7_000L
+
+    /**
+     * How long a row waits for ANY door at all. Twelve seconds is about as long as a
+     * plate can sit empty before the member has scrolled past it — and a poster that
+     * arrives after that is a poster nobody is looking at (the app's own rule from
+     * the reveal's cards).
+     */
+    private const val POSTER_BUDGET_MS = 12_000L
 }
 
 /**

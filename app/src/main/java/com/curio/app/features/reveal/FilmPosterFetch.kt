@@ -106,6 +106,26 @@ object FilmPosterFetch {
      * small requests, once, and never again for that title.
      */
     private fun wikipediaPoster(title: String, year: Int?): String? {
+        // ── v430 — THE SHARED DOOR FIRST, WHICH IS TWO REQUESTS AND NOT SIX ──
+        //
+        // The guesses below are a LADDER: up to four article reads, then a
+        // search, then two more reads — seven round trips at 8s each in the worst
+        // case (a title the wiki files under a name none of them guessed), run
+        // one after another inside a door that is itself one leg of a chain. That
+        // is the arithmetic behind the member's report twice over ("the posters
+        // are not loading for films", "movies doesnt even fetch ever only series
+        // does"): a series has TVMaze, which answers one short request, while a
+        // film's keyless door could spend most of a minute guessing.
+        //
+        // [WikipediaSummary] answers the same question in TWO requests — one
+        // search, one summary — and its own bracket rule keeps a film's article
+        // from being answered with the novel or the comic. It is memoised, so the
+        // price is paid once per title for the whole app (the Incursion sheet's
+        // prose uses the same page).
+        WikipediaSummary.leadImage(title, year, WikipediaSummary.Kind.FILM)?.let { return it }
+        // The guesses stay as the backup for whatever that door refuses (a page
+        // with no prose, a disambiguation it declined) — in the order a wiki
+        // actually names them.
         val guesses = ArrayList<String>(5)
         if (year != null) {
             guesses += "$title ($year film)"
@@ -234,13 +254,20 @@ object FilmPosterFetch {
         return wa.any { it in wb }
     }
 
-    /** Minimal keyless GET — 8s timeout, best-effort. */
+    /**
+     * Minimal keyless GET — best-effort.
+     *
+     * v430 — 4s to connect and 5s to answer, where both were 8s. A door in a
+     * chain is a WAIT the member is looking at, and this one is asked up to seven
+     * times in a row (see [wikipediaPoster]): the old pair meant a single slow
+     * read could hold a poster for sixteen seconds.
+     */
     private fun httpGet(urlString: String): String? = runCatching {
         val conn = URL(urlString).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
+            conn.connectTimeout = 4000
+            conn.readTimeout = 5000
             conn.setRequestProperty("User-Agent", USER_AGENT)
             val code = conn.responseCode
             if (code != 200) return null

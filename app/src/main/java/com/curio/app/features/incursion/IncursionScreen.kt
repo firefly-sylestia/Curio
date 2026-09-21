@@ -80,7 +80,10 @@ import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.data.AppPreferences
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * INCURSION — the viewing order, on its own page.
@@ -225,6 +228,35 @@ fun IncursionScreen(navController: NavController) {
      * mean anything.
      */
     val sortedFlat = activeSort != IncursionSort.ORDER
+
+    // ── v430 — THE POSTERS ARRIVE WITHOUT BEING ASKED FOR ─────────────────
+    //
+    // The member: *"movies dont even load and it should load when im only in the
+    // list without opening"*. A plate resolves while its own row is composed (see
+    // [IncursionPosterPlate]), so the covers being asked for were always the ones
+    // ALREADY on screen — a row scrolled to had to start its whole lookup at the
+    // moment it appeared, which is the delay being reported. So the page warms the
+    // first [WARM_ROWS] rows of whatever list is open, as soon as that list
+    // settles: by the time the member scrolls into them the URLs are in hand and
+    // the bytes are in Coil's cache.
+    //
+    // Two deliberate bounds. It asks only while the app's own artwork switch is on
+    // (`AppPreferences.coverFetchEnabledState` — the same gate the plate reads), so
+    // a member with fetching off pays nothing; and it asks a few at a time, so the
+    // rows the member can actually see are never queued behind the ones they
+    // cannot.
+    LaunchedEffect(sections, sortedFlat) {
+        if (!AppPreferences.coverFetchEnabledState) return@LaunchedEffect
+        sections.asSequence()
+            .flatMap { (_, rows) -> rows.asSequence() }
+            .take(WARM_ROWS)
+            .chunked(WARM_BATCH)
+            .forEach { batch ->
+                coroutineScope {
+                    batch.forEach { entry -> launch { IncursionPosters.resolve(entry) } }
+                }
+            }
+    }
 
     // v428 — THE WATCH BUTTON'S ONE DECISION, in one place: a row that is
     // WATCHED goes back to not watched, and anything else becomes watched. Two
@@ -418,6 +450,12 @@ fun IncursionScreen(navController: NavController) {
 }
 
 private data class PendingBulkClear(val keys: List<String>, val name: String)
+
+/** How many rows of the open list are warmed before the member scrolls to them. */
+private const val WARM_ROWS = 24
+
+/** How many of those are asked at once (see the warm-up in `IncursionScreen`). */
+private const val WARM_BATCH = 4
 
 // ── The four destinations ────────────────────────────────────────────────────
 
@@ -2026,7 +2064,26 @@ private fun IncursionDetailSheet(
 
             // ── THE SHOW'S OWN EPISODES (v428) ─────────────────────────────
             if (series) {
-                val list = guide
+                // ── v430 — A ROW THAT IS ONE SEASON SHOWS THAT SEASON ──────
+                //
+                // The member: *"also its not accurately by season"*. A row reads
+                // "Loki S2" — the season is which PART of the show that row is —
+                // and the keyless door (TVMaze) answers with the WHOLE show, so
+                // the sheet opened on season one's episodes under a title that
+                // says S2, with the season the row is actually about three
+                // headings further down. When the row names a season, the guide IS
+                // that season.
+                //
+                // The fallback is deliberate: a show whose guide does not carry
+                // that season at all (a numbering the door disagrees about, or an
+                // announced season with no episodes yet) shows the whole guide
+                // rather than an empty box — "not that season" is a worse lie than
+                // "here is everything".
+                val whole = guide
+                val list = entry.season?.let { want ->
+                    whole?.takeIf { rows -> rows.any { it.season == want } }
+                        ?.filter { it.season == want }
+                } ?: whole
                 Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

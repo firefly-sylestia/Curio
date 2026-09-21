@@ -1235,13 +1235,76 @@ Every endpoint below was **probed live from this environment** before being writ
 - **Nothing pushed** — the member said *"dont push this"*, so this sits as a local commit for CI to
   pick up on the next real push.
 
+## 22. Request — the PDF's pinch, and the Incursion posters that only series could fetch
+
+**The ask (member):** *"the pinc to zoom in vertical pages are no even more weird lso why the zoom is
+based on pages it should be for the hole screen i mean the pin to zoom gesture is working when its
+inside one page, and the gtlich is it weirdly scrolls etc etc also in incursion page the series etc
+movie poster still doesnt load fast, why not fetch uses all services and whover gives the first
+success wins also for movies the posters still not loading or shoing, cant we use the series api the
+one whih the series is using as the 1st, also its not accurately by season, and movies dont even load
+and it should load when im only in the list without opening."*
+
+### What was found
+
+- **The PDF pinch had two faults, and my own v428b fix was one of them.** It was armed per SHEET (so
+  it did nothing in the 16dp air between two sheets), and its anchor was `sheetsAbove = page · h ·
+  zoom`, a value read in the COMPOSITION that armed the gesture — and `pointerInput(key)` does not
+  re-arm when that value changes, so the whole pinch ran with the FIRST frame's number while the file
+  kept growing. The correction fell further behind with every event: the page slid under the fingers
+  and the column scrolled itself. That is the "weirdly scrolls" report, and it is why v428b made it
+  worse rather than better.
+- **Films never loaded because their keyless door was the slowest thing in the app.**
+  `FilmPosterFetch.wikipediaPoster` tried four article names, then a search, then two more reads — up
+  to seven sequential round trips at 8s + 8s each — inside a door that was itself one leg of a
+  SEQUENTIAL chain (TMDB by id → the row's own door → the last net). A series had TVMaze (one short
+  keyless request) and so answered; a film could spend most of a minute guessing. That is exactly
+  "movies doesnt even fetch ever only series does".
+- **The season was not the row's.** A row reads "Loki S2", but the keyless door answers with the WHOLE
+  show, so the sheet opened on season one's episodes under a title that said S2.
+
+### What was built
+
+1. **`documentOffsetAt(state, viewportY)`** (`BookReaderScreen.kt`) — how far down the file a point on
+   screen is, in the document's own pixels at the current zoom, read from the list's `layoutInfo` per
+   event (the sheet under the finger; the nearest one for a point in the air). The padding and the
+   16dp gaps cancel in the difference by construction, which is what a page-shaped term kept getting
+   wrong. `readerZoomDocument` and `readerDoubleTapDocument` take the `LazyListState` now instead of a
+   `sheetsAbove` float, the pinch moved from each sheet's Box to the **column** (one gesture for the
+   whole screen), the double tap answers in the air and on a sheet alike (each says its point in the
+   surface's x/y as the anchor needs), and the sheet's stale `sheetsAbovePx` is gone.
+2. **`IncursionPosters.firstSuccess`** — every door started together, the FIRST answer wins, the rest
+   cancelled; TMDB by id (both kinds), the row's own door, the row's kind's OTHER door, and the last
+   net; bounded at 12s (7s per door).
+3. **A film's keyless door is two requests, not seven** — `FilmPosterFetch.wikipediaPoster` asks the
+   shared `WikipediaSummary` door first (`Kind.FILM`, memoised) and keeps the name guesses only as the
+   backup; every keyless read in the file is 4s/5s instead of 8s/8s.
+4. **The page warms its first 24 rows** (`WARM_ROWS`, 4 at a time, consent-gated) as soon as the open
+   list settles, so a row scrolled to already has its URL.
+5. **A season row shows that season** — `entry.season` scopes the guide when the door carries it, with
+   the whole guide as the fallback rather than an empty box.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on all four touched Kotlin files; no `sheetsAbove` reference remains
+  anywhere; every changed call site (3 zoom call sites, the poster race, the warm-up, the guide) was
+  re-read after its edit.
+- **Nothing pushed** (the member's standing instruction for this batch); CI is still the only compiler
+  available here.
+
+### Still open from §21's research (the member's picks, NOT yet built)
+
+Openverse · Art Institute of Chicago · OpenAlex + Crossref · NASA image library · iNaturalist — all
+probed live and keyless; see the table in §21 for the measurements.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§21 (done, committed locally) — deliberately NOT pushed** on the member's instruction (*"dont
-  push this"*). Its research half (more APIs + app-wide feature suggestions) was delivered as
-  suggestions and needs the member's pick before anything is built.
+- **§21 + §22 (done, committed locally) — deliberately NOT pushed** on the member's instruction
+  (*"dont push this"*). §21's research half was answered by the member: **Openverse, Art Institute of
+  Chicago, OpenAlex + Crossref, NASA image library, iNaturalist** are the doors to wire next — not
+  built yet.
 - (empty slot)

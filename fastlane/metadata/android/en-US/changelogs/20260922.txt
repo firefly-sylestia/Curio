@@ -1,3 +1,8 @@
+FIX:
+- Incursion: a title's poster is fetched from every source at once and the first one to answer wins — it used to try them one after another, so a film's slowest source held the plate while the others went unasked; the page also warms the covers of the rows just below the fold, so they are there when you scroll to them.
+- Incursion: a series' episode guide is the season the row is — an "S2" row opened on season one's episodes, because the keyless source answers with the whole show.
+- Reading: the pinch in a scrolling PDF belongs to the whole screen now — it works anywhere on the page, not only inside a sheet, and it holds the exact point under your fingers instead of drifting and scrolling the file as it grows.
+
 ADD:
 - Writing: a journal's paper can take the colour you gave that day — a switch in the colour sheet beside the colour, kept with the page, so the whole page reads in your colour and the words stay readable on it.
 - Incursion: the list can be ordered — the viewing order, title, year or runtime, each the other way round with one tap, and a list that is not in viewing order leaves its phase headings behind.
