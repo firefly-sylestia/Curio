@@ -998,6 +998,12 @@ private fun ProfileDialogs(
     onDismiss: () -> Unit,
     onSave: () -> Unit
 ) {
+    // ── v439 — A CONTEXT A CLICK CAN HOLD ───────────────────────────────
+    //
+    // `LocalContext.current` is @Composable and the blob door's `onClick` is a
+    // plain lambda (see AGENTS rule 3), so it is read HERE, in the composable's
+    // own scope, and captured. The last build failed on exactly this.
+    val actionContext = LocalContext.current
     if (showEditDialog) {
         AlertDialog(
             // The profile's own editor wears the PAGE's surface with the brand
@@ -1129,12 +1135,12 @@ private fun ProfileDialogs(
                                             "Use my blob"
                                         },
                                         onClick = {
-                                            // `LocalContext.current` rather than a bare
-                                            // `context`: this dialog composable takes no
-                                            // context parameter, and the name resolves
-                                            // to a function in this file's scope.
+                                            // The captured context: this dialog
+                                            // composable takes no context parameter,
+                                            // and the name `context` resolves to a
+                                            // function in this file's scope.
                                             AppPreferences.setProfileAvatarBlob(
-                                                LocalContext.current,
+                                                actionContext,
                                                 !AppPreferences.profileAvatarBlobState
                                             )
                                         }

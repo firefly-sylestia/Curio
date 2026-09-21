@@ -500,6 +500,23 @@ internal fun PersonalVoiceRecorderCapsule(
 }
 
 /**
+ * The floor the live mic's reference can fall to (see [LiveVoiceWave]).
+ *
+ * About the level of a quiet room, so a silent strip is drawn as silence instead
+ * of being amplified into a picture of speech.
+ */
+private const val MIN_MIC_REF = 0.05f
+
+/**
+ * How much of the live reference survives each 70ms tick (see [LiveVoiceWave]).
+ *
+ * Slow enough that a pause mid-sentence does not shrink the strip under the
+ * words that follow it, fast enough that a member who drops to a whisper is met
+ * at their new loudness within a couple of seconds.
+ */
+private const val MIC_REF_DECAY = 0.995f
+
+/**
  * v421 — THE LIVE METER, DRAWN LIKE THE NOTE IT IS MAKING.
  *
  * The same rolling history the old bar meter kept (one entry per 70ms, eased
@@ -518,10 +535,33 @@ internal fun LiveVoiceWave(
 ) {
     val levelState by rememberUpdatedState(level)
     val history = remember(barCount) { FloatArray(barCount) { 0.06f } }
+    // ── v439 — THE METER IS READ AGAINST THE SPEAKER, NOT FULL SCALE ───────
+    //
+    // The mic's own level is `maxAmplitude / 32767`, and 32767 is the loudest a
+    // 16-bit sample can be — a number a voice in a room never approaches. Rough
+    // speech peaks land near a tenth of it, so the meter sat at the bottom of its
+    // travel and read as a nearly flat line while the member was talking (the
+    // same fault, and the same fix, as the stored waveform's — see
+    // [WaveformExtractor]): the level is now read against a REFERENCE that
+    // follows the loudest thing the member has said so far and decays slowly, so
+    // the strip fills when they speak at their own loudness and still shows the
+    // shape of how they said it.
+    //
+    // The reference has a floor ([MIN_MIC_REF]) so a recording of a quiet room is
+    // not amplified into a picture of speech — an honest meter shows an honest
+    // room.
+    val reference = remember { floatArrayOf(MIN_MIC_REF) }
     var tick by remember { mutableIntStateOf(0) }
     LaunchedEffect(active, barCount) {
         while (true) {
-            val target = if (active) levelState.coerceIn(0f, 1f) else 0.06f
+            val raw = if (active) levelState.coerceIn(0f, 1f) else 0f
+            // The loudest recent moment wins, then lets go a little each tick: a
+            // speaker who leans in fills the strip, and one who drifts off does
+            // not keep it pinned.
+            reference[0] = maxOf(raw, reference[0] * MIC_REF_DECAY)
+                .coerceAtLeast(MIN_MIC_REF)
+            val target =
+                if (active) (raw / reference[0]).coerceIn(0f, 1f) else 0.06f
             if (barCount > 0) {
                 for (i in 0 until barCount - 1) history[i] = history[i + 1]
                 val front = history[barCount - 1]
@@ -1008,22 +1048,34 @@ internal enum class PersonalVoiceStyle(val key: String, val label: String, val h
 }
 
 /**
- * v424 — HOW FAR THE INK REACHES FOR A LEVEL, and the whole difference between a
+ * HOW FAR THE INK REACHES FOR A LEVEL — and the whole difference between a
  * whisper and a shout.
  *
- * Every wave used to read its samples nearly STRAIGHT (a share of the band, with
- * a floor of about an eighth), so a quiet passage and a loud one looked much the
- * same — which is what "when there is not much sound in wave the wave isnt subtle
- * so its not clear differnt" is (member). The reach is the SQUARE of the level
- * now: a whisper is a tenth of the room it used to take, a shout is all of it, and
- * [VOICE_FLOOR] keeps a silence reading as a line rather than as a gap in the
- * drawing.
+ * ── v424 PUT THE SQUARE HERE, AND v439 TOOK IT BACK OUT ─────────────────────
+ *
+ * v424's square was right for the data it had. It was compensating for a real
+ * fault one layer down: the stored levels were normalized against 16-bit FULL
+ * SCALE, so normal speech sat at 0.05–0.35 and the squaring collapsed it to
+ * nearly nothing. With the floor on top, a quiet passage and a loud one did look
+ * the same — and the square was the only thing that separated them again.
+ *
+ * **That fault is fixed at the source now** (see [WaveformExtractor]: every bar
+ * is relative to the recording's own loudest moment, and it is a peak+RMS
+ * envelope rather than a bare peak), so the curve does not have to compress
+ * twice. The reach is the LEVEL itself, which is the honest reading of a
+ * waveform: **the height IS the amplitude.** A shout takes the whole band, a
+ * normal sentence takes half of it, a whisper a tenth. [VOICE_FLOOR] keeps a
+ * silence reading as a line rather than as a gap in the drawing.
+ *
+ * If a member ever says the wave is too subtle again, reach for the extractor's
+ * normalization — not for another exponent here. A curve on top of un-normalized
+ * data is what produced two rounds of "not clear differnt".
  */
 private const val VOICE_FLOOR = 0.08f
 
 private fun voiceReach(level: Float, bandHalf: Float): Float {
     val loud = level.coerceIn(0f, 1f)
-    return bandHalf * (VOICE_FLOOR + (1f - VOICE_FLOOR) * loud * loud)
+    return bandHalf * (VOICE_FLOOR + (1f - VOICE_FLOOR) * loud)
 }
 
 /**
