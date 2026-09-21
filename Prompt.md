@@ -345,6 +345,22 @@ prompt stays below it.)*
   upstream, picker removed, all call sites migrated); the reader's search/back/title pill too
   close to the status bar (own top floor); separate search as a circle pill that merges into
   the header when opened (done). The journal dock is the member's next step, not this one.
+- **§33 — the voice note's wave, and the failed CL (DONE, v439).** The member: *"make the
+  wave and bar of the sound in vn more accurate depiction also fix the failed cl"*.
+  **The CL:** the red run was `feat(profile,reading)` — two errors — then the one before it,
+  a third: `LocalContext.current` (which is @Composable) read inside the blob door's plain
+  `onClick`, plus `positionChanged()` unresolved in the reader (needs an import there) and
+  `context` resolving to a function inside `ProfileDialogs`. All three fixed and pushed
+  (`c3418e83`, `6194f2c6`). **Note for next time: the 6ff62b80 run proved the copy box,
+  the gesture wear-in and the empty state all COMPILED — only that one line was wrong.**
+  **The wave:** the inaccuracy was two layers deep — every bar normalized against 16-bit
+  FULL SCALE and then squared (a real sentence drew at ~4% of the band), and `bucketLevels`
+  dropping the tail of every drawing (42 columns from 72 samples = 36 real + six stale
+  repeats). Both fixed at the source, plus `sqrt(peak·rms)` per bar, a linear reach, the
+  live meter read against a decaying reference, the BEADS radius un-squared, and the
+  decode loop's `MutableList<Short>` (sixteen million boxed samples per 3-minute note)
+  replaced with a primitive sink. **Storage is unchanged: one hex byte a bar, no migration,
+  no SQL.** See the v439 section in `app/AGENTS.md`.
 - **§26 — the reader chrome pass (done).** Sheet scroll + swipe-close from anywhere; appearance
   as capsule/segmented controls with text size AND a PDF's zoom; the ⋯ menu as a six-capsule
   grid (Share / Gestures / Settings); the Gestures editor's eye, on-demand depth and
