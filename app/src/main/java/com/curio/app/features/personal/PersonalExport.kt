@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.ColorUtils
 import com.curio.app.R
 import com.curio.app.data.PersonalAlign
 import com.curio.app.data.PersonalAudioBars
@@ -212,24 +213,38 @@ private const val PDF_PAGE_HEIGHT = 1754
 private const val PDF_MARGIN = 110f
 
 /**
- * HOW MUCH OF THE SHEET ONE OF THE CANVAS' `sp` BECOMES (v427).
+ * THE JOURNAL COLUMN THE SHEET IS A FACSIMILE OF (v427).
+ *
+ * The read view's own page: a 360dp phone (`JournalReadView`), less the 22dp
+ * gutter it keeps down each side.
+ */
+private const val PDF_PAGE_MEASURE_DP = 316f
+
+/**
+ * HOW MUCH OF THE SHEET ONE OF THE CANVAS' `sp` — OR `dp` — BECOMES (v427).
  *
  * Every size in this file is a size the CANVAS sets its page in — the body, a
  * heading, a small line, a quoted line, a print's label — multiplied by this one
- * number, and every leading is the canvas' own line height for that size. The
- * number is the only thing the sheet decides for itself, because how much paper
- * a word deserves is a question about PAPER: the journal is read in a phone-wide
- * column (~40 characters a line), and a sheet that copied that measure would
- * arrive on A4 as large print. At this scale the page's own 16sp body becomes 30
- * units — a printable ~68 characters a line — while everything the member
- * actually sees (the balance between a heading and its prose, the air between two
- * lines, a quotation a shade smaller than the words around it) is the page's own.
+ * number, every leading is the canvas' own line height for that size, and every
+ * space (the air between two rows) is the canvas' own dp.
  *
- * If the sheet should instead MIMIC the column exactly, this is the one number to
- * change: the phone's page measures ~316dp against the sheet's 1020 units, so
- * about 3.2.
+ * AND THE NUMBER IS THE PAGE'S OWN MEASURE: the sheet's text column IS the
+ * journal's column, one canvas dp to one sheet unit ([PDF_PAGE_MEASURE_DP]), so a
+ * line on paper breaks where the same line breaks on screen, at the same size
+ * against the column, and an entry takes as many sheets as its words need. That
+ * is the member's own decision (asked and answered: "make the PDF a facsimile of
+ * the journal column — same measure, bigger type, more pages"), and it is the
+ * whole of the sheet's type scale — the sheet keeps only what is about PAPER: its
+ * A4 edges, the margin around the column, the foot that names and numbers the
+ * sheet, and how tall a picture may be.
+ *
+ * So the measure above is the one number that decides what the export IS. If the
+ * sheet should read as a PRINTED PAGE instead of as the page — a 30-unit body,
+ * ~68 characters a line, about half the sheets — that is the same column answer
+ * for a 544dp page.
  */
-private const val PDF_UNITS_PER_SP = 1.875f
+private val PDF_UNITS_PER_SP =
+    (PDF_PAGE_WIDTH - 2 * PDF_MARGIN) / PDF_PAGE_MEASURE_DP
 
 /** One of the canvas' sizes, in the sheet's own units. */
 private fun pdfPx(sp: TextUnit): Float = sp.value * PDF_UNITS_PER_SP
@@ -427,6 +442,7 @@ internal fun writePersonalPdf(
                     ink = ink,
                     accent = accent,
                     fonts = fonts,
+                    paper = paper,
                     highlightInk = highlightInk
                 ),
                 gap = gap
@@ -452,6 +468,8 @@ private fun exportLayout(
     ink: Int,
     accent: Int,
     fonts: PdfFonts,
+    /** The page's own colour — what a tick inside a ticked box is drawn in. */
+    paper: Int,
     highlightInk: (String) -> Int
 ): StaticLayout {
     val titled = block.runs.any { it.title }
@@ -518,7 +536,13 @@ private fun exportLayout(
         ?: block.runs.firstOrNull { it.quote }?.let { ExportMarker.RULE }
     if (marker != null) {
         text.setSpan(
-            ExportMarkerSpan(kind = marker, checked = block.checked, ink = ink, accent = accent),
+            ExportMarkerSpan(
+                kind = marker,
+                checked = block.checked,
+                ink = ink,
+                accent = accent,
+                paper = paper
+            ),
             0,
             text.length,
             0
@@ -888,24 +912,46 @@ private class ExportMarkerSpan(
     private val kind: ExportMarker,
     private val checked: Boolean,
     ink: Int,
-    accent: Int
+    accent: Int,
+    /** The page's own colour — what a tick is drawn in inside a ticked box. */
+    paper: Int
 ) : LeadingMarginSpan {
+    /**
+     * THE MARK IS THE PAGE'S MARK (v427).
+     *
+     * A list line's box and its bullet are the canvas' own width
+     * ([PERSONAL_MARKER_SIZE]) at the sheet's measure, the lead-in its words wrap
+     * to is the canvas' own ([PERSONAL_MARKER_LEAD]), and the strokes inside are
+     * the canvas' own ratios (`drawPersonalCheckbox`: a 0.085 outline and a 0.135
+     * tick; `drawPersonalMarker`: a 0.17 dot). The sheet used to take the box
+     * from the LINE instead (0.46 of the first line's height, which made its box
+     * a different shape from the page's) and draw it with a hairline that no
+     * longer matched once the type was the page's.
+     */
+    private val mark = PERSONAL_MARKER_SIZE.value * PDF_UNITS_PER_SP
+    /** A waiting box's outline is SOFT ink on the page, not full ink. */
     private val inkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ink
+        color = ColorUtils.setAlphaComponent(ink, 107)
         style = Paint.Style.STROKE
-        strokeWidth = 2.4f
+        strokeWidth = mark * 0.085f
         strokeCap = Paint.Cap.ROUND
     }
     private val accentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = accent }
     private val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = accent
+        color = paper
         style = Paint.Style.STROKE
-        strokeWidth = 2.8f
+        strokeWidth = mark * 0.135f
         strokeCap = Paint.Cap.ROUND
     }
 
-    override fun getLeadingMargin(first: Boolean): Int =
-        if (kind == ExportMarker.RULE) 34 else 56
+    /** The quote's own frame, where the rule stands and how wide it is. */
+    private val quoteLead = QUOTE_LEAD.value * PDF_UNITS_PER_SP
+    private val quoteRuleWidth = QUOTE_RULE_WIDTH.value * PDF_UNITS_PER_SP
+
+    override fun getLeadingMargin(first: Boolean): Int = (
+        if (kind == ExportMarker.RULE) quoteLead
+        else (PERSONAL_MARKER_SIZE.value + PERSONAL_MARKER_GAP.value) * PDF_UNITS_PER_SP
+        ).toInt()
 
     override fun drawLeadingMargin(
         canvas: Canvas,
@@ -923,31 +969,49 @@ private class ExportMarkerSpan(
     ) {
         if (!first) return
         if (kind == ExportMarker.RULE) {
-            canvas.drawRect(x.toFloat(), top.toFloat(), x + 5f, bottom.toFloat(), accentPaint)
+            canvas.drawRect(
+                x.toFloat(),
+                top.toFloat(),
+                x + quoteRuleWidth,
+                bottom.toFloat(),
+                accentPaint
+            )
             return
         }
-        val size = (baseline - top) * 0.46f
+        val size = mark
         val left = x.toFloat()
-        val centre = (top + baseline) / 2f
+        // Centred on the LINE, as the page centres it (see drawPersonalMarker).
+        val centre = (top + bottom) / 2f
         when (kind) {
-            ExportMarker.DOT -> canvas.drawCircle(left + size / 2f, centre, size * 0.34f, accentPaint)
+            ExportMarker.DOT -> canvas.drawCircle(left + size / 2f, centre, size * 0.17f, accentPaint)
 
+            // A CHECKED BOX IS A FILL OF THE PAGE'S ACCENT WITH A PAPER TICK, and
+            // a waiting one a soft outline — the page's own two states (see
+            // drawPersonalCheckbox), where the sheet drew both as an outline.
             ExportMarker.BOX -> {
                 val boxTop = centre - size / 2f
-                canvas.drawRoundRect(
-                    RectF(left, boxTop, left + size, boxTop + size),
-                    size * 0.26f,
-                    size * 0.26f,
-                    inkPaint
-                )
+                val corner = size * 0.30f
                 if (checked) {
+                    canvas.drawRoundRect(
+                        RectF(left, boxTop, left + size, boxTop + size),
+                        corner,
+                        corner,
+                        accentPaint
+                    )
                     canvas.drawPath(
                         Path().apply {
-                            moveTo(left + size * 0.22f, boxTop + size * 0.54f)
-                            lineTo(left + size * 0.43f, boxTop + size * 0.75f)
-                            lineTo(left + size * 0.79f, boxTop + size * 0.27f)
+                            moveTo(left + size * 0.24f, boxTop + size * 0.53f)
+                            lineTo(left + size * 0.42f, boxTop + size * 0.70f)
+                            lineTo(left + size * 0.77f, boxTop + size * 0.30f)
                         },
                         tickPaint
+                    )
+                } else {
+                    canvas.drawRoundRect(
+                        RectF(left, boxTop, left + size, boxTop + size),
+                        corner,
+                        corner,
+                        inkPaint
                     )
                 }
             }

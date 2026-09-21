@@ -231,6 +231,18 @@ internal val CAPTION_VIEW_SIZE = 13.sp
 internal val VIEW_ROW_GAP = 8.dp
 
 /**
+ * THE QUOTE'S OWN FRAME — the rule down its side, and how far past the rule the
+ * quoted words begin (the panel the editor draws and the panel the read view
+ * draws are ONE drawing, and they ask for both numbers here).
+ *
+ * They are named for a third reader: the PDF export draws the same quote as a
+ * leading margin, and at the sheet's measure a title-small indent would have
+ * been a quotation pressed against its own rule.
+ */
+internal val QUOTE_RULE_WIDTH = 3.dp
+internal val QUOTE_LEAD = 13.dp
+
+/**
  * THE QUOTE'S OWN COLOUR — COFFEE, never the app's accent (user decision: a
  * quotation has to read as ink on paper, and an accent-tinted quote looked
  * like a highlight someone forgot to finish). The dark theme takes the milky
@@ -3757,7 +3769,7 @@ private fun PersonalTextBlock(
                 when {
                     isQuote -> Modifier
                         .drawBehind {
-                            val barWidth = 3.dp.toPx()
+                            val barWidth = QUOTE_RULE_WIDTH.toPx()
                             val join = QUOTE_JOIN_EDITOR.toPx()
                             val top = if (quoteJoinAbove) -join else 0f
                             val bottom = if (quoteJoinBelow) join else 0f
@@ -3775,7 +3787,7 @@ private fun PersonalTextBlock(
                                 cornerRadius = CornerRadius(barWidth / 2f)
                             )
                         }
-                        .padding(start = 13.dp)
+                        .padding(start = QUOTE_LEAD)
                     // v389 — both list styles draw through the ONE shared
                     // renderer (see drawPersonalCheckbox / drawPersonalMarker)
                     // and indent by the same lead, so the editor and the
@@ -4694,7 +4706,7 @@ internal fun PersonalDocView(
                         when {
                             isQuote -> Modifier
                                 .drawBehind {
-                                    val barWidth = 3.dp.toPx()
+                                    val barWidth = QUOTE_RULE_WIDTH.toPx()
                                     val join = QUOTE_JOIN_VIEW.toPx()
                                     val top = if (quoteAbove) -join else 0f
                                     val bottom = if (quoteBelow) join else 0f
@@ -4712,7 +4724,7 @@ internal fun PersonalDocView(
                                         cornerRadius = CornerRadius(barWidth / 2f)
                                     )
                                 }
-                                .padding(start = 13.dp)
+                                .padding(start = QUOTE_LEAD)
                             isCheckbox -> Modifier
                                 .drawBehind {
                                     drawPersonalCheckbox(

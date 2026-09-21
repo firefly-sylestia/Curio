@@ -404,6 +404,10 @@ Asked via `ask_user`:
 > Line the PDF's type up with the journal view as well — body size, leading and the caption
 > face taken from the canvas instead of the export's own numbers
 
+Then, asked and answered: **make the PDF a facsimile of the journal column** — same measure,
+bigger type, more pages. So the sheet's scale is the page's own measure (see below), not the
+printable one it shipped with.
+
 ### Findings
 
 - **The export carried its own type table.** `PersonalExport.kt` had `PDF_BODY_SIZE = 30f`,
@@ -425,11 +429,22 @@ Asked via `ask_user`:
   `QUOTE_VIEW_SIZE`, `CAPTION_VIEW_SIZE`, `VIEW_ROW_GAP` (internal, so the writer, the
   reader and the exporter all read the same numbers), and the canvas' own two surfaces now
   take them instead of their literals — so the table IS the source, not a copy of it.
-- **`PersonalExport.kt` — the sheet's answer is one number.** `PDF_UNITS_PER_SP` (how much
-  of the sheet one canvas `sp` becomes; 16sp × 1.875 = the sheet's 30 units, a printable
-  ~68 characters a line — the sheet's own measure, the only decision it keeps) with every
+- **`PersonalExport.kt` — the sheet IS the column.** The scale is derived, not chosen:
+  `PDF_UNITS_PER_SP = (PDF_PAGE_WIDTH − 2 × PDF_MARGIN) / PDF_PAGE_MEASURE_DP`, where
+  `PDF_PAGE_MEASURE_DP = 316f` is the journal's own column (a 360dp phone, less
+  `JournalReadView`'s 22dp gutters) — **one canvas dp to one sheet unit (×3.228)**. Every
   size, every leading ratio (`BODY_VIEW_LINE / BODY_VIEW_SIZE` and the title's and the
-  small line's own) and the paragraph gap (`VIEW_ROW_GAP`) taken from the canvas.
+  small line's own) and the paragraph gap (`VIEW_ROW_GAP`) comes from the canvas through
+  that one number; the sheet keeps only what is about PAPER (its A4 edges, the margin, the
+  foot, a picture's height cap).
+- **The marks are the page's marks too.** A list line's box is `PERSONAL_MARKER_SIZE`
+  (18dp) and its lead-in `PERSONAL_MARKER_LEAD` (28dp) at the sheet's measure instead of
+  0.46 of the first LINE's height with a fixed 56-unit margin, the strokes are the canvas'
+  own ratios (outline 0.085, tick 0.135, dot 0.17), a CHECKED box is the accent fill with a
+  **paper** tick and a waiting one a 42% ink outline (`drawPersonalCheckbox`'s two states),
+  the mark is centred on the LINE as the page centres it, and the quote's rule takes the
+  canvas' `QUOTE_RULE_WIDTH` (3dp) and `QUOTE_LEAD` (13dp) — both newly named in the
+  canvas so its two quote panels and the sheet ask for one number.
 - **A quoted phrase is the page's quotation now.** Every quoted run is set at
   `QUOTE_VIEW_SIZE` (15sp) inside the block's own line, which is how the page sets it — a
   line that is a quotation throughout comes out as one, and a line with a quoted phrase in
@@ -448,10 +463,13 @@ Asked via `ask_user`:
 - Brace/paren/bracket balance 0/0/0 on both touched files; every new constant checked for a
   live call site (none left dangling) and every helper the export calls checked for its
   import (`TextUtils`, `TextUnit` added).
-- Which sizes and which leadings the export now uses: body 30 units on 1.6875 (was 30 on
-  1.42), title 41.25 on 1.409 (was 43.5 on 1.42), small 23.4 on 1.68 (was 25.2 on 1.42),
-  quote 28.1 on 1.6875, gap 15 units (was 21.6) — i.e. the same page density with the
-  page's own rhythm.
+- What the sheet now sets, in its own units (scale 3.2278): body **51.6** on 1.6875 (was
+  30 on 1.42), title 71 on 1.409, small 40.3 on 1.68, a quoted run 48.4 inside its line,
+  the air between rows 25.8, a marker box 58.1 with a 90.4 lead-in, a label 42 (its stamp
+  31.9). A line pitch of 87 units means ~17 lines a sheet — the "more pages" asked for,
+  and on A4 the body prints at ~24.8pt (the old scale printed ~14.4pt). The old printable
+  scale was the same constant at 1.875 (a 544dp measure), so the whole choice is one
+  number.
 - No Gradle in this environment — CI compiles it (per `AGENTS.md`).
 
 ### Noted, not changed
