@@ -87,6 +87,7 @@ import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.delay
@@ -1640,7 +1641,7 @@ composable(CurioRoutes.COMMUNITY) {
                             CurioIcon(
                                 name = if (activeSession.paused) CurioIcons.Pause else CurioIcons.Timer,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = curioAccentInk(),
                                 size = 18.dp
                             )
                             Text(

@@ -564,3 +564,8 @@ FIX:
 FIX:
 - Books: the reading-progress divisions follow the chapter count you set — a book with no file, or one whose contents carry names but no page ranges, now shows a division per chapter, adding or removing a chapter adds or takes one away, and the divisions settle into their new places instead of the bar flickering.
 - Journal: Select all shows its tools — with the whole page selected the tool bar now lights what that page carries, whichever door it came through (the gesture, Android's own Select all, or Ctrl+A).
+
+FIX:
+- Appearance: a Settings page is the same card as Profile at night — the card every Settings sub-page draws its rows on asked for a higher, brighter step of the theme's card ladder than the Profile card, which was close enough to pass on the app's own greys and nearly twice as bright under a theme whose ladder carries colour, so those pages read as a lit panel beside Profile's quiet one; both families are one fill now.
+- Appearance: the named themes' glyphs read in the dark — a named theme's hero fill sits in `primary` and a dark tone in `tertiary`, so every icon and mint label that asked those roles as INK came out nearly black on the theme's own dark page (the drawer, Stats, topic history, the reveal, a share card's toggles, the Cabinet's empty states); ink asks the theme's own accent tones now.
+- Journals: a quotation, a link and the day's feeling read at night — a quoted passage and a URL were painted in the light coffee whenever the theme was dark, and the darker mood inks sat at about 2.3:1 on the journal's dark paper; each has its night tone now.

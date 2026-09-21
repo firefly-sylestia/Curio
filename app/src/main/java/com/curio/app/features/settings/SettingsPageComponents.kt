@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.components.curioPressClickable
+import com.curio.app.ui.components.curioSettingsCardFill
 import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -138,8 +139,20 @@ fun SettingsOptionInfoRow(
 }
 
 /** A soft glass option card for the settings sub-pages — the hub's
- *  secondary-card surface (frosted white / raised dark), rounded 20. Rows
- *  sit inside it, separated by the shared settings divider. */
+ *  secondary-card surface (frosted white / quiet dark glass), rounded 20. Rows
+ *  sit inside it, separated by the shared settings divider.
+ *
+ *  v426 — THE DARK PLATE IS THE PROFILE CARD'S PLATE. It used to ask for
+ *  [androidx.compose.material3.ColorScheme.surfaceContainerHigh] in dark mode
+ *  (the "pill inside a card" rung) while Profile's own card asked for the
+ *  scheme's card rung plus a whisper of the hero accent. On the app's own
+ *  neutral greys the two were close enough to pass, but a theme whose ladder
+ *  carries colour made the difference loud: with a named theme at night this
+ *  plate measured L 0.225 against Profile's 0.158 — 1.94x the luminance, so
+ *  every Settings sub-page read as a bright panel beside Profile's quiet one
+ *  (member: "in profile ... background is good, but inside the settings the
+ *  appearance and its sub pages background is still bad ... in dark mode").
+ *  Both families answer [curioSettingsCardFill] now, in every theme. */
 @Composable
 fun SettingsOptionCard(
     modifier: Modifier = Modifier,
@@ -147,7 +160,7 @@ fun SettingsOptionCard(
 ) {
     val dark = isCurioDarkTheme()
     val cardFill =
-        if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+        if (dark) curioSettingsCardFill()
         else MaterialTheme.colorScheme.surfaceContainerLow
     Column(
         modifier = modifier

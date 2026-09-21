@@ -124,6 +124,7 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
 import com.curio.app.ui.theme.BungeeFontFamily
 import com.curio.app.ui.theme.ChangaOneFontFamily
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.GeomFontFamily
@@ -1555,7 +1556,7 @@ private fun AutoLayoutPill(onTap: () -> Unit, modifier: Modifier = Modifier) {
                 name = "auto_awesome",
                 contentDescription = "Auto layout — tap to fit the card, tap again for another arrangement",
                 size = 18.dp,
-                tint = MaterialTheme.colorScheme.primary
+                tint = curioAccentInk()
             )
         }
     }
@@ -11464,13 +11465,13 @@ fun TopicShareSheet(
                                                 // v3xx — drag_handle (three stacked lines) = LIST, grid_view = ROWS: the old
                                                 // raw view_agenda/view_module strings aren't in the bundled icon subset, so they
                                                 // rendered as literal text ("view_agenda") next to the label.
-                                                CurioIcon(name = CurioIcons.DragHandle, tint = if (!favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                                                CurioIcon(name = CurioIcons.DragHandle, tint = if (!favRows) curioAccentInk() else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
                                                 Text("List", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (!favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
                                         Surface(onClick = { AppPreferences.setAlbumFavRows(context, true) }, shape = RoundedCornerShape(50), color = if (favRows) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(32.dp)) {
                                             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                                CurioIcon(name = CurioIcons.GridView, tint = if (favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                                                CurioIcon(name = CurioIcons.GridView, tint = if (favRows) curioAccentInk() else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
                                                 Text("Rows", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
@@ -11832,7 +11833,7 @@ fun TopicShareSheet(
                                     if (isBookTopic) {
                                         Surface(onClick = { coverPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
                                             Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                                CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                                CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (bookCover != null) curioAccentInk() else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                                 Text(if (bookCover != null) "Change" else "Gallery", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
@@ -11888,7 +11889,7 @@ fun TopicShareSheet(
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
                                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) curioAccentInk() else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                             Text(if (userPhoto != null) "Change" else "Photo", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                         }
                                     }
@@ -12234,7 +12235,7 @@ fun TopicShareSheet(
                                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                                         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 10.dp, vertical = 8.dp)
                                     ) {
-                                        CurioIcon(name = "link", tint = MaterialTheme.colorScheme.primary, size = 14.dp)
+                                        CurioIcon(name = "link", tint = curioAccentInk(), size = 14.dp)
                                         Text(
                                             linkUrl,
                                             style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),

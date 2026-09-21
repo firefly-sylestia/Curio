@@ -9243,6 +9243,58 @@ rather than for the ink it has to carry.
   places the member named (Home's stat figures and their glyphs, Profile's stat
   pane) sit on exactly those steps.
 
+### v426 — ONE card plate for Profile + Settings, and the named themes' ink
+
+Two faults that only showed under a named theme, because both are cases where a
+scheme role means something different there than in the app's own schemes.
+
+- **THE SETTINGS OPTION CARD WEARS THE PROFILE CARD'S PLATE.**
+  `SettingsOptionCard` (`SettingsPageComponents.kt`) asked for
+  `surfaceContainerHigh` in dark mode — the "pill inside a card" rung — while
+  `CurioSettingsCard` asked for the scheme's card rung carrying a whisper of the
+  hero accent. On the app's own neutral greys the two were close enough to pass;
+  under a named theme at night the option card measured **L 0.225 against
+  Profile's 0.158 — 1.94x the luminance** (and 2.0–2.9x the same card in the
+  app's own dark scheme), so every Settings sub-page read as a lit panel beside
+  Profile's quiet glass (member: "in profile the xp progress settings etc
+  background is good, but inside the settings the appearance and its sub pages
+  background is still bad … fix it please in dark mode"). Both families answer
+  **`curioSettingsCardFill()`** (`ui/components/CurioSettingsCard.kt`) now — one
+  value, so the two screens cannot drift apart again. If a settings surface looks
+  too bright or too flat at night, the dial is that function, not the call site.
+- **`primary` AND `tertiary` ARE FILLS IN A NAMED SCHEME, NOT INKS.** The app's
+  own dark scheme puts the BRIGHT coral in `primary` and the bright mint
+  everywhere in `tertiary`, so `tint = MaterialTheme.colorScheme.primary` reads
+  in both modes there. A named theme puts its **deep hero fill** in `primary`
+  (L 0.30 — deliberately, see the v421/v425 notes) and a dark tone in
+  `tertiary`, so every glyph, label and glyph-tint that asked those roles as INK
+  landed at ~1.6–1.9:1 on the theme's own dark page — the member's "in dark mode
+  in many themes the text visibility is bad … the texts have black or dark
+  color". Ink now asks **`curioAccentInk()`** / **`curioTertiaryInk()`**
+  (`CurioTheme.kt`), which hand back `primary`/`tertiary` untouched for every
+  non-named theme (so nothing outside the five moved) and the named theme's own
+  `accentFor` / `onTertiaryContainer` under a named one. A FILL still keeps
+  `primary` — the hero, a bar, a selected pill want the deep tone.
+- **THE JOURNAL'S COFFEE HAD NO NIGHT TWIN.** `personalQuoteColor()` promised
+  "the milky coffee twin" in its own doc and returned the light coffee
+  unconditionally, and `personalAnnotateLinks` hard-coded the deep coffee
+  (`#5C3A20`, ~1.6:1 on the journal's dark paper) for every URL — the journal's
+  half of "the texts have black or dark color". The quote takes `#C09263` at
+  night, the link ink is passed IN (it runs outside composition — the caller
+  resolves `personalQuoteDeepColor()`), and `personalMoodInk` is `@Composable`
+  with a night floor of L 0.62 so Heavy's slate and Tired's mauve stop sitting at
+  ~2.3:1. The journal's paper is `#17130F`, so this is the one screen where those
+  inks live.
+- **STILL OPEN (deliberately not swept).** These are LISTED, not fixed — each
+  needs a judgement call, and none of them is a one-line role swap:
+  `color = MaterialTheme.colorScheme.primary` appears in 71 places and is a
+  MIXTURE of fills and ink (PetDesignerScreen's 26 are its own playground palette
+  on purpose — leave them); `secondary` is asked as a selected-state ink/fill in
+  `ShareHubScreen` (408/551/565) and `TopicShareCard` (12695/12710) — the right
+  answer there is the design question "what does selected mean on a named
+  theme", not a role swap; and the 12 `outlineVariant`-as-ink hits are mostly
+  borders and dividers, which is correct usage.
+
 ### The Pantone tone ladder (v413) — RETIRED in v414, history only
 
 - **RETIRED.** `PantoneThemes.kt` no longer exists, so nothing below is live

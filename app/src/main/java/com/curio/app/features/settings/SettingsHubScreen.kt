@@ -119,6 +119,7 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.activeNamedTheme
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CurioIcons
@@ -2122,7 +2123,7 @@ private fun SettingsQuickTools(
                     CurioIcon(
                         name = tool.icon,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = curioAccentInk(),
                         size = 13.dp
                     )
                     Text(

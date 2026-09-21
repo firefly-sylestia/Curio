@@ -73,6 +73,7 @@ import com.curio.app.ui.components.laneGridItems
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -661,7 +662,9 @@ private fun StatsDoorChip(
     onClick: () -> Unit,
     accent: Color? = null
 ) {
-    val tint = accent ?: MaterialTheme.colorScheme.primary
+    // v426 — the accent as INK, not as fill: a named theme's `primary` is its
+    // deep hero tone and vanished on its own dark page (see [curioAccentInk]).
+    val tint = accent ?: curioAccentInk()
     val base = MaterialTheme.colorScheme.surfaceContainerHighest
     // v411 — the chip is SOLID (the accent mixed into the surface) and wears
     // NO card border.

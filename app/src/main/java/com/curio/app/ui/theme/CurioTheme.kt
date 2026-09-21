@@ -359,6 +359,51 @@ fun curioRoseInk(): Color {
 }
 
 /**
+ * v426 — THE SCHEME'S ACCENT, AS INK.
+ *
+ * `MaterialTheme.colorScheme.primary` means two DIFFERENT things in this app,
+ * and only one of them is safe to write text or draw a glyph with:
+ *
+ *  · In the app's own schemes `primary` IS an accent INK — the bright dark-mode
+ *    coral (CoralBlush) and the rose by day — so a `tint = primary` icon reads
+ *    in both modes.
+ *  · **In a named theme `primary` is the HERO FILL** (`heroFor`, and at night a
+ *    deep jewel at L 0.30 — deliberately, see the v425 note in NamedThemes).
+ *    Drawn as ink on the theme's own dark page that lands at ~1.6:1: the glyph
+ *    or label is there, but it is nearly black on near-black — the member's
+ *    "in dark mode in many themes the text visibility is bad … the texts have
+ *    black or dark color".
+ *
+ * So: a FILL keeps `MaterialTheme.colorScheme.primary` (that is what a hero,
+ * a bar, a selected pill wants), and INK asks this. Every theme that is not a
+ * named one gets `primary` back untouched — the named themes answer with their
+ * own [CurioNamedTheme.accentFor], the same lifted tone the rest of their ink
+ * already uses.
+ */
+@Composable
+fun curioAccentInk(): Color {
+    activeNamedTheme()?.let { return it.accentFor(isCurioDarkTheme()) }
+    return MaterialTheme.colorScheme.primary
+}
+
+/**
+ * v426 — THE SCHEME'S THIRD ACCENT, AS INK (the mint twin of [curioAccentInk]).
+ *
+ * The app's own schemes pair `tertiary` with the SAME bright mint in every
+ * role, so `tertiary` works as a fill AND as ink there. A named theme does not:
+ * in the night schemes `tertiary` is a FILL (`tone(third, 0.34, 0.36)` — a
+ * dark tone) and the readable ink for that family is `onTertiaryContainer`
+ * (0.88). A mint label drawn with `tertiary` under a named dark theme landed at
+ * ~1.9:1 — the dark-on-dark text the member reported — so ink asks this and
+ * every other theme is handed `tertiary` back untouched.
+ */
+@Composable
+fun curioTertiaryInk(): Color {
+    activeNamedTheme()?.let { return MaterialTheme.colorScheme.onTertiaryContainer }
+    return MaterialTheme.colorScheme.tertiary
+}
+
+/**
  * v20 — the brand butter as INK, theme-aware: bright ButterYellow on dark
  * surfaces, deep GoldInk on light cream (ButterYellow vanishes on the
  * light background). Gold twin of [curioRoseInk].

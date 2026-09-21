@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -99,7 +100,10 @@ fun CurioSecondaryAction(
                 CurioIcon(
                     name = leadingGlyph,
                     contentDescription = null,
-                    tint = tint ?: MaterialTheme.colorScheme.primary,
+                    // v426 — the accent as INK: a named theme's `primary` is its
+                    // deep hero fill, which drew this pill's glyph nearly black
+                    // on the theme's own dark page (see [curioAccentInk]).
+                    tint = tint ?: curioAccentInk(),
                     size = 18.dp
                 )
             }

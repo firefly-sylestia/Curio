@@ -233,6 +233,78 @@ not `Layout` ones (same value, 1, inlined either way, but lint insists on the
 `LineBreaker` spelling). Fixed by importing `android.graphics.text.LineBreaker` and
 switching the call. Committed and pushed.
 
+## 7. Request (this session) — the named themes' dark mode, again
+
+> lets work on those theme again, in profile the xp progress setings etc backgroud is
+> good, but inside the settings the apprenace and its sub pages settings backgroud dis
+> still bad in those new theme fix it please in dark mode
+> also in dark mode in many themes the text visiblity is bad, like in dark mode the
+> texts have black or dark color, can u do a full audit and tell what are they.
+> ask me if youre confused or doubts
+
+Asked via `ask_user` (a wrong guess costs a full CI cycle):
+
+- **Which part of the Settings/Appearance screen is the bad background** → **the big card
+  behind the rows** (not the page, not the theme capsule, not the sheets).
+- **Where the black/dark text is** → "one place i noticed in journal, the texts are black
+  colors in dark mode check in all theme, and more similar dark texts black text colors".
+- **Scope** → **all dark themes** (not the five named ones only).
+- **The audit** → list it, then fix in the same pass.
+
+### Findings
+
+- **The Settings plate really is the odd one out, measured.** Profile's card resolves to
+  `lerp(surfaceContainerLow, settingsCardTintLift, 0.30f)`; `SettingsOptionCard` asked for
+  `surfaceContainerHigh` — the *pill inside a card* rung. On the app's own neutral greys the
+  two are close enough to pass (L 0.141 vs 0.097), but a theme whose ladder carries colour
+  made it loud: under a named theme at night the option card measured **L 0.225 against
+  Profile's 0.158 — 1.94x the luminance**, and 2.0–2.9x the same card in the app's own dark
+  scheme. So the member's report is exact, and so is the reason Profile looks right.
+- **A fixed-dark-in-the-journal scan.** Every hard-coded dark literal in the module was
+  swept (24 hits) — all but one are the *light* branch of a `if (dark) … else …` pair. The
+  journal's real offenders are three ink helpers that never got a night twin:
+  `personalQuoteColor()` (its own doc promised a milky twin and returned the light coffee),
+  `personalAnnotateLinks`' hard-coded `#5C3A20` link ink (~1.6:1 on the journal's `#17130F`
+  paper), and `personalMoodInk`'s darker moods (Heavy `#6E6A72` at ~2.3:1).
+- **The systemic class: `primary` and `tertiary` are FILLS in a named scheme.** The app's
+  own dark scheme puts the bright coral in `primary` and the bright mint in `tertiary`, so
+  `tint = MaterialTheme.colorScheme.primary` reads in both modes there; a named theme puts
+  its deep HERO fill in `primary` (L 0.30) and a dark tone in `tertiary`, so every glyph,
+  label and icon-tint asking those roles as INK lands at ~1.6–1.9:1. That is "in many themes
+  the texts have black or dark color".
+
+### What was built (v426)
+
+- `curioSettingsCardFill()` (`ui/components/CurioSettingsCard.kt`) — the Profile card's fill
+  named once, and `SettingsOptionCard` asks it in dark mode too, so a Settings sub-page and
+  a Profile card are the same plate in every theme.
+- `curioAccentInk()` / `curioTertiaryInk()` (`ui/theme/CurioTheme.kt`) — `primary`/`tertiary`
+  as INK. Both return the scheme role untouched for every non-named theme (so no other theme
+  moved a pixel) and the named theme's own accent tones under a named one. Applied to the 17
+  icon-ink sites (`CurioStreakPill`, `StatsScreen`, `SocialComponents`, `SettingsHubScreen`,
+  `TextHistory`, `CurioNavHost`, `TopicHistoryScreen`, `TopicRevealScreen`, `TopicShareCard`)
+  and the 7 `tertiary`-as-ink sites (`TextHistory` ×2, `CabinetScreen` ×3,
+  `CabinetV2Content` ×2).
+- The journal's night inks: the quote takes `#C09263` at night, `personalAnnotateLinks`
+  takes its link ink as a parameter (`personalQuoteDeepColor()`), and `personalMoodInk` is
+  `@Composable` with an L 0.62 night floor.
+
+### Verification
+
+- Brace/paren/bracket balance 0/0/0 on all 14 touched files; import/use pairs checked per
+  file (every `curioAccentInk`/`curioTertiaryInk` call site has its import).
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
+### Still open (listed, not swept — each needs a judgement call)
+
+- `color = MaterialTheme.colorScheme.primary` — 71 sites, a MIXTURE of fills and ink;
+  PetDesignerScreen's 26 are deliberately its own palette.
+- `secondary` as a selected-state ink/fill in `ShareHubScreen` (408/551/565) and
+  `TopicShareCard` (12695/12710) — a design question (what does "selected" mean on a named
+  theme), not a role swap.
+- The 12 `outlineVariant`-as-ink hits are mostly borders and dividers — correct usage, left
+  alone.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

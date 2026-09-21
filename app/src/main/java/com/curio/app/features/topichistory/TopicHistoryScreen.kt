@@ -79,6 +79,7 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
@@ -258,7 +259,7 @@ fun TopicHistoryScreen(navController: NavController) {
                             "No $filterCatName topics in your history yet."
                         else -> "Nothing in your history yet."
                     },
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                    tint = curioAccentInk().copy(alpha = 0.4f),
                     ctaLabel = "Clear filters",
                     onCtaClick = {
                         query = ""
@@ -289,7 +290,7 @@ fun TopicHistoryScreen(navController: NavController) {
                                 glyph = CurioIcons.Star,
                                 label = "Favorite",
                                 count = filteredFavorited.size,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = curioAccentInk()
                             )
                         }
                         items(filteredFavorited, key = { "fav_${it.categoryId.name}_${it.id}" }) { topic ->

@@ -75,6 +75,9 @@ import com.curio.app.navigation.PendingJournalDay
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.toHsl
 import androidx.navigation.NavController
 import java.time.Instant
 import java.time.LocalDate
@@ -631,14 +634,30 @@ private fun MoodOption(
  * gets a colour that means it, drawn from the journal's own palette rather than
  * the theme's accent — because six chips in one accent say "these are six
  * buttons", and six chips in six inks say "these are six different days".
+ *
+ * v426 — AND A FEELING'S INK HAS A NIGHT TWIN. These six tones were pitched
+ * against the light page, so on the journal's dark paper the darker ones
+ * (Heavy's slate, Tired's mauve) landed at ~2.3:1 — the member's "in dark mode
+ * the texts have black or dark color" in the journal. At night each feeling is
+ * re-read at the SAME hue with a lightness that can be read on a dark page
+ * (the app's own dark-lift rule — see `settingsAccentInk`), so the six chips
+ * still read as six different days instead of six dim ones.
  */
-internal fun personalMoodInk(mood: PersonalMood): Color = when (mood) {
-    PersonalMood.CALM -> Color(0xFF7FA8C9)
-    PersonalMood.HAPPY -> Color(0xFFE0A33C)
-    PersonalMood.CURIOUS -> Color(0xFF8FB08A)
-    PersonalMood.INSPIRED -> Color(0xFFD98A8A)
-    PersonalMood.TIRED -> Color(0xFF9B8AA6)
-    PersonalMood.HEAVY -> Color(0xFF6E6A72)
+@Composable
+internal fun personalMoodInk(mood: PersonalMood): Color {
+    val base = when (mood) {
+        PersonalMood.CALM -> Color(0xFF7FA8C9)
+        PersonalMood.HAPPY -> Color(0xFFE0A33C)
+        PersonalMood.CURIOUS -> Color(0xFF8FB08A)
+        PersonalMood.INSPIRED -> Color(0xFFD98A8A)
+        PersonalMood.TIRED -> Color(0xFF9B8AA6)
+        PersonalMood.HEAVY -> Color(0xFF6E6A72)
+    }
+    if (!isCurioDarkTheme()) return base
+    val hsl = toHsl(base)
+    // 0.62 is the night floor the journal's own paper needs: the paper sits at
+    // L 0.10, so a 0.62 reading clears 4.5:1 on it at every one of the six hues.
+    return fromHsl(hsl.h, hsl.s, maxOf(hsl.l, 0.62f))
 }
 
 // v389 — the eye/pen switch (ModeButton + EyeGlyph) moved to PersonalPage.kt

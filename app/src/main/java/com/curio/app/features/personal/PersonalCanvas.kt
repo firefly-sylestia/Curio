@@ -186,9 +186,17 @@ private val SMALL_VIEW_SIZE = 12.5.sp
  * quotation has to read as ink on paper, and an accent-tinted quote looked
  * like a highlight someone forgot to finish). The dark theme takes the milky
  * coffee twin, because the deep one would vanish into a dark page.
+ *
+ * v426 — THE TWIN WAS PROMISED BUT NEVER PAINTED. This returned the light
+ * coffee unconditionally, so on the journal's dark paper (a near-black page) a
+ * quoted passage was drawn at ~2.5:1 — the member's "in dark mode the texts
+ * have black or dark color" in the journal. It wears [personalQuoteDeepColor]'s
+ * milky tone at night now, which is the same coffee, one shade up, and clears
+ * 4.5:1 on the paper it is written on.
  */
 @Composable
-internal fun personalQuoteColor(): Color = Color(0xFF9A6A43)
+internal fun personalQuoteColor(): Color =
+    if (isCurioDarkTheme()) Color(0xFFC09263) else Color(0xFF9A6A43)
 
 /** The rule beside a quoted block: the same coffee, at rule strength. */
 @Composable
@@ -295,7 +303,13 @@ private val URL_REGEX = Regex(
  * Each match is tagged [PERSONAL_LINK_TAG] so the read-only view can open it
  * on tap with the coffee-dark underline style.
  */
-private fun personalAnnotateLinks(base: AnnotatedString): AnnotatedString {
+/** [linkInk] is passed IN because this runs outside composition — the caller
+ *  resolves the theme-aware coffee (see [personalQuoteDeepColor]): the deep
+ *  twin by day, the milky one at night. v426 — it used to hard-code the deep
+ *  coffee, which on the journal's dark paper drew every URL at ~1.6:1: the
+ *  member's "in dark mode the texts have black or dark color" (a link is the
+ *  one piece of text in the journal that is not the page's own ink). */
+private fun personalAnnotateLinks(base: AnnotatedString, linkInk: Color): AnnotatedString {
     val text = base.text
     val matches = URL_REGEX.findAll(text).toList()
     if (matches.isEmpty()) return base
@@ -304,7 +318,7 @@ private fun personalAnnotateLinks(base: AnnotatedString): AnnotatedString {
         for (match in matches) {
             addStyle(
                 SpanStyle(
-                    color = Color(0xFF5C3A20),
+                    color = linkInk,
                     textDecoration = TextDecoration.Underline
                 ),
                 match.range.first,
@@ -4477,7 +4491,7 @@ internal fun PersonalDocView(
                 // v392 — CLICKABLE LINKS: URLs in the read-only view
                 // open in the browser with a coffee-dark underline so they
                 // read as ink, not as the app's accent.
-                val linkText = personalAnnotateLinks(baseText)
+                val linkText = personalAnnotateLinks(baseText, personalQuoteDeepColor())
                 var linkLayout by remember(linkText) {
                     mutableStateOf<TextLayoutResult?>(null)
                 }

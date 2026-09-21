@@ -68,6 +68,8 @@ import androidx.compose.foundation.layout.width
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
+import com.curio.app.ui.theme.curioAccentInk
+import com.curio.app.ui.theme.curioTertiaryInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.delay
 import org.json.JSONArray
@@ -574,7 +576,7 @@ fun TextHistoryBrowser(
                     CurioIcon(
                         name = CurioIcons.Layers,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = curioAccentInk(),
                         size = 16.dp
                     )
                     Text(
@@ -754,7 +756,8 @@ fun TextHistoryBrowser(
                                             Text(
                                                 delta,
                                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                                color = MaterialTheme.colorScheme.tertiary
+                                                // v426 — the mint as INK (see [curioTertiaryInk]).
+                                                color = curioTertiaryInk()
                                             )
                                         }
                                         if (latestIds[e.field] == e.id) {
@@ -1761,7 +1764,10 @@ private fun CompareVersionsDialog(
                     Text(
                         "$addedCount word${if (addedCount == 1) "" else "s"} added",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.tertiary,
+                        // v426 — the ink that reads on its own container (see
+                        // [curioTertiaryInk]); under a named theme the old
+                        // `tertiary` was a dark tone on a dark chip.
+                        color = curioTertiaryInk(),
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
                             .background(MaterialTheme.colorScheme.tertiaryContainer)

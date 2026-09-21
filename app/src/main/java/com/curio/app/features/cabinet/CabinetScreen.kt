@@ -126,6 +126,7 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioTertiaryInk
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryChipSurface
@@ -623,7 +624,7 @@ fun CabinetScreen(navController: NavController) {
                         glyph = CurioIcons.SearchOff,
                         headline = "No captures match",
                         subtext = "Nothing in the Cabinet matches \"${searchQuery.trim()}\". Try a different name.",
-                        tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                        tint = curioTertiaryInk().copy(alpha = 0.4f),
                         ctaLabel = "Clear search",
                         onCtaClick = {
                             searchQuery = ""
@@ -635,7 +636,7 @@ fun CabinetScreen(navController: NavController) {
                         glyph = CurioIcons.History,
                         headline = "No legacy captures yet",
                         subtext = "Restore a FieldMind archive from Settings to keep old observations separate from Curio.",
-                        tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                        tint = curioTertiaryInk().copy(alpha = 0.4f),
                         ctaLabel = "Open settings",
                         onCtaClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } }
                     )
@@ -681,7 +682,7 @@ fun CabinetScreen(navController: NavController) {
                             glyph = CurioIcons.SearchOff,
                             headline = "No captures match these filters",
                             subtext = "Clear some category filters to see your saves again.",
-                            tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                            tint = curioTertiaryInk().copy(alpha = 0.4f),
                             ctaLabel = "Clear filters",
                             onCtaClick = {
                                 commitFilters { emptySet() }

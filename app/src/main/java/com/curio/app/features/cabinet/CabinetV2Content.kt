@@ -134,6 +134,7 @@ import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioTertiaryInk
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -1284,7 +1285,7 @@ private fun LazyGridScope.v2HomeItems(
                 glyph = CurioIcons.SearchOff,
                 headline = "No collections match",
                 subtext = "Try a different name, or open the Cupboard to search your media.",
-                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                tint = curioTertiaryInk().copy(alpha = 0.4f),
                 ctaLabel = "Clear search",
                 onCtaClick = onClearSearch
             )
@@ -1439,7 +1440,7 @@ private fun LazyGridScope.v2DetailItems(
                 glyph = CurioIcons.SearchOff,
                 headline = "No members match",
                 subtext = "Try a different search.",
-                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
+                tint = curioTertiaryInk().copy(alpha = 0.4f)
             )
         }
     }

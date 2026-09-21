@@ -221,6 +221,7 @@ import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -1833,7 +1834,7 @@ fun TopicRevealScreen(
                             CurioIcon(
                                 name = CurioIcons.BubbleChart,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = curioAccentInk(),
                                 size = 18.dp
                             )
                             Text(
@@ -7003,7 +7004,7 @@ private fun FileToCollectionSheet(
                             CurioIcon(
                                 name = CurioIcons.Inventory2,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = curioAccentInk(),
                                 size = 17.dp
                             )
                             Column(modifier = Modifier.weight(1f)) {
@@ -7023,7 +7024,7 @@ private fun FileToCollectionSheet(
                             CurioIcon(
                                 name = if (has) CurioIcons.Check else CurioIcons.ChevronRight,
                                 contentDescription = if (has) "Already in this collection" else null,
-                                tint = if (has) MaterialTheme.colorScheme.primary
+                                tint = if (has) curioAccentInk()
                                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 size = 18.dp
                             )
@@ -7044,7 +7045,7 @@ private fun FileToCollectionSheet(
                             CurioIcon(
                                 name = CurioIcons.Add,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = curioAccentInk(),
                                 size = 17.dp
                             )
                             Text(

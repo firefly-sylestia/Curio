@@ -34,6 +34,35 @@ import com.curio.app.ui.theme.curioCardShadow
  * BARE (no colored chip box behind them).
  */
 
+/**
+ * v426 — THE PAGE CARD'S FILL: ONE value for the whole Profile + Settings card
+ * family, so the two screens can never drift apart again.
+ *
+ * The card is the scheme's own card rung ([surfaceContainerLow], the rung the
+ * theme's own ladder calls "a card") carrying a whisper of the hero's accent
+ * ([settingsCardTintLift]). On a dark page that whisper pulls the plate a
+ * little DARKER than the rung, which is what makes a Curio card read as glass
+ * on the page instead of as a lit slab.
+ *
+ * **The Settings family used to ask for a HIGHER rung**
+ * (`surfaceContainerHigh`, the "pill inside a card" step) as its card fill,
+ * which was invisible on the app's own neutral greys but not under a theme
+ * whose ladder carries colour: with a named theme in dark mode that plate came
+ * out at nearly TWICE the luminance of the Profile card beside it (L 0.225 vs
+ * 0.158 — 1.94x), so Settings read as a bright panel where Profile read as
+ * quiet glass (member: "in profile the xp progress settings etc background is
+ * good, but inside the settings the appearance and its sub pages background is
+ * still bad, fix it please in dark mode"). Both screens answer this function
+ * now, so a settings row and a Profile card are the same plate in every theme —
+ * dark, light, named or not.
+ */
+@Composable
+fun curioSettingsCardFill(): Color = lerp(
+    MaterialTheme.colorScheme.surfaceContainerLow,
+    settingsCardTintLift(),
+    0.30f
+)
+
 /** 28dp paper card — the shared container for Profile and Settings cards.
  *  Elevation (not an outline) defines the card on the page; pass a custom
  *  [shadowElevation] to lift or flatten it. AMOLED cards wear the scheme's
@@ -47,11 +76,8 @@ fun CurioSettingsCard(
 ) {
     // v411 — the card's own fill, named so the elevation below can be tuned
     // against the real surface instead of a guessed one.
-    val cardFill = lerp(
-        MaterialTheme.colorScheme.surfaceContainerLow,
-        settingsCardTintLift(),
-        0.30f
-    )
+    // v426 — and SHARED with the settings option card ([curioSettingsCardFill]).
+    val cardFill = curioSettingsCardFill()
     Surface(
         shape = RoundedCornerShape(28.dp),
         // v27n — every theme wears the faint container step as its elevation

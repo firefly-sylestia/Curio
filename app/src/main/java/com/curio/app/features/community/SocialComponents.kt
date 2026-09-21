@@ -60,6 +60,7 @@ import com.curio.app.features.personal.personalQuoteDeepColor
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.rememberCurioPressSource
@@ -220,7 +221,7 @@ internal fun SocialCardHeading(
             CurioIcon(
                 name = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = curioAccentInk(),
                 size = 17.dp
             )
         }
