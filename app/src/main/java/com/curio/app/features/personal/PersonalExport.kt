@@ -761,8 +761,10 @@ private fun drawExportPrint(
 ) {
     val uri = block.photo?.let { raw -> runCatching { Uri.parse(raw) }.getOrNull() } ?: return
     val innerWidth = (frameWidth - PDF_PRINT_PAD * 2f).coerceAtLeast(1f)
+    // v427 — a null here is NOT an early exit any more: the print draws its frame,
+    // its label and a plate that says the picture could not be read (see
+    // [drawExportCell]).
     val bitmap = decodeExportBitmap(context, uri, innerWidth.toInt(), frameHeight.toInt())
-        ?: return
     // v427 — THE LABEL IS THE PAGE'S LABEL.
     //
     // The face is the print's own ([PersonalCaptionFace]) and the size is the
@@ -825,7 +827,7 @@ private fun drawExportPrint(
         )
         run.advance(height + PDF_ROW_GAP)
     }
-    bitmap.recycle()
+    bitmap?.recycle()
 }
 
 /**
@@ -867,7 +869,20 @@ private fun exportCaptionRoom(fonts: PdfFonts, block: PersonalBlock): Float {
  */
 private fun drawExportCell(
     run: PdfRun,
-    bitmap: Bitmap,
+    /**
+     * v427 — NULLABLE, AND THE PRINT IS DRAWN EITHER WAY.
+     *
+     * A photograph whose file cannot be read (a permission that lapsed, a file
+     * the picker moved, a page reproduced from a document whose picture is gone)
+     * used to make this whole function unreachable — the caller returned early,
+     * so the sheet held a HOLE where the member's print was, and a page of such
+     * prints exported as a file with no pictures at all. The frame, the label and
+     * the band are drawn as they always are, and the picture's place carries a
+     * plate that says what happened ([drawExportPicturePlate]) — a missing
+     * picture is something the file should SAY, never something it silently
+     * drops.
+     */
+    bitmap: Bitmap?,
     top: Float,
     left: Float,
     innerWidth: Float,
@@ -878,29 +893,40 @@ private fun drawExportCell(
     stamp: String,
     stampPaint: TextPaint
 ) {
-    // THE CROP IS THE PAGE'S CROP: the picture is scaled so it COVERS the
-    // frame's inner box, then the middle of it is the part that shows — the
-    // same window `ContentScale.Crop` opens on the page, so a print keeps the
-    // shape it wears there whether the photograph is a panorama or upright.
-    val cover = maxOf(
-        innerWidth / bitmap.width.toFloat(),
-        frameHeight / bitmap.height.toFloat()
-    )
-    val sourceWidth = (innerWidth / cover).toInt().coerceIn(1, bitmap.width)
-    val sourceHeight = (frameHeight / cover).toInt().coerceIn(1, bitmap.height)
-    val sourceX = ((bitmap.width - sourceWidth) / 2f).toInt().coerceAtLeast(0)
-    val sourceY = ((bitmap.height - sourceHeight) / 2f).toInt().coerceAtLeast(0)
-    val source = Rect(sourceX, sourceY, sourceX + sourceWidth, sourceY + sourceHeight)
     // The frame's own top pad: the picture sits INSIDE the paper, inset as the
     // page insets it (`padding(top = 7.dp)`), not flush with the cell's top.
     val pictureTop = top + PDF_PRINT_PAD
     val innerLeft = left + PDF_PRINT_PAD
-    run.surface().drawBitmap(
-        bitmap,
-        source,
-        RectF(innerLeft, pictureTop, innerLeft + innerWidth, pictureTop + frameHeight),
-        Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
-    )
+    if (bitmap == null) {
+        drawExportPicturePlate(
+            run = run,
+            left = innerLeft,
+            top = pictureTop,
+            width = innerWidth,
+            height = frameHeight,
+            paint = captionPaint
+        )
+    } else {
+        // THE CROP IS THE PAGE'S CROP: the picture is scaled so it COVERS the
+        // frame's inner box, then the middle of it is the part that shows — the
+        // same window `ContentScale.Crop` opens on the page, so a print keeps the
+        // shape it wears there whether the photograph is a panorama or upright.
+        val cover = maxOf(
+            innerWidth / bitmap.width.toFloat(),
+            frameHeight / bitmap.height.toFloat()
+        )
+        val sourceWidth = (innerWidth / cover).toInt().coerceIn(1, bitmap.width)
+        val sourceHeight = (frameHeight / cover).toInt().coerceIn(1, bitmap.height)
+        val sourceX = ((bitmap.width - sourceWidth) / 2f).toInt().coerceAtLeast(0)
+        val sourceY = ((bitmap.height - sourceHeight) / 2f).toInt().coerceAtLeast(0)
+        val source = Rect(sourceX, sourceY, sourceX + sourceWidth, sourceY + sourceHeight)
+        run.surface().drawBitmap(
+            bitmap,
+            source,
+            RectF(innerLeft, pictureTop, innerLeft + innerWidth, pictureTop + frameHeight),
+            Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
+        )
+    }
     val centre = left + frameWidth / 2f
     var line = pictureTop + frameHeight + PDF_PRINT_BAND
     if (captionLine.isNotEmpty()) {
@@ -911,6 +937,61 @@ private fun drawExportCell(
         run.surface().drawText(stamp, centre, line + stampPaint.textSize, stampPaint)
     }
 }
+
+/**
+ * THE PLATE A PRINT WEARS WHEN ITS PICTURE CANNOT BE READ (v427).
+ *
+ * Drawn in the sheet's own ink over the sheet's own paper, so it reads in a light
+ * journal and a dark one alike: a soft wash, a hairline inside the frame's own
+ * box, and the words that explain it in the print's own label face, cut to the
+ * plate's own measure. The frame and the label around it are the page's, so a
+ * page read on paper still has the print's place, its caption and its date.
+ */
+private fun drawExportPicturePlate(
+    run: PdfRun,
+    left: Float,
+    top: Float,
+    width: Float,
+    height: Float,
+    paint: TextPaint
+) {
+    val canvas = run.surface()
+    val shape = RectF(left, top, left + width, top + height)
+    val wash = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = run.ink()
+        alpha = 14
+        style = Paint.Style.FILL
+    }
+    val edge = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = run.ink()
+        alpha = 58
+        style = Paint.Style.STROKE
+        strokeWidth = 1.5f
+    }
+    val radius = PDF_PRINT_BAND
+    canvas.drawRoundRect(shape, radius, radius, wash)
+    canvas.drawRoundRect(shape, radius, radius, edge)
+    val words = TextPaint(paint).apply {
+        textAlign = Paint.Align.CENTER
+        textSize = (paint.textSize * 0.82f).coerceAtLeast(10f)
+        alpha = 96
+    }
+    val label = TextUtils.ellipsize(
+        EXPORT_MISSING_PICTURE,
+        words,
+        (width - PDF_PRINT_BAND * 2f).coerceAtLeast(1f),
+        TextUtils.TruncateAt.END
+    ).toString()
+    canvas.drawText(
+        label,
+        left + width / 2f,
+        top + height / 2f + words.textSize * 0.35f,
+        words
+    )
+}
+
+/** What a print whose picture cannot be read says, in the file itself. */
+private const val EXPORT_MISSING_PICTURE = "Picture could not be read"
 
 // ── A ROW OF PRINTS, AS THE PAGE LAYS ONE OUT (v427) ───────────────────────
 //
@@ -1228,8 +1309,9 @@ private fun drawExportRowCell(
 ) {
     val uri = block.photo?.let { raw -> runCatching { Uri.parse(raw) }.getOrNull() } ?: return
     val innerWidth = (frameWidth - PDF_PRINT_PAD * 2f).coerceAtLeast(1f)
+    // v427 — as in [drawExportPrint]: an unreadable picture draws the plate rather
+    // than leaving a hole in the row.
     val bitmap = decodeExportBitmap(context, uri, innerWidth.toInt(), pictureHeight.toInt())
-        ?: return
     val face = personalCaptionFace(block.captionFace)
     val labelSize =
         personalCaptionSizeSp(CAPTION_VIEW_SIZE, block.captionSize).value * PDF_UNITS_PER_SP
@@ -1270,7 +1352,7 @@ private fun drawExportRowCell(
         ),
         stampPaint = stampPaint
     )
-    bitmap.recycle()
+    bitmap?.recycle()
 }
 
 
@@ -1699,7 +1781,7 @@ private fun decodeExportBitmap(
 ): Bitmap? {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     runCatching {
-        context.contentResolver.openInputStream(uri)?.use { stream ->
+        openExportStream(context, uri)?.use { stream ->
             BitmapFactory.decodeStream(stream, null, bounds)
         }
     }
@@ -1712,13 +1794,49 @@ private fun decodeExportBitmap(
     ) {
         sample *= 2
     }
-    val options = BitmapFactory.Options().apply { inSampleSize = sample }
-    val decoded = runCatching {
-        context.contentResolver.openInputStream(uri)?.use { stream ->
-            BitmapFactory.decodeStream(stream, null, options)
-        }
-    }.getOrNull() ?: return null
-    return exportUpright(context, uri, decoded)
+    // v427 — A DECODE THAT FAILS TRIES AGAIN, SMALLER.
+    //
+    // One attempt used to be the whole story: a decode that came back null (a
+    // photograph big enough that the phone could not hold the sample we asked
+    // for, a stream that died halfway) left the print with no picture at all, and
+    // a page of them exported as a file with no pictures. Each failure now halves
+    // the pixels asked for, up to 16× — and the stream is RE-OPENED every time,
+    // because a failed decode leaves the previous one unusable.
+    while (sample <= EXPORT_SAMPLE_CAP) {
+        val decoded = runCatching {
+            openExportStream(context, uri)?.use { stream ->
+                BitmapFactory.decodeStream(
+                    stream,
+                    null,
+                    BitmapFactory.Options().apply { inSampleSize = sample }
+                )
+            }
+        }.getOrNull()
+        if (decoded != null) return exportUpright(context, uri, decoded)
+        sample *= 2
+    }
+    return null
+}
+
+/** The most a picture may be shrunk to fit a sheet's memory: ~16× smaller. */
+private const val EXPORT_SAMPLE_CAP = 16
+
+/**
+ * THE PICTURE'S OWN BYTES, however the page happens to name them.
+ *
+ * The page stores what the picker handed it — a `content://` URI with a persisted
+ * read grant, which is what every journal photograph is. A document that came from
+ * somewhere else (an imported page, a file copied next to the journal) may name a
+ * `file://` URI or a bare path instead, and `contentResolver.openInputStream`
+ * refuses those — which is precisely the case that used to end as a print with no
+ * picture in it. So: the resolver first, then the path itself.
+ */
+private fun openExportStream(context: Context, uri: Uri): java.io.InputStream? {
+    val viaResolver = runCatching { context.contentResolver.openInputStream(uri) }
+        .getOrNull()
+    if (viaResolver != null) return viaResolver
+    val path = uri.path ?: return null
+    return runCatching { File(path).inputStream() }.getOrNull()
 }
 
 /**
