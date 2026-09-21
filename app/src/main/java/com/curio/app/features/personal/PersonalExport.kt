@@ -268,6 +268,12 @@ private fun pdfDp(dp: Float): Float = dp * PDF_UNITS_PER_SP
 /** The pad inside a print's paper frame — [PersonalCanvas]'s own 7dp. */
 private val PDF_PRINT_PAD = pdfDp(7f)
 
+/**
+ * The pad inside the frame between the picture and its label — the page's own
+ * 5dp band (`PersonalPhotoBlock`: `padding(top = 5.dp, bottom = 5.dp)`).
+ */
+private val PDF_PRINT_BAND = pdfDp(5f)
+
 /** The sheet's body — the page's read-back body, at the sheet's measure. */
 private val PDF_BODY_SIZE = pdfPx(BODY_VIEW_SIZE)
 
@@ -412,6 +418,18 @@ private class PdfRun(
         cursor += by
     }
 
+    /**
+     * PUT THE CURSOR BACK — v427, for a ROW OF PRINTS. A row's cells share one
+     * line, so the row draws them where it decided and moves the sheet once, by
+     * the line's own height; `advance` can only add.
+     */
+    fun setCursor(at: Float) {
+        cursor = at
+    }
+
+    /** The ink this sheet was opened with — a cell's label reads it too. */
+    fun ink(): Int = ink
+
     fun room(): Float = contentBottom - cursor
 
     fun left(): Float = contentLeft
@@ -445,8 +463,40 @@ internal fun writePersonalPdf(
     val run = PdfRun(document, paper, ink, doc.exportName())
     val gap = PDF_ROW_GAP
 
+    // v427 — WHICH PRINTS ARE ONE ROW, decided the way the PAGE decides it (see
+    // exportPrintPlan). A row is drawn once, by its first print; every later cell
+    // and the blank rows the run stepped over are left out of the walk, exactly as
+    // the page's own drawing pass leaves them out.
+    val plan = exportPrintPlan(doc)
+
     for (block in doc.blocks) {
         when {
+            plan.rowCells.contains(block.id) -> Unit
+
+            // The line of a beside pair is drawn INSIDE the pair's own row (see
+            // drawExportPrintBeside), so the column draws nothing for it.
+            plan.besideLines.contains(block.id) -> Unit
+
+            plan.rows.containsKey(block.id) -> drawExportPrintRow(
+                context = context,
+                fonts = fonts,
+                run = run,
+                doc = doc,
+                ids = plan.rows.getValue(block.id)
+            )
+
+            plan.beside.containsKey(block.id) -> drawExportPrintBeside(
+                context = context,
+                fonts = fonts,
+                run = run,
+                doc = doc,
+                block = block,
+                lineId = plan.beside.getValue(block.id),
+                accent = accent,
+                paper = paper,
+                highlightInk = highlightInk
+            )
+
             block.isPhoto -> drawExportPhoto(context, fonts, run, block, ink)
 
             block.isAudio -> drawExportVoice(fonts, run, block, paper, ink, accent)
@@ -620,7 +670,31 @@ private fun drawExportLayout(run: PdfRun, layout: StaticLayout, gap: Float) {
 }
 
 /**
- * A PRINT, AS THE PAGE DRAWS ONE.
+ * A LONE PRINT: the page's own frame for the size it wears, at the page's own
+ * place (the measure's left edge, its own share of the width).
+ */
+private fun drawExportPhoto(
+    context: Context,
+    fonts: PdfFonts,
+    run: PdfRun,
+    block: PersonalBlock,
+    ink: Int
+) {
+    val size = PersonalPhotoSize.fromKey(block.photoSize)
+    drawExportPrint(
+        context = context,
+        fonts = fonts,
+        run = run,
+        block = block,
+        ink = ink,
+        left = run.left(),
+        frameWidth = (run.contentWidth.toFloat() * size.fraction).coerceAtLeast(1f),
+        frameHeight = pdfDp(personalPrintHeight(size).value)
+    )
+}
+
+/**
+ * ONE PRINT, AT A PLACE AND A SIZE THE CALLER OWNS — as the page draws one.
  *
  * v427 — THE SHEET USED TO FIT THE PICTURE WHERE THE PAGE CROPS IT.
  *
@@ -640,20 +714,23 @@ private fun drawExportLayout(run: PdfRun, layout: StaticLayout, gap: Float) {
  * the label inside the frame — and the photograph arrives UPRIGHT, because the
  * page renders it through Coil, which reads EXIF, while a bare `BitmapFactory`
  * decode does not ([decodeExportBitmap]).
+ *
+ * It is also a PLACE, not a cursor move: the row decides how wide and how tall
+ * each of its cells is and where it stands (see [drawExportPrintRow]), so the
+ * sizing is the caller's and this function only draws the print.
  */
-private fun drawExportPhoto(
+private fun drawExportPrint(
     context: Context,
     fonts: PdfFonts,
     run: PdfRun,
     block: PersonalBlock,
-    ink: Int
+    ink: Int,
+    left: Float,
+    frameWidth: Float,
+    frameHeight: Float
 ) {
     val uri = block.photo?.let { raw -> runCatching { Uri.parse(raw) }.getOrNull() } ?: return
-    val size = PersonalPhotoSize.fromKey(block.photoSize)
-    // The page's own frame: its share of the measure, its own height, its pad.
-    val frameWidth = (run.contentWidth.toFloat() * size.fraction).coerceAtLeast(1f)
     val innerWidth = (frameWidth - PDF_PRINT_PAD * 2f).coerceAtLeast(1f)
-    val frameHeight = pdfDp(personalPrintHeight(size).value)
     val bitmap = decodeExportBitmap(context, uri, innerWidth.toInt(), frameHeight.toInt())
         ?: return
     // v427 — THE LABEL IS THE PAGE'S LABEL.
@@ -703,43 +780,467 @@ private fun drawExportPhoto(
         hasStamp -> stampPaint.textSize * 1.9f
         else -> 0f
     }
-    if (run.want(frameHeight + captionRoom + 40f)) {
-        val frameLeft = run.left() + (run.contentWidth - frameWidth) / 2f
-        val left = frameLeft + PDF_PRINT_PAD
-        val top = run.cursor
-        // THE CROP IS THE PAGE'S CROP: the picture is scaled so it COVERS the
-        // frame's inner box, then the middle of it is the part that shows — the
-        // same window `ContentScale.Crop` opens on the page, so a print keeps the
-        // shape it wears there whether the photograph is a panorama or upright.
-        val cover = maxOf(
-            innerWidth / bitmap.width.toFloat(),
-            frameHeight / bitmap.height.toFloat()
+    // The frame's own height IS the picture plus its band — the page draws a print
+    // as a picture with a caption strip under it, so the strip is part of the
+    // print and not air the sheet adds afterwards.
+    val height = frameHeight + PDF_PRINT_BAND + captionRoom
+    if (run.want(height + PDF_ROW_GAP)) {
+        drawExportCell(
+            run = run,
+            bitmap = bitmap,
+            top = run.cursor,
+            left = left,
+            innerWidth = innerWidth,
+            frameWidth = frameWidth,
+            frameHeight = frameHeight,
+            captionLine = captionLine,
+            captionPaint = captionPaint,
+            stamp = stamp,
+            stampPaint = stampPaint
         )
-        val sourceWidth = (innerWidth / cover).toInt().coerceIn(1, bitmap.width)
-        val sourceHeight = (frameHeight / cover).toInt().coerceIn(1, bitmap.height)
-        val sourceX = ((bitmap.width - sourceWidth) / 2f).toInt().coerceAtLeast(0)
-        val sourceY = ((bitmap.height - sourceHeight) / 2f).toInt().coerceAtLeast(0)
-        val source = Rect(sourceX, sourceY, sourceX + sourceWidth, sourceY + sourceHeight)
-        run.surface().drawBitmap(
-            bitmap,
-            source,
-            RectF(left, top, left + innerWidth, top + frameHeight),
-            Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
-        )
-        run.advance(frameHeight + 26f)
-        val centre = frameLeft + frameWidth / 2f
-        if (hasCaption) {
-            run.surface().drawText(captionLine, centre, run.cursor + captionPaint.textSize, captionPaint)
-            run.advance(captionPaint.textSize * 1.7f)
-        }
-        if (hasStamp) {
-            run.surface().drawText(stamp, centre, run.cursor + stampPaint.textSize, stampPaint)
-            run.advance(stampPaint.textSize * 1.9f)
-        }
-        run.advance(18f)
+        run.advance(height + PDF_ROW_GAP)
     }
     bitmap.recycle()
 }
+
+/**
+ * THE BAND A PRINT'S LABEL NEEDS, for a caller that must know a cell's full height
+ * before it draws anything (a row: its line is as tall as its tallest cell). The
+ * same numbers [drawExportPrint] measures its own caption with.
+ */
+private fun exportCaptionRoom(fonts: PdfFonts, block: PersonalBlock): Float {
+    val labelSize =
+        personalCaptionSizeSp(CAPTION_VIEW_SIZE, block.captionSize).value * PDF_UNITS_PER_SP
+    val face = personalCaptionFace(block.captionFace)
+    val hasCaption = block.caption.isNotBlank()
+    val hasStamp = block.captionDateMillis > 0L
+    val captionPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        typeface = fonts.label(face)
+        textSize = labelSize
+        textAlign = Paint.Align.CENTER
+    }
+    return when {
+        hasCaption && hasStamp -> captionPaint.textSize * 1.7f + captionPaint.textSize * 0.76f * 1.9f
+        hasCaption -> captionPaint.textSize * 1.7f
+        hasStamp -> captionPaint.textSize * 0.76f * 1.9f
+        else -> 0f
+    }
+}
+
+/**
+ * THE PRINT ITSELF, AT [top] — the picture, then the label and its stamp inside
+ * the frame's own width. It draws; it does NOT move the sheet's cursor.
+ *
+ * That is the whole point of it being separate: a ROW's cells share one line, so
+ * the row decides where they stand and how far the page moves under them (see
+ * [drawExportPrintRow]) — a per-print cursor move cannot place the second half of
+ * a pair on the same line as the first.
+ */
+private fun drawExportCell(
+    run: PdfRun,
+    bitmap: Bitmap,
+    top: Float,
+    left: Float,
+    innerWidth: Float,
+    frameWidth: Float,
+    frameHeight: Float,
+    captionLine: String,
+    captionPaint: TextPaint,
+    stamp: String,
+    stampPaint: TextPaint
+) {
+    // THE CROP IS THE PAGE'S CROP: the picture is scaled so it COVERS the
+    // frame's inner box, then the middle of it is the part that shows — the
+    // same window `ContentScale.Crop` opens on the page, so a print keeps the
+    // shape it wears there whether the photograph is a panorama or upright.
+    val cover = maxOf(
+        innerWidth / bitmap.width.toFloat(),
+        frameHeight / bitmap.height.toFloat()
+    )
+    val sourceWidth = (innerWidth / cover).toInt().coerceIn(1, bitmap.width)
+    val sourceHeight = (frameHeight / cover).toInt().coerceIn(1, bitmap.height)
+    val sourceX = ((bitmap.width - sourceWidth) / 2f).toInt().coerceAtLeast(0)
+    val sourceY = ((bitmap.height - sourceHeight) / 2f).toInt().coerceAtLeast(0)
+    val source = Rect(sourceX, sourceY, sourceX + sourceWidth, sourceY + sourceHeight)
+    val innerLeft = left + PDF_PRINT_PAD
+    run.surface().drawBitmap(
+        bitmap,
+        source,
+        RectF(innerLeft, top, innerLeft + innerWidth, top + frameHeight),
+        Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
+    )
+    val centre = left + frameWidth / 2f
+    var line = top + frameHeight + PDF_PRINT_BAND
+    if (captionLine.isNotEmpty()) {
+        run.surface().drawText(captionLine, centre, line + captionPaint.textSize, captionPaint)
+        line += captionPaint.textSize * 1.7f
+    }
+    if (stamp.isNotEmpty()) {
+        run.surface().drawText(stamp, centre, line + stampPaint.textSize, stampPaint)
+    }
+}
+
+// ── A ROW OF PRINTS, AS THE PAGE LAYS ONE OUT (v427) ───────────────────────
+//
+// The sheet drew every print alone, full measure, whatever row it stood in on the
+// page (the member: "make the PDF draw print stacks and rows as the journal lays
+// them out"). The page builds ROWS — two, three or four prints, each cell taking
+// its own size's share of the measure and its own size's height (see
+// `PersonalPrintArrangement`) — so the sheet builds the same rows, from the same
+// numbers, with the canvas' own `PRINT_ROW_GAP` and `printBesideShare` rather than
+// gaps and shares of its own invention.
+
+/**
+ * WHICH PRINTS ARE ONE ROW, and which line sits BESIDE which print.
+ *
+ * The same pass the page runs (see the editor's row builder and the read view's
+ * twin): a run of prints up to `PRINT_ROW_LIMIT`, stepping over blank rows that
+ * are nobody's place, and a lone SMALL print taking the line under it as its
+ * companion. The sheet has no caret, so it takes the READ VIEW's version of the
+ * air rule (a blank row with no voice note in it) — the one condition the two
+ * passes must never disagree about is which pictures are one row, and the caret
+ * is not a fact a file can carry.
+ */
+private class ExportPrintPlan(
+    /** The first print of a row -> every print in it, in order. */
+    val rows: Map<String, List<String>>,
+    /** Every print of a row after the first, and every blank row it stepped over. */
+    val rowCells: Set<String>,
+    /** A print's id -> the line drawn beside it. */
+    val beside: Map<String, String>
+) {
+    /** The lines drawn INSIDE a beside pair's row, so they are not drawn twice. */
+    val besideLines: Set<String> = beside.values.toSet()
+}
+
+private fun exportPrintPlan(doc: PersonalDoc): ExportPrintPlan {
+    val rows = LinkedHashMap<String, List<String>>()
+    val rowCells = linkedSetOf<String>()
+    val beside = LinkedHashMap<String, String>()
+    val blocks = doc.blocks
+    var i = 0
+    while (i < blocks.size) {
+        val first = blocks[i]
+        if (first.isPhoto) {
+            val run = ArrayList<String>()
+            val gaps = ArrayList<String>()
+            var j = i
+            while (j < blocks.size && run.size < PRINT_ROW_LIMIT) {
+                val member = blocks[j]
+                if (member.isPhoto) {
+                    run.add(member.id)
+                    j += 1
+                } else if (!member.isAudio && member.text.isBlank()) {
+                    gaps.add(member.id)
+                    j += 1
+                } else {
+                    break
+                }
+            }
+            if (run.size > 1) {
+                rows[run.first()] = run
+                run.drop(1).forEach { rowCells.add(it) }
+                gaps.forEach { rowCells.add(it) }
+                i = j
+                continue
+            }
+            val next = blocks.getOrNull(i + 1)
+            if (next != null &&
+                PersonalPhotoSize.fromKey(first.photoSize) == PersonalPhotoSize.SMALL &&
+                !next.isPhoto && !next.isAudio && next.text.isNotBlank()
+            ) {
+                beside[first.id] = next.id
+                i += 2
+                continue
+            }
+        }
+        i += 1
+    }
+    return ExportPrintPlan(rows, rowCells, beside)
+}
+
+/** The size a row's member wears, and the three readings of it the page uses. */
+private fun rowSizeOf(doc: PersonalDoc, id: String): PersonalPhotoSize =
+    PersonalPhotoSize.fromKey(doc.blocks.firstOrNull { it.id == id }?.photoSize)
+
+private fun rowWeightOf(doc: PersonalDoc, id: String): Float =
+    rowSizeOf(doc, id).fraction.coerceIn(0.3f, 1f)
+
+private fun rowHeightOf(doc: PersonalDoc, id: String): Float =
+    pdfDp(personalPrintHeight(rowSizeOf(doc, id)).value)
+
+/**
+ * ONE ROW, THE SHAPE THE PAGE GIVES IT: a pair side by side, an upright frame
+ * with two stacked beside it, or four as a square — each cell placed and sized by
+ * its own size, exactly as `PersonalPrintArrangement` places them.
+ *
+ * The row is decided and drawn as ONE block: it either fits the sheet it is on or
+ * it starts the next one, which is what a page's own Column does for a row it
+ * cannot split.
+ */
+private fun drawExportPrintRow(
+    context: Context,
+    fonts: PdfFonts,
+    run: PdfRun,
+    doc: PersonalDoc,
+    ids: List<String>
+) {
+    if (ids.size < 2) return
+    val gap = pdfDp(PRINT_ROW_GAP.value)
+    val measure = run.contentWidth.toFloat()
+    // The lines of the row, placed before anything is drawn, so the row's own
+    // height can be asked of the sheet first.
+    val lines = ArrayList<List<ExportPrintCell>>()
+    if (ids.size == 3) {
+        // ── A THREE: the frame, and the two stacked beside it ──────────────
+        //
+        // The page's own rule: whichever member's size asked to stand up takes
+        // the frame (the first print does when none asked), the frame takes at
+        // least the widest print beside it, and each stacked print keeps its own
+        // share of its column.
+        val tall = ids.firstOrNull { PersonalPhotoSize.isUpright(rowSizeOf(doc, it)) } ?: ids[0]
+        val stacked = ids.filterNot { it == tall }
+        val stackedShare = stacked.maxOf { rowWeightOf(doc, it) }
+        val tallShare = maxOf(rowWeightOf(doc, tall), stackedShare)
+        val total = tallShare + stackedShare
+        val room = (measure - gap).coerceAtLeast(1f)
+        val tallWidth = tallShare / total * room
+        val columnWidth = stackedShare / total * room
+        val tallHeight = exportCellHeight(doc, fonts, tall)
+        // The frame and the column are ONE line — the column's two prints stack
+        // inside it — so the line is as tall as the taller of the two, and the
+        // stacked pair carries its own offset down that line.
+        val columnHeight = stacked.sumOf { exportCellHeight(doc, fonts, it).toDouble() }
+            .toFloat() + gap * (stacked.size - 1)
+        val cells = ArrayList<ExportPrintCell>(3)
+        cells.add(ExportPrintCell(tall, run.left(), tallWidth, rowHeightOf(doc, tall), 0f))
+        var y = 0f
+        stacked.forEach { id ->
+            cells.add(
+                ExportPrintCell(
+                    id,
+                    run.left() + tallWidth + gap,
+                    rowWeightOf(doc, id) / stackedShare * columnWidth,
+                    rowHeightOf(doc, id),
+                    y
+                )
+            )
+            y += exportCellHeight(doc, fonts, id) + gap
+        }
+        drawExportLines(
+            context = context,
+            fonts = fonts,
+            run = run,
+            doc = doc,
+            lines = listOf(cells),
+            lineHeights = listOf(maxOf(tallHeight, columnHeight))
+        )
+        return
+    }
+    val chunked = if (ids.size == 2) listOf(ids) else ids.chunked(2)
+    chunked.forEach { line ->
+        // One line of the row: its cells split the measure by their OWN sizes'
+        // shares, with the page's own gap between them. (A four is two lines of
+        // two, and each line weighs itself — exactly as the page's own Column of
+        // Rows does, so a four reads as the square the member built.)
+        val total = line.sumOf { rowWeightOf(doc, it).toDouble() }.toFloat()
+        val room = (measure - gap * (line.size - 1)).coerceAtLeast(1f)
+        var x = run.left()
+        lines.add(
+            line.map { id ->
+                val width = rowWeightOf(doc, id) / total * room
+                ExportPrintCell(id, x, width, rowHeightOf(doc, id), 0f).also { x += width + gap }
+            }
+        )
+    }
+    drawExportLines(
+        context = context,
+        fonts = fonts,
+        run = run,
+        doc = doc,
+        lines = lines,
+        lineHeights = lines.map { line -> line.maxOf { exportCellHeight(doc, fonts, it.id) } }
+    )
+}
+
+/**
+ * A PRINT WITH ITS LINE BESIDE IT — the page's beside pair.
+ *
+ * The page draws a lone SMALL print with the line under it as one row: the print
+ * takes `printBesideShare(size)` of the measure (Small 44/56, Small portrait
+ * 36/64, Half and up an even half), the line takes the rest, and 10dp sits between
+ * them (see the read view's beside branch). The sheet drew the print at the full
+ * measure and then the line under it, so the pair the member built came out as two
+ * stacked rows on paper.
+ */
+private fun drawExportPrintBeside(
+    context: Context,
+    fonts: PdfFonts,
+    run: PdfRun,
+    doc: PersonalDoc,
+    block: PersonalBlock,
+    lineId: String,
+    accent: Int,
+    paper: Int,
+    highlightInk: (String) -> Int
+) {
+    val lineBlock = doc.blocks.firstOrNull { it.id == lineId } ?: return
+    val size = PersonalPhotoSize.fromKey(block.photoSize)
+    val gap = pdfDp(10f)
+    val measure = run.contentWidth.toFloat()
+    val share = printBesideShare(size)
+    val printWidth = (measure - gap) * share
+    val lineWidth = (measure - gap) * (1f - share)
+    val layout = exportLayout(
+        block = lineBlock,
+        width = lineWidth.toInt().coerceAtLeast(1),
+        ink = run.ink(),
+        accent = accent,
+        fonts = fonts,
+        paper = paper,
+        highlightInk = highlightInk
+    )
+    val rowHeight = maxOf(
+        rowHeightOf(doc, block.id) + PDF_PRINT_BAND + exportCaptionRoom(fonts, block),
+        layout.height.toFloat()
+    )
+    if (!run.want(rowHeight + PDF_ROW_GAP)) return
+    val top = run.cursor
+    drawExportRowCell(
+        context = context,
+        fonts = fonts,
+        run = run,
+        block = block,
+        left = run.left(),
+        frameWidth = printWidth,
+        pictureHeight = rowHeightOf(doc, block.id),
+        top = top
+    )
+    // The line, drawn at the column beside the print and CLIPPED to the row: the
+    // pair is one row on the page, so it is one row here (the layout was measured
+    // against this very column, so it wraps where the page wraps it).
+    val canvas = run.surface()
+    val lineLeft = run.left() + printWidth + gap
+    canvas.save()
+    canvas.clipRect(lineLeft, top, lineLeft + lineWidth, top + rowHeight)
+    canvas.translate(lineLeft, top)
+    layout.draw(canvas)
+    canvas.restore()
+    run.setCursor(top + rowHeight + PDF_ROW_GAP)
+}
+
+/** A cell's own height: its picture's height plus the band its label needs. */
+private fun exportCellHeight(doc: PersonalDoc, fonts: PdfFonts, id: String): Float {
+    val block = doc.blocks.firstOrNull { it.id == id } ?: return 0f
+    return rowHeightOf(doc, id) + PDF_PRINT_BAND + exportCaptionRoom(fonts, block)
+}
+
+/** Where a cell stands in its line (for the stacked pair of a three). */
+private class ExportPrintCell(
+    val id: String,
+    val left: Float,
+    val width: Float,
+    val pictureHeight: Float,
+    val topOffset: Float
+)
+
+/**
+ * THE LINES OF A ROW, DRAWN — each line as tall as its tallest cell, the page's
+ * own gap between lines, the whole row placed on one sheet (a row is one block on
+ * a page and one block here: it either fits or it starts the next sheet).
+ */
+private fun drawExportLines(
+    context: Context,
+    fonts: PdfFonts,
+    run: PdfRun,
+    doc: PersonalDoc,
+    lines: List<List<ExportPrintCell>>,
+    lineHeights: List<Float>
+) {
+    val gap = pdfDp(PRINT_ROW_GAP.value)
+    val total = lineHeights.sum() + gap * (lineHeights.size - 1)
+    if (!run.want(total + gap)) return
+    lines.forEachIndexed { index, line ->
+        val lineTop = run.cursor
+        line.forEach { cell ->
+            val block = doc.blocks.firstOrNull { it.id == cell.id } ?: return@forEach
+            drawExportRowCell(
+                context = context,
+                fonts = fonts,
+                run = run,
+                block = block,
+                left = cell.left,
+                frameWidth = cell.width,
+                pictureHeight = cell.pictureHeight,
+                top = lineTop + cell.topOffset
+            )
+        }
+        run.setCursor(lineTop + lineHeights[index] + gap)
+    }
+}
+
+/**
+ * ONE CELL OF A ROW: the print's own measurements (its frame, the crop, the label
+ * at the frame's width) read exactly as [drawExportPrint] reads them — the only
+ * difference is that the PLACE comes from the row rather than from the cursor.
+ */
+private fun drawExportRowCell(
+    context: Context,
+    fonts: PdfFonts,
+    run: PdfRun,
+    block: PersonalBlock,
+    left: Float,
+    frameWidth: Float,
+    pictureHeight: Float,
+    top: Float
+) {
+    val uri = block.photo?.let { raw -> runCatching { Uri.parse(raw) }.getOrNull() } ?: return
+    val innerWidth = (frameWidth - PDF_PRINT_PAD * 2f).coerceAtLeast(1f)
+    val bitmap = decodeExportBitmap(context, uri, innerWidth.toInt(), pictureHeight.toInt())
+        ?: return
+    val face = personalCaptionFace(block.captionFace)
+    val labelSize =
+        personalCaptionSizeSp(CAPTION_VIEW_SIZE, block.captionSize).value * PDF_UNITS_PER_SP
+    val captionPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        typeface = fonts.label(face)
+        textSize = labelSize
+        color = run.ink()
+        alpha = PDF_LABEL_ALPHA
+        textAlign = Paint.Align.CENTER
+    }
+    val stampPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        typeface = captionPaint.typeface
+        textSize = labelSize * 0.76f
+        color = run.ink()
+        alpha = PDF_STAMP_ALPHA
+        letterSpacing = 0.6f * PDF_UNITS_PER_SP
+        textAlign = Paint.Align.CENTER
+    }
+    val caption = block.caption.trim()
+    val captionLine = if (caption.isEmpty()) {
+        ""
+    } else {
+        TextUtils.ellipsize(caption, captionPaint, innerWidth, TextUtils.TruncateAt.END).toString()
+    }
+    drawExportCell(
+        run = run,
+        bitmap = bitmap,
+        top = top,
+        left = left,
+        innerWidth = innerWidth,
+        frameWidth = frameWidth,
+        frameHeight = pictureHeight,
+        captionLine = captionLine,
+        captionPaint = captionPaint,
+        stamp = personalCaptionDateText(
+            block.captionDateMillis,
+            PersonalCaptionDates.order(context, block.captionOrder)
+        ),
+        stampPaint = stampPaint
+    )
+    bitmap.recycle()
+}
+
 
 /**
  * A VOICE NOTE AS THE PAGE DRAWS ONE — the page's OWN drawing.

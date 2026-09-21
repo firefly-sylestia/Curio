@@ -556,6 +556,54 @@ batch, this one carried the four items above. It is a new surface, so it needs t
 new-feature question first: whether a fetch lab should exist as a Dev-page section or stay
 out of the app entirely.
 
+## 11. Request — the PDF lays out print stacks and rows as the journal does
+
+**The ask (member):** *"Make the PDF draw print stacks and rows as the journal lays them out"*
+
+**What the sheet did:** every print was drawn ALONE, at the full measure, whatever row it
+stood in on the page — so a pair came out as two stacked rows, a three as three full-width
+pictures, and a print beside its line as the picture and then the line under it.
+
+**What it does now** — the page's own grouping and the page's own shapes, in
+`PersonalExport.kt`:
+
+- `exportPrintPlan` runs the same pass the canvas runs: a run of prints up to
+  `PRINT_ROW_LIMIT`, stepping over blank rows that are nobody's place, and a lone SMALL
+  print taking the line under it as its companion (`rows` / `rowCells` / `beside`). The
+  sheet has no caret, so it takes the READ VIEW's version of the air rule — the caret is
+  not a fact a file can carry, and which pictures are ONE ROW is the one thing the passes
+  must never disagree about.
+- `drawExportPrintRow` builds the three shapes `PersonalPrintArrangement` builds: a pair
+  side by side; a three as the upright frame — whichever member's size asked to stand,
+  taken at least as wide as the widest print beside it — with the other two stacked in a
+  column that keeps each print's OWN share; and a four as two lines of two, each line
+  weighing itself as the page's Column of Rows does. The gap is the canvas' own
+  `PRINT_ROW_GAP`, and a cell's height is its own size's picture plus `PDF_PRINT_BAND` and
+  its label's room.
+- `drawExportPrintBeside` is the pair the page draws for a lone SMALL print: the print
+  takes `printBesideShare(size)` of the measure, its line takes the rest, 10dp between —
+  and the line is laid out at THAT column's width, so it wraps where the page wraps it.
+- The row is decided and drawn as ONE block (it fits the sheet or starts the next one),
+  and `drawExportLines` places a line's cells where the row decided and moves the sheet
+  once, by the line's own height — that is what `PdfRun.setCursor` exists for.
+- Four canvas members became `internal` for this, so the sheet cannot invent its own
+  numbers: `PRINT_ROW_LIMIT`, `PRINT_ROW_GAP`, `printBesideShare` (and, from the previous
+  pass, `personalPrintHeight` / `PersonalPhotoSize` were already reachable).
+
+**Not a parity item, and named rather than half-built:** a BUBBLE voice look's tinted
+bubble, and the voice strip's tap-to-seek — nothing on paper can be scrubbed.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on both touched files (the character scanner, not a regex).
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
+### Still owed
+
+**The Dev settings source-fetch lab** (asked two prompts ago, answered "Every content
+source") is still NOT built — it is a new surface, so it needs the new-feature question
+(Dev-page section, or out of the app) before it is written.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

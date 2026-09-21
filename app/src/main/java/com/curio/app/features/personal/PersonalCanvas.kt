@@ -4290,7 +4290,7 @@ internal fun personalPrintHeight(size: PersonalPhotoSize): Dp = when (size) {
  * writing always keeps at least half the measure: Small 44/56, Small portrait
  * 36/64, Half and up an even half.
  */
-private fun printBesideShare(size: PersonalPhotoSize): Float =
+internal fun printBesideShare(size: PersonalPhotoSize): Float =
     size.fraction.coerceIn(0.30f, 0.50f)
 
 // ── ONE ROW OF PRINTS (v396) ──────────────────────────────────────────────
@@ -4309,8 +4309,13 @@ private fun printBesideShare(size: PersonalPhotoSize): Float =
 // entirely (a page-wide picture is its own row), and an UPRIGHT size claims the
 // tall slot of a three. Everything else about a print is untouched.
 
-/** How many prints one row holds before the next row starts. */
-private const val PRINT_ROW_LIMIT = 4
+/**
+ * How many prints one row holds before the next row starts.
+ *
+ * v427 — `internal` for the same reason [PRINT_ROW_GAP] is: the sheet builds the
+ * page's own rows, so it must not decide for itself how long a row may be.
+ */
+internal const val PRINT_ROW_LIMIT = 4
 
 /**
  * v427 — IS THIS ROW JUST AIR BETWEEN TWO PRINTS?
@@ -4333,8 +4338,15 @@ private fun printRowGapSteppable(state: PersonalEditorState, id: String): Boolea
     return state.selection(id) == null
 }
 
-/** The row's own gap — the pair's gap, shared by every shape. */
-private val PRINT_ROW_GAP = 8.dp
+/**
+ * The row's own gap — the pair's gap, shared by every shape.
+ *
+ * v427 — `internal`, because the SHEET lays a row out too (see
+ * `PersonalExport.drawExportPrintRow`): a row on paper with a gap of its own is a
+ * second drawing of the page's own row, which is exactly what the export is not
+ * allowed to be.
+ */
+internal val PRINT_ROW_GAP = 8.dp
 
 // A row's cells have no heights of their own any more (v400): each print takes
 // ITS OWN size's height and its own size's share of the measure, so the sizes a

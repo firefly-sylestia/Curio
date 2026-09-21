@@ -9854,12 +9854,32 @@ scheme role means something different there than in the app's own schemes.
     filled pill and a bar chart) is what the member reported as "the waves are
     also not visible as it is in journal eye view".
 
-  Still the sheet's own, and known: the ROWS a run of prints makes (a stack of
-  two, three or four is drawn as separate full-width prints on paper), the
-  beside-the-writing pair, a bubble look's tinted bubble, and the voice strip's
-  tap-to-seek (nothing on paper can be scrubbed — see the member's own question
-  about an interactive PDF). Those are the next parity pass, not a licence to
-  draw a second version of anything.
+  - **A ROW OF PRINTS IS THE PAGE'S OWN ROW (v427, second pass).** `exportPrintPlan`
+    runs the page's own grouping pass over the document — a run of prints up to
+    `PRINT_ROW_LIMIT`, stepping over blank rows that are nobody's place, and a
+    lone SMALL print taking the line under it as its companion — and
+    `drawExportPrintRow` builds the same SHAPES `PersonalPrintArrangement`
+    builds: a pair side by side, a three as the upright frame (whichever member's
+    size asked to stand, at least as wide as the widest print beside it) with the
+    other two stacked in a column that keeps each print's OWN share, and a four as
+    two lines of two (each line weighing itself, as the page's Column of Rows
+    does). The gap is the canvas' `PRINT_ROW_GAP`, the beside share is the
+    canvas' `printBesideShare`, a cell's height is its own size's picture plus
+    `PDF_PRINT_BAND` and its label's room, and the row is drawn as ONE block: it
+    either fits the sheet or it starts the next one. `drawExportLines` places a
+    line's cells where the row decided and moves the sheet once, by the line's own
+    height (`PdfRun.setCursor` exists for that; `advance` can only add) — a
+    per-print cursor move cannot put the second half of a pair on the first's line.
+    The beside pair draws its line with `exportLayout` at the column's own width and
+    clips it to the row, so the words wrap where the page wraps them. **The sheet
+    must keep asking the canvas for every one of these numbers** (`PRINT_ROW_GAP`,
+    `PRINT_ROW_LIMIT`, `printBesideShare`, `personalPrintHeight`, `PersonalPhotoSize`)
+    — they are `internal` for exactly this.
+
+  Still the sheet's own, and known: a BUBBLE voice look's tinted bubble, and the
+  voice strip's tap-to-seek (nothing on paper can be scrubbed — see the member's own
+  question about an interactive PDF). Those are the next parity pass, not a licence
+  to draw a second version of anything.
 - **A WORD IN THE READING VIEW OWNS ITS COLOUR (v427).** The eye view's writing
   came out black in every theme, and only where the page was dark, because of one
   thing: `PersonalDocView`'s `Text` set a `TextStyle` with NO colour, and
