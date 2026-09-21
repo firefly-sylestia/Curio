@@ -1,4 +1,13 @@
 FIX:
+- Writing: the words read back in dark mode are the page's own ink — a plain word carried no colour at all, so it fell back to the ink Compose uses outside a card (black) and the eye view was dark text on a dark page; the reading side sets the colour it draws with everywhere now.
+- Writing: a picture leaves for paper as the page draws it — the sheet fitted the whole photograph into a box where the page crops it to the size's own frame, so a Small print or a portrait frame came out as a different picture at a height the page never gave it; the frame, the pad and the crop are the page's own now, and a photograph shot sideways prints upright instead of lying down.
+- Writing: a voice note's wave on paper is the page's own drawing — the sheet drew a lookalike (a filled pill and a bar chart of the sound), so a note printed as a different object at a different weight; the strip is the page's own row and the wave is the page's own stroke, drawn from the same code the page uses.
+- Writing: the text bar shows what it is holding — its reach washes the picked rows on the page, where it counted "4 of 12 rows" while the page showed nothing.
+
+ADD:
+- Writing: the text bar's reach goes letter by letter — Letters mode picks a run of characters inside the line with the arrows moving it a letter at a time, All letters takes the whole line, and Cut, Copy and Paste act on exactly those characters.
+
+FIX:
 - Home: the drawer's star map is a night sky now — the constellations wear the two lanes' own colours instead of one grey, each line stops at the glow of the star it joins (and a join long enough to cross the sky is not drawn at all), every star's halo is a four-step bloom where there were three flat rings, the sky itself is taller with the stars spread into it, and the "N of N lanes explored" line under it is gone (the stars already say it).
 - Reveal: the previews on a topic read properly again — a book's synopsis teaser, an album's track list, a series or anime's synopsis and episode rows, and the chapter chips all sit on a card tinted with the topic's own colour, while their words were wearing the inks meant for the UNTINTED page; each card now asks its own fill what reads on it, in light and dark alike.
 

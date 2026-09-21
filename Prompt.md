@@ -484,6 +484,78 @@ printable one it shipped with.
 - The voice note's geometry on paper (a pill `body × 2.3`, its clock at `body × 0.85`) is
   still the sheet's own — asked for as body / leading / caption face, so untouched.
 
+## 10. Request — the eye view's ink, the PDF's prints and waves, the bar's letter reach
+
+**The ask (member):** *"still in journal eye view the text writing have dark black texts,
+and in pdf export the photos are not visible as they are in the preview of journal. and the
+waves are also not visible as it is in journal eye view. also is it possible to make the pdf
+interactable. also the select tools doesnt hihglight whats selecting and why theres onl row
+selection i also want letter by letter too. push the previous one"*
+
+**The previous one** was already pushed (`2d40d542`, the star map) before this batch started;
+the red-build fix (`34065a99`) and the gesture removal (`d87efad1`) are in `origin/main` too.
+
+### 1. The eye view's black text — ROOT CAUSE FOUND (the same class as the reader's v422 ruling)
+
+Not a theme fault at all, and not the quote / link / mood inks that were fixed in `8338e1f8`.
+The read view's `Text` set a `TextStyle` with **no colour**, and `personalAnnotated` coloured
+only the FLAGGED runs — so a plain word carried no colour and fell through to
+`LocalContentColor`, which outside a `Surface` is **Compose's own default, `Color.Black`**.
+The writing page passes `color = ink` in its `bodyStyle` (that is why the pen was always
+fine), and the reading page does not (that is why the eye was black — in every theme, and
+invisible only where the page is dark). Two layers of fix: a `SpanStyle(color = ink)` over the
+whole string in `personalAnnotated`, and `color = ink` on all three read-view styles.
+
+### 2. The PDF's prints and waves
+
+Both were the sheet's SECOND DRAWING of a block the page owns:
+
+- **A print.** The page: a frame `fraction × personalPrintHeight(size)` with the photograph
+  CROPPED into it. The sheet: decode the whole file, fit it inside a box, draw it whole — so
+  a Small print or a portrait frame left the journal as a different picture at an aspect and
+  a height the page never gave it. Now the frame, the 7dp pad, the centre crop and the label
+  inside the frame are all the page's, and the decode returns the photograph UPRIGHT
+  (platform `ExifInterface`, as the page's own Coil path already did).
+- **A voice note.** The page draws a hand-drawn pulse (or the look the note wears); the sheet
+  drew a filled pill and a bar chart. `drawVoicePulse` / `drawVoiceWave` are `internal` now
+  and the sheet draws them through a `CanvasDrawScope` at `Density(PDF_UNITS_PER_SP)`, so the
+  page's own dp geometry lands at the sheet's own scale. The control follows the look, the
+  clock takes Fraunces at the page's alpha.
+
+**Not a parity item (the member's own question):** a PDF cannot be made interactive here.
+`android.graphics.pdf.PdfDocument` writes a flat sheet — no annotations, no link rectangles,
+no scripts — so tap-to-tick, tap-to-play and text selection cannot exist in the file. The
+interactive version of a page is the app's own read view; the PDF is its printed form. Doing
+more would mean a PDF library (a new dependency) for links only, which would still not make
+a tick box live. Left as it is, and said plainly rather than half-built.
+
+### 3. The text bar's reach — LETTER MODE, AND IT IS DRAWN
+
+- The bar's reach was rows only, which cannot pick a clause out of a line (the member:
+  "why theres only row selection i also want letter by letter too"). LETTER MODE adds a
+  window of characters inside the reach's FRONT row — one row on purpose, because a
+  character range across rows IS those rows. The arrows move the far end a letter at a time,
+  All letters takes the whole line, and Cut / Copy / Paste branch on the mode (Cut in letter
+  mode edits the line's own text and mask, remembering the removed window for Undo).
+- **The reach is now visible**, which is what it was missing: a picked row wears the page's
+  selection wash, and the picked letters are a `SpanStyle(background = …)` span added LAST in
+  `personalAnnotated` so the letters being picked are always the ones on show.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on the three touched files, with a character scanner that knows
+  Kotlin strings, raw strings, char literals and both comment kinds (a regex strip gives
+  false alarms — it did, on `PersonalVoice.kt`).
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
+### Still owed (from the previous batch)
+
+**The Dev settings source-fetch lab** ("add a api test fetching in dev settings", answered
+"Every content source") is NOT built — the gesture removal and the star map landed in that
+batch, this one carried the four items above. It is a new surface, so it needs the
+new-feature question first: whether a fetch lab should exist as a Dev-page section or stay
+out of the app entirely.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

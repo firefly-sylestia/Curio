@@ -1042,8 +1042,15 @@ private fun voiceReach(level: Float, bandHalf: Float): Float {
  * 3dp is a fuzzy band rather than a wave) and a stable hand wobble (a hash of the
  * sample's own index, never a random number, so the ink never crawls while the
  * note plays).
+ *
+ * v427 — it is `internal`, so A SHEET OF PAPER CAN DRAW THE NOTE THE PAGE
+ * DRAWS: the PDF used to draw its own lookalike of this (a filled pill and a row
+ * of rounded bars), a second drawing of the same note that drifted from the
+ * first — the member's "the waves are also not visible as it is in journal eye
+ * view". This stroke is now drawn on the sheet's own canvas too (see
+ * `drawExportVoice`), so the two cannot disagree again.
  */
-private fun DrawScope.drawVoicePulse(
+internal fun DrawScope.drawVoicePulse(
     samples: FloatArray,
     progress: Float,
     ink: Color,
@@ -1179,7 +1186,7 @@ private fun DrawScope.drawVoicePulse(
  * heard run is the SAME drawing in the accent, cut at the play head, in every one
  * of them: a bar that fills up is not part of a drawing, and neither is a knob.
  */
-private fun DrawScope.drawVoiceWave(
+internal fun DrawScope.drawVoiceWave(
     samples: FloatArray,
     progress: Float,
     ink: Color,

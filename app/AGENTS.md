@@ -9822,6 +9822,67 @@ scheme role means something different there than in the app's own schemes.
   the canvas does not have**: the export had its own table (a heading as body ×
   1.45, one 1.42 leading for every size, every caption in Lora, a box sized from
   the line) and that is precisely what drifted from the page it was drawing.
+- **…AND THE TWO DRAWINGS THE PAGE OWNS ARE DRAWN BY THE PAGE (v427).** A print
+  and a voice note are the two blocks the sheet used to DRAW ITS OWN VERSION of,
+  and each had drifted where the member could see it. Both are the page's now:
+  - **A PRINT IS A FRAME, NOT A FIT.** On the page a print is `size.fraction` of
+    the measure WIDE and `personalPrintHeight(size)` TALL, and the photograph is
+    **CROPPED** into it (`ContentScale.Crop`, `PersonalPagePhoto`). The sheet
+    decoded the whole file and FITTED it inside the box, so a print the member
+    had set to Small or to a portrait frame left the journal as a small complete
+    picture at an aspect and a height nothing on the page had given it (their
+    "in pdf export the photos are not visible as they are in the preview of
+    journal"). `drawExportPhoto` asks for the size's own frame (plus
+    `PDF_PRINT_PAD`, the canvas' 7dp), draws the picture with `drawBitmap(src,
+    dst)` over a centre-cropped `Rect` that covers the box, and puts the label
+    inside that frame — and `decodeExportBitmap(context, uri, w, h)` samples
+    against BOTH targets, because a cropped picture must be sharp along its
+    height too. **It also returns the photograph UPRIGHT** (`exportUpright`,
+    platform `android.media.ExifInterface`, the same treatment
+    `AdaptiveImageGallery` uses): the page paints through Coil, which reads EXIF,
+    while a bare `BitmapFactory` decode does not — so a sideways shot printed
+    lying down.
+  - **A VOICE NOTE IS THE PAGE'S OWN STROKE.** `drawVoicePulse` and
+    `drawVoiceWave` in `PersonalVoice.kt` are `internal` for exactly this: the
+    sheet draws the note through a `CanvasDrawScope` sized at `Density(
+    PDF_UNITS_PER_SP)` (so the page's own dp geometry lands at the sheet's own
+    scale), translated to the strip's place, with `progress = 0f`. The control
+    follows the look (`style.drawsPulse` / `MINIMAL` = the drawn mark in ink, no
+    disc; the rest wear the accent fill with the paper mark) and the clock is
+    `fonts.display` for the drawn looks at the page's own alpha. **Never
+    re-invent the wave, the bars or the pulse on the sheet** — that lookalike (a
+    filled pill and a bar chart) is what the member reported as "the waves are
+    also not visible as it is in journal eye view".
+
+  Still the sheet's own, and known: the ROWS a run of prints makes (a stack of
+  two, three or four is drawn as separate full-width prints on paper), the
+  beside-the-writing pair, a bubble look's tinted bubble, and the voice strip's
+  tap-to-seek (nothing on paper can be scrubbed — see the member's own question
+  about an interactive PDF). Those are the next parity pass, not a licence to
+  draw a second version of anything.
+- **A WORD IN THE READING VIEW OWNS ITS COLOUR (v427).** The eye view's writing
+  came out black in every theme, and only where the page was dark, because of one
+  thing: `PersonalDocView`'s `Text` set a `TextStyle` with NO colour, and
+  `personalAnnotated` only coloured the FLAGGED runs — so a plain word carried no
+  colour at all and fell through to `LocalContentColor`, which outside a
+  `Surface` is **Compose's own default, `Color.Black`**. The writing page passed
+  a colour of its own (`bodyStyle`), which is why the fault only ever showed on
+  the reading side (the member: "still in journal eye view the text writing have
+  dark black texts"). Two rules hold it shut: `personalAnnotated` lays a
+  `SpanStyle(color = ink)` over the WHOLE string before the flags, and every
+  read-view `TextStyle` sets `color = ink` as well. **A read-only surface must
+  never rely on an inherited ink** — `LocalContentColor` is black unless a
+  `Surface` says otherwise.
+- **THE PAGE BAR'S REACH HAS TWO UNITS (v427).** The bar counts ROWS
+  (`pageRange`, `pageRowPicked`) and, in LETTER MODE (`pageLetterMode`,
+  `pageCharRange`, one row only — a character range across rows IS those rows),
+  the characters inside the reach's FRONT row. `pageSelectionText`,
+  `cutPageSelection` / `cutPageLetters` and `pastePageText` / `pastePageLetters`
+  all branch on the mode, and Cut in letter mode edits the LINE (its text and its
+  mask) instead of removing rows. **The reach is DRAWN, or the bar is lying**: a
+  picked row wears the page's selection wash, and the picked letters are a
+  `SpanStyle(background = selectionWash)` span added LAST in `personalAnnotated`
+  (the member's "the select tools doesnt highlight whats selecting").
 
 
 ## Child DOX Index

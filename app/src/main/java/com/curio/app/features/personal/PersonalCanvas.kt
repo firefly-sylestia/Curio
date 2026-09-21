@@ -702,6 +702,18 @@ internal fun DrawScope.drawPersonalCheckbox(
  * expects — a touch smaller, in the quote ink, with the rule drawn beside the
  * block by the caller. Bold / italic / underline still stack on top of it, so
  * "quote the line and embolden the first words" reads exactly as written.
+ *
+ * v427 — AND EVERY WORD WEARS THE PAGE'S INK, ROOTED IN THE TEXT ITSELF.
+ *
+ * Only a FLAGGED run was coloured here, so a plain word carried NO colour at
+ * all: an unstyled span renders as `TextStyle.color` and, where the style sets
+ * none either, as `LocalContentColor` — which outside a `Surface` is Compose's
+ * own default, **`Color.Black`**. The writing page passes a colour of its own
+ * (see the editor's `bodyStyle`), so the fault only ever showed on the READING
+ * side, and only where the page is dark: the member's "still in journal eye view
+ * the text writing have dark black texts". The base style is laid over the whole
+ * string now, before the flags, so the annotated text is self-sufficient — no
+ * consumer can inherit a foreign ink again, whatever it does or does not set.
  */
 internal fun personalAnnotated(
     text: String,
@@ -710,9 +722,23 @@ internal fun personalAnnotated(
     quoteInk: Color,
     quoteSize: TextUnit,
     titleSize: TextUnit = TextUnit.Unspecified,
-    smallSize: TextUnit = TextUnit.Unspecified
+    smallSize: TextUnit = TextUnit.Unspecified,
+    /**
+     * v427 — THE BAR'S LETTER REACH, WASHED UNDER THE WORDS.
+     *
+     * The page bar could say "12 of 68 letters" while the page showed nothing at
+     * all, which is the member's "the select tools doesnt highlight whats
+     * selecting". A window of characters is a span like any other here, so it is
+     * drawn with the one mechanism this file already has for a wash under words
+     * (a marker pen's own background), and it is added LAST so the letters the
+     * member is picking are the ones they can see.
+     */
+    selectionChars: TextRange? = null,
+    selectionWash: Color = Color.Unspecified
 ): AnnotatedString = androidx.compose.ui.text.buildAnnotatedString {
     append(text)
+    // The page's ink under everything; a flagged run overrides it below.
+    if (text.isNotEmpty()) addStyle(SpanStyle(color = ink), 0, text.length)
     var i = 0
     while (i < text.length) {
         val flags = mask.getOrElse(i) { 0 }
@@ -765,6 +791,14 @@ internal fun personalAnnotated(
             )
         }
         i = j
+    }
+    // The bar's letter reach, over everything else — see the parameter's note.
+    selectionChars?.let { reach ->
+        if (selectionWash != Color.Unspecified && !reach.collapsed) {
+            val from = reach.min.coerceIn(0, text.length)
+            val to = reach.max.coerceIn(0, text.length)
+            if (to > from) addStyle(SpanStyle(background = selectionWash), from, to)
+        }
     }
 }
 
@@ -1792,17 +1826,24 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     fun togglePageEditBar() {
         pageEditBarOpen = !pageEditBarOpen
-        if (!pageEditBarOpen) pageRange = IntRange.EMPTY
+        if (!pageEditBarOpen) {
+            pageRange = IntRange.EMPTY
+            pageLetterMode = false
+            pageCharRange = TextRange.Zero
+        }
     }
 
     fun closePageEditBar() {
         pageEditBarOpen = false
         pageRange = IntRange.EMPTY
+        pageLetterMode = false
+        pageCharRange = TextRange.Zero
     }
 
     /** The whole page, as the selection (the bar's own Select all). */
     fun selectWholePage() {
         pageRange = if (order.isEmpty()) IntRange.EMPTY else 0..order.lastIndex
+        offerPageLetters()
     }
 
     /** One row more on each end of the reach — the arrow that says "more". */
@@ -1814,6 +1855,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         pageRange = (pageRange.first - 1).coerceAtLeast(0)..
             (pageRange.last + 1).coerceAtMost(order.lastIndex)
+        offerPageLetters()
     }
 
     /** One row less, off the end of the reach — the arrow that says "less". */
@@ -1821,21 +1863,140 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val range = pageRange
         if (range.isEmpty()) return
         pageRange = if (range.first >= range.last) IntRange.EMPTY else range.first..(range.last - 1)
+        offerPageLetters()
+    }
+
+    /**
+     * v427 — AND THE REACH GOES DOWN TO A LETTER.
+     *
+     * The bar's reach was rows and only rows, which cannot pick a clause out of
+     * a line — the member's "why theres only row selection i also want letter by
+     * letter too". LETTER MODE adds a window of characters INSIDE the reach's own
+     * front row: the arrows move the window's far end one letter at a time, so a
+     * run of words can be cut or copied exactly, and the page washes the letters
+     * they have picked (see [pageRowCharRange]).
+     *
+     * One row, on purpose: a character range that crossed rows IS those rows, and
+     * the row mode already says it — so the two modes stay honest about what each
+     * one can express instead of pretending to be one continuous selection.
+     */
+    var pageLetterMode by mutableStateOf(false)
+        private set
+
+    /** The window of letters, inside the reach's own first row. */
+    var pageCharRange by mutableStateOf(TextRange.Zero)
+        private set
+
+    /** The row the letter reach lives in — the front row of the row reach. */
+    private fun pageLetterRowId(): String? =
+        if (pageRange.isEmpty()) null else order.getOrNull(pageRange.first)
+
+    /** How long that row's writing is. */
+    private fun pageLetterRowLength(): Int =
+        pageLetterRowId()?.let { blocks[it]?.text?.length ?: 0 } ?: 0
+
+    /** Phone the letter window in after the row reach moved under it. */
+    private fun offerPageLetters() {
+        if (!pageLetterMode) return
+        val length = pageLetterRowLength()
+        pageCharRange = if (length == 0) TextRange.Zero else TextRange(0, 1.coerceAtMost(length))
+    }
+
+    fun togglePageLetterMode() {
+        pageLetterMode = !pageLetterMode
+        if (!pageLetterMode) {
+            pageCharRange = TextRange.Zero
+            return
+        }
+        // A letter needs a line to live in: with nothing picked, the whole page
+        // is offered first, exactly as Cut and Copy offer it.
+        if (pageRange.isEmpty()) selectWholePage()
+        offerPageLetters()
+    }
+
+    /** One letter more at the window's end — the letter mode's "more". */
+    fun growPageChar() {
+        val length = pageLetterRowLength()
+        if (length == 0) return
+        val range = pageCharRange
+        pageCharRange = if (range.max >= length) {
+            // At the row's end the WINDOW STARTS EARLIER instead: the arrows keep
+            // meaning "more" without the reach leaving the line it belongs to.
+            TextRange((range.min - 1).coerceAtLeast(0), range.max)
+        } else {
+            TextRange(range.min, range.max + 1)
+        }
+    }
+
+    /** One letter less, off the end of the window. */
+    fun shrinkPageChar() {
+        val range = pageCharRange
+        if (range.max - range.min <= 1) {
+            if (range.min > 0) pageCharRange = TextRange(range.min - 1, range.max)
+            return
+        }
+        pageCharRange = TextRange(range.min, range.max - 1)
+    }
+
+    /** The whole of the letter row's writing, as the letter reach. */
+    fun selectAllPageLetters() {
+        val length = pageLetterRowLength()
+        pageCharRange = if (length == 0) TextRange.Zero else TextRange(0, length)
     }
 
     /** How many rows the bar is holding — what the arrows count out loud. */
     val pageSelectionCount: Int
         get() = if (pageRange.isEmpty()) 0 else pageRange.last - pageRange.first + 1
 
+    /** How many LETTERS the letter reach is holding, and how many the row has. */
+    val pageLetterCount: Int
+        get() = (pageCharRange.max - pageCharRange.min).coerceAtLeast(0)
+
+    val pageLetterTotal: Int get() = pageLetterRowLength()
+
+    /**
+     * IS THIS ROW IN THE BAR'S REACH? The page WASHES a picked row (see
+     * [PersonalTextBlock]'s `selectionWash`), which is the highlight the bar was
+     * missing: it said "4 of 12 rows" while the page showed nothing at all.
+     */
+    fun pageRowPicked(index: Int): Boolean =
+        !pageRange.isEmpty() && index >= pageRange.first && index <= pageRange.last
+
+    /**
+     * THE LETTERS PICKED INSIDE [index] — or null, which is every row but the one
+     * the letter window sits in. Drawn as a wash behind exactly those characters
+     * (see [personalAnnotated]), so the reach is visible to the letter.
+     */
+    fun pageRowCharRange(index: Int): TextRange? {
+        if (!pageLetterMode) return null
+        if (pageRange.isEmpty() || index != pageRange.first) return null
+        val text = blocks[order.getOrNull(index) ?: return null]?.text.orEmpty()
+        if (text.isEmpty()) return null
+        val from = pageCharRange.min.coerceIn(0, text.length)
+        val to = pageCharRange.max.coerceIn(0, text.length)
+        return if (to > from) TextRange(from, to) else null
+    }
+
     private fun selectedRowIds(): List<String> =
         if (pageRange.isEmpty()) emptyList() else pageRange.mapNotNull { order.getOrNull(it) }
 
-    /** The selection's words, top to bottom (a print or a voice note holds none). */
-    fun pageSelectionText(): String = selectedRowIds()
-        .mapNotNull { blocks[it] }
-        .filter { !it.isPhoto && it.audio == null }
-        .joinToString("\n") { it.text }
-        .trim('\n')
+    /**
+     * The selection's words, top to bottom (a print or a voice note holds none).
+     * In LETTER MODE it is the characters the window holds, and nothing else.
+     */
+    fun pageSelectionText(): String = if (pageLetterMode) {
+        val id = pageLetterRowId() ?: return ""
+        val text = blocks[id]?.text.orEmpty()
+        val from = pageCharRange.min.coerceIn(0, text.length)
+        val to = pageCharRange.max.coerceIn(0, text.length)
+        if (to > from) text.substring(from, to) else ""
+    } else {
+        selectedRowIds()
+            .mapNotNull { blocks[it] }
+            .filter { !it.isPhoto && it.audio == null }
+            .joinToString("\n") { it.text }
+            .trim('\n')
+    }
 
     private fun rememberPageUndo(undo: () -> Unit) {
         if (pageUndo.size >= 8) pageUndo.removeFirst()
@@ -1851,10 +2012,40 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** Copy: the selection's words, and the page is left exactly as it is. */
     fun copyPageSelection(): String = pageSelectionText()
 
+    /**
+     * CUT, in LETTER MODE: the characters the window holds leave the LINE they
+     * were picked out of, and nothing else on the page moves. Undo puts them
+     * back exactly where they were taken from.
+     */
+    private fun cutPageLetters(): String {
+        val id = pageLetterRowId() ?: return ""
+        val block = blocks[id] ?: return ""
+        val range = pageRowCharRange(pageRange.first) ?: return ""
+        val words = block.text
+        val taken = words.substring(range.min, range.max)
+        val mask = mask(id)
+        rememberPageUndo {
+            blocks[id] = blocks[id]?.copy(text = words) ?: block
+            masks[id] = mask
+            pageCharRange = range
+            onDocChanged(doc())
+        }
+        val keptMask = IntArray(words.length - taken.length) { index ->
+            mask.getOrElse(if (index < range.min) index else index + taken.length) { 0 }
+        }
+        blocks[id] = block.copy(text = words.removeRange(range.min, range.max))
+        masks[id] = keptMask
+        selections[id] = TextRange(range.min)
+        pageCharRange = TextRange(range.min, range.min)
+        onDocChanged(doc())
+        return taken
+    }
+
     /** Cut: the selection's words go back to the caller (the clipboard) and its
      *  ROWS leave the page — prints and voice notes included, because the member
      *  picked them. */
     fun cutPageSelection(): String {
+        if (pageLetterMode) return cutPageLetters()
         val ids = selectedRowIds()
         if (ids.isEmpty()) return ""
         val text = pageSelectionText()
@@ -1885,9 +2076,15 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /** Paste: every line of [text] arrives as its own row, under the selection
-     *  (or at the foot of the page when nothing is picked). */
+     *  (or at the foot of the page when nothing is picked). In LETTER MODE it
+     *  lands INSIDE the line the window is in, at the window's own place — which
+     *  is what pasting into a picked run of letters means. */
     fun pastePageText(text: String) {
         if (text.isEmpty()) return
+        if (pageLetterMode) {
+            pastePageLetters(text)
+            return
+        }
         val at = if (pageRange.isEmpty()) order.size
                  else (pageRange.last + 1).coerceAtMost(order.size)
         val created = ArrayList<String>(4)
@@ -1908,6 +2105,40 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             created.add(block.id)
         }
         pageRange = IntRange.EMPTY
+        onDocChanged(doc())
+    }
+
+    /**
+     * Paste INTO the line the letter window is in: the window's characters give
+     * way to what was pasted, and the window then holds exactly what arrived, so
+     * the member can see where it landed and carry on from there.
+     */
+    private fun pastePageLetters(text: String) {
+        val id = pageLetterRowId() ?: return
+        val block = blocks[id] ?: return
+        val words = block.text
+        val mask = mask(id)
+        val at = pageCharRange.min.coerceIn(0, words.length)
+        val until = pageCharRange.max.coerceIn(at, words.length)
+        rememberPageUndo {
+            blocks[id] = blocks[id]?.copy(text = words) ?: block
+            masks[id] = mask
+            pageCharRange = TextRange(at, until)
+            onDocChanged(doc())
+        }
+        val inserted = text.replace('\n', ' ')
+        val next = words.substring(0, at) + inserted + words.substring(until)
+        val nextMask = emptyMask(next.length).also { fresh ->
+            for (index in 0 until at) if (index < mask.size) fresh[index] = mask[index]
+            for (index in until until words.length) {
+                val to = at + inserted.length + (index - until)
+                if (to < fresh.size && index < mask.size) fresh[to] = mask[index]
+            }
+        }
+        blocks[id] = block.copy(text = next)
+        masks[id] = nextMask
+        selections[id] = TextRange(at + inserted.length)
+        pageCharRange = TextRange(at, at + inserted.length)
         onDocChanged(doc())
     }
 
@@ -3577,7 +3808,15 @@ internal fun PersonalCanvas(
                         quoteJoinAbove = quoteAbove,
                         quoteJoinBelow = quoteBelow,
                         onTitlePosition = titleReport,
-                        selectionWash = if (state.pageSelected) selectionWash else Color.Transparent
+                        // v427 — AND THE BAR'S REACH WEARS THE SAME WASH, so the
+                        // page shows what the bar is counting (both the rows it
+                        // has picked and, inside the front one, the letters).
+                        selectionWash = if (state.pageSelected || state.pageRowPicked(index)) {
+                            selectionWash
+                        } else {
+                            Color.Transparent
+                        },
+                        selectionChars = state.pageRowCharRange(index)
                     )
                 }
                 }
@@ -3592,8 +3831,14 @@ private fun PersonalTextBlock(
     id: String,
     state: PersonalEditorState,
     /** v389 — the page is SELECTED: this row wears the selection's own wash
-     *  (transparent on every ordinary page, so nothing changes there). */
+     *  (transparent on every ordinary page, so nothing changes there).
+     *
+     *  v427 — and the bar's own reach wears it too (see `pageRowPicked`), which
+     *  is the highlight the text bar was missing: it said "4 of 12 rows" while
+     *  the page showed nothing. */
     selectionWash: Color = Color.Transparent,
+    /** The LETTERS of this row the bar is holding (see `pageRowCharRange`). */
+    selectionChars: TextRange? = null,
     ink: Color,
     accent: Color,
     enabled: Boolean,
@@ -3698,7 +3943,13 @@ private fun PersonalTextBlock(
         annotatedString = personalAnnotated(
             text, mask, ink, quoteInk, QUOTE_BODY_SIZE,
             titleSize = if (isTitle) TextUnit.Unspecified else TITLE_BODY_SIZE,
-            smallSize = if (isSmall) TextUnit.Unspecified else SMALL_BODY_SIZE
+            smallSize = if (isSmall) TextUnit.Unspecified else SMALL_BODY_SIZE,
+            // The bar's own reach — the letters it is holding, washed in the
+            // same colour the page washes a whole picked row with (null on every
+            // page whose bar is closed, which is every page but the one being
+            // edited).
+            selectionChars = selectionChars,
+            selectionWash = selectionWash
         ),
         selection = (state.selection(id) ?: TextRange(text.length))
             .let { if (it.max > text.length) TextRange(text.length) else it }
@@ -4809,12 +5060,19 @@ internal fun PersonalDocView(
                             fontSize = TITLE_VIEW_SIZE,
                             lineHeight = TITLE_VIEW_LINE,
                             fontWeight = FontWeight.SemiBold,
+                            // v427 — the read view sets its ink HERE as well as in
+                            // the annotated text: a style with no colour leaves a
+                            // word to `LocalContentColor`, which is Compose's
+                            // black outside a `Surface` — the eye view's own
+                            // "dark black texts" (see [personalAnnotated]).
+                            color = ink,
                             textAlign = alignOf
                         )
                         isSmall -> TextStyle(
                             fontFamily = WritingFontFamily,
                             fontSize = SMALL_VIEW_SIZE,
                             lineHeight = SMALL_VIEW_LINE,
+                            color = ink,
                             textAlign = alignOf
                         )
                         else -> TextStyle(
@@ -4825,6 +5083,7 @@ internal fun PersonalDocView(
                             } else {
                                 BODY_VIEW_LINE
                             },
+                            color = ink,
                             textAlign = alignOf
                         )
                     },
@@ -5101,6 +5360,20 @@ private fun PersonalPageEditBar(
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val picked = state.pageSelectionCount
     val rows = state.blockIds.size
+    // v427 — THE REACH HAS TWO UNITS (see the state's own note): the ROWS a
+    // member picks a part of the page by, and the LETTERS they pick a part of a
+    // LINE by. The bar says which one it is counting, so "4 of 12" is never
+    // ambiguous about what four of twelve.
+    val letters = state.pageLetterMode
+    val letterCount = state.pageLetterCount
+    val letterTotal = state.pageLetterTotal
+    val hasReach = if (letters) letterCount > 0 else picked > 0
+    // Cut and Copy with an empty reach OFFER one first — the whole page in row
+    // mode, the whole line in letter mode — which is the member's two-tap flow:
+    // the first tap says how much, the second one does it.
+    val offerReach: () -> Unit = {
+        if (letters) state.selectAllPageLetters() else state.selectWholePage()
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -5115,19 +5388,37 @@ private fun PersonalPageEditBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            PageTextChip("◀", enabled = picked > 0, accent = ink) {
-                state.shrinkPageSelection()
+            PageTextChip(if (letters) "Letters" else "Rows", accent = accent) {
+                state.togglePageLetterMode()
+            }
+            PageTextChip(
+                "◀",
+                enabled = if (letters) letterCount > 1 else picked > 0,
+                accent = ink
+            ) {
+                if (letters) state.shrinkPageChar() else state.shrinkPageSelection()
             }
             Text(
-                text = if (picked == 0) "Nothing picked" else "$picked of $rows rows",
+                text = when {
+                    letters && letterTotal == 0 -> "Nothing picked"
+                    letters -> "$letterCount of $letterTotal letters"
+                    picked == 0 -> "Nothing picked"
+                    else -> "$picked of $rows rows"
+                },
                 style = MaterialTheme.typography.labelSmall,
                 color = muted,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
-            PageTextChip("▶", enabled = picked < rows, accent = ink) {
-                state.growPageSelection()
+            PageTextChip(
+                "▶",
+                enabled = if (letters) letterCount < letterTotal else picked < rows,
+                accent = ink
+            ) {
+                if (letters) state.growPageChar() else state.growPageSelection()
             }
-            PageTextChip("All rows", accent = ink) { state.selectWholePage() }
+            PageTextChip(if (letters) "All letters" else "All rows", accent = ink) {
+                if (letters) state.selectAllPageLetters() else state.selectWholePage()
+            }
             PageTextChip("Done", accent = accent) { state.closePageEditBar() }
         }
         // ── THE ACTIONS ─────────────────────────────────────────────────
@@ -5138,17 +5429,17 @@ private fun PersonalPageEditBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            PageTextChip("Cut", enabled = rows > 0, accent = accent) {
-                if (picked == 0) {
-                    state.selectWholePage()
+            PageTextChip("Cut", enabled = true, accent = accent) {
+                if (!hasReach) {
+                    offerReach()
                 } else {
                     val text = state.cutPageSelection()
                     if (text.isNotEmpty()) clipboard.setText(AnnotatedString(text))
                 }
             }
-            PageTextChip("Copy", enabled = rows > 0, accent = accent) {
-                if (picked == 0) {
-                    state.selectWholePage()
+            PageTextChip("Copy", enabled = true, accent = accent) {
+                if (!hasReach) {
+                    offerReach()
                 } else {
                     val text = state.copyPageSelection()
                     if (text.isNotEmpty()) {

@@ -5,12 +5,15 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.graphics.text.LineBreaker
+import android.media.ExifInterface
 import android.net.Uri
 import android.text.Layout
 import android.text.SpannableString
@@ -29,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
@@ -249,6 +253,21 @@ private val PDF_UNITS_PER_SP =
 /** One of the canvas' sizes, in the sheet's own units. */
 private fun pdfPx(sp: TextUnit): Float = sp.value * PDF_UNITS_PER_SP
 
+/**
+ * One canvas DP, in the sheet's own units.
+ *
+ * v427 — the sheet used to hold two scales: TEXT came from the canvas (`pdfPx`)
+ * while the pictures and the voice notes were drawn at sizes the sheet invented
+ * (`PDF_BODY_SIZE * 2.3` for a strip, a fitted box for a print). Everything a page
+ * draws in dp — a print's frame height, the pad inside it, the wave's own strip
+ * — is read through here now, so one canvas dp is one sheet unit for a drawing as
+ * well as for a word (see [PDF_PAGE_MEASURE_DP]).
+ */
+private fun pdfDp(dp: Float): Float = dp * PDF_UNITS_PER_SP
+
+/** The pad inside a print's paper frame — [PersonalCanvas]'s own 7dp. */
+private val PDF_PRINT_PAD = pdfDp(7f)
+
 /** The sheet's body — the page's read-back body, at the sheet's measure. */
 private val PDF_BODY_SIZE = pdfPx(BODY_VIEW_SIZE)
 
@@ -430,7 +449,7 @@ internal fun writePersonalPdf(
         when {
             block.isPhoto -> drawExportPhoto(context, fonts, run, block, ink)
 
-            block.isAudio -> drawExportVoice(run, block, paper, ink, accent)
+            block.isAudio -> drawExportVoice(fonts, run, block, paper, ink, accent)
 
             block.text.isBlank() -> Unit
 
@@ -600,7 +619,28 @@ private fun drawExportLayout(run: PdfRun, layout: StaticLayout, gap: Float) {
     }
 }
 
-/** A photograph, at its own size, with its own label under it. */
+/**
+ * A PRINT, AS THE PAGE DRAWS ONE.
+ *
+ * v427 — THE SHEET USED TO FIT THE PICTURE WHERE THE PAGE CROPS IT.
+ *
+ * A print on the page is a FRAME of two fixed numbers — the size's own share of
+ * the measure as its width ([PersonalPhotoSize.fraction]) and the size's own
+ * height ([personalPrintHeight]) — and the photograph is CROPPED to fill it
+ * (`ContentScale.Crop`, see `PersonalPagePhoto`). The sheet read the photograph
+ * the other way round: it decoded the whole file, fitted all of it inside the
+ * box and drew it whole. So the same print the member looked at — a letterbox
+ * band of a photograph, or an upright frame of one — left the journal as a small
+ * complete picture, at its own aspect, at a height nothing on the page had ever
+ * given it: their "in pdf export the photos are not visible as they are in the
+ * preview of journal".
+ *
+ * The print is the page's own geometry now: the frame's width and height, the
+ * picture cropped to that frame exactly as `Crop` crops it, the frame's own pad,
+ * the label inside the frame — and the photograph arrives UPRIGHT, because the
+ * page renders it through Coil, which reads EXIF, while a bare `BitmapFactory`
+ * decode does not ([decodeExportBitmap]).
+ */
 private fun drawExportPhoto(
     context: Context,
     fonts: PdfFonts,
@@ -609,29 +649,13 @@ private fun drawExportPhoto(
     ink: Int
 ) {
     val uri = block.photo?.let { raw -> runCatching { Uri.parse(raw) }.getOrNull() } ?: return
-    val bitmap = decodeExportBitmap(context, uri, run.contentWidth) ?: return
-    // v427 — THE PRINT KEEPS THE SIZE THE PAGE GAVE IT.
-    //
-    // Every print was decoded at the page's OWN measure and scaled down only
-    // until it fitted, so a picture the member had set to Small, or to a portrait
-    // frame, left the journal as a page-wide photograph — the member's "the pdf
-    // isnt accurate, it doesnt show exactly as the journal view have". The box is
-    // the print's own share of the measure now ([PersonalPhotoSize]'s fraction —
-    // the same number the canvas splits a row of prints with), and the picture
-    // keeps its own aspect inside that box, so nothing is distorted and a Small
-    // print reads as small on paper exactly as it does on the page.
-    //
-    // The old clamp at 1f is gone with it: a small bitmap had to stay small, so a
-    // low-resolution picture printed as a stamp no matter which size it wore.
     val size = PersonalPhotoSize.fromKey(block.photoSize)
-    val boxWidth = (run.contentWidth.toFloat() * size.fraction).coerceAtLeast(1f)
-    val maxHeight = (run.bottom() - PDF_MARGIN) * 0.68f
-    val scale = minOf(
-        boxWidth / bitmap.width.toFloat(),
-        maxHeight / bitmap.height.toFloat()
-    )
-    val drawnWidth = bitmap.width * scale
-    val drawnHeight = bitmap.height * scale
+    // The page's own frame: its share of the measure, its own height, its pad.
+    val frameWidth = (run.contentWidth.toFloat() * size.fraction).coerceAtLeast(1f)
+    val innerWidth = (frameWidth - PDF_PRINT_PAD * 2f).coerceAtLeast(1f)
+    val frameHeight = pdfDp(personalPrintHeight(size).value)
+    val bitmap = decodeExportBitmap(context, uri, innerWidth.toInt(), frameHeight.toInt())
+        ?: return
     // v427 — THE LABEL IS THE PAGE'S LABEL.
     //
     // The face is the print's own ([PersonalCaptionFace]) and the size is the
@@ -669,7 +693,7 @@ private fun drawExportPhoto(
     val captionLine = if (caption.isEmpty()) {
         ""
     } else {
-        TextUtils.ellipsize(caption, captionPaint, boxWidth, TextUtils.TruncateAt.END).toString()
+        TextUtils.ellipsize(caption, captionPaint, innerWidth, TextUtils.TruncateAt.END).toString()
     }
     val hasCaption = captionLine.isNotEmpty()
     val hasStamp = stamp.isNotEmpty()
@@ -679,17 +703,31 @@ private fun drawExportPhoto(
         hasStamp -> stampPaint.textSize * 1.9f
         else -> 0f
     }
-    if (run.want(drawnHeight + captionRoom + 40f)) {
-        val left = run.left() + (run.contentWidth - drawnWidth) / 2f
+    if (run.want(frameHeight + captionRoom + 40f)) {
+        val frameLeft = run.left() + (run.contentWidth - frameWidth) / 2f
+        val left = frameLeft + PDF_PRINT_PAD
         val top = run.cursor
+        // THE CROP IS THE PAGE'S CROP: the picture is scaled so it COVERS the
+        // frame's inner box, then the middle of it is the part that shows — the
+        // same window `ContentScale.Crop` opens on the page, so a print keeps the
+        // shape it wears there whether the photograph is a panorama or upright.
+        val cover = maxOf(
+            innerWidth / bitmap.width.toFloat(),
+            frameHeight / bitmap.height.toFloat()
+        )
+        val sourceWidth = (innerWidth / cover).toInt().coerceIn(1, bitmap.width)
+        val sourceHeight = (frameHeight / cover).toInt().coerceIn(1, bitmap.height)
+        val sourceX = ((bitmap.width - sourceWidth) / 2f).toInt().coerceAtLeast(0)
+        val sourceY = ((bitmap.height - sourceHeight) / 2f).toInt().coerceAtLeast(0)
+        val source = Rect(sourceX, sourceY, sourceX + sourceWidth, sourceY + sourceHeight)
         run.surface().drawBitmap(
             bitmap,
-            null,
-            RectF(left, top, left + drawnWidth, top + drawnHeight),
+            source,
+            RectF(left, top, left + innerWidth, top + frameHeight),
             Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
         )
-        run.advance(drawnHeight + 26f)
-        val centre = run.left() + run.contentWidth / 2f
+        run.advance(frameHeight + 26f)
+        val centre = frameLeft + frameWidth / 2f
         if (hasCaption) {
             run.surface().drawText(captionLine, centre, run.cursor + captionPaint.textSize, captionPaint)
             run.advance(captionPaint.textSize * 1.7f)
@@ -703,64 +741,133 @@ private fun drawExportPhoto(
     bitmap.recycle()
 }
 
-/** A voice note as the page draws one: the play pill, the wave, the clock. */
-private fun drawExportVoice(run: PdfRun, block: PersonalBlock, paper: Int, ink: Int, accent: Int) {
-    val height = PDF_BODY_SIZE * 2.3f
-    if (!run.want(height + 22f)) return
-    val canvas = run.surface()
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    val top = run.cursor
-    val pillWidth = height * 1.7f
-    paint.color = accent
-    canvas.drawRoundRect(
-        RectF(run.left(), top, run.left() + pillWidth, top + height),
-        height / 2f,
-        height / 2f,
-        paint
-    )
-    // The mark in the paper's own colour: a play triangle is the one control a
-    // reader knows without being told.
-    val centreX = run.left() + pillWidth / 2f
-    val centreY = top + height / 2f
-    val mark = Path().apply {
-        moveTo(centreX - height * 0.11f, centreY - height * 0.19f)
-        lineTo(centreX + height * 0.19f, centreY)
-        lineTo(centreX - height * 0.11f, centreY + height * 0.19f)
-        close()
-    }
-    paint.color = paper
-    canvas.drawPath(mark, paint)
-
-    val bars = PersonalAudioBars.decode(block.audioBars)
+/**
+ * A VOICE NOTE AS THE PAGE DRAWS ONE — the page's OWN drawing.
+ *
+ * v427 — THE SHEET'S LOOKALIKE IS GONE. It drew a filled pill, a row of rounded
+ * bars and a plain UI clock, which is a SECOND drawing of the same note: the page
+ * draws a hand-drawn pulse (or one of the looks the member picked — see
+ * [drawVoiceWave]), so on paper the note came out as a different object at a
+ * different weight — the member's "the waves are also not visible as it is in
+ * journal eye view".
+ *
+ * The strip is the page's own row now, in the page's own order and at the page's
+ * own sizes: the note's control (a FILLED disc for the looks that carry one, a
+ * plain drawn mark for the two bare looks, which is what the page shows), the
+ * 34dp strip, and the clock in the editorial serif the drawn looks wear — and the
+ * WAVE itself is the page's own stroke, drawn by [drawVoicePulse] /
+ * [drawVoiceWave] on the sheet's canvas through a [CanvasDrawScope] sized at the
+ * sheet's own scale. One drawing, two surfaces, so they can never drift again.
+ */
+private fun drawExportVoice(
+    fonts: PdfFonts,
+    run: PdfRun,
+    block: PersonalBlock,
+    paper: Int,
+    ink: Int,
+    accent: Int
+) {
+    val style = PersonalVoiceStyle.fromKey(block.audioStyle)
+    val samples = PersonalAudioBars.decode(block.audioBars)
     val clock = formatRecordingTime(block.audioSeconds)
+    val control = pdfDp(38f)
+    val strip = pdfDp(34f)
     val clockPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ink
-        alpha = 190
-        textSize = PDF_BODY_SIZE * 0.85f
+        alpha = if (style.drawsPulse || style == PersonalVoiceStyle.MINIMAL) 209 else 179
+        typeface = if (style.drawsPulse || style == PersonalVoiceStyle.MINIMAL) {
+            fonts.display
+        } else {
+            null
+        }
+        textSize = pdfDp(12f)
         textAlign = Paint.Align.RIGHT
     }
-    val waveLeft = run.left() + pillWidth + 24f
-    val waveRight = run.right() - clockPaint.measureText(clock) - 24f
-    if (bars.isNotEmpty() && waveRight > waveLeft) {
-        val step = (waveRight - waveLeft) / bars.size
-        val barWidth = (step * 0.42f).coerceAtLeast(1.6f)
-        val wavePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = ink
-            alpha = 150
+    val rowHeight = control.coerceAtLeast(strip)
+    if (!run.want(rowHeight + 22f)) return
+    val canvas = run.surface()
+    val top = run.cursor
+    val centreY = top + rowHeight / 2f
+    // ── THE CONTROL, as the page's own note draws it ────────────────────
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    val bare = style.drawsPulse || style == PersonalVoiceStyle.MINIMAL
+    if (bare) {
+        // The two bare looks draw the mark in the wave's own ink and weight: no
+        // disc, because a Material disc beside a hand-drawn line is two drawings
+        // in one strip (the page's own ruling).
+        val stroke = (control * 0.10f).coerceAtLeast(1.6f)
+        paint.color = ink
+        paint.alpha = if (style.drawsPulse) 219 else 204
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = stroke
+        paint.strokeCap = Paint.Cap.ROUND
+        paint.strokeJoin = Paint.Join.ROUND
+        val half = control * 0.30f
+        val mark = Path().apply {
+            moveTo(run.left() + control * 0.28f, centreY - half * 0.78f)
+            lineTo(run.left() + control * 0.28f + half * 1.30f, centreY)
+            lineTo(run.left() + control * 0.28f, centreY + half * 0.78f)
+            close()
         }
-        bars.forEachIndexed { index, level ->
-            val reach = (level.coerceIn(0f, 1f) * 0.44f + 0.06f) * height * 0.72f
-            val x = waveLeft + step * index
-            canvas.drawRoundRect(
-                RectF(x, centreY - reach, x + barWidth, centreY + reach),
-                barWidth / 2f,
-                barWidth / 2f,
-                wavePaint
+        canvas.drawPath(mark, paint)
+        if (style == PersonalVoiceStyle.MINIMAL) {
+            paint.alpha = 66
+            canvas.drawCircle(
+                run.left() + control / 2f,
+                centreY,
+                (control / 2f - stroke / 2f).coerceAtLeast(1f),
+                paint
             )
         }
+    } else {
+        // The disc looks keep a real filled control (the pill, the bubble) — the
+        // same accent-with-paper-mark pairing the page shows.
+        paint.color = accent
+        val pill = if (style == PersonalVoiceStyle.PILL) control * 1.7f else control
+        canvas.drawRoundRect(
+            RectF(run.left(), centreY - control / 2f, run.left() + pill, centreY + control / 2f),
+            control / 2f,
+            control / 2f,
+            paint
+        )
+        val mark = Path().apply {
+            val cx = run.left() + pill / 2f
+            moveTo(cx - control * 0.10f, centreY - control * 0.17f)
+            lineTo(cx + control * 0.17f, centreY)
+            lineTo(cx - control * 0.10f, centreY + control * 0.17f)
+            close()
+        }
+        paint.color = paper
+        canvas.drawPath(mark, paint)
+    }
+    // ── THE WAVE, drawn by the page's own stroke ────────────────────────
+    val waveLeft = run.left() + control + pdfDp(10f)
+    val waveRight = run.right() - clockPaint.measureText(clock) - pdfDp(10f)
+    if (samples.isNotEmpty() && waveRight > waveLeft) {
+        // The strip is scaled the way the sheet measures everything (one canvas
+        // dp, one sheet unit), so the page's own dp-based geometry lands at the
+        // paper's size. Progress is 0 — a printed note has not been played.
+        val stripTop = centreY - strip / 2f
+        val width = waveRight - waveLeft
+        canvas.save()
+        canvas.translate(waveLeft, stripTop)
+        val scope = androidx.compose.ui.graphics.drawscope.CanvasDrawScope()
+        scope.draw(
+            density = androidx.compose.ui.unit.Density(PDF_UNITS_PER_SP),
+            layoutDirection = androidx.compose.ui.unit.LayoutDirection.Ltr,
+            canvas = canvas,
+            size = androidx.compose.ui.geometry.Size(width, strip)
+        ) {
+            if (style.drawsPulse) {
+                drawVoicePulse(samples, 0f, Color(ink), Color(accent))
+            } else {
+                drawVoiceWave(samples, 0f, Color(ink), Color(accent), style)
+            }
+        }
+        canvas.restore()
     }
     canvas.drawText(clock, run.right(), centreY + clockPaint.textSize * 0.36f, clockPaint)
-    run.advance(height + 22f)
+    run.advance(rowHeight + 22f)
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1021,8 +1128,26 @@ private class ExportMarkerSpan(
     }
 }
 
-/** A photograph decoded no larger than it will be drawn. */
-private fun decodeExportBitmap(context: Context, uri: Uri, targetWidth: Int): Bitmap? {
+/**
+ * A PHOTOGRAPH, DECODED NO LARGER THAN IT WILL BE DRAWN — AND THE RIGHT WAY UP.
+ *
+ * v427 — THE UPRIGHT HALF WAS MISSING. The page paints a photograph through Coil,
+ * which reads the file's EXIF orientation, so a picture taken with the phone held
+ * sideways is shown UPRIGHT. A bare `BitmapFactory` decode knows nothing about
+ * EXIF: it returns the sensor's own pixels, so the same photograph left the
+ * journal lying on its side — one more way the sheet did not show what the
+ * preview showed.
+ *
+ * The sample is taken against BOTH targets, because a print's photograph is
+ * CROPPED to its frame (see [drawExportPhoto]): a decode shrunk to fit the frame's
+ * width alone would be too coarse to fill its height.
+ */
+private fun decodeExportBitmap(
+    context: Context,
+    uri: Uri,
+    targetWidth: Int,
+    targetHeight: Int
+): Bitmap? {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     runCatching {
         context.contentResolver.openInputStream(uri)?.use { stream ->
@@ -1031,13 +1156,48 @@ private fun decodeExportBitmap(context: Context, uri: Uri, targetWidth: Int): Bi
     }
     if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
     var sample = 1
-    while (bounds.outWidth / (sample * 2) >= targetWidth && sample < 8) {
+    while (
+        sample < 8 &&
+        bounds.outWidth / (sample * 2) >= targetWidth &&
+        bounds.outHeight / (sample * 2) >= targetHeight
+    ) {
         sample *= 2
     }
     val options = BitmapFactory.Options().apply { inSampleSize = sample }
-    return runCatching {
+    val decoded = runCatching {
         context.contentResolver.openInputStream(uri)?.use { stream ->
             BitmapFactory.decodeStream(stream, null, options)
         }
-    }.getOrNull()
+    }.getOrNull() ?: return null
+    return exportUpright(context, uri, decoded)
+}
+
+/**
+ * The photograph as the page shows it: the sensor's pixels turned by the file's
+ * own EXIF angle (see [decodeExportBitmap]). A file with no orientation — or one
+ * whose EXIF cannot be read — is handed back untouched, which is what the sheet
+ * has always drawn.
+ */
+private fun exportUpright(context: Context, uri: Uri, decoded: Bitmap): Bitmap {
+    val orientation = runCatching {
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            ExifInterface(stream).getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+        }
+    }.getOrNull() ?: ExifInterface.ORIENTATION_NORMAL
+    val degrees = when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+        else -> 0f
+    }
+    if (degrees == 0f) return decoded
+    val matrix = Matrix().apply { postRotate(degrees) }
+    val turned = runCatching {
+        Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+    }.getOrNull() ?: return decoded
+    if (turned !== decoded) decoded.recycle()
+    return turned
 }
