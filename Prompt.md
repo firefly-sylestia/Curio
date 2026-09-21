@@ -184,12 +184,96 @@ ambiguity:
    notes/highlights lists a real panel, the head settling on a smooth fade, and the head/search
    morph sharing one 220ms clock. All done.
 
+## 7. §31 — the plan, decided and ordered (NOT YET BUILT)
+
+The member answered five questions; every decision below is theirs, not a guess.
+**Do these in this order**, because the first two are migrations and a half-done
+migration is worse than none (it is the same "animations are still bad" report).
+
+### 7.1 One motion token set (do FIRST — everything else refers to it)
+
+A single place (suggested: `ui/theme/CurioMotion.kt`) holding named durations and
+easings — enter (~220ms, `FastOutSlowInEasing`), exit (~140ms, `FastOutLinearInEasing`),
+emphasized (~320ms) — with a documented rule: **no surface may invent its own
+milliseconds.** Today the numbers are scattered: the reader's sheets 200/120, the
+reader's head 220/160, its search 180/140, the journal dock 180-220, the copy box
+160/120, the page slider 170/130. Migrate every one of them.
+
+### 7.2 One arrival for every floating pill (the member's own top pick)
+
+Every floating pill — the reader's head and foot, its search bar, the journal dock,
+the copy box, the page slider, the new motion lock — arrives and leaves the SAME
+way: a fade on the token's clock plus a small settle (6-of-height drift, as the
+head already does). The reader's sheets and chrome are the two the member named as
+still bad, so those are the ones to get right first.
+
+### 7.3 Press feedback everywhere
+
+A small press-squish on the controls that have none: the reader's chrome buttons
+(`ReaderChromeButton`), the ⋯ tiles (`ReaderMenuTile`), the settings rows. The
+journal dock's tools already have it (`expressiveCardPress`-style) — find the one
+helper the journal uses and reuse it rather than writing a second.
+
+### 7.4 One pill/dock language
+
+One capsule spec shared by the journal's dock, the copy box, the reader's foot pill
+and the motion lock: the SAME height (46dp), the same radius rule (28dp when the
+pill grows a panel, a real capsule when it does not), the same lift (12dp). **The
+copy box is the member's own example of the failure** (*"the copy paste tool bar two
+row ui is bad and not like that dock ui"*): its two rows are a second toolbar, not
+the dock's one-row-plus-panel shape, so it must be rebuilt as ONE row with its
+actions behind a door that grows INSIDE the pill (`PersonalDockGroup` is the
+existing pattern to copy).
+
+### 7.5 One empty state
+
+The em dash wherever a list is empty — journal list, Cabinet, highlights, notices —
+instead of a sentence each place writes for itself. `ReaderMarksSection` (v438) is
+the first one; find the rest by searching for "Nothing" / "No … yet".
+
+### 7.6 The motion lock, and the Zoom slider goes
+
+The member: *"in pdf only remove that zoom slider and add the motion lock pill which
+restrits that drag to move and pinch to zoom it locks in the state the user left the
+zoom position"*, then chose **freeze pan AND pinch, and remember it**. So:
+
+- Remove the Zoom row from `ReaderAppearanceSheet` AND `ReaderSettingsScreen`, and
+drop `showZoom` from both signatures and their call sites.
+- `ReaderLook.motionLock: Boolean`, persisted — **and it MUST be added to
+`ReaderLook.rememberKey()` or it will silently never save** (the v434 rule).
+- The pill: floating, PDF only, bottom RIGHT corner above the foot pill (bottom
+≈84dp, end ≈14dp), and hidden while the page slider is up (they would overlap).
+- The lock itself: the guard belongs in the PDF's gesture path — the `pinchToZoom`
+handler AND the pan it folds in (`readerZoomDocument` / `readerZoomedPan`), not in
+the drawing. A tap must still turn the page.
+
+### 7.7 Still open, unchanged by the answers above
+
+1. **Zoomed-in long-press selection, and the tools not returning on a single tap.**
+   The same root cause, and the v434 band-aid (`ReaderTouch.selecting`) did not
+   cover the tap path. Fix at the gesture seam, not with another flag.
+2. **"Fix the highlighht pill selecter in pdf"** — confirm WHICH part: the pens'
+   row, or the pill that opens it.
+3. **The gestures box**: hide the floating panel while an area is being adjusted, a
+   way to hide the PANEL (not the backdrop), and a way to bring it back to edit.
+4. **The journal's paper following its colour by default** — still needs the word
+   (the "Paint the page too" switch).
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§31 — the reader's polish round two (PARTLY DONE, plan in §7).** Done from it: back
+  no longer exits the reader (`BackHandler`), the settings head wears the reader's top
+  floor, the night dim covers the tools, the ⋯ tiles are a glyph-only capsule with the
+  name outside it, an empty marks list is an em dash, one word gets the whole selection
+  bar back, and the page slider has the foot to itself. **Committed as `2db57fc0` and
+  deliberately NOT pushed** (the member's instruction). Not built: the motion-lock pill +
+  removing the Zoom slider, the copy box's restyle to the dock's language, the motion
+  token set / one-arrival / press-feedback passes, one empty state everywhere, and the
+  two zoomed-gesture bugs. The member's five answers are recorded in §7.
 - **§30 — the writing page always keeps a line to type in (DONE).** The member's rule from §28,
   implemented at the state level rather than inside the copy box: one `publish()` choke point and
   one `keepLineToTypeIn()` guard, so cut, the row tools and the gesture tools cannot empty a page.
