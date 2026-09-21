@@ -8033,7 +8033,7 @@ fun TopicShareSheet(
     // change after it, however the change was made (the toolbar's toggle, or an
     // edit restored from the last time this topic was shared). A caller that
     // passes no listener is unaffected.
-    LaunchedEffect(aspect) { onAspectChanged?.invoke(aspect) }
+    androidx.compose.runtime.LaunchedEffect(aspect) { onAspectChanged?.invoke(aspect) }
     var selectedId by remember { mutableStateOf<String?>(null) }
     // v335 — Reading progress can stay on while the user picks a Custom
     // fact: the progress bar keeps rendering with the fact stacked below it.

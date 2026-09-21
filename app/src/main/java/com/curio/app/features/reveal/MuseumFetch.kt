@@ -239,8 +239,11 @@ internal object MuseumFetch {
         val conn = URL(urlString).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
+            // v429 — the SHORT budget a door in a chain is allowed: this museum
+            // is one of three asked at once for a work (see [ArtworkFetch]), so
+            // it may never be the reason a sheet waits.
+            conn.connectTimeout = 4_000
+            conn.readTimeout = 5_000
             conn.setRequestProperty("User-Agent", "Curio/1.0")
             if (conn.responseCode != 200) return null
             conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }

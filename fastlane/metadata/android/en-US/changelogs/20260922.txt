@@ -4,6 +4,8 @@ ADD:
 - Books: Google Books is asked for a book's page count and its blurb as well as its chapters, and a book whose about-text every catalogue is missing is read out of its Wikipedia article.
 
 FIX:
+- Art: a painting or an artwork no museum holds is only looked up once — the three sources were re-asked on every open to arrive at the same nothing; a lookup that FAILED (a timeout) is still not remembered, so a bad line is tried again next time.
+- Art: a work is looked up faster — the museum records inside a search are read together instead of one after another (a painter's list of eight was eight round trips), each source answers on a short budget, and a painting Wikipedia files under a longer name ("Nighthawks (painting)") finds its article instead of falling back to whichever museum happens to hold it.
 - Incursion: a series' episode guide loads, and the season you are looking at is the season it reads — the keyed and keyless doors are asked at the same time instead of one waiting out the other, so a guide arrives in a second rather than never.
 - Incursion: the watch button is an eye — a hairline eye until you have watched a title, filled in your accent once you have; a play mark read as an instruction to play rather than as "I have seen this".
 - Incursion: rows and titles stop waiting on a source that is not answering — every provider in a chain is held to a short budget, so a dead key can no longer stall a page for half a minute (TMDB's read alone could take 24 seconds).

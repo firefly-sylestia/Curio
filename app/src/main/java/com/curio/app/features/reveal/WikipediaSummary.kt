@@ -30,7 +30,7 @@ import org.json.JSONObject
 internal object WikipediaSummary {
 
     /** What kind of work is being looked for — it decides which article wins. */
-    internal enum class Kind { ANY, FILM, BOOK }
+    internal enum class Kind { ANY, FILM, BOOK, ART }
 
     private val pageCache = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val textCache = java.util.concurrent.ConcurrentHashMap<String, String>()
@@ -52,10 +52,15 @@ internal object WikipediaSummary {
         val key = "$page|img"
         imageCache[key]?.let { return it.ifEmpty { null } }
         val row = summary(page)
-        // `originalimage` is the full file — for a poster or a cover that is
-        // meaningfully bigger than the thumbnail the REST summary also offers.
-        val source = row?.optJSONObject("originalimage")?.optString("source").orEmpty()
-            .ifBlank { row?.optJSONObject("thumbnail")?.optString("source").orEmpty() }
+        // ── v429 — THE THUMBNAIL FIRST, AND THAT IS A CHOICE ABOUT BYTES ────
+        // Every caller of this door draws a ROW or a card (an Incursion plate of
+        // 94×140dp, a shelf tile), never a full-screen view, so the REST
+        // summary's ~320px thumbnail is already more pixels than the target and
+        // the full-resolution original is several megabytes of a member's data
+        // for detail nothing displays. The original is the fallback for a page
+        // whose summary carries no thumbnail at all.
+        val source = row?.optJSONObject("thumbnail")?.optString("source").orEmpty()
+            .ifBlank { row?.optJSONObject("originalimage")?.optString("source").orEmpty() }
         val usable = source.takeIf { it.startsWith("http", ignoreCase = true) }.orEmpty()
         imageCache[key] = usable
         return usable.ifEmpty { null }
@@ -119,6 +124,7 @@ internal object WikipediaSummary {
         Kind.ANY -> true
         Kind.FILM -> FILM_WORDS.any { bracket.contains(it) }
         Kind.BOOK -> BOOK_WORDS.any { bracket.contains(it) }
+        Kind.ART -> ART_WORDS.any { bracket.contains(it) }
     }
 
     /** A page's REST summary, or null (a disambiguation page is refused). */
@@ -161,6 +167,7 @@ internal object WikipediaSummary {
 
     private val FILM_WORDS = listOf("film", "series", "television", "miniseries", "sitcom")
     private val BOOK_WORDS = listOf("novel", "book", "novella", "memoir", "biography", "comic")
+    private val ART_WORDS = listOf("painting", "artwork", "sculpture", "portrait", "fresco", "mural")
 
     /** Wikimedia asks every client to name itself. */
     private const val USER_AGENT = "Curio/1.0 (https://github.com/firefly-sylestia/Curio)"

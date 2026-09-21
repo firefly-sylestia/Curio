@@ -337,13 +337,17 @@ object AuthorWorksFetch {
         }.getOrDefault(emptyList())
     }
 
-    /** Minimal keyless GET — 8s timeout, best-effort, exactly as the art fetchers do. */
+    /**
+     * Minimal keyless GET, best-effort — on the SHORT budget a door in a chain is
+     * allowed (v429): an author's shelf is one door of several the art lanes ask
+     * at once, so it may not be the reason a sheet waits.
+     */
     private fun httpGet(urlString: String): String? = runCatching {
         val conn = URL(urlString).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
+            conn.connectTimeout = 4_000
+            conn.readTimeout = 5_000
             conn.setRequestProperty("User-Agent", "Curio/1.0")
             if (conn.responseCode != 200) return null
             conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }

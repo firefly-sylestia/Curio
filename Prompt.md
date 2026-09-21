@@ -1146,10 +1146,24 @@ chose **an eye** (outline when unwatched, filled/lit once watched).
    into `readerZoomDocument` and `readerDoubleTapDocument`; the anchor is `(sheetsAbove + focus.y) *
    (ratio - 1)`, so padding and inter-sheet gaps drop out by construction.
 
+### Follow-up (the member's own CI log + one more ask)
+
+- **CI failed on `3f35aca3`:** `TopicShareCard.kt:8036 Unresolved reference 'LaunchedEffect'` — the
+  ratio-reporting effect added with the post's own card editor used the bare name, where this file's
+  own convention is the QUALIFIED `androidx.compose.runtime.LaunchedEffect(...)` (it has no runtime
+  import for it, and 25 other call sites spell it out). Fixed to match; the file now has no bare-name
+  reference left (checked).
+- **"also fetching artworks, painting fetching proper fail safe too"** — the art lane had the same two
+  holes: a work neither museum holds was re-asked of all three doors on every open, and every door was
+  on an 8s+8s budget with up to eight SEQUENTIAL record reads inside a single one of them. See the
+  v429b note in `app/AGENTS.md`: a confirmed miss is remembered (a FAILED door is not), the budgets are
+  4s/5s, the Met's record reads run together, the direct-slug Wikipedia read falls back to the shared
+  search door with `Kind.ART`, and the lead image is the thumbnail on purpose.
+
 ### Verification
 
 - Brace/paren balance 0/0/0 on all eleven touched Kotlin files (character scanner, string- and
-  comment-aware).
+  comment-aware), plus the five touched by the follow-up.
 - Every changed call site re-read after its edit (the sheet's guide call, the poster chain, both
   zoom anchors, the lab's rows, the cover provider).
 - **CI compiles it — that is the only build gate in this environment** (no Gradle allowed here).
@@ -1160,4 +1174,4 @@ chose **an eye** (outline when unwatched, filled/lit once watched).
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- (none — §20 is built and pushed with the rest of this batch)
+- (none — §20 and its follow-up (the CI fix + the art lane's fail-safes) are pushed)

@@ -123,11 +123,26 @@ object ArtworkFetch {
     /** title|artist → the record (an absent record is cached as null-free). */
     private val cache = ConcurrentHashMap<String, ArtworkInfo>()
 
+    /**
+     * v429 — A WORK NO DOOR HOLDS, REMEMBERED (keyed exactly as [cache]).
+     *
+     * Only a CONFIRMED miss lands here — every door reached its catalogue and
+     * each answered "not here" — and that distinction is the whole fail-safe: a
+     * door that FAILED (a timeout, a dead line) is not an answer, so it is not
+     * remembered and the next open tries again (the app's own rule, learned the
+     * expensive way on the shelf: *"a lookup that failed is no longer remembered
+     * as done"*). Without this, a painting neither museum holds was re-asked of
+     * three sources on every single open — the sheet re-ran the whole chain to
+     * arrive at the same nothing.
+     */
+    private val misses: MutableSet<String> = java.util.Collections.newSetFromMap(ConcurrentHashMap())
+
     /** The work's own record, best-effort; null when neither source knows it. */
     internal suspend fun artwork(title: String, artist: String): ArtworkInfo? = withContext(Dispatchers.IO) {
         val key = "${title.trim()}|${artist.trim()}"
         if (title.isBlank()) return@withContext null
         cache[key]?.let { return@withContext it }
+        if (key in misses) return@withContext null
         // v407 — THE TWO SOURCES ARE QUERIED AT THE SAME TIME. They are
         // independent, but they used to run back to back: the Met's search,
         // then up to five object records, THEN the Wikipedia article — so a
@@ -141,13 +156,22 @@ object ArtworkFetch {
         // reading an encyclopedia article about the painting instead of a
         // museum's own record of it. The three run together, so the wait is
         // still the slowest of them rather than their sum.
-        val (met, cleveland, wiki) = coroutineScope {
-            val metJob = async { runCatching { metObject(title, artist) }.getOrNull() }
-            val clevelandJob = async { runCatching { MuseumFetch.work(title, artist) }.getOrNull() }
-            val wikiJob = async { runCatching { wikiSummary(title, artist) }.getOrNull() }
+        val (metResult, clevelandResult, wikiResult) = coroutineScope {
+            val metJob = async { runCatching { metObject(title, artist) } }
+            val clevelandJob = async { runCatching { MuseumFetch.work(title, artist) } }
+            val wikiJob = async { runCatching { wikiSummary(title, artist) } }
             Triple(metJob.await(), clevelandJob.await(), wikiJob.await())
         }
-        if (met == null && cleveland == null && wiki == null) return@withContext null
+        val met = metResult.getOrNull()
+        val cleveland = clevelandResult.getOrNull()
+        val wiki = wikiResult.getOrNull()
+        if (met == null && cleveland == null && wiki == null) {
+            // A miss is only a miss when nobody FAILED: if any door threw, the
+            // next open is allowed to ask again (see [misses]).
+            val answered = metResult.isSuccess && clevelandResult.isSuccess && wikiResult.isSuccess
+            if (answered) misses += key
+            return@withContext null
+        }
         val merged = ArtworkInfo(
             title = met?.title?.takeIf { it.isNotBlank() }
                 ?: cleveland?.title?.takeIf { it.isNotBlank() }
@@ -186,8 +210,15 @@ object ArtworkFetch {
         if (limit >= MAKER_LIMIT) makerCache[name]?.let { return@withContext it }
         val resolved = runCatching {
             val ids = metIds(name, artistScoped = true).take(limit)
-            val fromMet = ids.mapNotNull { id ->
-                val objectJson = getJson("$MET/objects/$id") ?: return@mapNotNull null
+            // v429 — the maker's records are read AT ONCE, in the order asked for
+            // (see [metObject]): a list of eight was eight round trips in a row,
+            // which is what made an artist's sheet sit on its own empty list.
+            val bodies = coroutineScope {
+                val jobs = ids.map { id -> async { getJson("$MET/objects/$id") } }
+                jobs.map { job -> job.await() }
+            }
+            val fromMet = bodies.mapNotNull { objectJson ->
+                if (objectJson == null) return@mapNotNull null
                 val row = runCatching { JSONObject(objectJson) }.getOrNull() ?: return@mapNotNull null
                 val title = row.optString("title").trim()
                 if (title.isBlank()) return@mapNotNull null
@@ -335,15 +366,28 @@ object ArtworkFetch {
         }.getOrDefault(emptyList())
     }
 
-    /** The Met's object record for a title, matched by name — or null. */
-    private fun metObject(title: String, artist: String): ArtworkInfo? {
+    /**
+     * The Met's object record for a title, matched by name — or null.
+     *
+     * v429 — THE THREE RECORDS ARE READ AT ONCE. They are independent reads of
+     * the same catalogue, and they used to run one after another: three round
+     * trips INSIDE a door that is itself one of three running in parallel, so a
+     * slow line could make this single source cost three times its budget while
+     * the other two doors had long finished. The order is unchanged — the list is
+     * awaited in the order the search returned it, so the same record still wins.
+     */
+    private suspend fun metObject(title: String, artist: String): ArtworkInfo? {
         // v407 — three records, not five: each one is a round trip and the
         // title match almost always arrives on the first or second hit.
         val ids = metIds(title, artistScoped = false).take(3)
         if (ids.isEmpty()) return null
+        val bodies = coroutineScope {
+            val jobs = ids.map { id -> async { getJson("$MET/objects/$id") } }
+            jobs.map { job -> job.await() }
+        }
         val wanted = normalise(title)
-        for (id in ids) {
-            val body = getJson("$MET/objects/$id") ?: continue
+        for (body in bodies) {
+            if (body == null) continue
             val row = runCatching { JSONObject(body) }.getOrNull() ?: continue
             val name = row.optString("title").trim()
             if (name.isBlank()) continue
@@ -377,8 +421,34 @@ object ArtworkFetch {
         return null
     }
 
-    /** Wikipedia's page summary for a work, or null when it has no page/words. */
+    /**
+     * Wikipedia's page summary for a work, or null when it has no page/words.
+     *
+     * v429 — AND WHEN THE BARE TITLE IS NOT A PAGE, THE ARTICLE IS SEARCHED FOR.
+     *
+     * The read used to be a single direct slug (`…/summary/The_Starry_Night`),
+     * which is right only when the work's name IS the article's name. A great
+     * many paintings are filed with a disambiguator — "Nighthawks (painting)",
+     * "Guernica (Picasso)", "The Kiss (Klimt)" — so the direct read answered
+     * nothing for exactly the works whose names are also a word, a place or a
+     * band, and the sheet fell back to whichever museum happened to be holding
+     * one. The shared [WikipediaSummary] door is the search-then-best-hit path
+     * (with `Kind.ART` preferring the bracket that says "painting"), and it is
+     * asked only when the direct read actually came up empty.
+     */
     private fun wikiSummary(title: String, artist: String): ArtworkInfo? {
+        val direct = wikiSummaryOf(title, artist)
+        if (direct != null) return direct
+        val page = WikipediaSummary.page(
+            title,
+            kind = WikipediaSummary.Kind.ART
+        ) ?: return null
+        return if (normalise(page) == normalise(title)) null else wikiSummaryOf(page, artist)
+    }
+
+    /** One REST summary read, validated, as a work's own record. */
+    private fun wikiSummaryOf(title: String, artist: String): ArtworkInfo? {
+        if (title.isBlank()) return null
         val slug = Uri.encode(title.trim().replace(' ', '_'))
         val body = getJson("https://en.wikipedia.org/api/rest_v1/page/summary/$slug")
             ?: return null
@@ -417,13 +487,17 @@ object ArtworkFetch {
     private fun normalise(value: String): String =
         value.lowercase().filter { it.isLetterOrDigit() }
 
-    /** Minimal keyless GET — 8s timeout, best-effort, with a plain User-Agent. */
+    /**
+     * Minimal keyless GET, best-effort — on the SHORT budget a door in a chain is
+     * allowed (v429): the Met, Cleveland and Wikipedia are asked at once for a
+     * work, so no one of them may hold the sheet.
+     */
     private fun getJson(urlString: String): String? = runCatching {
         val conn = URL(urlString).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
+            conn.connectTimeout = 4_000
+            conn.readTimeout = 5_000
             conn.setRequestProperty("User-Agent", "Curio/1.0 (https://curio.app)")
             if (conn.responseCode != 200) return null
             conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
