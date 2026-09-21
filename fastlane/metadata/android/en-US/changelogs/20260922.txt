@@ -1,3 +1,14 @@
+ADD:
+- Incursion: a Personal tab where the Essentials tab was — how far into the whole order you are, a bar per line, what each line wants next, the six states tallied, and the figures your statuses add up to (hours watched, hours left, essentials done, longest run); essential rows keep their star and their filter chip.
+- Incursion: every row, tile and title sheet carries the title's own poster — the data already knew each title's TMDB id, so the art is asked for by id and falls back to the app's keyless providers; it obeys the existing Cover fetching switch, and with that off the plate is Curio's own, carrying the order.
+- Incursion: one search across all three lines — a query is answered from Marvel, Sony and X-Men at once, each group saying which line it came from and how many titles it holds.
+- Incursion: Next up — the first title the page still wants from you, in the head, one tap into its sheet.
+- Incursion: a line of your own on any title, kept in its sheet.
+
+FIX:
+- Incursion: a title's sheet is the app's own — the poster leads it, the six states are one scrolling chip row instead of six stacked rows (which pushed the synopsis and the note off its first screen), and the synopsis has its own heading.
+- Incursion: the foot bar's icons are the app's own set and no two tabs share a shape — a reel, a play, a spark and the person, where a globe stood for Marvel and both film lines wore the same glyph.
+
 FIX:
 - Writing: a row of pictures leaves for paper as the page lays it out — two side by side, an upright frame with two stacked beside it, four as a square, or a lone small print with its line beside it; the sheet drew every print alone at the full measure, so a row of pictures the member had built came out as one picture per row.
 - Writing: a print on paper is the height the page gives it — the sheet kept one of the frame's five pads and gave an uncaptioned print no strip at all, so a picture printed 14dp shorter than the page (about a quarter short with nothing written in it) and every row it stood in measured short with it; the frame's own paper is the page's own now, on its own and inside a row alike.

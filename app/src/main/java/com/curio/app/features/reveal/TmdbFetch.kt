@@ -82,6 +82,16 @@ object TmdbFetch {
     private val factsCache = ConcurrentHashMap<String, Facts>()
 
     /**
+     * v427 — `movie:603` / `tv:84958` → a poster URL ("" = asked, nothing there).
+     *
+     * Kept apart from [factsCache] because this door is reached by ID and never
+     * by name: a caller that already holds TMDB's own number must not be sent
+     * through a name search, where a remake, a re-release or a shared title is
+     * exactly how the wrong poster arrives.
+     */
+    private val idPosterCache = ConcurrentHashMap<String, String>()
+
+    /**
      * A title → its episodes. An EMPTY list is a real, remembered answer —
      * "asked, not a show" — because `ConcurrentHashMap` cannot hold a null value,
      * so "no answer yet" and "no show here" have to be told apart by the key
@@ -92,6 +102,37 @@ object TmdbFetch {
     /** The poster for a film (or a show), or null when there is no answer. */
     suspend fun posterUrl(title: String): String? =
         facts(title)?.posterUrl?.takeIf { it.isNotBlank() }
+
+    /**
+     * v427 — A POSTER FOR A TITLE WE ALREADY KNOW BY ID.
+     *
+     * For a caller whose own data carries a TMDB id — an Incursion row knows
+     * which film or season it is by number — a search is a needless guess. The
+     * detail read is one call, memoised per id, and a MISS is remembered as an
+     * empty string so it is never asked twice (the same convention [Facts] uses:
+     * a `ConcurrentHashMap` cannot hold a null, so "not asked" and "nothing
+     * there" have to be told apart by the key).
+     *
+     * [isShow] decides WHICH catalogue the id belongs to. A row labelled a series
+     * is a show; a row labelled a film is a movie — and the caller tries the
+     * other one only when this returns nothing, so an id upstream filed under the
+     * other kind still finds its art.
+     */
+    suspend fun posterUrlById(id: Int, isShow: Boolean): String? = withContext(Dispatchers.IO) {
+        if (!isConfigured || id <= 0) return@withContext null
+        val key = (if (isShow) "tv:" else "movie:") + id
+        idPosterCache[key]?.let { return@withContext it.ifEmpty { null } }
+        // Written as a branch rather than a non-local `return null`: the project's
+        // own rule (see [getJson]) — a return out of an inline lambda becomes the
+        // `$$$$$NON_LOCAL_RETURN$$$$$` helper class, whose method name R8 refuses
+        // to dex, so a debug build is fine and a release build dies.
+        val resolved = runCatching {
+            val body = getJson(if (isShow) "/tv/$id" else "/movie/$id") ?: return@runCatching ""
+            imageUrl(JSONObject(body).optString("poster_path"))
+        }.getOrDefault("")
+        idPosterCache[key] = resolved
+        resolved.ifEmpty { null }
+    }
 
     /**
      * A title's record — its poster, its facts, and whether it is really a show.

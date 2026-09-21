@@ -29,6 +29,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -37,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -70,6 +73,7 @@ import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
+import kotlinx.coroutines.delay
 
 /**
  * INCURSION — the viewing order, on its own page.
@@ -83,17 +87,46 @@ import com.curio.app.ui.theme.isCurioDarkTheme
  * What it IS is deliberate: every Marvel, Sony and X-Men title in the order
  * they are meant to be watched, the essentials from upstream marked as such, and
  * a status on every row — not watched, watching, plan to watch, watched, on hold,
- * dropped. Two things exist here that no other Curio list has:
+ * dropped. Three things exist here that no other Curio list has:
  *
- *  - ITS OWN NAV. The four destinations (Marvel · Sony · X-Men · Essentials)
- *    live in a bar at the foot of THIS page, not in Curio's tabs, because a
- *    viewing order is a different mode of looking — Curio's Cabinet is what you
- *    saved, this is what exists.
+ *  - ITS OWN NAV. The four destinations (Marvel · Sony · X-Men · Personal) live
+ *    in a bar at the foot of THIS page, not in Curio's tabs, because a viewing
+ *    order is a different mode of looking — Curio's Cabinet is what you saved,
+ *    this is what exists.
  *  - BULK BY PHASE. A phase header carries its own action: mark every title in
  *    Phase 3 watched in one gesture, or set the whole phase to any of the six
  *    states. Thirty rows is what a phase IS, and marking thirty rows one at a
  *    time is how a tracker goes unused. The same action exists per studio from
  *    the header's own menu.
+ *  - ART ON EVERY ROW (v427). Each row carries its own poster — the data has
+ *    always known each title's TMDB id, so the app's own poster chain asks for
+ *    the exact title instead of guessing by name (see `IncursionPosters`), under
+ *    the same artwork switch every other fetched cover in the app obeys.
+ *
+ * v427 — THE PERSONAL TAB, AND WHAT ELSE CHANGED. The member: *"do the incursion
+ * full ui redesign with better ui matching the app … instead of essential tab add
+ * personal tab where [the] status shows … use proper icons in that ui"*, and,
+ * asked what that tab should hold, *"all 3"* — the desk, the tally and the
+ * figures. So:
+ *
+ *  · **Essentials is a FILTER and a STAR now, not a destination.** The rows it
+ *    names are still marked on every row they belong to (the star, and the
+ *    "Essentials" chip in the filter row); the destination it used to hold is
+ *    the Personal tab the member asked for, and the catalog's own
+ *    `IncursionCatalog.essentials` still answers who they are (the desk counts
+ *    them).
+ *  · **THE PERSONAL TAB IS THE STATUS DESK** (`IncursionPersonalDesk`): how far
+ *    in the whole order is, one bar per line, what each line wants next, the
+ *    six-state tally and the figures those statuses add up to. It reads; it
+ *    never writes, and the only thing it can do is take you to a title.
+ *  · **ONE SEARCH, EVERY LINE.** A query is answered across all three lines at
+ *    once and each group says which line it came from — a search for a name
+ *    should not depend on which tab happened to be open.
+ *  · **NEXT UP.** The first row the page still wants from the member, in the
+ *    head, one tap into its sheet.
+ *  · **A TITLE'S SHEET IS THE APP'S SHEET**, with the poster as its head, the
+ *    six states as one compact row, the synopsis and the "watch first" line,
+ *    and a line of the member's own saved with the title.
  *
  * Nothing here writes to Room, the Cabinet, the streak or topic progress. A
  * viewing order is its own shelf, and marking Iron Man watched here says nothing
@@ -114,26 +147,28 @@ fun IncursionScreen(navController: NavController) {
     var pendingClear by remember { mutableStateOf<PendingBulkClear?>(null) }
 
     val activeFilter = IncursionFilter.fromId(filter)
-    val essentials = remember(studios) { IncursionCatalog.essentials(studios) }
     val studioDestinations = studios.map { IncursionDestination.of(it) }
     val destinationId = destination.takeIf { id -> studioDestinations.any { it.id == id } }
-        ?: IncursionDestination.ESSENTIALS.id
-    val onEssentials = destinationId == IncursionDestination.ESSENTIALS.id
+        ?: IncursionDestination.MARVEL.id
+    val onPersonal = destinationId == IncursionDestination.PERSONAL.id
     val activeStudio = studios.firstOrNull { it.id == destinationId }
 
-    // Everything below reads ONE shape — (studio, entries) pairs — so the
-    // Essentials tab (which spans three studios) and a studio tab (which is one)
-    // share a single renderer instead of being two lists that drift apart.
-    //
     // `statusState` is read HERE, in composition, and handed to the filter as a
     // plain value: a `remember` whose body reads Compose state directly would
     // cache the first answer for the life of the screen and a status would never
     // appear to change.
     val statuses = IncursionStore.statusState
+    // ONE SEARCH, EVERY LINE (v427). The search used to be scoped to whichever
+    // destination was open, so looking for a title meant knowing which of three
+    // lists it was in first. A query now answers across all three at once, and
+    // each group of results says which line it came from (see the studio band in
+    // `IncursionList`). The tabs keep their meaning for BROWSING; searching is
+    // the one gesture that is about the title, not the shelf.
+    val needle = query.trim()
+    val searching = needle.isNotEmpty()
     val sections: List<Pair<IncursionStudio, List<IncursionEntry>>> = remember(
-        studios, essentials, destinationId, query, filter, statuses
+        studios, destinationId, needle, filter, statuses
     ) {
-        val needle = query.trim()
         fun keep(entry: IncursionEntry): Boolean {
             if (needle.isNotEmpty() && !entry.title.contains(needle, ignoreCase = true)) return false
             val status = statuses[entry.storageKey]
@@ -141,10 +176,10 @@ fun IncursionScreen(navController: NavController) {
                 ?: IncursionStore.Status.UNWATCHED
             return activeFilter.matches(entry, status)
         }
-        if (onEssentials) {
-            val byStudio = essentials.filter { (_, entry) -> keep(entry) }
-                .groupBy({ it.first }, { it.second })
-            studios.mapNotNull { studio -> byStudio[studio]?.let { studio to it } }
+        if (searching) {
+            studios.mapNotNull { studio ->
+                studio.entries.filter(::keep).takeIf { it.isNotEmpty() }?.let { studio to it }
+            }
         } else {
             val studio = activeStudio ?: return@remember emptyList()
             listOf(studio to studio.entries.filter(::keep))
@@ -155,6 +190,21 @@ fun IncursionScreen(navController: NavController) {
     val watched = remember(allKeys, statuses) {
         IncursionStore.count(allKeys) { it == IncursionStore.Status.WATCHED }
     }
+    // NEXT UP (v427) — the first row this page still wants from the member: not
+    // watched, and not one they deliberately set aside, in the order the list is
+    // in. The same rule the Personal tab's desk uses, so the two can never point
+    // at different titles.
+    val nextUp = remember(sections, statuses) {
+        sections.asSequence()
+            .flatMap { (_, entries) -> entries.asSequence() }
+            .firstOrNull { entry ->
+                val status = statuses[entry.storageKey]
+                    ?.let { IncursionStore.Status.entries.getOrNull(it) }
+                    ?: IncursionStore.Status.UNWATCHED
+                status == IncursionStore.Status.UNWATCHED ||
+                    status == IncursionStore.Status.PLANNED
+            }
+    }
 
     Column(
         modifier = Modifier
@@ -162,15 +212,27 @@ fun IncursionScreen(navController: NavController) {
             .background(MaterialTheme.colorScheme.background)
     ) {
         IncursionHeader(
-            title = if (onEssentials) "Essentials" else activeStudio?.name.orEmpty(),
-            blurb = if (onEssentials) {
-                "The rows a first-time viewer should not skip, from all three lines."
-            } else {
-                activeStudio?.blurb.orEmpty()
+            title = when {
+                searching -> "Every line"
+                onPersonal -> "Your status"
+                else -> activeStudio?.name.orEmpty()
+            },
+            blurb = when {
+                searching -> "Matches across Marvel, Sony and X-Men — every group says " +
+                    "which line it came from."
+                onPersonal -> "Where you are in the whole order: a bar per line, the six " +
+                    "states, and the figures your statuses add up to."
+                else -> activeStudio?.blurb.orEmpty()
             },
             groupLabel = activeStudio?.groupLabel?.lowercase() ?: "phase",
             watched = watched,
             total = allKeys.size,
+            // The list's own tools belong to a list: the desk is not one, and a
+            // "mark everything on this page" over a stats page would be a
+            // destructive control with nothing to mark.
+            showListTools = !onPersonal || searching,
+            nextUp = nextUp,
+            onOpenNext = { detail = it },
             grid = grid,
             onGridChange = { grid = it },
             onBulk = { status ->
@@ -183,7 +245,10 @@ fun IncursionScreen(navController: NavController) {
         CurioSearchField(
             query = query,
             onQueryChange = { query = it },
-            placeholder = "Search these titles",
+            // The scope is the whole page now, so the field says so — a search
+            // that quietly answered from three lists while its placeholder named
+            // one would be the worse surprise.
+            placeholder = "Search all three lines",
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -197,27 +262,44 @@ fun IncursionScreen(navController: NavController) {
         // to be weighted: without it the list would claim the whole column and
         // push the page's own nav off the bottom.
         Box(Modifier.weight(1f)) {
-            if (sections.isEmpty() || sections.all { it.second.isEmpty() }) {
-                IncursionEmpty(query = query.trim(), filtered = activeFilter != IncursionFilter.ALL)
-            } else if (grid) {
-                IncursionGrid(
+            val hasRows = sections.any { it.second.isNotEmpty() }
+            when {
+                hasRows && grid -> IncursionGrid(
                     sections = sections,
                     onOpen = { detail = it },
                     onBulk = { keys, status -> IncursionStore.setGroupStatus(context, keys, status) },
                     onClear = { keys, name -> pendingClear = PendingBulkClear(keys, name) }
                 )
-            } else {
-                IncursionList(
+
+                hasRows -> IncursionList(
                     sections = sections,
+                    // A search is answered from three lists at once, so its
+                    // groups are labelled by line (see the studio band).
+                    showLineBand = searching,
                     onOpen = { detail = it },
                     onBulk = { keys, status -> IncursionStore.setGroupStatus(context, keys, status) },
                     onClear = { keys, name -> pendingClear = PendingBulkClear(keys, name) }
                 )
+
+                searching || activeFilter != IncursionFilter.ALL -> IncursionEmpty(
+                    query = needle,
+                    filtered = true
+                )
+
+                // THE PERSONAL TAB: the desk, from the catalog the page already
+                // holds and the statuses it already reads.
+                onPersonal -> IncursionPersonalDesk(
+                    studios = studios,
+                    statuses = statuses,
+                    onOpen = { detail = it }
+                )
+
+                else -> IncursionEmpty(query = "", filtered = false)
             }
         }
 
         IncursionNavBar(
-            destinations = studioDestinations + IncursionDestination.ESSENTIALS,
+            destinations = studioDestinations + IncursionDestination.PERSONAL,
             active = destinationId,
             onSelect = { destination = it.id }
         )
@@ -227,7 +309,8 @@ fun IncursionScreen(navController: NavController) {
         IncursionDetailSheet(
             entry = entry,
             onDismiss = { detail = null },
-            onStatus = { status -> IncursionStore.setStatus(context, entry.storageKey, status) }
+            onStatus = { status -> IncursionStore.setStatus(context, entry.storageKey, status) },
+            onNote = { text -> IncursionStore.setNote(context, entry.storageKey, text) }
         )
     }
 
@@ -258,11 +341,23 @@ private data class PendingBulkClear(val keys: List<String>, val name: String)
 
 // ── The four destinations ────────────────────────────────────────────────────
 
-private enum class IncursionDestination(val id: String, val label: String, val glyph: String) {
-    MARVEL("marvel", "Marvel", CurioIcons.Public),
-    SONY("sony", "Sony", CurioIcons.Movie),
+/**
+ * THE PAGE'S OWN NAV — four destinations, each with a REAL icon of its own.
+ *
+ * v427 — EVERY GLYPH HERE IS A DRAWN ICON FROM THE APP'S SET, and no two of them
+ * share a shape: the reel for Marvel, the round play for Sony, the spark for
+ * X-Men and the person for the member. The old bar used a globe for Marvel and
+ * the same film glyph for both film lines, so a glance could not tell which tab
+ * was which — "use proper icons in that ui". [PERSONAL] took the place
+ * [ESSENTIALS] held (the member: *"instead of essential tab add personal tab"*);
+ * the essentials idea is still a filter chip and the star on a row, which is
+ * where it belongs now that it is not a place.
+ */
+internal enum class IncursionDestination(val id: String, val label: String, val glyph: String) {
+    MARVEL("marvel", "Marvel", CurioIcons.Movies),
+    SONY("sony", "Sony", CurioIcons.PlayCircle),
     XMEN("xmen", "X-Men", CurioIcons.AutoAwesome),
-    ESSENTIALS("essentials", "Essentials", CurioIcons.Star);
+    PERSONAL("personal", "Personal", CurioIcons.Person);
 
     companion object {
         fun of(studio: IncursionStudio): IncursionDestination = when (studio.id) {
@@ -300,6 +395,9 @@ private enum class IncursionFilter(val id: String, val label: String) {
 }
 
 // ── Status ink ──────────────────────────────────────────────────────────────
+// v427 — `internal` rather than file-private: the Personal tab's desk draws the
+// same six tones in its tally, and two mappings of "what colour is this state"
+// is exactly how a page starts disagreeing with itself.
 
 /**
  * Each state's own colour, so a list of a hundred rows reads at a glance without
@@ -317,7 +415,7 @@ private enum class IncursionFilter(val id: String, val label: String) {
  * night. [curioFillInk] is still what reads on a chip FILLED with one of these.
  */
 @Composable
-private fun statusInk(status: IncursionStore.Status): Color {
+internal fun incursionStatusInk(status: IncursionStore.Status): Color {
     val dark = isCurioDarkTheme()
     val hue = when (status) {
         IncursionStore.Status.WATCHED -> 152f
@@ -351,6 +449,11 @@ private fun IncursionHeader(
     groupLabel: String,
     watched: Int,
     total: Int,
+    /** False on the Personal tab: a desk has no rows to mark or to lay out. */
+    showListTools: Boolean,
+    /** The first row this page still wants, if it wants one. */
+    nextUp: IncursionEntry?,
+    onOpenNext: (IncursionEntry) -> Unit,
     grid: Boolean,
     onGridChange: (Boolean) -> Unit,
     onBulk: (IncursionStore.Status) -> Unit,
@@ -386,7 +489,7 @@ private fun IncursionHeader(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Box {
+            if (showListTools) Box {
                 var menu by remember { mutableStateOf(false) }
                 IconPill(
                     glyph = CurioIcons.Tune,
@@ -419,12 +522,14 @@ private fun IncursionHeader(
                     )
                 }
             }
-            Spacer(Modifier.width(6.dp))
-            IconPill(
-                glyph = if (grid) CurioIcons.Menu else CurioIcons.GridView,
-                description = if (grid) "List view" else "Grid view",
-                onClick = { onGridChange(!grid) }
-            )
+            if (showListTools) {
+                Spacer(Modifier.width(6.dp))
+                IconPill(
+                    glyph = if (grid) CurioIcons.Menu else CurioIcons.GridView,
+                    description = if (grid) "List view" else "Grid view",
+                    onClick = { onGridChange(!grid) }
+                )
+            }
         }
 
         // v425 — THE PAGE'S HEAD IS A PLATE. The blurb and the one progress bar
@@ -462,6 +567,54 @@ private fun IncursionHeader(
                 accent = accent,
                 groupLabel = groupLabel
             )
+            // ── NEXT UP (v427) ────────────────────────────────────────────────
+            // The one row the page still wants from the member, in the head,
+            // where they already are: a progress bar says how far in they are and
+            // then leaves them to find the next row themselves. It is a tap, not
+            // a control — it opens the title's own sheet, exactly as the row it
+            // names would.
+            nextUp?.let { entry ->
+                Spacer(Modifier.height(10.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .clickable { onOpenNext(entry) }
+                        .padding(horizontal = 9.dp, vertical = 7.dp)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.PlayCircle,
+                        contentDescription = null,
+                        tint = accent,
+                        size = 16.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Next up",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accent
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        entry.title,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        "#${entry.orderLabel}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
         Spacer(Modifier.height(10.dp))
     }
@@ -574,6 +727,8 @@ private fun IncursionFilterRow(
 @Composable
 private fun IncursionList(
     sections: List<Pair<IncursionStudio, List<IncursionEntry>>>,
+    /** True when these groups came from MORE THAN ONE line — a search. */
+    showLineBand: Boolean,
     onOpen: (IncursionEntry) -> Unit,
     onBulk: (List<String>, IncursionStore.Status) -> Unit,
     onClear: (List<String>, String) -> Unit
@@ -584,6 +739,11 @@ private fun IncursionList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         for ((studio, entries) in sections) {
+            if (showLineBand && sections.size > 1) {
+                item(key = "${studio.id}-band") {
+                    StudioBand(studio = studio, hits = entries.size)
+                }
+            }
             val byGroup = entries.groupBy { it.group }
             for (group in studio.groups) {
                 val rows = byGroup[group.id] ?: continue
@@ -766,7 +926,7 @@ private fun PhaseStatusChip(
     pressed: Boolean,
     onClick: () -> Unit
 ) {
-    val ink = statusInk(status)
+    val ink = incursionStatusInk(status)
     // v425 — a chip is a FILL, not an outline: the app gave up drawn edges
     // ("no more outlines anywhere — a card is its fill, its radius and a soft
     // shadow"), and these two were the last boxed rectangles on the page.
@@ -840,7 +1000,7 @@ private fun PhaseClearChip(label: String, onClick: () -> Unit) {
 @Composable
 private fun EntryRow(entry: IncursionEntry, onOpen: () -> Unit) {
     val status = IncursionStore.status(entry.storageKey)
-    val ink = statusInk(status)
+    val ink = incursionStatusInk(status)
     val rowShape = RoundedCornerShape(18.dp)
     Surface(
         shape = rowShape,
@@ -853,31 +1013,34 @@ private fun EntryRow(entry: IncursionEntry, onOpen: () -> Unit) {
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp)
         ) {
-            // The ORDER is the row's identity here — this list's whole promise is
-            // a sequence, so the number leads.
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (status == IncursionStore.Status.WATCHED) ink.copy(alpha = 0.16f)
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                    )
-            ) {
-                Text(
-                    entry.orderLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = if (status == IncursionStore.Status.WATCHED) ink
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.width(10.dp))
+            // ── THE POSTER, AND THE ORDER THAT LEADS IT (v427) ────────────────
+            //
+            // The member, of this list: "with movie cover also in list i want
+            // proper moview cover fetching". The plate is the row's own art — the
+            // exact title's, by TMDB id — and while it is arriving (or while
+            // fetching is off) it is the app's own drawn plate carrying the order
+            // the row leads with, because this list's whole promise is a sequence.
+            IncursionPosterPlate(
+                entry = entry,
+                modifier = Modifier.width(40.dp).height(56.dp),
+                shape = RoundedCornerShape(8.dp)
+            )
+            Spacer(Modifier.width(11.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // The order stays ON the row rather than inside the plate: a
+                    // poster is the art, and the place in the sequence is a fact
+                    // that must survive the art arriving.
+                    Text(
+                        "#${entry.orderLabel}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (status == IncursionStore.Status.WATCHED) ink
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(7.dp))
                     Text(
                         entry.title,
                         style = MaterialTheme.typography.bodyMedium,
@@ -948,22 +1111,16 @@ private fun StatusChip(status: IncursionStore.Status) {
         )
         return
     }
-    val ink = statusInk(status)
+    val ink = incursionStatusInk(status)
     Surface(
         shape = RoundedCornerShape(50),
         color = ink.copy(alpha = if (isCurioDarkTheme()) 0.26f else 0.14f)
     ) {
         Text(
-            status.let {
-                when (it) {
-                    IncursionStore.Status.WATCHING -> "Watching"
-                    IncursionStore.Status.PLANNED -> "Planned"
-                    IncursionStore.Status.WATCHED -> "Watched"
-                    IncursionStore.Status.ON_HOLD -> "On hold"
-                    IncursionStore.Status.DROPPED -> "Dropped"
-                    IncursionStore.Status.UNWATCHED -> ""
-                }
-            },
+            // v427 — the state's own name for a chip lives on the state
+            // (`Status.shortLabel`), not in a `when` here: this was the third
+            // mapping of the same six words.
+            status.shortLabel,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
             color = ink,
@@ -978,8 +1135,51 @@ private fun StatusDot(status: IncursionStore.Status, size: androidx.compose.ui.u
         modifier = Modifier
             .size(size)
             .clip(CircleShape)
-            .background(statusInk(status))
+            .background(incursionStatusInk(status))
     )
+}
+
+// ── The line a search hit came from ────────────────────────────────────────
+
+/**
+ * v427 — WHICH LINE IS THIS?
+ *
+ * A search answers from all three lists at once, so its results are grouped by
+ * the line they belong to and each group says so at its head — the line's own
+ * icon, its name, and how many rows it holds. It is drawn BETWEEN the results,
+ * not as a heading over the whole page: the member is looking for a title, and the
+ * band is the one thing that tells them where in the order they just landed.
+ */
+@Composable
+private fun StudioBand(studio: IncursionStudio, hits: Int) {
+    val accent = settingsRoseAccent()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 14.dp, bottom = 2.dp)
+    ) {
+        CurioIcon(
+            name = IncursionDestination.of(studio).glyph,
+            contentDescription = null,
+            tint = accent,
+            size = 15.dp
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            studio.name.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.3.sp,
+            color = accent
+        )
+        Spacer(Modifier.weight(1f))
+        Text(
+            if (hits == 1) "1 title" else "$hits titles",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 // ── The grid ────────────────────────────────────────────────────────────────
@@ -1004,6 +1204,7 @@ private fun IncursionGrid(
     onBulk: (List<String>, IncursionStore.Status) -> Unit,
     onClear: (List<String>, String) -> Unit
 ) {
+    val showLineBand = sections.size > 1
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
@@ -1012,6 +1213,11 @@ private fun IncursionGrid(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         for ((studio, entries) in sections) {
+            if (showLineBand) {
+                item(key = "${studio.id}-grid-band", span = { GridItemSpan(maxLineSpan) }) {
+                    StudioBand(studio = studio, hits = entries.size)
+                }
+            }
             val byGroup = entries.groupBy { it.group }
             for (group in studio.groups) {
                 val rows = byGroup[group.id] ?: continue
@@ -1053,7 +1259,7 @@ private fun IncursionGrid(
 @Composable
 private fun EntryTile(entry: IncursionEntry, onOpen: () -> Unit) {
     val status = IncursionStore.status(entry.storageKey)
-    val ink = statusInk(status)
+    val ink = incursionStatusInk(status)
     val tileShape = RoundedCornerShape(20.dp)
     Surface(
         shape = tileShape,
@@ -1076,53 +1282,67 @@ private fun EntryTile(entry: IncursionEntry, onOpen: () -> Unit) {
             .clip(tileShape)
             .clickable(onClick = onOpen)
     ) {
-        Column(Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "#${entry.orderLabel}",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = settingsRoseAccent()
-                )
-                Spacer(Modifier.weight(1f))
-                if (status != IncursionStore.Status.UNWATCHED) {
-                    StatusDot(status = status, size = 8.dp)
-                    Spacer(Modifier.width(6.dp))
-                }
-                if (entry.essential) {
-                    CurioIcon(
-                        name = CurioIcons.Star,
-                        contentDescription = "Essential",
-                        tint = settingsRoseAccent(),
-                        size = 13.dp
+        // ── THE POSTER IS THE TILE NOW (v427) ────────────────────────────────
+        //
+        // A grid of titles with no artwork is a wall of text; the member asked
+        // for covers "in list", and a two-up grid is exactly where a cover earns
+        // its place. The art takes the tile's whole width at a poster's own
+        // height, and everything the tile said before (the order, the essentials
+        // mark, the state, the meta line) keeps its place underneath it.
+        Column {
+            IncursionPosterPlate(
+                entry = entry,
+                modifier = Modifier.fillMaxWidth().height(168.dp),
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+            )
+            Column(Modifier.padding(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "#${entry.orderLabel}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = settingsRoseAccent()
                     )
+                    Spacer(Modifier.weight(1f))
+                    if (status != IncursionStore.Status.UNWATCHED) {
+                        StatusDot(status = status, size = 8.dp)
+                        Spacer(Modifier.width(6.dp))
+                    }
+                    if (entry.essential) {
+                        CurioIcon(
+                            name = CurioIcons.Star,
+                            contentDescription = "Essential",
+                            tint = settingsRoseAccent(),
+                            size = 13.dp
+                        )
+                    }
                 }
+                Spacer(Modifier.height(5.dp))
+                Text(
+                    entry.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    listOfNotNull(
+                        entry.year?.toString(),
+                        entry.typeLabel,
+                        status.takeIf { it != IncursionStore.Status.UNWATCHED }?.shortLabel
+                    ).joinToString(" · "),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (status == IncursionStore.Status.UNWATCHED) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        ink
+                    },
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            Spacer(Modifier.height(6.dp))
-            Text(
-                entry.title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                listOfNotNull(
-                    entry.year?.toString(),
-                    entry.typeLabel,
-                    status.takeIf { it != IncursionStore.Status.UNWATCHED }?.label
-                ).joinToString(" · "),
-                style = MaterialTheme.typography.labelSmall,
-                color = if (status == IncursionStore.Status.UNWATCHED) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                } else {
-                    ink
-                },
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }
@@ -1133,12 +1353,24 @@ private fun EntryTile(entry: IncursionEntry, onOpen: () -> Unit) {
 private fun IncursionDetailSheet(
     entry: IncursionEntry,
     onDismiss: () -> Unit,
-    onStatus: (IncursionStore.Status) -> Unit
+    onStatus: (IncursionStore.Status) -> Unit,
+    /** v427 — the member's own line, saved with the title. */
+    onNote: (String) -> Unit
 ) {
     val accent = settingsRoseAccent()
     val status = IncursionStore.status(entry.storageKey)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val pillShape = RoundedCornerShape(50)
+    // The note is edited locally and written after a pause, not on every
+    // keystroke: a prefs write per character is how a text field starts to
+    // stutter, and the store is the app's own small JSON map.
+    var draft by remember(entry.storageKey) { mutableStateOf(IncursionStore.note(entry.storageKey)) }
+    LaunchedEffect(draft) {
+        if (draft != IncursionStore.note(entry.storageKey)) {
+            delay(500)
+            onNote(draft)
+        }
+    }
 
     // v425 — A TITLE OPENS AS A SHEET, NOT A BOX. This was an `AlertDialog`:
     // the app has ONE detail language — the sheet (a topic reveal, a book's own
@@ -1159,80 +1391,97 @@ private fun IncursionDetailSheet(
                 .padding(bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // The head: the order number the page is about, the title, its meta
-            // line, and the essentials mark as a chip beside them.
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(
-                            curioTintOn(
-                                MaterialTheme.colorScheme.surfaceContainerLow,
-                                accent,
-                                if (isCurioDarkTheme()) 0.18f else 0.12f
-                            )
-                        )
-                ) {
+            // ── THE HEAD IS THE POSTER (v427) ───────────────────────────────
+            //
+            // The app's one detail language is a sheet with the thing itself at
+            // the top — a topic reveal opens on the topic, a book on its cover —
+            // and a title's own sheet opened on a small disc with a number in
+            // it. The poster is the title's own art now (see [IncursionPosters]):
+            // the order and the line it belongs to over it as the page's own
+            // eyebrow, the title and its meta beside it, the state and the
+            // essentials mark under them.
+            Row(verticalAlignment = Alignment.Top) {
+                IncursionPosterPlate(
+                    entry = entry,
+                    modifier = Modifier.width(94.dp).height(140.dp),
+                    shape = RoundedCornerShape(14.dp)
+                )
+                Spacer(Modifier.width(13.dp))
+                Column(Modifier.weight(1f)) {
                     Text(
-                        entry.orderLabel,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
+                        "INCURSION · #${entry.orderLabel}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.3.sp,
                         color = accent
                     )
-                }
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         entry.title,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    Spacer(Modifier.height(3.dp))
                     Text(
                         entryMeta(entry),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-                if (entry.essential) {
-                    Surface(
-                        shape = pillShape,
-                        color = curioTintOn(
-                            MaterialTheme.colorScheme.surfaceContainerLow,
-                            accent,
-                            if (isCurioDarkTheme()) 0.18f else 0.12f
-                        )
+                    Spacer(Modifier.height(10.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Star,
-                                contentDescription = null,
-                                tint = accent,
-                                size = 12.dp
-                            )
-                            Spacer(Modifier.width(5.dp))
-                            Text(
-                                "Essential",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = accent
-                            )
+                        StatusChip(status = status)
+                        if (entry.essential) {
+                            Surface(
+                                shape = pillShape,
+                                color = curioTintOn(
+                                    MaterialTheme.colorScheme.surfaceContainerLow,
+                                    accent,
+                                    if (isCurioDarkTheme()) 0.18f else 0.12f
+                                )
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.Star,
+                                        contentDescription = null,
+                                        tint = accent,
+                                        size = 12.dp
+                                    )
+                                    Spacer(Modifier.width(5.dp))
+                                    Text(
+                                        "Essential",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = accent
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
 
             entry.desc?.takeIf { it.isNotBlank() }?.let { desc ->
-                Text(
-                    desc,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column {
+                    Text(
+                        "ABOUT",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = accent,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(5.dp))
+                    Text(
+                        desc,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
 
             entry.prereq?.takeIf { it.isNotBlank() && it != "—" }?.let { prereq ->
@@ -1258,55 +1507,83 @@ private fun IncursionDetailSheet(
                 color = accent,
                 fontWeight = FontWeight.Bold
             )
-            // Six rows, the current one ticked — the same states the phase
-            // header's own chips offer, so a title and a whole phase are marked
-            // the same way. Every row is a FILL in the app's language: no
-            // outlines, and only the chosen one wears its state's tone.
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // Six CHIPS, the current one filled — v427 compacted this from six
+            // full-width rows to one scrolling line, because six stacked rows
+            // pushed the synopsis and the note off the sheet's first screen for a
+            // control that is a single tap either way. They are the very chips the
+            // phase header offers (same tones, same shapes), so a title and a
+            // whole phase are still marked in one language.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+            ) {
                 IncursionStore.Status.entries.forEach { option ->
                     val on = option == status
-                    val ink = statusInk(option)
-                    val optionShape = RoundedCornerShape(16.dp)
+                    val ink = incursionStatusInk(option)
+                    val chipShape = RoundedCornerShape(50)
                     Surface(
-                        shape = optionShape,
+                        shape = chipShape,
                         color = if (on) {
                             curioTintOn(
                                 MaterialTheme.colorScheme.surfaceContainerLow,
                                 ink,
-                                if (isCurioDarkTheme()) 0.20f else 0.14f
+                                if (isCurioDarkTheme()) 0.24f else 0.16f
                             )
                         } else {
-                            MaterialTheme.colorScheme.surfaceContainerLow
+                            MaterialTheme.colorScheme.surfaceContainerHigh
                         },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(optionShape)
+                            .clip(chipShape)
                             .clickable { onStatus(option) }
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp)
+                            modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp)
                         ) {
-                            StatusDot(status = option, size = 11.dp)
-                            Spacer(Modifier.width(10.dp))
+                            StatusDot(status = option, size = 9.dp)
+                            Spacer(Modifier.width(7.dp))
                             Text(
-                                option.label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f)
+                                option.shortLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
+                                color = if (on) ink else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             if (on) {
+                                Spacer(Modifier.width(5.dp))
                                 CurioIcon(
                                     name = CurioIcons.Check,
                                     contentDescription = null,
                                     tint = ink,
-                                    size = 16.dp
+                                    size = 13.dp
                                 )
                             }
                         }
                     }
                 }
+            }
+
+            // ── A LINE OF YOUR OWN (v427) ────────────────────────────────────
+            //
+            // The member asked for it plainly ("your own note on a title"), and
+            // it belongs HERE rather than in a menu: the reason a row is marked
+            // the way it is is the one thing about it only they can write, and
+            // the sheet is where they decide. One line, saved with the title (see
+            // IncursionStore.setNote) and written after a pause, not per keystroke.
+            Column {
+                Text(
+                    "YOUR NOTE",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = accent,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(6.dp))
+                IncursionNoteField(
+                    value = draft,
+                    onValueChange = { draft = it.take(IncursionStore.NOTE_LIMIT) },
+                    accent = accent
+                )
             }
 
             Surface(
@@ -1322,6 +1599,49 @@ private fun IncursionDetailSheet(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 11.dp)
                 )
             }
+        }
+    }
+}
+
+// ── The note field ──────────────────────────────────────────────────────────
+
+/**
+ * ONE LINE OF THE MEMBER'S OWN, inside a title's sheet.
+ *
+ * A `BasicTextField` in a rounded plate — the shape the app's other small inputs
+ * wear (see the shared bubble's session note) — with the placeholder as a `Text`
+ * drawn UNDER the field rather than as a Material label, so the empty state costs
+ * no height and the field never jumps when the first character arrives.
+ */
+@Composable
+private fun IncursionNoteField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    accent: Color
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = MaterialTheme.typography.bodySmall.copy(
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        cursorBrush = SolidColor(accent),
+        maxLines = 2,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .padding(horizontal = 11.dp, vertical = 9.dp)
+    ) { inner ->
+        Box {
+            if (value.isEmpty()) {
+                Text(
+                    "Why you left it where you did…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+            }
+            inner()
         }
     }
 }

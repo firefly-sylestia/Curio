@@ -31,6 +31,9 @@ object IncursionStore {
     private const val KEY_UNLOCKED = "incursion_unlocked_v1"
     private const val KEY_STATUS = "incursion_status_v1"
 
+    /** v427 — one line of the member's own, per title. */
+    private const val KEY_NOTES = "incursion_notes_v1"
+
     /**
      * The phrase, lowercase and collapsed, as it is matched.
      *
@@ -41,15 +44,24 @@ object IncursionStore {
      */
     const val PHRASE = "i love you 3000"
 
-    /** Every state a title can be in, in the order the picker shows them. */
-    enum class Status(val label: String) {
+    /**
+     * Every state a title can be in, in the order the picker shows them.
+     *
+     * v427 — [label] is the state as it is OFFERED ("Plan to watch"), and
+     * [shortLabel] is the same state as it is TALLIED ("Planned"). The two live
+     * here rather than in a `when` at each call site because a page that offers a
+     * state and a page that counts it must never disagree about what it is called,
+     * and the chip that shows a row's own state had grown a third mapping of its
+     * own.
+     */
+    enum class Status(val label: String, val shortLabel: String) {
         /** The default: nothing said about it yet. */
-        UNWATCHED("Not watched"),
-        WATCHING("Watching"),
-        PLANNED("Plan to watch"),
-        WATCHED("Watched"),
-        ON_HOLD("On hold"),
-        DROPPED("Dropped");
+        UNWATCHED("Not watched", "Not watched"),
+        WATCHING("Watching", "Watching"),
+        PLANNED("Plan to watch", "Planned"),
+        WATCHED("Watched", "Watched"),
+        ON_HOLD("On hold", "On hold"),
+        DROPPED("Dropped", "Dropped");
 
         /** A title that has been decided about, one way or another. */
         val decided: Boolean get() = this != UNWATCHED
@@ -57,6 +69,18 @@ object IncursionStore {
 
     /** `storageKey → status ordinal`. Reactive; seeded once by [seed]. */
     var statusState by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+
+    /**
+     * v427 — `storageKey → a line of the member's own`. Reactive, seeded by
+     * [seed], written through like the statuses.
+     *
+     * It is ONE line on purpose: a viewing order is a list, and the thing worth
+     * writing on a row is the reason it is marked the way it is ("stopped here,
+     * the pacing drops") — a notebook per title belongs in the journal, which is
+     * where the app already keeps writing.
+     */
+    var noteState by mutableStateOf<Map<String, String>>(emptyMap())
         private set
 
     /** Whether Incursion has been unlocked on this device. Reactive. */
@@ -78,6 +102,7 @@ object IncursionStore {
         val prefs = prefs(context)
         unlocked = prefs.getBoolean(KEY_UNLOCKED, false)
         statusState = readAll(prefs.getString(KEY_STATUS, null))
+        noteState = readNotes(prefs.getString(KEY_NOTES, null))
     }
 
     // ── The phrase ───────────────────────────────────────────────────────────
@@ -143,6 +168,47 @@ object IncursionStore {
     /** How many of [keys] are marked [match]. Synchronous — the lists are tiny. */
     fun count(keys: List<String>, match: (Status) -> Boolean): Int =
         keys.count { match(status(it)) }
+
+    // ── The notes ────────────────────────────────────────────────────────────
+
+    /** The line the member left on a title, or "" when they left none. */
+    fun note(key: String): String = noteState[key].orEmpty()
+
+    /**
+     * Writes a title's own line. A blank or whitespace-only note REMOVES the
+     * entry instead of storing an empty string, so the map stays as small as the
+     * notes that actually exist — the same rule the statuses follow for
+     * [Status.UNWATCHED].
+     */
+    fun setNote(context: Context, key: String, text: String) {
+        val clean = text.trim().take(NOTE_LIMIT)
+        val next = noteState.toMutableMap()
+        if (clean.isEmpty()) next.remove(key) else next[key] = clean
+        noteState = next
+        writeNotes(context, next)
+    }
+
+    /** How long one title's own line may be — a line, not a page. */
+    const val NOTE_LIMIT = 160
+
+    private fun readNotes(raw: String?): Map<String, String> {
+        if (raw.isNullOrBlank()) return emptyMap()
+        return runCatching {
+            val json = JSONObject(raw)
+            buildMap {
+                json.keys().forEach { key ->
+                    val value = json.optString(key).trim()
+                    if (value.isNotEmpty()) put(key, value)
+                }
+            }
+        }.getOrDefault(emptyMap())
+    }
+
+    private fun writeNotes(context: Context, map: Map<String, String>) {
+        val json = JSONObject()
+        map.forEach { (key, value) -> runCatching { json.put(key, value) } }
+        prefs(context).edit().putString(KEY_NOTES, json.toString()).apply()
+    }
 
     private fun readAll(raw: String?): Map<String, Int> {
         if (raw.isNullOrBlank()) return emptyMap()

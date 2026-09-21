@@ -722,6 +722,68 @@ what the journal shows on their device, the useful thing to report is which shap
 looking at (a pair, a three, a four, or a print beside a line) — the shapes are one code
 path each and each can be checked on its own.
 
+## 14. Request — the Incursion full redesign (+ the PDF/print question, + a CI fix)
+
+**The ask (member):** *"so the pdf exactly shows the images as they are on journal with caption
+dates ? now do the incursion full ui redesign with better ui matching the app also other features
+for it and instead of essential tab add personal tab where [the] status shows, also use proper
+icons in that ui. proper description etch etc."* — plus the CI error pasted with it.
+
+**CI first, because the build was red:** `compileReleaseKotlin` failed at
+`PersonalExport.kt:1359` — *"actual type is `android.graphics.Canvas`, but
+`androidx.compose.ui.graphics.Canvas` was expected"*. The voice note's wave (the pass before this
+one) handed the PAGE's canvas to a `CanvasDrawScope`; the two canvas types are different. Fixed by
+importing Compose's `Canvas` as `ComposeCanvas` and drawing the wave into an `ImageBitmap` at the
+sheet's own measure (`Canvas(image)` + `CanvasDrawScope` — the bridge `SocialNotifications`'
+avatar cache already uses), then blitting it. Pushed as `4cbf569a`.
+
+**The PDF/print question, answered:** yes for geometry and yes for the caption dates. The frame,
+the crop, the size's own share and height, the pads, the label inside the frame and its stamp all
+come from the page now, and the always-present band is drawn. Two honest caveats: the caption's
+LINE BOX is still the sheet's 1.7 × label-size approximation of Compose's text metrics, and the
+sheet draws no frame rectangle or shadow (its paper IS the page's paper, so the frame shows only
+as the pads).
+
+**Incursion — answers taken before implementing** (ask_user): the Personal tab is **a status desk
++ the six-state tally + the derived figures** ("all 3") · features: **posters, Next up, one search
+across lines, your own note** (NOT hide-watched, NOT share) · **Personal tab last** (Essentials
+loses its destination) · **no new toggle** — and none was needed: the app already has one switch
+for fetched artwork (`AppPreferences.coverFetchEnabledState`, the Experiments page's "Cover
+fetching"), which the posters ride.
+
+**What was built:**
+
+- `features/incursion/IncursionPoster.kt` (new) — `IncursionPosters.resolve` (TMDB by the row's own
+  `tmdbId`, then the keyless `FilmPosterFetch` / `SeriesPosterFetch`, memoised per `storageKey`
+  WITH misses) + `IncursionPosterPlate` (the poster, or the app's drawn plate: the order + a kind
+  glyph). Consent-gated, resolved per composed row.
+- `features/reveal/TmdbFetch.kt` — `posterUrlById(id, isShow)` with its own id cache.
+- `data/IncursionStore.kt` — `noteState` / `note()` / `setNote()` (one line per title, blank
+  removes, `NOTE_LIMIT` 160, its own prefs key), and `Status.shortLabel` beside `Status.label`.
+- `features/incursion/IncursionPersonal.kt` (new) — the desk: whole-order progress, a bar per line,
+  next up per line, the six-state tally, the figures (hours in / hours left / essentials / longest
+  run). Read-only; `minutesOf` counts a series as per-episode runtime × episodes covered.
+- `features/incursion/IncursionScreen.kt` — `PERSONAL` replaces `ESSENTIALS` as a destination (with
+  real icons: reel / play / spark / person), one search across all three lines (`StudioBand` heads),
+  `nextUp` in the head, posters on rows and tiles, and the sheet rebuilt on the poster with one
+  scrolling chip row, `ABOUT`, `WATCH FIRST`, `YOUR NOTE` (debounced 500 ms) and Done.
+- `features/settings/UserExperimentsScreen.kt` — the Cover fetching switch's description now names
+  the Incursion art it also covers.
+
+### What is still owed / named, not done
+
+- `IncursionSurfaces.kt` (the unlock reveal and Home's door) was left alone: nothing in this request
+  asked for it, and it already wears the v425 card language.
+- The desk's figures are counts of the statuses only — no per-week history, because the store keeps
+  no timestamps. Adding them would be a data change, not a UI one.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on all five touched files (the character scanner, not a regex).
+- Symbol sweep: no references left to `IncursionDestination.ESSENTIALS`, `statusInk(` (renamed
+  `incursionStatusInk`), or the old `statusInkFor`; every new file's imports are used.
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

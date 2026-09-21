@@ -193,7 +193,8 @@ fun UserExperimentsScreen(navController: NavController) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ExperimentSwitchRow(
                             "Cover fetching",
-                            "Download book covers + ratings, album artwork and series posters (keyless providers)",
+                            "Download book covers + ratings, album artwork, series posters and the " +
+                                "art on an Incursion row (keyless providers, TMDB when a key is set)",
                             AppPreferences.coverFetchEnabledState
                         ) {
                             AppPreferences.setCoverFetchEnabled(context, it)
