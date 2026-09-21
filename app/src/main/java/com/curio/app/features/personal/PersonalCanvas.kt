@@ -1142,7 +1142,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         masks[id] = maskApplyFont(mask(id), 0, block.text.length, key)
         armedFont = null
-        onDocChanged(doc())
+        publish()
     }
 
     /** The pen the caret sits in right now — what the dock's marker button
@@ -1182,7 +1182,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             val every = (start until end).all { highlightKeyOf(mask(id).getOrElse(it) { 0 }) == key }
             masks[id] = maskApplyHighlight(mask(id), start, end, if (every) null else key)
             armedHighlight = null
-            onDocChanged(doc())
+            publish()
             return
         }
         val current = highlightOfFocused()
@@ -1293,7 +1293,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun runPendingSplit(caret: PersonalCaret) {
         pendingSplit = null
         splitOnNewlines(caret.blockId, caret.index)
-        onDocChanged(doc())
+        publish()
     }
 
     init {
@@ -1337,7 +1337,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         masks[id] = maskAfterEdit(block.text, text, mask(id), 0, 0)
         blocks[id] = block.copy(text = text)
         selections[id] = TextRange(text.length)
-        onDocChanged(doc())
+        publish()
     }
 
     fun mask(id: String): IntArray = masks[id] ?: emptyMask(text(id).length)
@@ -1361,7 +1361,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val block = blocks[id] ?: return
         if (block.isPhoto.not()) return
         blocks[id] = block.copy(photoSize = size.key)
-        onDocChanged(doc())
+        publish()
     }
 
     /** The line's bullet marker (the default dot when it never picked one). */
@@ -1419,6 +1419,62 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
     )
 
+    /**
+     * v438 — THE PAGE ALWAYS KEEPS ONE LINE TO TYPE IN.
+     *
+     * The member, of the copy box: *"using cut when selected all removed that line
+     * and i cant type anything again in the body, coz i dont get any option to"* —
+     * and their answer for the rule: **"Always one empty line to type in"**.
+     *
+     * Cutting or deleting the whole page left the document with NO block at all,
+     * and an empty document is the one state the writing surface cannot come back
+     * from: a block is what a caret lives in and what the keyboard is attached to, so
+     * with none left there is nothing to tap into, nothing to type in, and no door
+     * that puts a line back ([removeBlock] had its own version of this guard; every
+     * other path — cut, the row tools, the gesture tools — did not).
+     *
+     * The rule is stated once here and enforced on the way OUT of every edit (see
+     * [publish]): a page with a photo and a voice note and nothing else gets the line
+     * too, because neither of those can be typed into either.
+     */
+    private fun keepLineToTypeIn() {
+        val typed = order.firstOrNull { id ->
+            val block = blocks[id] ?: return@firstOrNull false
+            !block.isPhoto && block.audio == null
+        }
+        if (typed != null) return
+        // ONE EMPTY LINE, at the foot of whatever is left, with the caret already
+        // in it — the member cleared the page to write something else, so the new
+        // line is where the writing is.
+        val block = PersonalBlock(id = newBlockId())
+        order.add(block.id)
+        blocks[block.id] = block
+        masks[block.id] = emptyMask(0)
+        selections[block.id] = TextRange(0)
+        focusedId = block.id
+        caret = PersonalCaret(block.id, 0)
+        // …and the TAP, not only the focus: the caret and the focus token can both
+        // already be true of a line while the keyboard is down (the same reason
+        // [focusLastLine] bumps it), so the one signal that reliably puts the
+        // member back in a field is the one a finger on the page sends.
+        tapTarget = block.id
+        tapTick++
+    }
+
+    /**
+     * THE ONE WAY AN EDIT IS PUBLISHED.
+     *
+     * Every change ends here rather than at `onDocChanged(doc())` so the
+     * one-line invariant cannot be forgotten by an edit path added later — and so
+     * there is exactly one place to add the next rule about what a page must
+     * always still be. **A new edit must call this, never `onDocChanged(doc())`
+     * directly.**
+     */
+    private fun publish() {
+        keepLineToTypeIn()
+        onDocChanged(doc())
+    }
+
     // ── Edits ──────────────────────────────────────────────────────────
 
     /** The writer typed / pasted / deleted inside one block. */
@@ -1474,7 +1530,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 compositions[id] = value.composition
                 caret = PersonalCaret(id, value.selection.start.coerceIn(0, newText.length))
                 pendingSplit = caret
-                onDocChanged(doc())
+                publish()
                 return
             }
             masks[id] = maskAfterEdit(
@@ -1535,7 +1591,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         selections[id] = value.selection
         compositions[id] = value.composition
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -1657,7 +1713,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 masks[row] = updated
             }
             armed = armed and listFlags.inv()
-            onDocChanged(doc())
+            publish()
             return
         }
         val selection = selections[id]
@@ -1668,7 +1724,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             if (!current) updated = maskApply(updated, selection.min, selection.max, other, false)
             masks[id] = updated
             armed = armed and listFlags.inv()
-            onDocChanged(doc())
+            publish()
             return
         }
         // v389e — NOTHING SELECTED: THE LIST DRESSES THE LINE UNDER THE CARET,
@@ -1689,7 +1745,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             masks[target] = updated
             armed = armed and listFlags.inv()
         }
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -1702,7 +1758,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val block = blocks[id] ?: return
         if (block.checked == value) return
         blocks[id] = block.copy(checked = value)
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -1736,7 +1792,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             armed = armed and listFlags.inv()
         }
         blocks[id] = block.copy(marker = marker?.key.orEmpty())
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -2176,7 +2232,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             blocks[id] = blocks[id]?.copy(text = words) ?: block
             masks[id] = mask
             pageCharRange = range
-            onDocChanged(doc())
+            publish()
         }
         val keptMask = IntArray(words.length - taken.length) { index ->
             mask.getOrElse(if (index < range.min) index else index + taken.length) { 0 }
@@ -2185,7 +2241,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         masks[id] = keptMask
         selections[id] = TextRange(range.min)
         pageCharRange = TextRange(range.min, range.min)
-        onDocChanged(doc())
+        publish()
         return taken
     }
 
@@ -2209,7 +2265,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 row.selection?.let { selections[row.id] = it }
             }
             pageRange = IntRange.EMPTY
-            onDocChanged(doc())
+            publish()
         }
         ids.forEach { id ->
             order.remove(id)
@@ -2219,7 +2275,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             compositions.remove(id)
         }
         pageRange = IntRange.EMPTY
-        onDocChanged(doc())
+        publish()
         return text
     }
 
@@ -2243,7 +2299,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 masks.remove(id)
             }
             pageRange = IntRange.EMPTY
-            onDocChanged(doc())
+            publish()
         }
         text.split('\n').forEachIndexed { offset, line ->
             val block = PersonalBlock(id = newBlockId(), text = line)
@@ -2253,7 +2309,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             created.add(block.id)
         }
         pageRange = IntRange.EMPTY
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -2272,7 +2328,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             blocks[id] = blocks[id]?.copy(text = words) ?: block
             masks[id] = mask
             pageCharRange = TextRange(at, until)
-            onDocChanged(doc())
+            publish()
         }
         val inserted = text.replace('\n', ' ')
         val next = words.substring(0, at) + inserted + words.substring(until)
@@ -2287,7 +2343,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         masks[id] = nextMask
         selections[id] = TextRange(at + inserted.length)
         pageCharRange = TextRange(at, at + inserted.length)
-        onDocChanged(doc())
+        publish()
     }
 
     fun toggle(flag: Int) {
@@ -2306,7 +2362,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 masks[id] = maskApply(mask(id), 0, block.text.length, flag, !allOn)
             }
             armed = armed and flag.inv()
-            onDocChanged(doc())
+            publish()
             return
         }
         val id = focusedId ?: return
@@ -2332,7 +2388,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 masks[id] = maskApply(chosen, selection.min, selection.max, flag, on)
                 armed = armed and flag.inv()
                 armedOff = armedOff and flag.inv()
-                onDocChanged(doc())
+                publish()
                 return
             }
             val target = isolateCaretLine(id)
@@ -2349,7 +2405,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                     armed = armed and flag.inv()
                     armedOff = armedOff or flag
                 }
-                onDocChanged(doc())
+                publish()
                 return
             }
             val lineMask = mask(target)
@@ -2357,7 +2413,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             masks[target] = maskApply(lineMask, 0, lineText.length, flag, on)
             armed = armed and flag.inv()
             armedOff = armedOff and flag.inv()
-            onDocChanged(doc())
+            publish()
             return
         }
         val blockMask = mask(id)
@@ -2375,7 +2431,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 armed = armed and flag.inv()
                 armedOff = armedOff or flag
             }
-            onDocChanged(doc())
+            publish()
             return
         }
         val range = selection.min to selection.max
@@ -2383,7 +2439,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         masks[id] = maskApply(blockMask, range.first, range.second, flag, on)
         armed = armed and flag.inv()
         armedOff = armedOff and flag.inv()
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -2405,7 +2461,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             val block = blocks[id] ?: return@forEach
             blocks[id] = block.copy(align = align)
         }
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -2517,13 +2573,13 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             caret = PersonalCaret(empty.id, 0)
         }
         focusedId = caret?.blockId
-        onDocChanged(doc())
+        publish()
     }
 
     fun setCaption(id: String, caption: String) {
         val block = blocks[id] ?: return
         blocks[id] = block.copy(caption = caption)
-        onDocChanged(doc())
+        publish()
     }
 
     // ── v401 — THE CAPTION'S OWN LABEL ─────────────────────────────────
@@ -2559,28 +2615,28 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val block = blocks[id] ?: return
         if (block.captionDateMillis == millis) return
         blocks[id] = block.copy(captionDateMillis = millis)
-        onDocChanged(doc())
+        publish()
     }
 
     fun setCaptionFace(id: String, key: String) {
         val block = blocks[id] ?: return
         if (block.captionFace == key) return
         blocks[id] = block.copy(captionFace = key)
-        onDocChanged(doc())
+        publish()
     }
 
     fun setCaptionSize(id: String, key: String) {
         val block = blocks[id] ?: return
         if (block.captionSize == key) return
         blocks[id] = block.copy(captionSize = key)
-        onDocChanged(doc())
+        publish()
     }
 
     fun setCaptionOrder(id: String, key: String) {
         val block = blocks[id] ?: return
         if (block.captionOrder == key) return
         blocks[id] = block.copy(captionOrder = key)
-        onDocChanged(doc())
+        publish()
     }
 
     /** v421 — a voice note's LOOK ([PersonalVoiceStyle.key], stored with the
@@ -2592,7 +2648,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         val block = blocks[id] ?: return
         if (block.audioStyle == style.key) return
         blocks[id] = block.copy(audioStyle = style.key)
-        onDocChanged(doc())
+        publish()
     }
 
     /** Removes a photo block (and its caption). */
@@ -2604,14 +2660,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         masks.remove(id)
         selections.remove(id)
         compositions.remove(id)
-        if (order.isEmpty()) {
-            val block = PersonalBlock(id = newBlockId())
-            order.add(block.id)
-            blocks[block.id] = block
-            masks[block.id] = emptyMask(0)
-        }
+        // v438 — the page cannot be left with nothing to write in (see
+        // [keepLineToTypeIn], which is now the ONE statement of that rule: this
+        // path had its own copy of it, and the copy box's cut had none).
+        keepLineToTypeIn()
         if (focusedId == id) focusedId = order.getOrNull(index.coerceAtMost(order.size - 1))
-        onDocChanged(doc())
+        publish()
     }
 
     // ── The to-do page's own gestures (v389) ───────────────────────────
@@ -2642,7 +2696,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // cell's size on the way in (see normaliseRowSizesAt), so the row the
         // member just built is a row they can see in the same frame.
         normaliseRowSizesAt(adjustedTo)
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -2778,7 +2832,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             masks[fresh.id] = emptyMask(0)
         }
         if (focusedId == id) focusedId = order.getOrNull(index.coerceAtMost(order.size - 1))
-        onDocChanged(doc())
+        publish()
     }
 
     /** The Undo pill: puts the swiped row back, at the place it was swiped from. */
@@ -2804,7 +2858,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         order.add(index, block.id)
         blocks[block.id] = block
         masks[block.id] = runsToMask(block.text.length, block.runs)
-        onDocChanged(doc())
+        publish()
     }
 
     /** Dismisses the Undo pill without putting anything back. */
@@ -2952,14 +3006,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             selections[lineId] = TextRange(offsetInLine)
             focusedId = lineId
             caret = PersonalCaret(lineId, offsetInLine)
-            onDocChanged(doc())
+            publish()
             return lineId
         }
         // The line already starts the block, so what is left of it IS the line.
         selections[id] = TextRange(offsetInLine)
         focusedId = id
         caret = PersonalCaret(id, offsetInLine)
-        onDocChanged(doc())
+        publish()
         return id
     }
 
@@ -3054,7 +3108,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         caret = PersonalCaret(tail.id, 0)
         armed = carried
         armedOff = 0
-        onDocChanged(doc())
+        publish()
         return tail.id
     }
 
@@ -3162,7 +3216,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         selections[previousId] = TextRange(at)
         focusedId = previousId
         caret = PersonalCaret(previousId, at)
-        onDocChanged(doc())
+        publish()
         return true
     }
 
@@ -3203,7 +3257,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // A picked chapter is already written, so nothing is armed: the next
         // thing typed is prose under the heading.
         armed = if (text.isEmpty()) FLAG_TITLE else 0
-        onDocChanged(doc())
+        publish()
     }
 
     /**
@@ -3243,7 +3297,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // Pasted words are already written, so nothing is armed for what is
         // typed next — the same rule a picked chapter name follows.
         armed = 0
-        onDocChanged(doc())
+        publish()
     }
 
     /** Focus + caret request the canvas consumes on its next frame. */

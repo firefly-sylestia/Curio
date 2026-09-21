@@ -153,9 +153,12 @@ ambiguity:
 
 1. **Copy box** — *"two row and hide the dock just show the copy doc when thats on"*. Two rows
    now (reach above, actions below), nothing scrolls, and the writing dock's `AnimatedVisibility`
-   tests `!editor.pageEditBarOpen`. **The cut-everything dead end is still open**: the member's
-   answer was *"Always one empty line to type in"* — the editor must guarantee an editable block
-   after a cut empties the page. **TODO (not done in this session).**
+   tests `!editor.pageEditBarOpen`. **The cut-everything dead end is DONE (v438)**: the member's
+   rule (*"Always one empty line to type in"*) is now a state invariant — `publish()` is the one
+   way an edit lands, and `keepLineToTypeIn()` gives the page an empty, focused, caret-bearing
+   line whenever nothing in it can be typed into. Every mutation went through
+   `onDocChanged(doc())` → `publish()` (44 sites), and `removeBlock`'s own duplicate guard was
+   folded into the shared one.
 2. **Marker axis** — answered: **"Too low, below the words"**. `PERSONAL_MARKER_AXIS_LIFT = 0.06f`
    is applied to `lineHeight` in `drawPersonalMarker` (done).
 3. **The journal's colour** — answered with all three places (paper, dock tools, date/title
@@ -187,6 +190,10 @@ ambiguity:
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§30 — the writing page always keeps a line to type in (DONE).** The member's rule from §28,
+  implemented at the state level rather than inside the copy box: one `publish()` choke point and
+  one `keepLineToTypeIn()` guard, so cut, the row tools and the gesture tools cannot empty a page.
+  Known and accepted: undoing a full-page cut restores the rows and keeps the added line.
 - **§29 — the ⋯ menu, the sheets' speed, and the reader's animations (DONE).** *"the 3 dot menu
   in pdf reader is bad like too huge and also the drop downs of each is slo, lie it takes a
   secdond to close, and also the highloght and notes dropd won is so small"* plus *"for the
