@@ -25,12 +25,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.BuildConfig
+import com.curio.app.R
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.features.feedback.FeedbackFormCard
 import com.curio.app.features.feedback.FeedbackFormState
 import com.curio.app.features.onboarding.CurioOnboardingState
+import com.curio.app.features.reveal.TmdbFetch
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.SettingsOptionCard
@@ -62,7 +64,10 @@ import com.curio.app.features.settings.SettingsHeroTotalHeight
  * Contents:
  *  - Feedback: Report a bug, Crash logs, Test crash.
  *  - About Curio: Replay intro + the open-source GitHub repository (merged
- *    here from the old Settings → About page).
+ *    here from the old Settings → About page). v428 — this is also the app's
+ *    CREDITS section, so it carries TMDB's required attribution row (its own
+ *    approved logo + the verbatim notice, shown only when a build holds one of
+ *    TMDB's two credentials; see [TmdbFetch]).
  *  - Updates (LAST): v112 — the update flow (check / release notes /
  *    download / install) moved to its OWN sub-page (Settings → Updates).
  *    This page keeps the version readout (five-tap diagnostic →
@@ -261,6 +266,45 @@ fun SupportScreen(navController: NavController) {
                                         Uri.parse("https://github.com/Kyant0/AndroidLiquidGlass")
                                     )
                                 )
+                            }
+                        }
+                        // v428 — TMDB'S ATTRIBUTION, IN THE APP'S CREDITS
+                        // SECTION — the place TMDB's own terms name. Every
+                        // application using its API must carry the sentence
+                        // below verbatim and show its logo (unmodified), and
+                        // the film sheets and the Incursion rows take TMDB's
+                        // artwork and facts; so the row is here, in the same
+                        // card as the app's other credits, wearing TMDB's own
+                        // approved mark instead of a Curio glyph.
+                        //
+                        // SHOWN ONLY WHEN THIS BUILD CARRIES ONE OF TMDB'S TWO
+                        // CREDENTIALS (see [TmdbFetch]): a build with neither
+                        // never asks TMDB for anything, so there is nothing to
+                        // attribute — the row is a statement of fact, not a
+                        // permanently parked credit. The tap goes to
+                        // themoviedb.org, which is the link TMDB's branding
+                        // rules require it to be.
+                        if (TmdbFetch.isConfigured) {
+                            SettingsOptionDivider()
+                            SettingsOptionRow(
+                                icon = null,
+                                logoRes = R.raw.tmdb_logo,
+                                // The required notice, kept verbatim.
+                                title = "Artwork and metadata by TMDB",
+                                subtitle = "This product uses the TMDB API but is not " +
+                                    "endorsed or certified by TMDB.",
+                                // The one row whose sentence must never be cut:
+                                // `plain` is what lets it run to three lines.
+                                plain = true
+                            ) {
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse("https://www.themoviedb.org")
+                                        )
+                                    )
+                                }
                             }
                         }
                     }

@@ -24,15 +24,21 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.curioSettingsCardFill
 import com.curio.app.ui.components.rememberCurioControlTick
@@ -190,8 +196,8 @@ fun SettingsOptionCard(
  *  Color theme door), so it is no longer file-private: it is the same piece of
  *  row furniture as [SettingsOptionDivider] and [SettingsOptionCard]. */
 @Composable
-fun SettingsOptionIconTile(icon: String?, dark: Boolean) {
-    if (icon == null) return
+fun SettingsOptionIconTile(icon: String?, dark: Boolean, logoRes: Int? = null) {
+    if (icon == null && logoRes == null) return
     Box(
         modifier = Modifier
             .size(40.dp)
@@ -199,12 +205,37 @@ fun SettingsOptionIconTile(icon: String?, dark: Boolean) {
             .background(if (dark) Color.White.copy(alpha = 0.09f) else Color(0xFFF2E8DC)),
         contentAlignment = Alignment.Center
     ) {
-        CurioIcon(
-            name = icon,
-            contentDescription = null,
-            tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
-            size = 20.dp
-        )
+        // v428 — A BRAND MARK, DRAWN AS THE VENDOR PUBLISHED IT. TMDB's
+        // attribution row (Support → About Curio) carries TMDB's own approved
+        // logo, and TMDB's branding rules forbid recolouring, reshaping or
+        // rotating it — so this tile TINTS NOTHING where every other tile in
+        // the family hands its glyph an ink. The asset is `R.raw.tmdb_logo`:
+        // TMDB's unmodified "Primary short (blue)" SVG from
+        // themoviedb.org/about/logos-attribution, resized by the layout (never
+        // by us, so its aspect ratio is preserved) and loaded through Coil's
+        // SvgDecoder exactly as the drawer footer's art is.
+        if (logoRes != null) {
+            val context = LocalContext.current
+            val model = remember(context, logoRes) {
+                ImageRequest.Builder(context)
+                    .data(logoRes)
+                    .decoderFactory(SvgDecoder.Factory())
+                    .build()
+            }
+            AsyncImage(
+                model = model,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(26.dp)
+            )
+        } else if (icon != null) {
+            CurioIcon(
+                name = icon,
+                contentDescription = null,
+                tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
+                size = 20.dp
+            )
+        }
     }
 }
 
@@ -246,6 +277,8 @@ fun SettingsOptionRow(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
+    /** v428 — a BRAND MARK in place of the glyph (see [SettingsOptionIconTile]). */
+    logoRes: Int? = null,
     /** v408 — the roomy row: taller, and copy free to wrap to three lines
      *  (see [SettingsRowEntry.plain]). Used by the four "front door" entries
      *  on the hub. v409 — it wears its ICON TILE again: the icon was dropped
@@ -266,7 +299,7 @@ fun SettingsOptionRow(
             .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
             .padding(vertical = if (plain) 16.dp else 12.dp)
     ) {
-        SettingsOptionIconTile(icon, dark)
+        SettingsOptionIconTile(icon, dark, logoRes)
         SettingsOptionCopy(
             title,
             subtitle,

@@ -953,6 +953,67 @@ the Personal tab at all (a desk has no rows to filter; a SEARCH still is, and is
 - Every poster lookup above was measured against the live endpoints with `curl`, not recalled.
 - No Gradle in this environment — CI compiles it (per `AGENTS.md`).
 
+## 18. Request — TMDB: read its docs for a better implementation ("i think there are two keys")
+
+**The ask (member):** *"also tmbd read its docs for better implemetayipn for apps i think there are two
+keys."* — a re-send of the follow-up §17 already carried, so this pass started by **verifying what the
+docs actually say against what the tree does**, not by rebuilding the two-credential work.
+
+### What the docs say (read, not recalled)
+
+- **Authentication** (`developer.themoviedb.org/docs/authentication-application`): *"Version 3 is
+  controlled by either a single query parameter, `api_key`, or by using your access token as a Bearer
+  token"*, and the read token *"has the added benefit of being a single authentication process that you
+  can use across both the v3 and v4 methods"*. **The member was right: two credentials.**
+- **FAQ** (`/docs/faq`) — the part that was NOT implemented anywhere: *"Our API is free to use for
+  non-commercial purposes **as long as you attribute TMDB** as the source of the data and/or images."*
+  and *"You shall place the following notice prominently on your application: 'This product uses the TMDB
+  API but is not endorsed or certified by TMDB.' … the attribution must be within your application's
+  'About' or 'Credits' type section."* Plus: the logo is required, only an approved one may be used, and
+  *"should not be modified in color, aspect ratio, flipped or rotated"*; the link must point to
+  `https://www.themoviedb.org`.
+- **Logos & attribution** (`themoviedb.org/about/logos-attribution`): the five approved SVGs, with the
+  brand colours (`#0d253f`, `#01b4e4`, `#90cea1`).
+- **Rate limiting**: the legacy limit is disabled; ~40 req/s remains, and a 429 should be respected.
+  `getJson` already degrades a non-200 to "ask the next provider", so nothing to change.
+- **Image basics**: base_url + size + path. The hardcoded `image.tmdb.org/t/p/w500` is the documented
+  shape; left alone.
+
+### What was already right (verified, unchanged)
+
+`TmdbFetch` reads `TMDB_READ_TOKEN` first and falls back to `TMDB_API_KEY`, sends the token as
+`Authorization: Bearer …` (and never alongside `api_key`), recognises a JWT pasted into the key field,
+and both workflows export both secrets. No change needed — §17 got the two keys right.
+
+### The three real gaps this pass closed
+
+1. **Attribution — missing entirely.** TMDB's terms make it a condition of the free API, and the app
+   shows TMDB artwork and facts on the film sheets and on Incursion rows. **Asked, then built:** the
+   member chose *a row in Settings → Support → About Curio* (the app's Credits section — the place the
+   FAQ names) *and* the official logo. The row carries the notice **verbatim**, `plain = true` so it can
+   never be cut off, links to `themoviedb.org`, and is drawn **only when `TmdbFetch.isConfigured`** — a
+   keyless build never asks TMDB anything, so there is nothing to attribute. The mark is TMDB's
+   **unmodified** approved "Primary short (blue)" SVG, vendored byte-identical as `R.raw.tmdb_logo` and
+   drawn through Coil's `SvgDecoder`; `SettingsOptionRow` gained an optional `logoRes` and
+   `SettingsOptionIconTile` a brand-mark branch that **tints nothing** (the branding rules forbid
+   recolouring it).
+2. **The Dev source lab would have lied about TMDB.** Its probe built `?api_key=` from
+   `BuildConfig.TMDB_API_KEY` and gated on that field alone — so a build holding only the read token read
+   as *"Needs TMDB_API_KEY — not set in this build"* while the film sheets in it were resolving posters
+   fine. `TmdbFetch.apiKey` / `readToken` are now `internal` (one resolution, one place), `keyOf` returns
+   whichever credential the app would really send, the row's new `keyLabel` names both fields, and the
+   probe authenticates the way the app does (Bearer when a token exists, `?api_key=` otherwise).
+3. **The CI run summary only reported `TMDB_API_KEY`.** `build-summary.sh` now uses an `add_provider`
+   helper that takes one-or-more vars per provider, so TMDB counts as present when EITHER secret is
+   exported, and the label still prints once.
+
+### Verification
+
+- Both credentials, the attribution sentence and the logo rules were read from TMDB's own pages (above).
+- `bash -n .github/scripts/build-summary.sh` → syntax OK.
+- Brace/paren balance 0/0/0 on all four touched Kotlin files (the character scanner, not a regex).
+- No Gradle here — CI compiles it (per `AGENTS.md`).
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

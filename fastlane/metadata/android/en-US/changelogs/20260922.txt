@@ -1,8 +1,10 @@
 ADD:
+- Settings: TMDB's attribution sits in About Curio — its own approved mark and the notice "This product uses the TMDB API but is not endorsed or certified by TMDB.", shown by a build that uses TMDB and linking to themoviedb.org.
 - Incursion: a watch button on every row and tile — one tap marks a title watched, the next takes it back, and every finer state is still the sheet's own chips.
 - Incursion: a series' sheet carries its episode guide — the show's own episodes with their numbers, names and airdates, read through the same fetcher the series lane uses (and the year and season are stripped from the lookup, so "Loki S2" is looked up as "Loki").
 
 FIX:
+- Dev: the source lab asks TMDB with the credential the build really carries — the read token as a Bearer header or the key as a query parameter, exactly as the app's own door sends them — so a build holding only the token no longer reads as "needs TMDB_API_KEY" while its film sheets are resolving posters fine.
 - Incursion: the Personal tab opens — every tap on it was answered with Marvel, because its own id failed the page's validity check, so the status desk could never draw; it is also asked about before the list's own branches, and the filters are no longer drawn on it.
 - Art: film posters load again — iTunes' movie search answers nothing at all for any title (its music store on the same endpoint still answers), so a film's keyless door was dead and only the keyed one was left; a film's own Wikipedia article image is the primary door now, with the candidate chain a wiki really files films under and a search behind it.
 - Incursion: series posters load — these rows say which season they are ("WandaVision S1"), which is a name no catalogue has, so the season and year come off before anything is asked.

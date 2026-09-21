@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.BuildConfig
+import com.curio.app.features.reveal.TmdbFetch
 import com.curio.app.ui.components.CurioSettingsDivider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -72,6 +73,11 @@ import java.net.URLEncoder
  *  · **keyed, key set** — the probe runs with the app's own `BuildConfig` value,
  *    so the lab tests the key this build would really use.
  *
+ * A door may accept MORE THAN ONE credential (TMDB takes a v3 key or an API Read
+ * Access Token — see [TmdbFetch]): the row is open when ANY of them is present,
+ * and its message names them all, so the lab never reports a source as unusable
+ * for a build the app itself authenticates with.
+ *
  * Nothing here is persisted and nothing here runs on its own: a probe fires when
  * its own button (or Run all) is pressed, and its result lives in this screen's
  * own map until the page is left. It is a developer's bench, not a feature.
@@ -109,6 +115,11 @@ internal class SourceFetchSource(
     val where: String,
     /** The `BuildConfig` name this door needs, or null for a keyless source. */
     val keyName: String? = null,
+    /**
+     * What the "not set in this build" line should name, when one field is not
+     * the whole story — TMDB takes either of its two credentials.
+     */
+    val keyLabel: String? = null,
     val probe: suspend () -> SourceFetchResult
 )
 
@@ -274,8 +285,19 @@ private fun fieldsOf(obj: JSONObject): String {
  */
 internal object SourceFetchCatalog {
 
+    /**
+     * v428 — TMDB's gate reads BOTH its credentials, because the app does.
+     *
+     * TMDB hands an account a v3 key and an API Read Access Token, and the app's
+     * own [TmdbFetch] accepts either (the token as a Bearer header, the key as
+     * `?api_key=`). A lab that only looked at the key would tell a member
+     * carrying just the token that the source "needs TMDB_API_KEY" — while the
+     * film sheets in the same build were happily resolving posters through it.
+     * The value returned is whichever credential the app would actually send, so
+     * a blank here means TMDB genuinely cannot answer.
+     */
     private fun keyOf(name: String): String = when (name) {
-        "TMDB_API_KEY" -> BuildConfig.TMDB_API_KEY
+        "TMDB_API_KEY" -> TmdbFetch.readToken.ifBlank { TmdbFetch.apiKey }
         "COMIC_VINE_API_KEY" -> BuildConfig.COMIC_VINE_API_KEY
         "GOOGLE_BOOKS_API_KEY" -> BuildConfig.GOOGLE_BOOKS_API_KEY
         "LIBRARY_THING_API_KEY" -> BuildConfig.LIBRARY_THING_API_KEY
@@ -558,11 +580,19 @@ internal object SourceFetchCatalog {
                 note = "A film's or a series' own poster, year, runtime and episode guide",
                 where = "features/reveal/TmdbFetch.kt",
                 keyName = "TMDB_API_KEY",
+                keyLabel = "TMDB_API_KEY or TMDB_READ_TOKEN",
                 probe = {
-                    probeRequest(
-                        "https://api.themoviedb.org/3/search/movie?query=" +
-                            encoded("Inception") + "&api_key=" + BuildConfig.TMDB_API_KEY
-                    )
+                    // The token travels as a header and the key as a query
+                    // parameter, exactly as [TmdbFetch] sends them — see its own
+                    // note on TMDB's two credentials. Never both, and never a
+                    // bare `api_key=`.
+                    val query = "https://api.themoviedb.org/3/search/movie?query=" + encoded("Inception")
+                    val token = TmdbFetch.readToken
+                    if (token.isNotBlank()) {
+                        probeRequest(query, headers = mapOf("Authorization" to "Bearer $token"))
+                    } else {
+                        probeRequest(query + "&api_key=" + TmdbFetch.apiKey)
+                    }
                 }
             ),
 
@@ -785,7 +815,7 @@ internal fun SourceFetchLabSection() {
                             )
                             Text(
                                 if (hasKey) source.note
-                                else "Needs ${source.keyName} — not set in this build",
+                                else "Needs ${source.keyLabel ?: source.keyName} — not set in this build",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

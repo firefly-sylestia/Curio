@@ -73,11 +73,17 @@ object TmdbFetch {
      * pasted into the KEY field is recognised as a token rather than sent as a
      * query parameter no one will accept (a v4 token starts with `eyJ`, which is
      * base64 for `{"` — a v3 key is 32 hex characters and never does).
+     *
+     * Both are `internal` on purpose: the Dev settings source lab probes TMDB
+     * with the credential THIS object would send and in the shape it would send
+     * it (the token as a Bearer header, the key as `?api_key=`), so the lab can
+     * never report "no credential" for a build the app itself authenticates
+     * with. The resolution lives here and nowhere else.
      */
-    private val apiKey: String
+    internal val apiKey: String
         get() = runCatching { BuildConfig.TMDB_API_KEY.trim() }.getOrDefault("")
 
-    private val readToken: String
+    internal val readToken: String
         get() = runCatching {
             BuildConfig.TMDB_READ_TOKEN.trim().ifBlank {
                 apiKey.takeIf { it.startsWith("eyJ") }.orEmpty()

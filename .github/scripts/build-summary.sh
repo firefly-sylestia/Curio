@@ -84,20 +84,25 @@ if [ -n "$report" ]; then
 fi
 
 # ── which optional providers this build carried ─────────────────────────────
+# A provider may accept MORE THAN ONE credential: TMDB takes a v3 key or an API
+# Read Access Token (see `TmdbFetch`), so its row lists both vars and the label is
+# printed once, whichever one this build was given.
 providers=""
-for entry in \
-  "Google Books:GOOGLE_BOOKS_API_KEY" \
-  "LibraryThing:LIBRARY_THING_API_KEY" \
-  "Spotify:SPOTIFY_CLIENT_ID" \
-  "TMDB:TMDB_API_KEY" \
-  "Supabase:SUPABASE_URL" \
-  "Account site:CURIO_AUTH_SITE_URL"; do
-  label="${entry%%:*}"
-  var="${entry##*:}"
-  if [ -n "${!var:-}" ]; then
-    providers="${providers}${label}, "
-  fi
-done
+add_provider() {
+  label="$1"; shift
+  for var in "$@"; do
+    if [ -n "${!var:-}" ]; then
+      providers="${providers}${label}, "
+      return
+    fi
+  done
+}
+add_provider "Google Books" GOOGLE_BOOKS_API_KEY
+add_provider "LibraryThing" LIBRARY_THING_API_KEY
+add_provider "Spotify" SPOTIFY_CLIENT_ID
+add_provider "TMDB" TMDB_API_KEY TMDB_READ_TOKEN
+add_provider "Supabase" SUPABASE_URL
+add_provider "Account site" CURIO_AUTH_SITE_URL
 [ -n "$providers" ] || providers="none (keyless build)"
 
 {
