@@ -1,6 +1,7 @@
 package com.curio.app.features.personal
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,6 +13,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -39,6 +42,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -53,12 +57,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.curio.app.data.PersonalMood
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.navigation.CurioRoutes
@@ -117,13 +123,41 @@ fun JournalListScreen(navController: NavController) {
     var query by remember { mutableStateOf("") }
     var searchOpen by remember { mutableStateOf(false) }
     //
+    // ── v440 — AND WHAT KIND OF PAGE, NOT JUST WHAT IT SAYS (the member's own
+    // pick from the settings list: *"Filter the list by mood, colour or length"*).
+    //
+    // Two of the three are COLUMNS the row already carries (`mood`, `accentArgb`),
+    // so they cost nothing at all to filter by. Length is the one that has to be
+    // counted, and a word count only exists inside the page's own document — so it
+    // is counted ONCE, off the main thread, and only while a length is actually
+    // being filtered for (`lengths` below). Counting every page on every keystroke
+    // is exactly the kind of thing that makes a long list stutter (see [answers]).
+    var moodFilter by remember { mutableStateOf<PersonalMood?>(null) }
+    var colourFilter by remember { mutableIntStateOf(JOURNAL_ANY_COLOUR) }
+    var lengthFilter by remember { mutableStateOf(JournalLength.ANY) }
+    var filtersOpen by remember { mutableStateOf(false) }
+    //
     // NEWEST FIRST is the default, which is what the list has always been: the
     // latest day at the top. The head's date pill orders it (see [PersonalHeaderDate]).
     var newestFirst by remember { mutableStateOf(true) }
     val focusManager = LocalFocusManager.current
     val needle = query.trim().lowercase()
-    val matched = remember(journals, needle) {
-        if (needle.isEmpty()) journals else journals.filter { it.answers(needle) }
+    val filtersOn = moodFilter != null || colourFilter != JOURNAL_ANY_COLOUR ||
+        lengthFilter != JournalLength.ANY
+    val lengths by produceState<Map<String, Int>>(emptyMap(), journals, lengthFilter) {
+        value = if (lengthFilter == JournalLength.ANY) emptyMap()
+        else withContext(Dispatchers.Default) {
+            journals.associate { page -> page.id to page.doc.wordCount() }
+        }
+    }
+    val matched = remember(journals, needle, moodFilter, colourFilter, lengthFilter, lengths) {
+        journals.filter { page ->
+            (needle.isEmpty() || page.answers(needle)) &&
+                (moodFilter == null || page.moodEnum == moodFilter) &&
+                (colourFilter == JOURNAL_ANY_COLOUR || page.accentArgb == colourFilter) &&
+                (lengthFilter == JournalLength.ANY ||
+                    lengthFilter.holds(lengths[page.id] ?: 0))
+        }
     }
     // The order is decided HERE rather than in the query so the door can reverse
     // it without a second trip to the database. `writtenAtMillis` is the
@@ -146,10 +180,11 @@ fun JournalListScreen(navController: NavController) {
         PersonalHeader(
             title = "Journals",
             subtitle = when {
-                // A search says what it found, out of what there is: a count of
-                // the whole collection during a search is a number the member
-                // cannot use.
-                needle.isNotEmpty() -> "${matched.size} of ${journals.size} pages"
+                // A FIND says what it found, out of what there is: a count of
+                // the whole collection while a search or a filter is on is a
+                // number the member cannot use.
+                needle.isNotEmpty() || filtersOn ->
+                    "${matched.size} of ${journals.size} pages"
                 journals.size == 0 -> "A page for a day"
                 journals.size == 1 -> "1 page"
                 else -> "${journals.size} pages"
@@ -187,8 +222,85 @@ fun JournalListScreen(navController: NavController) {
                 searchOpen = false
                 query = ""
                 focusManager.clearFocus()
-            }
+            },
+            onToggleFilters = { filtersOpen = !filtersOpen },
+            filtersOpen = filtersOpen,
+            filtersActive = filtersOn
         )
+
+        // ── v440 — THE FILTER PANEL ─────────────────────────────────────
+        //
+        // Three rows of capsules, one question each: how it felt, what colour the
+        // day wears, and how much was written. Each row opens with its own "any"
+        // chip, so the way out of a filter is always in the same place as the way
+        // in, and every row scrolls sideways rather than wrapping — a panel over a
+        // list must not push the list down the screen to say itself.
+        AnimatedVisibility(
+            visible = filtersOpen,
+            enter = CurioMotion.pillArrive(fromTop = true),
+            exit = CurioMotion.pillLeave(fromTop = true)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    JournalFilterChip(
+                        label = "Any mood",
+                        live = moodFilter == null,
+                        onClick = { moodFilter = null }
+                    )
+                    PersonalMood.entries.forEach { mood ->
+                        JournalFilterChip(
+                            label = mood.label,
+                            live = moodFilter == mood,
+                            onClick = { moodFilter = mood },
+                            glyph = personalMoodGlyph(mood)
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    JournalFilterChip(
+                        label = "Any colour",
+                        live = colourFilter == JOURNAL_ANY_COLOUR,
+                        onClick = { colourFilter = JOURNAL_ANY_COLOUR }
+                    )
+                    JournalFilterChip(
+                        label = "Theme",
+                        live = colourFilter == JOURNAL_ACCENT_THEME,
+                        onClick = { colourFilter = JOURNAL_ACCENT_THEME }
+                    )
+                    journalHueChoices().forEach { (label, colour) ->
+                        val argb = colour.toArgb()
+                        JournalFilterChip(
+                            label = label,
+                            live = colourFilter == argb,
+                            onClick = { colourFilter = argb }
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    JournalLength.entries.forEach { length ->
+                        JournalFilterChip(
+                            label = length.label,
+                            live = lengthFilter == length,
+                            onClick = { lengthFilter = length }
+                        )
+                    }
+                }
+            }
+        }
 
         if (journals.isEmpty()) {
             PersonalEmptyCard(
@@ -219,7 +331,15 @@ fun JournalListScreen(navController: NavController) {
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    "No page in your journals has \u201C${query.trim()}\u201D in it.",
+                    // v440 — a find can come up empty because of a WORD or because
+                    // of a FILTER, and the sentence has to name the one the member
+                    // can actually change (a filter they forgot is the likelier of
+                    // the two).
+                    when {
+                        needle.isNotEmpty() ->
+                            "No page in your journals has \u201C${query.trim()}\u201D in it."
+                        else -> "No page in your journals answers every filter at once."
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
@@ -525,13 +645,32 @@ private fun JournalSearchPill(
     query: String,
     onOpen: () -> Unit,
     onQuery: (String) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    /** v440 — the FILTER door, at the end of the same row (see [JournalFindRow]). */
+    onToggleFilters: (() -> Unit)? = null,
+    /** Whether the filter panel is down — the door wears it. */
+    filtersOpen: Boolean = false,
+    /** Whether anything is actually filtering, so the door can say so. */
+    filtersActive: Boolean = false
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val focus = remember { FocusRequester() }
     LaunchedEffect(open) { if (open) runCatching { focus.requestFocus() } }
-    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp)) {
+    // ── v440 — ONE ROW, TWO DOORS ───────────────────────────────────
+    //
+    // The filter door sits at the END of the search's own row rather than on a
+    // row of its own: a second strip of chrome over a list of days is exactly the
+    // "two stacked rows" the member rejected in the writing dock (§7.4), and the
+    // two doors ask the same kind of question ("what am I looking at").
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         AnimatedContent(
+            modifier = Modifier.weight(1f),
             targetState = open,
             transitionSpec = { CurioMotion.pillArrive() togetherWith CurioMotion.pillLeave() },
             label = "journal-search"
@@ -597,6 +736,103 @@ private fun JournalSearchPill(
                 }
             }
         }
+        if (onToggleFilters != null) {
+            // A round door, in the ⋯-tile language the app settles on: the glyph
+            // carries it, and it wears the accent when the list is actually
+            // filtered — so a member who filtered a week ago and forgot can see
+            // that the list they are scrolling is not the whole collection.
+            Surface(
+                onClick = onToggleFilters,
+                shape = CircleShape,
+                color = if (filtersActive || filtersOpen) personalAccent().copy(alpha = 0.16f)
+                else MaterialTheme.colorScheme.surfaceContainer
+            ) {
+                Box(Modifier.size(46.dp), contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        CurioIcons.Tune,
+                        if (filtersOpen) "Hide the filters" else "Filter your journals",
+                        tint = if (filtersActive || filtersOpen) personalAccentInk()
+                        else ink.copy(alpha = 0.7f),
+                        size = 19.dp
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * v440 — ONE CHOICE IN THE FIND ROW, in the app's own capsule language.
+ *
+ * The same chip the reader's gestures box uses ([ZoneChip]'s shape): transparent
+ * until it is live, an accent wash when it is, and the label weight says which —
+ * so a member can read the state of a filter without a legend explaining it.
+ */
+@Composable
+private fun JournalFilterChip(
+    label: String,
+    live: Boolean,
+    onClick: () -> Unit,
+    glyph: String? = null
+) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (live) personalAccent().copy(alpha = 0.18f) else Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 13.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (glyph != null) {
+                CurioIcon(
+                    glyph,
+                    null,
+                    tint = if (live) personalAccentInk() else ink.copy(alpha = 0.6f),
+                    size = 14.dp
+                )
+            }
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (live) FontWeight.SemiBold else FontWeight.Normal
+                ),
+                color = if (live) personalAccentInk() else ink.copy(alpha = 0.7f),
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/**
+ * "No colour filter" — every page's own colour follows the theme ([JOURNAL_ACCENT_THEME]
+ * is 0 and is a filter of its own, so "any" needs a value that is not a colour at
+ * all).
+ */
+private const val JOURNAL_ANY_COLOUR = -1
+
+/**
+ * The lengths a journal is filed under (see the filter panel in [JournalListScreen]).
+ *
+ * Three buckets rather than a slider: the question a member is asking of a
+ * collection of days is "where are the long ones" / "where did I only manage a
+ * line", and a range would be a second thing to set before the question is
+ * answered. The thresholds are a page's worth of writing rather than a word count
+ * pulled from anywhere: under a paragraph, a page, and more than a page.
+ */
+private enum class JournalLength(val label: String) {
+    ANY("Any length"),
+    SHORT("A few lines"),
+    PAGE("About a page"),
+    LONG("Longer");
+
+    fun holds(words: Int): Boolean = when (this) {
+        ANY -> true
+        SHORT -> words < 120
+        PAGE -> words in 120..399
+        LONG -> words >= 400
     }
 }
 

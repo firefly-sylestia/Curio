@@ -301,6 +301,19 @@ internal fun ReaderSettingsScreen(
                     palette = palette,
                     onSelect = { at -> ReaderLook.keepScreenOn = at == 0 }
                 )
+                // v440 — WHEN the dim comes on (member: *"Night dim on a schedule
+                // (auto at sunset, not just manual)"*): always, or only once the
+                // phone itself is in its dark theme — which is where a phone set
+                // to automatic crosses sunset (see [ReaderLook.dimAuto]).
+                ReaderSegmentRow(
+                    segments = listOf(
+                        ReaderSegment("Dim always", CurioIcons.DarkMode),
+                        ReaderSegment("At sunset", CurioIcons.Nightlight)
+                    ),
+                    selectedIndex = if (ReaderLook.dimAuto) 1 else 0,
+                    palette = palette,
+                    onSelect = { at -> ReaderLook.dimAuto = at == 1 }
+                )
                 ReaderSliderRow(
                     label = "Night dim",
                     value = ReaderLook.dim,

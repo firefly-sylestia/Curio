@@ -570,6 +570,16 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // only known inside it, so that one reports `liveTextBlock`.
     var liveTextBlock by remember(bookId, document) { mutableIntStateOf(-1) }
 
+    /**
+     * v440 — HOW MANY PAGES OF THE CHAPTER ARE STILL AHEAD.
+     *
+     * Reported by the paged text flow, which is the only surface that knows where
+     * a chapter's pages end (see [TextPagedReader]). A BOOK WITH ITS OWN PAGES never
+     * reports at all — the places sheet works the PDF's own answer out from the
+     * outline, which carries a page per chapter.
+     */
+    var sectionPagesLeft by remember(bookId, document) { mutableStateOf<Int?>(null) }
+
     // ── v422 — ONE STEP, FOR A TAP (see [ReaderLook.tapZones]) ────────
     //
     // A tap inside a zone asks for the next thing rather than for the chrome: a
@@ -1052,6 +1062,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     document = document,
                     onOpenedAt = { openedAt = it },
                     onBlockShown = { liveTextBlock = it },
+                    onSectionPagesLeft = { left -> sectionPagesLeft = left },
                     onLongPress = { marking = it },
                     chromeVisible = chrome,
                     onTap = onSurfaceTap,
@@ -1230,11 +1241,18 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // the zones editor and every sheet. Those are drawn after it in this Box
         // (or outside it), which is what keeps them bright; it takes no pointer
         // input, so a tap still reaches the page it is dimming.
-        if (ReaderLook.dim > 0f) {
+        // ── v440 — AND THE DIM'S OWN WHEN (see [ReaderLook.dimAuto]) ──
+        //
+        // "At sunset" is the phone's own dark theme, which is what a phone set to
+        // automatic switches at sunset — so the dim follows the sky without this
+        // app ever asking for a location. Read HERE, in the composable scope, and
+        // never inside a lambda: [isCurioDarkTheme] is @Composable.
+        val nightDim = if (ReaderLook.dimAuto && !isCurioDarkTheme()) 0f else ReaderLook.dim
+        if (nightDim > 0f) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = ReaderLook.dim))
+                    .background(Color.Black.copy(alpha = nightDim))
             )
         }
 
@@ -1524,6 +1542,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             content = content,
             chapters = chapters,
             pages = printedPages,
+            // v440 — what the paged text flow says is left of the chapter.
+            sectionPagesLeft = sectionPagesLeft,
             palette = palette,
             onJump = jumpToMarkNow,
             onDelete = deleteMarkNow,
@@ -1543,6 +1563,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             content = content,
             chapters = chapters,
             pages = printedPages,
+            // v440 — what the paged text flow says is left of the chapter.
+            sectionPagesLeft = sectionPagesLeft,
             palette = palette,
             onJump = jumpToMarkNow,
             onDelete = deleteMarkNow,
@@ -1561,6 +1583,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             content = content,
             chapters = chapters,
             pages = printedPages,
+            // v440 — what the paged text flow says is left of the chapter.
+            sectionPagesLeft = sectionPagesLeft,
             palette = palette,
             onJump = jumpToMarkNow,
             onDelete = deleteMarkNow,
@@ -1579,6 +1603,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             content = content,
             chapters = chapters,
             pages = printedPages,
+            // v440 — what the paged text flow says is left of the chapter.
+            sectionPagesLeft = sectionPagesLeft,
             palette = palette,
             onJump = jumpToMarkNow,
             onDelete = deleteMarkNow,
@@ -1833,6 +1859,8 @@ private fun TextReader(
     /** Hoisted to the SCREEN, because the page bar lives in the chrome. */
     pagerState: PagerState,
     onPageCount: (Int) -> Unit,
+    /** v440 — what the paged flow says is left of the chapter (see [TextPagedReader]). */
+    onSectionPagesLeft: (Int?) -> Unit,
     ownPages: Boolean,
     /** A block to land on, asked for from outside (a chapter, a search find). */
     pendingBlock: Int?,
@@ -1936,6 +1964,7 @@ private fun TextReader(
             pagerState = pagerState,
             onPageCount = onPageCount,
             onBlockShown = onBlockShown,
+            onSectionPagesLeft = onSectionPagesLeft,
             restoredBlock = restoredBlock,
             marks = marks,
             palette = palette,
@@ -2570,6 +2599,21 @@ private fun TextPagedReader(
     onPageCount: (Int) -> Unit,
     /** v406 — the block this page opens on, reported live. */
     onBlockShown: (Int) -> Unit,
+    /**
+     * v440 — HOW MANY PAGES OF THE CHAPTER THE MEMBER IS IN ARE STILL AHEAD.
+     *
+     * The member asked for the count in the progress card (*"'Pages left in this
+     * chapter' in the progress card"*). It is reported from HERE rather than
+     * computed by the card because the page ranges are this reader's own
+     * invention: [paginateBlocks] breaks the book into ranges of BLOCKS, and
+     * nothing outside this function can say which page a chapter reaches. Every
+     * block carries its [ReaderBlock.section], so the chapter's own last page is
+     * the last range holding a block of the section the current page opens in.
+     *
+     * `null` means "not known" — a page the reader cannot place — and the card
+     * then simply says nothing rather than printing a zero it cannot stand behind.
+     */
+    onSectionPagesLeft: (Int?) -> Unit,
     restoredBlock: Int,
     marks: List<ReaderMarkEntity>,
     palette: ReaderPalette,
@@ -2602,6 +2646,23 @@ private fun TextPagedReader(
     }
 
     LaunchedEffect(pages.size) { onPageCount(pages.size) }
+
+    // ── v440 — AND WHAT IS LEFT OF THE CHAPTER (see [onSectionPagesLeft]) ──
+    //
+    // Pages AFTER this one, which is what "pages left" means to a reader: on the
+    // chapter's final page the count is zero, and the card says so in words.
+    LaunchedEffect(pages.size, pagerState.currentPage, content.blocks.size) {
+        val section = pages.getOrNull(pagerState.currentPage)
+            ?.let { range -> content.blocks.getOrNull(range.first)?.section }
+        val chapterEnd = section?.let { here -> content.blocks.indexOfLast { it.section == here } }
+        val lastPage = chapterEnd?.takeIf { it >= 0 }?.let { block ->
+            pages.indexOfLast { block in it }
+        }
+        onSectionPagesLeft(
+            if (lastPage == null || lastPage < 0) null
+            else (lastPage - pagerState.currentPage).coerceAtLeast(0)
+        )
+    }
 
     // Where the member was, once the pages exist to be counted: the page whose
     // range covers the block they stopped on.
@@ -5100,6 +5161,18 @@ private fun ReaderAppearanceSheet(
                 palette = palette,
                 onSelect = { at -> ReaderLook.keepScreenOn = at == 0 }
             )
+            // v440 — WHEN the dim comes on (see [ReaderLook.dimAuto]): always, or
+            // only once the phone is in its own dark theme, which is where a phone
+            // set to automatic crosses sunset.
+            ReaderSegmentRow(
+                segments = listOf(
+                    ReaderSegment("Dim always", CurioIcons.DarkMode),
+                    ReaderSegment("At sunset", CurioIcons.Nightlight)
+                ),
+                selectedIndex = if (ReaderLook.dimAuto) 1 else 0,
+                palette = palette,
+                onSelect = { at -> ReaderLook.dimAuto = at == 1 }
+            )
             ReaderSliderRow(
                 label = "Night dim",
                 value = ReaderLook.dim,
@@ -5654,6 +5727,8 @@ private fun ReaderPlacesSheet(
     content: ReaderContent?,
     chapters: List<ReaderOutlineEntry>,
     pages: List<ReaderOutlineEntry>,
+    /** v440 — what the paged text flow says is left of the chapter (may be null). */
+    sectionPagesLeft: Int? = null,
     palette: ReaderPalette,
     onJump: (ReaderMarkEntity) -> Unit,
     onDelete: (ReaderMarkEntity) -> Unit,
@@ -5710,6 +5785,33 @@ private fun ReaderPlacesSheet(
         ?: position?.positionFraction?.coerceIn(0f, 1f)
         ?: 0f
     val placeTitle = readerPlaceTitle(content, chapters, position)
+    // ── v440 — AND WHAT IS LEFT OF THIS CHAPTER ─────────────────────
+    //
+    // Two books, two ways of knowing. A book that HAS pages answers it from the
+    // outline, which carries "PDF: 1-based page the entry opens" for every chapter
+    // — so the chapter's pages run from its own first page to the page the next
+    // chapter opens on (or the book's last page). A reflowed book has no such map
+    // here at all: its pages are the paged reader's own slicing, so IT reports the
+    // count up ([sectionPagesLeft]) and this simply passes it on. A flow with no
+    // pages — a novel read as a scroll — leaves it null and the card says nothing,
+    // which is the only honest answer when there is no page to be on.
+    val pagesLeftInChapter: Int? = when (val loaded = content) {
+        is ReaderContent.Pages -> {
+            val page = live?.index ?: position?.positionIndex
+            val starts = chapters
+                .mapNotNull { entry -> entry.page.takeIf { it > 0 }?.minus(1) }
+                .distinct()
+                .sorted()
+            val opens = starts.lastOrNull { start -> page != null && start <= page }
+            val next = starts.firstOrNull { start -> page != null && start > page }
+            val end = next ?: loaded.pageCount
+            if (page == null || opens == null) null else (end - page - 1).coerceAtLeast(0)
+        }
+
+        is ReaderContent.Text -> sectionPagesLeft
+
+        null -> null
+    }
     val countLabel = when (val loaded = content) {
         is ReaderContent.Pages -> {
             val total = atTotal ?: loaded.pageCount
@@ -5746,6 +5848,7 @@ private fun ReaderPlacesSheet(
                     through = through,
                     placeTitle = placeTitle,
                     countLabel = countLabel,
+                    pagesLeft = pagesLeftInChapter,
                     hasPlace = atIndex != null,
                     marked = placeMark != null,
                     palette = palette,
@@ -5910,6 +6013,16 @@ private fun ReaderProgressCard(
     through: Float,
     placeTitle: String,
     countLabel: String,
+    /**
+     * v440 — HOW MANY PAGES OF THIS CHAPTER ARE STILL AHEAD, when that is known.
+     *
+     * The member asked for the line (*"'Pages left in this chapter' in the
+     * progress card"*). It sits with the figure rather than in the header row,
+     * because it is the same question the percentage answers — how much reading is
+     * left — asked in the unit the member actually turns. Omitted entirely when no
+     * surface could work it out: a made-up zero is worse than a missing line.
+     */
+    pagesLeft: Int? = null,
     hasPlace: Boolean,
     marked: Boolean,
     palette: ReaderPalette,
@@ -5968,6 +6081,18 @@ private fun ReaderProgressCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = palette.ink.copy(alpha = 0.75f),
                 modifier = Modifier.padding(start = 7.dp, bottom = 6.dp)
+            )
+        }
+        // ── v440 — AND WHAT IS LEFT OF THE CHAPTER (see [pagesLeft]) ──
+        if (pagesLeft != null) {
+            Text(
+                when (pagesLeft) {
+                    0 -> "This is the chapter's last page"
+                    1 -> "1 page left in this chapter"
+                    else -> "$pagesLeft pages left in this chapter"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = palette.accent
             )
         }
         // The rail. A bar that only fills is a number drawn twice; the bead at
@@ -7449,6 +7574,26 @@ internal object ReaderLook {
     var dim by mutableStateOf(0f)
 
     /**
+     * v440 — WHEN THE NIGHT DIM COMES ON: always, or when it is dark out.
+     *
+     * The member asked for a night dim that works on a schedule rather than by
+     * hand (*"Night dim on a schedule (auto at sunset, not just manual)"*). Android
+     * has no sunset of its own to ask, and computing one would mean asking for the
+     * LOCATION — a permission this app does not hold and has no other use for —
+     * while the phone already knows: **the system's dark theme is what a phone set
+     * to automatic switches at sunset**, [isCurioDarkTheme] is exactly that switch
+     * (system-dark when the member's theme is "System", and their own choice when
+     * they forced one), and it is the same signal every other surface in the app
+     * answers to.
+     *
+     * So the row is a two-way choice rather than a second switch, and the DEFAULT
+     * is [dimAlways]: every member who had a dim before this keeps exactly the dim
+     * they had, at exactly the level they set, at every hour — the automatic one is
+     * there for the member who asked for it.
+     */
+    var dimAuto by mutableStateOf(false)
+
+    /**
      * v439 — LOW POWER READING, AND IT IS ON FROM THE START.
      *
      * The member: *"in pdf reader, a high charge save turns on which makes the
@@ -7522,6 +7667,10 @@ internal object ReaderLook {
         justify.toString(),
         keepScreenOn.toString(),
         dim.toString(),
+        // v440 — the dim's own WHEN, in the key like every other look field (the
+        // v434 rule): a field left out of here saves every other setting and
+        // silently forgets this one.
+        dimAuto.toString(),
         lowPower.toString(),
         // v439 — the motion lock MUST be in here, or it saves all of the other
         // fields and silently forgets this one (the v434 rule).
@@ -7574,6 +7723,7 @@ internal object ReaderLookStore {
     private const val KEEP_ON = "reader_keep_screen_on"
     private const val DIM = "reader_dim"
     private const val LOW_POWER = "reader_low_power"
+    private const val DIM_AUTO = "reader_dim_auto"
     private const val MOTION_LOCK = "reader_motion_lock"
 
     /**
@@ -7606,6 +7756,7 @@ internal object ReaderLookStore {
             ReaderLook.justify = prefs.getBoolean(JUSTIFY, ReaderLook.justify)
             ReaderLook.keepScreenOn = prefs.getBoolean(KEEP_ON, ReaderLook.keepScreenOn)
             ReaderLook.dim = prefs.getFloat(DIM, ReaderLook.dim).coerceIn(0f, 0.6f)
+            ReaderLook.dimAuto = prefs.getBoolean(DIM_AUTO, ReaderLook.dimAuto)
             ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
             ReaderLook.motionLock = prefs.getBoolean(MOTION_LOCK, ReaderLook.motionLock)
         }
@@ -7631,6 +7782,7 @@ internal object ReaderLookStore {
                 .putBoolean(JUSTIFY, ReaderLook.justify)
                 .putBoolean(KEEP_ON, ReaderLook.keepScreenOn)
                 .putFloat(DIM, ReaderLook.dim)
+                .putBoolean(DIM_AUTO, ReaderLook.dimAuto)
                 .putBoolean(LOW_POWER, ReaderLook.lowPower)
                 .putBoolean(MOTION_LOCK, ReaderLook.motionLock)
                 .putBoolean(MARK, true)
