@@ -305,6 +305,83 @@ Asked via `ask_user` (a wrong guess costs a full CI cycle):
 - The 12 `outlineVariant`-as-ink hits are mostly borders and dividers — correct usage, left
   alone.
 
+## 8. Request (this session) — the pickers, the journal's editing, the PDF
+
+> redesign the theme pickers, and redesign the 2 option choosing things, also in journal
+> the copy tools selects all but i wanted it to open a tool ith cut copy paste undo tool,
+> also the pdf isnt accurate, it doesnt show exactly as the journal view have, also a bug
+> when a voice note is of differnt line or moves up once its not comong down the text
+> again also its very difficult to insert texts in between images, also similiar bug to
+> photo of a differnt line fails to merge with a older line also in stack those sizes
+> options are not accurate, fix the size accuracy in stacks of 2 3 4 when user picks a
+> size or style
+
+Asked via `ask_user`:
+
+- **"The 2 option choosing things"** = the two two-option rows on the Appearance page:
+  **Glyph backdrop** (Subtle / Deep) and **Paper** (White page / Cream page).
+- **The pickers' redesign**: "more compact & premium", "the missing motion / touch feel",
+  and **"too many texts and em dashes"** — so: tighter rows, real press/reveal motion,
+  and less copy (and stop scattering em dashes through the subtitles).
+- **The Copy bar**: Cut / Copy / Paste / an extra **Select all** button, and choosing Cut or
+  Copy **starts a selection** with arrow tools to grow or shrink it, then the action
+  confirms — not Android's plain select-all bar.
+- **Sequence**: all of it, in whatever order I judge right, committing each as it lands.
+
+### Findings (all located — this is the working list)
+
+1. **The theme pickers** — `SettingsSectionScreen.kt`: `ColorThemeRow` → `ColorThemeSheet`
+   (each row a three-swatch preview + label + hint) and `ThemeModeSwitch` (the
+   Light/Dark/System capsule). Subtitles carry the em dashes and the length.
+2. **The two 2-option rows** — `SettingsSectionScreen.AppearanceSection` calls
+   `CompactSegmentedRow(CurioIcons.Wallpaper, "Glyph backdrop", …)` and
+   `CompactSegmentedRow(CurioIcons.Contrast, "Paper", …)`; the component itself lives in
+   the settings shared components.
+3. **The Copy tool** — `PersonalCanvas.kt`: the dock button calls
+   `state.requestPageTextMenu()` (line ~5153), the state sets `pageTextMenuRequest`
+   (~1677) and the canvas raises **Android's own** floating bar (`showMenu`), i.e. Copy +
+   Select all only. `pageText()` (~1685) already knows how to read the whole page, and
+   `pageSelected` / `toggle(flag)` (~1695) already handle page-wide state — so Cut, Paste
+   and Undo have a place to hang, and the arrow-selection needs a range on top of
+   `pageSelected`.
+4. **The PDF** — `PersonalExport.kt` draws its own `PdfDocument` (`StaticLayout`
+   paragraphs, marker pens, photos, voice waves, a numbered foot). "Doesn't show exactly
+   as the journal view" is a layout-parity gap between that drawing and what
+   `PersonalCanvas`/`PersonalPhotoBlock`/`PersonalVoice` draw on screen.
+5. **The merge bugs** — `PersonalCanvas.kt`: `mergeWithPrevious` (line ~2543) returns
+   false whenever the block ABOVE is a photo or a voice note, and the row builder
+   (line ~2829) only forms a run of **consecutive** prints (`PRINT_ROW_LIMIT` = 4) plus the
+   lone-SMALL-beside-writing case (`besideSkips`). So a print or a voice note that ends up
+   on its own line with a text row between it and its run never rejoins it — that is the
+   "fails to merge with an older line" report, in both the photo and the voice-note form.
+6. **Text between images** — same row builder: a run of prints is drawn as ONE unit by its
+   first member (`printRows`), so there is no tap target between two prints of a row; the
+   run has to be broken before text can be slipped in.
+7. **Stack sizes** — `PersonalPrintArrangement` (line ~3823) with `PRINT_ROW_LIMIT = 4`:
+   each cell's WIDTH is its size's `fraction` as a Compose weight while each cell's HEIGHT
+   is `personalPrintHeight(size)` — two independent readings of the same size. In a THREE
+   that inverts the shape (a PORTRAIT tall frame at 0.54 against a stacked column of
+   0.44 + 0.44 = 0.88 gets **38%** of the measure, so the "one upright frame with two
+   stacked beside it" comes out with the two stacked prints WIDER than the frame), and in
+   a FOUR the two lines weight themselves independently (PAGE 1.0 + HALF 0.62 → 62/38 on
+   one line, SMALL + SMALL → 50/50 on the next), so "the same size" gives different widths
+   per line. The row's heights also never agree (`PORTRAIT` 232 vs `HALF` 128 +
+   `SMALL` 100 + an 8dp gap = 236 beside it).
+
+### Plan (one commit each, in this order)
+
+1. The merge bugs — the row builder learns to let a print / voice note rejoin the run it
+   belongs to, and `mergeWithPrevious` stops treating a photo or a voice note above as a
+   wall (5 + 6 in the list above share this code).
+2. The stack sizes — one reading of a size per cell (the shape decides the WIDTH share, the
+   size decides the HEIGHT), with the three's tall frame leading and a four's lines
+   agreeing.
+3. The text bar — Cut / Copy / Paste / Undo / Select all, with the arrow-grown selection
+   the member described.
+4. The pickers — the Color theme sheet + the Light/Dark/System capsule + the two 2-option
+   rows: tighter, premium, real press motion, less copy, no em dashes.
+5. The PDF — close the parity gap between `PersonalExport`'s drawing and the journal view.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
