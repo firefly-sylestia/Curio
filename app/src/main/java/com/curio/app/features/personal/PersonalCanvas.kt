@@ -265,7 +265,12 @@ internal val QUOTE_LEAD = 13.dp
  */
 @Composable
 internal fun personalQuoteColor(): Color =
-    if (isCurioDarkTheme()) Color(0xFFC09263) else Color(0xFF9A6A43)
+    // v436 — a wider split, at the member's word ("the quote and bulletpoint
+    // colors make it theme aware and use darker shades in light mode and vise
+    // versa"): the light twin is a deeper coffee and the night twin a lighter
+    // milk, so the same passage reads equally firm on cream paper and on the
+    // journal's dark paper. Both clear 4.5:1 on the surface they are drawn on.
+    if (isCurioDarkTheme()) Color(0xFFD3AA7C) else Color(0xFF7B4F2D)
 
 /** The rule beside a quoted block: the same coffee, at rule strength. */
 @Composable
@@ -291,7 +296,7 @@ internal fun personalQuoteWash(): Color =
  */
 @Composable
 internal fun personalQuoteDeepColor(): Color =
-    if (isCurioDarkTheme()) Color(0xFFC09263) else Color(0xFF5C3A20)
+    if (isCurioDarkTheme()) Color(0xFFD3AA7C) else Color(0xFF4E2F18)
 
 /**
  * v389 — THE BULLET'S OWN COLOUR: DEEP COFFEE, never the theme's accent.
@@ -304,7 +309,9 @@ internal fun personalQuoteDeepColor(): Color =
  */
 @Composable
 internal fun personalBulletColor(): Color =
-    if (isCurioDarkTheme()) Color(0xFFB08255) else Color(0xFF6E4A2E)
+    // The same wider split as the quotation's (v436): deeper on cream, lighter
+    // at night — see [personalQuoteColor].
+    if (isCurioDarkTheme()) Color(0xFFC9A075) else Color(0xFF55361F)
 
 /**
  * v389 — THE FOUR MARKER PENS.

@@ -3,6 +3,7 @@ ADD:
 - About Curio: the credit for the member faces, with blobatar's own licence notice.
 
 FIX:
+- Writing: a quotation and a bullet read firmly in both modes — a deeper coffee on the light page, a lighter milk at night.
 - Writing: the dock is a proper tool row — bigger targets and a real lift, so it no longer reads as a thin strip under the page.
 - Writing: the heart bullet sits level with its words, and the dash bullet is centred like every other mark.
 
