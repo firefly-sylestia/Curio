@@ -1366,8 +1366,15 @@ internal fun DrawScope.drawVoiceWave(
                 strokeWidth = 1.dp.toPx()
             )
             steps.forEachIndexed { index, level ->
+                // v439 — LINEAR, like every other look: the bead's size IS the
+                // sound. The square here was v424's compensation for levels that
+                // had been normalized against full scale (see [voiceReach] and
+                // [WaveformExtractor]) — with that fault fixed, squaring again
+                // would draw an ordinary sentence as a row of minRadius dots,
+                // which is the opposite of the accurate depiction the member
+                // asked for and would make the beads disagree with the bars.
                 val loud = level.coerceIn(0f, 1f)
-                val radius = minRadius + (room - minRadius) * loud * loud
+                val radius = minRadius + (room - minRadius) * loud
                 val x = slot * (index + 0.5f)
                 drawCircle(
                     color = if (progress > 0f && x <= played) accent else ink.copy(alpha = 0.42f),
@@ -1440,20 +1447,39 @@ private fun pulsePointAt(points: List<Offset>, x: Float): Offset? {
  * every few dp — a fuzzy band, not a wave. Taking the loudest of each bucket
  * keeps the PEAKS of a fast passage (a quieter mean would flatten exactly the
  * thing the drawing is about) while giving the stroke room to read.
+ *
+ * ── v439 — AND THE BUCKETS COVER THE WHOLE RECORDING, EXACTLY ONCE ────────
+ *
+ * They did not. The old split was a CEILING division — `per = ceil(size /
+ * buckets)` — and every bucket past the end simply repeated the one before it.
+ * The counts almost never divide: the bars look draws 42 columns from 72 stored
+ * samples (per = 2, so 36 columns carried data and SIX repeated the previous
+ * column), the ribbon draws 30 (24 real, six repeated) and the bubble draws 34
+ * (24 real, TEN repeated). The visible result is a wave whose last tenth is a
+ * flat stale strip and whose time axis is compressed into the left of the
+ * drawing — a depiction that is not only inaccurate at the end, it is wrong
+ * about WHEN everything happened. **That is part of what the member means by
+ * "more accurate depiction".**
+ *
+ * Each bucket now takes its own proportional span of the samples — bucket `b`
+ * covers `[b·size/buckets, (b+1)·size/buckets)` — so every column carries its
+ * own moment, the last column carries the last moment, and the whole recording is
+ * drawn exactly once at whatever resolution the strip can show. **Never go back
+ * to a per-bucket ceiling count here.**
  */
 private fun bucketLevels(samples: FloatArray, buckets: Int): FloatArray {
-    if (samples.isEmpty()) return FloatArray(buckets) { 0.08f }
+    if (samples.isEmpty() || buckets <= 0) return FloatArray(buckets) { 0.08f }
     val out = FloatArray(buckets)
-    val per = (samples.size + buckets - 1) / buckets
     for (bucket in 0 until buckets) {
-        val from = bucket * per
-        if (from >= samples.size) {
-            out[bucket] = out[bucket - 1]
-            continue
-        }
-        val to = (from + per).coerceAtMost(samples.size)
+        val from = (bucket.toLong() * samples.size / buckets).toInt()
+        val to = ((bucket + 1).toLong() * samples.size / buckets).toInt()
+        val start = from.coerceIn(0, samples.size - 1)
+        // At least one sample per bucket: a strip with more columns than stored
+        // bars repeats a moment rather than leaving a hole, and the repeats are
+        // spread where their moment is rather than piled at the end.
+        val end = to.coerceAtLeast(start + 1).coerceAtMost(samples.size)
         var loudest = 0f
-        for (i in from until to) {
+        for (i in start until end) {
             if (samples[i] > loudest) loudest = samples[i]
         }
         out[bucket] = loudest
