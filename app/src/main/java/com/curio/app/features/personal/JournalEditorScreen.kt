@@ -134,6 +134,11 @@ fun JournalEditorScreen(
     // v428 — AND THE DAY'S OWN COLOUR, if the member gave it one: 0 means the
     // page follows whatever theme the app is on (see [journalDoorAccent]).
     var accentArgb by remember { mutableIntStateOf(JOURNAL_ACCENT_THEME) }
+    // v429 — AND WHETHER THIS DAY'S PAPER TAKES IT (the member's own option,
+    // offered in the colour sheet and kept with the page — see
+    // [PersonalNoteEntity.pagePainted]). Off for every page that never turned it
+    // on, including every journal written before the option existed.
+    var pagePainted by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var pickerForDate by remember { mutableLongStateOf(startOfToday()) }
     val titleFocusRequester = remember { FocusRequester() }
@@ -180,7 +185,8 @@ fun JournalEditorScreen(
                 mood = mood?.key.orEmpty(),
                 dateMillis = dateMillis,
                 kind = PAGE_KIND_JOURNAL,
-                accentArgb = accentArgb
+                accentArgb = accentArgb,
+                pagePainted = pagePainted
             )
         },
         // The page's colour is the journal's alone: the note-on-a-topic page,
@@ -188,12 +194,15 @@ fun JournalEditorScreen(
         // grow a door that could not keep its answer.
         journalAccent = accentArgb,
         onJournalAccent = { accentArgb = it },
+        journalPagePainted = pagePainted,
+        onJournalPagePainted = { pagePainted = it },
         // A saved day arrives with its own head: the date it belongs to, how it
         // felt, its title.
         onLoaded = { existing ->
             title = existing.title
             mood = existing.moodEnum
             accentArgb = existing.accentArgb
+            pagePainted = existing.pagePainted
             if (existing.dateMillis > 0L) dateMillis = existing.dateMillis
             // v440 — AND THIS IS NOW THE PAGE THE JOURNAL'S DOOR RETURNS TO, when
             // the member asked for "the last one you opened". Written only for a
@@ -206,6 +215,7 @@ fun JournalEditorScreen(
             // takes that corner), so the guarded exit is the system's.
             JournalTopBar(
                 dateMillis = dateMillis,
+                accentArgb = accentArgb,
                 saving = saving,
                 editing = editing,
                 onToggleMode = onEditing,
@@ -357,18 +367,26 @@ private fun JournalTopBar(
     dateMillis: Long,
     saving: Boolean,
     editing: Boolean,
+    /**
+     * v437 — THE DAY'S OWN COLOUR (see [journalDoorAccent]).
+     *
+     * The member: *"the date and title chrome stays the theme's"*. This bar is
+     * composed in the HEADER slot, so it stands OUTSIDE the page's own paint
+     * provider (see [JournalPagePaint], provided inside `PersonalWritingPage`)
+     * and could not have read the colour from the composition local even if it
+     * wanted to. Handed in, so the day pill and its steppers wear the colour the
+     * page is wearing — the day IS the page's own title.
+     */
+    accentArgb: Int = JOURNAL_ACCENT_THEME,
     onToggleMode: (Boolean) -> Unit,
     onShiftDate: (Long) -> Unit,
     onPickDate: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
-    // v438 — THE DAY'S CHROME IS THE THEME'S AGAIN. v437 handed this bar the
-    // day's own colour so the day pill and its steppers wore it; the member's
-    // answer is that the page's colour stays on the DOORS and its tools "stay like
-    // before", so the bar is the app's accent as it always was — the fill on the
-    // day pill, its ink, its steppers and the saving dot.
-    val accent = personalAccent()
-    val onAccent = personalOnAccent()
+    // The page's colour when it has one, the theme's measured accent ink when it
+    // follows the theme — so a day that never picked a colour is unchanged.
+    val accent = journalDoorAccent(accentArgb)
+    val onAccent = journalOn(accent)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -393,7 +411,7 @@ private fun JournalTopBar(
                 modifier = Modifier.size(dayStep)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronLeft, "Previous day", tint = personalAccentInk(), size = 19.dp)
+                    CurioIcon(CurioIcons.ChevronLeft, "Previous day", tint = accent, size = 19.dp)
                 }
             }
             Surface(
@@ -457,7 +475,7 @@ private fun JournalTopBar(
                 modifier = Modifier.size(dayStep)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronRight, "Next day", tint = personalAccentInk(), size = 19.dp)
+                    CurioIcon(CurioIcons.ChevronRight, "Next day", tint = accent, size = 19.dp)
                 }
             }
         }
