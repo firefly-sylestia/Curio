@@ -1808,7 +1808,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** One row more on each end of the reach — the arrow that says "more". */
     fun growPageSelection() {
         if (order.isEmpty()) return
-        if (pageRange.isEmpty) {
+        if (pageRange.isEmpty()) {
             selectWholePage()
             return
         }
@@ -1819,16 +1819,16 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /** One row less, off the end of the reach — the arrow that says "less". */
     fun shrinkPageSelection() {
         val range = pageRange
-        if (range.isEmpty) return
+        if (range.isEmpty()) return
         pageRange = if (range.first >= range.last) IntRange.EMPTY else range.first..(range.last - 1)
     }
 
     /** How many rows the bar is holding — what the arrows count out loud. */
     val pageSelectionCount: Int
-        get() = if (pageRange.isEmpty) 0 else pageRange.last - pageRange.first + 1
+        get() = if (pageRange.isEmpty()) 0 else pageRange.last - pageRange.first + 1
 
     private fun selectedRowIds(): List<String> =
-        if (pageRange.isEmpty) emptyList() else pageRange.mapNotNull { order.getOrNull(it) }
+        if (pageRange.isEmpty()) emptyList() else pageRange.mapNotNull { order.getOrNull(it) }
 
     /** The selection's words, top to bottom (a print or a voice note holds none). */
     fun pageSelectionText(): String = selectedRowIds()
@@ -1888,7 +1888,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      *  (or at the foot of the page when nothing is picked). */
     fun pastePageText(text: String) {
         if (text.isEmpty()) return
-        val at = if (pageRange.isEmpty) order.size
+        val at = if (pageRange.isEmpty()) order.size
                  else (pageRange.last + 1).coerceAtMost(order.size)
         val created = ArrayList<String>(4)
         rememberPageUndo {
