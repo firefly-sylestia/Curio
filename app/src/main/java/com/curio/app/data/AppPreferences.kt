@@ -1335,14 +1335,6 @@ object AppPreferences {
     // the current screen is frozen and peels away from where you tapped, a
     // touch faster than the theme wipe. Off = today's plain transitions.
     var screenRevealEnabledState by mutableStateOf(false)
-    // v413 — JOURNAL GESTURE TOOLS (Settings ▸ Dev page, default OFF): TEN
-    // hidden writing gestures, one BIT each (see `JournalGestureTool` in
-    // features/personal/PersonalGestures.kt). ONE int rather than ten booleans
-    // so the set can grow a row without a new preference, a new key and a new
-    // load line each time; every read is a bit test and every write is a
-    // read-modify-write of the same key. Nothing is switched on by default —
-    // each gesture is met one at a time on the Dev page, with its explanation.
-    var journalGestureToolsState by mutableIntStateOf(0)
     // v394 — PINNED TITLES experiment (Settings ▸ Experiments, default OFF):
     // keeps the current title line visible while scrolling Book Review and Journal.
     var pinnedTitleViewState by mutableStateOf(false)
@@ -1948,7 +1940,6 @@ object AppPreferences {
         glassClarityState = isGlassClarityEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
-        journalGestureToolsState = journalGestureTools(context)
         pinnedTitleViewState = isPinnedTitleViewEnabled(context)
         captureStudioState = isCaptureStudioEnabled(context)
         socialTextEditingState = isSocialTextEditingEnabled(context)
@@ -2371,7 +2362,6 @@ object AppPreferences {
     private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
-    private const val KEY_JOURNAL_GESTURES = "journal_gesture_tools_v413"
     private const val KEY_PINNED_TITLE_VIEW = "pinned_title_view_experiment"
     private const val KEY_CAPTURE_STUDIO = "capture_studio_v1"
   private const val KEY_SOCIAL_TEXT_EDITING = "social_text_editing_enabled"
@@ -2496,28 +2486,6 @@ object AppPreferences {
      *  see the state comment above). */
     fun isScreenRevealEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_SCREEN_REVEAL, false)
-
-    /**
-     * v413 — THE JOURNAL'S HIDDEN TOOLS, as one bitmask (see
-     * [journalGestureToolsState]). [bits] are the `bit` values the tool
-     * catalogue owns; an untouched key reads as none of them.
-     */
-    fun journalGestureTools(context: Context): Int =
-        prefs(context).getInt(KEY_JOURNAL_GESTURES, 0)
-
-    /** Whether ONE hidden journal gesture is switched on (a bit test). */
-    fun isJournalGestureToolEnabled(context: Context, bit: Int): Boolean =
-        journalGestureTools(context) and bit != 0
-
-    fun setJournalGestureToolEnabled(context: Context, bit: Int, enabled: Boolean) {
-        val now = journalGestureTools(context)
-        val next = if (enabled) now or bit else now and bit.inv()
-        prefs(context).edit().putInt(KEY_JOURNAL_GESTURES, next).apply()
-        // The Compose state is set here rather than re-read: the page must feel
-        // the switch immediately (it is what the tool list renders from), and
-        // the stored value is the same number.
-        journalGestureToolsState = next
-    }
 
     fun setScreenRevealEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SCREEN_REVEAL, enabled).apply()
