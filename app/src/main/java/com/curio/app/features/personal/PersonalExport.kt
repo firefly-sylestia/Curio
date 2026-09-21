@@ -274,6 +274,26 @@ private val PDF_PRINT_PAD = pdfDp(7f)
  */
 private val PDF_PRINT_BAND = pdfDp(5f)
 
+/** The frame's own last lip under the label — the page's `bottom = 2.dp`. */
+private val PDF_PRINT_EDGE = pdfDp(2f)
+
+/**
+ * v427 — THE PAPER A PRINT'S FRAME ADDS AROUND ITS PICTURE.
+ *
+ * A print is a picture with a band under it, and the PAGE draws every pad that
+ * holds them: 7dp of paper above the picture, 5dp between the picture and its
+ * label, 5dp of band left under the label, 2dp of frame at the very bottom
+ * (`renderPrint`: a `padding(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 2.dp)`
+ * box around a caption column of `padding(top = 5.dp, bottom = 5.dp)`).
+ *
+ * The sheet kept ONE of those five bands and drew the picture flush at its cell's
+ * top, so a print stood 14dp shorter on paper than on the page — and a ROW of
+ * prints, whose line is as tall as its tallest cell, stood short with it (the
+ * member: "make the PDF draw print stacks and rows as the journal lays them out").
+ */
+private val PDF_PRINT_FRAME =
+    PDF_PRINT_PAD + PDF_PRINT_BAND + PDF_PRINT_BAND + PDF_PRINT_EDGE
+
 /** The sheet's body — the page's read-back body, at the sheet's measure. */
 private val PDF_BODY_SIZE = pdfPx(BODY_VIEW_SIZE)
 
@@ -772,18 +792,13 @@ private fun drawExportPrint(
     } else {
         TextUtils.ellipsize(caption, captionPaint, innerWidth, TextUtils.TruncateAt.END).toString()
     }
-    val hasCaption = captionLine.isNotEmpty()
-    val hasStamp = stamp.isNotEmpty()
-    val captionRoom = when {
-        hasCaption && hasStamp -> captionPaint.textSize * 1.7f + stampPaint.textSize * 1.9f
-        hasCaption -> captionPaint.textSize * 1.7f
-        hasStamp -> stampPaint.textSize * 1.9f
-        else -> 0f
-    }
-    // The frame's own height IS the picture plus its band — the page draws a print
-    // as a picture with a caption strip under it, so the strip is part of the
-    // print and not air the sheet adds afterwards.
-    val height = frameHeight + PDF_PRINT_BAND + captionRoom
+    // The frame's own height IS the picture plus every pad the page puts around it
+    // — the page draws a print as a picture with a caption strip under it, so the
+    // strip and the paper holding it are part of the print and not air the sheet
+    // adds afterwards. The band is read by the SAME helper a row's cells use
+    // ([exportCaptionRoom]), so a lone print and a cell of a row can never
+    // measure differently.
+    val height = PDF_PRINT_FRAME + frameHeight + exportCaptionRoom(fonts, block)
     if (run.want(height + PDF_ROW_GAP)) {
         drawExportCell(
             run = run,
@@ -812,19 +827,23 @@ private fun exportCaptionRoom(fonts: PdfFonts, block: PersonalBlock): Float {
     val labelSize =
         personalCaptionSizeSp(CAPTION_VIEW_SIZE, block.captionSize).value * PDF_UNITS_PER_SP
     val face = personalCaptionFace(block.captionFace)
-    val hasCaption = block.caption.isNotBlank()
     val hasStamp = block.captionDateMillis > 0L
     val captionPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = fonts.label(face)
         textSize = labelSize
         textAlign = Paint.Align.CENTER
     }
-    return when {
-        hasCaption && hasStamp -> captionPaint.textSize * 1.7f + captionPaint.textSize * 0.76f * 1.9f
-        hasCaption -> captionPaint.textSize * 1.7f
-        hasStamp -> captionPaint.textSize * 0.76f * 1.9f
-        else -> 0f
-    }
+    // v427 — THE BAND IS ALWAYS THERE, written in or not.
+    //
+    // The page keeps the label's own line for EVERY print: the empty band carries
+    // a non-breaking space rather than nothing, so a print nobody has captioned is
+    // still the print the member saw (v400's "keep the buttom strip here i write
+    // caption for them even if theres no captaion keep it in preview"). The sheet
+    // dropped the band entirely for one, so an uncaptioned print left the journal
+    // a quarter shorter than the page it was read from — and every row it stood in
+    // with it.
+    return captionPaint.textSize * 1.7f +
+        if (hasStamp) captionPaint.textSize * 0.76f * 1.9f else 0f
 }
 
 /**
@@ -862,15 +881,18 @@ private fun drawExportCell(
     val sourceX = ((bitmap.width - sourceWidth) / 2f).toInt().coerceAtLeast(0)
     val sourceY = ((bitmap.height - sourceHeight) / 2f).toInt().coerceAtLeast(0)
     val source = Rect(sourceX, sourceY, sourceX + sourceWidth, sourceY + sourceHeight)
+    // The frame's own top pad: the picture sits INSIDE the paper, inset as the
+    // page insets it (`padding(top = 7.dp)`), not flush with the cell's top.
+    val pictureTop = top + PDF_PRINT_PAD
     val innerLeft = left + PDF_PRINT_PAD
     run.surface().drawBitmap(
         bitmap,
         source,
-        RectF(innerLeft, top, innerLeft + innerWidth, top + frameHeight),
+        RectF(innerLeft, pictureTop, innerLeft + innerWidth, pictureTop + frameHeight),
         Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
     )
     val centre = left + frameWidth / 2f
-    var line = top + frameHeight + PDF_PRINT_BAND
+    var line = pictureTop + frameHeight + PDF_PRINT_BAND
     if (captionLine.isNotEmpty()) {
         run.surface().drawText(captionLine, centre, line + captionPaint.textSize, captionPaint)
         line += captionPaint.textSize * 1.7f
@@ -1101,7 +1123,7 @@ private fun drawExportPrintBeside(
         highlightInk = highlightInk
     )
     val rowHeight = maxOf(
-        rowHeightOf(doc, block.id) + PDF_PRINT_BAND + exportCaptionRoom(fonts, block),
+        exportCellHeight(doc, fonts, block.id),
         layout.height.toFloat()
     )
     if (!run.want(rowHeight + PDF_ROW_GAP)) return
@@ -1132,7 +1154,7 @@ private fun drawExportPrintBeside(
 /** A cell's own height: its picture's height plus the band its label needs. */
 private fun exportCellHeight(doc: PersonalDoc, fonts: PdfFonts, id: String): Float {
     val block = doc.blocks.firstOrNull { it.id == id } ?: return 0f
-    return rowHeightOf(doc, id) + PDF_PRINT_BAND + exportCaptionRoom(fonts, block)
+    return PDF_PRINT_FRAME + rowHeightOf(doc, id) + exportCaptionRoom(fonts, block)
 }
 
 /** Where a cell stands in its line (for the stacked pair of a three). */

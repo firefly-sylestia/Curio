@@ -9868,8 +9868,10 @@ scheme role means something different there than in the app's own schemes.
     other two stacked in a column that keeps each print's OWN share, and a four as
     two lines of two (each line weighing itself, as the page's Column of Rows
     does). The gap is the canvas' `PRINT_ROW_GAP`, the beside share is the
-    canvas' `printBesideShare`, a cell's height is its own size's picture plus
-    `PDF_PRINT_BAND` and its label's room, and the row is drawn as ONE block: it
+    canvas' `printBesideShare`, a cell's height is `exportCellHeight` — the frame's
+    own paper (`PDF_PRINT_FRAME`) plus its picture plus its label's room, the SAME
+    reading the lone-print path uses, so a cell and a print can never measure
+    differently — and the row is drawn as ONE block: it
     either fits the sheet or it starts the next one. `drawExportLines` places a
     line's cells where the row decided and moves the sheet once, by the line's own
     height (`PdfRun.setCursor` exists for that; `advance` can only add) — a
@@ -9879,6 +9881,22 @@ scheme role means something different there than in the app's own schemes.
     must keep asking the canvas for every one of these numbers** (`PRINT_ROW_GAP`,
     `PRINT_ROW_LIMIT`, `printBesideShare`, `personalPrintHeight`, `PersonalPhotoSize`)
     — they are `internal` for exactly this.
+
+  - **AND THE PAPER THE FRAME ADDS IS THE PAGE'S OWN (v427, third pass).** A print
+    is a picture with a band under it, and the PAGE draws every pad that holds
+    them: `renderPrint` is a `padding(start = 7.dp, end = 7.dp, top = 7.dp,
+    bottom = 2.dp)` box around a caption column of `padding(top = 5.dp, bottom =
+    5.dp)` — and the band is **ALWAYS there**, empty or not (v400: the blank band
+    carries a non-breaking space rather than nothing, so a print nobody has
+    captioned is still the print the member saw). The sheet kept ONE of those five
+    bands, returned NO band at all for an uncaptioned print, and drew the picture
+    flush at its cell's top — so a print stood 14dp short on paper and an
+    uncaptioned one a quarter short, and every ROW (whose line is as tall as its
+    tallest cell) stood short with it. `PDF_PRINT_FRAME` = the pads, the picture is
+    inset by `PDF_PRINT_PAD`, and `exportCaptionRoom` always reserves the label's
+    line. **Never make a print's height depend on whether it has been captioned** —
+    that is the page's rule, and paper has to obey it or a row of prints measures
+    differently on the two sides.
 
   Still the sheet's own, and known: a BUBBLE voice look's tinted bubble, and the
   voice strip's tap-to-seek (nothing on paper can be scrubbed — see the member's own

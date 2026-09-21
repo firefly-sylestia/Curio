@@ -652,6 +652,64 @@ builders, which is the honest cost of showing raw payloads; the `where` on every
   (`ByteArray`, `Charsets`, `Regex`) and `android.util.Base64` (fully qualified) need none.
 - No Gradle in this environment — CI compiles it (per `AGENTS.md`).
 
+## 13. Request — print stacks and rows in the PDF (re-sent); the frame's own paper
+
+**The ask (member):** *"Make the PDF draw print stacks and rows as the journal lays them
+out"* — the SAME words as section 11, re-sent after that pass had already shipped
+(`9f810e37`). So this pass began by checking what §11 left undone rather than rebuilding it.
+
+**What §11 had already done (verified in the tree, not from memory):** `exportPrintPlan`
+still runs the read view's own grouping pass (a run up to `PRINT_ROW_LIMIT`, stepping over
+nobody's blank rows, a lone SMALL print taking the line under it), and `drawExportPrintRow`
+still builds the page's three shapes — the pair, the three with its upright frame and its
+stacked column, the four as two lines of two — from the canvas' own `PRINT_ROW_GAP`,
+`printBesideShare`, `personalPrintHeight` and `PersonalPhotoSize`. The rows were in place.
+
+**What was still wrong — a print's HEIGHT.** A print on the page is a picture inside paper
+that the page draws the pads for (`renderPrint`): 7dp above the picture, 5dp between the
+picture and its label, 5dp of band left under the label, 2dp of frame at the bottom — and
+the band is **ALWAYS there**, empty or not (v400: the blank band carries a non-breaking
+space, so an uncaptioned print is still the print the member saw). The sheet:
+
+- kept ONE of those five bands and drew the picture flush at its cell's top, so any print
+  stood **14dp shorter** on paper than on the page;
+- returned **no band at all** for a print with nothing written under it — a quarter of a
+  Small print's height gone;
+- and because a ROW's line is as tall as its tallest cell, every row of prints measured
+  short with it — which is exactly what "as the journal lays them out" fails on.
+
+**What changed** (`PersonalExport.kt` only, 45 insertions / 23 deletions):
+
+- `PDF_PRINT_FRAME` = `PDF_PRINT_PAD` + `PDF_PRINT_BAND` ×2 + `PDF_PRINT_EDGE` (the new 2dp
+  lip) — one name for the paper a print's frame adds, with the page's own pads written out
+  in its comment.
+- `drawExportCell` insets the picture by `PDF_PRINT_PAD` (the frame's top pad) and places
+  the label from that inset picture's foot, so a print is drawn where the page draws it.
+- `exportCaptionRoom` **always reserves the label's line** (a stamp adds its own), and
+  `drawExportPrint` reads its band from that same helper instead of a second `when` of its
+  own — so a lone print and a cell of a row cannot measure differently.
+- `exportCellHeight` and the beside pair's row height both go through `PDF_PRINT_FRAME` /
+  `exportCellHeight`, so the rows inherit the correction.
+
+**Not changed, and why:** the sheet still has no frame *rectangle* (its paper IS the page's
+paper, so the frame shows only as the pads), and the caption's line box is still the sheet's
+1.7 × label size approximation of the page's text line — that one is shared with every text
+block on the sheet and is a separate question from the frame.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on the touched file (the character scanner, not a regex).
+- `grep` sweep: no leftover references to the removed `hasCaption` / `captionRoom` locals,
+  and every `PDF_PRINT_BAND` / `PDF_PRINT_FRAME` use is one of the five intended ones.
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
+### Note for the member
+
+§11's row runner had already been pushed when this arrived, so if the rows are STILL not
+what the journal shows on their device, the useful thing to report is which shape they are
+looking at (a pair, a three, a four, or a print beside a line) — the shapes are one code
+path each and each can be checked on its own.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
