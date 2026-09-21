@@ -5150,6 +5150,21 @@ private fun ReaderAppearanceSheet(
                 ReaderAlignRow(palette)
             }
 
+            // ── v440 — WHERE A LOOKUP GOES (see [ReaderDictionarySource]) ──
+            ReaderSheetLabel("Dictionary", palette)
+            ReaderSegmentRow(
+                segments = ReaderDictionarySource.entries.map {
+                    ReaderSegment(it.label, CurioIcons.MenuBook)
+                },
+                selectedIndex = ReaderDictionarySource.entries.indexOf(ReaderLook.dictionary),
+                palette = palette,
+                onSelect = { at ->
+                    ReaderDictionarySource.entries.getOrNull(at)?.let { source ->
+                        ReaderLook.dictionary = source
+                    }
+                }
+            )
+
             // ── AND THE NIGHT'S TWO (v434) ────────────────────────────
             ReaderSheetLabel("Screen", palette)
             ReaderSegmentRow(
@@ -7594,6 +7609,17 @@ internal object ReaderLook {
     var dimAuto by mutableStateOf(false)
 
     /**
+     * v440 — WHICH DICTIONARY ANSWERS A LOOKUP (see [ReaderDictionarySource]).
+     *
+     * The member, asked what "bundled vs online" should mean once they heard there
+     * is no bundled dictionary in the app: **two online sources to choose between**.
+     * It is a READING preference and lives here with the rest of them, so it follows
+     * the member from book to book and is remembered across restarts
+     * (see [ReaderLookStore]).
+     */
+    var dictionary by mutableStateOf(ReaderDictionarySource.WIKTIONARY)
+
+    /**
      * v439 — LOW POWER READING, AND IT IS ON FROM THE START.
      *
      * The member: *"in pdf reader, a high charge save turns on which makes the
@@ -7671,6 +7697,8 @@ internal object ReaderLook {
         // v434 rule): a field left out of here saves every other setting and
         // silently forgets this one.
         dimAuto.toString(),
+        // v440 — and which dictionary the lookups go to (the v434 rule).
+        dictionary.key,
         lowPower.toString(),
         // v439 — the motion lock MUST be in here, or it saves all of the other
         // fields and silently forgets this one (the v434 rule).
@@ -7724,6 +7752,7 @@ internal object ReaderLookStore {
     private const val DIM = "reader_dim"
     private const val LOW_POWER = "reader_low_power"
     private const val DIM_AUTO = "reader_dim_auto"
+    private const val DICTIONARY = "reader_dictionary"
     private const val MOTION_LOCK = "reader_motion_lock"
 
     /**
@@ -7757,6 +7786,9 @@ internal object ReaderLookStore {
             ReaderLook.keepScreenOn = prefs.getBoolean(KEEP_ON, ReaderLook.keepScreenOn)
             ReaderLook.dim = prefs.getFloat(DIM, ReaderLook.dim).coerceIn(0f, 0.6f)
             ReaderLook.dimAuto = prefs.getBoolean(DIM_AUTO, ReaderLook.dimAuto)
+            ReaderLook.dictionary = ReaderDictionarySource.fromKey(
+                prefs.getString(DICTIONARY, ReaderLook.dictionary.key)
+            )
             ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
             ReaderLook.motionLock = prefs.getBoolean(MOTION_LOCK, ReaderLook.motionLock)
         }
@@ -7783,6 +7815,7 @@ internal object ReaderLookStore {
                 .putBoolean(KEEP_ON, ReaderLook.keepScreenOn)
                 .putFloat(DIM, ReaderLook.dim)
                 .putBoolean(DIM_AUTO, ReaderLook.dimAuto)
+                .putString(DICTIONARY, ReaderLook.dictionary.key)
                 .putBoolean(LOW_POWER, ReaderLook.lowPower)
                 .putBoolean(MOTION_LOCK, ReaderLook.motionLock)
                 .putBoolean(MARK, true)

@@ -330,6 +330,29 @@ internal fun ReaderSettingsScreen(
                 )
             }
 
+            // ── v440 — WHERE A LOOKUP GOES ──────────────────────────────
+            //
+            // The member, asked what "bundled vs online" should mean once they heard
+            // there is no bundled dictionary in the app: *"two online sources to
+            // choose between"*. Both are keyless, so both work in every build — and
+            // the choice is remembered with the rest of the reader's look (see
+            // [ReaderDictionarySource]).
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                ReaderSettingsSection("Dictionary", palette)
+                ReaderSegmentRow(
+                    segments = ReaderDictionarySource.entries.map {
+                        ReaderSegment(it.label, CurioIcons.MenuBook)
+                    },
+                    selectedIndex = ReaderDictionarySource.entries.indexOf(ReaderLook.dictionary),
+                    palette = palette,
+                    onSelect = { at ->
+                        ReaderDictionarySource.entries.getOrNull(at)?.let { source ->
+                            ReaderLook.dictionary = source
+                        }
+                    }
+                )
+            }
+
             // ── v439 — WHAT THE READING COSTS ───────────────────────────
             //
             // The member: *"in pdf reader, a high charge save turns on which makes
