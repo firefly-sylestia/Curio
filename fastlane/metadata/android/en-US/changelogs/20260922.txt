@@ -711,3 +711,14 @@ FIX:
 - Reading: a pinch stops reading as a tap when your fingers lift — the tools no longer come and go with every zoom, and a lift near the side of the screen no longer turns the page instead of bringing the tools back.
 - Reading: the tools arrive and leave with a move — the head pill settles down from the top and the foot pill rises from the bottom, where both only faded in place.
 - Reading: the tools no longer leave on their own — the four-second countdown that took the pills away mid-sentence is gone, and a tap on the page or your own scroll is what puts them away.
+
+ADD:
+- Social: the faces are alive — every member's portrait breathes, bobs, blinks and glances on its own seeded timing, so a wall of them reads as a crowd instead of one heartbeat; it obeys the phone's own "remove animations" setting.
+- Reading: the page slider is a small floating pill over the page instead of a sheet — the two hold-to-turn arrows, the count following your thumb and a cross to put it away, and a tap on the page closes it too.
+
+FIX:
+- Writing: the journal's colour reaches its own controls — the date pill, the dock's tools and the page's raised paper wear the day's colour instead of the theme's rose.
+- Writing: the copy box is two rows with nothing to scroll — the reach arrows, Select all and Line along the top, cut, copy, paste, undo and the cross below — and the writing dock steps aside while the box is up.
+- Writing: a bullet sits level with its words — every mark was centred on the line's own box, which sits below where the eye reads a line of text.
+- Reading: the reader's sheets leave quickly, and the notes and highlights lists keep a real panel's height instead of shrinking to a strip.
+- Reading: the ⋯ menu is smaller, and opening the search merges with the book's name in one movement instead of two panels changing places.

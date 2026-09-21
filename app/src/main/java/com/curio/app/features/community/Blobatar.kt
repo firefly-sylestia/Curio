@@ -18,6 +18,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -395,6 +396,258 @@ private fun blobatarColors(hue: Double, tone: Double): BlobatarColors {
         eye = hexColor(toHex(r.getValue("eye")))
     )
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// motion.css + animate.ts — THE IDLE LAYER (v437)
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * v437 — THE IDLE MOTION, AS NUMBERS.
+ *
+ * Upstream's motion is a CSS layer (`packages/blobatar/src/motion.css`, ~1,200
+ * lines) over the same figure this file already traces: a root class for the
+ * amplitude, then a handful of ambient loops — breathe, bob, blink, glance, and
+ * the wrap that keeps the eyes reading as marks on a sphere rather than stickers
+ * on a disc. A Compose surface has no stylesheet, so the layer is EVALUATED here
+ * instead of declared, from the same numbers, and the two things upstream is
+ * emphatic about are kept:
+ *
+ *  · **Every phase is SEEDED per face.** A grid where every face breathes in
+ *    unison does not read as a crowd, it reads as a heartbeat — so the breathe
+ *    and the bob draw INDEPENDENT offsets (sharing one locks every face into the
+ *    same drift, one level up), the blink and the glance draw their own periods
+ *    and offsets, and the glance's direction is drawn as a magnitude and a sign
+ *    separately so a sign can never flip a value that was already near zero.
+ *  · **Every loop resolves to the identity when it is not moving**, which is what
+ *    makes "not animating" the same code path as "animating": at phase zero the
+ *    breathe is 1×, the bob and the glance are 0, and the eyes are open.
+ *
+ * What is deliberately NOT ported: the expression layer (the pose channels, the
+ * tremor, the seesaw) and the hover reaction. Curio's faces carry no expressions
+ * and are not hovered — there is no pointer on a phone — so six of upstream's
+ * thirteen channels have nothing to act on here, and the colour morph belongs to
+ * the poses that do not exist.
+ *
+ * Easing: upstream's breathe and bob are CSS `ease-in-out`, which is a cubic
+ * Bézier this file does not reproduce exactly — [smooth] (the smoothstep) is the
+ * same shape in one multiply, and at a 2.2% scale the difference between them is
+ * below one device pixel on every avatar size the app draws. The blink and the
+ * glance windows are LINEAR upstream and are linear here, which is the part that
+ * matters: a glance has to SNAP between fixations rather than float.
+ */
+private class BlobatarIdle(t: BlobatarTraits) {
+
+    /** How far into the breathe cycle this face starts. */
+    private val phase = t.num("motion.phase", 0.0, 2800.0).roundToInt().toDouble()
+
+    /** The same for the bob, drawn independently so the drift is not shared. */
+    private val bobPhase = t.num("motion.bob", 0.0, 3400.0).roundToInt().toDouble()
+
+    /** The blink's whole period, and where in it this face starts. */
+    private val blinkMs = t.num("motion.blink", 3500.0, 6500.0).roundToInt().toDouble()
+    private val blinkPhase = t.num("motion.blinkPhase", 0.0, blinkMs).roundToInt().toDouble()
+
+    /** The glance's period and offset — its own, for the reason the bob has one. */
+    private val saccadeMs = t.num("motion.saccade", 4200.0, 7600.0).roundToInt().toDouble()
+    private val saccadePhase = t.num("motion.saccadePhase", 0.0, saccadeMs).roundToInt().toDouble()
+
+    /** The glance's magnitude, rounded to 2dp exactly as upstream rounds it. */
+    private val lookX0 = round2(t.num("motion.lookX", 1.0, 2.2))
+    private val lookY0 = round2(t.num("motion.lookY", 0.8, 1.7))
+
+    /** The same direction, signed — the DRAW is the sign, never the magnitude. */
+    private val lookX = if (t["motion.lookXFlip"] < 0.5) lookX0 else -lookX0
+    private val lookY = if (t["motion.lookYFlip"] < 0.5) lookY0 else -lookY0
+
+    /**
+     * Upstream's `mo-saccade` / `mo-wrap` keyframe fractions.
+     *
+     * Six fixations around the compass — centre, up-left, right, down, up-right,
+     * left — each HELD for a long window and separated by a 1.5% jump, which is
+     * what makes eyes look somewhere rather than slide on a rail. A sequence that
+     * walked the compass in order would read as a mechanism, which is why the
+     * order is not a clock sweep.
+     */
+    private val stops = doubleArrayOf(
+        0.0, 0.15, 0.165, 0.31, 0.325, 0.47,
+        0.485, 0.63, 0.645, 0.79, 0.805, 0.985, 1.0
+    )
+
+    /** The glance's own travel, per stop (`x`, `y` in viewBox units). */
+    private val glance: List<FloatArray> = listOf(
+        xy(0.0, 0.0), xy(0.0, 0.0),
+        xy(-0.8 * lookX, -0.9 * lookY), xy(-0.8 * lookX, -0.9 * lookY),
+        xy(1.0 * lookX, 0.1 * lookY), xy(1.0 * lookX, 0.1 * lookY),
+        xy(-0.15 * lookX, 0.85 * lookY), xy(-0.15 * lookX, 0.85 * lookY),
+        xy(0.75 * lookX, -0.8 * lookY), xy(0.75 * lookX, -0.8 * lookY),
+        xy(-1.0 * lookX, -0.15 * lookY), xy(-1.0 * lookX, -0.15 * lookY),
+        xy(0.0, 0.0)
+    )
+
+    /**
+     * The wrap — the foreshortening that says the eyes are on a sphere.
+     *
+     * Three cues, in the order they do work: the shared compression of a glance
+     * (reading the UNSIGNED magnitude, because how far a feature foreshortens
+     * does not depend on which way the face turned), the differential that makes
+     * the leading eye compress harder than the trailing one (signed, and kept
+     * under half the shared term so the pair can never scale PAST 1 — an eye that
+     * grew on a glance is the tell that breaks the illusion), and the tilt, which
+     * is the product x·y so it vanishes on the pure horizontals and verticals
+     * where a real face shows none either.
+     *
+     * Per eye sign, because the asymmetry has to come from somewhere: upstream
+     * gives the left eye `--mo-wrap: -1` and the right `+1`.
+     */
+    private fun wrapStops(side: Double): List<FloatArray> {
+        fun box(sx: Double, sy: Double, rot: Double) =
+            floatArrayOf(sx.toFloat(), sy.toFloat(), rot.toFloat())
+        val still = box(1.0, 1.0, 0.0)
+        val upLeft = box(
+            1 - 0.0176 * lookX0 + 0.008 * lookX * side,
+            1 - 0.027 * lookY0,
+            0.648 * lookX * lookY * side
+        )
+        val right = box(
+            1 - 0.022 * lookX0 - 0.01 * lookX * side,
+            1 - 0.003 * lookY0,
+            0.09 * lookX * lookY * side
+        )
+        val down = box(
+            1 - 0.0033 * lookX0 + 0.0015 * lookX * side,
+            1 - 0.0255 * lookY0,
+            -0.115 * lookX * lookY * side
+        )
+        val upRight = box(
+            1 - 0.0165 * lookX0 - 0.0075 * lookX * side,
+            1 - 0.024 * lookY0,
+            -0.54 * lookX * lookY * side
+        )
+        val left = box(
+            1 - 0.022 * lookX0 + 0.01 * lookX * side,
+            1 - 0.0045 * lookY0,
+            0.135 * lookX * lookY * side
+        )
+        return listOf(
+            still, still, upLeft, upLeft, right, right,
+            down, down, upRight, upRight, left, left, still
+        )
+    }
+
+    private val wrapLeft = wrapStops(-1.0)
+    private val wrapRight = wrapStops(1.0)
+
+    /**
+     * ONE FRAME of every loop, at [ms] of elapsed time.
+     *
+     * Evaluated per DRAW rather than per composition (see [BlobatarArt.draw]),
+     * so the arithmetic here is the whole per-frame cost of animating a face —
+     * thirteen interpolations for the glance, thirteen per eye for the wrap, and
+     * four scalars. Deliberately not cached: caching it would mean a state write
+     * per frame per face, which is the thing this shape exists to avoid.
+     */
+    fun frameAt(ms: Double, eyeCount: Int): BlobatarPose {
+        val breath = smooth(triangle((ms + phase) / BREATHE_MS))
+        val bob = smooth(triangle((ms + bobPhase) / BOB_MS))
+        val at = wrap01((ms + saccadePhase) / saccadeMs)
+        val stop = stopAt(at)
+        return BlobatarPose(
+            breatheX = (1 + 0.022 * breath).toFloat(),
+            breatheY = (1 - 0.018 * breath).toFloat(),
+            bobY = (-1.1 * bob).toFloat(),
+            glanceX = lerp2(glance, stop, at)[0],
+            glanceY = lerp2(glance, stop, at)[1],
+            blinkY = blinkAt(wrap01((ms + blinkPhase) / blinkMs)).toFloat(),
+            wrap = Array(eyeCount) { index ->
+                lerp3(if (index == 0) wrapLeft else wrapRight, stop, at)
+            }
+        )
+    }
+
+    /**
+     * The blink, as a 1.4%-wide window at the END of a seeded period.
+     *
+     * Upstream is explicit that this drift is a feature rather than a rounding
+     * error: keyframe percentages are static, so the animation has to run for the
+     * whole interval and the blink can only be a narrow window inside it — which
+     * means a face on a 6.5s period holds its eyes shut longer than one on a
+     * 3.5s period, and reads as slightly sleepier. It is also the layer to keep
+     * if only one survives: a face that blinks reads as alive at a fraction of
+     * the cost of everything else here.
+     */
+    private fun blinkAt(q: Double): Double = when {
+        q < 0.972 -> 1.0
+        q < 0.986 -> 1.0 - 0.92 * ((q - 0.972) / 0.014)
+        else -> 1.0 - 0.92 * (1.0 - ((q - 0.986) / 0.014))
+    }
+
+    /** The stop this fraction sits in: every window holds, the 1.5%s jump. */
+    private fun stopAt(q: Double): Int {
+        for (i in 0 until stops.size - 1) if (q <= stops[i + 1]) return i
+        return stops.size - 2
+    }
+
+    private fun lerp2(table: List<FloatArray>, stop: Int, q: Double): FloatArray {
+        val a = table[stop]
+        val b = table[stop + 1]
+        val f = fraction(q, stop)
+        return floatArrayOf(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f)
+    }
+
+    private fun lerp3(table: List<FloatArray>, stop: Int, q: Double): FloatArray {
+        val a = table[stop]
+        val b = table[stop + 1]
+        val f = fraction(q, stop)
+        return floatArrayOf(
+            a[0] + (b[0] - a[0]) * f,
+            a[1] + (b[1] - a[1]) * f,
+            a[2] + (b[2] - a[2]) * f
+        )
+    }
+
+    private fun fraction(q: Double, stop: Int): Float {
+        val span = stops[stop + 1] - stops[stop]
+        if (span <= 0.0) return 0f
+        return ((q - stops[stop]) / span).coerceIn(0.0, 1.0).toFloat()
+    }
+
+    private fun xy(x: Double, y: Double) = floatArrayOf(x.toFloat(), y.toFloat())
+
+    private companion object {
+        const val BREATHE_MS = 2800.0
+        const val BOB_MS = 3400.0
+
+        /** A fraction of a cycle, 0..1, for any input. */
+        fun wrap01(v: Double): Double {
+            val x = v % 1.0
+            return if (x < 0) x + 1 else x
+        }
+
+        /** 0 at 0, 1 at 1, 0 at 2 — CSS `alternate` over two periods. */
+        fun triangle(v: Double): Double {
+            val x = wrap01(v / 2.0) * 2.0
+            return 1.0 - abs(x - 1.0)
+        }
+
+        /** The smoothstep, standing in for CSS `ease-in-out` (see the class note). */
+        fun smooth(t: Double): Double = t * t * (3.0 - 2.0 * t)
+
+        fun round2(v: Double): Double = (v * 100).roundToInt() / 100.0
+    }
+}
+
+/** One frame of [BlobatarIdle]: what to scale, what to move, what to squash. */
+private class BlobatarPose(
+    val breatheX: Float,
+    val breatheY: Float,
+    val bobY: Float,
+    val glanceX: Float,
+    val glanceY: Float,
+    /** The blink, as a Y scale — 1 open, 0.08 shut. */
+    val blinkY: Float,
+    /** Per eye: `scaleX`, `scaleY`, then the rotation in degrees to bracket it with. */
+    val wrap: Array<FloatArray>
+)
 
 // ────────────────────────────────────────────────────────────────────────────
 // styles/shapes.ts — the silhouette vocabulary
@@ -977,6 +1230,16 @@ internal class BlobatarArt(seed: String) {
     private val taperPath: Path?
     private val bodyPath: Path
     private val eyePaths: List<Path>
+    /**
+     * v437 — THE EYES THE IDLE LOOPS MOVE (see [BlobatarIdle]).
+     *
+     * Held beside their traced paths because the motion needs each eye's OWN
+     * centre and lean — the wrap layer squashes a capsule in the capsule's own
+     * frame, and the blink multiplies that rather than replacing it (upstream's
+     * `R · S · B · R⁻¹`, see `motion.css`).
+     */
+    private val eyes: List<BlobEye>
+    private val idle: BlobatarIdle
 
     init {
         val traits = BlobatarTraits(seed)
@@ -986,6 +1249,8 @@ internal class BlobatarArt(seed: String) {
         )
 
         val layout = blobatarLayout(traits)
+        eyes = layout.eyes
+        idle = BlobatarIdle(traits)
         petals = layout.petals
         val taper = layout.taper
         taperPath = taper?.let { t -> Path().also { path -> taperInto(path, t) } }
@@ -1010,10 +1275,23 @@ internal class BlobatarArt(seed: String) {
      * viewBox→canvas scale so every coordinate above stays comparable with the
      * upstream source.
      */
-    fun draw(scope: DrawScope, ring: Boolean = true) {
+    /**
+     * Paints the face into the current [DrawScope], which must be SQUARE.
+     *
+     * v437 — [elapsedMs] IS THE IDLE MOTION (see [BlobatarIdle]): null paints the
+     * one still pose every face has always been painted at, which is what the
+     * notification bitmap and every off-screen render want, and a millisecond
+     * count paints that face alive. The pose is evaluated HERE, in the draw
+     * scope, so an animating avatar invalidates its own draw phase and never its
+     * composition — a wall of faces re-draws and does not re-compose.
+     */
+    fun draw(scope: DrawScope, ring: Boolean = true, elapsedMs: Double? = null) {
         val radius = scope.size.minDimension / 2f
         val u = scope.size.minDimension / 100f
 
+        // The disc never moves: upstream keeps it outside `.mo-breathe` too, so
+        // a breathing face breathes INSIDE a still light rather than swimming
+        // in a breathing pool.
         scope.drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -1028,16 +1306,42 @@ internal class BlobatarArt(seed: String) {
         )
 
         scope.withTransform({ scale(u, u, pivot = Offset.Zero) }) {
-            for (petal in petals) {
-                drawCircle(
-                    color = colors.head,
-                    radius = petal.r.toFloat(),
-                    center = Offset(petal.cx.toFloat(), petal.cy.toFloat())
-                )
+            val pose = elapsedMs?.let { idle.frameAt(it, eyes.size) }
+            if (pose == null) {
+                drawFigure()
+            } else {
+            // The two ambient layers, outermost first — upstream's
+            // `.mo-breathe` wraps `.mo-bob`, and the bob has to be inside the
+            // breathe or its travel would be scaled by it.
+            withTransform({
+                scale(pose.breatheX, pose.breatheY, pivot = Offset(50f, 50f))
+            }) {
+                withTransform({ translate(0f, pose.bobY) }) {
+                    // The BODY group only — upstream's `.mo-bob` holds two
+                    // children, the body and the eyes, and the eyes are drawn
+                    // with their own transforms below (drawing the still figure
+                    // here would paint every eye twice).
+                    drawBody()
+                    // The glance moves BOTH eyes together (upstream's `.mo-eyes`),
+                    // and the wrap squashes each one in its own frame.
+                    withTransform({ translate(pose.glanceX, pose.glanceY) }) {
+                        eyes.forEachIndexed { index, eye ->
+                            val centre = Offset(eye.cx.toFloat(), eye.cy.toFloat())
+                            val wrap = pose.wrap[index]
+                            withTransform({ rotate(wrap[2], pivot = centre) }) {
+                                withTransform({
+                                    scale(wrap[0], wrap[1] * pose.blinkY, pivot = centre)
+                                }) {
+                                    withTransform({ rotate(-wrap[2], pivot = centre) }) {
+                                        drawPath(eyePaths[index], colors.eye)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            taperPath?.let { drawPath(it, colors.head) }
-            drawPath(bodyPath, colors.head)
-            for (eye in eyePaths) drawPath(eye, colors.eye)
+            }
         }
 
         if (ring) {
@@ -1047,5 +1351,24 @@ internal class BlobatarArt(seed: String) {
                 style = Stroke(width = 2f * u)
             )
         }
+    }
+
+    /** The still figure — the body group and the two eyes, as drawn before v437. */
+    private fun DrawScope.drawFigure() {
+        drawBody()
+        for (eye in eyePaths) drawPath(eye, colors.eye)
+    }
+
+    /** The body group: the petals, the droplet's taper, and the silhouette. */
+    private fun DrawScope.drawBody() {
+        for (petal in petals) {
+            drawCircle(
+                color = colors.head,
+                radius = petal.r.toFloat(),
+                center = Offset(petal.cx.toFloat(), petal.cy.toFloat())
+            )
+        }
+        taperPath?.let { drawPath(it, colors.head) }
+        drawPath(bodyPath, colors.head)
     }
 }

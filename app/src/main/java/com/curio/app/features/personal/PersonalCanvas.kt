@@ -508,6 +508,25 @@ internal fun PersonalDoc.checklistProgress(): Pair<Int, Int> {
 /** The marker's box: the glyph width every list line reserves. */
 internal val PERSONAL_MARKER_SIZE = 18.dp
 
+/**
+ * v437 — THE OPTICAL AXIS THE WHOLE MARKER ROSTER CENTRES ON.
+ *
+ * The member: *"fix its weird positioning not matching with the text"*.
+ * Every mark was centred on the LINE BOX's own middle ([lineHeight] / 2), and a
+ * line box is not a word: it carries the descender space a line of words rarely
+ * uses and half the leading on either side, so its geometric middle sits BELOW
+ * where the eye reads the words' own centre. A dot on that axis reads as hanging
+ * under its words — which is exactly what the member reported ("Too low, below
+ * the words").
+ *
+ * The lift is a fraction of the line rather than a dp count on purpose: the page
+ * writes at several sizes ([PersonalLook]), and a fixed 2dp nudge that fixed the
+ * default size would hang a mark high on a large one. 6% of the line is the
+ * empirical nudge that puts the roster's centre on the words at every size the
+ * page offers — and it is ONE number, so the whole roster cannot drift apart.
+ */
+internal const val PERSONAL_MARKER_AXIS_LIFT = 0.06f
+
 /** The air between the marker and the first word. */
 internal val PERSONAL_MARKER_GAP = 10.dp
 
@@ -557,7 +576,9 @@ internal fun DrawScope.drawPersonalMarker(
 ) {
     val size = PERSONAL_MARKER_SIZE.toPx()
     val cx = size / 2f
-    val cy = lineHeight / 2f
+    // v437 — the words' own centre, not the line box's (see
+    // [PERSONAL_MARKER_AXIS_LIFT]: the member's "too low, below the words").
+    val cy = lineHeight * (0.5f - PERSONAL_MARKER_AXIS_LIFT)
     val r = size * 0.46f
     when (marker) {
         PersonalMarker.DOT -> drawCircle(
@@ -5600,10 +5621,6 @@ internal fun PersonalPageEditBar(
     ink: Color
 ) {
     val clipboard = LocalClipboardManager.current
-    // ONE ROW, ONE SCROLL (see below) — a single place that remembers where the
-    // row was, so a reach built arrow by arrow never makes the member find their
-    // arrow again (v428's rule, kept).
-    val reachScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
     val hasReach = state.pageSelectionCount > 0 || state.pageLettersPicked
     val lineHere = state.pageSelectionCount > 0
     // Cut and Copy with an empty reach OFFER the whole page first — the
@@ -5618,17 +5635,26 @@ internal fun PersonalPageEditBar(
         shadowElevation = 10.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .height(JournalCapsule.Height)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxHeight()
-                .horizontalScroll(reachScroll)
-                .padding(horizontal = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        // ── v437 — TWO ROWS, AND NOTHING TO SCROLL ──────────────────────────
+        //
+        // The member: *"for the copy tools i will have to scroll to see all
+        // options so fix that"*, and their answer for how: **"two row"**. Every
+        // option was in ONE row that scrolled sideways, so the last of them — cut,
+        // copy, paste, undo, the cross — were off-screen on a phone and reachable
+        // only by a horizontal swipe inside a box that is itself only 46dp tall.
+        //
+        // The split follows what the two halves of the box ARE: HOW MUCH of the
+        // page is in hand (the four reach arrows, Select all, Line) reads along
+        // the top, and WHAT TO DO with it (cut, copy, paste, undo, close) along
+        // the bottom. Nothing scrolls, so nothing can be off-screen, and the box
+        // grows DOWN into the air it already floated in rather than sideways past
+        // the page's own edge.
+        Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // ── THE CORNER: FOUR ARROWS, AS PILLS ──────────────────────────
+            // ── THE REACH: FOUR ARROWS, AS PILLS ───────────────────────────
             //
             // ↑ ↓ are the rows and ← → the letters, in that order, and each is
             // a pill of the box's own ink rather than a bare glyph: a control
@@ -5636,6 +5662,11 @@ internal fun PersonalPageEditBar(
             // press (the member: "make the arrow proper pills in the corner").
             // A dead one dims to a hairline of itself, which is the whole of
             // what tells a member it has nowhere left to go.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
             ReachPill(
                 icon = CurioIcons.ArrowUpward,
                 label = "More rows up",
@@ -5682,12 +5713,18 @@ internal fun PersonalPageEditBar(
             CopyChip("Line", enabled = lineHere, accent = ink) {
                 state.selectPageLineLetters()
             }
+            }
             // ── AND THE ACTIONS, AS ICONS ────────────────────────────────
             //
             // The member: "instead of cut copy paste use its icon, and for undo
             // the undo icon". Cut and Copy keep the reach's manner: with nothing
             // picked they OFFER the page first, so the second tap is the one
             // that acts.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
             ActionPill(
                 label = "Cut",
                 accent = accent,
@@ -5741,6 +5778,11 @@ internal fun PersonalPageEditBar(
                 CurioIcon(CurioIcons.Undo, null, size = 18.dp)
             }
             // ── AND THE CROSS, AT THE BOX'S RIGHT CORNER ────────────────
+            //
+            // The weight is what keeps it AT that corner: the actions are
+            // left-hung, and the cross is the one control that means "nothing
+            // here", so it stands apart rather than in the run of tools.
+            Spacer(Modifier.weight(1f))
             ActionPill(
                 label = "Close copy tools",
                 accent = accent,
@@ -5748,6 +5790,7 @@ internal fun PersonalPageEditBar(
                 onClick = { state.closePageEditBar() }
             ) {
                 CurioIcon(CurioIcons.Close, null, size = 18.dp)
+            }
             }
         }
     }
@@ -5946,7 +5989,14 @@ internal fun PersonalToolDock(
     // The dock wears the app's own accent (the same one Home's hero uses), not
     // a hard rose — a member on the azure/hero-lane theme sees THEIR accent.
     val accent = personalAccent()
-    val accentInk = personalAccentInk()
+    // v437 — UNLESS THE PAGE HAS A COLOUR OF ITS OWN, and then the tools light
+    // in THAT. The member: *"the dock's tools don't light in it"*. Every tool,
+    // every panel's lit choice and the marker pens took [personalAccentInk] —
+    // the theme's accent — so a page coloured anything at all still lit rose.
+    // [journalDoorAccent] answers the theme's ink for a page that follows the
+    // theme, so a journal that never picked a colour is pixel-for-pixel what it
+    // was.
+    val accentInk = journalDoorAccent(journalAccent)
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     // v428 — THE TOOL ROW REMEMBERS WHERE IT WAS LEFT. A row of tools wider
     // than a phone is scrolled to reach the last of them, and the state used to

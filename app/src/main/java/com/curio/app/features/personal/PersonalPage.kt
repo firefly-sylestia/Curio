@@ -996,8 +996,18 @@ internal fun PersonalWritingPage(
             }
         }
 
+        // ── v437 — AND THE DOCK STEPS ASIDE FOR THE COPY BOX ─────────────
+        //
+        // The member: *"hide the dock just show the copy doc when thats on"*.
+        // v433 kept the two stacked — the box floating above a dock that still
+        // held its nine writing tools — which left the page's bottom with two
+        // toolbars and eighteen controls in it while the member was doing the
+        // one thing: picking a reach and cutting it. The copy box IS the page's
+        // bottom while it is open, so the dock goes away with the same slide it
+        // leaves by when the writing is scrolled past (see [dockScrolledAway]).
         AnimatedVisibility(
-            visible = editing && liveVoice == null && !dockScrolledAway,
+            visible = editing && liveVoice == null && !dockScrolledAway &&
+                !editor.pageEditBarOpen,
             enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
             exit = slideOutVertically(tween(160)) { height -> height / 2 } + fadeOut(tween(120)),
             modifier = Modifier.fillMaxWidth()

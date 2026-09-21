@@ -48,6 +48,17 @@ internal fun personalAccentInk(): Color = settingsAccentInk()
 @Composable
 internal fun personalOnAccent(): Color = settingsReadableInk(personalAccent())
 
+/**
+ * v437 — INK FOR TEXT SITTING ON AN ARBITRARY FILL.
+ *
+ * The page's own colour is a colour the member picked off a wheel, so the theme's
+ * "on accent" answer does not hold for it: a near-white page colour under light
+ * ink is a pill nobody can read. Named here beside [personalOnAccent] so a page
+ * control that wears the page's own colour has one thing to ask.
+ */
+@Composable
+internal fun journalOn(fill: Color): Color = settingsReadableInk(fill)
+
 /** Glyph tone on an accent wash or a bare accent surface. */
 @Composable
 internal fun personalIconTint(accent: Color): Color = settingsAccentInk()
@@ -136,10 +147,24 @@ internal object JournalCapsule {
     val Pad = 15.dp
 }
 
-/** The journal card's fill where a control needs one step of separation. */
+/**
+ * The journal card's fill where a control needs one step of separation.
+ *
+ * v437 — AND IT IS TINTED TOWARD THE PAGE'S OWN COLOUR, not the theme's ink.
+ * The member: *"still the journal page and ts buttons dont get the color by
+ * chnaging it"*. This is the fill every page-level capsule wears (the date pill,
+ * the eye/pen switch, the dock, the copy box), and it was lerped toward
+ * [personalAccentInk] — the THEME's accent — whatever colour the page had been
+ * given. So a page coloured indigo still grew rose paper under its own controls,
+ * which is why the colour looked like it never arrived.
+ */
 @Composable
 internal fun journalPaperRaised(): Color =
-    lerp(journalPaper(), personalAccentInk(), if (isCurioDarkTheme()) 0.10f else 0.04f)
+    lerp(
+        journalPaper(),
+        LocalJournalPagePaint.current.own ?: personalAccentInk(),
+        if (isCurioDarkTheme()) 0.10f else 0.04f
+    )
 
 /**
  * The ink the journal writes with — the page's own onSurface, named so a journal

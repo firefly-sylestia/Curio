@@ -11,7 +11,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -281,6 +283,17 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // ── The reader's own look and its chrome ───────────────────────────
     var chrome by remember { mutableStateOf(true) }
     var sheet by remember { mutableStateOf<ReaderSheet?>(null) }
+    /**
+     * v437 — WHETHER THE PAGE SLIDER IS UP (see [ReaderScrubPill]).
+     *
+     * It is NOT a [ReaderSheet] any more: a sheet is a modal panel with a scrim
+     * that covers the page, and the whole of the member's ask was that scrubbing
+     * through a book should not cover the book ("small floating without the bottom
+     * sheet"). It is a floating control of the reading surface, so it has its own
+     * flag — and `sheet` staying null while it is up is what lets the selection bar
+     * and the chrome behave exactly as they do without it.
+     */
+    var scrubOpen by remember { mutableStateOf(false) }
     //
     // v431 — AND THE READING SETTINGS ARE A PAGE OF THEIR OWN. The member asked
     // for it ("settings gets its own screen"), and it belongs to the reader rather
@@ -318,6 +331,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // is standing where the foot of the reader is.
         if (selection != null) {
             selection = null
+            return
+        }
+        // v437 — and the page slider goes first of all (the member: "hides when
+        // tap on page"). It floats over the very page a tap lands on, so a tap
+        // there is a tap on it rather than a request for the tools.
+        if (scrubOpen) {
+            scrubOpen = false
             return
         }
         chrome = !chrome
@@ -955,7 +975,15 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // this sits UNDER the words, so it never eats a long press meant for
             // a paragraph.
             .pointerInput(Unit) {
-                detectTapGestures(onTap = { if (!ReaderTouch.multi) chrome = !chrome })
+                detectTapGestures(
+                    onTap = {
+                        // v437 — the page slider answers a tap before the chrome
+                        // does (see [tapPage], and the member's "hides when tap on
+                        // page").
+                        if (scrubOpen) scrubOpen = false
+                        else if (!ReaderTouch.multi) chrome = !chrome
+                    }
+                )
             }
     ) {
         when {
@@ -1132,7 +1160,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onSearchStep = { step -> searchStep(step) },
             onAppearance = { sheet = ReaderSheet.APPEARANCE },
             onContents = { sheet = ReaderSheet.CONTENTS },
-            onPages = { sheet = ReaderSheet.SCRUBBER },
+            // v437 — the page slider is a toggle on the page, not a sheet:
+            // a second tap on the count puts it away (see [ReaderScrubPill]).
+            onPages = { scrubOpen = !scrubOpen },
             onPinPages = { ReaderLook.pinnedPage = !ReaderLook.pinnedPage },
             onBookmarks = { sheet = ReaderSheet.BOOKMARKS },
             onMenu = { sheet = ReaderSheet.MENU }
@@ -1235,6 +1265,32 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         selection = null
                     },
                     onClear = { selection = null }
+                )
+            }
+        }
+
+        // ── v437 — AND THE PAGE SLIDER, FLOATING OVER THE PAGE ─────────────
+        //
+        // Above the foot pill's own row (58dp of pill, 14dp of air, and the
+        // navigation bar under it — see [ReaderBottomPill]), so the two never
+        // fight for the same strip of the screen, and it comes up with the same
+        // settle-in the reader's other floating controls use.
+        val run = scrubber
+        AnimatedVisibility(
+            visible = scrubOpen && run != null,
+            enter = fadeIn(tween(170)) + slideInVertically(tween(210)) { height -> height },
+            exit = fadeOut(tween(130)) + slideOutVertically(tween(160)) { height -> height },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 84.dp)
+        ) {
+            if (run != null) {
+                ReaderScrubPill(
+                    scrubber = run,
+                    palette = palette,
+                    onDismiss = { scrubOpen = false }
                 )
             }
         }
@@ -1493,14 +1549,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             },
             onDismiss = { sheet = null }
         )
-
-        // ── THE SCRUBBER (the foot pill's middle button) ────────
-        ReaderSheet.SCRUBBER -> {
-            val run = scrubber
-            if (run != null) {
-                ReaderScrubberSheet(scrubber = run, palette = palette, onDismiss = { sheet = null })
-            }
-        }
 
         // ── THE DICTIONARY ───────────────────────────────────────────
         ReaderSheet.DICTIONARY -> ReaderDictionarySheet(
@@ -3490,16 +3538,28 @@ private fun ReaderChrome(
         // v435 — AND IT STEPS ASIDE, rather than blinking out, while the search
         // takes the row: the head shrinks toward the edge it came from so the
         // bar reads as growing OUT of it (see the search block below).
+        // v437 — AND IT FADES, RATHER THAN FLINCHING.
+        //
+        // The member: *"for the floating title in pdf reader use smooth fade
+        // animation"*. The head used to travel half its own height as it came and
+        // went, which on a pill that hangs 18dp off the glass is a jump with a
+        // fade attached — and two panels travelling at once is what the eye reads
+        // as a swap. It SETTLES now: a six-of-its-height drift over a longer fade,
+        // built on the slow-in/slow-out pair so the movement has no corner in it,
+        // and on the way out it still slides toward the RIGHT edge the search pill
+        // lives in, so opening the search reads as the head merging into the door
+        // rather than as the head leaving (see the search block below).
         AnimatedVisibility(
             visible = visible && search == null,
-            enter = fadeIn(tween(180)) + slideInVertically(tween(240)) { -it / 2 },
-            exit = fadeOut(tween(150)) +
+            enter = fadeIn(tween(220, easing = LinearOutSlowInEasing)) +
+                slideInVertically(tween(260, easing = FastOutSlowInEasing)) { -it / 6 },
+            exit = fadeOut(tween(160)) +
+                slideOutVertically(tween(200, easing = FastOutSlowInEasing)) { -it / 6 } +
                 shrinkHorizontally(
-                    tween(220, easing = FastOutSlowInEasing),
-                    shrinkTowards = Alignment.Start,
+                    tween(200, easing = FastOutSlowInEasing),
+                    shrinkTowards = Alignment.End,
                     clip = false
-                ) +
-                slideOutVertically(tween(200)) { -it / 2 },
+                ),
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
             ReaderTopPill(title = title, palette = palette, onClose = onClose, onSearch = onSearch)
@@ -3519,17 +3579,25 @@ private fun ReaderChrome(
         // pill lives in — while the name capsule shrinks away from the left, so
         // the one action is the search opening rather than two panels swapping
         // (member: "when opened it merges smoothly with the header for search").
+        // v437 — AND THE TWO RUN ON ONE CLOCK.
+        //
+        // The head left in 200ms while the bar arrived in 300ms, so for a tenth
+        // of a second the row had neither and the morph read as two panels
+        // changing places. Both are 220ms on the same easing now, which is what
+        // makes it ONE movement: the name collapsing into the right corner and the
+        // bar growing out of it are the same 220ms (member: "for search pil use
+        // merge and smooth morphe").
         AnimatedVisibility(
             visible = search != null,
-            enter = fadeIn(tween(160)) +
+            enter = fadeIn(tween(180, easing = LinearOutSlowInEasing)) +
                 expandHorizontally(
-                    tween(300, easing = FastOutSlowInEasing),
+                    tween(220, easing = FastOutSlowInEasing),
                     expandFrom = Alignment.End,
                     clip = false
                 ),
-            exit = fadeOut(tween(140)) +
+            exit = fadeOut(tween(140, easing = FastOutLinearInEasing)) +
                 shrinkHorizontally(
-                    tween(220, easing = FastOutSlowInEasing),
+                    tween(200, easing = FastOutSlowInEasing),
                     shrinkTowards = Alignment.End,
                     clip = false
                 ),
@@ -3550,7 +3618,7 @@ private fun ReaderChrome(
         // v431 — THE PAGE BAR IS THE SCRUBBER NOW. The middle button of the
         // foot pill opens it (a tap) and a HOLD on that button pins the counter,
         // so the reader's page control lives on the pill the member asked for
-        // and never floats over the words on its own (see [ReaderScrubberSheet]
+        // and never floats over the words on its own (see [ReaderScrubPill]
         // and [ReaderPinnedPage]).
 
         // ── v431 — AND THE FOOT IS ONE FLOATING PILL ───────────────────
@@ -3966,16 +4034,36 @@ private fun ReaderPinnedPage(
 }
 
 /**
- * v431 — THE SCRUBBER: ONE DRAG ACROSS THE WHOLE BOOK.
+ * v431 — THE SCRUBBER: ONE DRAG ACROSS THE WHOLE BOOK.  v437 — AND IT FLOATS.
  *
  * The old page bar could only step, one page per tap or a held arrow — which is
  * fine for the next page and hopeless for page 180 of 300. A scrubber is the
  * other half of the same job, and the two arrows are still here (they are the
  * hold-to-turn [ReaderHoldButton] the bar always had), so nothing the reader
  * could do before is gone.
+ *
+ * ── v437 — SMALL, FLOATING, AND NOT A SHEET ──────────────────────────────
+ *
+ * The member: *"the page scrobble slider it needs to be similair to the dock
+ * small floaating without the buttom sheet so its easier todo the page scrbbing
+ * faster. a buttom pill floating at the buttom with the slider and hides when tap
+ * on page, also a way to close it"*.
+ *
+ * It was a half-height MODAL sheet: a scrim over the book, a panel across the
+ * bottom, a slider inside it — three gestures to choose a page, on the one control
+ * whose entire point is speed, and the page being scrubbed to was covered by the
+ * panel while the member scrubbed to it. It is a PILL now, floating over the
+ * page's own foot where the thumb already is (above the foot pill, see the
+ * caller), with the count INSIDE it as the slider is dragged and a cross to put it
+ * away. A tap anywhere on the page closes it as well (see [tapPage]) — the member's
+ * own rule, and the same tap that already means "get out of the way".
+ *
+ * The two arrows are the hold-to-turn ones from the old sheet, one on each side of
+ * the slider, so the pill is the whole of the page bar: drag for a long jump, hold
+ * to walk a page at a time. Nothing was dropped in the move.
  */
 @Composable
-private fun ReaderScrubberSheet(
+private fun ReaderScrubPill(
     scrubber: ReaderScrubber,
     palette: ReaderPalette,
     onDismiss: () -> Unit
@@ -3983,54 +4071,79 @@ private fun ReaderScrubberSheet(
     // The thumb is LOCAL until the drag ends, so the reading surface is asked for
     // a page once per gesture instead of once per pixel of travel (see
     // `onValueChangeFinished`).
-    var dragged by remember(scrubber.at) { mutableStateOf(scrubber.at.toFloat()) }
+    var dragged by remember(scrubber.at) { mutableIntStateOf(scrubber.at) }
     val last = scrubber.total.coerceAtLeast(1)
-    ReaderSheetFrame(scrubber.label.ifBlank { "Go to a page" }, palette, onDismiss) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+    Surface(
+        // 28dp, the dock's own radius: it is a capsule at this height and it
+        // never arcs a slider thumb out of its track.
+        shape = RoundedCornerShape(28.dp),
+        color = palette.surface,
+        shadowElevation = 12.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            ReaderHoldButton(
+                glyph = CurioIcons.ChevronLeft,
+                label = "The page before",
+                palette = palette,
+                step = scrubber.onPrev
+            )
             // A book with one page has nothing to scrub THROUGH, and a slider
             // whose range is a single value is a divide by zero wearing a thumb
             // (a one-page PDF is the honest case). The arrows still work.
             if (last > 1) {
                 Slider(
-                    value = dragged.coerceIn(1f, last.toFloat()),
-                    onValueChange = { next -> dragged = next },
-                    onValueChangeFinished = { scrubber.onScrub(dragged.roundToInt()) },
+                    value = dragged.coerceIn(1, last).toFloat(),
+                    onValueChange = { next -> dragged = next.roundToInt() },
+                    onValueChangeFinished = { scrubber.onScrub(dragged.coerceIn(1, last)) },
                     valueRange = 1f..last.toFloat(),
+                    modifier = Modifier.weight(1f),
                     colors = SliderDefaults.colors(
                         thumbColor = palette.accent,
                         activeTrackColor = palette.accent,
                         inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
                     )
                 )
+            } else {
+                Spacer(Modifier.weight(1f))
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            // The count follows the THUMB, not the settled page: a scrubber that
+            // named the old page while the finger was elsewhere would be the one
+            // thing on it that is not the answer to the question asked.
+            Text(
+                "$dragged / $last",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = palette.ink.copy(alpha = 0.8f),
+                maxLines = 1
+            )
+            ReaderHoldButton(
+                glyph = CurioIcons.ChevronRight,
+                label = "The next page",
+                palette = palette,
+                step = scrubber.onNext
+            )
+            Surface(
+                onClick = onDismiss,
+                shape = CircleShape,
+                color = Color.Transparent,
+                modifier = Modifier.size(34.dp)
             ) {
-                ReaderHoldButton(
-                    glyph = CurioIcons.ChevronLeft,
-                    label = "The page before",
-                    palette = palette,
-                    step = scrubber.onPrev
-                )
-                Text(
-                    "${dragged.roundToInt()} / $last",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = palette.ink.copy(alpha = 0.8f),
-                    modifier = Modifier.weight(1f)
-                )
-                ReaderHoldButton(
-                    glyph = CurioIcons.ChevronRight,
-                    label = "The next page",
-                    palette = palette,
-                    step = scrubber.onNext
-                )
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Close the page slider",
+                        tint = palette.ink.copy(alpha = 0.75f),
+                        size = 18.dp
+                    )
+                }
             }
         }
     }
@@ -4070,7 +4183,7 @@ private fun ReaderMenuSheet(
     ReaderSheetFrame("More in this book", palette, onDismiss) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ReaderTileRow(
                 tiles = listOf(
@@ -4107,7 +4220,7 @@ private class ReaderTile(
 private fun ReaderTileRow(tiles: List<ReaderTile>, palette: ReaderPalette) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         tiles.forEach { tile ->
             ReaderMenuTile(tile = tile, palette = palette, modifier = Modifier.weight(1f))
@@ -4132,7 +4245,12 @@ private fun ReaderMenuTile(
         onClick = tile.onClick,
         shape = RoundedCornerShape(50),
         color = palette.ink.copy(alpha = 0.06f),
-        modifier = modifier.height(94.dp)
+        // v437 — SMALLER. 94dp tiles under a 30dp glyph made the ⋯ menu the
+        // biggest thing in the reader — a panel that took over the page it was
+        // floating over (member: "the 3 dot menu in pdf reader is bad like too
+        // huge"). The glyph is still the loudest thing in the tile; the tile is
+        // simply no longer a billboard.
+        modifier = modifier.height(68.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -4140,7 +4258,7 @@ private fun ReaderMenuTile(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box {
-                CurioIcon(tile.glyph, null, tint = palette.accent, size = 30.dp)
+                CurioIcon(tile.glyph, null, tint = palette.accent, size = 24.dp)
                 when {
                     tile.count > 0 -> Box(
                         modifier = Modifier
@@ -4290,21 +4408,45 @@ private fun ReaderSheetFrame(
     title: String,
     palette: ReaderPalette,
     onDismiss: () -> Unit,
+    /**
+     * v437 — HOW MUCH OF THE SCREEN THE SHEET KEEPS EVEN WHEN IT HAS LITTLE TO
+     * SAY, as a fraction of the screen's height (0 = pure wrap).
+     *
+     * The member: *"the highloght and notes dropd won is so small"*. Both are
+     * LISTS of marks, so both shrank to whatever two rows they happened to hold
+     * and a reader with nothing kept yet met a strip of paper with one line in it —
+     * a panel that size reads as a mistake rather than as an empty list. The two
+     * places sheets keep a real panel's floor now ([ReaderPlacesSheet] passes it),
+     * while a sheet that genuinely has one line to say (a dictionary entry, the
+     * mark sheet) still wraps and stays small.
+     */
+    minHeightFraction: Float = 0f,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     val appear = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
-        appear.animateTo(1f, tween(durationMillis = 260, easing = FastOutSlowInEasing))
+        // v437 — FAST. See [close]: a sheet is a tool on the way to the page, and
+        // the member's report was that it took about a second to get out of the
+        // way ("the drop downs of each is slo, lie it takes a secdond to close").
+        appear.animateTo(1f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
     }
     var drag by remember { mutableFloatStateOf(0f) }
     // The drag that means "shut", in the sheet's own pixels.
     val dismissPull = remember(density) { with(density) { 108.dp.toPx() } }
     val body = rememberScrollState()
+    /**
+     * Shut, and QUICKLY.
+     *
+     * 200ms in, 120ms out: leaving is the system getting out of the way, and the
+     * member's report was that the reader's sheets were slow to go. The fade is
+     * shorter than the travel it hides on purpose — the eye needs the sheet GONE, not
+     * a performance of it going.
+     */
     fun close() {
         scope.launch {
-            appear.animateTo(0f, tween(durationMillis = 180))
+            appear.animateTo(0f, tween(durationMillis = 120, easing = FastOutLinearInEasing))
             onDismiss()
         }
     }
@@ -4317,7 +4459,9 @@ private fun ReaderSheetFrame(
         if (drag <= 0f) return
         scope.launch {
             val anim = Animatable(drag)
-            anim.animateTo(0f, tween(durationMillis = 180)) { drag = value }
+            anim.animateTo(0f, tween(durationMillis = 140, easing = FastOutSlowInEasing)) {
+                drag = value
+            }
         }
     }
     // ── v434 — THE BODY SCROLLS FIRST, AND THE SHEET GOES NEXT ─────────
@@ -4356,8 +4500,10 @@ private fun ReaderSheetFrame(
     // scroll's own stop callback is not in the API this reader builds against —
     // so the leftover drag settles once the finger has stopped moving for a
     // moment, which is also what makes a slow, deliberate drag feel anchored.
+    // v437 — AND THE SETTLE IS QUICK: 150ms of waiting was a tenth of a second the
+    // member spent watching a sheet sit half-way down before it decided.
     LaunchedEffect(Unit) {
-        snapshotFlow { drag }.debounce(150).collect { settle() }
+        snapshotFlow { drag }.debounce(80).collect { settle() }
     }
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // ── v434 — AS TALL AS IT NEEDS, UP TO A CAP ─────────────────────
@@ -4368,6 +4514,7 @@ private fun ReaderSheetFrame(
         // the swipe above shuts it from the body. (Member's choice: "wrap
         // content, cap at ~60%.")
         val cap = maxHeight * 0.6f
+        val floor = maxHeight * minHeightFraction
         val capPx = with(density) { cap.toPx() }
         // THE SCRIM: a wash, not a wall — the page stays legible under it.
         Box(
@@ -4384,7 +4531,7 @@ private fun ReaderSheetFrame(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .heightIn(max = cap)
+                .heightIn(min = floor, max = cap)
                 .offset {
                     IntOffset(
                         0,
@@ -5304,7 +5451,11 @@ private fun ReaderPlacesSheet(
             it.positionIndex == index && it.markKind == ReaderMarkKind.BOOKMARK
         }
     }
-    ReaderSheetFrame(title, palette, onDismiss) {
+    // v437 — A PANEL'S FLOOR (see [ReaderSheetFrame.minHeightFraction]): a list of
+    // marks keeps 45% of the screen whether it holds twenty rows or none, because
+    // the member's own read of the small one was that it looked broken rather than
+    // empty.
+    ReaderSheetFrame(title, palette, onDismiss, minHeightFraction = 0.45f) {
         // v434 — no scroll of its own: the SHEET's body is the one scroll now,
         // so this sheet cannot end up with a scroll inside a scroll (see
         // [ReaderSheetFrame]).
@@ -8604,7 +8755,6 @@ private enum class ReaderSheet {
     NOTES,
     HIGHLIGHTS,
     MENU,
-    SCRUBBER,
     DICTIONARY
 }
 

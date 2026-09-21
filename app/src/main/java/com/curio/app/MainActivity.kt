@@ -270,6 +270,12 @@ class MainActivity : ComponentActivity() {
                 // signed in, Online Mode is on, and the Notifications switch
                 // is on, so an offline user never pays for it.
                 SocialNotificationWatcher()
+                // v437 — ONE frame clock for every animated social face (see
+                // [BlobatarIdleClock]). Composed once, at the root, because N
+                // faces must not mean N frame loops: it draws nothing, does
+                // nothing until a face asks to move, and stops the moment the
+                // last one leaves the screen.
+                com.curio.app.features.community.BlobatarIdleClock()
             }
         }
     }

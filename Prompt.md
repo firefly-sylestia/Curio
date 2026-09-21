@@ -148,14 +148,38 @@ split, and blobatar's MIT notice. Everything below is NOT done.
    needs to be similair to the dock small floaating without the buttom sheet so its easier to
    do the page scrbbing faster". Today a tap on the foot pill's count opens `ReaderScrubberSheet`
    (a bottom sheet). It should be the dock-like pill instead.
-5. **blobatar's idle animation** — the member chose **always on**, and nothing is ported yet:
-   upstream's `animate` is CSS-only (`motion.css` + a root class + seeded custom properties),
-   which is exactly why its React Native adapter refuses it. Porting it means the breathe / bob /
-   eye-drift loops plus `idleSeeds`' timings, driven in Compose per face, on every avatar.
+All six are now DONE (see §29 for the last of them), and the member's answers closed each
+ambiguity:
+
+1. **Copy box** — *"two row and hide the dock just show the copy doc when thats on"*. Two rows
+   now (reach above, actions below), nothing scrolls, and the writing dock's `AnimatedVisibility`
+   tests `!editor.pageEditBarOpen`. **The cut-everything dead end is still open**: the member's
+   answer was *"Always one empty line to type in"* — the editor must guarantee an editable block
+   after a cut empties the page. **TODO (not done in this session).**
+2. **Marker axis** — answered: **"Too low, below the words"**. `PERSONAL_MARKER_AXIS_LIFT = 0.06f`
+   is applied to `lineHeight` in `drawPersonalMarker` (done).
+3. **The journal's colour** — answered with all three places (paper, dock tools, date/title
+   chrome). Fixed: `journalPaperRaised()` tints toward the page's own colour, the dock lights
+   with `journalDoorAccent(journalAccent)`, and `JournalTopBar` takes the argb as a parameter
+   (it stands OUTSIDE the paint provider). **The page's PAPER still needs "Paint the page too"
+   on — the v429 option was kept deliberately; if the member wants the paper to follow the colour
+   by default, that is a one-line flip and needs their word.**
+4. **The page scrubber** — answered: *"a buttom pill floating at the buttom with the slider and
+   hides when tap on page, also a way to close it"*. `ReaderScrubPill` + `scrubOpen` (done);
+   the sheet and its enum member are gone.
+5. **blobatar's idle animation** — **always on**, and now PORTED: `BlobatarIdle` /
+   `BlobatarPose` (the breathe, bob, blink, glance and eye-wrap loops, from upstream's own seeds)
+   plus `BlobatarClock` + `BlobatarIdleClock()` hosted once at the app root, and
+   `rememberCurioMotionEnabled` for Android's "remove animations". No expressions and no hover —
+   neither exists in Curio.
 6. `SocialApi.updateAvatarStyle` is now unreferenced (dead but harmless); it goes with the
    `avatar_style` column if the member ever wants that dropped — a schema change, which needs
-   their word. **§28 asked "does the previous change need no sql change?": no. Nothing to
-   paste.**
+   their word. **Both §28 and §29 asked whether the portrait change needs SQL: no. Nothing to
+   paste, and no migration.**
+7. **§29's own asks (the reader's polish)** — the ⋯ grid smaller (68dp tiles, 24dp glyph), the
+   sheets fast (200ms in / 120ms out, an 80ms settle) with `minHeightFraction` keeping the
+   notes/highlights lists a real panel, the head settling on a smooth fade, and the head/search
+   morph sharing one 220ms clock. All done.
 
 ## User prompts
 
@@ -163,14 +187,21 @@ split, and blobatar's MIT notice. Everything below is NOT done.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§28 — the journal dock pass, the reader's scrubber, and the build (IN PROGRESS).** Fixing the
-  red release build (done, two fixes); the copy box's width and its cut-everything dead end;
-  the dock's thickness and its two remaining dropdowns (done); leaf + crystal removed (done);
-  the bullet's positioning against the text; the journal colour not reaching the page or its
-  buttons; theme-aware quote/bullet shades (done); the reader's page scrubber as a small
-  floating control instead of a sheet; blobatar's idle animation always on (decided, not built);
-  and whether the portrait port needed a SQL change (answered: no). **See §6 above for the
-  state of each item.**
+- **§29 — the ⋯ menu, the sheets' speed, and the reader's animations (DONE).** *"the 3 dot menu
+  in pdf reader is bad like too huge and also the drop downs of each is slo, lie it takes a
+  secdond to close, and also the highloght and notes dropd won is so small"* plus *"for the
+  floating title in pdf reader use smooth fade animatuio n for search pil use merge and smoth
+  morphe, for buttom sheet use proper animation fast animation, and more similiar pass smoth
+  animattions"*. All shipped. **The one item carried forward: the copy box's cut-everything dead
+  end (an empty line must always remain) — the member's rule, still unimplemented.**
+- **§28 — the journal dock pass, the reader's scrubber, and the build (DONE).** Both red-build
+  fixes (the swallowed `Column(` and the `@Composable` display-cutout getter); the dock's
+  thickness and its two remaining dropdowns; leaf + crystal removed; quote/bullet shades split
+  wider for the light page and the night; the bullet axis lifted to the words' centre; the
+  journal's colour reaching the raised paper, the dock's tools and the date/title bar; the copy
+  box as two rows with the dock stepping aside; the reader's scrubber as a floating pill; the
+  blobatar idle motion; the SQL question (answered: no change). **Open: the copy box's
+  cut-everything dead end.**
 - **§27 — the portrait port, the root clutter, and the reader's head (done).**
   Asked permission before every deletion and confirmed the four decisions before editing.
   Four asks: remove the useless root node modules + manifest/doc clutter (done); use blobatar
