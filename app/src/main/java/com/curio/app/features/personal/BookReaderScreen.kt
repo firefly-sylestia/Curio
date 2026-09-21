@@ -8436,7 +8436,12 @@ private fun Modifier.pinchToZoom(
             // column or the pager underneath from taking it instead, which is how
             // a locked page stays exactly where the member left it).
             if (ReaderLook.motionLock) {
-                if (pressed.size >= 2 || event.changes.any { it.positionChanged() }) {
+                // (`position != previousPosition` rather than
+                // `positionChanged()`: that helper does not exist in this
+                // Compose version — a reference to it fails the build.)
+                if (pressed.size >= 2 ||
+                    event.changes.any { it.position != it.previousPosition }
+                ) {
                     event.changes.forEach { it.consume() }
                 }
                 last = null

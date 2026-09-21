@@ -1129,8 +1129,12 @@ private fun ProfileDialogs(
                                             "Use my blob"
                                         },
                                         onClick = {
+                                            // `LocalContext.current` rather than a bare
+                                            // `context`: this dialog composable takes no
+                                            // context parameter, and the name resolves
+                                            // to a function in this file's scope.
                                             AppPreferences.setProfileAvatarBlob(
-                                                context,
+                                                LocalContext.current,
                                                 !AppPreferences.profileAvatarBlobState
                                             )
                                         }
