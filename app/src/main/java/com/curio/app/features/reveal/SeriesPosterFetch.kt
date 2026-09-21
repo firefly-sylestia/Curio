@@ -44,9 +44,17 @@ object SeriesPosterFetch {
      */
     suspend fun resolvePosterUrl(showName: String, provider: Int = 0): String? =
         withContext(Dispatchers.IO) {
-            val title = showName
-                .replace(Regex("""\s*\(\d{4}\)\s*$"""), "")
-                .trim()
+            // v428 — AND A ROW THAT NAMES ITS SEASON IS STILL THE SAME SHOW.
+            //
+            // A tracker's rows read "WandaVision S1", "Loki S2", "The Gifted
+            // S1" — which is exactly what makes a list readable and exactly what
+            // a catalogue has never heard of: TVMaze's single search answered
+            // nothing for every one of them, so a series row in Curio's own order
+            // fell back to its plate while its title sat there in plain sight
+            // (member: "the posters are not loading ... in incursion movies or
+            // series"). The season is HOW MUCH of the show, never WHICH show, so
+            // it comes off before anything is asked (see [cleanShowName]).
+            val title = cleanShowName(showName)
             val key = "$title|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
@@ -63,8 +71,9 @@ object SeriesPosterFetch {
 
     /** TVMaze single-show search → the show's poster (original, else medium). */
     private fun tvmazePoster(title: String): String? {
-        val json = httpGet("https://api.tvmaze.com/singlesearch/shows?q=${Uri.encode(title)}")
-            ?: return null
+        val json = httpGet(
+            "https://api.tvmaze.com/singlesearch/shows?q=${Uri.encode(tvmazeSpelling(title))}"
+        ) ?: return null
         return runCatching {
             val obj = org.json.JSONObject(json)
             val image = obj.optJSONObject("image") ?: return null
@@ -102,6 +111,16 @@ object SeriesPosterFetch {
         }.getOrNull()
     }
 
+    /**
+     * A series name as a catalogue writes it.
+     *
+     * A topic carries its year in brackets ("Seinfeld (1989)") and this app's own
+     * Incursion rows carry their season ("WandaVision S1", "season 2"); neither
+     * belongs in a query. Both come off — in ANY order, because a row can carry
+     * both ("Loki S2 (2023)") — and the result is trimmed.
+     */
+    private fun cleanShowName(name: String): String = stripNaming(name)
+
     /** Rough relevance: 2 = exact title, 1 = containment / word overlap, 0 = miss. */
     private fun matchScore(name: String, wantTitle: String): Int {
         val n = name.trim()
@@ -127,7 +146,7 @@ object SeriesPosterFetch {
             conn.requestMethod = "GET"
             conn.connectTimeout = 8000
             conn.readTimeout = 8000
-            conn.setRequestProperty("User-Agent", "Curio/1.0")
+            conn.setRequestProperty("User-Agent", USER_AGENT)
             val code = conn.responseCode
             if (code != 200) return null
             conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
@@ -136,3 +155,42 @@ object SeriesPosterFetch {
         }
     }.getOrNull()
 }
+
+/**
+ * THE THREE FETCHERS' SHARED SPELLING (v428).
+ *
+ * A Curio title carries things that are about WHERE IT IS BEING SHOWN from the
+ * thing being looked up: a topic's year in brackets ("Seinfeld (1989)") is a
+ * disambiguator, and one of this app's own Incursion rows says which season it is
+ * ("Loki S2", "Loki season 2"). No catalogue has ever heard of either, so every
+ * query in this package goes through [stripNaming] first, and every provider that
+ * files an ampersand as the word "and" gets that spelling too.
+ *
+ * It is one function on purpose: the film door, the series door and the episode
+ * guide all look the same title up, and three copies of "which suffixes come off"
+ * is how one of them ends up looking up a name nobody has.
+ */
+internal fun stripNaming(name: String): String {
+    val pattern = Regex(
+        """\s*(?:\(\d{4}\)|S\d+|season\s+\d+)\s*$""",
+        RegexOption.IGNORE_CASE
+    )
+    // In a loop, because a title can carry BOTH ("Loki S2 (2023)") and one pass
+    // only ever takes the last one off.
+    var out = name.trim()
+    while (true) {
+        val next = out.replace(pattern, "").trim()
+        if (next == out) return out
+        out = next
+    }
+}
+
+/** The spelling TVMaze files a title under — an ampersand is the word "and". */
+internal fun tvmazeSpelling(title: String): String = title
+    .replace("&amp;", "and")
+    .replace("&", "and")
+    .replace(Regex("""\s{2,}"""), " ")
+    .trim()
+
+/** Wikimedia asks every client to name itself; a named agent is served. */
+private const val USER_AGENT = "Curio/1.0 (https://github.com/firefly-sylestia/Curio)"

@@ -89,6 +89,11 @@ object CurioIcons {
     const val Apps = "apps"
     const val Lock = "lock"
     const val VisibilityOff = "visibility_off"
+
+    /** v428 — the open eye. The bundled subset carries `visibility` (checked in
+     *  `material_symbols_outlined.ttf`, so it is a real ligature and needs no
+     *  [safeGlyphName] remap) — the mark a "mark this watched" button wears. */
+    const val Visibility = "visibility"
     const val PushPin = "push_pin"
     const val Crop = "crop"
     const val Share = "share"

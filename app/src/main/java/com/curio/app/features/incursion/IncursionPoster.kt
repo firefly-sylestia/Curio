@@ -80,12 +80,23 @@ internal object IncursionPosters {
             TmdbFetch.posterUrlById(id, isShow = isSeries)
                 ?: TmdbFetch.posterUrlById(id, isShow = !isSeries)
         }
-        val titled = entry.year?.takeIf { it > 0 }?.let { "${entry.title} ($it)" }
-            ?: entry.title
+        // v428 — A SERIES IS ASKED FOR BY ITS OWN NAME, WITHOUT THE SEASON OR THE
+        // YEAR.
+        //
+        // These rows read "WandaVision S1", "Loki S2", "The Gifted S1" — the
+        // season is WHICH PART of the show a row is, never which show — and that
+        // is a string no catalogue answers: TVMaze returned nothing for every one
+        // of them, so a series row kept its plate while its title sat there in
+        // plain sight (member: "the posters are not loading for films and in
+        // incursion movies or series"). A FILM wants its year, because that is
+        // what tells the 2010 poster from the 1980 one; a show does not, and every
+        // door now strips such suffixes anyway ([stripNaming]).
         val resolved = byId ?: if (isSeries) {
-            SeriesPosterFetch.resolvePosterUrl(titled)
+            SeriesPosterFetch.resolvePosterUrl(entry.title)
         } else {
-            FilmPosterFetch.resolvePosterUrl(titled)
+            FilmPosterFetch.resolvePosterUrl(
+                entry.year?.takeIf { it > 0 }?.let { "${entry.title} ($it)" } ?: entry.title
+            )
         }
         cache[key] = resolved.orEmpty()
         return resolved

@@ -56,9 +56,37 @@ object TmdbFetch {
     /** How much of the cast a sheet shows — the top-billed few. */
     private const val CAST_ROWS = 6
 
-    /** Whether this build carries a TMDB key at all. */
+    /**
+     * v428 — THE TWO CREDENTIALS, READ THE WAY TMDB DOCUMENTS THEM.
+     *
+     * TMDB's own application-authentication page states it plainly: *"Version 3
+     * is controlled by either a single query parameter, `api_key`, or by using
+     * your access token as a Bearer token"*, and the account page holds both — a
+     * v3 **API key** and an **API Read Access Token** (a JWT), the token being
+     * the one that *"has the added benefit of being a single authentication
+     * process that you can use across both the v3 and v4 methods"*
+     * (https://developer.themoviedb.org/docs/authentication-application).
+     *
+     * So a build may carry EITHER, and this reads both: the read token
+     * (`TMDB_READ_TOKEN`) wins because it travels as a header and works on both
+     * versions; otherwise the v3 key (`TMDB_API_KEY`) travels as `api_key`. A JWT
+     * pasted into the KEY field is recognised as a token rather than sent as a
+     * query parameter no one will accept (a v4 token starts with `eyJ`, which is
+     * base64 for `{"` — a v3 key is 32 hex characters and never does).
+     */
+    private val apiKey: String
+        get() = runCatching { BuildConfig.TMDB_API_KEY.trim() }.getOrDefault("")
+
+    private val readToken: String
+        get() = runCatching {
+            BuildConfig.TMDB_READ_TOKEN.trim().ifBlank {
+                apiKey.takeIf { it.startsWith("eyJ") }.orEmpty()
+            }
+        }.getOrDefault("")
+
+    /** Whether this build carries a TMDB credential at all. */
     val isConfigured: Boolean
-        get() = runCatching { BuildConfig.TMDB_API_KEY.isNotBlank() }.getOrDefault(false)
+        get() = readToken.isNotBlank() || apiKey.isNotBlank()
 
     /** A title's own record, as TMDB states it. */
     internal data class Facts(
@@ -347,14 +375,26 @@ object TmdbFetch {
      * batch O chased through `PersonalCanvasKt`). The behaviour is identical.
      */
     private fun getJson(path: String): String? = runCatching {
-        val url = "https://api.themoviedb.org/3$path" +
-            (if (path.contains('?')) "&" else "?") + "api_key=" + BuildConfig.TMDB_API_KEY
+        val token = readToken
+        val key = apiKey
+        // One credential or the other, never both and never a bare `api_key=`:
+        // the token authenticates by HEADER (see the note on [readToken]), so the
+        // query is left alone when it is present. With a token, `path` keeps its
+        // own `?…` untouched.
+        val url = "https://api.themoviedb.org/3$path" + when {
+            token.isNotBlank() || key.isBlank() -> ""
+            path.contains('?') -> "&api_key=$key"
+            else -> "?api_key=$key"
+        }
         val conn = URL(url).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
             conn.connectTimeout = 8_000
             conn.readTimeout = 8_000
             conn.setRequestProperty("Accept", "application/json")
+            // "Authorization: Bearer ACCESS_TOKEN" — the docs' own header, and
+            // the one form of authentication TMDB accepts on v3 and v4 alike.
+            if (token.isNotBlank()) conn.setRequestProperty("Authorization", "Bearer $token")
             if (conn.responseCode == 200) {
                 conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
             } else {

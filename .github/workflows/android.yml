@@ -167,6 +167,11 @@ jobs:
           # really a show) from TMDB first; unset stays on the keyless
           # providers (iTunes, TVMaze, Jikan).
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          # v428 — optional: TMDB's OTHER credential, the "API Read Access
+          # Token" (a JWT, sent as `Authorization: Bearer …` and valid on v3 and
+          # v4 alike). Either secret on its own is enough — the token is read
+          # first, and a JWT in the key field is recognised as one.
+          TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
           # v426 — optional: free Comic Vine key (non-commercial use). When
           # present it is baked into BuildConfig.COMIC_VINE_API_KEY and the
           # comics sources ask it FIRST for a Comic and LAST for a manga, so a

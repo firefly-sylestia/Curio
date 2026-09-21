@@ -162,9 +162,15 @@ object SeriesEpisodeFetcher {
      */
     fun cached(showName: String): List<SeriesEpisode>? = seriesCache[clean(showName)]
 
-    /** A title without its "(2013)" disambiguator. */
-    fun clean(showName: String): String =
-        showName.replace(Regex("""\s*\(\d{4}\)\s*$"""), "").trim()
+    /**
+     * A title without its "(2013)" disambiguator, or its season (v428).
+     *
+     * The year belongs to the topic's own name and the season to whatever list
+     * the member is reading (Curio's Incursion rows say "Loki S2"); neither is
+     * part of a show's name, and TVMaze has never heard of either — one clean
+     * here is what every query and every cache key below goes through.
+     */
+    fun clean(showName: String): String = stripNaming(showName)
 
     /**
      * The episodes of a title that MIGHT be a show at all (v389f).
@@ -187,7 +193,7 @@ object SeriesEpisodeFetcher {
     /** Look up the TVMaze show ID by name. Returns null on miss. */
     private fun lookupShowId(title: String): Int? {
         val json = httpGet(
-            "https://api.tvmaze.com/singlesearch/shows?q=${Uri.encode(title)}"
+            "https://api.tvmaze.com/singlesearch/shows?q=${Uri.encode(tvmazeSpelling(title))}"
         ) ?: return null
         return try {
             JSONObject(json).optInt("id", 0).takeIf { it > 0 }

@@ -61,6 +61,8 @@ import com.curio.app.data.IncursionEntry
 import com.curio.app.data.IncursionGroup
 import com.curio.app.data.IncursionStore
 import com.curio.app.data.IncursionStudio
+import com.curio.app.data.SeriesEpisode
+import com.curio.app.features.reveal.SeriesEpisodeFetcher
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioDropdownItem
@@ -148,7 +150,18 @@ fun IncursionScreen(navController: NavController) {
 
     val activeFilter = IncursionFilter.fromId(filter)
     val studioDestinations = studios.map { IncursionDestination.of(it) }
-    val destinationId = destination.takeIf { id -> studioDestinations.any { it.id == id } }
+    // v428 — AND THE TAB THAT IS NOT A STUDIO IS STILL A TAB.
+    //
+    // This validity check listed the STUDIO ids only, so the Personal tab's own
+    // id failed it and every tap on Personal was quietly answered with Marvel:
+    // `onPersonal` could never be true, the desk never composed, and the member's
+    // report was exactly that ("the profile page doesnt even open"). The check is
+    // against ALL the destinations — the tabs the nav bar actually draws — which
+    // is the list a saved tab id has to be legal against (a `rememberSaveable`
+    // restoration lands here too, so a rotation on the desk used to bounce to
+    // Marvel as well).
+    val destinations = studioDestinations + IncursionDestination.PERSONAL
+    val destinationId = destination.takeIf { id -> destinations.any { it.id == id } }
         ?: IncursionDestination.MARVEL.id
     val onPersonal = destinationId == IncursionDestination.PERSONAL.id
     val activeStudio = studios.firstOrNull { it.id == destinationId }
@@ -184,6 +197,23 @@ fun IncursionScreen(navController: NavController) {
             val studio = activeStudio ?: return@remember emptyList()
             listOf(studio to studio.entries.filter(::keep))
         }
+    }
+
+    // v428 — THE WATCH BUTTON'S ONE DECISION, in one place: a row that is
+    // WATCHED goes back to not watched, and anything else becomes watched. Two
+    // taps therefore mean "done" and "undo", which is what the member asked for
+    // ("mark it Watched, tap again to undo") — and everything finer than that
+    // (Watching, Planned, On hold, Dropped) is still the sheet's own six chips.
+    val watchToggle: (IncursionEntry) -> Unit = { entry ->
+        IncursionStore.setStatus(
+            context,
+            entry.storageKey,
+            if (IncursionStore.status(entry.storageKey) == IncursionStore.Status.WATCHED) {
+                IncursionStore.Status.UNWATCHED
+            } else {
+                IncursionStore.Status.WATCHED
+            }
+        )
     }
 
     val allKeys = remember(sections) { sections.flatMap { (_, entries) -> entries.map { it.storageKey } } }
@@ -252,11 +282,18 @@ fun IncursionScreen(navController: NavController) {
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        IncursionFilterRow(
-            selected = activeFilter,
-            onSelect = { filter = it.id },
-            modifier = Modifier.padding(top = 10.dp)
-        )
+        // v428 — THE FILTERS BELONG TO A LIST. On the Personal tab they were
+        // still offered, and a filter chosen there decided whether the desk drew
+        // at all (see the branch below) — which is how a stats page could answer
+        // with "nothing here". A desk has no rows to filter, so the row is not
+        // drawn there; a SEARCH still is, because a search is about a title.
+        if (!onPersonal || searching) {
+            IncursionFilterRow(
+                selected = activeFilter,
+                onSelect = { filter = it.id },
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
 
         // The results take everything between the filters and the nav bar. It has
         // to be weighted: without it the list would claim the whole column and
@@ -264,9 +301,26 @@ fun IncursionScreen(navController: NavController) {
         Box(Modifier.weight(1f)) {
             val hasRows = sections.any { it.second.isNotEmpty() }
             when {
+                // v428 — THE DESK IS NOT A LIST, so it is asked about FIRST.
+                //
+                // It used to be reached only after "are there rows?", "is there a
+                // search?" and "is a filter on?" had all said no — so the Personal
+                // tab showed the FILTERED-EMPTY page whenever a filter was set (a
+                // stats desk has no rows to filter) and its own desk only in the
+                // one state where nothing else applied. Searching still wins: a
+                // query is about a title, not about the shelf it happens to be
+                // under, and a search made from Personal is answered across all
+                // three lines like any other.
+                onPersonal && !searching -> IncursionPersonalDesk(
+                    studios = studios,
+                    statuses = statuses,
+                    onOpen = { detail = it }
+                )
+
                 hasRows && grid -> IncursionGrid(
                     sections = sections,
                     onOpen = { detail = it },
+                    onWatch = watchToggle,
                     onBulk = { keys, status -> IncursionStore.setGroupStatus(context, keys, status) },
                     onClear = { keys, name -> pendingClear = PendingBulkClear(keys, name) }
                 )
@@ -277,29 +331,20 @@ fun IncursionScreen(navController: NavController) {
                     // groups are labelled by line (see the studio band).
                     showLineBand = searching,
                     onOpen = { detail = it },
+                    onWatch = watchToggle,
                     onBulk = { keys, status -> IncursionStore.setGroupStatus(context, keys, status) },
                     onClear = { keys, name -> pendingClear = PendingBulkClear(keys, name) }
                 )
 
-                searching || activeFilter != IncursionFilter.ALL -> IncursionEmpty(
+                else -> IncursionEmpty(
                     query = needle,
-                    filtered = true
+                    filtered = searching || activeFilter != IncursionFilter.ALL
                 )
-
-                // THE PERSONAL TAB: the desk, from the catalog the page already
-                // holds and the statuses it already reads.
-                onPersonal -> IncursionPersonalDesk(
-                    studios = studios,
-                    statuses = statuses,
-                    onOpen = { detail = it }
-                )
-
-                else -> IncursionEmpty(query = "", filtered = false)
             }
         }
 
         IncursionNavBar(
-            destinations = studioDestinations + IncursionDestination.PERSONAL,
+            destinations = destinations,
             active = destinationId,
             onSelect = { destination = it.id }
         )
@@ -730,6 +775,8 @@ private fun IncursionList(
     /** True when these groups came from MORE THAN ONE line — a search. */
     showLineBand: Boolean,
     onOpen: (IncursionEntry) -> Unit,
+    /** v428 — the row's own watch button (see [WatchButton]). */
+    onWatch: (IncursionEntry) -> Unit,
     onBulk: (List<String>, IncursionStore.Status) -> Unit,
     onClear: (List<String>, String) -> Unit
 ) {
@@ -757,7 +804,11 @@ private fun IncursionList(
                     )
                 }
                 items(rows, key = { it.storageKey }) { entry ->
-                    EntryRow(entry = entry, onOpen = { onOpen(entry) })
+                    EntryRow(
+                        entry = entry,
+                        onOpen = { onOpen(entry) },
+                        onWatch = { onWatch(entry) }
+                    )
                 }
             }
             // A title whose group id is not in the studio's own table (upstream
@@ -776,7 +827,11 @@ private fun IncursionList(
                     )
                 }
                 items(orphans, key = { it.storageKey }) { entry ->
-                    EntryRow(entry = entry, onOpen = { onOpen(entry) })
+                    EntryRow(
+                        entry = entry,
+                        onOpen = { onOpen(entry) },
+                        onWatch = { onWatch(entry) }
+                    )
                 }
             }
         }
@@ -998,7 +1053,11 @@ private fun PhaseClearChip(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun EntryRow(entry: IncursionEntry, onOpen: () -> Unit) {
+private fun EntryRow(
+    entry: IncursionEntry,
+    onOpen: () -> Unit,
+    onWatch: () -> Unit = {}
+) {
     val status = IncursionStore.status(entry.storageKey)
     val ink = incursionStatusInk(status)
     val rowShape = RoundedCornerShape(18.dp)
@@ -1069,7 +1128,70 @@ private fun EntryRow(entry: IncursionEntry, onOpen: () -> Unit) {
                 )
             }
             Spacer(Modifier.width(8.dp))
+            // v428 — THE WATCH BUTTON, on every row.
+            //
+            // The member: *"add watch icon button in rows and grid"*, and, asked
+            // what one tap should do, *"mark it Watched, tap again to undo"*. So
+            // it is the ONLY quick action a row carries: one tap finishes a title
+            // from the list, the second takes it back — the same two-tap truth the
+            // six-state chips keep for everything finer than watched or not. It
+            // sits before the state chip rather than replacing it, because the
+            // chip says where the row IS and this says what to do with it.
+            WatchButton(
+                watched = status == IncursionStore.Status.WATCHED,
+                accent = settingsRoseAccent(),
+                title = entry.title,
+                onClick = onWatch
+            )
+            Spacer(Modifier.width(6.dp))
             StatusChip(status = status)
+        }
+    }
+}
+
+/**
+ * ONE TAP FINISHES A TITLE — or takes it back.
+ *
+ * A round button the size of the row's own chip, wearing the page's accent when
+ * the row is watched and the plate's quiet fill when it is not, so a list can be
+ * read down its right-hand edge for "what have I still got". Its glyph changes
+ * with the state (a check while it is done), which is what makes the second tap
+ * read as UNDO rather than as the same action twice.
+ */
+@Composable
+private fun WatchButton(
+    watched: Boolean,
+    accent: Color,
+    title: String,
+    onClick: () -> Unit
+) {
+    val shape = CircleShape
+    Surface(
+        shape = shape,
+        color = if (watched) {
+            curioTintOn(
+                MaterialTheme.colorScheme.surfaceContainerHigh,
+                accent,
+                if (isCurioDarkTheme()) 0.30f else 0.18f
+            )
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        },
+        modifier = Modifier
+            .size(34.dp)
+            .clip(shape)
+            .clickable(
+                onClickLabel = if (watched) "Unwatch $title" else "Mark $title watched",
+                onClick = onClick
+            )
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = if (watched) CurioIcons.Check else CurioIcons.Visibility,
+                contentDescription = if (watched) "Watched" else "Mark watched",
+                tint = if (watched) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 17.dp
+            )
         }
     }
 }
@@ -1201,6 +1323,8 @@ private fun StudioBand(studio: IncursionStudio, hits: Int) {
 private fun IncursionGrid(
     sections: List<Pair<IncursionStudio, List<IncursionEntry>>>,
     onOpen: (IncursionEntry) -> Unit,
+    /** v428 — the tile's own watch button (see [WatchButton]). */
+    onWatch: (IncursionEntry) -> Unit,
     onBulk: (List<String>, IncursionStore.Status) -> Unit,
     onClear: (List<String>, String) -> Unit
 ) {
@@ -1234,7 +1358,11 @@ private fun IncursionGrid(
                     )
                 }
                 items(rows, key = { it.storageKey }) { entry ->
-                    EntryTile(entry = entry, onOpen = { onOpen(entry) })
+                    EntryTile(
+                        entry = entry,
+                        onOpen = { onOpen(entry) },
+                        onWatch = { onWatch(entry) }
+                    )
                 }
             }
             val orphans = entries.filter { entry -> studio.groups.none { it.id == entry.group } }
@@ -1249,7 +1377,11 @@ private fun IncursionGrid(
                     )
                 }
                 items(orphans, key = { it.storageKey }) { entry ->
-                    EntryTile(entry = entry, onOpen = { onOpen(entry) })
+                    EntryTile(
+                        entry = entry,
+                        onOpen = { onOpen(entry) },
+                        onWatch = { onWatch(entry) }
+                    )
                 }
             }
         }
@@ -1257,7 +1389,11 @@ private fun IncursionGrid(
 }
 
 @Composable
-private fun EntryTile(entry: IncursionEntry, onOpen: () -> Unit) {
+private fun EntryTile(
+    entry: IncursionEntry,
+    onOpen: () -> Unit,
+    onWatch: () -> Unit = {}
+) {
     val status = IncursionStore.status(entry.storageKey)
     val ink = incursionStatusInk(status)
     val tileShape = RoundedCornerShape(20.dp)
@@ -1342,6 +1478,17 @@ private fun EntryTile(entry: IncursionEntry, onOpen: () -> Unit) {
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(9.dp))
+                // v428 — THE SAME WATCH BUTTON THE ROWS CARRY, at the tile's own
+                // foot: a grid is where a member picks what to start, so the one
+                // quick action belongs on it too, and it is the same control and
+                // the same two taps as the list's.
+                WatchButton(
+                    watched = status == IncursionStore.Status.WATCHED,
+                    accent = settingsRoseAccent(),
+                    title = entry.title,
+                    onClick = onWatch
+                )
             }
         }
     }
@@ -1360,6 +1507,26 @@ private fun IncursionDetailSheet(
     val accent = settingsRoseAccent()
     val status = IncursionStore.status(entry.storageKey)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // ── v428 — THE EPISODE GUIDE, THE SAME ONE THE SERIES SHEET SHOWS ──────
+    //
+    // The member: *"for series in incursion use what the series category bottom
+    // sheet uses with episode guide"*. The series lane's sheet leads with the
+    // poster and the synopsis and then hands over to the show's own episodes; an
+    // Incursion row is a SEASON of a show ("Loki S2"), so without them the sheet
+    // can only say the season exists. This is the reveal's own fetcher — TMDB when
+    // a key is set (it is the only source that states outright whether a title is
+    // a show), TVMaze keyless behind it — through the same `stripNaming` the
+    // poster doors use, so "Loki S2" is looked up as "Loki".
+    //
+    // A preview already in memory is used as the seed (nothing is re-asked), and
+    // the fetch runs once per title, on open.
+    val series = entry.type.lowercase() == "series"
+    var guide by remember(entry.storageKey) { mutableStateOf(SeriesEpisodeFetcher.cached(entry.title)) }
+    var guideOpen by remember(entry.storageKey) { mutableStateOf(false) }
+    LaunchedEffect(entry.storageKey) {
+        if (series && guide == null) guide = SeriesEpisodeFetcher.fetchForAny(entry.title)
+    }
     val pillShape = RoundedCornerShape(50)
     // The note is edited locally and written after a pause, not on every
     // keystroke: a prefs write per character is how a text field starts to
@@ -1501,6 +1668,95 @@ private fun IncursionDetailSheet(
                 }
             }
 
+            // ── THE SHOW'S OWN EPISODES (v428) ─────────────────────────────
+            if (series) {
+                val list = guide
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    ) {
+                        Text(
+                            "EPISODE GUIDE",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = accent,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (list != null && list.isNotEmpty()) {
+                            val seasons = list.map { it.season }.distinct().size
+                            Text(
+                                buildString {
+                                    append("${list.size} episode")
+                                    if (list.size != 1) append("s")
+                                    if (seasons > 1) append(" · $seasons seasons")
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    when {
+                        list == null -> Text(
+                            "Reading the guide…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        list.isEmpty() -> Text(
+                            "No episode guide for this one.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        else -> {
+                            // The first half-season is shown at a glance; the rest
+                            // is one tap away, because a long runner's guide is
+                            // hundreds of rows and the sheet's job is the title.
+                            val shown = if (guideOpen) list else list.take(EPISODE_PREVIEW)
+                            // A season heading only when the guide spans seasons:
+                            // on a single-season show it would be the same word over
+                            // every row.
+                            val multiSeason = list.map { it.season }.distinct().size > 1
+                            shown.forEachIndexed { index, episode ->
+                                val newSeason = index == 0 || shown[index - 1].season != episode.season
+                                if (multiSeason && newSeason) {
+                                    Text(
+                                        "SEASON ${episode.season}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(
+                                            top = if (index == 0) 0.dp else 9.dp,
+                                            bottom = 3.dp
+                                        )
+                                    )
+                                }
+                                EpisodeRow(episode = episode, accent = accent)
+                            }
+                            if (list.size > EPISODE_PREVIEW) {
+                                Spacer(Modifier.height(7.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(50))
+                                        .clickable { guideOpen = !guideOpen }
+                                ) {
+                                    Text(
+                                        if (guideOpen) "Show less"
+                                        else "Show all ${list.size} episodes",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.SemiBold
+                                        ),
+                                        color = accent,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             Text(
                 "WHERE YOU ARE",
                 style = MaterialTheme.typography.labelSmall,
@@ -1599,6 +1855,50 @@ private fun IncursionDetailSheet(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 11.dp)
                 )
             }
+        }
+    }
+}
+
+// ── The episode guide ───────────────────────────────────────────────────────
+
+/** How many episodes a series' sheet shows before the rest is asked for. */
+private const val EPISODE_PREVIEW = 12
+
+/**
+ * ONE EPISODE — its own number, its name and the day it aired.
+ *
+ * The reveal's series sheet draws this as a card per episode; inside a title's
+ * sheet (which already leads with a poster, a synopsis and the member's own six
+ * states) one quiet line per episode is what fits, and it is the same information
+ * in the same order: `S2E3`, the episode's name, the airdate.
+ */
+@Composable
+private fun EpisodeRow(episode: SeriesEpisode, accent: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+    ) {
+        Text(
+            "S${episode.season}E${episode.number}",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = accent
+        )
+        Spacer(Modifier.width(9.dp))
+        Text(
+            episode.title.ifBlank { "Episode ${episode.number}" },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        episode.airdate.takeIf { it.isNotBlank() }?.let { air ->
+            Spacer(Modifier.width(8.dp))
+            Text(
+                air,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

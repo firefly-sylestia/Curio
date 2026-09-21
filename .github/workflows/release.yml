@@ -101,6 +101,9 @@ jobs:
           # v389f — free TMDB key (film/anime artwork, a film's facts, and the
           # episode list of a title that is really a show).
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          # v428 — TMDB's other credential: the API Read Access Token (a JWT,
+          # sent as `Authorization: Bearer …`). Either one alone is enough.
+          TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
           # v426 — free Comic Vine key (Western comics: Marvel's and DC's
           # volumes both). Unset keeps the keyless comics sources.
           COMIC_VINE_API_KEY: ${{ secrets.COMIC_VINE_API_KEY }}

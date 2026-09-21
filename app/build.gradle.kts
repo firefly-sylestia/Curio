@@ -90,6 +90,21 @@ val tmdbEscaped: String = envTmdbApiKey
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// v428 — AND TMDB'S OTHER KEY: the API READ ACCESS TOKEN.
+//
+// TMDB hands an account two credentials, and its own documentation says either
+// authenticates the same API: the **v3 API key**, sent as the `api_key` query
+// parameter, and the **API Read Access Token** (a JWT), sent as
+// `Authorization: Bearer <token>` — the token being the one that works across
+// v3 AND v4. This is the second one, so a build can carry whichever the account
+// actually has (see https://developer.themoviedb.org/docs/authentication-application).
+// Unset = nothing changes: the v3 key, or no key at all.
+val envTmdbReadToken: String? = System.getenv("TMDB_READ_TOKEN")?.trim()?.takeIf { it.isNotEmpty() }
+val tmdbTokenEscaped: String = envTmdbReadToken
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // v426 — OPTIONAL Comic Vine API key (free for non-commercial use): the KEYED
 // door for WESTERN COMICS, and the one that actually answers for them — it
 // holds Marvel's and DC's volumes both, asked by name, with the cover, the
@@ -183,6 +198,9 @@ android {
         // v389f — optional TMDB key: film/anime artwork and facts, and the
         // episode list of a title that maps to a show. Empty string otherwise.
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbEscaped\"")
+        // v428 — the v4 read token ("API Read Access Token"), when the account
+        // has that instead of (or as well as) the v3 key. Empty string otherwise.
+        buildConfigField("String", "TMDB_READ_TOKEN", "\"$tmdbTokenEscaped\"")
 
         // v426 — optional Comic Vine key: the comics sources ask it first for a
         // Western comic and last for a manga; empty string otherwise (the
