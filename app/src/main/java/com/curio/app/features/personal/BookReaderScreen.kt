@@ -5043,11 +5043,22 @@ private fun ReaderSheetFrame(
         // the note on [measuredHeight]), the cap until then.
         val travel = if (measuredHeight > 0) measuredHeight.toFloat() else capPx
         // THE SCRIM: a wash, not a wall — the page stays legible under it.
+        // ── v440 — DRAWN, NOT LAID OUT IN A LAYER ─────────────────────────
+        //
+        // It used to fade with `graphicsLayer { alpha = appear.value }`, which
+        // asks the renderer for an OFFSCREEN LAYER the size of the screen and
+        // re-blends it every frame of the sheet's arrival and departure — on a
+        // full-screen scrim, that is the most expensive way to change a wash's
+        // opacity there is, and it is at the exact moment the member is watching
+        // for smoothness (their report: the app "feels clunky and not smooth").
+        // The alpha is now drawn in the DRAW phase, so the fade costs a rect and
+        // never a recomposition or a layer.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer { alpha = appear.value }
-                .background(Color.Black.copy(alpha = 0.42f))
+                .drawBehind {
+                    drawRect(color = Color.Black, alpha = 0.42f * appear.value)
+                }
                 .pointerInput(Unit) { detectTapGestures { close() } }
         )
         Surface(
