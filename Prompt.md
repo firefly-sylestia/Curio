@@ -876,6 +876,83 @@ select things starting from bottom too"* — where the last clause was already a
 - Brace/paren balance 0/0/0 on the touched file.
 - No Gradle in this environment — CI compiles it (per `AGENTS.md`).
 
+## 17. Request — Incursion again, the posters, the watch button, the journal's stacks, the studio dock
+
+**The ask (member):** *"the incursion ui is still bad, the profile page doesnt even open. and the posters
+are not loading for films and in incursion movies or series, and for series in incursion use what the
+series category buttom sheet uses with episode guide. also add watch icon button in rows and grid. only
+watch button also for the journal photo stacking sometimes they unstack and also when they are separated
+with a text or maybe i added one very later, they dont stack, similar for voice note they dont move that
+better then fix the glitchy dock in save your take, its a little glitcy"* — plus a follow-up while the
+batch was being planned: *"also tmbd read its docs for better implemetayipn for apps i think there are
+two keys."*
+
+**Answers taken before implementing** (ask_user): the page that does not open is **Incursion's Personal
+tab** · the watch button is **one tap marks it Watched, tap again to undo** · stacks join **"only when
+they end up next to each other"** (dropping onto a row joins it; a picture added later joins the row it
+lands beside) · the studio dock **"jumps or flickers when the keyboard opens/closes"**.
+
+### 1 · The Personal tab — the bug, found
+
+`destinationId = destination.takeIf { id -> studioDestinations.any { it.id == id } }` — the validity check
+listed **studio ids only**, so `"personal"` failed it and every tap on Personal was answered with
+**Marvel**: `onPersonal` could never be true and the desk never composed. Fixed to check all the tabs
+the nav bar draws (which also covers a `rememberSaveable` rotation), and the desk is now asked about
+BEFORE the list/filter branches — it used to draw only in the one state where a search was empty AND no
+filter was on, so a filter turned the desk into the filtered-empty page. The filter row is not drawn on
+the Personal tab at all (a desk has no rows to filter; a SEARCH still is, and is answered across lines).
+
+### 2 · The posters — both causes measured against the live endpoints
+
+- **Films: iTunes' movie search is DEAD.** `itunes.apple.com/search?term=…&media=movie` answers
+  `{"resultCount":0,"results":[]}` for every title, every storefront and every entity spelling, while
+  `media=music` on the same endpoint still answers — so the door that closed is Apple's FILM catalogue,
+  not the search. `FilmPosterFetch` therefore had one dead leg and TVMaze (television, not cinema)
+  behind it. The new primary door is **Wikipedia's own article image**: a film article leads with its
+  poster, the REST summary endpoint serves it, and it needs no key. FilmPosterFetch now tries
+  `Title (Year film)`, `Title (Year)`, `Title (film)`, `Title`, then ONE search whose first two hits are
+  tried the same way — measured over the X-Men lane's films: 8/10 on the guesses alone, and every miss in
+  that sample was a 429 from my own test script, not a real gap.
+- **Series: the rows name their season.** `"WandaVision S1"`, `"Loki S2"`, `"The Gifted S1"` — a name no
+  catalogue has, so TVMaze answered nothing for any of them (measured: 14/14 hit once the season came
+  off, including the `&` → `and` spelling TVMaze files). One shared `stripNaming` (film door, series
+  door, episode guide) strips `(\d{4})` **and** `S<n>` / `season <n>` in a loop, "Loki S2 (2023)" included.
+- **TMDB's two keys, per its docs.** Its application-authentication page: v3 is `?api_key=`, or the
+  **API Read Access Token** as `Authorization: Bearer …` — *"valid across both the v3 and v4 methods"*.
+  `TmdbFetch` now reads `TMDB_READ_TOKEN` first and falls back to `TMDB_API_KEY`, sends the token as the
+  header, and recognises a JWT pasted into the key field (starts `eyJ`). New `buildConfigField`, both
+  workflows export the secret, `.env.example` and `.github/AGENTS.md` document it.
+
+### 3 · The watch button, the guide, the stacks
+
+- **Watch button** on rows and grid tiles: one tap = Watched, tap again = back to not watched, with a
+  `visibility` / `check` glyph (both ligatures verified present in the bundled Material Symbols subset).
+- **Episode guide** on a series' sheet, from the reveal's own `SeriesEpisodeFetcher` (TMDB first when a
+  key is set, TVMaze keyless behind it), seeded from its cache, 12 rows then "Show all N", grouped by
+  season when the show has more than one.
+- **The unstacking, found:** `printRowGapSteppable` refused to step over a blank line **while the caret
+  was in it** — and that is exactly where the caret lands after almost any picture is added. Two prints
+  with only air between them were therefore ONE row in the eye view and TWO lone prints in the pen view,
+  which breaks the project's own rule that the two passes must never disagree. The caret no longer breaks
+  a row; the one gap holding the caret is left visible and drawn under the row.
+
+### Not done, and why (named, not silently dropped)
+
+- **The voice note's movement.** No diagnosis I can stand behind from here; the drag is a measured-slot
+  machine (`PersonalRowDragState.advanceBy`) that v400 already re-derived. Needs one detail: what fails
+  (will not pick up / jumps on the way / the guide line lands off), given the grip already accepts a
+  plain drag.
+- **The studio dock's keyboard jump.** `SaveCaptureScreen` has the screen's IME inset applied **once**,
+  on the floating note pill (`SessionNoteFloatingPill`, inside the scroll area), while the window is
+  `adjustResize` — the two can disagree, which is the classic jump. Changing it blind risks hiding the
+  pill behind the keys, so it wants one detail too: does it jump TOO FAR (double inset) or STUTTER.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on every touched file (the character scanner, not a regex).
+- Every poster lookup above was measured against the live endpoints with `curl`, not recalled.
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

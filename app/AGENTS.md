@@ -9948,6 +9948,18 @@ scheme role means something different there than in the app's own schemes.
   letters are a `SpanStyle(background = selectionWash)` span added LAST in
   `personalAnnotated` (the member's "the select tools doesnt highlight whats
   selecting").
+- **AIR BETWEEN TWO PRINTS IS AIR, EVEN WITH THE CARET IN IT (v428).** A print
+  row may step over the blank lines between its prints (`printRowGapSteppable`),
+  and the editor used to REFUSE to step over the one the caret was resting in —
+  so two pictures with nothing but a blank line between them were one row in the
+  EYE view and two lone prints in the PEN view, which is where the caret lands by
+  itself after almost any picture is added (member: *"sometimes they unstack"*).
+  Since v428 the caret does not break a row: the grouping pass claims the gap
+  either way, and the ONE gap that holds the caret (or a selection) is left
+  VISIBLE and drawn in place under the row instead of being hidden with the
+  rest. **The two passes must agree about which pictures are one row** — that is
+  the rule the change protects, and it is why the fix is in the grouping pass and
+  not in the caret.
 - **A PAGE CARRIES ITS OWN COLOUR, AND 0 MEANS THE THEME (v428).**
   `PersonalNoteEntity.accentArgb` (`personal_notes.accentArgb`, migration
   21→22, `INTEGER NOT NULL DEFAULT 0`) is a JOURNAL's own colour. **0 is not

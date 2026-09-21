@@ -3410,7 +3410,28 @@ internal fun PersonalCanvas(
                     if (run.size > 1) {
                         printRows[run.first()] = run
                         run.drop(1).forEach { groupSkips.add(it) }
-                        gaps.forEach { groupSkips.add(it) }
+                        gaps.forEach { gap ->
+                            // v428 — AIR THE MEMBER IS STANDING IN IS STILL AIR,
+                            // BUT IT IS STILL DRAWN.
+                            //
+                            // A blank line only ever blocked a row, so two prints
+                            // with nothing but a blank line between them were one
+                            // row in the eye view and TWO prints in the pen view
+                            // the moment the caret happened to rest in that blank
+                            // line — which is where the caret lands by itself after
+                            // almost any picture is added (member: "sometimes they
+                            // unstack"; and the project's own rule is that the two
+                            // passes must never disagree about which pictures are
+                            // one row). So the caret no longer breaks the row: the
+                            // prints group anyway, and the one blank line the
+                            // member is in is left VISIBLE and drawn under the
+                            // row (see the drawing pass) instead of being hidden
+                            // with the rest of the air — a caret has to be
+                            // somewhere it can be seen.
+                            if (gap != state.focusedId && state.selection(gap) == null) {
+                                groupSkips.add(gap)
+                            }
+                        }
                         i = j
                         continue
                     }
@@ -4416,9 +4437,11 @@ internal const val PRINT_ROW_LIMIT = 4
 private fun printRowGapSteppable(state: PersonalEditorState, id: String): Boolean {
     val block = state.block(id) ?: return false
     if (block.isPhoto || block.isAudio) return false
-    if (block.text.isNotBlank()) return false
-    if (id == state.focusedId) return false
-    return state.selection(id) == null
+    // v428 — and the caret no longer stops it: air with nothing on it is air,
+    // wherever the caret happens to be resting. Whether the line is then HIDDEN
+    // with the row is the drawing pass's own decision (a line holding the caret
+    // is drawn, see the row's `gaps`), so the two questions stay separate.
+    return block.text.isBlank()
 }
 
 /**

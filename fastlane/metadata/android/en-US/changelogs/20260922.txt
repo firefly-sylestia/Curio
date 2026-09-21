@@ -1,4 +1,15 @@
 ADD:
+- Incursion: a watch button on every row and tile — one tap marks a title watched, the next takes it back, and every finer state is still the sheet's own chips.
+- Incursion: a series' sheet carries its episode guide — the show's own episodes with their numbers, names and airdates, read through the same fetcher the series lane uses (and the year and season are stripped from the lookup, so "Loki S2" is looked up as "Loki").
+
+FIX:
+- Incursion: the Personal tab opens — every tap on it was answered with Marvel, because its own id failed the page's validity check, so the status desk could never draw; it is also asked about before the list's own branches, and the filters are no longer drawn on it.
+- Art: film posters load again — iTunes' movie search answers nothing at all for any title (its music store on the same endpoint still answers), so a film's keyless door was dead and only the keyed one was left; a film's own Wikipedia article image is the primary door now, with the candidate chain a wiki really files films under and a search behind it.
+- Incursion: series posters load — these rows say which season they are ("WandaVision S1"), which is a name no catalogue has, so the season and year come off before anything is asked.
+- Writing: two pictures with only a blank line between them stay one row — the blank line stopped counting as air the moment the caret rested in it, which is where the caret lands after almost every picture is added, so a row could come apart in the editor while the reading view still drew it as a row.
+- Setup: TMDB's second credential works — the API Read Access Token is sent as a Bearer header (valid on v3 and v4 alike) instead of being ignored, and a token pasted into the key field is recognised as one.
+
+ADD:
 - Writing: a journal can have its own colour — pick one of the app's own themes or any colour at all on a wheel, and it is kept with that day: the day wears it down the journal list's spine, on its chip on Home, and on the palette tool in its own tools. Until you change it, a page follows your theme.
 
 FIX:
