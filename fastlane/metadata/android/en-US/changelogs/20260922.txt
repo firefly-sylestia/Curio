@@ -1,4 +1,8 @@
 ADD:
+- Writing: a journal's paper can take the colour you gave that day — a switch in the colour sheet beside the colour, kept with the page, so the whole page reads in your colour and the words stay readable on it.
+- Incursion: the list can be ordered — the viewing order, title, year or runtime, each the other way round with one tap, and a list that is not in viewing order leaves its phase headings behind.
+
+ADD:
 - Incursion: a title's own description, rating, runtime and genres are looked up where the row carries none — one network of four sources (TMDB, OMDb, Wikipedia, Comic Vine), each on a short leash, with the facts the source states shown as small pills under the text.
 - Incursion: a title nothing else could dress finds its art in OMDb, Wikipedia or Comic Vine — the doors behind the app's own keyless ones.
 - Books: Google Books is asked for a book's page count and its blurb as well as its chapters, and a book whose about-text every catalogue is missing is read out of its Wikipedia article.

@@ -75,13 +75,32 @@ data class PersonalNoteEntity(
      * backup, and it is the door that carries it (see the journal list's spine
      * and Home's journal chips).
      */
-    val accentArgb: Int = 0
+    val accentArgb: Int = 0,
+    /**
+     * v429 — DOES THE PAGE ITSELF WEAR THAT COLOUR, or only its doors?
+     *
+     * The member, one pass after the colour landed: *"the journal page color also
+     * needs to chnage with the color chnage, add an option for that to turn on"*
+     * — and, asked where that option belongs, *"in the color sheet, and its per
+     * journal stored with the page"*. So it is a fact about THIS page, stored
+     * beside the colour it is about, and it defaults to false: every journal
+     * written before this existed keeps its theme's parchment, exactly as it did.
+     *
+     * When it is true, `journalPaper()` takes the page's colour at a real tint
+     * and `journalInk()` answers for the result — a coloured page the member's
+     * own ink cannot read on would be a prettiness that cost them their writing
+     * (see [com.curio.app.features.personal.JournalPagePaint]).
+     */
+    val pagePainted: Boolean = false
 ) {
     val doc: PersonalDoc get() = PersonalDocCodec.decode(bodyJson)
     val moodEnum: PersonalMood? get() = PersonalMood.fromKey(mood)
 
     /** True when the member gave this page a colour of its own. */
     val hasOwnAccent: Boolean get() = accentArgb != 0
+
+    /** True when the page's own colour also paints its paper. */
+    val paintsOwnAccent: Boolean get() = hasOwnAccent && pagePainted
 
     /** True for a checklist page (its rows are tickable). */
     val isTodo: Boolean get() = kind == PAGE_KIND_TODO

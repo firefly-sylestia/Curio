@@ -131,6 +131,11 @@ fun JournalEditorScreen(
     // v428 — AND THE DAY'S OWN COLOUR, if the member gave it one: 0 means the
     // page follows whatever theme the app is on (see [journalDoorAccent]).
     var accentArgb by remember { mutableIntStateOf(JOURNAL_ACCENT_THEME) }
+    // v429 — AND WHETHER THIS DAY'S PAPER TAKES IT (the member's own option,
+    // offered in the colour sheet and kept with the page — see
+    // [PersonalNoteEntity.pagePainted]). Off for every page that never turned it
+    // on, including every journal written before the option existed.
+    var pagePainted by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var pickerForDate by remember { mutableLongStateOf(startOfToday()) }
     val titleFocusRequester = remember { FocusRequester() }
@@ -172,7 +177,8 @@ fun JournalEditorScreen(
                 mood = mood?.key.orEmpty(),
                 dateMillis = dateMillis,
                 kind = PAGE_KIND_JOURNAL,
-                accentArgb = accentArgb
+                accentArgb = accentArgb,
+                pagePainted = pagePainted
             )
         },
         // The page's colour is the journal's alone: the note-on-a-topic page,
@@ -180,12 +186,15 @@ fun JournalEditorScreen(
         // grow a door that could not keep its answer.
         journalAccent = accentArgb,
         onJournalAccent = { accentArgb = it },
+        journalPagePainted = pagePainted,
+        onJournalPagePainted = { pagePainted = it },
         // A saved day arrives with its own head: the date it belongs to, how it
         // felt, its title.
         onLoaded = { existing ->
             title = existing.title
             mood = existing.moodEnum
             accentArgb = existing.accentArgb
+            pagePainted = existing.pagePainted
             if (existing.dateMillis > 0L) dateMillis = existing.dateMillis
         },
         header = { editing, saving, onEditing, _ ->

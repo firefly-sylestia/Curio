@@ -211,6 +211,15 @@ interface PersonalDao {
     @Query("UPDATE personal_notes SET accentArgb = :argb, updatedAtMillis = :now WHERE id = :id")
     suspend fun setNoteAccent(id: String, argb: Int, now: Long)
 
+    /**
+     * v429 — whether the page's paper takes that colour. Column-scoped like the
+     * colour above, but it is normally reached through the page's own debounced
+     * writer rather than directly: the switch rides the page's meta, so it saves
+     * on the same clock a typed word does.
+     */
+    @Query("UPDATE personal_notes SET pagePainted = :painted, updatedAtMillis = :now WHERE id = :id")
+    suspend fun setNotePagePainted(id: String, painted: Boolean, now: Long)
+
     @Query("DELETE FROM personal_notes WHERE id = :id")
     suspend fun deleteNote(id: String)
 

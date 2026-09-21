@@ -1168,10 +1168,80 @@ chose **an eye** (outline when unwatched, filled/lit once watched).
   zoom anchors, the lab's rows, the cover provider).
 - **CI compiles it — that is the only build gate in this environment** (no Gradle allowed here).
 
+## 21. Request — the page paints its own paper, the Incursion list sorts, and "more research"
+
+**The ask (member):** *"the journal page color also needs to chnage with the color chnage, add an
+option for that to turn on. and for incursion ui, make it more better, add sorting etc. also dont
+push this, and do more research for feature suggestions for the hole app and some more api"*
+
+Confirmed with the member earlier via `ask_user` (for the page colour): **"in the color sheet, and
+its per journal stored with the page"** + **"A real tint"**.
+
+### What was built
+
+1. **The journal page paints its own colour, as an option, kept per page.**
+   `PersonalNoteEntity.pagePainted` (`personal_notes.pagePainted`, `INTEGER NOT NULL DEFAULT 0`,
+   migration **22→23**) is a fact about the PAGE, stored beside the colour it is about; false is the
+   honest backfill (no page painted its paper before the column existed). The switch ("Paint the page
+   too") lives in `JournalAccentSheet`, draws only when the page has a colour of its own AND a setter
+   to keep the answer, and rides `PersonalPageMeta.pagePainted` through the page's debounced writer —
+   a field left out of the meta is a field ERASED on the next keystroke.
+2. **The paint reaches every surface through one local.** `JournalPagePaint` +
+   `LocalJournalPagePaint` (in `PersonalTheme.kt`) are provided once per page by
+   `PersonalWritingPage` around all three surfaces that draw paper: the reading side, the writing
+   canvas, and the DOCK (which is where the export is resolved, so a file a page leaves as wears the
+   page's own paper). Colours are not threaded as parameters — that would have made "the page's
+   colour" a parameter of every journal surface.
+3. **A painted page answers for its own readability.** `journalPaper()` takes the page's colour at
+   0.20 (light) / 0.28 (dark) instead of the theme's 0.05/0.10 whisper, and `journalInk()` stops
+   being `onSurface`: the theme's ink is measured against the theme's surfaces, not against a colour
+   off a wheel, so when paper and ink are BOTH light (or both dark) the page's own readable ink stands
+   in. Anything else — no colour, or `painted = false` — keeps the theme's parchment and ink exactly
+   as before.
+4. **Incursion sorts.** `IncursionSort` (`ORDER` / `TITLE` / `YEAR` / `RUNTIME`, each with a
+   `flipLabel`; the viewing order has none) is applied WHERE THE ROWS ARE GATHERED, so the list, the
+   grid, the head's progress and "Next up" all agree about the rows and their order. Fact orders
+   PARTITION first (a row with no year yet, or no stated runtime, sinks to the END instead of
+   pretending to be year 0). `flat = true` tells the list and the grid to drop the PHASE headers —
+   "Phase 2" is a claim about the viewing order — while the search's LINE bands stay. The control is a
+   pill in the head wearing `drag_handle`, a MEASURED glyph choice (`sort`, `swap_vert`,
+   `sort_by_alpha`, `low_priority` and `filter_list` are all absent from the bundled font subset).
+
+### Research delivered (suggestions only — NOTHING was built, per the confirmation rule)
+
+Every endpoint below was **probed live from this environment** before being written down:
+
+| Door | Probe | Notes |
+|---|---|---|
+| Wikimedia **On This Day** | `200`, 134 KB, 1.7s | keyless, same origin as the app's Wikipedia door |
+| **Openverse** | `200`, 1.9 KB | keyless, anonymous; returns `license`, `creator`, `creator_url`, `foreign_landing_url` (attribution is possible) — top hit for "okapi" IS the okapi photo |
+| **Art Institute of Chicago** | `200`, 0.8s | keyless, IIIF images at `artic.edu/iiif/2/{image_id}/full/843,/0/default.jpg` |
+| **OpenAlex** | `200`, 18 KB, 1.2s | keyless, papers/abstracts for the science lanes |
+| **iNaturalist** | `200`, 0.7s | keyless, taxa + photos |
+| **GBIF** | `200`, 1.1s | keyless, species |
+| **arXiv** | `200`, atom | keyless, preprints |
+| **Crossref** | `200`, 2.1s | keyless, DOIs |
+| **NASA image library** | `200`, 213 KB, 2.3s | keyless |
+| MusicBrainz / Cover Art Archive | `200` with the app's own UA | **already used**; a generic UA (and `okhttp/4.12.0`) is `403` — the app's `Curio/1.0` UA is why the music doors work |
+| iTunes Search | `200`, but **movie searches answer `resultCount: 0`** here (music answers fine) | evidence for why the film door moved to Wikipedia |
+| BoardGameGeek `xmlapi2` | **`401`** | not suggested |
+| Gutendex (Gutenberg) | **timeout (0 bytes, 12s)** | not suggested from here |
+
+### Verification
+
+- Brace/paren balance 0/0/0 on all ten touched Kotlin files (string/comment-aware scanner).
+- Every changed call site re-read after its edit (the sort pill's params, both `flat` branches, the
+  dock's provider, the sheet's switch, the meta/entity round trip).
+- **Nothing pushed** — the member said *"dont push this"*, so this sits as a local commit for CI to
+  pick up on the next real push.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- (none — §20 and its follow-up (the CI fix + the art lane's fail-safes) are pushed)
+- **§21 (done, committed locally) — deliberately NOT pushed** on the member's instruction (*"dont
+  push this"*). Its research half (more APIs + app-wide feature suggestions) was delivered as
+  suggestions and needs the member's pick before anything is built.
+- (empty slot)

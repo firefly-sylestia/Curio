@@ -150,10 +150,16 @@ fun IncursionScreen(navController: NavController) {
     var query by rememberSaveable { mutableStateOf("") }
     var filter by rememberSaveable { mutableStateOf(IncursionFilter.ALL.id) }
     var grid by rememberSaveable { mutableStateOf(false) }
+    // v429 — the list's own order, and which way round it runs (see
+    // [IncursionSort]). Saveable like the tab and the filter, so a rotation does
+    // not drop the member back into the viewing order mid-browse.
+    var sortId by rememberSaveable { mutableStateOf(IncursionSort.ORDER.id) }
+    var sortFlipped by rememberSaveable { mutableStateOf(false) }
     var detail by remember { mutableStateOf<IncursionEntry?>(null) }
     var pendingClear by remember { mutableStateOf<PendingBulkClear?>(null) }
 
     val activeFilter = IncursionFilter.fromId(filter)
+    val activeSort = IncursionSort.fromId(sortId)
     val studioDestinations = studios.map { IncursionDestination.of(it) }
     // v428 — AND THE TAB THAT IS NOT A STUDIO IS STILL A TAB.
     //
@@ -185,7 +191,7 @@ fun IncursionScreen(navController: NavController) {
     val needle = query.trim()
     val searching = needle.isNotEmpty()
     val sections: List<Pair<IncursionStudio, List<IncursionEntry>>> = remember(
-        studios, destinationId, needle, filter, statuses
+        studios, destinationId, needle, filter, statuses, sortId, sortFlipped
     ) {
         fun keep(entry: IncursionEntry): Boolean {
             if (needle.isNotEmpty() && !entry.title.contains(needle, ignoreCase = true)) return false
@@ -194,7 +200,7 @@ fun IncursionScreen(navController: NavController) {
                 ?: IncursionStore.Status.UNWATCHED
             return activeFilter.matches(entry, status)
         }
-        if (searching) {
+        val gathered = if (searching) {
             studios.mapNotNull { studio ->
                 studio.entries.filter(::keep).takeIf { it.isNotEmpty() }?.let { studio to it }
             }
@@ -202,7 +208,23 @@ fun IncursionScreen(navController: NavController) {
             val studio = activeStudio ?: return@remember emptyList()
             listOf(studio to studio.entries.filter(::keep))
         }
+        // v429 — THE ORDER IS APPLIED WHERE THE ROWS ARE GATHERED, so the list,
+        // the grid, the head's own progress and "Next up" all see the same rows
+        // in the same order: a sorted page that still counted its progress over
+        // a differently-ordered list is how two numbers about one shelf start
+        // disagreeing.
+        if (activeSort == IncursionSort.ORDER) gathered
+        else gathered.map { (studio, rows) -> studio to activeSort.order(rows, sortFlipped) }
     }
+
+    /**
+     * True when the rows are in an order OTHER than the viewing one, which is
+     * what tells the list and the grid to drop their PHASE headers: a phase is a
+     * block of the viewing order, so a title/year/runtime order drawn under
+     * phase headings would be sorted rows filed under headings that no longer
+     * mean anything.
+     */
+    val sortedFlat = activeSort != IncursionSort.ORDER
 
     // v428 — THE WATCH BUTTON'S ONE DECISION, in one place: a row that is
     // WATCHED goes back to not watched, and anything else becomes watched. Two
@@ -270,6 +292,10 @@ fun IncursionScreen(navController: NavController) {
             onOpenNext = { detail = it },
             grid = grid,
             onGridChange = { grid = it },
+            sort = activeSort,
+            sortFlipped = sortFlipped,
+            onSort = { picked -> sortId = picked.id },
+            onSortFlip = { sortFlipped = !sortFlipped },
             onBulk = { status ->
                 IncursionStore.setGroupStatus(context, allKeys, status)
             },
@@ -324,6 +350,9 @@ fun IncursionScreen(navController: NavController) {
 
                 hasRows && grid -> IncursionGrid(
                     sections = sections,
+                    // v429 — a sorted view is one flat run of rows; phases belong
+                    // to the viewing order (see `sortedFlat`).
+                    flat = sortedFlat,
                     onOpen = { detail = it },
                     onWatch = watchToggle,
                     onBulk = { keys, status -> IncursionStore.setGroupStatus(context, keys, status) },
@@ -335,6 +364,7 @@ fun IncursionScreen(navController: NavController) {
                     // A search is answered from three lists at once, so its
                     // groups are labelled by line (see the studio band).
                     showLineBand = searching,
+                    flat = sortedFlat,
                     onOpen = { detail = it },
                     onWatch = watchToggle,
                     onBulk = { keys, status -> IncursionStore.setGroupStatus(context, keys, status) },
@@ -506,6 +536,17 @@ private fun IncursionHeader(
     onOpenNext: (IncursionEntry) -> Unit,
     grid: Boolean,
     onGridChange: (Boolean) -> Unit,
+    /**
+     * v429 — THE LIST'S ORDER, and the two ways the member changes it: pick
+     * another order, or turn this one around. It lives in the head rather than
+     * beside the filter chips because it describes the ROWS rather than the
+     * shelf they are on — and because the chips row is already the page's full
+     * width at four filters on a phone.
+     */
+    sort: IncursionSort,
+    sortFlipped: Boolean,
+    onSort: (IncursionSort) -> Unit,
+    onSortFlip: () -> Unit,
     onBulk: (IncursionStore.Status) -> Unit,
     onClearAll: () -> Unit,
     onBack: () -> Unit
@@ -570,6 +611,70 @@ private fun IncursionHeader(
                             onClearAll()
                         }
                     )
+                }
+            }
+            // v429 — THE ORDER CONTROL. A list can be read four ways, and the
+            // one that matters most — the viewing order — is the one it starts
+            // in, so the control is a quiet pill that names the order it is in
+            // ("Order: Title · A to Z") rather than a chip row competing with
+            // the filters below it.
+            //
+            // The glyph is `drag_handle`, and that is a MEASURED choice, not a
+            // preference: the bundled Material Symbols subset has no `sort`,
+            // `swap_vert`, `sort_by_alpha`, `low_priority` or `filter_list` in
+            // its name table (checked with the byte probe the icon contract
+            // prescribes — see [safeGlyphName]'s note), so a `sort` pill would
+            // have drawn the word "sort" on a phone that lacks the ligature.
+            if (showListTools) {
+                Spacer(Modifier.width(6.dp))
+                Box {
+                    var menu by remember { mutableStateOf(false) }
+                    val flip = sort.flipLabel(sortFlipped)
+                    IconPill(
+                        glyph = CurioIcons.DragHandle,
+                        description = if (flip == null) "Order: ${sort.label}"
+                        else "Order: ${sort.label} · $flip",
+                        onClick = { menu = true }
+                    )
+                    CurioDropdownMenu(
+                        expanded = menu,
+                        onDismissRequest = { menu = false },
+                        accent = accent
+                    ) {
+                        IncursionSort.entries.forEach { option ->
+                            val on = option == sort
+                            CurioDropdownItem(
+                                text = {
+                                    // The ACTIVE order says which way round it is
+                                    // running, so the member never has to open
+                                    // the flip row to find out.
+                                    val way = if (on) option.flipLabel(sortFlipped) else null
+                                    Text(if (way == null) option.label else "${option.label} · $way")
+                                },
+                                accent = accent,
+                                selected = on,
+                                trailingIcon = {
+                                    if (on) CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
+                                },
+                                onClick = {
+                                    menu = false
+                                    onSort(option)
+                                }
+                            )
+                        }
+                        // Only offered where it means something: the viewing
+                        // order has no other way round (see flipLabel).
+                        if (flip != null) {
+                            CurioDropdownItem(
+                                text = { Text("Switch to ${sort.flipLabel(!sortFlipped)}") },
+                                accent = accent,
+                                onClick = {
+                                    menu = false
+                                    onSortFlip()
+                                }
+                            )
+                        }
+                    }
                 }
             }
             if (showListTools) {
@@ -772,6 +877,80 @@ private fun IncursionFilterRow(
     }
 }
 
+// ── Sorting ─────────────────────────────────────────────────────────────────
+
+/**
+ * v429 — HOW THE ROWS ARE ORDERED (the member: *"for incursion ui, make it more
+ * better, add sorting etc."*).
+ *
+ * [ORDER] is the page's own: the viewing order upstream curated, phase by phase —
+ * the one thing an Incursion list exists to be. Every other order is a way of
+ * LOOKING FOR a title rather than following the story, and that is why they drop
+ * the phase headers: a list that says "Title, A to Z" and still arrives in
+ * phases would be an order the page only pretended to have (see `flat` in
+ * [IncursionList]).
+ *
+ * [flipped] reverses whatever the order's own sense is, and each order has a
+ * DEFAULT sense a member actually means: titles A–Z, the newest year first, the
+ * longest runtime first. A row with no year (an announced title) sorts to the
+ * end of a year order rather than pretending to be year 0 of the list.
+ */
+internal enum class IncursionSort(val id: String, val label: String) {
+    ORDER("order", "Viewing order"),
+    TITLE("title", "Title"),
+    YEAR("year", "Year"),
+    RUNTIME("runtime", "Runtime");
+
+    /**
+     * The rows in this order, or the same list when this IS [ORDER].
+     *
+     * The two fact orders PARTITION first, so a row that has no year yet (an
+     * announced title) or no stated runtime always sinks to the END rather than
+     * pretending to be year 0 or a zero-minute film at the top of the list — that
+     * is the one thing a reversed list would get wrong (see [flipLabel]).
+     */
+    fun order(rows: List<IncursionEntry>, flipped: Boolean): List<IncursionEntry> = when (this) {
+        ORDER -> rows
+        TITLE -> {
+            val alphabetical = rows.sortedBy { it.title.trim().lowercase() }
+            if (flipped) alphabetical.reversed() else alphabetical
+        }
+        YEAR -> rows.factOrder(flipped) { it.year }
+        RUNTIME -> rows.factOrder(flipped) { it.runtime }
+    }
+
+    /**
+     * A numeric order with the rows that have no number yet pushed to the back:
+     * ascending when [flipped], and the order's own default sense otherwise (the
+     * newest year, the longest runtime).
+     */
+    private fun List<IncursionEntry>.factOrder(
+        flipped: Boolean,
+        value: (IncursionEntry) -> Int?
+    ): List<IncursionEntry> {
+        val (known, unknown) = partition { value(it) != null }
+        val ascending = known.sortedBy { value(it) ?: 0 }
+        return (if (flipped) ascending else ascending.reversed()) + unknown
+    }
+
+    /**
+     * What FLIPPING this order would mean, in the member's own words — or null
+     * for [ORDER], which has no other way round to offer: a curatorial viewing
+     * order read backwards is not an order anybody asked for, so the flip row is
+     * not drawn for it.
+     */
+    fun flipLabel(flipped: Boolean): String? = when (this) {
+        ORDER -> null
+        TITLE -> if (flipped) "Z to A" else "A to Z"
+        YEAR -> if (flipped) "Oldest first" else "Newest first"
+        RUNTIME -> if (flipped) "Shortest first" else "Longest first"
+    }
+
+    companion object {
+        fun fromId(id: String): IncursionSort = entries.firstOrNull { it.id == id } ?: ORDER
+    }
+}
+
 // ── The list ────────────────────────────────────────────────────────────────
 
 @Composable
@@ -779,6 +958,19 @@ private fun IncursionList(
     sections: List<Pair<IncursionStudio, List<IncursionEntry>>>,
     /** True when these groups came from MORE THAN ONE line — a search. */
     showLineBand: Boolean,
+    /**
+     * v429 — TRUE WHEN THE ROWS ARE IN AN ORDER OTHER THAN THE VIEWING ONE, so
+     * the PHASE HEADERS come off (and with them the per-phase bulk menu — the
+     * page's own Tune menu still marks the whole list).
+     *
+     * The headers are not decoration: "Phase 2" is a claim about where a row
+     * sits in the viewing order, so A–Z rows filed under Phase 1/2/3 would be a
+     * list sorted by title and captioned as though it were not. Dropping them is
+     * the honest rendering of a title order; the line bands stay, because a
+     * search's bands say which LINE a row came from, which stays true in any
+     * order.
+     */
+    flat: Boolean,
     onOpen: (IncursionEntry) -> Unit,
     /** v428 — the row's own watch button (see [WatchButton]). */
     onWatch: (IncursionEntry) -> Unit,
@@ -790,6 +982,24 @@ private fun IncursionList(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        if (flat) {
+            for ((studio, entries) in sections) {
+                if (showLineBand && sections.size > 1) {
+                    item(key = "${studio.id}-flat-band") {
+                        StudioBand(studio = studio, hits = entries.size)
+                    }
+                }
+                items(entries, key = { it.storageKey }) { entry ->
+                    EntryRow(
+                        entry = entry,
+                        onOpen = { onOpen(entry) },
+                        onWatch = { onWatch(entry) }
+                    )
+                }
+            }
+            item { Spacer(Modifier.height(6.dp)) }
+            return@LazyColumn
+        }
         for ((studio, entries) in sections) {
             if (showLineBand && sections.size > 1) {
                 item(key = "${studio.id}-band") {
@@ -1383,6 +1593,8 @@ private fun StudioBand(studio: IncursionStudio, hits: Int) {
 @Composable
 private fun IncursionGrid(
     sections: List<Pair<IncursionStudio, List<IncursionEntry>>>,
+    /** v429 — a sorted view is one flat run of tiles (see [IncursionList]). */
+    flat: Boolean,
     onOpen: (IncursionEntry) -> Unit,
     /** v428 — the tile's own watch button (see [WatchButton]). */
     onWatch: (IncursionEntry) -> Unit,
@@ -1397,6 +1609,23 @@ private fun IncursionGrid(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        if (flat) {
+            for ((studio, entries) in sections) {
+                if (showLineBand) {
+                    item(key = "${studio.id}-grid-flat-band", span = { GridItemSpan(maxLineSpan) }) {
+                        StudioBand(studio = studio, hits = entries.size)
+                    }
+                }
+                items(entries, key = { it.storageKey }) { entry ->
+                    EntryTile(
+                        entry = entry,
+                        onOpen = { onOpen(entry) },
+                        onWatch = { onWatch(entry) }
+                    )
+                }
+            }
+            return@LazyVerticalGrid
+        }
         for ((studio, entries) in sections) {
             if (showLineBand) {
                 item(key = "${studio.id}-grid-band", span = { GridItemSpan(maxLineSpan) }) {

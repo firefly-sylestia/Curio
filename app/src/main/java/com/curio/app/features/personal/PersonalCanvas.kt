@@ -5692,6 +5692,14 @@ internal fun PersonalToolDock(
      */
     journalAccent: Int = JOURNAL_ACCENT_THEME,
     onJournalAccent: ((Int) -> Unit)? = null,
+    /**
+     * v429 — WHETHER THE PAGE'S PAPER TAKES THE COLOUR TOO (see
+     * [JournalPagePaint]). Stored with the page like the colour, and offered in
+     * the same sheet; null draws no switch, exactly as a null [onJournalAccent]
+     * draws no palette door.
+     */
+    journalPagePainted: Boolean = false,
+    onJournalPagePainted: ((Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier,
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
@@ -5705,6 +5713,8 @@ internal fun PersonalToolDock(
         JournalAccentSheet(
             current = journalAccent,
             onPick = onJournalAccent,
+            painted = journalPagePainted,
+            onPainted = onJournalPagePainted,
             onDismiss = { accentOpen = false }
         )
     }

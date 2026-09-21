@@ -2,8 +2,10 @@ package com.curio.app.features.personal
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
@@ -50,23 +52,60 @@ internal fun personalIconTint(accent: Color): Color = settingsAccentInk()
 // ── v411 — THE JOURNAL'S OWN COLOURS ────────────────────────────────────────
 
 /**
- * THE JOURNAL'S PAPER (v411).
+ * v429 — WHETHER THIS PAGE PAINTS ITS PAPER WITH ITS OWN COLOUR.
  *
- * The member: "elevation depth also for journal introduce its own colors". The
- * journal is where Curio's writing happens, and it was dressed in the app's
- * generic container steps — the same fill as a settings row, on the same flat
- * elevation. It has its own paper now: a WARM parchment that carries a whisper
- * of the member's own accent ([personalAccent], so it follows a lane-following
- * hero or the rose without knowing which), rather than the
- * neutral cream every other card wears.
+ * Provided by the PAGE's host (see `PersonalWritingPage`), because the paper is
+ * drawn in five places owned by four different composables and threading a
+ * colour through all of them would have made "the page's colour" a parameter of
+ * every journal surface that draws a background.
  *
- * It answers DARK mode with a warm near-black instead of a grey one, because ink
- * on a cold black page reads as a screen and ink on a warm one reads as a book.
+ * [painted] is only ever true when the page HAS a colour of its own and the
+ * member turned the option on ([PersonalNoteEntity.pagePainted], stored with the
+ * page): a page following the theme keeps the theme's own whisper, which is what
+ * every journal written before this existed already looks like.
+ */
+internal data class JournalPagePaint(
+    val argb: Int = JOURNAL_ACCENT_THEME,
+    val painted: Boolean = false
+) {
+    /** The colour to tint with, or null when the theme's own accent applies. */
+    val own: Color? get() = if (painted && argb != JOURNAL_ACCENT_THEME) Color(argb) else null
+}
+
+/** The page's own paint, provided by the page's host (see [JournalPagePaint]). */
+internal val LocalJournalPagePaint = staticCompositionLocalOf { JournalPagePaint() }
+
+/**
+ * THE JOURNAL'S PAPER (v411, and v429 for the page's own colour).
+ *
+ * A WARM parchment carrying a whisper of the member's own accent (so it follows
+ * a lane-following hero or the rose without knowing which), and a warm near-black
+ * in dark mode — ink on a cold black page reads as a screen, ink on a warm one
+ * reads as a book.
+ *
+ * v411 — THE MEMBER ASKED FOR THE JOURNAL TO HAVE ITS OWN COLOURS ("elevation
+ * depth also for journal introduce its own colors"): it was dressed in the app's
+ * generic container steps, the same fill as a settings row, and it has its own
+ * paper now.
+ *
+ * v429 — AND WHEN THE PAGE HAS A COLOUR OF ITS OWN AND [JournalPagePaint.painted]
+ * IS ON, the paper takes THAT colour at a REAL tint (0.20 light / 0.28 dark)
+ * rather than the theme's whisper (the member: *"the journal page color also
+ * needs to chnage with the color chnage"*), and that is why [journalInk] has to
+ * answer for itself below — a paper this coloured is a paper the theme's ink may
+ * no longer read on.
  */
 @Composable
 internal fun journalPaper(): Color {
     val warm = if (isCurioDarkTheme()) Color(0xFF17130F) else Color(0xFFFDF9F0)
-    return lerp(warm, personalAccent(), if (isCurioDarkTheme()) 0.10f else 0.05f)
+    val paint = LocalJournalPagePaint.current
+    val own = paint.own
+    val tint = own ?: personalAccent()
+    val strength = when {
+        own != null -> if (isCurioDarkTheme()) 0.28f else 0.20f
+        else -> if (isCurioDarkTheme()) 0.10f else 0.05f
+    }
+    return lerp(warm, tint, strength)
 }
 
 /** The journal card's fill where a control needs one step of separation. */
@@ -74,10 +113,32 @@ internal fun journalPaper(): Color {
 internal fun journalPaperRaised(): Color =
     lerp(journalPaper(), personalAccentInk(), if (isCurioDarkTheme()) 0.10f else 0.04f)
 
-/** The ink the journal writes with — the page's own onSurface, named so a
- *  journal surface never reaches past this file for it. */
+/**
+ * The ink the journal writes with — the page's own onSurface, named so a journal
+ * surface never reaches past this file for it.
+ *
+ * v429 — AND IT ANSWERS FOR A PAINTED PAGE. The theme's ink is measured against
+ * the theme's surfaces, not against a colour the member picked off a wheel: a
+ * WHITE page on a dark theme would have written light ink on light paper, and a
+ * near-black page on a light theme the mirror of that. When the page paints its
+ * own colour, the theme's ink is kept only while it still contrasts with the
+ * paper; otherwise the page's own readable ink (dark on a light page, light on a
+ * dark one) stands in, so the one thing a journal must never do — become
+ * unreadable because it was made pretty — cannot happen.
+ */
 @Composable
-internal fun journalInk(): Color = MaterialTheme.colorScheme.onSurface
+internal fun journalInk(): Color {
+    val paper = journalPaper()
+    val themeInk = MaterialTheme.colorScheme.onSurface
+    if (LocalJournalPagePaint.current.own == null) return themeInk
+    val paperIsLight = paper.luminance() > 0.5f
+    val inkIsLight = themeInk.luminance() > 0.5f
+    return when {
+        paperIsLight && inkIsLight -> Color(0xFF1B1613)
+        !paperIsLight && !inkIsLight -> Color(0xFFF7F2E8)
+        else -> themeInk
+    }
+}
 
 /** The notebook's hairline — the rules and dividers INSIDE a journal card.
  *  (Cards themselves draw no border: a soft shadow is the edge now.) */
