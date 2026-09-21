@@ -30,7 +30,7 @@ FIX:
 ADD:
 - Reading: the page's tap zones are yours to place — a tap on the SIDE of the screen turns the page now (both side edges stand the whole height, the head scrolls back and the foot goes on), and holding the Crop switch in the reader's foot opens the zones themselves: drag each edge's line where your thumb reaches, say what that edge does (back, on, a screenful either way, or nothing) and set how deep it stands.
 - Writing: a page's tools can copy the whole page — the new Copy tool selects the page and raises Android's own copy / select all bar right above the tools.
-- Writing: a page exports as a file — PDF drawn on the page's own paper, ink and pens (its photos, voice notes and checkboxes with it), plus plain text, or Markdown that keeps the bold, italics and headings.
+- Writing: a page exports as a file — PDF drawn on the page's own paper, ink, pens and typography (its photos, voice notes and checkboxes with it; a heading, a quotation, the small print, the leading under each and every print's own label are set exactly as the page sets them), plus plain text, or Markdown that keeps the bold, italics and headings.
 - Writing: a seventh voice note look — Pill, the drawn pulse with its play mark in a wide pill button.
 
 FIX:

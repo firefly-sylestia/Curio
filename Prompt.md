@@ -390,14 +390,79 @@ Asked via `ask_user`:
    those states work); the Color theme sheet lost its second sentence, its em dash and its
    spare air.
 
-### Still open from this batch
+### Still open from this batch — both landed after it
 
-- **The pickers' second half** — the deeper "compact & premium" pass and the missing
-  press/reveal motion on the Color theme sheet's nine rows (the sheet's rows already squish
-  on press; the reveal is on pick, not on touch).
-- **The PDF.** `PersonalExport` draws the page by hand, and its drawing has to be brought
-  in line with what `PersonalCanvas` / `PersonalPhotoBlock` / `PersonalVoice` put on
-  screen — a bigger job than the four above, and the one item of the batch not landed.
+- **The pickers' second half** — DONE in the next commit: the live row's wash animates in
+  (`animateColorAsState`) instead of snapping, and the picker's rows squish deeper than a
+  section row's.
+- **The PDF** — DONE in the next commit (the print's own size is the box it is drawn in,
+  and the old clamp at `1f` so a low-resolution picture printed as a stamp is gone) and
+  finished by §9 below (its type, leading and labels are the canvas' now).
+
+## 9. Request (this session) — the PDF's type, from the canvas
+
+> Line the PDF's type up with the journal view as well — body size, leading and the caption
+> face taken from the canvas instead of the export's own numbers
+
+### Findings
+
+- **The export carried its own type table.** `PersonalExport.kt` had `PDF_BODY_SIZE = 30f`,
+  a heading as `body × 1.45`, a small line as `body × 0.84`, ONE leading ratio for every
+  size (`PDF_LINE_SPACING = 1.42f`), a paragraph gap of `body × 0.72`, and every print's
+  caption in Lora at `body × 0.74` — none of it read from the page it was drawing. Against
+  the canvas' own read-back numbers (body 16sp on a 27sp line = **1.6875**, title 22/31,
+  small 12.5/21, quote 15sp, the label 13sp × the label's own size, 8dp between rows) the
+  body and the small print were close by luck and the LEADING was set a fifth too tight.
+- **None of those numbers had a name.** They were literals in the canvas' read view
+  (`16.sp`, `27.sp`, `22.sp`, `31.sp`, `12.5.sp`, `21.sp`, `13.sp`, `spacedBy(8.dp)`), so
+  nothing could take them from there without them being copied — which is exactly how the
+  export's own table drifted.
+
+### What was built (v427)
+
+- **`PersonalCanvas.kt` — the page's type is one table.** `BODY_BODY_SIZE/LINE`,
+  `BODY_VIEW_SIZE/LINE`, `TITLE_VIEW_SIZE/LINE`, `SMALL_VIEW_SIZE/LINE`,
+  `QUOTE_VIEW_SIZE`, `CAPTION_VIEW_SIZE`, `VIEW_ROW_GAP` (internal, so the writer, the
+  reader and the exporter all read the same numbers), and the canvas' own two surfaces now
+  take them instead of their literals — so the table IS the source, not a copy of it.
+- **`PersonalExport.kt` — the sheet's answer is one number.** `PDF_UNITS_PER_SP` (how much
+  of the sheet one canvas `sp` becomes; 16sp × 1.875 = the sheet's 30 units, a printable
+  ~68 characters a line — the sheet's own measure, the only decision it keeps) with every
+  size, every leading ratio (`BODY_VIEW_LINE / BODY_VIEW_SIZE` and the title's and the
+  small line's own) and the paragraph gap (`VIEW_ROW_GAP`) taken from the canvas.
+- **A quoted phrase is the page's quotation now.** Every quoted run is set at
+  `QUOTE_VIEW_SIZE` (15sp) inside the block's own line, which is how the page sets it — a
+  line that is a quotation throughout comes out as one, and a line with a quoted phrase in
+  it keeps its prose and shrinks exactly that phrase (where the sheet set the whole line at
+  the body's size with only a rule beside it). The leading stays the line's own.
+- **The label is the print's own.** A new `PdfFonts` resolves the sheet's four run faces
+  plus the six a print's label can wear (`PersonalCaptionFace` → `lora`,
+  `patrick_hand_regular`, `playfair_display`, `space_mono`, `bebas_neue`, `space_grotesk`,
+  resolved once per file), the label's size is `personalCaptionSizeSp(CAPTION_VIEW_SIZE, …)`
+  — so the member's Small / Standard / Large finally reaches paper — and its STAMP rides
+  under the words when the print carries one. Both lines are cut to the PRINT's own measure
+  (one line, then an ellipsis), as the page cuts them.
+
+### Verification
+
+- Brace/paren/bracket balance 0/0/0 on both touched files; every new constant checked for a
+  live call site (none left dangling) and every helper the export calls checked for its
+  import (`TextUtils`, `TextUnit` added).
+- Which sizes and which leadings the export now uses: body 30 units on 1.6875 (was 30 on
+  1.42), title 41.25 on 1.409 (was 43.5 on 1.42), small 23.4 on 1.68 (was 25.2 on 1.42),
+  quote 28.1 on 1.6875, gap 15 units (was 21.6) — i.e. the same page density with the
+  page's own rhythm.
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
+### Noted, not changed
+
+- The canvas' two sides disagree about one number: the PEN sizes a label by the frame it
+  sits in (13sp under a page-wide print, 10sp under a small one) while the EYE reads every
+  label at 13sp. The sheet mirrors the EYE (a sheet of paper is the page read), so a Small
+  print with a Large label ellipsizes as fast on paper as it does on screen. Left as it is
+  because it is the page's own behaviour, not the export's.
+- The voice note's geometry on paper (a pill `body × 2.3`, its clock at `body × 0.85`) is
+  still the sheet's own — asked for as body / leading / caption face, so untouched.
 
 ## User prompts
 

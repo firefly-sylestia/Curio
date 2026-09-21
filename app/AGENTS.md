@@ -9761,14 +9761,35 @@ scheme role means something different there than in the app's own schemes.
   chosen from the dock's export menu: **PDF** drawn with Android's own
   `PdfDocument` (A4 at 150dpi, the journal's paper/ink/accent, `StaticLayout`
   paragraphs split across pages by line, marker pens as leading-margin spans,
-  photos with captions, voice notes with their wave and clock, a foot that names
-  and numbers the page) so the words are REAL TEXT in the file; **Text**; and
+  photos with their own labels, voice notes with their wave and clock, a foot that
+  names and numbers the page) so the words are REAL TEXT in the file; **Text**; and
   **Markdown** with the styling kept. Files land in `cacheDir/exports/` (the
   `personal_exports` path in `res/xml/file_paths.xml` is what makes them
   shareable) and leave through Android's sheet. The colours are resolved in the
   composition (`rememberPersonalExporter`) and the write happens off the UI
   thread. A new format is a new `PersonalExportFormat` entry plus its writer —
   never a second exporter.
+- **AND THE SHEET'S TYPE IS THE PAGE'S (v427).** Every size and every leading in
+  `PersonalExport.kt` is read from the canvas' own type table — `BODY_VIEW_SIZE` /
+  `BODY_VIEW_LINE` (16sp on 27sp), `TITLE_VIEW_SIZE` / `TITLE_VIEW_LINE`,
+  `SMALL_VIEW_SIZE` / `SMALL_VIEW_LINE`, `QUOTE_VIEW_SIZE`, `VIEW_ROW_GAP` (8dp) —
+  and scaled by the ONE number the sheet
+  keeps for itself, `PDF_UNITS_PER_SP` (how much of the sheet one canvas `sp`
+  becomes; 16sp × 1.875 = the sheet's 30 units, a printable ~68 characters a
+  line, because the journal's phone-wide column would arrive on A4 as large
+  print). Every quoted run is set at `QUOTE_VIEW_SIZE` inside the block's own line
+  (as the page sets it, so a quoted phrase keeps its prose and shrinks itself),
+  and a print's LABEL is the print's own: `PdfFonts` resolves each
+  `PersonalCaptionFace` to its bundled file (the
+  sheet's four run faces, then `lora` / `patrick_hand_regular` / `playfair_display`
+  / `space_mono` / `bebas_neue` / `space_grotesk`), the size is
+  `personalCaptionSizeSp(CAPTION_VIEW_SIZE, …)` so the member's
+  Small / Standard / Large reaches paper, and the stamp rides under the words —
+  both lines cut to the PRINT's own measure (one line, then an ellipsis), which is
+  how the page cuts them. **Never add a size, a line height or a caption face to
+  that file that the canvas does not have**: the export had its own table (a
+  heading as body × 1.45, one 1.42 leading for every size, every caption in Lora)
+  and that is precisely what drifted from the page it was drawing.
 
 ## Child DOX Index
 

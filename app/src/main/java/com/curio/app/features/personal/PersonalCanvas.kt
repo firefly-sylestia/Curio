@@ -159,14 +159,41 @@ import com.curio.app.ui.theme.isCurioDarkTheme
  * text, never inside it).
  */
 
+/**
+ * THE PAGE'S TYPE — ONE TABLE, BOTH SIDES OF THE SWITCH (v427).
+ *
+ * Every size a page is written or read at lives here as a SIZE and the LEADING
+ * it is set on, because the two surfaces that draw the same words have to agree:
+ * the PEN (the canvas' `BasicTextField`, which takes the *BODY numbers) and the
+ * EYE (the read-only view, which takes the *VIEW ones). A word set larger on one
+ * side than the other is a page that changes shape the moment the member stops
+ * writing.
+ *
+ * They are `internal` for one more reader: the PDF export draws this same page
+ * onto a sheet of paper and takes EVERY number from here — its body, its
+ * headings, a quoted line, its small print, the leading under each and the air
+ * between its rows — rather than carrying numbers of its own that could drift
+ * (v427, user request: "line the PDF's type up with the journal view as well —
+ * body size, leading and the caption face taken from the canvas instead of the
+ * export's own numbers"). The one thing the export does NOT take from here is
+ * HOW MUCH OF A PAGE one of these becomes — that is the sheet's own measure,
+ * see `PDF_UNITS_PER_SP`.
+ */
+internal val BODY_BODY_SIZE = 17.sp
+internal val BODY_BODY_LINE = 29.sp
+internal val BODY_VIEW_SIZE = 16.sp
+internal val BODY_VIEW_LINE = 27.sp
+
 /** The quote size inside the canvas' 17sp body and the read-only 16sp body —
  *  a quoted line reads as a quotation, a touch smaller than the prose. */
 private val QUOTE_BODY_SIZE = 16.sp
-private val QUOTE_VIEW_SIZE = 15.sp
+internal val QUOTE_VIEW_SIZE = 15.sp
 
 /** A TITLE line and a SMALL line, in the editor and in the read-only view. */
 private val TITLE_BODY_SIZE = 24.sp
-private val TITLE_VIEW_SIZE = 22.sp
+private val TITLE_BODY_LINE = 34.sp
+internal val TITLE_VIEW_SIZE = 22.sp
+internal val TITLE_VIEW_LINE = 31.sp
 
 /**
  * THE SIZE OF A PAGE WHOSE ROWS ARE THE CONTENT — the to-do list (v389e).
@@ -179,7 +206,29 @@ private val TITLE_VIEW_SIZE = 22.sp
  */
 internal val ROW_VIEW_SIZE = 22.sp
 private val SMALL_BODY_SIZE = 13.5.sp
-private val SMALL_VIEW_SIZE = 12.5.sp
+private val SMALL_BODY_LINE = 22.sp
+internal val SMALL_VIEW_SIZE = 12.5.sp
+internal val SMALL_VIEW_LINE = 21.sp
+
+/**
+ * A PRINT'S CAPTION, READ BACK.
+ *
+ * The pen sizes a label by the frame it sits in (13sp under a page-wide print,
+ * 10sp under a small one — see `PersonalPhotoBlock`), while the eye reads every
+ * label at this one, and a label's own size setting (`PersonalCaptionLabelSize`)
+ * multiplies whichever it is. This is the read-back number, and the one the PDF
+ * export takes, because a sheet of paper is the page READ.
+ */
+internal val CAPTION_VIEW_SIZE = 13.sp
+
+/**
+ * THE AIR BETWEEN TWO ROWS OF A PAGE READ BACK.
+ *
+ * The pen leaves 6dp between the rows it writes (see `PersonalCanvas`), the eye
+ * leaves this — and the PDF export, which draws the page read back, takes it as
+ * its own paragraph gap, so a sheet's rhythm is the journal's rhythm.
+ */
+internal val VIEW_ROW_GAP = 8.dp
 
 /**
  * THE QUOTE'S OWN COLOUR — COFFEE, never the app's accent (user decision: a
@@ -3564,7 +3613,7 @@ private fun PersonalTextBlock(
     val mask = state.mask(id)
     val align = state.align(id)
     val rowPage = rowSize.isSpecified
-    val rowBody = if (rowPage) rowSize.value * 1.7f else 29f
+    val rowBody = if (rowPage) rowSize.value * 1.7f else BODY_BODY_LINE.value
     val rowMark = if (rowPage) ROW_MARKER_SIZE else PERSONAL_MARKER_SIZE
     val quoteRule = personalQuoteRule()
     val quoteWash = personalQuoteWash()
@@ -3608,7 +3657,11 @@ private fun PersonalTextBlock(
     // the next line in enter automatic reselect").
     val isCheckbox = personalBlockCarries(text, mask, FLAG_CHECKBOX) ||
         (text.isBlank() && state.keepsChecklistRows && state.checklistRowWaits(id))
-    val lineHeight = if (isTitle) 34.sp else if (isSmall) 22.sp else rowBody.sp
+    val lineHeight = when {
+        isTitle -> TITLE_BODY_LINE
+        isSmall -> SMALL_BODY_LINE
+        else -> rowBody.sp
+    }
     // The tick the writer actually made is on the BLOCK now, not in this row's
     // widget state, so a reload cannot lose it.
     val checked = state.checked(id)
@@ -3647,7 +3700,7 @@ private fun PersonalTextBlock(
         isTitle -> TextStyle(
             fontFamily = FrauncesFontFamily,
             fontSize = TITLE_BODY_SIZE,
-            lineHeight = 34.sp,
+            lineHeight = TITLE_BODY_LINE,
             fontWeight = FontWeight.SemiBold,
             color = ink,
             textAlign = alignOf
@@ -3655,13 +3708,13 @@ private fun PersonalTextBlock(
         isSmall -> TextStyle(
             fontFamily = WritingFontFamily,
             fontSize = SMALL_BODY_SIZE,
-            lineHeight = 22.sp,
+            lineHeight = SMALL_BODY_LINE,
             color = ink,
             textAlign = alignOf
         )
         else -> TextStyle(
             fontFamily = WritingFontFamily,
-            fontSize = if (rowPage) rowSize else 17.sp,
+            fontSize = if (rowPage) rowSize else BODY_BODY_SIZE,
             lineHeight = rowBody.sp,
             color = ink,
             textAlign = alignOf
@@ -4742,20 +4795,24 @@ internal fun PersonalDocView(
                         isTitle -> TextStyle(
                             fontFamily = FrauncesFontFamily,
                             fontSize = TITLE_VIEW_SIZE,
-                            lineHeight = 31.sp,
+                            lineHeight = TITLE_VIEW_LINE,
                             fontWeight = FontWeight.SemiBold,
                             textAlign = alignOf
                         )
                         isSmall -> TextStyle(
                             fontFamily = WritingFontFamily,
                             fontSize = SMALL_VIEW_SIZE,
-                            lineHeight = 21.sp,
+                            lineHeight = SMALL_VIEW_LINE,
                             textAlign = alignOf
                         )
                         else -> TextStyle(
                             fontFamily = WritingFontFamily,
-                            fontSize = if (rowSize.isSpecified) rowSize else 16.sp,
-                            lineHeight = if (rowSize.isSpecified) rowSize * 1.7f else 27.sp,
+                            fontSize = if (rowSize.isSpecified) rowSize else BODY_VIEW_SIZE,
+                            lineHeight = if (rowSize.isSpecified) {
+                                rowSize * 1.7f
+                            } else {
+                                BODY_VIEW_LINE
+                            },
                             textAlign = alignOf
                         )
                     },
@@ -4830,7 +4887,7 @@ internal fun PersonalDocView(
             // face, its own size, and its date on its own line under the words.
             val readContext = LocalContext.current
             val readFace = personalCaptionFace(block.captionFace)
-            val readSize = personalCaptionSizeSp(13.sp, block.captionSize)
+            val readSize = personalCaptionSizeSp(CAPTION_VIEW_SIZE, block.captionSize)
             val readDate = personalCaptionDateText(
                 block.captionDateMillis,
                 PersonalCaptionDates.order(readContext, block.captionOrder)
@@ -4872,7 +4929,7 @@ internal fun PersonalDocView(
         }
     }
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(VIEW_ROW_GAP)) {
         doc.blocks.forEachIndexed { index, block ->
             val quoteAbove = index > 0 && isQuoteRun(doc.blocks[index - 1])
             val quoteBelow = index < doc.blocks.lastIndex && isQuoteRun(doc.blocks[index + 1])

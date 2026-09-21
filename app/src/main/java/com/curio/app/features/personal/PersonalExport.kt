@@ -16,6 +16,8 @@ import android.text.Layout
 import android.text.SpannableString
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.BackgroundColorSpan
 import android.text.style.LeadingMarginSpan
 import android.text.style.StrikethroughSpan
@@ -29,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.TextUnit
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import com.curio.app.R
@@ -207,8 +210,86 @@ private fun markdownInline(text: String, runs: List<PersonalRun>): String {
 private const val PDF_PAGE_WIDTH = 1240
 private const val PDF_PAGE_HEIGHT = 1754
 private const val PDF_MARGIN = 110f
-private const val PDF_BODY_SIZE = 30f
-private const val PDF_LINE_SPACING = 1.42f
+
+/**
+ * HOW MUCH OF THE SHEET ONE OF THE CANVAS' `sp` BECOMES (v427).
+ *
+ * Every size in this file is a size the CANVAS sets its page in — the body, a
+ * heading, a small line, a quoted line, a print's label — multiplied by this one
+ * number, and every leading is the canvas' own line height for that size. The
+ * number is the only thing the sheet decides for itself, because how much paper
+ * a word deserves is a question about PAPER: the journal is read in a phone-wide
+ * column (~40 characters a line), and a sheet that copied that measure would
+ * arrive on A4 as large print. At this scale the page's own 16sp body becomes 30
+ * units — a printable ~68 characters a line — while everything the member
+ * actually sees (the balance between a heading and its prose, the air between two
+ * lines, a quotation a shade smaller than the words around it) is the page's own.
+ *
+ * If the sheet should instead MIMIC the column exactly, this is the one number to
+ * change: the phone's page measures ~316dp against the sheet's 1020 units, so
+ * about 3.2.
+ */
+private const val PDF_UNITS_PER_SP = 1.875f
+
+/** One of the canvas' sizes, in the sheet's own units. */
+private fun pdfPx(sp: TextUnit): Float = sp.value * PDF_UNITS_PER_SP
+
+/** The sheet's body — the page's read-back body, at the sheet's measure. */
+private val PDF_BODY_SIZE = pdfPx(BODY_VIEW_SIZE)
+
+/** A heading, a small line and a quoted line, exactly as the page sets them. */
+private val PDF_TITLE_SIZE = pdfPx(TITLE_VIEW_SIZE)
+private val PDF_SMALL_SIZE = pdfPx(SMALL_VIEW_SIZE)
+private val PDF_QUOTE_SIZE = pdfPx(QUOTE_VIEW_SIZE)
+
+/**
+ * THE LEADING, TAKEN THE SAME WAY — as the canvas' own ratio of line height to
+ * size, so a paragraph on paper is set as openly as the same paragraph on the
+ * page. A quoted line keeps the BODY's leading: on the page a quotation is set
+ * inside the prose's own line, only a shade smaller.
+ */
+private val PDF_BODY_LEADING = BODY_VIEW_LINE.value / BODY_VIEW_SIZE.value
+private val PDF_TITLE_LEADING = TITLE_VIEW_LINE.value / TITLE_VIEW_SIZE.value
+private val PDF_SMALL_LEADING = SMALL_VIEW_LINE.value / SMALL_VIEW_SIZE.value
+
+/** The air between two rows of the page read back, on paper. */
+private val PDF_ROW_GAP = VIEW_ROW_GAP.value * PDF_UNITS_PER_SP
+
+/** How much of the page's own ink a label's words carry, and its stamp. */
+private const val PDF_LABEL_ALPHA = 158
+private const val PDF_STAMP_ALPHA = 102
+
+/**
+ * THE SHEET'S FACES, RESOLVED ONCE FOR THE WHOLE FILE.
+ *
+ * The four a run can name, plus a print's LABEL — which is the print's own
+ * typography ([PersonalCaptionFace]) and not a sheet decision at all (v427, user
+ * request: "…and the caption face taken from the canvas"). Resolved once because
+ * a page can carry a print every few rows and each one asks for its own face.
+ */
+private class PdfFonts(private val context: Context) {
+    val body: Typeface? = ResourcesCompat.getFont(context, R.font.lora)
+    val display: Typeface? = ResourcesCompat.getFont(context, R.font.fraunces)
+    val sans: Typeface? = ResourcesCompat.getFont(context, R.font.geom)
+    val mono: Typeface? = ResourcesCompat.getFont(context, R.font.space_mono)
+
+    private val labels = mutableMapOf<PersonalCaptionFace, Typeface?>()
+
+    /** A label's face — the same six bundled files the page draws it in. */
+    fun label(face: PersonalCaptionFace): Typeface? = labels.getOrPut(face) {
+        ResourcesCompat.getFont(
+            context,
+            when (face) {
+                PersonalCaptionFace.PRINT, PersonalCaptionFace.SERIF -> R.font.lora
+                PersonalCaptionFace.HAND -> R.font.patrick_hand_regular
+                PersonalCaptionFace.DISPLAY -> R.font.playfair_display
+                PersonalCaptionFace.MONO -> R.font.space_mono
+                PersonalCaptionFace.POSTER -> R.font.bebas_neue
+                PersonalCaptionFace.MODERN -> R.font.space_grotesk
+            }
+        )
+    }
+}
 
 /**
  * ONE SHEET OF THE JOURNAL'S PAPER, AND THE CURSOR THAT FILLS IT.
@@ -324,18 +405,15 @@ internal fun writePersonalPdf(
     accent: Int,
     highlightInk: (String) -> Int
 ): File {
-    val body: Typeface? = ResourcesCompat.getFont(context, R.font.lora)
-    val display: Typeface? = ResourcesCompat.getFont(context, R.font.fraunces)
-    val sans: Typeface? = ResourcesCompat.getFont(context, R.font.geom)
-    val mono: Typeface? = ResourcesCompat.getFont(context, R.font.space_mono)
+    val fonts = PdfFonts(context)
 
     val document = PdfDocument()
     val run = PdfRun(document, paper, ink, doc.exportName())
-    val gap = PDF_BODY_SIZE * 0.72f
+    val gap = PDF_ROW_GAP
 
     for (block in doc.blocks) {
         when {
-            block.isPhoto -> drawExportPhoto(context, run, block, ink)
+            block.isPhoto -> drawExportPhoto(context, fonts, run, block, ink)
 
             block.isAudio -> drawExportVoice(run, block, paper, ink, accent)
 
@@ -348,10 +426,7 @@ internal fun writePersonalPdf(
                     width = run.contentWidth,
                     ink = ink,
                     accent = accent,
-                    body = body,
-                    display = display,
-                    sans = sans,
-                    mono = mono,
+                    fonts = fonts,
                     highlightInk = highlightInk
                 ),
                 gap = gap
@@ -376,26 +451,37 @@ private fun exportLayout(
     width: Int,
     ink: Int,
     accent: Int,
-    body: Typeface?,
-    display: Typeface?,
-    sans: Typeface?,
-    mono: Typeface?,
+    fonts: PdfFonts,
     highlightInk: (String) -> Int
 ): StaticLayout {
     val titled = block.runs.any { it.title }
+    val small = block.runs.any { it.small }
+    // v427 — THE SIZE AND THE LEADING ARE THE CANVAS'.
+    //
+    // A heading takes the page's heading size, a small line its small size and
+    // everything else the page's body, each on the leading the page gives that
+    // size. The sheet used to carry its own multipliers (a heading was the body
+    // "×1.45", a small line "×0.84") and one leading ratio for all three (1.42,
+    // against the page's 27/16), which is why a paragraph on paper read tighter
+    // than the same paragraph on the page.
     val size = when {
-        titled -> PDF_BODY_SIZE * 1.45f
-        block.runs.any { it.small } -> PDF_BODY_SIZE * 0.84f
+        titled -> PDF_TITLE_SIZE
+        small -> PDF_SMALL_SIZE
         else -> PDF_BODY_SIZE
+    }
+    val leading = when {
+        titled -> PDF_TITLE_LEADING
+        small -> PDF_SMALL_LEADING
+        else -> PDF_BODY_LEADING
     }
     // A FACE IS THE LINE'S OWN: the first run that named one wins, a heading falls
     // back to the display serif, and everything else is the page's writing face —
     // the same three rules the canvas follows.
     val face = when (block.runs.firstOrNull { it.font.isNotEmpty() }?.font) {
-        "sans" -> sans
-        "mono" -> mono
-        "display" -> display
-        else -> if (titled) display else body
+        "sans" -> fonts.sans
+        "mono" -> fonts.mono
+        "display" -> fonts.display
+        else -> if (titled) fonts.display else fonts.body
     }
     val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = face ?: Typeface.SERIF
@@ -407,6 +493,12 @@ private fun exportLayout(
         val from = run.start.coerceIn(0, text.length)
         val to = run.end.coerceIn(0, text.length)
         if (to <= from) return@forEach
+        // A QUOTED SPAN IS SET AT THE PAGE'S QUOTATION SIZE — the page draws a
+        // quotation inside the prose's own LINE, a shade smaller, so a line that
+        // is a quotation throughout comes out as one and a line with a quoted
+        // phrase in it keeps its prose and shrinks exactly that phrase. The
+        // leading is the line's own either way, as it is on the page.
+        if (run.quote) text.setSpan(AbsoluteSizeSpan(PDF_QUOTE_SIZE.toInt()), from, to, 0)
         if (run.bold) text.setSpan(StyleSpan(Typeface.BOLD), from, to, 0)
         if (run.italic) text.setSpan(StyleSpan(Typeface.ITALIC), from, to, 0)
         if (run.underline) text.setSpan(UnderlineSpan(), from, to, 0)
@@ -441,7 +533,7 @@ private fun exportLayout(
                 PersonalAlign.END -> Layout.Alignment.ALIGN_OPPOSITE
             }
         )
-        .setLineSpacing(0f, PDF_LINE_SPACING)
+        .setLineSpacing(0f, leading)
         .setIncludePad(false)
     if (block.align == PersonalAlign.JUSTIFY) {
         builder.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD)
@@ -484,8 +576,14 @@ private fun drawExportLayout(run: PdfRun, layout: StaticLayout, gap: Float) {
     }
 }
 
-/** A photograph, at the page's own measure, with its caption under it. */
-private fun drawExportPhoto(context: Context, run: PdfRun, block: PersonalBlock, ink: Int) {
+/** A photograph, at its own size, with its own label under it. */
+private fun drawExportPhoto(
+    context: Context,
+    fonts: PdfFonts,
+    run: PdfRun,
+    block: PersonalBlock,
+    ink: Int
+) {
     val uri = block.photo?.let { raw -> runCatching { Uri.parse(raw) }.getOrNull() } ?: return
     val bitmap = decodeExportBitmap(context, uri, run.contentWidth) ?: return
     // v427 — THE PRINT KEEPS THE SIZE THE PAGE GAVE IT.
@@ -510,15 +608,53 @@ private fun drawExportPhoto(context: Context, run: PdfRun, block: PersonalBlock,
     )
     val drawnWidth = bitmap.width * scale
     val drawnHeight = bitmap.height * scale
+    // v427 — THE LABEL IS THE PAGE'S LABEL.
+    //
+    // The face is the print's own ([PersonalCaptionFace]) and the size is the
+    // label's own (a member's Small / Standard / Large multiplies the page's
+    // caption size), and the print's stamp rides under the words when it carries
+    // one — where the sheet used to set every caption in Lora at a size of its
+    // own. Both lines are cut to the PRINT's own measure, one line and then an
+    // ellipsis, exactly as the page cuts them; the sheet ran them as wide as the
+    // paper, so a sentence on a Small print arrived wider than its picture.
+    val labelFace = personalCaptionFace(block.captionFace)
     val caption = block.caption.trim()
+    val stamp = personalCaptionDateText(
+        block.captionDateMillis,
+        PersonalCaptionDates.order(context, block.captionOrder)
+    )
+    val labelSize =
+        personalCaptionSizeSp(CAPTION_VIEW_SIZE, block.captionSize).value * PDF_UNITS_PER_SP
     val captionPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = ResourcesCompat.getFont(context, R.font.lora)
-        textSize = PDF_BODY_SIZE * 0.74f
+        typeface = fonts.label(labelFace)
+        textSize = labelSize
         color = ink
-        alpha = 190
+        alpha = PDF_LABEL_ALPHA
         textAlign = Paint.Align.CENTER
     }
-    val captionRoom = if (caption.isEmpty()) 0f else captionPaint.textSize * 1.7f
+    // The stamp is the label's small print, so it rides the label's own size
+    // instead of a size of its own — and it is spaced as the page spaces it.
+    val stampPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        typeface = captionPaint.typeface
+        textSize = labelSize * 0.76f
+        color = ink
+        alpha = PDF_STAMP_ALPHA
+        letterSpacing = 0.6f * PDF_UNITS_PER_SP
+        textAlign = Paint.Align.CENTER
+    }
+    val captionLine = if (caption.isEmpty()) {
+        ""
+    } else {
+        TextUtils.ellipsize(caption, captionPaint, boxWidth, TextUtils.TruncateAt.END).toString()
+    }
+    val hasCaption = captionLine.isNotEmpty()
+    val hasStamp = stamp.isNotEmpty()
+    val captionRoom = when {
+        hasCaption && hasStamp -> captionPaint.textSize * 1.7f + stampPaint.textSize * 1.9f
+        hasCaption -> captionPaint.textSize * 1.7f
+        hasStamp -> stampPaint.textSize * 1.9f
+        else -> 0f
+    }
     if (run.want(drawnHeight + captionRoom + 40f)) {
         val left = run.left() + (run.contentWidth - drawnWidth) / 2f
         val top = run.cursor
@@ -529,14 +665,14 @@ private fun drawExportPhoto(context: Context, run: PdfRun, block: PersonalBlock,
             Paint(Paint.ANTI_ALIAS_FLAG).apply { isFilterBitmap = true }
         )
         run.advance(drawnHeight + 26f)
-        if (caption.isNotEmpty()) {
-            run.surface().drawText(
-                caption,
-                run.left() + run.contentWidth / 2f,
-                run.cursor + captionPaint.textSize,
-                captionPaint
-            )
-            run.advance(captionRoom)
+        val centre = run.left() + run.contentWidth / 2f
+        if (hasCaption) {
+            run.surface().drawText(captionLine, centre, run.cursor + captionPaint.textSize, captionPaint)
+            run.advance(captionPaint.textSize * 1.7f)
+        }
+        if (hasStamp) {
+            run.surface().drawText(stamp, centre, run.cursor + stampPaint.textSize, stampPaint)
+            run.advance(stampPaint.textSize * 1.9f)
         }
         run.advance(18f)
     }
