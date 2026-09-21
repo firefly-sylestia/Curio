@@ -1,4 +1,10 @@
 ADD:
+- Writing: a journal can have its own colour — pick one of the app's own themes or any colour at all on a wheel, and it is kept with that day: the day wears it down the journal list's spine, on its chip on Home, and on the palette tool in its own tools. Until you change it, a page follows your theme.
+
+FIX:
+- Writing: the text bar is four arrows and nothing else — ↑ ↓ take rows and ← → take letters (the Letters / Rows switch is gone), a new selection starts on the row you are writing in so a reach can be built from the bottom of a page, and every arrow dims when it has nowhere left to go.
+
+ADD:
 - Incursion: a Personal tab where the Essentials tab was — how far into the whole order you are, a bar per line, what each line wants next, the six states tallied, and the figures your statuses add up to (hours watched, hours left, essentials done, longest run); essential rows keep their star and their filter chip.
 - Incursion: every row, tile and title sheet carries the title's own poster — the data already knew each title's TMDB id, so the art is asked for by id and falls back to the app's keyless providers; it obeys the existing Cover fetching switch, and with that off the plate is Curio's own, carrying the order.
 - Incursion: one search across all three lines — a query is answered from Marvel, Sony and X-Men at once, each group saying which line it came from and how many titles it holds.

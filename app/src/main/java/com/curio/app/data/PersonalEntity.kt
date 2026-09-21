@@ -57,10 +57,31 @@ data class PersonalNoteEntity(
      */
     val topicId: String = "",
     val topicName: String = "",
-    val categoryId: String = ""
+    val categoryId: String = "",
+    /**
+     * v428 — THE PAGE'S OWN COLOUR, when the member gave it one.
+     *
+     * The member: *"make the journal theme[-]not[-]aware and it have its own
+     * theme if user wants to change ... and by default they follow the theme
+     * only the changed colour stays as it looks"*. So this is a nullable fact
+     * expressed as 0: **0 means the page follows the app's theme** (the accent
+     * every other Curio surface wears, so a lane-following hero or the rose is
+     * honoured without this page knowing which), and anything else is the ARGB
+     * the member picked — kept exactly as they set it, on whatever theme they
+     * are on later.
+     *
+     * Stored on the note rather than in preferences because it is a property of
+     * THE PAGE: it travels with the entry to another device and back through a
+     * backup, and it is the door that carries it (see the journal list's spine
+     * and Home's journal chips).
+     */
+    val accentArgb: Int = 0
 ) {
     val doc: PersonalDoc get() = PersonalDocCodec.decode(bodyJson)
     val moodEnum: PersonalMood? get() = PersonalMood.fromKey(mood)
+
+    /** True when the member gave this page a colour of its own. */
+    val hasOwnAccent: Boolean get() = accentArgb != 0
 
     /** True for a checklist page (its rows are tickable). */
     val isTodo: Boolean get() = kind == PAGE_KIND_TODO

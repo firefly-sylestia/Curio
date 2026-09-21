@@ -247,8 +247,6 @@ private fun JournalRow(
     onLongPress: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    val accent = personalAccent()
-    val accentInk = personalAccentInk()
     val mood = journal.moodEnum
     // Decoding a body is only for the row that is actually measuring words:
     // `doc` re-parses the stored JSON on every access, so it is read ONCE per
@@ -280,7 +278,11 @@ private fun JournalRow(
                 .drawBehind {
                     val barWidth = 3.dp.toPx()
                     drawRoundRect(
-            color = accentInk,
+            // v428 — a page the member gave a colour to carries it HERE, on the
+            // spine: the list stays one notebook, but a coloured day is
+            // findable down the margin without opening it (see
+            // [journalDoorAccent]).
+            color = journalDoorAccent(journal.accentArgb),
             size = androidx.compose.ui.geometry.Size(barWidth, size.height),
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f)
                     )

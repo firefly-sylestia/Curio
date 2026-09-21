@@ -203,6 +203,14 @@ interface PersonalDao {
     @Query("UPDATE personal_books SET coverUrl = :url, updatedAtMillis = :now WHERE id = :id")
     suspend fun setCoverUrl(id: String, url: String, now: Long)
 
+    /**
+     * v428 — the page's own COLOUR, and nothing else. Column-scoped like the
+     * other single-fact writes: giving a journal a colour is not a reason to
+     * rewrite its words, its date or its mood.
+     */
+    @Query("UPDATE personal_notes SET accentArgb = :argb, updatedAtMillis = :now WHERE id = :id")
+    suspend fun setNoteAccent(id: String, argb: Int, now: Long)
+
     @Query("DELETE FROM personal_notes WHERE id = :id")
     suspend fun deleteNote(id: String)
 
@@ -334,6 +342,14 @@ class PersonalRepository(private val dao: PersonalDao) {
     }
 
     suspend fun bookByTitle(title: String): PersonalBookEntity? = dao.bookByTitle(title.trim())
+
+    /**
+     * The page's own colour ([PersonalNoteEntity.accentArgb]); 0 sends it back
+     * to following the app's theme.
+     */
+    suspend fun setNoteAccent(id: String, argb: Int) {
+        dao.setNoteAccent(id, argb, System.currentTimeMillis())
+    }
 
     /**
      * Persists one note. [preview] is recomputed HERE from the document, so

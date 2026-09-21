@@ -762,15 +762,36 @@ private fun JournalChip(
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     val mood = journal.moodEnum
+    // v428 — A CHIP IS A PAGE'S DOOR, so a page the member gave a colour to
+    // wears it here: a wash of it under the chip and the spine down its left
+    // edge, so a coloured day is findable from Home without opening anything
+    // (see [journalDoorAccent]). An uncoloured page is the chip it always was.
+    val own = journalDoorAccent(journal.accentArgb)
+    val worn = if (journal.hasOwnAccent) own else null
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = worn?.let { lerp(MaterialTheme.colorScheme.surfaceContainerLow, it, 0.14f) }
+            ?: MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier
             .width(CHIP_WIDTH)
             .height(CHIP_HEIGHT)
     ) {
-        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .drawBehind {
+                    if (worn != null) {
+                        val barWidth = 3.dp.toPx()
+                        drawRoundRect(
+                            color = worn,
+                            size = androidx.compose.ui.geometry.Size(barWidth, size.height),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f)
+                        )
+                    }
+                }
+                .padding(12.dp)
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // v389e — THE DAY IS INK, NOT ACCENT.
                 //

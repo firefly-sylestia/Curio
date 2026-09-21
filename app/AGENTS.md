@@ -9922,16 +9922,50 @@ scheme role means something different there than in the app's own schemes.
   read-view `TextStyle` sets `color = ink` as well. **A read-only surface must
   never rely on an inherited ink** — `LocalContentColor` is black unless a
   `Surface` says otherwise.
-- **THE PAGE BAR'S REACH HAS TWO UNITS (v427).** The bar counts ROWS
-  (`pageRange`, `pageRowPicked`) and, in LETTER MODE (`pageLetterMode`,
-  `pageCharRange`, one row only — a character range across rows IS those rows),
-  the characters inside the reach's FRONT row. `pageSelectionText`,
-  `cutPageSelection` / `cutPageLetters` and `pastePageText` / `pastePageLetters`
-  all branch on the mode, and Cut in letter mode edits the LINE (its text and its
-  mask) instead of removing rows. **The reach is DRAWN, or the bar is lying**: a
-  picked row wears the page's selection wash, and the picked letters are a
-  `SpanStyle(background = selectionWash)` span added LAST in `personalAnnotated`
-  (the member's "the select tools doesnt highlight whats selecting").
+- **THE PAGE BAR'S REACH HAS TWO AXES AND NO MODE (v427 → v428).** v427 gave
+  the bar ROWS (`pageRange`, `pageRowPicked`) and a LETTER MODE
+  (`pageLetterMode`, `pageCharRange`, one row only — a character range across
+  rows IS those rows) with a switch to choose between them. The member: *"proper
+  arrow up down left right arrow and no more letter row option but the arrows do
+  the work ... dont let user select things starting from bottom"* (clarified:
+  *"let user select things from bottom proper tool of how it should behave"*).
+  So the switch is GONE and the two units are the two AXES: ↑ ↓ rows, ← →
+  letters, letters switching themselves on at the first ← or →.
+  `PersonalEditorState.nudgePageRows(up)` builds the reach FROM THE MEMBER'S OWN
+  ROW (the caret's, else the page's foot), the arrow pressed FIRST setting which
+  way it grows (`pageGrowsUp`), the other giving a row back and walking one row
+  at a single row; `nudgePageLetters(more)` opens a one-character window at the
+  caret (else the row's end for an upward reach, its start for a downward one).
+  The ANCHOR row — where the letter window lives — is `pageAnchorIndex()`: the
+  reach's foot when it grew upward, its head when it grew downward. All rows
+  draws itself as a bottom-up reach, so letters after it come from the last row.
+  `pageSelectionText`, `cutPageSelection` / `cutPageLetters` and
+  `pastePageText` / `pastePageLetters` branch on `pageLettersPicked` (the window
+  holds more than nothing). **Every arrow DIMS when its axis has nowhere to go**
+  (`canNudgePageRows` / `canNudgePageLetters`) — a control that answers a press
+  with nothing teaches a member to stop pressing it. **The reach is DRAWN, or the
+  bar is lying**: a picked row wears the page's selection wash, and the picked
+  letters are a `SpanStyle(background = selectionWash)` span added LAST in
+  `personalAnnotated` (the member's "the select tools doesnt highlight whats
+  selecting").
+- **A PAGE CARRIES ITS OWN COLOUR, AND 0 MEANS THE THEME (v428).**
+  `PersonalNoteEntity.accentArgb` (`personal_notes.accentArgb`, migration
+  21→22, `INTEGER NOT NULL DEFAULT 0`) is a JOURNAL's own colour. **0 is not
+  black and not a palette index — it means "follow the app's theme"**, which is
+  the honest backfill for every row that already exists and the reason no page
+  changed colour on the update (the member: *"by default they follow the theme
+  only the changed colour stays as it looks"*). Read it through
+  `journalDoorAccent(argb)` (theme accent INK, or the stored ARGB) and the picker
+  is `JournalAccentSheet` — the app's own hues (`journalHueChoices`, each read
+  through `CurioNamedTheme.heroFor` so a swatch IS the colour the app paints
+  with) plus an HSV wheel and a brightness slider; it applies LIVE and the page's
+  own debounced writer persists it. WHAT WEARS IT — the doors, never the page: the
+  journal list's spine, Home's journal chips, and the palette button in the
+  page's tools. Set it only where it can be KEPT: `onJournalAccent` is null on
+  the topic-note, chapter-review and book-review pages, so those never grow a
+  door that could not store the answer, and the colour rides
+  `PersonalPageMeta.accentArgb` because the writer rebuilds the whole entity from
+  the meta — **a field left out there is a field ERASED on the next keystroke**.
 
 
 ## Child DOX Index

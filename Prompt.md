@@ -784,6 +784,98 @@ fetching"), which the posters ride.
   `incursionStatusInk`), or the old `statusInkFor`; every new file's imports are used.
 - No Gradle in this environment — CI compiles it (per `AGENTS.md`).
 
+## 15. Request — the PDF's prints went missing, and a journal's own colour
+
+**The ask (member):** *"the pdf doesnt export exactly as the images as shown with stacks and now
+there is no images at all so fix it, make the journal theme[-]not[-]aware and it have its own
+theme if user wants to change and its strip or [the] door for that particular journal gets that
+color and by default they follow the theme only the changed color stays as it looks"*.
+
+**1. The prints, first (shipped as `3a48c9f7`).** A photograph whose bytes could not be read was
+silently DROPPED from the sheet — the decode's failure path returned early and drew nothing at
+all, which is exactly "there is no images at all" for a page of photos (a `content://` or file
+URI that the sheet's own bare `BitmapFactory` decode cannot open, a large file, a path handed
+over as `file://`). Now: the decode retries smaller and accepts a bare path as well as a
+`file://` one, and a picture that still cannot be read is drawn with the page's own PLATE rather
+than vanishing — a print the page has is a print the sheet has.
+
+**2. A journal's own colour — answers taken first** (ask_user): the picker offers **the app's
+own hues + a wheel** · what wears it: **Home's journal chips, the journal list's spine, and the
+palette button in the page's tools** · and the theme stays the default.
+
+What was built (v428):
+
+- `data/PersonalEntity.kt` — `PersonalNoteEntity.accentArgb: Int = 0` (**0 means follow the
+theme**, which is the honest backfill and the reason no page changed colour on the update),
+  `hasOwnAccent`.
+- `data/CurioDatabase.kt` — version **22** + `MIGRATION_21_22` (`INTEGER NOT NULL DEFAULT 0`),
+  registered with the rest.
+- `data/PersonalDao.kt` — `setNoteAccent(id, argb, now)` (column-scoped: a colour is not a reason
+  to rewrite a page's words) + the repository's `setNoteAccent`.
+- `features/personal/JournalAccent.kt` (new) — `journalDoorAccent(argb)` (the theme's accent ink,
+  or the stored ARGB), `journalHueChoices()` (the app's own hues, each read through
+  `CurioNamedTheme.heroFor` so a swatch IS the colour the app paints with), and
+  `JournalAccentSheet`: the swatches, an HSV wheel (sweep gradient + saturation falloff + a value
+  wash) with a brightness slider, applying LIVE — the page's own debounced writer is what
+  persists a drag as ONE write.
+- `features/personal/PersonalCanvas.kt` — the dock's palette door (it WEA*RS* the colour in hand,
+  and only appears when the page can keep an answer) + `journalAccent` / `onJournalAccent` params.
+- `features/personal/PersonalPage.kt` — `PersonalPageMeta.accentArgb` and `writePage` passing it,
+  which is the load-bearing half: the writer REBUILDS the whole entity from the meta, so a field
+  left out there is a field erased on the next keystroke.
+- `features/personal/JournalEditorScreen.kt` — the page's own state, loaded in `onLoaded`, handed
+  to the core, and the setter (the topic-note, chapter and book-review pages pass nothing, so they
+  never grow a door that could not store its answer).
+- `features/personal/JournalListScreen.kt` / `PersonalHome.kt` — the row's spine and Home's chip
+  wear `journalDoorAccent`.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on every touched file (the character scanner, not a regex).
+- Sweep for every construction site of `PersonalNoteEntity` (three): the two book paths build a
+  new row and keep the theme default; the page's writer now carries the colour.
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
+## 16. Request — the bar's four arrows (no mode switch, built from the bottom)
+
+**The ask (member):** *"also while youre at journal, fix the copy paste etc ui also proper arrow up
+down left right arrow and no more letter row option but the arrows do the work, also dont let user
+select things starting from bottom too"* — where the last clause was already answered once as
+*"let user select things from bottom proper tool of how it should behave"* (§10), so it is read as
+"a selection must be BUILDABLE from the bottom", which is what this pass implements.
+
+**What changed** (`PersonalCanvas.kt`):
+
+- `pageLetterMode` is **gone** — the two units are the two AXES. ↑ ↓ rows, ← → letters, and the
+  letters switch themselves on at the first ← or → (`pageLettersPicked`).
+- `PersonalEditorState.nudgePageRows(up)` replaces `growPageSelection` / `shrinkPageSelection`: a
+  fresh reach is ONE ROW (the caret's, else the page's last), the arrow pressed FIRST decides
+  which way it grows (`pageGrowsUp`), the other gives a row back, and at a single row it WALKS
+  that row — so the foot of a page can be moved without a fifth control and down is never a dead
+  end at the page's end.
+- `nudgePageLetters(more)` replaces `growPageChar` / `shrinkPageChar` / `selectAllPageLetters`:
+  the first press opens a one-character window (at the caret, else the anchor row's end for an
+  up-growing reach and its start for a down-growing one), and `selectPageLineLetters()` is the
+  bar's "Line".
+- The ANCHOR row is `pageAnchorIndex()` — the reach's foot when it grew upward, its head when it
+  grew downward — and `pageRowCharRange` / `cutPageLetters` / `pageSelectionText` all read it
+  through that one function. `selectWholePage()` draws itself as a bottom-up reach, so letters
+  after All rows come from the last row.
+- The bar is TWO ROWS: the row arrows with the count beside them, then the letter arrows with
+  Line / Cut / Copy / Paste / Undo. The count is one sentence ("3 of 12 rows" and, only once
+  reached into, "· 5 of 24 letters"), the arrows are real icons (`PageArrowChip` — `ArrowUpward` /
+  `ArrowDownward` / `ArrowBack` / `ArrowForward`), and **every arrow dims when its axis has
+  nowhere to go** (`canNudgePageRows` / `canNudgePageLetters`).
+
+### Verification
+
+- Repo-wide sweep: no reference to `pageLetterMode`, `togglePageLetterMode`,
+  `growPageSelection` / `shrinkPageSelection`, `growPageChar` / `shrinkPageChar` or
+  `selectAllPageLetters` is left anywhere, and `app/AGENTS.md`'s v427 entry was rewritten as the
+  v427 → v428 contract.
+- Brace/paren balance 0/0/0 on the touched file.
+- No Gradle in this environment — CI compiles it (per `AGENTS.md`).
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its

@@ -135,7 +135,16 @@ internal data class PersonalPageMeta(
     val kind: String = PAGE_KIND_JOURNAL,
     val topicId: String = "",
     val topicName: String = "",
-    val categoryId: String = ""
+    val categoryId: String = "",
+    /**
+     * v428 — the page's OWN colour ([PersonalNoteEntity.accentArgb]), or
+     * [JOURNAL_ACCENT_THEME]. It rides the meta because that IS this page's
+     * half of the stored row: the writer below rebuilds the whole entity from
+     * it, so a colour left out here would be a colour erased on the next
+     * keystroke — and because the debounce reads the meta as a value, choosing
+     * a colour saves on the same clock a typed word does.
+     */
+    val accentArgb: Int = JOURNAL_ACCENT_THEME
 )
 
 /**
@@ -168,6 +177,18 @@ internal fun PersonalWritingPage(
     /** How to come BACK here (the keep-recording pill's tap target). */
     voiceRoute: (String) -> String = { CurioRoutes.journalEditor(it) },
     onLoaded: (PersonalNoteEntity) -> Unit = {},
+    /**
+     * WHERE THE JOURNAL'S OWN COLOUR COMES FROM, and where it goes.
+     *
+     * A page's colour is only offered when the page WANTS it: [onJournalAccent]
+     * is null for the note-on-a-topic page, the chapter review and the book
+     * review, so the door never appears on a surface that has nowhere to put
+     * the answer. The journal page passes its own setter, and the colour itself
+     * arrives through the meta (see [PersonalPageMeta.accentArgb]), which is
+     * what makes the write the page's normal debounced save.
+     */
+    journalAccent: Int = JOURNAL_ACCENT_THEME,
+    onJournalAccent: ((Int) -> Unit)? = null,
     /** The document as it changes — the to-do page counts its own rows from it
      *  (see TodoScreen), and nothing else has to reach into the editor. */
     onDoc: (PersonalDoc) -> Unit = {},
@@ -374,7 +395,8 @@ internal fun PersonalWritingPage(
                     kind = page.kind,
                     topicId = page.topicId,
                     topicName = page.topicName,
-                    categoryId = page.categoryId
+                    categoryId = page.categoryId,
+                    accentArgb = page.accentArgb
                 )
             )
         }
@@ -894,6 +916,8 @@ internal fun PersonalWritingPage(
                     state = editor,
                     onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
                     showJournalTools = showJournalTools,
+                    journalAccent = journalAccent,
+                    onJournalAccent = onJournalAccent,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }

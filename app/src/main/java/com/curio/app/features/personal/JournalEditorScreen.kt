@@ -44,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -127,6 +128,9 @@ fun JournalEditorScreen(
     var dateMillis by remember {
         mutableLongStateOf(PendingJournalDay.take() ?: startOfToday())
     }
+    // v428 — AND THE DAY'S OWN COLOUR, if the member gave it one: 0 means the
+    // page follows whatever theme the app is on (see [journalDoorAccent]).
+    var accentArgb by remember { mutableIntStateOf(JOURNAL_ACCENT_THEME) }
     var showDatePicker by remember { mutableStateOf(false) }
     var pickerForDate by remember { mutableLongStateOf(startOfToday()) }
     val titleFocusRequester = remember { FocusRequester() }
@@ -167,14 +171,21 @@ fun JournalEditorScreen(
                 title = title,
                 mood = mood?.key.orEmpty(),
                 dateMillis = dateMillis,
-                kind = PAGE_KIND_JOURNAL
+                kind = PAGE_KIND_JOURNAL,
+                accentArgb = accentArgb
             )
         },
+        // The page's colour is the journal's alone: the note-on-a-topic page,
+        // the chapter review and the book review leave this null and so never
+        // grow a door that could not keep its answer.
+        journalAccent = accentArgb,
+        onJournalAccent = { accentArgb = it },
         // A saved day arrives with its own head: the date it belongs to, how it
         // felt, its title.
         onLoaded = { existing ->
             title = existing.title
             mood = existing.moodEnum
+            accentArgb = existing.accentArgb
             if (existing.dateMillis > 0L) dateMillis = existing.dateMillis
         },
         header = { editing, saving, onEditing, _ ->

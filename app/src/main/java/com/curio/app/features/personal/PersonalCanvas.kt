@@ -1826,122 +1826,167 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     fun togglePageEditBar() {
         pageEditBarOpen = !pageEditBarOpen
-        if (!pageEditBarOpen) {
-            pageRange = IntRange.EMPTY
-            pageLetterMode = false
-            pageCharRange = TextRange.Zero
-        }
+        if (!pageEditBarOpen) clearPageReach()
     }
 
     fun closePageEditBar() {
         pageEditBarOpen = false
+        clearPageReach()
+    }
+
+    private fun clearPageReach() {
         pageRange = IntRange.EMPTY
-        pageLetterMode = false
         pageCharRange = TextRange.Zero
-    }
-
-    /** The whole page, as the selection (the bar's own Select all). */
-    fun selectWholePage() {
-        pageRange = if (order.isEmpty()) IntRange.EMPTY else 0..order.lastIndex
-        offerPageLetters()
-    }
-
-    /** One row more on each end of the reach — the arrow that says "more". */
-    fun growPageSelection() {
-        if (order.isEmpty()) return
-        if (pageRange.isEmpty()) {
-            selectWholePage()
-            return
-        }
-        pageRange = (pageRange.first - 1).coerceAtLeast(0)..
-            (pageRange.last + 1).coerceAtMost(order.lastIndex)
-        offerPageLetters()
-    }
-
-    /** One row less, off the end of the reach — the arrow that says "less". */
-    fun shrinkPageSelection() {
-        val range = pageRange
-        if (range.isEmpty()) return
-        pageRange = if (range.first >= range.last) IntRange.EMPTY else range.first..(range.last - 1)
-        offerPageLetters()
+        pageGrowsUp = true
     }
 
     /**
-     * v427 — AND THE REACH GOES DOWN TO A LETTER.
+     * The whole page, as the selection (the bar's own All rows).
      *
-     * The bar's reach was rows and only rows, which cannot pick a clause out of
-     * a line — the member's "why theres only row selection i also want letter by
-     * letter too". LETTER MODE adds a window of characters INSIDE the reach's own
-     * front row: the arrows move the window's far end one letter at a time, so a
-     * run of words can be cut or copied exactly, and the page washes the letters
-     * they have picked (see [pageRowCharRange]).
-     *
-     * One row, on purpose: a character range that crossed rows IS those rows, and
-     * the row mode already says it — so the two modes stay honest about what each
-     * one can express instead of pretending to be one continuous selection.
+     * It is drawn AS a reach built from the foot (`pageGrowsUp`), because that is
+     * where a selection made from the bottom begins (see [nudgePageRows]): with
+     * every row already in hand, the depth the arrows have left to work in is the
+     * LETTERS, and those belong to the row the member was writing in — the last
+     * one on the page.
      */
-    var pageLetterMode by mutableStateOf(false)
-        private set
+    fun selectWholePage() {
+        pageRange = if (order.isEmpty()) IntRange.EMPTY else 0..order.lastIndex
+        pageCharRange = TextRange.Zero
+        pageGrowsUp = true
+    }
 
-    /** The window of letters, inside the reach's own first row. */
+    /**
+     * THE ROWS ARROWS — ONE AXIS, ONE DIRECTION EACH, AND THE REACH IS BUILT FROM
+     * ITS FOOT.
+     *
+     * The member: *"let user select things from bottom"*, and (of the old switch)
+     * *"no more letter row option but the arrows do the work"*. So:
+     *
+     *  · A FRESH REACH IS ONE ROW where the writing is — the row the caret is in,
+     *    or the page's last row when the caret is not on the page — never the whole
+     *    page, so a selection can begin at the FOOT of the page and climb.
+     *  · THE ARROW THAT IS PRESSED FIRST DECIDES WHICH WAY THE REACH GROWS: press
+     *    ↑ and it grows upward from that row, press ↓ and it grows downward. It is
+     *    a SELECTION built away from a place the member chose, which is what a
+     *    range is.
+     *  · THE OTHER ARROW GIVES A ROW BACK (off the far end), and at a single row it
+     *    WALKS that row one step that way — so the reach's foot can be moved
+     *    without a fifth control, and down is never a dead end at the page's end.
+     *  · EVERY ROW ARROW STARTS THE LETTER WINDOW OVER (`pageCharRange`): the
+     *    window belongs to the row the reach begins at, so changing the rows is
+     *    the member changing their mind about the row, not about a clause.
+     */
+    fun nudgePageRows(up: Boolean) {
+        if (order.isEmpty()) return
+        if (pageRange.isEmpty()) {
+            val anchor = focusedId?.let { id -> order.indexOf(id).takeIf { it >= 0 } }
+                ?: order.lastIndex
+            pageGrowsUp = up
+            pageRange = anchor..anchor
+            pageCharRange = TextRange.Zero
+            return
+        }
+        pageCharRange = TextRange.Zero
+        val range = pageRange
+        // The same direction as the reach grows = MORE. The other = one row back.
+        if (up == pageGrowsUp) {
+            pageRange = if (pageGrowsUp) {
+                (range.first - 1).coerceAtLeast(0)..range.last
+            } else {
+                range.first..(range.last + 1).coerceAtMost(order.lastIndex)
+            }
+            return
+        }
+        val single = range.first == range.last
+        pageRange = when {
+            !single && pageGrowsUp -> range.first + 1..range.last
+            !single -> range.first..range.last - 1
+            range.first > 0 && pageGrowsUp -> (range.first - 1)..(range.first - 1)
+            range.last < order.lastIndex -> (range.last + 1)..(range.last + 1)
+            else -> range
+        }
+    }
+
+    /**
+     * v427 — AND THE REACH GOES DOWN TO A LETTER, WITHOUT A MODE.
+     *
+     * The bar's reach was rows and only rows, which cannot pick a clause out of a
+     * line (the member's *"why theres only row selection i also want letter by
+     * letter too"*), and the mode it grew to fix that made the member state which
+     * unit they meant before an arrow could tell them anything (*"no more letter
+     * row option but the arrows do the work"*). The two AXES are the four arrows
+     * now: ↑ ↓ for rows, ← → for letters, and the letters switch themselves on the
+     * moment ← or → is pressed.
+     *
+     * The window always holds ONE ROW's characters — a character range that
+     * crossed rows IS those rows, and the row axis already says it — and it opens
+     * where the writing is: at the caret when the caret is in the row, otherwise at
+     * the END of the row for a reach built upward from the page's foot (the member
+     * is reading back up through what they wrote) and at its START for one built
+     * downward.
+     */
+    /** True once ← or → has been used: the anchor row's letters are in the reach. */
+    val pageLettersPicked: Boolean get() = pageCharRange.max > pageCharRange.min
+
+    /** Which way the reach grew — the arrow that was pressed first (see
+     *  [nudgePageRows]). */
+    private var pageGrowsUp by mutableStateOf(true)
+
+    /** The window of letters, inside the anchor row. */
     var pageCharRange by mutableStateOf(TextRange.Zero)
         private set
 
-    /** The row the letter reach lives in — the front row of the row reach. */
+    /** The anchor row's index: the row the reach STARTED at, i.e. its foot when it
+     *  grew upward and its head when it grew downward. */
+    private fun pageAnchorIndex(): Int =
+        if (pageRange.isEmpty()) -1 else if (pageGrowsUp) pageRange.last else pageRange.first
+
+    /** The row the letter reach lives in. */
     private fun pageLetterRowId(): String? =
-        if (pageRange.isEmpty()) null else order.getOrNull(pageRange.first)
+        order.getOrNull(pageAnchorIndex())
 
     /** How long that row's writing is. */
     private fun pageLetterRowLength(): Int =
         pageLetterRowId()?.let { blocks[it]?.text?.length ?: 0 } ?: 0
 
-    /** Phone the letter window in after the row reach moved under it. */
-    private fun offerPageLetters() {
-        if (!pageLetterMode) return
-        val length = pageLetterRowLength()
-        pageCharRange = if (length == 0) TextRange.Zero else TextRange(0, 1.coerceAtMost(length))
-    }
-
-    fun togglePageLetterMode() {
-        pageLetterMode = !pageLetterMode
-        if (!pageLetterMode) {
-            pageCharRange = TextRange.Zero
-            return
-        }
-        // A letter needs a line to live in: with nothing picked, the whole page
-        // is offered first, exactly as Cut and Copy offer it.
-        if (pageRange.isEmpty()) selectWholePage()
-        offerPageLetters()
-    }
-
-    /** One letter more at the window's end — the letter mode's "more". */
-    fun growPageChar() {
-        val length = pageLetterRowLength()
-        if (length == 0) return
+    /**
+     * THE LETTER ARROWS. [more] is → and !more is ←.
+     *
+     * The first press OPENS the window at one character; from there more extends
+     * the window's far end and less gives a character back. At the row's far end
+     * (and at a single character) the window WALKS instead of sticking, which is
+     * how the old mode kept its arrows meaningful without the reach leaving the
+     * line it belongs to.
+     */
+    fun nudgePageLetters(more: Boolean) {
+        val id = pageLetterRowId() ?: return
+        val text = blocks[id]?.text.orEmpty()
+        if (text.isEmpty()) return
         val range = pageCharRange
-        pageCharRange = if (range.max >= length) {
-            // At the row's end the WINDOW STARTS EARLIER instead: the arrows keep
-            // meaning "more" without the reach leaving the line it belongs to.
-            TextRange((range.min - 1).coerceAtLeast(0), range.max)
+        pageCharRange = if (!pageLettersPicked) {
+            if (!more) return
+            val caret = selections[id]?.start ?: 0
+            val at = if (caret in 0 until text.length) {
+                caret
+            } else if (pageGrowsUp) {
+                text.length - 1
+            } else {
+                0
+            }
+            TextRange(at, (at + 1).coerceAtMost(text.length))
+        } else if (more) {
+            if (range.max < text.length) {
+                TextRange(range.min, range.max + 1)
+            } else {
+                TextRange((range.min - 1).coerceAtLeast(0), range.max)
+            }
         } else {
-            TextRange(range.min, range.max + 1)
+            when {
+                range.max - range.min > 1 -> TextRange(range.min, range.max - 1)
+                range.min > 0 -> TextRange(range.min - 1, range.max)
+                else -> TextRange.Zero
+            }
         }
-    }
-
-    /** One letter less, off the end of the window. */
-    fun shrinkPageChar() {
-        val range = pageCharRange
-        if (range.max - range.min <= 1) {
-            if (range.min > 0) pageCharRange = TextRange(range.min - 1, range.max)
-            return
-        }
-        pageCharRange = TextRange(range.min, range.max - 1)
-    }
-
-    /** The whole of the letter row's writing, as the letter reach. */
-    fun selectAllPageLetters() {
-        val length = pageLetterRowLength()
-        pageCharRange = if (length == 0) TextRange.Zero else TextRange(0, length)
     }
 
     /** How many rows the bar is holding — what the arrows count out loud. */
@@ -1953,6 +1998,42 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         get() = (pageCharRange.max - pageCharRange.min).coerceAtLeast(0)
 
     val pageLetterTotal: Int get() = pageLetterRowLength()
+
+    /**
+     * WHETHER AN ARROW HAS ANYTHING TO DO. The four arrows are the whole control
+     * surface (the mode switch is gone), so a dead arrow has to LOOK dead — a
+     * chip that answers a press with nothing is how a bar teaches a member to
+     * stop pressing it.
+     */
+    fun canNudgePageRows(up: Boolean): Boolean {
+        if (order.isEmpty()) return false
+        if (pageRange.isEmpty()) return true
+        val range = pageRange
+        if (up == pageGrowsUp) {
+            return if (pageGrowsUp) range.first > 0 else range.last < order.lastIndex
+        }
+        return if (range.first == range.last) {
+            if (up) range.first > 0 else range.last < order.lastIndex
+        } else {
+            true
+        }
+    }
+
+    fun canNudgePageLetters(more: Boolean): Boolean {
+        if (pageRange.isEmpty()) return false
+        val length = pageLetterRowLength()
+        if (length == 0) return false
+        if (!pageLettersPicked) return more
+        val range = pageCharRange
+        return if (more) range.max < length || range.min > 0 else range.max - range.min > 1 || range.min > 0
+    }
+
+    /** The whole of the anchor row's writing, as the letter reach — the bar's
+     *  "Line", the counterpart of All rows. */
+    fun selectPageLineLetters() {
+        val length = pageLetterRowLength()
+        pageCharRange = if (length == 0) TextRange.Zero else TextRange(0, length)
+    }
 
     /**
      * IS THIS ROW IN THE BAR'S REACH? The page WASHES a picked row (see
@@ -1968,8 +2049,8 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * (see [personalAnnotated]), so the reach is visible to the letter.
      */
     fun pageRowCharRange(index: Int): TextRange? {
-        if (!pageLetterMode) return null
-        if (pageRange.isEmpty() || index != pageRange.first) return null
+        if (!pageLettersPicked) return null
+        if (pageRange.isEmpty() || index != pageAnchorIndex()) return null
         val text = blocks[order.getOrNull(index) ?: return null]?.text.orEmpty()
         if (text.isEmpty()) return null
         val from = pageCharRange.min.coerceIn(0, text.length)
@@ -1982,9 +2063,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 
     /**
      * The selection's words, top to bottom (a print or a voice note holds none).
-     * In LETTER MODE it is the characters the window holds, and nothing else.
+     * With letters PICKED it is the characters the window holds and nothing else —
+     * the member has said which clause they mean, so that is what Cut and Copy
+     * take.
      */
-    fun pageSelectionText(): String = if (pageLetterMode) {
+    fun pageSelectionText(): String = if (pageLettersPicked) {
         val id = pageLetterRowId() ?: return ""
         val text = blocks[id]?.text.orEmpty()
         val from = pageCharRange.min.coerceIn(0, text.length)
@@ -2013,14 +2096,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun copyPageSelection(): String = pageSelectionText()
 
     /**
-     * CUT, in LETTER MODE: the characters the window holds leave the LINE they
-     * were picked out of, and nothing else on the page moves. Undo puts them
+     * CUT, WITH LETTERS PICKED: the characters the window holds leave the LINE
+     * they were picked out of, and nothing else on the page moves. Undo puts them
      * back exactly where they were taken from.
      */
     private fun cutPageLetters(): String {
         val id = pageLetterRowId() ?: return ""
         val block = blocks[id] ?: return ""
-        val range = pageRowCharRange(pageRange.first) ?: return ""
+        val range = pageRowCharRange(pageAnchorIndex()) ?: return ""
         val words = block.text
         val taken = words.substring(range.min, range.max)
         val mask = mask(id)
@@ -2045,7 +2128,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      *  ROWS leave the page — prints and voice notes included, because the member
      *  picked them. */
     fun cutPageSelection(): String {
-        if (pageLetterMode) return cutPageLetters()
+        if (pageLettersPicked) return cutPageLetters()
         val ids = selectedRowIds()
         if (ids.isEmpty()) return ""
         val text = pageSelectionText()
@@ -2076,12 +2159,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     /** Paste: every line of [text] arrives as its own row, under the selection
-     *  (or at the foot of the page when nothing is picked). In LETTER MODE it
+     *  (or at the foot of the page when nothing is picked). With LETTERS PICKED it
      *  lands INSIDE the line the window is in, at the window's own place — which
      *  is what pasting into a picked run of letters means. */
     fun pastePageText(text: String) {
         if (text.isEmpty()) return
-        if (pageLetterMode) {
+        if (pageLettersPicked) {
             pastePageLetters(text)
             return
         }
@@ -5359,6 +5442,25 @@ private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
  * rows is the one-tap select-everything the member also asked for, and Done puts
  * the writing tools back.
  *
+ * v427 — AND THE SWITCH IS GONE (member: "proper arrow up down left right arrow
+ * and no more letter row option but the arrows do the work ... dont let user
+ * select things starting from bottom" → "let user select things from bottom
+ * proper tool of how it should behave"). The bar is now FOUR ARROWS on TWO
+ * AXES, each axis beside the thing it counts:
+ *
+ *  · ↑ ↓ are the rows, and they are built FROM THE MEMBER'S OWN ROW — the caret's
+ *    when the caret is on the page, else the page's foot — so a selection can
+ *    start at the bottom of the page and climb. The arrow pressed FIRST sets
+ *    which way the reach grows; the other one gives a row back, and at a single
+ *    row it walks. See [PersonalEditorState.nudgePageRows].
+ *  · ← → are the letters, and they SWITCH THEMSELVES ON: the first press opens a
+ *    one-character window in that row, after which more extends it and less
+ *    takes a character back. See [PersonalEditorState.nudgePageLetters].
+ *  · The count is one line — "3 of 12 rows" and, only once reached into, "· 5 of
+ *    24 letters" — so "4 of 12" is never ambiguous about what four of twelve.
+ *  · Every arrow DIMS when its axis has nowhere to go, because a control that
+ *    answers a press with nothing teaches a member to stop pressing it.
+ *
  * Undo is the bar's own last actions (see the state's own note) — it is not a
  * keystroke undo, and nothing here pretends it is.
  */
@@ -5372,27 +5474,34 @@ private fun PersonalPageEditBar(
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val picked = state.pageSelectionCount
     val rows = state.blockIds.size
-    // v427 — THE REACH HAS TWO UNITS (see the state's own note): the ROWS a
-    // member picks a part of the page by, and the LETTERS they pick a part of a
-    // LINE by. The bar says which one it is counting, so "4 of 12" is never
-    // ambiguous about what four of twelve.
-    val letters = state.pageLetterMode
+    // v427 — THE REACH HAS TWO AXES AND NO MODE (see the state's own note on
+    // [PersonalEditorState.nudgePageRows]). ↑ ↓ are the ROWS, ← → are the
+    // LETTERS, each pair sits with the thing it counts, and the letters switch
+    // themselves on the moment ← or → is pressed — so the bar never has to be
+    // told which unit the member means before an arrow can tell them anything.
+    val lettersPicked = state.pageLettersPicked
     val letterCount = state.pageLetterCount
     val letterTotal = state.pageLetterTotal
-    val hasReach = if (letters) letterCount > 0 else picked > 0
-    // Cut and Copy with an empty reach OFFER one first — the whole page in row
-    // mode, the whole line in letter mode — which is the member's two-tap flow:
-    // the first tap says how much, the second one does it.
-    val offerReach: () -> Unit = {
-        if (letters) state.selectAllPageLetters() else state.selectWholePage()
+    val lettersHere = picked > 0 && letterTotal > 0
+    // The reach as one sentence: the rows, then — only once they have been
+    // reached into — the letters inside them. A count that is not true is worse
+    // than no count, so the letter half appears when it has something to say.
+    val reachLine = when {
+        picked == 0 -> "Nothing picked"
+        lettersPicked -> "$picked of $rows rows · $letterCount of $letterTotal letters"
+        else -> "$picked of $rows rows"
     }
+    val hasReach = picked > 0
+    // Cut and Copy with an empty reach OFFER the whole page first — the
+    // member's two-tap flow: the first tap says how much, the second acts.
+    val offerReach: () -> Unit = { state.selectWholePage() }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 7.dp),
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
-        // ── THE REACH ───────────────────────────────────────────────────
+        // ── THE ROWS: ↑ MORE · ↓ MORE, OR ONE STEP BACK ──────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -5400,40 +5509,30 @@ private fun PersonalPageEditBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            PageTextChip(if (letters) "Letters" else "Rows", accent = accent) {
-                state.togglePageLetterMode()
-            }
-            PageTextChip(
-                "◀",
-                enabled = if (letters) letterCount > 1 else picked > 0,
-                accent = ink
-            ) {
-                if (letters) state.shrinkPageChar() else state.shrinkPageSelection()
-            }
+            // Proper arrows, not triangles: the same icon language as the rest
+            // of the app, and an arrow that is dead now LOOKS dead.
+            PageArrowChip(
+                icon = CurioIcons.ArrowUpward,
+                label = "More rows up",
+                accent = accent,
+                enabled = state.canNudgePageRows(up = true)
+            ) { state.nudgePageRows(up = true) }
+            PageArrowChip(
+                icon = CurioIcons.ArrowDownward,
+                label = "More rows down",
+                accent = accent,
+                enabled = state.canNudgePageRows(up = false)
+            ) { state.nudgePageRows(up = false) }
             Text(
-                text = when {
-                    letters && letterTotal == 0 -> "Nothing picked"
-                    letters -> "$letterCount of $letterTotal letters"
-                    picked == 0 -> "Nothing picked"
-                    else -> "$picked of $rows rows"
-                },
+                text = reachLine,
                 style = MaterialTheme.typography.labelSmall,
-                color = muted,
+                color = if (picked > 0) ink else muted,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
-            PageTextChip(
-                "▶",
-                enabled = if (letters) letterCount < letterTotal else picked < rows,
-                accent = ink
-            ) {
-                if (letters) state.growPageChar() else state.growPageSelection()
-            }
-            PageTextChip(if (letters) "All letters" else "All rows", accent = ink) {
-                if (letters) state.selectAllPageLetters() else state.selectWholePage()
-            }
+            PageTextChip("All rows", accent = ink) { state.selectWholePage() }
             PageTextChip("Done", accent = accent) { state.closePageEditBar() }
         }
-        // ── THE ACTIONS ─────────────────────────────────────────────────
+        // ── THE LETTERS: ← ONE BACK · → ONE MORE ─────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -5441,6 +5540,23 @@ private fun PersonalPageEditBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
+            PageArrowChip(
+                icon = CurioIcons.ArrowBack,
+                label = "Fewer letters",
+                accent = accent,
+                enabled = state.canNudgePageLetters(more = false)
+            ) { state.nudgePageLetters(more = false) }
+            PageArrowChip(
+                icon = CurioIcons.ArrowForward,
+                label = "One more letter",
+                accent = accent,
+                enabled = state.canNudgePageLetters(more = true)
+            ) { state.nudgePageLetters(more = true) }
+            // The whole line in one tap — the counterpart of All rows, for the
+            // member who wants the line rather than a clause out of it.
+            PageTextChip("Line", enabled = lettersHere, accent = ink) {
+                state.selectPageLineLetters()
+            }
             PageTextChip("Cut", enabled = true, accent = accent) {
                 if (!hasReach) {
                     offerReach()
@@ -5471,6 +5587,34 @@ private fun PersonalPageEditBar(
     }
 }
 
+/** One arrow of [PersonalPageEditBar] — an icon in a round tap target, tinted
+ *  with the page's own ink, dimmed to the point of being plainly unavailable
+ *  when its axis has nowhere left to go. */
+@Composable
+private fun PageArrowChip(
+    icon: String,
+    label: String,
+    accent: Color,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(34.dp)
+            .clip(RoundedCornerShape(50))
+            .clickable(enabled = enabled, onClickLabel = label, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(
+            icon,
+            contentDescription = label,
+            tint = if (enabled) accent
+                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+            size = 18.dp
+        )
+    }
+}
+
 /** One word of [PersonalPageEditBar] — a bare label in the page's own inks, so
  *  the bar reads as the dock's language (a row of small words) rather than as a
  *  second toolbar with its own furniture. */
@@ -5498,10 +5642,28 @@ internal fun PersonalToolDock(
     state: PersonalEditorState,
     onPickPhoto: () -> Unit,
     showJournalTools: Boolean = true,
+    /**
+     * v428 — THE PAGE'S OWN COLOUR (see [JournalAccentSheet]), offered only when
+     * the page has somewhere to keep it: null draws no door at all.
+     */
+    journalAccent: Int = JOURNAL_ACCENT_THEME,
+    onJournalAccent: ((Int) -> Unit)? = null,
     modifier: Modifier = Modifier,
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
     val active = state.activeFlags()
+    // The journal's own colour, as a door rather than a swatch: the button
+    // WEARS the colour the page is wearing (its own when it has one, else the
+    // app's accent ink), which is what makes the palette read as "this journal's
+    // colour" instead of "a palette".
+    var accentOpen by remember { mutableStateOf(false) }
+    if (accentOpen && onJournalAccent != null) {
+        JournalAccentSheet(
+            current = journalAccent,
+            onPick = onJournalAccent,
+            onDismiss = { accentOpen = false }
+        )
+    }
     // ── v424 — AND THE PAGE'S EXPORT DOOR ───────────────────────────
     //
     // Resolved here rather than inside the tool, because the file a page leaves
@@ -5594,6 +5756,24 @@ internal fun PersonalToolDock(
                 onClick = { historyOpen = true }
             ) {
                 CurioIcon(CurioIcons.History, null, size = 19.dp)
+            }
+            // v428 — THIS JOURNAL'S COLOUR, right beside the history tool: both
+            // are facts about the PAGE rather than about the line the caret is
+            // on, and a member who wants to change how their journal looks looks
+            // here first. The door carries the page's own colours (its fill is
+            // its paper, its glyph the colour in hand), so the dock says what
+            // the page is wearing before it is opened.
+            if (onJournalAccent != null) {
+                val worn = if (journalAccent == JOURNAL_ACCENT_THEME) accentInk
+                           else Color(journalAccent)
+                PersonalToolButton(
+                    label = "This journal's colour",
+                    active = journalAccent != JOURNAL_ACCENT_THEME,
+                    accent = worn, ink = ink,
+                    onClick = { accentOpen = true }
+                ) {
+                    CurioIcon(CurioIcons.Palette, null, tint = worn, size = 19.dp)
+                }
             }
             PersonalToolButton(
                 label = "Bold",

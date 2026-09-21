@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         // reviews). Its own tables, never the capture archive's.
         PersonalNoteEntity::class, PersonalBookEntity::class, ReaderMarkEntity::class
     ],
-    version = 21,
+    version = 22,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -459,6 +459,23 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v428 — A PAGE'S OWN COLOUR ([PersonalNoteEntity.accentArgb]).
+         *
+         * 0 = follow the app's theme, which is the honest backfill for every row
+         * that already exists: every journal written before this column followed
+         * the theme, and every one of them still does — nothing to guess, and no
+         * page changes colour on the update.
+         */
+        val MIGRATION_21_22 = object : Migration(21, 22) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE `personal_notes` ADD COLUMN `accentArgb` " +
+                        "INTEGER NOT NULL DEFAULT 0"
+                )
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -473,7 +490,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }
