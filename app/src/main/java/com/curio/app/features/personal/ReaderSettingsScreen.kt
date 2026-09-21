@@ -16,8 +16,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,12 +28,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import kotlin.math.roundToInt
 
 /**
@@ -330,6 +336,132 @@ internal fun ReaderSettingsScreen(
                 )
             }
 
+            // ── v440 — THE VOICE: HOW FAST, AND WHOSE (see [ReaderSpeaker]) ──
+            //
+            // The member's own pick from the settings list: *"Read-aloud: a speed and
+            // voice picker"*, and their answer for what it reads: *"The visible page,
+            // then follow on"* (the reader's own driver). Both are remembered with the
+            // rest of the look, so a member who needs a slower voice on a book has it
+            // on the next one.
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                ReaderSettingsSection("Read aloud", palette)
+                ReaderSliderRow(
+                    label = "Speed",
+                    value = ReaderLook.speakSpeed,
+                    range = SPEAK_SLOW..SPEAK_FAST,
+                    step = 0.1f,
+                    valueLabel = "${(ReaderLook.speakSpeed * 10f).roundToInt() / 10f}\u00D7",
+                    palette = palette,
+                    onValue = { next ->
+                        ReaderLook.speakSpeed = next.coerceIn(SPEAK_SLOW, SPEAK_FAST)
+                    },
+                    leadingGlyph = CurioIcons.Remove,
+                    leadingLabel = "Slower",
+                    trailingGlyph = CurioIcons.Add,
+                    trailingLabel = "Faster"
+                )
+                // ── AND WHICH VOICE ────────────────────────────────────
+                //
+                // The phone's own list, read from the engine the first time this door
+                // is opened ([ReaderSpeaker.prepare] + `voices()`) — so nothing is
+                // downloaded and the row says what the member has. The stored value is
+                // the engine's own voice NAME, and blank means "whatever the phone
+                // reads with" (see [ReaderLook.speakVoice]).
+                val context = LocalContext.current
+                var picker by remember { mutableStateOf(false) }
+                var voices by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+                Surface(
+                    onClick = {
+                        ReaderSpeaker.prepare(context)
+                        voices = ReaderSpeaker.voices()
+                        picker = true
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = palette.ink.copy(alpha = 0.06f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CurioIcon(CurioIcons.PlayArrow, null, tint = palette.accent, size = 17.dp)
+                        Text(
+                            "Voice",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = palette.ink.copy(alpha = 0.8f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            // The label when the picker has been opened in this visit,
+                            // and otherwise the voice's own name — never "the phone's
+                            // own" over a voice the member has CHOSEN: a row that
+                            // describes the wrong state is worse than a terse one.
+                            voices.firstOrNull { it.first == ReaderLook.speakVoice }?.second
+                                ?: ReaderLook.speakVoice.substringAfterLast('#', "").ifBlank {
+                                    if (ReaderLook.speakVoice.isBlank()) "The phone's own"
+                                    else ReaderLook.speakVoice
+                                },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.accent,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                if (picker) {
+                    AlertDialog(
+                        onDismissRequest = { picker = false },
+                        containerColor = palette.paper,
+                        title = {
+                            Text(
+                                "Which voice reads",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontFamily = readerTypeFamily(ReaderLook.typeFace)
+                                ),
+                                color = palette.ink
+                            )
+                        },
+                        text = {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                VoiceChoice(
+                                    label = "The phone's own",
+                                    live = ReaderLook.speakVoice.isBlank(),
+                                    palette = palette
+                                ) { ReaderLook.speakVoice = "" }
+                                voices.forEach { (name, label) ->
+                                    VoiceChoice(
+                                        label = label,
+                                        live = ReaderLook.speakVoice == name,
+                                        palette = palette
+                                    ) { ReaderLook.speakVoice = name }
+                                }
+                                if (voices.isEmpty()) {
+                                    Text(
+                                        "No voices are installed on this phone yet.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = palette.ink.copy(alpha = 0.6f),
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    )
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { picker = false }) {
+                                Text("Done", color = palette.accent)
+                            }
+                        }
+                    )
+                }
+            }
+
             // ── v440 — WHERE A LOOKUP GOES ──────────────────────────────
             //
             // The member, asked what "bundled vs online" should mean once they heard
@@ -429,6 +561,50 @@ internal fun ReaderSettingsScreen(
             }
 
             Spacer(Modifier.height(6.dp))
+        }
+    }
+}
+
+/** v440 — how slow and how fast the voice may read (see [ReaderSpeaker]). */
+private const val SPEAK_SLOW = 0.6f
+private const val SPEAK_FAST = 2f
+
+/**
+ * v440 — ONE VOICE IN THE PICKER, in the reader's own capsule language.
+ *
+ * A row rather than a chip: voice names are long ("English (United States) ·
+ * female_1") and a chip that ellipsises them tells the member nothing — which is
+ * the one thing a picker has to do.
+ */
+@Composable
+private fun VoiceChoice(
+    label: String,
+    live: Boolean,
+    palette: ReaderPalette,
+    onPick: () -> Unit
+) {
+    Surface(
+        onClick = onPick,
+        shape = RoundedCornerShape(12.dp),
+        color = if (live) palette.accent.copy(alpha = 0.14f) else Color.Transparent,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            if (live) {
+                CurioIcon(CurioIcons.Check, null, tint = palette.accent, size = 16.dp)
+            }
+            Text(
+                label,
+                style = TextStyle(
+                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                    fontSize = 14.sp,
+                    color = palette.ink.copy(alpha = if (live) 0.95f else 0.75f)
+                )
+            )
         }
     }
 }
