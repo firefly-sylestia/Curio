@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -300,6 +301,25 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // than to the app: it opens OVER the book, in the reader's own paper, and
     // back returns to the page that was being read (see [ReaderSettingsScreen]).
     var readerSettingsOpen by remember { mutableStateOf(false) }
+    // ── v438 — BACK CLOSES WHAT IS OPEN, NOT THE BOOK ────────────────────
+    //
+    // The member: *"backing from settings exits the reader"*. Reading settings is
+    // drawn OVER the reading from inside this screen (see [ReaderSettingsScreen]) —
+    // it is not a route — and the reader registered no back handler at all, so the
+    // system's own back went to the navigation stack and popped the READER out from
+    // under the settings page. One handler now answers for everything this screen
+    // opens over itself, innermost thing first, and it is enabled only while
+    // something IS open: with nothing up, back leaves the book exactly as before.
+    BackHandler(
+        enabled = readerSettingsOpen || ReaderLook.zonesEditing || sheet != null || scrubOpen
+    ) {
+        when {
+            readerSettingsOpen -> readerSettingsOpen = false
+            ReaderLook.zonesEditing -> ReaderLook.zonesEditing = false
+            sheet != null -> sheet = null
+            scrubOpen -> scrubOpen = false
+        }
+    }
     var marking by remember { mutableStateOf<ReaderParagraph?>(null) }
     var noteFor by remember { mutableStateOf<ReaderParagraph?>(null) }
     var searching by remember { mutableStateOf<ReaderSearch?>(null) }
@@ -1126,25 +1146,12 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             }
         }
 
-        // ── v434 — AND THE NIGHT DIM, OVER THE PAPER ───────────────────
-        //
-        // A wash of black over the reading — never over the chrome, because a
-        // tool you cannot see is a tool you cannot find — and it takes no
-        // pointer input of its own, so a tap still reaches the page it is
-        // dimming (see [ReaderLook.dim]).
-        if (ReaderLook.dim > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = ReaderLook.dim))
-            )
-        }
-
         ReaderChrome(
             visible = chrome && !ReaderLook.zonesEditing,
             title = book?.title.orEmpty().ifBlank { "Reader" },
             palette = palette,
             pageLabel = scrubber?.short.orEmpty(),
+            footHidden = scrubOpen,
             search = searching,
             onClose = { navController.popBackStack() },
             onSearch = {
@@ -1182,6 +1189,29 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     onUnpin = { ReaderLook.pinnedPage = false }
                 )
             }
+        }
+
+        // ── v438 — AND THE NIGHT DIM, OVER THE PAPER **AND** THE TOOLS ──────
+        //
+        // v434 drew this wash UNDER the chrome, on the reasoning that a tool you
+        // cannot see is a tool you cannot find. The member's answer is that the
+        // opposite is true at night: *"the night dim should also work on the
+        // buttons etc"* — a dimmed page under undimmed white pills is the one
+        // arrangement that makes the tools the brightest thing in a dark room,
+        // which is exactly what a night dim is for.
+        //
+        // So it is drawn OVER the page AND the whole chrome — head pill, search
+        // bar, foot pill and the pinned count alike — and UNDER the things a
+        // member is actively working in: the selection's own bar, the mark dock,
+        // the zones editor and every sheet. Those are drawn after it in this Box
+        // (or outside it), which is what keeps them bright; it takes no pointer
+        // input, so a tap still reaches the page it is dimming.
+        if (ReaderLook.dim > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = ReaderLook.dim))
+            )
         }
 
         // ── v424 — AND THE ZONES' OWN EDITOR, ON THE PAGE ───────────────
@@ -3504,6 +3534,17 @@ private fun ReaderChrome(
     palette: ReaderPalette,
     /** v431 — the compact count the middle button wears; blank with no pages. */
     pageLabel: String,
+    /**
+     * v438 — WHETHER THE PAGE SLIDER HAS THE FOOT TO ITSELF.
+     *
+     * The member: *"the page slider is bad too it should hide the dock hen the
+     * slider shows"*. The scrubber is a pill of its own floating above the foot
+     * pill, so with both up the page's own bottom carried two rows of controls
+     * at once — and the count button that OPENED the slider was still sitting
+     * there underneath it. The foot stands down while the slider is up, which is
+     * the same bargain the journal's dock makes for its copy box.
+     */
+    footHidden: Boolean = false,
     /** v431 — while the search bar is up the head hands its row over to it. */
     search: ReaderSearch?,
     onClose: () -> Unit,
@@ -3635,7 +3676,7 @@ private fun ReaderChrome(
         //   · Bookmarks  — the places the member kept;
         //   · ⋯          — notes, highlights, the dictionary, share and settings.
         AnimatedVisibility(
-            visible = visible,
+            visible = visible && !footHidden,
             enter = fadeIn(tween(180)) + slideInVertically(tween(240)) { it / 2 },
             exit = fadeOut(tween(150)) + slideOutVertically(tween(200)) { it / 2 },
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -3678,8 +3719,14 @@ private fun ReaderChrome(
  */
 private val ReaderChromeTopFloor = 18.dp
 
+/**
+ * v438 — `internal`, because reading settings is drawn INSIDE the reader and had
+ * the same bug: `statusBarsPadding()` collapses to zero under a reader that hides
+ * the status bar, so its own head settled on the glass (member: *"in settings the
+ * header is again over the status bar"*). One floor, both heads.
+ */
 @Composable
-private fun Modifier.readerChromeTopInset(): Modifier = this
+internal fun Modifier.readerChromeTopInset(): Modifier = this
     .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
     .padding(top = ReaderChromeTopFloor)
 
@@ -4241,24 +4288,32 @@ private fun ReaderMenuTile(
     palette: ReaderPalette,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = tile.onClick,
-        shape = RoundedCornerShape(50),
-        color = palette.ink.copy(alpha = 0.06f),
-        // v437 — SMALLER. 94dp tiles under a 30dp glyph made the ⋯ menu the
-        // biggest thing in the reader — a panel that took over the page it was
-        // floating over (member: "the 3 dot menu in pdf reader is bad like too
-        // huge"). The glyph is still the loudest thing in the tile; the tile is
-        // simply no longer a billboard.
-        modifier = modifier.height(68.dp)
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Surface(
+            onClick = tile.onClick,
+            shape = RoundedCornerShape(50),
+            color = palette.ink.copy(alpha = 0.06f),
+            // ── v438 — A PILL WITH THE GLYPH IN IT, AND THE NAME UNDER IT ──
+            //
+            // The member: *"the 3 dot in pdf buttom sheet still looks bad with
+            // huge buttons, and keep the button inside the pil keep the text out
+            // of it"*. v437 shrank a 94dp tile to 68 and left the NAME inside the
+            // capsule under the glyph, so the pill was tall and the name sat in
+            // the fill like a second control. The capsule holds the GLYPH and
+            // nothing else — a real 46dp pill, the height the reader's own
+            // controls are — and the name is a label UNDERNEATH it, outside the
+            // fill, which is where a label belongs.
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp)
         ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Box {
-                CurioIcon(tile.glyph, null, tint = palette.accent, size = 24.dp)
+                CurioIcon(tile.glyph, null, tint = palette.accent, size = 22.dp)
                 when {
                     tile.count > 0 -> Box(
                         modifier = Modifier
@@ -4290,16 +4345,16 @@ private fun ReaderMenuTile(
                     )
                 }
             }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                tile.label,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Medium
-                ),
-                color = palette.ink.copy(alpha = 0.78f),
-                maxLines = 1
-            )
+            }
         }
+        Text(
+            tile.label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Medium
+            ),
+            color = palette.ink.copy(alpha = 0.78f),
+            maxLines = 1
+        )
     }
 }
 
@@ -5770,10 +5825,17 @@ private fun ReaderMarksSection(
     onDelete: (ReaderMarkEntity) -> Unit
 ) {
     if (marks.isEmpty()) {
+        // ── v438 — AN EMPTY LIST IS AN EM DASH ──────────────────────────
+        //
+        // It said "Nothing marked yet — hold a passage while you read.", which is
+        // a sentence every opening had to read again to learn the same thing. The
+        // member: *"highliths and notes empty stat eis bad dot use erm dash"*. The
+        // dash is the app's own way of saying "nothing here" everywhere else, and
+        // the sheet's own title has already said which list is empty.
         Text(
-            "Nothing marked yet \u2014 hold a passage while you read.",
-            style = MaterialTheme.typography.bodySmall,
-            color = palette.ink.copy(alpha = 0.75f)
+            "\u2014",
+            style = MaterialTheme.typography.bodyMedium,
+            color = palette.ink.copy(alpha = 0.45f)
         )
     }
     val paged = content is ReaderContent.Pages
@@ -6854,14 +6916,20 @@ private fun ReaderSelectionBar(
     onMore: () -> Unit,
     onClear: () -> Unit
 ) {
-    // ── v431 — ONE WORD IS A LOOKUP, NOT A MARK-UP ───────────────────
+    // ── v438 — ONE WORD GETS THE WHOLE BAR BACK ──────────────────────
     //
-    // The member's rule, in their own words: "when user hight one wor only show
-    // the dictionarcy icon". A sweep that landed on a single word has exactly one
-    // thing the member wants from it — what it means — and offering five inks and
-    // a bookmark beside it made the one useful door the smallest thing on the bar.
-    // So a single word gets that door and nothing else (a tap on the page clears
-    // the selection; see [tapPage]).
+    // v431 cut this bar down to the dictionary alone for a single word (the
+    // member's rule then: *"when user hight one wor only show the dictionarcy
+    // icon"*). Their answer now is the opposite: *"the hihglight screen dock only
+    // have disconary option and nothing else … compare the dock in this commit see
+    // it had many hihglith options etc, please fix the highlighht pill selecter in
+    // pdf"*. One word is the commonest thing a reader highlights — an unfamiliar
+    // word, a name, a term — so hiding the five pens behind it made the most
+    // frequent action the one with the fewest tools. The bar is ONE row for every
+    // selection now — the five pens, the note, the bookmark, the dictionary, the
+    // ⋯ door and the cross — and the `singleWord` test that used to branch it is
+    // gone with the branch (the dictionary door was already the row's own, so a
+    // single word simply gets it beside the pens rather than instead of them).
     //
     // ── AND THE BAR IS A WIDE FLOATING CAPSULE ───────────────────────
     //
@@ -6871,7 +6939,6 @@ private fun ReaderSelectionBar(
     // similiar to what samsung uses"). One row, a full-radius capsule, one lift,
     // icons only, and `animateContentSize` so going from a word to a sentence is a
     // resize rather than a swap.
-    val singleWord = selection.text.trim().let { it.isNotEmpty() && !it.contains(' ') }
     Surface(
         shape = RoundedCornerShape(50),
         color = palette.surface,
@@ -6887,14 +6954,6 @@ private fun ReaderSelectionBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            if (singleWord) {
-                SelectionBarAction(
-                    CurioIcons.MenuBook,
-                    "Look this word up",
-                    palette,
-                    onDictionary
-                )
-            } else {
                 ReaderHighlighter.entries.forEach { ink ->
                     Surface(
                         onClick = { onHighlight(ink) },
@@ -6935,7 +6994,6 @@ private fun ReaderSelectionBar(
                 )
                 Spacer(Modifier.width(2.dp))
                 SelectionBarAction(CurioIcons.Close, "Clear the selection", palette, onClear)
-            }
         }
     }
 }

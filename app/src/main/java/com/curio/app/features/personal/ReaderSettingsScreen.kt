@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,7 +85,12 @@ internal fun ReaderSettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(palette.paper)
-            .statusBarsPadding()
+            // v438 — the READER's own top floor, not the (hidden) status bar: this
+            // page is drawn inside the reader, which hides the bar, so
+            // `statusBarsPadding()` collapsed to zero and the head sat on the
+            // glass (member: "in settings the header is again over the status
+            // bar"). See [readerChromeTopInset].
+            .readerChromeTopInset()
     ) {
         // ── THE HEAD, IN THE READER'S OWN PILL ──────────────────────────
         Surface(

@@ -724,4 +724,9 @@ FIX:
 - Reading: the ⋯ menu is smaller, and opening the search merges with the book's name in one movement instead of two panels changing places.
 
 FIX:
+- Reading: one word gets the whole selection bar back — highlighting a single word used to offer only the dictionary, so the pens, the note, the bookmark and Share had to wait for a longer sweep.
+- Reading: back closes what is open instead of leaving the book — reading settings is drawn over the reading, and the system's back was popping the reader itself.
+- Reading: the reading-settings head clears the top of the screen, and the night dim now darkens the tools as well as the page, while the panels you are working in stay bright.
+- Reading: the ⋯ grid is a pill with the glyph in it and its name underneath — the names were inside the capsule, which is what made the buttons read as huge; the empty notes and highlights lists say nothing but a dash now.
+- Reading: the page slider takes the bottom of the page to itself while it is up, so the buttons it opened from step aside.
 - Writing: a page always keeps a line to type in — cutting or deleting the whole page left the writing with nothing to put the cursor in, so there was no way to type again; an empty line stays at the foot with the cursor already in it.
