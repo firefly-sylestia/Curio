@@ -32,10 +32,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -45,11 +47,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -98,6 +103,39 @@ fun JournalListScreen(navController: NavController) {
     var pendingDelete by remember { mutableStateOf<PersonalNoteEntity?>(null) }
     val scope = rememberCoroutineScope()
 
+    // ── v440 — FINDING A PAGE, AND THE ORDER THEY SIT IN ────────────────
+    //
+    // The member asked for both in one breath: *"add search for journals and also
+    // sorting by date by tapping the date in journals date"*. A collection that is
+    // one page per day grows into hundreds of days, and until now the only way to
+    // a page was to scroll to its month.
+    //
+    // The search reads what a ROW already shows (its title, its opening line, the
+    // topic it is about, its mood, and its own date line) — it never decodes a
+    // document, so a keystroke cannot cost a JSON parse per page (see the row's own
+    // note on `doc`).
+    var query by remember { mutableStateOf("") }
+    var searchOpen by remember { mutableStateOf(false) }
+    //
+    // NEWEST FIRST is the default, which is what the list has always been: the
+    // latest day at the top. The head's date pill orders it (see [PersonalHeaderDate]).
+    var newestFirst by remember { mutableStateOf(true) }
+    val focusManager = LocalFocusManager.current
+    val needle = query.trim().lowercase()
+    val matched = remember(journals, needle) {
+        if (needle.isEmpty()) journals else journals.filter { it.answers(needle) }
+    }
+    // The order is decided HERE rather than in the query so the door can reverse
+    // it without a second trip to the database. `writtenAtMillis` is the
+    // tiebreaker — NOT `updatedAtMillis`: a page edited late does not climb its
+    // own day (member: "in journals view dont update the time if its edited again
+    // late").
+    val ordered = remember(matched, newestFirst) {
+        val by = compareBy<PersonalNoteEntity> { it.dateMillis }
+            .thenBy { it.writtenAtMillis() }
+        matched.sortedWith(if (newestFirst) by.reversed() else by)
+    }
+
     Box(
         Modifier
             .fillMaxSize()
@@ -107,9 +145,13 @@ fun JournalListScreen(navController: NavController) {
         Column(Modifier.fillMaxSize()) {
         PersonalHeader(
             title = "Journals",
-            subtitle = when (journals.size) {
-                0 -> "A page for a day"
-                1 -> "1 page"
+            subtitle = when {
+                // A search says what it found, out of what there is: a count of
+                // the whole collection during a search is a number the member
+                // cannot use.
+                needle.isNotEmpty() -> "${matched.size} of ${journals.size} pages"
+                journals.size == 0 -> "A page for a day"
+                journals.size == 1 -> "1 page"
                 else -> "${journals.size} pages"
             },
             onBack = { navController.popBackStack() },
@@ -117,7 +159,35 @@ fun JournalListScreen(navController: NavController) {
             // page, and a second door in the head only crowded the title. The
             // head wears TODAY instead, which is the one date a journal is
             // about (user request).
-            action = { PersonalHeaderDate() }
+            //
+            // v440 — AND THE DATE IS THE ORDER'S DOOR (member: "sorting by date by
+            // tapping the date in journals date"): a tap says which end of the
+            // collection to read from, and the pill's own arrow says which end it
+            // is showing.
+            action = {
+                PersonalHeaderDate(
+                    onToggleSort = { newestFirst = !newestFirst },
+                    newestFirst = newestFirst
+                )
+            }
+        )
+
+        // ── v440 — THE SEARCH, AS A PILL THAT OPENS INTO A FIELD ────────
+        //
+        // Closed it is one quiet pill under the head, so a collection nobody is
+        // searching still reads as a list of days; opened it grows into the field
+        // and the pill IS the field (the same shape the reader's own search wears —
+        // a door that becomes the thing it opened).
+        JournalSearchPill(
+            open = searchOpen,
+            query = query,
+            onOpen = { searchOpen = true },
+            onQuery = { query = it },
+            onClose = {
+                searchOpen = false
+                query = ""
+                focusManager.clearFocus()
+            }
         )
 
         if (journals.isEmpty()) {
@@ -133,10 +203,33 @@ fun JournalListScreen(navController: NavController) {
                     ) { launchSingleTop = true }
                 }
             )
+        } else if (ordered.isEmpty()) {
+            // ── v440 — A SEARCH THAT FOUND NOTHING ──────────────────────
+            //
+            // The one empty state that is NOT a bare dash: a filtered list has a
+            // CAUSE the member needs told (see [com.curio.app.ui.components.CurioEmptyLine]),
+            // because an empty pane with no words in it reads as a broken search.
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    "Nothing matches",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    "No page in your journals has \u201C${query.trim()}\u201D in it.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
+            }
         } else {
             // Grouped by MONTH: a journal is a run of days, and a month
-            // heading turns a flat list of entries into a book's chapters.
-            val months = journals.groupBy { journal ->
+            // heading turns a flat list of entries into a book's chapters. The
+            // grouping follows the ORDER above, so reversing the list reverses the
+            // months with it (a `groupBy` keeps insertion order).
+            val months = ordered.groupBy { journal ->
                 journal.dateMillis.toLocalDate().withDayOfMonth(1)
             }
             LazyColumn(
@@ -360,11 +453,148 @@ private fun JournalRow(
                     )
                 }
                 Spacer(Modifier.height(6.dp))
+                // ── v440 — AND THE MOMENT IT WAS WRITTEN ────────────────
+                //
+                // The member: *"for journal ad time note too its only note date"*.
+                // It rides the metadata line the row already had, beside the word
+                // count, rather than adding a line to the date column: the day is
+                // what the column is for, and the moment belongs with the facts
+                // about the page.
+                //
+                // **It is [writtenAtMillis] — the time the page was WRITTEN.** It
+                // does not move when the page is edited later, which is the second
+                // half of the same request.
                 Text(
-                    words,
+                    "$words \u00b7 ${journal.writtenAtMillis().prettyTime()}",
                     style = MaterialTheme.typography.labelSmall,
                     color = ink.copy(alpha = 0.45f)
                 )
+            }
+        }
+    }
+}
+
+/**
+ * v440 — WHEN A PAGE WAS WRITTEN, not when it was last touched.
+ *
+ * The member: *"in journals view dont update the time if its edited again late"*.
+ * [PersonalNoteEntity.createdAtMillis] is stamped once by `saveNote` and preserved
+ * on every later write, so it IS the moment the page came into being — while
+ * `updatedAtMillis` moves every time a word changes, which is exactly what must not
+ * show in a list (a page written at nine in the morning and corrected at midnight
+ * would claim midnight).
+ *
+ * The fallback is for rows written before v389 stamped a creation time: those have
+ * only `updatedAtMillis`, and showing nothing at all would be worse than showing the
+ * only stamp they have.
+ */
+private fun PersonalNoteEntity.writtenAtMillis(): Long =
+    if (createdAtMillis > 0L) createdAtMillis else updatedAtMillis
+
+/**
+ * v440 — WHETHER A PAGE ANSWERS A SEARCH.
+ *
+ * It reads what a ROW already shows and nothing else: the title, the stored opening
+ * line, the topic the page is about, the mood, and the page's own date line (so
+ * "wednesday", "16" or "sept" find a day). **No document is decoded** — a search
+ * that parsed every page's JSON per keystroke is a search that stutters on a
+ * collection of a few hundred days (see [JournalRow]'s own note on `doc`).
+ */
+private fun PersonalNoteEntity.answers(needle: String): Boolean =
+    title.lowercase().contains(needle) ||
+        preview.lowercase().contains(needle) ||
+        topicName.lowercase().contains(needle) ||
+        (moodEnum?.label.orEmpty()).lowercase().contains(needle) ||
+        dateMillis.prettyDate().lowercase().contains(needle)
+
+/**
+ * v440 — THE SEARCH, AS A PILL THAT BECOMES A FIELD.
+ *
+ * Closed, it is one quiet pill under the head: a collection nobody is searching
+ * still reads as a list of days rather than as a toolbar. Tapped, it IS the field —
+ * the same trick the reader's own search plays on its head (a door that becomes the
+ * thing it opened, on the one motion clock), so the app has one search shape rather
+ * than two.
+ *
+ * It takes focus as it opens, because a member who tapped it has already said they
+ * are going to type.
+ */
+@Composable
+private fun JournalSearchPill(
+    open: Boolean,
+    query: String,
+    onOpen: () -> Unit,
+    onQuery: (String) -> Unit,
+    onClose: () -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(open) { if (open) runCatching { focus.requestFocus() } }
+    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp)) {
+        AnimatedContent(
+            targetState = open,
+            transitionSpec = { CurioMotion.pillArrive() togetherWith CurioMotion.pillLeave() },
+            label = "journal-search"
+        ) { searching ->
+            if (searching) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = onQuery,
+                        singleLine = true,
+                        shape = RoundedCornerShape(50),
+                        placeholder = { Text("Search your journals") },
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focus)
+                    )
+                    Surface(
+                        onClick = onClose,
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                CurioIcons.Close,
+                                "Close the search",
+                                tint = ink.copy(alpha = 0.7f),
+                                size = 18.dp
+                            )
+                        }
+                    }
+                }
+            } else {
+                Surface(
+                    onClick = onOpen,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainer
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    ) {
+                        CurioIcon(
+                            CurioIcons.Search,
+                            null,
+                            tint = personalAccentInk(),
+                            size = 15.dp
+                        )
+                        Text(
+                            "Search your journals",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = ink.copy(alpha = 0.72f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
         }
     }
@@ -517,10 +747,25 @@ internal fun PersonalHeader(
  */
 @Composable
 internal fun PersonalHeaderDate(
-    dateMillis: Long = System.currentTimeMillis()
+    dateMillis: Long = System.currentTimeMillis(),
+    /**
+     * v440 — WHEN SET, THE DATE IS A DOOR THAT ORDERS THE LIST.
+     *
+     * The member: *"sorting by date by tapping the date in journals date"*. The
+     * shelf leaves it null and keeps the plain pill it always had; the journals
+     * list hands it a toggle, and the pill grows an arrow that says which end of
+     * the collection is at the top.
+     */
+    onToggleSort: (() -> Unit)? = null,
+    /** Which end is at the top right now (see [onToggleSort]). */
+    newestFirst: Boolean = true
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     Surface(
+        onClick = { onToggleSort?.invoke() },
+        // A plain label on the shelf (an `enabled = false` Surface takes no
+        // presses and draws no ripple), a real door on the journals list.
+        enabled = onToggleSort != null,
         shape = RoundedCornerShape(50),
         color = MaterialTheme.colorScheme.surfaceContainer
     ) {
@@ -542,6 +787,20 @@ internal fun PersonalHeaderDate(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            // ── v440 — AND WHERE THE LIST BEGINS ────────────────────────
+            //
+            // An arrow at the pill's far edge: DOWN for newest-first (the list
+            // descends from today) and UP for oldest-first, with the tooltip saying
+            // it in words. Only on a pill that is a door — the shelf's label grows
+            // nothing.
+            if (onToggleSort != null) {
+                CurioIcon(
+                    if (newestFirst) CurioIcons.ArrowDownward else CurioIcons.ArrowUpward,
+                    if (newestFirst) "Newest first" else "Oldest first",
+                    tint = personalAccentInk(),
+                    size = 15.dp
+                )
+            }
         }
     }
 }

@@ -738,3 +738,9 @@ FIX:
 - Reading: the page slider takes the bottom of the page to itself while it is up, so the buttons it opened from step aside.
 - Writing: a page always keeps a line to type in — cutting or deleting the whole page left the writing with nothing to put the cursor in, so there was no way to type again; an empty line stays at the foot with the cursor already in it.
 - Writing: a journal's colour stays on the previews that name it — the journal list's spine, its chip on Home and the palette tool — and no longer tints the page or its tools, where the words around them could blend into the fill.
+
+ADD:
+- Writing: search your journals — a pill under the head that becomes the field when you tap it; it reads the titles, opening lines, topics, moods and dates you can already see, and says how many pages answered.
+- Writing: a journal row says the time it was written beside its word count, and that time is the moment the page was made — editing it later never moves it.
+- Writing: tap the date in the journals head to read the collection from its other end, newest or oldest, with the arrow in the pill saying which one it is.
+- Reading: the gestures box can get out of the way — it steps off the page while you are placing an edge, and a small door puts it away entirely and leaves a "Gestures" pill in the corner to bring it back.

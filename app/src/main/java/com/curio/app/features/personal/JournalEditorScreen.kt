@@ -816,6 +816,22 @@ internal fun Long.toLocalDate(): LocalDate =
 internal fun Long.prettyDate(): String =
     toLocalDate().format(DateTimeFormatter.ofPattern("EEE, d MMMM", Locale.getDefault()))
 
+/**
+ * v440 — THE TIME OF DAY, for a page that carries one.
+ *
+ * The member: *"for journal ad time note too its only note date"* — a journal
+ * said which DAY it was about and nothing about when it was written, so two pages
+ * written on the same day were indistinguishable in the list. This is that
+ * moment, in the member's own clock, in the app's existing 24-hour form (the
+ * community surfaces already print `HH:mm`, so a page and a comment read alike).
+ *
+ * **It is the time the page was WRITTEN, never the time it was last touched** —
+ * see [writtenAtMillis].
+ */
+internal fun Long.prettyTime(): String =
+    Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalTime()
+        .format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
+
 /** The word count shown on a list row / the shelf (never a hint, always a
  *  fact about what is on the page). */
 internal fun PersonalDoc.wordsLabel(): String {

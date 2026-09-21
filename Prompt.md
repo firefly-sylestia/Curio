@@ -297,8 +297,9 @@ the drawing. A tap must still turn the page.
    cover the tap path. Fix at the gesture seam, not with another flag.
 2. **"Fix the highlighht pill selecter in pdf"** — confirm WHICH part: the pens'
    row, or the pill that opens it.
-3. **The gestures box**: hide the floating panel while an area is being adjusted, a
-   way to hide the PANEL (not the backdrop), and a way to bring it back to edit.
+3. ~~**The gestures box**: hide the floating panel while an area is being adjusted, a
+   way to hide the PANEL (not the backdrop), and a way to bring it back to edit.~~
+   **DONE (v440, §34).**
 4. **The journal's paper following its colour by default** — still needs the word
    (the "Paint the page too" switch).
 
@@ -308,6 +309,31 @@ the drawing. A tap must still turn the page.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§34 — "do the reder, journal additions and also for journal ad time note too its only note date, and in journals view dont update the time if its edited again late, and add search for journals and also sorting by date by tapping the date in journals date" (THE THREE JOURNAL ITEMS ARE DONE; THE "READER, JOURNAL ADDITIONS" GROUPS ARE AWAITING ONE ANSWER).**
+  **Built and committed (unpushed, per the member's "dont push anything now") — v440:**
+  1. **A row names the moment the page was WRITTEN.** `PersonalNoteEntity.writtenAtMillis()`
+     (= `createdAtMillis`, falling back to `updatedAtMillis` for pre-v389 rows) is printed
+     beside the word count by `Long.prettyTime()`. `saveNote` already preserved
+     `createdAtMillis` and only re-stamped `updatedAtMillis`, so a late edit cannot move it —
+     the DAO's tiebreaker (`COALESCE(NULLIF(createdAtMillis, 0), updatedAtMillis)`) says the
+     same thing for the same reason. **No SQL, no migration.**
+  2. **Search** (`JournalSearchPill` + `PersonalNoteEntity.answers`): a pill under the head
+     that becomes the field, on the `CurioMotion` pill clock, taking focus as it opens. It
+     reads only what a row already shows — **never `doc`**, which re-parses JSON per access —
+     and the head's subtitle counts ``matched of journals`` during a search. A miss is a
+     cause ("Nothing matches" + the query), not a bare dash.
+  3. **The date pill orders the collection** (`PersonalHeaderDate(onToggleSort, newestFirst)`):
+     the shelf passes nothing and keeps its plain label (`enabled = onToggleSort != null` — a
+     disabled `Surface` takes no presses and draws no ripple, so one composable is both); the
+     journals list reverses on tap with an arrow saying which end is up. Ordering happens in
+     the SCREEN (`sortedWith`, tie on `writtenAtMillis()`), so reversing costs no DB trip, and
+     the month groups reverse with it.
+  4. **The gestures box stands down, three ways** (`ReaderTapZoneEditor`): while an edge is
+     being placed (`ReaderZoneHandle.onAdjust` — drag start/end/cancel), by a collapse door on
+     the panel, and by v434's eye for the washes. Standing down leaves a "Gestures" pill in
+     the corner that opens it again, and every movement is a `CurioMotion` factory.
+  **Still awaiting one answer:** *"do the reader, journal additions"* — which of the suggested
+  settings groups to build (see "What remains" below). Nothing else in this prompt is open.
 - **§32 — "continue and still the pdf reader buttom sheet close is weirdly slow ... do the motion token set and one arrival for every floating pill ... and in pdf reader, a high charge save turns on" (DONE, v439).** Built: the sheet close now travels its OWN height (the "weirdly slow" was 60%-of-screen travel on a 200dp sheet, not the clock — see `app/AGENTS.md` v439); the pill clock added to `CurioMotion` and spent across the reader's and journal's floating furniture; the back button is its own 50dp circle pill; press feedback on the reader's two control builders; and **low power reading** (`ReaderLook.lowPower`, on by default, a real "Power" row in the reader's settings — RGB_565 pages, a 1.5× upscale cap, `beyondViewportPageCount = 0`, and `cacheDir/book-images` pruned as the reader closes). **Also fixed the red build that was pushed as `147a2516`**: `PersonalPage.kt:722` had an orphan `else MaterialTheme.colorScheme.background` left by v438's edit — the file's own paper is `journalPaper()`. No SQL change for anything in either round.
 
 - **§31 — the reader's polish round two (PARTLY DONE, plan in §7).** Done from it: back

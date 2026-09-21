@@ -20,17 +20,32 @@ interface PersonalDao {
 
     // ── Journals ────────────────────────────────────────────────────────
 
-    /** Every live journal, newest day first (an entry with no date sorts by
-     *  when it was last written). */
+    /**
+     * Every live journal, newest day first.
+     *
+     * ── v440 — AND WITHIN A DAY IT SORTS BY WHEN IT WAS WRITTEN ───────────
+     *
+     * The tiebreaker was `updatedAtMillis`, so EDITING an entry moved it up its
+     * own day: a page written at nine in the morning and corrected at midnight
+     * jumped above the one written at ten — the member: *"in journals view dont
+     * update the time if its edited again late"*. The order of a day's pages is
+     * the order they were written in, which is [PersonalNoteEntity.createdAtMillis].
+     *
+     * The COALESCE/NULLIF is for the rows that predate v389's stamping: a note with
+     * `createdAtMillis = 0` has no written-at time to sort by, so it falls back to
+     * the only stamp it does have rather than jumping to the top of its day.
+     */
     @Query(
         "SELECT * FROM personal_notes WHERE deletedAt IS NULL AND bookId IS NULL " +
-            "ORDER BY dateMillis DESC, updatedAtMillis DESC"
+            "ORDER BY dateMillis DESC, " +
+            "COALESCE(NULLIF(createdAtMillis, 0), updatedAtMillis) DESC"
     )
     fun observeJournals(): Flow<List<PersonalNoteEntity>>
 
     @Query(
         "SELECT * FROM personal_notes WHERE deletedAt IS NULL AND bookId IS NULL " +
-            "ORDER BY dateMillis DESC, updatedAtMillis DESC"
+            "ORDER BY dateMillis DESC, " +
+            "COALESCE(NULLIF(createdAtMillis, 0), updatedAtMillis) DESC"
     )
     suspend fun journals(): List<PersonalNoteEntity>
 

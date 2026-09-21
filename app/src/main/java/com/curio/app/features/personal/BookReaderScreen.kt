@@ -7940,6 +7940,20 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
     var showOverlay by remember { mutableStateOf(true) }
     var showDepth by remember { mutableStateOf(false) }
     var draggingDepth by remember { mutableStateOf(false) }
+    // ── v440 — AND THE BOX ITSELF STANDS DOWN (the rest of the member's ask) ──
+    //
+    // "the gesture box hide that when adjusting area and a way to hide that box
+    // not the backgroud thing, and a way to make it appear again to edit".
+    //
+    // So the gestures box answers to two things now, where the eye only ever
+    // reached the WASHES: a finger placing an edge takes it off the page for as long
+    // as the finger is down ([adjustingZone] — the member is aiming at real words
+    // through the exact part of the screen the box occupies), and a door on it puts
+    // it away for good ([panelUp]). Either way it comes back — the drag ends, or the
+    // small "Gestures" pill in the corner is tapped — so nothing here can be
+    // hidden from its owner.
+    var panelUp by remember { mutableStateOf(true) }
+    var adjustingZone by remember { mutableStateOf(false) }
     val washesUp = showOverlay && !draggingDepth
     BoxWithConstraints(
         modifier = Modifier
@@ -7985,187 +7999,257 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                 box = boxSize,
                 selected = edge == chosen,
                 accent = accent,
-                onSelect = { chosen = edge }
+                onSelect = { chosen = edge },
+                onAdjust = { adjustingZone = it }
             )
         }
 
         // ── THE PANEL: WHAT THE CHOSEN EDGE ASKS FOR, AND HOW DEEP ──
-        Surface(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-            shape = RoundedCornerShape(28.dp),
-            color = palette.paper.copy(alpha = 0.98f),
-            shadowElevation = 10.dp
+        //
+        // v440 — and it is a FLOATING pill that can leave, on the one motion clock
+        // every other pill in the app uses: away while an edge is under a finger,
+        // and away for as long as the member wants the page to themselves.
+        AnimatedVisibility(
+            visible = panelUp && !adjustingZone,
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
+            modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(9.dp)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                shape = RoundedCornerShape(28.dp),
+                color = palette.paper.copy(alpha = 0.98f),
+                shadowElevation = 10.dp
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "Gestures",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontFamily = FrauncesFontFamily,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = ink
-                    )
-                    Spacer(Modifier.weight(1f))
-                    // THE EYE: the page, without the washes (see [washesUp]).
-                    Surface(
-                        onClick = { showOverlay = !showOverlay },
-                        shape = CircleShape,
-                        color = if (showOverlay) accent.copy(alpha = 0.14f)
-                        else ink.copy(alpha = 0.07f),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            ReaderEyeGlyph(
-                                open = showOverlay,
-                                tint = if (showOverlay) accent else ink.copy(alpha = 0.6f)
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(9.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "Gestures",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = FrauncesFontFamily,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = ink
+                        )
+                        Spacer(Modifier.weight(1f))
+                        // THE EYE: the page, without the washes (see [washesUp]).
+                        Surface(
+                            onClick = { showOverlay = !showOverlay },
+                            shape = CircleShape,
+                            color = if (showOverlay) accent.copy(alpha = 0.14f)
+                            else ink.copy(alpha = 0.07f),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                ReaderEyeGlyph(
+                                    open = showOverlay,
+                                    tint = if (showOverlay) accent else ink.copy(alpha = 0.6f)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Surface(
+                            onClick = {
+                                ReaderZoneEdge.entries.forEach { edge ->
+                                    edge.setAction(ReaderZoneEdge.defaultAction(edge))
+                                    edge.setDepth(ReaderZoneEdge.defaultDepth(edge))
+                                }
+                            },
+                            shape = RoundedCornerShape(50),
+                            color = accent.copy(alpha = 0.12f)
+                        ) {
+                            Text(
+                                "Reset",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = accent,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                            )
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        // ── v440 — AND OUT OF THE WAY, ON PURPOSE ───────────
+                        //
+                        // The eye takes the washes off the page; THIS takes the box off
+                        // it, which is the other half of the same wish. It is a small
+                        // round door like every other control in the row, and the pill
+                        // it leaves behind in the corner brings it straight back.
+                        Surface(
+                            onClick = { panelUp = false },
+                            shape = CircleShape,
+                            color = ink.copy(alpha = 0.07f),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CurioIcon(
+                                    CurioIcons.ArrowDownward,
+                                    "Hide the gestures box",
+                                    tint = ink.copy(alpha = 0.7f),
+                                    size = 18.dp
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Surface(
+                            onClick = onDone,
+                            shape = RoundedCornerShape(50),
+                            color = accent.copy(alpha = 0.16f)
+                        ) {
+                            Text(
+                                "Done",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = accent,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 7.dp)
                             )
                         }
                     }
-                    Spacer(Modifier.width(8.dp))
-                    Surface(
-                        onClick = {
-                            ReaderZoneEdge.entries.forEach { edge ->
-                                edge.setAction(ReaderZoneEdge.defaultAction(edge))
-                                edge.setDepth(ReaderZoneEdge.defaultDepth(edge))
-                            }
+                    Text(
+                        when {
+                            !ReaderLook.tapZones ->
+                                "The gestures are off — turn them on in Reading settings."
+                            showOverlay -> "Tap a zone on the page to pick it, then say what it does."
+                            else -> "The washes are off — the page is clear to read."
                         },
-                        shape = RoundedCornerShape(50),
-                        color = accent.copy(alpha = 0.12f)
-                    ) {
-                        Text(
-                            "Reset",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = accent,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Surface(
-                        onClick = onDone,
-                        shape = RoundedCornerShape(50),
-                        color = accent.copy(alpha = 0.16f)
-                    ) {
-                        Text(
-                            "Done",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = accent,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 7.dp)
-                        )
-                    }
-                }
-                Text(
-                    when {
-                        !ReaderLook.tapZones ->
-                            "The gestures are off — turn them on in Reading settings."
-                        showOverlay -> "Tap a zone on the page to pick it, then say what it does."
-                        else -> "The washes are off — the page is clear to read."
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ink.copy(alpha = 0.7f)
-                )
-                // WHICH EDGE, then WHAT IT DOES.
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    ReaderZoneEdge.entries.forEach { edge ->
-                        ZoneChip(
-                            label = edge.label,
-                            live = edge == chosen,
-                            accent = accent,
-                            ink = ink,
-                            onClick = { chosen = edge }
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    ReaderZoneAction.entries.forEach { action ->
-                        ZoneChip(
-                            label = action.label,
-                            live = action == chosen.action(),
-                            accent = accent,
-                            ink = ink,
-                            onClick = { chosen.setAction(action) }
-                        )
-                    }
-                }
-                // ── THE DEPTH, ON DEMAND (v434) ────────────────────────
-                //
-                // It used to stand here always, taking a row of a panel that
-                // floats over the very lines it governs. It is a capsule now: a
-                // tap opens it, and while it is dragged the washes come off the
-                // page so the member can see the edge move against real words.
-                Surface(
-                    onClick = { showDepth = !showDepth },
-                    shape = RoundedCornerShape(50),
-                    color = if (showDepth) accent.copy(alpha = 0.14f) else ink.copy(alpha = 0.06f),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ink.copy(alpha = 0.7f)
+                    )
+                    // WHICH EDGE, then WHAT IT DOES.
                     Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        CurioIcon(CurioIcons.Tune, null, tint = accent, size = 17.dp)
-                        Text(
-                            "Depth",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Medium
+                        ReaderZoneEdge.entries.forEach { edge ->
+                            ZoneChip(
+                                label = edge.label,
+                                live = edge == chosen,
+                                accent = accent,
+                                ink = ink,
+                                onClick = { chosen = edge }
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        ReaderZoneAction.entries.forEach { action ->
+                            ZoneChip(
+                                label = action.label,
+                                live = action == chosen.action(),
+                                accent = accent,
+                                ink = ink,
+                                onClick = { chosen.setAction(action) }
+                            )
+                        }
+                    }
+                    // ── THE DEPTH, ON DEMAND (v434) ────────────────────────
+                    //
+                    // It used to stand here always, taking a row of a panel that
+                    // floats over the very lines it governs. It is a capsule now: a
+                    // tap opens it, and while it is dragged the washes come off the
+                    // page so the member can see the edge move against real words.
+                    Surface(
+                        onClick = { showDepth = !showDepth },
+                        shape = RoundedCornerShape(50),
+                        color = if (showDepth) accent.copy(alpha = 0.14f) else ink.copy(alpha = 0.06f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            CurioIcon(CurioIcons.Tune, null, tint = accent, size = 17.dp)
+                            Text(
+                                "Depth",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = ink.copy(alpha = 0.8f),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                "${(chosen.depth() * 100f).roundToInt()}%",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFeatureSettings = "tnum"
+                                ),
+                                color = accent
+                            )
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = showDepth,
+                        enter = CurioMotion.pillArrive(fromTop = true),
+                        exit = CurioMotion.pillLeave(fromTop = true)
+                    ) {
+                        Slider(
+                            value = chosen.depth(),
+                            onValueChange = {
+                                // The page is what the member is aiming at, so the
+                                // washes step out of the way for the drag itself.
+                                draggingDepth = true
+                                chosen.setDepth(it)
+                            },
+                            onValueChangeFinished = { draggingDepth = false },
+                            valueRange = ReaderZoneEdge.DEPTH_MIN..ReaderZoneEdge.DEPTH_MAX,
+                            colors = SliderDefaults.colors(
+                                thumbColor = accent,
+                                activeTrackColor = accent,
+                                inactiveTrackColor = ink.copy(alpha = 0.15f)
                             ),
-                            color = ink.copy(alpha = 0.8f),
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            "${(chosen.depth() * 100f).roundToInt()}%",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                fontFeatureSettings = "tnum"
-                            ),
-                            color = accent
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
-                }
-                AnimatedVisibility(
-                    visible = showDepth,
-                    enter = CurioMotion.pillArrive(fromTop = true),
-                    exit = CurioMotion.pillLeave(fromTop = true)
-                ) {
-                    Slider(
-                        value = chosen.depth(),
-                        onValueChange = {
-                            // The page is what the member is aiming at, so the
-                            // washes step out of the way for the drag itself.
-                            draggingDepth = true
-                            chosen.setDepth(it)
-                        },
-                        onValueChangeFinished = { draggingDepth = false },
-                        valueRange = ReaderZoneEdge.DEPTH_MIN..ReaderZoneEdge.DEPTH_MAX,
-                        colors = SliderDefaults.colors(
-                            thumbColor = accent,
-                            activeTrackColor = accent,
-                            inactiveTrackColor = ink.copy(alpha = 0.15f)
-                        ),
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        chosen.action().hint,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ink.copy(alpha = 0.6f)
                     )
                 }
-                Text(
-                    chosen.action().hint,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ink.copy(alpha = 0.6f)
-                )
+            }
+        }
+        // ── v440 — WHAT THE BOX LEFT BEHIND ────────────────────────
+        //
+        // A hidden box with no way back is a trap the member cannot get out of, so
+        // the moment the panel stands down this takes its place: one small pill in
+        // the corner that says what it is and opens it again. The page is clear, and
+        // the way to edit it is still one tap away.
+        AnimatedVisibility(
+            visible = !panelUp,
+            enter = CurioMotion.popArrive(),
+            exit = CurioMotion.popLeave(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(end = 16.dp, bottom = 16.dp)
+        ) {
+            Surface(
+                onClick = { panelUp = true },
+                shape = RoundedCornerShape(50),
+                color = palette.paper.copy(alpha = 0.98f),
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CurioIcon(CurioIcons.Tune, null, tint = accent, size = 17.dp)
+                    Text(
+                        "Gestures",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = ink.copy(alpha = 0.85f)
+                    )
+                }
             }
         }
     }
@@ -8273,7 +8357,16 @@ private fun ReaderZoneHandle(
     box: IntSize,
     selected: Boolean,
     accent: Color,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    /**
+     * v440 — WHETHER THIS HANDLE IS BEING PLACED RIGHT NOW.
+     *
+     * True from the finger going down to it coming up. The editor uses it to take
+     * its own panel off the page for the drag (member: *"the gesture box hide that
+     * when adjusting area"*) — the member is aiming an edge at real lines of text, and
+     * a white slab across the foot of the screen is the one thing in the way of that.
+     */
+    onAdjust: (Boolean) -> Unit = {}
 ) {
     if (box.width <= 0 || box.height <= 0) return
     val density = LocalDensity.current
@@ -8304,7 +8397,11 @@ private fun ReaderZoneHandle(
             .background(if (selected) accent else accent.copy(alpha = 0.40f))
             .clickable(onClick = onSelect)
             .pointerInput(edge, box) {
-                detectDragGestures { change, drag ->
+                detectDragGestures(
+                    onDragStart = { onAdjust(true) },
+                    onDragEnd = { onAdjust(false) },
+                    onDragCancel = { onAdjust(false) }
+                ) { change, drag ->
                     change.consume()
                     val travel = if (across) drag.x else drag.y
                     val sign = if (edge.fromStart) 1f else -1f
