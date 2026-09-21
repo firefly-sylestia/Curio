@@ -97,7 +97,9 @@ import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.ui.components.AvatarCropDialog
+import com.curio.app.ui.components.CurioMemberAvatar
 import com.curio.app.ui.components.ProfileAvatarImage
+import com.curio.app.ui.components.hasOwnPicture
 import java.io.File
 import com.curio.app.features.community.SocialConfirmDialog
 import com.curio.app.features.community.SocialModerationHistoryCard
@@ -704,8 +706,13 @@ fun ProfileScreen(navController: NavController) {
                         .background(heroFill),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (!avatarPath.isNullOrBlank()) {
-                        ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                    // v439 — the member's own choice resolves HERE: their blob
+                    // while they are wearing it, else their photo (see
+                    // [CurioMemberAvatar]). `hasOwnPicture` is what decides
+                    // between that and the initial — a blob with no photo is
+                    // still a picture, and the initial must not win.
+                    if (hasOwnPicture(avatarPath)) {
+                        CurioMemberAvatar(avatarPath, Modifier.fillMaxSize())
                     } else {
                         Text(
                             displayName.firstOrNull()?.uppercase().orEmpty(),
@@ -1060,8 +1067,11 @@ private fun ProfileDialogs(
                                     .background(curioPillTintLift()),
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (avatarPath.isNotBlank()) {
-                                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                                // v439 — the same resolution the hero uses, so the
+                                // preview and the hero can never disagree about
+                                // what the member is wearing.
+                                if (hasOwnPicture(avatarPath)) {
+                                    CurioMemberAvatar(avatarPath, Modifier.fillMaxSize())
                                 } else {
                                     Text(
                                         nameInput.firstOrNull()?.uppercase().orEmpty(),
@@ -1074,7 +1084,7 @@ private fun ProfileDialogs(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                EditSectionLabel(icon = CurioIcons.Person, text = "Your photo")
+                                EditSectionLabel(icon = CurioIcons.Person, text = "Your picture")
                                 Text(
                                     // v435 — the line used to promise the icon
                                     // travelled into Social, which was true when
@@ -1083,8 +1093,13 @@ private fun ProfileDialogs(
                                     // the honest statement is: this photo is
                                     // local, and Social draws you from your
                                     // username.
-                                    "This photo stays on this device \u2014 in Social your " +
-                                        "face is drawn from your @username.",
+                                    if (AppPreferences.profileAvatarBlobState) {
+                                        "Your blob, drawn from your @username \u2014 the " +
+                                            "same face Social shows. Your photo is kept."
+                                    } else {
+                                        "This photo stays on this device \u2014 in Social " +
+                                            "your face is drawn from your @username."
+                                    },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1096,6 +1111,29 @@ private fun ProfileDialogs(
                                         label = if (avatarPath.isNotBlank()) "Change photo" else "Add photo",
                                         accent = true,
                                         onClick = onPickAvatar
+                                    )
+                                    // ── v439 — OR WEAR YOUR BLOB ─────────────
+                                    //
+                                    // The member: *"let user set that blob as
+                                    // their pfp in app profile too"*. It is the
+                                    // face Social already draws them from their
+                                    // handle, so it is offered here BESIDE the
+                                    // photo rather than instead of it: the pick
+                                    // is remembered on its own and the photo on
+                                    // this device is left exactly where it is,
+                                    // so switching back puts it straight on again.
+                                    DialogPillAction(
+                                        label = if (AppPreferences.profileAvatarBlobState) {
+                                            "Use a photo"
+                                        } else {
+                                            "Use my blob"
+                                        },
+                                        onClick = {
+                                            AppPreferences.setProfileAvatarBlob(
+                                                context,
+                                                !AppPreferences.profileAvatarBlobState
+                                            )
+                                        }
                                     )
                                     if (avatarPath.isNotBlank()) {
                                         DialogPillAction(
@@ -1491,8 +1529,8 @@ private fun ProfileHero(
                                 // the Box) replaces the name initial when set.
                                 // (avatarPath is nullable here — the hero's
                                 // default param — so null-safe blank check.)
-                                if (!avatarPath.isNullOrBlank()) {
-                                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                                if (hasOwnPicture(avatarPath)) {
+                                    CurioMemberAvatar(avatarPath, Modifier.fillMaxSize())
                                 } else {
                                     Text(
                                         initial,

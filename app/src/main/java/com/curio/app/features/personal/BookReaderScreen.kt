@@ -114,6 +114,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
@@ -1173,6 +1174,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             palette = palette,
             pageLabel = scrubber?.short.orEmpty(),
             footHidden = scrubOpen,
+            // v439 — the motion lock is a PDF's control (see [ReaderChrome]).
+            pdf = content is ReaderContent.Pages,
             search = searching,
             onClose = { navController.popBackStack() },
             onSearch = {
@@ -3589,6 +3592,14 @@ private fun ReaderChrome(
      * the same bargain the journal's dock makes for its copy box.
      */
     footHidden: Boolean = false,
+    /**
+     * v439 — WHETHER THIS BOOK IS A PDF, for the motion lock pill.
+     *
+     * The lock is a PDF's business: a reflowable book's size is its TYPE (a real
+     * re-lay-out, in the appearance sheet) and it has no pan to freeze, so the
+     * pill would be a control over nothing (see [ReaderLook.motionLock]).
+     */
+    pdf: Boolean = false,
     /** v431 — while the search bar is up the head hands its row over to it. */
     search: ReaderSearch?,
     onClose: () -> Unit,
@@ -3749,6 +3760,30 @@ private fun ReaderChrome(
                 onBookmarks = onBookmarks,
                 onMenu = onMenu
             )
+        }
+
+        // ── v439 — THE MOTION LOCK, ABOVE THE FOOT'S RIGHT CORNER ──────────
+        //
+        // The member: *"what about just remove the zoom slider and instead add the
+        // motuin lock as a pill above the dock at the right corner"* — so it sits
+        // where a thumb reaches for it, clear of the foot pill's own row (58dp of
+        // pill, 14dp of air, plus the navigation bar under it — see
+        // [ReaderBottomPill]), and it belongs to the CHROME: it comes and goes with
+        // the head and the foot, because a member reading with the tools away is
+        // reading, not adjusting.
+        //
+        // Hidden while the page slider is up (the same `footHidden` the foot obeys)
+        // because the slider's own pill now owns that strip of the page.
+        AnimatedVisibility(
+            visible = visible && pdf && !footHidden,
+            enter = CurioMotion.popArrive(),
+            exit = CurioMotion.popLeave(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(end = 12.dp, bottom = 78.dp)
+        ) {
+            ReaderMotionLockPill(palette)
         }
     }
 }
@@ -3973,6 +4008,54 @@ private fun RowScope.ReaderPillButton(
         contentAlignment = Alignment.Center
     ) {
         CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.8f), size = 21.dp)
+    }
+}
+
+/**
+ * v439 — THE LOCKED PAGE, AS ONE PILL.
+ *
+ * The member asked for the motion lock to replace the Zoom slider, and for it to
+ * be "a pill above the dock at the right corner". It is a glyph on a pill rather
+ * than a word, like every other control in this reader, and it says its state
+ * the way the journal's dock says a lit tool: **a locked page wears the reader's
+ * own accent as a fill**, so the answer to "is my page held?" is readable from
+ * across the room, and an unlocked one is the plain pill every other control is.
+ *
+ * The fill is an OPAQUE blend rather than a translucent wash — a shadowed pill
+ * with a see-through fill lets the page's words bleed into it (the root rail's
+ * own rule), and this pill floats directly over words.
+ *
+ * The label is spoken, not printed: the pill is the only thing on the page at
+ * that corner, and a sentence there would be the one piece of prose on a screen
+ * the member is reading.
+ */
+@Composable
+private fun ReaderMotionLockPill(palette: ReaderPalette) {
+    val locked = ReaderLook.motionLock
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (locked) lerp(palette.surface, palette.accent, 0.30f) else palette.surface,
+        shadowElevation = 8.dp,
+        modifier = Modifier
+            .height(40.dp)
+            .clip(RoundedCornerShape(50))
+            .curioPressClickable(
+                pressedScale = 0.92f,
+                onClickLabel = if (locked) "Let the page move again" else "Hold the page still"
+            ) { ReaderLook.motionLock = !locked }
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
+        ) {
+            CurioIcon(
+                if (locked) CurioIcons.Lock else CurioIcons.DragHandle,
+                if (locked) "The page is held still" else "The page can be moved",
+                tint = palette.ink.copy(alpha = 0.85f),
+                size = 18.dp
+            )
+        }
     }
 }
 
@@ -4827,7 +4910,14 @@ private fun ReaderAppearanceSheet(
     palette: ReaderPalette,
     /** Whether a type size (and the layout controls) mean anything here. */
     showType: Boolean,
-    /** v434 — whether this is a PDF, for the ZOOM slider it needs instead. */
+    /**
+     * v434 — whether this is a PDF, for the page control it needs instead.
+     *
+     * v439 — that control is the MOTION LOCK now, not a Zoom slider: a slider was
+     * how a member set the page's size, which the pinch already does better, and
+     * what they actually wanted afterwards was for the page to stay (see
+     * [ReaderLook.motionLock]).
+     */
     showZoom: Boolean,
     /** v431 — whether this book is being read as PAGES, for the mode segment. */
     paged: Boolean,
@@ -4860,19 +4950,30 @@ private fun ReaderAppearanceSheet(
                     trailingGlyph = CurioIcons.TextIncrease,
                     trailingLabel = "Larger type"
                 )
-            } else if (showZoom) {
-                ReaderSliderRow(
-                    label = "Zoom",
-                    value = ReaderLook.pdfZoom,
-                    range = 1f..4f,
-                    step = 0.25f,
-                    valueLabel = "${(ReaderLook.pdfZoom * 100f).roundToInt()}%",
+            }
+
+            // ── v439 — THE ZOOM SLIDER IS GONE; THE LOCK REPLACES IT ──────
+            //
+            // The member: *"in pdf only remove that zoom slider and add the motion
+            // lock pill which restrits that drag to move and pinch to zoom it locks
+            // in the state the user left the zoom position"*. A slider was the
+            // wrong control for a PDF page in the first place: the page is a
+            // picture, the pinch is how a reader sizes it, and what they actually
+            // want afterwards is for it to STAY — which is the lock, and it is
+            // here as well as on the page's own pill so a member who locked a page
+            // by accident can undo it from the place they look for settings
+            // (see [ReaderLook.motionLock] for what it freezes and where it is
+            // enforced).
+            if (showZoom) {
+                ReaderSheetLabel("Moving the page", palette)
+                ReaderSegmentRow(
+                    segments = listOf(
+                        ReaderSegment("Held still", CurioIcons.Lock),
+                        ReaderSegment("Free", CurioIcons.DragHandle)
+                    ),
+                    selectedIndex = if (ReaderLook.motionLock) 0 else 1,
                     palette = palette,
-                    onValue = { next -> ReaderLook.pdfZoom = next.coerceIn(1f, 4f) },
-                    leadingGlyph = CurioIcons.Remove,
-                    leadingLabel = "Zoom out",
-                    trailingGlyph = CurioIcons.Add,
-                    trailingLabel = "Zoom in"
+                    onSelect = { at -> ReaderLook.motionLock = at == 0 }
                 )
             }
 
@@ -7376,6 +7477,31 @@ internal object ReaderLook {
     var lowPower by mutableStateOf(true)
 
     /**
+     * v439 — THE MOTION LOCK, AND THE ZOOM SLIDER IT REPLACED.
+     *
+     * The member: *"in pdf only remove that zoom slider and add the motion lock
+     * pill which restrits that drag to move and pinch to zoom it locks in the
+     * state the user left the zoom position"*, then, asked what the lock freezes,
+     * *"Freeze pan and pinch, and remember it"*.
+     *
+     * So: a member magnifies a page once, to the size they read it at, and then
+     * says so — from that moment the page cannot be zoomed or dragged by accident
+     * while they read or sweep a highlight, and the position they left it in is
+     * the position it comes back to. It is remembered (this field is in
+     * [rememberKey]) because a member who reads a PDF at 2× reads every PDF at 2×.
+     *
+     * **ENFORCED IN THE GESTURE PATH, NEVER IN THE DRAWING.** The lock is read by
+     * [pinchToZoom] — the one handler EVERY gesture in the reader passes through —
+     * where drags and pinches are swallowed, and by [readerDoubleTapZoom].
+     * Swallowing is deliberate rather than "not applying": a drag it merely
+     * ignored would still be claimed by the scrolling column or the pager
+     * underneath, so the page would move anyway. It must NOT swallow a gesture's
+     * first down, though — a tap has to keep turning the page and putting the
+     * chrome back (see the guard's own note).
+     */
+    var motionLock by mutableStateOf(false)
+
+    /**
      * v434 — EVERYTHING THE MEMBER CHOSE, as one string, for the store.
      *
      * Read inside a `snapshotFlow`, so every field below is tracked and the write
@@ -7396,7 +7522,10 @@ internal object ReaderLook {
         justify.toString(),
         keepScreenOn.toString(),
         dim.toString(),
-        lowPower.toString()
+        lowPower.toString(),
+        // v439 — the motion lock MUST be in here, or it saves all of the other
+        // fields and silently forgets this one (the v434 rule).
+        motionLock.toString()
     ).joinToString("|")
 }
 
@@ -7445,6 +7574,7 @@ internal object ReaderLookStore {
     private const val KEEP_ON = "reader_keep_screen_on"
     private const val DIM = "reader_dim"
     private const val LOW_POWER = "reader_low_power"
+    private const val MOTION_LOCK = "reader_motion_lock"
 
     /**
      * Read once, on the way into a reader. Does nothing at all on a fresh install:
@@ -7477,6 +7607,7 @@ internal object ReaderLookStore {
             ReaderLook.keepScreenOn = prefs.getBoolean(KEEP_ON, ReaderLook.keepScreenOn)
             ReaderLook.dim = prefs.getFloat(DIM, ReaderLook.dim).coerceIn(0f, 0.6f)
             ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
+            ReaderLook.motionLock = prefs.getBoolean(MOTION_LOCK, ReaderLook.motionLock)
         }
     }
 
@@ -7501,6 +7632,7 @@ internal object ReaderLookStore {
                 .putBoolean(KEEP_ON, ReaderLook.keepScreenOn)
                 .putFloat(DIM, ReaderLook.dim)
                 .putBoolean(LOW_POWER, ReaderLook.lowPower)
+                .putBoolean(MOTION_LOCK, ReaderLook.motionLock)
                 .putBoolean(MARK, true)
                 .apply()
         }
@@ -8284,6 +8416,28 @@ private fun Modifier.pinchToZoom(
         do {
             val event = awaitPointerEvent()
             val pressed = event.changes.filter { it.pressed }
+            // ── v439 — THE MOTION LOCK, AT THE ONE DOOR EVERY GESTURE USES ──
+            //
+            // The member: *"the motion lock pill which restrits that drag to move
+            // and pinch to zoom"* (see [ReaderLook.motionLock]). This is the right
+            // seam for it because EVERY gesture in the reader passes through this
+            // handler, whatever surface it starts on — one guard, and no surface
+            // can be forgotten.
+            //
+            // It consumes MOVEMENT and never the first down: a tap is a down and
+            // an up with nothing in between, and `detectTapGestures` needs that
+            // down unconsumed — consuming it would make the page untappable and
+            // take the page turns and the chrome with it. A real drag or a second
+            // finger is swallowed whole (consuming is what stops the scrolling
+            // column or the pager underneath from taking it instead, which is how
+            // a locked page stays exactly where the member left it).
+            if (ReaderLook.motionLock) {
+                if (pressed.size >= 2 || event.changes.any { it.positionChanged() }) {
+                    event.changes.forEach { it.consume() }
+                }
+                last = null
+                continue
+            }
             if (pressed.size >= 2) {
                 // Two fingers are always the zoom's, from the first event: a
                 // pinch that begins on a page is never a page turn.
@@ -8673,6 +8827,12 @@ private fun readerZoomThisPage(
 private fun readerDoubleTapZoom(page: Int, box: IntSize, aspect: Float, at: Offset) {
     // A PINCH IS NOT A TAP (see [ReaderTouch]).
     if (ReaderTouch.multi) return
+    // v439 — and a LOCKED page does not zoom at all: a double tap that resized a
+    // page the member has just told the reader to hold still would be the reader
+    // arguing with them (see [ReaderLook.motionLock]). The tap is not swallowed —
+    // it is simply not a zoom, so everything else a double tap might mean on this
+    // surface is untouched.
+    if (ReaderLook.motionLock) return
     if (ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f) {
         ReaderLook.pdfZoom = 1f
         ReaderLook.pdfPanX = 0f

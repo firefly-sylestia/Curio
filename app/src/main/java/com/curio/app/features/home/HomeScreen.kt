@@ -169,7 +169,9 @@ import com.curio.app.ui.components.CurioPatientHold
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.glyphWatermarkDepthScale
 import com.curio.app.ui.components.PaperTitleLines
+import com.curio.app.ui.components.CurioMemberAvatar
 import com.curio.app.ui.components.ProfileAvatarImage
+import com.curio.app.ui.components.hasOwnPicture
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
@@ -1896,11 +1898,14 @@ private fun TopBarPill(
             )
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            if (!avatarPath.isNullOrBlank()) {
-                // Avatar photo fills the pill (the Surface clips to the
-                // shape); the rim ring rides on top so the pill keeps its
-                // frosted-rim look while scrolling.
-                ProfileAvatarImage(
+            // v439 — their blob while they are wearing it, else their photo
+            // (see [CurioMemberAvatar]): the drawer hero must show the same
+            // picture the profile does.
+            if (hasOwnPicture(avatarPath)) {
+                // The picture fills the pill (the Surface clips to the shape);
+                // the rim ring rides on top so the pill keeps its frosted-rim
+                // look while scrolling.
+                CurioMemberAvatar(
                     avatarPath,
                     Modifier
                         .fillMaxSize()
@@ -2664,8 +2669,8 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     .background(CurioColors.CreamWhite),
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (avatarPath.isNotBlank()) {
-                                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                                if (hasOwnPicture(avatarPath)) {
+                                    CurioMemberAvatar(avatarPath, Modifier.fillMaxSize())
                                 } else {
                                     Text(
                                         displayName.firstOrNull()?.uppercase().orEmpty(),
@@ -2820,8 +2825,8 @@ private fun DrawerGlassHero(
                     .background(CurioColors.CreamWhite),
                 contentAlignment = Alignment.Center
             ) {
-                if (avatarPath.isNotBlank()) {
-                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                if (hasOwnPicture(avatarPath)) {
+                    CurioMemberAvatar(avatarPath, Modifier.fillMaxSize())
                 } else {
                     Text(
                         displayName.firstOrNull()?.uppercase().orEmpty(),

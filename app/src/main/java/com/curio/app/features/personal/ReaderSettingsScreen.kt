@@ -70,7 +70,14 @@ internal fun ReaderSettingsScreen(
     palette: ReaderPalette,
     /** Whether a type size and a face mean anything for what is open. */
     showType: Boolean,
-    /** v434 — whether a PDF is open, for the ZOOM row it needs instead. */
+    /**
+     * v434 — whether a PDF is open, for the page control it needs instead.
+     *
+     * v439 — the ZOOM row is gone and the MOTION LOCK stands in its place: a
+     * slider set the page's size, which the pinch already does better, and what a
+     * member wants afterwards is for the page to stay where they left it (see
+     * [ReaderLook.motionLock]).
+     */
     showZoom: Boolean = false,
     /** Whether the reading is being read as PAGES right now. */
     paged: Boolean,
@@ -186,21 +193,28 @@ internal fun ReaderSettingsScreen(
                         }
                     )
                 }
-            } else if (showZoom) {
+            }
+
+            // ── v439 — THE ZOOM SLIDER IS GONE, THE LOCK STANDS IN ITS PLACE ──
+            //
+            // The member: *"in pdf only remove that zoom slider and add the motion
+            // lock pill"*. A slider is the wrong control for a PDF page anyway:
+            // the page is a picture, and the honest way to size it is the pinch
+            // itself — which the member does, and then wants to KEEP. The lock
+            // freezes that choice (pan and pinch both, see [ReaderLook.motionLock]),
+            // and it is offered here as well as on the page's pill because
+            // settings is where a member looks for a state they can't undo.
+            if (showZoom) {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    ReaderSettingsSection("Zoom", palette)
-                    ReaderSliderRow(
-                        label = "Page zoom",
-                        value = ReaderLook.pdfZoom,
-                        range = 1f..4f,
-                        step = 0.25f,
-                        valueLabel = "${(ReaderLook.pdfZoom * 100f).roundToInt()}%",
+                    ReaderSettingsSection("Moving the page", palette)
+                    ReaderSegmentRow(
+                        segments = listOf(
+                            ReaderSegment("Held still", CurioIcons.Lock),
+                            ReaderSegment("Free", CurioIcons.DragHandle)
+                        ),
+                        selectedIndex = if (ReaderLook.motionLock) 0 else 1,
                         palette = palette,
-                        onValue = { next -> ReaderLook.pdfZoom = next.coerceIn(1f, 4f) },
-                        leadingGlyph = CurioIcons.Remove,
-                        leadingLabel = "Zoom out",
-                        trailingGlyph = CurioIcons.Add,
-                        trailingLabel = "Zoom in"
+                        onSelect = { at -> ReaderLook.motionLock = at == 0 }
                     )
                 }
             }

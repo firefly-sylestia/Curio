@@ -1074,6 +1074,29 @@ object AppPreferences {
         profileAvatarPathState = path
     }
 
+    /**
+     * v439 — AND THE PICTURE MAY BE THE MEMBER'S OWN BLOB INSTEAD.
+     *
+     * The member: *"let user set that blob as their pfp in app profile too"*.
+     * The photo below is a picture this device holds; the blob is the face
+     * Social already draws for them from their handle. Both are legitimate, and
+     * the member chooses — so this is a CHOICE STORED BESIDE the photo's path
+     * rather than a replacement for it: turning the blob on never deletes the
+     * photo they picked, and turning it off puts that photo straight back
+     * (see [com.curio.app.ui.components.CurioMemberAvatar]).
+     *
+     * It is a real preference and not a derived fact because a member with a
+     * handle has a face whether or not they want to WEAR it on this device.
+     */
+    private const val KEY_PROFILE_AVATAR_BLOB = "profile_avatar_blob"
+    fun isProfileAvatarBlob(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PROFILE_AVATAR_BLOB, false)
+
+    fun setProfileAvatarBlob(context: Context, blob: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PROFILE_AVATAR_BLOB, blob).apply()
+        profileAvatarBlobState = blob
+    }
+
     // ── Update-notification dedupe (v53) ─────────────────────────────
     // The version tag of the newest update that has ALREADY been announced
     // with a notification — the updater only notifies once per new release
@@ -1419,6 +1442,11 @@ object AppPreferences {
     // / getProfileAvatarPath() functions read SharedPreferences once and
     // don't trigger recomposition.
     var displayNameState by mutableStateOf("Curious Explorer")
+        internal set
+    // v439 — whether the member's picture is their derived blob rather than the
+    // photo on this device (see [isProfileAvatarBlob]). Reactive like the path
+    // above, so choosing one repaints the hero and the drawer immediately.
+    var profileAvatarBlobState by mutableStateOf(false)
         internal set
     var favoriteSongState by mutableStateOf("")
         internal set
@@ -1932,6 +1960,7 @@ object AppPreferences {
         albumFavStripVisibleState = isAlbumFavStripVisible(context)
         albumFavRowsState = isAlbumFavRows(context)
         profileAvatarPathState = getProfileAvatarPath(context)
+        profileAvatarBlobState = isProfileAvatarBlob(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)

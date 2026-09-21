@@ -249,6 +249,14 @@ The em dash wherever a list is empty — journal list, Cabinet, highlights, noti
 instead of a sentence each place writes for itself. `ReaderMarksSection` (v438) is
 the first one; find the rest by searching for "Nothing" / "No … yet".
 
+**STATUS (v439 cont.): 7.6 IS DONE.** Built exactly as written below: both Zoom rows
+out, `ReaderLook.motionLock` in (and in `rememberKey()`), the pill on the page's
+bottom-right above the foot, and the guard at the top of `pinchToZoom`'s event loop
+(the one handler every reader gesture passes through) plus `readerDoubleTapZoom`.
+**The two traps it recorded were both kept**: consume movement but never the first
+down, and the flag in `rememberKey()`. Also done in the same pass, and not from
+this plan: the member's blob as their own profile picture (§32).
+
 ### 7.6 The motion lock, and the Zoom slider goes
 
 The member: *"in pdf only remove that zoom slider and add the motion lock pill which
