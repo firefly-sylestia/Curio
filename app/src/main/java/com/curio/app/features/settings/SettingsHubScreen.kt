@@ -101,7 +101,6 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
-import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
@@ -119,7 +118,6 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.activeNamedTheme
-import com.curio.app.ui.theme.curioAccentInk
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CurioIcons
@@ -1839,9 +1837,14 @@ private val SettingsRailBoundsTransform = BoundsTransform { _, _ ->
  * page open, which read as a jump on top of the page fade). Pass null on
  * settings-family screens that aren't a rail destination (drill-in tool
  * pages): nothing is highlighted. Shared by the hub AND every settings
- * sub-page; when [navController] is provided the page's QUICK TOOLS (its
- * key deep settings) render under the chips so frequent controls are one
- * tap away without opening the page.
+ * sub-page.
+ *
+ * v433 — [navController] is CARRIED but not used: every settings-family screen
+ * hands it in, and the quick-tool row it used to feed was removed on the
+ * member's instruction ("from the settings sub pages remove the quick row and
+ * its suggestions"). It is kept because the alternative is an edit in eighteen
+ * screens for a parameter nobody reads; a future door that really needs the rail
+ * to navigate should use it rather than adding a second one.
  */
 @Composable
 internal fun SettingsNavRail(
@@ -2001,143 +2004,19 @@ internal fun SettingsNavRail(
                 }
             }
         }
-        // The quick tools — key deep settings surfaced right on the rail so
-        // a frequent control is one tap away without opening the page (only
-        // when a nav controller is available to open them).
-        if (navController != null) {
-            Spacer(Modifier.height(6.dp))
-            SettingsQuickTools(navController = navController)
-        }
+        // ── v433 — AND THE QUICK ROW IS GONE ────────────────────────────
+        //
+        // A rotating row of deep settings used to sit under these chips on every
+        // settings page ("QUICK", four suggestions that changed on each visit).
+        // The member: *"from the settings sub pages remove the quick row and its
+        // suggestions"*. The rail is the settings PAGES now and nothing else — a
+        // shortcut row under a list of pages was a second, shallower index of the
+        // same thing, and one that moved every time it was looked at.
     }
 }
 
-/** One quick-tool chip — a deep setting surfaced on the rail itself. */
-private data class QuickTool(
-    val icon: String,
-    val label: String,
-    val route: String,
-    val page: SettingsPage? = null,
-    val rowKey: String? = null
-)
-
-/** The quick-tools ROTATION — one curated pool of genuinely useful deep
- *  settings drawn from EVERY settings sub-page (not just the open page's
- *  own rows). The rail shows a window of this pool and CYCLES through it
- *  deterministically: each time a settings screen shows the rail, the
- *  window advances, so the quick tools are different on every visit while
- *  staying stable within the screen's lifetime (never random). */
-private val quickToolsRotation = listOf(
-    QuickTool(CurioIcons.DarkMode, "Theme", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
-    QuickTool(CurioIcons.Palette, "Category tint", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
-    QuickTool(CurioIcons.AutoAwesome, "Pastel colors", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
-    QuickTool(CurioIcons.Search, "Search engine", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
-    QuickTool(CurioIcons.Timer, "Explore sessions", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-sessions"),
-    QuickTool(CurioIcons.Notifications, "Daily reminder", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-reminder"),
-    QuickTool(CurioIcons.Mic, "Audio quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
-    QuickTool(CurioIcons.Edit, "Voice-to-text", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-voice"),
-    QuickTool(CurioIcons.Download, "Offline model", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-offline-model"),
-    QuickTool(CurioIcons.Delete, "Recycle bin", CurioRoutes.RECYCLE_BIN),
-    QuickTool(CurioIcons.Image, "Book covers", CurioRoutes.SETTINGS_BOOK_COVER),
-    QuickTool(CurioIcons.Download, "Updates", CurioRoutes.UPDATES)
-)
-
-/** How many quick tools ride one rail window. */
-private const val QuickToolsPerWindow = 4
-
-/** Deterministic cycle pointer — advances one window per rail show. */
-private object QuickToolsCycle { var index = 0 }
-
-/** The next rotation window (4 tools), advancing the cycle by one. */
-private fun nextQuickToolsWindow(): List<QuickTool> {
-    val start = (QuickToolsCycle.index % quickToolsRotation.size + quickToolsRotation.size) % quickToolsRotation.size
-    QuickToolsCycle.index++
-    return buildList {
-        repeat(QuickToolsPerWindow) { i ->
-            add(quickToolsRotation[(start + i) % quickToolsRotation.size])
-        }
-    }
-}
-
-/** The quick-tools chip row under the nav rail — frosted pills, one tap
- *  opens the deep setting (with the row highlight when it lives inside a
- *  sub-section screen). */
-@Composable
-private fun SettingsQuickTools(
-    navController: NavController
-) {
-    // v3xx — CYCLE: `remember` runs once per composition entry (one rail
-    // show), pulling the next window of the global rotation. Recomposition
-    // reuses the same window, so the chips never flicker mid-screen.
-    val tools = remember { nextQuickToolsWindow() }
-    if (tools.isEmpty()) return
-    val dark = isCurioDarkTheme()
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "QUICK",
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.2.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-        )
-        Spacer(Modifier.width(8.dp))
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.weight(1f)
-        ) {
-            items(tools, key = { it.label }) { tool ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    modifier = Modifier
-                        // v411 — a soft shadow BEFORE the fill (no hairline any
-                        // more: see the card-edge rule).
-                        .curioCardShadow(RoundedCornerShape(50), 2.dp)
-                        .clip(RoundedCornerShape(50))
-                        // v408 — opaque, like every other small control on
-                        // this page (the card ladder): these chips sat at
-                        // 62% white over the hero wash and dissolved into it.
-                        .background(
-                            if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
-                            else MaterialTheme.colorScheme.surfaceContainerLow
-                        )
-                        // v3xx46 — the quick-tool chips squish + tick too.
-                        .curioPressClickable(pressedScale = 0.96f) {
-                            if (tool.page != null && tool.rowKey != null) {
-                                SettingsHighlightTarget.page = tool.page
-                                SettingsHighlightTarget.rowKey = tool.rowKey
-                            }
-                            // v3xx40 — navigate like the rail chips do
-                            // (popUpTo the Settings hub): the deep pages
-                            // REPLACE the current screen instead of stacking,
-                            // so tapping quick tools on several pages in a
-                            // row never builds a tower of back-presses — the
-                            // hub stays ONE back away.
-                            navController.navigate(tool.route) {
-                                popUpTo(CurioRoutes.SETTINGS) { inclusive = false }
-                                launchSingleTop = true
-                            }
-                        }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    CurioIcon(
-                        name = tool.icon,
-                        contentDescription = null,
-                        tint = curioAccentInk(),
-                        size = 13.dp
-                    )
-                    Text(
-                        text = tool.label,
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-            }
-        }
-    }
-}
-
+// ── v433 — REMOVED: the quick-tool row (QuickTool + its rotation, the per-show
+// cycle and the chip row itself). See the note in [SettingsNavRail].
 /** The JSX search — rounded white box with the magnifier (search still
  *  falls back to the deep row index below). */
 @Composable

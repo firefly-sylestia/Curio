@@ -138,6 +138,16 @@ object CurioIcons {
     const val OpenInNew = "open_in_new"
     const val PlayCircle = "play_circle"
     const val ContentCopy = "content_copy"
+
+    /**
+     * THE SCISSORS (v433).
+     *
+     * The bundled subset carries `cut` and NOT `content_cut` (measured with the
+     * byte probe [safeGlyphName] documents), so the page's copy box asks for the
+     * plain name — a `content_cut` here would have drawn the literal words
+     * "content_cut" on the button.
+     */
+    const val ContentCut = "cut"
     const val Pause = "pause"
     const val Stop = "stop"
     const val Timer = "timer"

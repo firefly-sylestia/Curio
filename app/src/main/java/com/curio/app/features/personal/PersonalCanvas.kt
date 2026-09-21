@@ -1,7 +1,13 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -20,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -78,6 +85,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -1894,8 +1902,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun nudgePageRows(up: Boolean) {
         if (order.isEmpty()) return
         if (pageRange.isEmpty()) {
-            val anchor = focusedId?.let { id -> order.indexOf(id).takeIf { it >= 0 } }
-                ?: order.lastIndex
+            val anchor = pageStartRow()
             pageGrowsUp = up
             pageRange = anchor..anchor
             pageCharRange = TextRange.Zero
@@ -1956,6 +1963,13 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     private fun pageAnchorIndex(): Int =
         if (pageRange.isEmpty()) -1 else if (pageGrowsUp) pageRange.last else pageRange.first
 
+    /**
+     * v433 — THE ROW A FRESH REACH BEGINS AT: where the writing is — the row the
+     * caret is in, or the page's last row when the caret is not on the page.
+     */
+    private fun pageStartRow(): Int =
+        focusedId?.let { id -> order.indexOf(id).takeIf { it >= 0 } } ?: order.lastIndex
+
     /** The row the letter reach lives in. */
     private fun pageLetterRowId(): String? =
         order.getOrNull(pageAnchorIndex())
@@ -1974,6 +1988,24 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * line it belongs to.
      */
     fun nudgePageLetters(more: Boolean) {
+        // ── v433 — A LETTER REACH CAN START BY ITSELF ───────────────────────
+        //
+        // The letter arrows used to need a ROW reach before they meant anything:
+        // with nothing picked they were drawn dead, and the only way in was to
+        // press a row arrow (or the bar's whole-page offer) first — the member's
+        // report, exactly: *"without all select i cant select only word by
+        // word"*. A letter is a place in a LINE, so a fresh ← / → reach opens on
+        // the row the writing is in by itself (the same row a fresh row-reach
+        // starts at, see [pageStartRow]), and the row arrows are still there to
+        // take the reach further up or down the page.
+        if (pageRange.isEmpty()) {
+            if (!more || order.isEmpty()) return
+            val anchor = pageStartRow()
+            if (anchor < 0) return
+            pageGrowsUp = true
+            pageRange = anchor..anchor
+            pageCharRange = TextRange.Zero
+        }
         val id = pageLetterRowId() ?: return
         val text = blocks[id]?.text.orEmpty()
         if (text.isEmpty()) return
@@ -2035,7 +2067,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     fun canNudgePageLetters(more: Boolean): Boolean {
-        if (pageRange.isEmpty()) return false
+        // With nothing picked yet, → is live as long as the row the writing is in
+        // HAS words to reach into, and ← has nothing to give back (v433).
+        if (pageRange.isEmpty()) {
+            val row = order.getOrNull(pageStartRow()) ?: return false
+            return more && !blocks[row]?.text.isNullOrEmpty()
+        }
         val length = pageLetterRowLength()
         if (length == 0) return false
         if (!pageLettersPicked) return more
@@ -3215,7 +3252,13 @@ internal class PersonalEditorState(initial: PersonalDoc) {
 internal fun PersonalCanvas(
     state: PersonalEditorState,
     modifier: Modifier = Modifier,
-    ink: Color = MaterialTheme.colorScheme.onSurface,
+    // v433 — THE PAGE'S OWN INK (see [journalInk]). It IS the theme's onSurface
+    // for every page that has no colour of its own — the same colour this
+    // defaulted to — and it answers for itself when the page paints its paper,
+    // which is the other half of the option working (a painted page drawn in the
+    // theme's ink can come out unreadable; see the paint's own note in
+    // [PersonalWritingPage]).
+    ink: Color = journalInk(),
     accent: Color = personalAccent(),
     // The tapped thumbnail's bounds ride along with its URI: the page's own
     // overlay grows the picture out of the spot it was tapped in (see
@@ -4908,7 +4951,8 @@ private fun PrintSizeGlyph(tint: Color) {
 internal fun PersonalDocView(
     doc: PersonalDoc,
     modifier: Modifier = Modifier,
-    ink: Color = MaterialTheme.colorScheme.onSurface,
+    // v433 — the reading side wears the page's own ink too (see [PersonalCanvas]).
+    ink: Color = journalInk(),
     accent: Color = personalAccent(),
     onOpenPhoto: (String, Rect?) -> Unit = { _, _ -> },
     /**
@@ -5461,224 +5505,396 @@ private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
 
 
 /**
+ * v433 — WHICH GROUP OF TOOLS IS OPEN IN THE DOCK.
+ *
+ * The member asked for the dock's tools to be COMPACT and for the ones that
+ * belong together to open where they stand: *"collapse the B I U s and font into
+ * one toggle … the option smoothly expands in that dock when its tapped …
+ * similar grouping for other tools keep this collapse style and for format change
+ * it from drop down to this collapse style but not for the bullet point"*.
+ *
+ * So a door marks a SUBJECT rather than one action, and its choices open in the
+ * dock itself as a panel under the tool row:
+ *
+ *  · [FORMAT] — bold, italics, underline, strike and the four faces;
+ *  · [ALIGN]  — the line's alignment, four choices;
+ *  · [EXPORT] — what the page leaves as (PDF, text, Markdown).
+ *
+ * The PEN (marker) and the BULLET keep their menus: the member said so of the
+ * bullet, and the pen is the same colour-picking manner the bullet taught. One
+ * panel at a time, and a cross at its end closes it.
+ */
+private enum class PersonalDockGroup { FORMAT, ALIGN, EXPORT }
+
+/** The hairline between two halves of a dock panel (v433). */
+@Composable
+private fun DockPanelDivider(ink: Color) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 4.dp)
+            .width(1.dp)
+            .height(22.dp)
+            .background(ink.copy(alpha = 0.12f))
+    )
+}
+
+/**
  * The tool dock — it rides ABOVE the keyboard (the caller pins it to the
  * bottom of an `imePadding()` column), so the tools are always under the
  * writer's thumb while the words stay above the keys.
  */
 /**
- * v427 — THE PAGE'S TEXT BAR.
+ * v427 — THE PAGE'S COPY BOX.
  *
- * What the dock's copy door opens now (see [PersonalEditorState.pageEditBarOpen]
- * and [PersonalToolDock]): the page's own cut / copy / paste / undo, with the
- * arrows that say HOW MUCH of the page is in hand.
+ * What the dock's copy door opens (see [PersonalEditorState.pageEditBarOpen] and
+ * [PersonalToolDock]): the page's own cut / copy / paste / undo, with the arrows
+ * that say HOW MUCH of the page is in hand. Cut or Copy with nothing picked does
+ * not act — it OFFERS the whole page and lets the arrows trim the reach, and the
+ * second tap is the one that does it (the flow is the member's own, in their
+ * words: "cut copy paste starts a selection with arrow tools to go how much
+ * select then action done with cut copy or paste, extra select all button as
+ * well").
  *
- * The flow is the member's own, in their words: "cut copy paste starts a
- * selection with arrow tools to go how much select then action done with cut
- * copy or paste, extra select all button as well". So Cut or Copy with nothing
- * picked does not act — it OFFERS the whole page and lets the arrows trim the
- * reach ("◀ 4 of 12 rows ▶"), and the second tap is the one that does it. All
- * rows is the one-tap select-everything the member also asked for, and Done puts
- * the writing tools back.
+ * FOUR ARROWS on TWO AXES (the mode switch the bar was born with is gone —
+ * member: "proper arrow up down left right arrow and no more letter row option
+ * but the arrows do the work"): ↑ ↓ are the rows and ← → the letters, built from
+ * the member's own row, where the arrow pressed first sets which way the reach grows
+ * ([PersonalEditorState.nudgePageRows]) and the letter window opens on the first
+ * press ([PersonalEditorState.nudgePageLetters]). Every arrow DIMS when its axis
+ * has nowhere left to go.
  *
- * v427 — AND THE SWITCH IS GONE (member: "proper arrow up down left right arrow
- * and no more letter row option but the arrows do the work ... dont let user
- * select things starting from bottom" → "let user select things from bottom
- * proper tool of how it should behave"). The bar is now FOUR ARROWS on TWO
- * AXES, each axis beside the thing it counts:
+ * ── v433 — IT FLOATS, AND IT IS MADE OF PILLS ────────────────────────────
  *
- *  · ↑ ↓ are the rows, and they are built FROM THE MEMBER'S OWN ROW — the caret's
- *    when the caret is on the page, else the page's foot — so a selection can
- *    start at the bottom of the page and climb. The arrow pressed FIRST sets
- *    which way the reach grows; the other one gives a row back, and at a single
- *    row it walks. See [PersonalEditorState.nudgePageRows].
- *  · ← → are the letters, and they SWITCH THEMSELVES ON: the first press opens a
- *    one-character window in that row, after which more extends it and less
- *    takes a character back. See [PersonalEditorState.nudgePageLetters].
- *  · The count is one line — "3 of 12 rows" and, only once reached into, "· 5 of
- *    24 letters" — so "4 of 12" is never ambiguous about what four of twelve.
- *  · Every arrow DIMS when its axis has nowhere to go, because a control that
- *    answers a press with nothing teaches a member to stop pressing it.
+ * The member: *"also the copy floating layout, make the arrow proper pills in the
+ * corner, add a cross button to close the option box, dont show the nothing
+ * picker or 6 out of 6 row text its no need, also instead of all rows use text
+ * select all or just the icon of select all, and instead of cut copy paste use
+ * its icon, and for undo the undo icon"*. So:
  *
- * Undo is the bar's own last actions (see the state's own note) — it is not a
+ *  · A FLOATING CARD of the journal's own paper (see the caller — it rides over
+ *    the page's foot, above the dock) instead of a strip inside the dock's pill.
+ *  · The arrows are PROPER PILL BUTTONS at the box's own corner, not bare glyphs.
+ *  · NOTHING SAYS HOW MUCH IS PICKED IN WORDS. The count line is gone — the page
+ *    WASHES every row in the reach and every character in the letter window (see
+ *    [PersonalEditorState.pageRowPicked]), so the words were the second telling
+ *    of what the page already shows.
+ *  · Select all is a WORD, because the bundled Material Symbols subset carries no
+ *    `select_all` (measured — see [safeGlyphName]); cut, copy and undo are their
+ *    own icons, and paste is DRAWN for the same measured reason ([PasteGlyph]).
+ *  · A CROSS closes the box, and Done is gone with the count that named it.
+ *
+ * Undo is the box's own last actions (see the state's own note) — it is not a
  * keystroke undo, and nothing here pretends it is.
  */
+// internal: the BOX is the caller's to place now (see [PersonalWritingPage] — it
+// floats over the page's foot rather than riding in the dock's own pill), and a
+// private one could not leave this file.
 @Composable
-private fun PersonalPageEditBar(
+internal fun PersonalPageEditBar(
     state: PersonalEditorState,
     accent: Color,
     ink: Color
 ) {
     val clipboard = LocalClipboardManager.current
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val picked = state.pageSelectionCount
-    val rows = state.blockIds.size
-    // v427 — THE REACH HAS TWO AXES AND NO MODE (see the state's own note on
-    // [PersonalEditorState.nudgePageRows]). ↑ ↓ are the ROWS, ← → are the
-    // LETTERS, each pair sits with the thing it counts, and the letters switch
-    // themselves on the moment ← or → is pressed — so the bar never has to be
-    // told which unit the member means before an arrow can tell them anything.
-    val lettersPicked = state.pageLettersPicked
-    val letterCount = state.pageLetterCount
-    val letterTotal = state.pageLetterTotal
-    val lettersHere = picked > 0 && letterTotal > 0
-    // The reach as one sentence: the rows, then — only once they have been
-    // reached into — the letters inside them. A count that is not true is worse
-    // than no count, so the letter half appears when it has something to say.
-    // v428 — THE TEXT BAR'S TWO ROWS REMEMBER THEIR PLACE. Same reason as the
-    // dock's tool row: a reach is built by pressing the same arrow again and
-    // again, and a row that snapped back to the left between presses made the
-    // member find their arrow a second time.
-    val rowScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
-    val letterScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
-    val reachLine = when {
-        picked == 0 -> "Nothing picked"
-        lettersPicked -> "$picked of $rows rows · $letterCount of $letterTotal letters"
-        else -> "$picked of $rows rows"
-    }
-    val hasReach = picked > 0
+    // ONE ROW, ONE SCROLL (see below) — a single place that remembers where the
+    // row was, so a reach built arrow by arrow never makes the member find their
+    // arrow again (v428's rule, kept).
+    val reachScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
+    val hasReach = state.pageSelectionCount > 0 || state.pageLettersPicked
+    val lineHere = state.pageSelectionCount > 0
     // Cut and Copy with an empty reach OFFER the whole page first — the
     // member's two-tap flow: the first tap says how much, the second acts.
     val offerReach: () -> Unit = { state.selectWholePage() }
-    Column(
+    Surface(
+        // v433 — THE PAGE'S CAPSULE (see [JournalCapsule]): the box is 46dp of
+        // the journal's own raised paper, one real capsule, like the date pill
+        // and the mood pill it sits between.
+        shape = JournalCapsule.Shape,
+        color = journalPaperRaised(),
+        shadowElevation = 10.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 7.dp),
-        verticalArrangement = Arrangement.spacedBy(1.dp)
+            .height(JournalCapsule.Height)
     ) {
-        // ── THE ROWS: ↑ MORE · ↓ MORE, OR ONE STEP BACK ──────────────────
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rowScroll),
+                .fillMaxHeight()
+                .horizontalScroll(reachScroll)
+                .padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            // Proper arrows, not triangles: the same icon language as the rest
-            // of the app, and an arrow that is dead now LOOKS dead.
-            PageArrowChip(
+            // ── THE CORNER: FOUR ARROWS, AS PILLS ──────────────────────────
+            //
+            // ↑ ↓ are the rows and ← → the letters, in that order, and each is
+            // a pill of the box's own ink rather than a bare glyph: a control
+            // the thumb presses again and again has to LOOK like something to
+            // press (the member: "make the arrow proper pills in the corner").
+            // A dead one dims to a hairline of itself, which is the whole of
+            // what tells a member it has nowhere left to go.
+            ReachPill(
                 icon = CurioIcons.ArrowUpward,
                 label = "More rows up",
                 accent = accent,
+                ink = ink,
                 enabled = state.canNudgePageRows(up = true)
             ) { state.nudgePageRows(up = true) }
-            PageArrowChip(
+            ReachPill(
                 icon = CurioIcons.ArrowDownward,
                 label = "More rows down",
                 accent = accent,
+                ink = ink,
                 enabled = state.canNudgePageRows(up = false)
             ) { state.nudgePageRows(up = false) }
-            Text(
-                text = reachLine,
-                style = MaterialTheme.typography.labelSmall,
-                color = if (picked > 0) ink else muted,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            PageTextChip("All rows", accent = ink) { state.selectWholePage() }
-            PageTextChip("Done", accent = accent) { state.closePageEditBar() }
-        }
-        // ── THE LETTERS: ← ONE BACK · → ONE MORE ─────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(letterScroll),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            PageArrowChip(
+            ReachPill(
                 icon = CurioIcons.ArrowBack,
                 label = "Fewer letters",
                 accent = accent,
+                ink = ink,
                 enabled = state.canNudgePageLetters(more = false)
             ) { state.nudgePageLetters(more = false) }
-            PageArrowChip(
+            ReachPill(
                 icon = CurioIcons.ArrowForward,
                 label = "One more letter",
                 accent = accent,
+                ink = ink,
                 enabled = state.canNudgePageLetters(more = true)
             ) { state.nudgePageLetters(more = true) }
-            // The whole line in one tap — the counterpart of All rows, for the
-            // member who wants the line rather than a clause out of it.
-            PageTextChip("Line", enabled = lettersHere, accent = ink) {
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 3.dp)
+                    .width(1.dp)
+                    .height(22.dp)
+                    .background(ink.copy(alpha = 0.12f))
+            )
+            // Select all is a WORD on purpose: the bundled Material Symbols
+            // subset has no `select_all` (measured — see [safeGlyphName]), and
+            // a word the member already knows beats a glyph standing in for it
+            // (member's own two options: "use text select all or just the icon
+            // of select all"). Line takes the words of the row the reach begins
+            // at, which is the reach's own unit when the member wants the line
+            // rather than a clause out of it.
+            CopyChip("Select all", accent = ink) { state.selectWholePage() }
+            CopyChip("Line", enabled = lineHere, accent = ink) {
                 state.selectPageLineLetters()
             }
-            PageTextChip("Cut", enabled = true, accent = accent) {
-                if (!hasReach) {
-                    offerReach()
-                } else {
-                    val text = state.cutPageSelection()
-                    if (text.isNotEmpty()) clipboard.setText(AnnotatedString(text))
-                }
-            }
-            PageTextChip("Copy", enabled = true, accent = accent) {
-                if (!hasReach) {
-                    offerReach()
-                } else {
-                    val text = state.copyPageSelection()
-                    if (text.isNotEmpty()) {
-                        clipboard.setText(AnnotatedString(text))
-                        state.closePageEditBar()
+            // ── AND THE ACTIONS, AS ICONS ────────────────────────────────
+            //
+            // The member: "instead of cut copy paste use its icon, and for undo
+            // the undo icon". Cut and Copy keep the reach's manner: with nothing
+            // picked they OFFER the page first, so the second tap is the one
+            // that acts.
+            ActionPill(
+                label = "Cut",
+                accent = accent,
+                enabled = true,
+                onClick = {
+                    if (!hasReach) {
+                        offerReach()
+                    } else {
+                        val text = state.cutPageSelection()
+                        if (text.isNotEmpty()) clipboard.setText(AnnotatedString(text))
                     }
                 }
+            ) {
+                CurioIcon(CurioIcons.ContentCut, null, size = 18.dp)
             }
-            PageTextChip("Paste", accent = accent) {
-                val text = clipboard.getText()?.text.orEmpty()
-                if (text.isNotEmpty()) state.pastePageText(text)
+            ActionPill(
+                label = "Copy",
+                accent = accent,
+                enabled = true,
+                onClick = {
+                    if (!hasReach) {
+                        offerReach()
+                    } else {
+                        val text = state.copyPageSelection()
+                        if (text.isNotEmpty()) {
+                            clipboard.setText(AnnotatedString(text))
+                            state.closePageEditBar()
+                        }
+                    }
+                }
+            ) {
+                CurioIcon(CurioIcons.ContentCopy, null, size = 18.dp)
             }
-            PageTextChip("Undo", enabled = state.canUndoPageEdit, accent = accent) {
-                state.undoPageEdit()
+            ActionPill(
+                label = "Paste",
+                accent = accent,
+                enabled = true,
+                onClick = {
+                    val text = clipboard.getText()?.text.orEmpty()
+                    if (text.isNotEmpty()) state.pastePageText(text)
+                }
+            ) {
+                PasteGlyph(tint = LocalContentColor.current)
+            }
+            ActionPill(
+                label = "Undo",
+                accent = accent,
+                enabled = state.canUndoPageEdit,
+                onClick = { state.undoPageEdit() }
+            ) {
+                CurioIcon(CurioIcons.Undo, null, size = 18.dp)
+            }
+            // ── AND THE CROSS, AT THE BOX'S RIGHT CORNER ────────────────
+            ActionPill(
+                label = "Close copy tools",
+                accent = accent,
+                enabled = true,
+                onClick = { state.closePageEditBar() }
+            ) {
+                CurioIcon(CurioIcons.Close, null, size = 18.dp)
             }
         }
     }
 }
 
-/** One arrow of [PersonalPageEditBar] — an icon in a round tap target, tinted
- *  with the page's own ink, dimmed to the point of being plainly unavailable
- *  when its axis has nowhere left to go. */
+/**
+ * ONE ARROW OF [PersonalPageEditBar], AS A PILL.
+ *
+ * A capsule of the page's own ink at a whisper — the shape the member asked for
+ * ("make the arrow proper pills") — tinted with the reach's accent while it has
+ * somewhere to go and dimmed to a hairline of itself when it does not, because a
+ * control that answers a press with nothing teaches a member to stop pressing
+ * it.
+ */
 @Composable
-private fun PageArrowChip(
+private fun ReachPill(
     icon: String,
     label: String,
     accent: Color,
+    ink: Color,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .size(34.dp)
-            .clip(RoundedCornerShape(50))
-            .clickable(enabled = enabled, onClickLabel = label, onClick = onClick),
-        contentAlignment = Alignment.Center
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(50),
+        color = ink.copy(alpha = if (enabled) 0.08f else 0.03f),
+        modifier = Modifier.height(34.dp)
     ) {
-        CurioIcon(
-            icon,
-            contentDescription = label,
-            tint = if (enabled) accent
-                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-            size = 18.dp
-        )
+        Box(
+            modifier = Modifier.width(38.dp).semantics { contentDescription = label },
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                icon,
+                contentDescription = label,
+                tint = if (enabled) accent else ink.copy(alpha = 0.28f),
+                size = 18.dp
+            )
+        }
     }
 }
 
-/** One word of [PersonalPageEditBar] — a bare label in the page's own inks, so
- *  the bar reads as the dock's language (a row of small words) rather than as a
+/** One ACTION of [PersonalPageEditBar] — an icon in a round tap target of the
+ *  page's own ink, dimmed when the action has nothing to act on. */
+@Composable
+private fun ActionPill(
+    label: String,
+    accent: Color,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(50),
+        color = Color.Transparent,
+        modifier = Modifier.size(34.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize().semantics { contentDescription = label },
+            contentAlignment = Alignment.Center
+        ) {
+            CompositionLocalProvider(
+                LocalContentColor provides if (enabled) accent
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.40f)
+            ) { content() }
+        }
+    }
+}
+
+/** One WORD of [PersonalPageEditBar] ("Select all", "Line") — a capsule in the
+ *  page's own ink, so the box reads as the dock's language rather than as a
  *  second toolbar with its own furniture. */
 @Composable
-private fun PageTextChip(
+private fun CopyChip(
     label: String,
     accent: Color,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-        color = if (enabled) accent
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .clickable(enabled = enabled, onClickLabel = label, onClick = onClick)
-            .padding(horizontal = 11.dp, vertical = 8.dp)
-    )
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(50),
+        color = accent.copy(alpha = 0.10f),
+        modifier = Modifier.height(34.dp)
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 13.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = if (enabled) accent
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/**
+ * PASTE, DRAWN.
+ *
+ * The bundled Material Symbols subset carries no `content_paste` — measured, the
+ * same byte probe [safeGlyphName] documents (`content_copy` is present and
+ * `content_cut` is NOT; the scissors the app uses are the plain `cut`) — so the
+ * app draws its own: a page going down into a board, which is the one shape
+ * everyone reads as paste.
+ */
+@Composable
+private fun PasteGlyph(tint: Color) {
+    androidx.compose.foundation.Canvas(modifier = Modifier.size(19.dp)) {
+        val stroke = 1.5f.dp.toPx()
+        val w = size.width
+        val h = size.height
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(w * 0.18f, h * 0.12f),
+            size = Size(w * 0.64f, h * 0.80f),
+            cornerRadius = CornerRadius(2.4f.dp.toPx()),
+            style = Stroke(width = stroke)
+        )
+        drawLine(
+            color = tint,
+            start = Offset(w * 0.5f, h * 0.36f),
+            end = Offset(w * 0.5f, h * 0.74f),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+        drawLine(
+            color = tint,
+            start = Offset(w * 0.34f, h * 0.58f),
+            end = Offset(w * 0.5f, h * 0.74f),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+        drawLine(
+            color = tint,
+            start = Offset(w * 0.66f, h * 0.58f),
+            end = Offset(w * 0.5f, h * 0.74f),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+    }
 }
 
 @Composable
@@ -5736,6 +5952,18 @@ internal fun PersonalToolDock(
     // twice. Hoisted above the dock's own bar swap and made saveable, so its
     // place survives the swap and a rotation alike.
     val toolScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
+    // ── v433 — WHICH GROUP IS OPEN IN THE DOCK (see [PersonalDockGroup]) ──
+    //
+    // One panel at a time, and it belongs to the dock rather than to a door, so
+    // opening the format never leaves the alignment panel standing under it. The
+    // doors close their own panel on a second press.
+    var openGroup by remember { mutableStateOf<PersonalDockGroup?>(null) }
+    val panelScroll = remember { ScrollState(0) }
+    // A caption takes the dock's row over: whatever group was open belongs to the
+    // WRITING tools and steps aside with them.
+    LaunchedEffect(state.captionFocusedId) {
+        if (state.captionFocusedId != null) openGroup = null
+    }
     // v389 — TEXT HISTORY, the dock's FIRST tool.
     //
     // The writing pages had it everywhere else in Curio but here, so the one
@@ -5784,13 +6012,16 @@ internal fun PersonalToolDock(
             animationSpec = tween(durationMillis = 180),
             label = "personalDockTools"
         ) { writingCaptionId ->
-        // v427 — THE PAGE'S TEXT BAR takes the dock's own row while it is open:
-        // the tools the member is NOT using step aside for the ones they just
-        // asked for, in the place their thumb already is (see
-        // [PersonalPageEditBar]). A caption still wins while its caret is in it.
-        if (state.pageEditBarOpen) {
-            PersonalPageEditBar(state = state, accent = accentInk, ink = ink)
-        } else if (writingCaptionId != null) {
+        // ── v433 — THE COPY BOX IS NOT A DOCK ROW ANY MORE ─────────────────
+        //
+        // v427 gave the page's cut / copy / paste this row: the writing tools
+        // stepped aside for them, in the place the thumb already was. The member
+        // has the box FLOATING over the page's foot instead ("also the copy
+        // floating layout" — see [PersonalWritingPage] and
+        // [PersonalPageEditBar]), so the dock keeps its tools and the copy door
+        // below stays LIT while the box is up, which is what says where it came
+        // from. A caption still wins while its caret is in it.
+        if (writingCaptionId != null) {
             PersonalCaptionTools(
                 state = state,
                 captionId = writingCaptionId,
@@ -5798,6 +6029,11 @@ internal fun PersonalToolDock(
                 ink = ink
             )
         } else {
+        // v433 — THE TOOL ROW AND THE PANEL ARE ONE COLUMN: the row never moves
+        // and the panel opens UNDER it, inside the same pill (see
+        // [PersonalDockGroup]). `animateContentSize` is what makes the pill grow
+        // to hold it instead of jumping.
+        Column(modifier = Modifier.animateContentSize()) {
         Row(
             modifier = Modifier
                 // Nine tools in a fixed row overflowed a narrow phone and cut
@@ -5829,96 +6065,59 @@ internal fun PersonalToolDock(
             if (onJournalAccent != null) {
                 val worn = if (journalAccent == JOURNAL_ACCENT_THEME) accentInk
                            else Color(journalAccent)
+                val colourOn = journalAccent != JOURNAL_ACCENT_THEME
                 PersonalToolButton(
                     label = "This journal's colour",
-                    active = journalAccent != JOURNAL_ACCENT_THEME,
+                    active = colourOn,
                     accent = worn, ink = ink,
                     onClick = { accentOpen = true }
                 ) {
-                    CurioIcon(CurioIcons.Palette, null, tint = worn, size = 19.dp)
+                    // v433 — the glyph is the page's colour while the door is
+                    // unlit and the KNOCKED-OUT ink while it is lit, because a
+                    // lit tool is a solid disc of that same colour now (see
+                    // [PersonalToolButton]): a palette drawn in the colour of its
+                    // own fill is a button with nothing on it.
+                    CurioIcon(
+                        CurioIcons.Palette,
+                        null,
+                        tint = if (colourOn) readableOnFill(worn) else worn,
+                        size = 19.dp
+                    )
                 }
             }
+            // ── v433 — FORMAT IS ONE DOOR ────────────────────────────────
+            //
+            // The member: *"collapse the B I U s and font into one toggle and no
+            // dont make it drop down but the option smoothly expands in that dock
+            // when its tapped … similar grouping for other tools keep this
+            // collapse style"*. B, I, U, S and the face held five slots of this
+            // row for one subject — how the line the caret is in is SET — so they
+            // are one door now, marked with a drawn "Aa", and its five choices
+            // open IN the dock (see [PersonalDockGroup]). It is lit whenever the
+            // line already carries any of them, so a bold line still says so.
+            val formatLit = active and
+                (FLAG_BOLD or FLAG_ITALIC or FLAG_UNDERLINE or FLAG_STRIKE) != 0
             PersonalToolButton(
-                label = "Bold",
-                active = active and FLAG_BOLD != 0,
+                label = "Format",
+                active = formatLit || openGroup == PersonalDockGroup.FORMAT,
                 accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_BOLD) }
-  ) {
-  CurioIcon(CurioIcons.FormatBold, null, size = 20.dp)
-  }
-
-            PersonalToolButton(
-                label = "Italic",
-                active = active and FLAG_ITALIC != 0,
-                accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_ITALIC) }
-            ) {
-  CurioIcon(CurioIcons.FormatItalic, null, size = 20.dp)
-            }
-            PersonalToolButton(
-                label = "Underline",
-                active = active and FLAG_UNDERLINE != 0,
-                accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_UNDERLINE) }
-            ) {
-  CurioIcon(CurioIcons.FormatUnderline, null, size = 20.dp)
-            }
-            PersonalToolButton(
-                label = "Strikethrough",
-                active = active and FLAG_STRIKE != 0,
-                accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_STRIKE) }
-            ) {
-                StrikeGlyph()
-            }
-            // v389 — THE FACE. Four voices the app already bundles, one tap
-            // from a menu that is set IN each of them, because a font menu
-            // written in one font is a list of words (user request: "the font
-            // chnage … add in the universal tool bar").
-            Box {
-                val fontMenu = remember { CurioMenuToggle() }
-                val face = state.fontOfFocused()
-                PersonalToolButton(
-                    label = "Font: ${personalFontLabel(face)}",
-                    // Lit only when a face was actually CHOSEN: the page's own
-                    // serif is not a setting, it is where a line starts.
-                    active = face.isNotEmpty(),
-                    accent = accentInk, ink = ink,
-                    onClick = { fontMenu.buttonClick() }
-                ) {
-                    FontGlyph(face)
+                onClick = {
+                    openGroup = if (openGroup == PersonalDockGroup.FORMAT) null
+                                else PersonalDockGroup.FORMAT
                 }
-                DropdownMenu(
-                    expanded = fontMenu.open,
-                    onDismissRequest = { fontMenu.dismissed() },
-                    properties = MenuKeepKeyboardProperties
-                ) {
-                    PERSONAL_FONT_KEYS.forEach { key ->
-                        DropdownMenuItem(
-                            text = {
-                                // Set in the face it offers — the preview and the
-                                // result are the same bytes.
-                                Text(
-                                    personalFontLabel(key),
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontFamily = personalFontPreview(key)
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            trailingIcon = {
-                                if (face == key) {
-                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
-                                }
-                            },
-                            onClick = {
-                                state.applyFont(key)
-                                fontMenu.close()
-                            }
-                        )
-                    }
-                }
+            ) {
+                Text(
+                    text = "Aa",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = LocalContentColor.current
+                )
             }
+            // v389 — THE FACE rides with the format now (v433): the four voices
+            // the app already bundles are the second half of the SAME subject, so
+            // they are four "Aa"s in the door's own panel, each set IN the face it
+            // offers — a font list written in one font is a list of words.
             // v389 — THE MARKER PEN, the first tool in the dock that is a
             // COLOUR. It follows the bullet tool's manner exactly, because that
             // is the manner this dock already taught the member: the first tap
@@ -5945,7 +6144,11 @@ internal fun PersonalToolDock(
                         else state.applyHighlight(PERSONAL_HIGHLIGHT_KEYS.first())
                     }
                 ) {
-                    MarkerPenGlyph(pen = if (penOn) personalHighlightInk(pen) else null)
+                    // The FILL says the pen now (a lit tool is a solid disc of it,
+                    // v433), so the brush draws in the ink that reads on that disc
+                    // rather than in the pen's own colour — which would be the
+                    // colour of the disc it sits on.
+                    MarkerPenGlyph(pen = null)
                 }
                 DropdownMenu(
                     expanded = penMenu.open,
@@ -6086,51 +6289,28 @@ internal fun PersonalToolDock(
             // Four buttons (left / centre / right / justify) held four slots in
             // this row, each saying one quarter of the same thing. The member:
             // *"collapse the alignments into one option"* — so there is ONE
-            // alignment tool now, wearing the FOCUSED LINE's own alignment (the
-            // button answers "what is this line doing?" before it is touched),
-            // with the four choices behind it in the tap-then-menu habit the
-            // bullet tool already teaches. It is lit for anything but plain
-            // left, so a line moved off the margin says so in the dock.
-            Box {
-                val alignMenu = remember { CurioMenuToggle() }
-                val choices = remember {
-                    listOf(
-                        PersonalAlign.START to "Align left",
-                        PersonalAlign.CENTER to "Align centre",
-                        PersonalAlign.END to "Align right",
-                        PersonalAlign.JUSTIFY to "Justify"
-                    )
+            // alignment tool, wearing the FOCUSED LINE's own alignment (the button
+            // answers "what is this line doing?" before it is touched).
+            //
+            // ── v433 — AND ITS CHOICES OPEN IN THE DOCK, NOT OVER IT ─────
+            //
+            // The member: *"for format change it from drop down to this collapse
+            // style but NOT for the bullet point"* — so the alignment is the
+            // dock's own panel now, while the bullet and the pen keep the menus
+            // this row taught. It is lit for anything but plain left, so a line
+            // moved off the margin says so in the dock.
+            val focusedAlign = state.alignOfFocused()
+            PersonalToolButton(
+                label = "Alignment",
+                active = focusedAlign != PersonalAlign.START ||
+                    openGroup == PersonalDockGroup.ALIGN,
+                accent = accentInk, ink = ink,
+                onClick = {
+                    openGroup = if (openGroup == PersonalDockGroup.ALIGN) null
+                                else PersonalDockGroup.ALIGN
                 }
-                val focusedAlign = state.alignOfFocused()
-                PersonalToolButton(
-                    label = "Alignment",
-                    active = focusedAlign != PersonalAlign.START,
-                    accent = accentInk, ink = ink,
-                    onClick = { alignMenu.buttonClick() }
-                ) {
-                    AlignGlyph(focusedAlign.toAlignKind())
-                }
-                DropdownMenu(
-                    expanded = alignMenu.open,
-                    onDismissRequest = { alignMenu.dismissed() },
-                    properties = MenuKeepKeyboardProperties
-                ) {
-                    choices.forEach { (align, label) ->
-                        DropdownMenuItem(
-                            text = { MarkerMenuLabel(label) },
-                            leadingIcon = { AlignGlyph(align.toAlignKind()) },
-                            trailingIcon = {
-                                if (focusedAlign == align) {
-                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
-                                }
-                            },
-                            onClick = {
-                                state.setAlign(align)
-                                alignMenu.close()
-                            }
-                        )
-                    }
-                }
+            ) {
+                AlignGlyph(focusedAlign.toAlignKind())
             }
             if (showJournalTools) PersonalToolButton(
                 label = "Add a photo",
@@ -6142,16 +6322,14 @@ internal fun PersonalToolDock(
             }
             // ── v424 — THE PAGE'S OWN TWO TOOLS ──────────────────────────
             //
-            // COPY is the PAGE's copy, not the line's: it hands the request to
-            // the canvas, which selects the whole page and raises Android's own
-            // floating bar above these tools (see the canvas's own effect). One
-            // bar for copy and select all, in the place a member already
-            // expects to find them.
+            // COPY is the PAGE's copy, not the line's: the door opens the page's
+            // own COPY BOX — cut, copy, paste, undo, the reach arrows and select
+            // all — which FLOATS over the page's foot above this dock now (v433,
+            // see [PersonalWritingPage] and [PersonalPageEditBar]). The door
+            // stays lit while the box is up, which is what says where it came
+            // from, and a second press takes it back.
             PersonalToolButton(
                 label = "Page text tools: cut, copy, paste, undo",
-                // v427 — the door opens the page's own TEXT BAR (see
-                // [PersonalPageEditBar]) instead of Android's select-all menu:
-                // the member asked for cut, copy, paste and undo on the page.
                 active = state.pageEditBarOpen,
                 accent = accentInk, ink = ink,
                 onClick = { state.togglePageEditBar() }
@@ -6163,38 +6341,145 @@ internal fun PersonalToolDock(
             // (see [PersonalExport]). Three shapes behind one door, because the
             // question "what am I exporting as" is asked once, when the file is
             // made, and never again.
-            Box {
-                val exportMenu = remember { CurioMenuToggle() }
-                PersonalToolButton(
-                    label = "Export this page",
-                    active = exporter.busy,
-                    accent = accentInk, ink = ink,
-                    onClick = { exportMenu.buttonClick() }
-                ) {
-                    CurioIcon(CurioIcons.Download, null, size = 18.dp)
+            //
+            // v433 — and the door opens them IN the dock like the format and the
+            // alignment (the member's *"and advance for the copy and download"*):
+            // what the file is made as is a choice about THIS page, made while the
+            // page is open, so it belongs where the tools are rather than in a menu
+            // to be dismissed.
+            PersonalToolButton(
+                label = "Export this page",
+                active = exporter.busy || openGroup == PersonalDockGroup.EXPORT,
+                accent = accentInk, ink = ink,
+                onClick = {
+                    openGroup = if (openGroup == PersonalDockGroup.EXPORT) null
+                                else PersonalDockGroup.EXPORT
                 }
-                DropdownMenu(
-                    expanded = exportMenu.open,
-                    onDismissRequest = { exportMenu.dismissed() },
-                    properties = MenuKeepKeyboardProperties
+            ) {
+                CurioIcon(CurioIcons.Download, null, size = 18.dp)
+            }
+        }
+        // ── AND THE PANEL A DOOR OPENS, IN THE DOCK ITSELF (v433) ────────
+        //
+        // Not a menu over the page: the choices stand where the tools are, so a
+        // thumb that just pressed the door has its choices under it instead of a
+        // floating list somewhere else. The cross at the panel's end puts it
+        // away, and so does the door (a second press closes what it opened).
+        AnimatedVisibility(
+            visible = openGroup != null,
+            enter = expandVertically(tween(170)) + fadeIn(tween(130)),
+            exit = shrinkVertically(tween(130)) + fadeOut(tween(100))
+        ) {
+            Column(Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp)
+                        .height(1.dp)
+                        .background(ink.copy(alpha = 0.10f))
+                )
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(panelScroll)
+                        .padding(horizontal = 8.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    PersonalExportFormat.entries.forEach { format ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    format.label,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            onClick = {
-                                exportMenu.close()
-                                exporter.run(format)
+                    when (openGroup) {
+                        PersonalDockGroup.FORMAT -> {
+                            // The styling, then the faces — one panel, because
+                            // they are one subject (see the door's own note).
+                            PersonalToolButton(
+                                label = "Bold",
+                                active = active and FLAG_BOLD != 0,
+                                accent = accentInk, ink = ink,
+                                onClick = { state.toggle(FLAG_BOLD) }
+                            ) {
+                                CurioIcon(CurioIcons.FormatBold, null, size = 20.dp)
                             }
-                        )
+                            PersonalToolButton(
+                                label = "Italic",
+                                active = active and FLAG_ITALIC != 0,
+                                accent = accentInk, ink = ink,
+                                onClick = { state.toggle(FLAG_ITALIC) }
+                            ) {
+                                CurioIcon(CurioIcons.FormatItalic, null, size = 20.dp)
+                            }
+                            PersonalToolButton(
+                                label = "Underline",
+                                active = active and FLAG_UNDERLINE != 0,
+                                accent = accentInk, ink = ink,
+                                onClick = { state.toggle(FLAG_UNDERLINE) }
+                            ) {
+                                CurioIcon(CurioIcons.FormatUnderline, null, size = 20.dp)
+                            }
+                            PersonalToolButton(
+                                label = "Strikethrough",
+                                active = active and FLAG_STRIKE != 0,
+                                accent = accentInk, ink = ink,
+                                onClick = { state.toggle(FLAG_STRIKE) }
+                            ) {
+                                StrikeGlyph()
+                            }
+                            DockPanelDivider(ink = ink)
+                            val face = state.fontOfFocused()
+                            PERSONAL_FONT_KEYS.forEach { key ->
+                                PersonalToolButton(
+                                    label = "Face: ${personalFontLabel(key)}",
+                                    // The page's own serif is not a setting, so the
+                                    // empty key is lit only when nothing was picked.
+                                    active = face == key,
+                                    accent = accentInk, ink = ink,
+                                    onClick = { state.applyFont(key) }
+                                ) {
+                                    FontGlyph(key)
+                                }
+                            }
+                        }
+
+                        PersonalDockGroup.ALIGN -> {
+                            val focusedAlign = state.alignOfFocused()
+                            listOf(
+                                PersonalAlign.START to "Align left",
+                                PersonalAlign.CENTER to "Align centre",
+                                PersonalAlign.END to "Align right",
+                                PersonalAlign.JUSTIFY to "Justify"
+                            ).forEach { (align, label) ->
+                                PersonalToolButton(
+                                    label = label,
+                                    active = focusedAlign == align,
+                                    accent = accentInk, ink = ink,
+                                    onClick = { state.setAlign(align) }
+                                ) {
+                                    AlignGlyph(align.toAlignKind())
+                                }
+                            }
+                        }
+
+                        PersonalDockGroup.EXPORT -> {
+                            PersonalExportFormat.entries.forEach { format ->
+                                CopyChip(
+                                    label = format.label,
+                                    accent = ink,
+                                    enabled = !exporter.busy
+                                ) { exporter.run(format) }
+                            }
+                        }
+
+                        null -> Unit
+                    }
+                    Spacer(Modifier.width(4.dp))
+                    PersonalToolButton(
+                        label = "Close",
+                        active = false,
+                        accent = accentInk, ink = ink,
+                        onClick = { openGroup = null }
+                    ) {
+                        CurioIcon(CurioIcons.Close, null, size = 17.dp)
                     }
                 }
             }
+        }
         }
         }
         }
@@ -6729,6 +7014,16 @@ private fun AlignGlyph(kind: AlignKind) {
     }
 }
 
+/**
+ * The ink that reads ON a fill (v433): dark on a light one, the journal's own
+ * cream on a deep one — the same rule [journalInk] applies to a painted page, and
+ * the reason a lit tool can wear any accent a member can pick. It is a plain
+ * function, not a theme role: the fill here is a colour somebody chose, not one
+ * the theme measured.
+ */
+private fun readableOnFill(fill: Color): Color =
+    if (fill.luminance() > 0.55f) Color(0xFF1B1613) else Color(0xFFF7F2E8)
+
 @Composable
 private fun PersonalToolButton(
     label: String,
@@ -6739,9 +7034,18 @@ private fun PersonalToolButton(
     onLongClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    // ── v433 — A LIT TOOL IS A SOLID DISC ───────────────────────────────
+    //
+    // The lit state was a 24% WASH of the tool's own colour, which on the
+    // journal's paper read as a smudge rather than as a state — the member:
+    // *"fix the selected highlight color of the tool it looks bad make them
+    // proper icons"*. A lit tool is a solid disc of that colour now, with the
+    // glyph knocked out of it in the ink that reads on the disc ([readableOnFill]),
+    // so the mark is a proper icon on a proper fill at every accent a member can
+    // choose — the same pairing the date pill and the eye/pen switch wear.
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (active) accent.copy(alpha = 0.24f) else Color.Transparent,
+        color = if (active) accent else Color.Transparent,
         modifier = Modifier
             .size(36.dp)
             .combinedClickable(
@@ -6753,7 +7057,9 @@ private fun PersonalToolButton(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            CompositionLocalProvider(LocalContentColor provides if (active) accent else ink) {
+            CompositionLocalProvider(
+                LocalContentColor provides if (active) readableOnFill(accent) else ink
+            ) {
                 Box(
                     modifier = Modifier.semantics { contentDescription = label },
                     contentAlignment = Alignment.Center

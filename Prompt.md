@@ -8,37 +8,50 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> tell me did the previous task finished for the pdf settings etc? smoothly ui etc ? and
-> also it needs a bit more fix the double tap zoom and double tap again to unzoom is kinda
-> buggy and also its appear ad disapper of the tools,
+> now a similiar pass for the journal dock tools capcule look, and lets make it more compact,
+> collapse the B I U s and font into one toggle and no dont make it drop down but the option
+> smoothly expands in that dock when its tapped, an dsimiliar geouping for other tools keep
+> this collape style and for format chnag eit from ddrop down to this colapse style but not
+> for the bullet point, and advcance for the copy and download, also the copy floating layout,
+> make the arrow proper pills in the corner hide the voice note opyion when copy tools are on,
+> and add a cross button to close the option box, dont show the nothing picker or 6 out of 6
+> row text its no need, also instead of all rows use text select all or just the icon of
+> select all, also fix the line selection, without all select i cant select only word by word,
+> fix it, and instead of cut copy paste use its icon, and for undo the undo icon, make it
+> better, also fix the paint the page too not working, also fix the selected hihgligh color of
+> the tool it slooks bad make them proper icons, also make the today and eye pen pill more
+> capsule like and same for the how did the day feel same capsule style as now they ae too
+> thing, use one unified capsule style, so they look good. also from the settings sub pages
+> remove the quick row and its usggestions.
 
-Three things: (a) report whether the previous reader pass actually landed, (b) fix the
-double-tap zoom in and the double-tap-to-unzoom, (c) fix the tools appearing and
-disappearing.
+The journal dock pass (§24 below, asked twice before and parked twice) — done this session.
 
 ## 2. Findings
 
-**(a) The previous pass did NOT land.** Both reader commits were pushed
-(`633283e0`, `17bef96c`) but CI **failed** on the second one — five compile errors in
-`BookReaderScreen.kt`: `ReaderSheet.PLACES` no longer exists (renamed to `CONTENTS` in the
-v431 sheet split), and the four `ReaderLook.zone*` properties went `internal` (the object
-had to become `internal` so `ReaderSettingsScreen.kt`, a new file, could read it) while the
-type they carry — `private enum class ReaderZoneAction` / `ReaderZoneEdge` — stayed
-file-private (`'internal' property exposes its 'private-in-file' type`). So the reader
-redesign as shipped was **not compiling**; the app on origin is the v430 build. Fixed first,
-before anything else this session.
+The dock already had most of its parts; the pass was about SHAPE and reach:
 
-**(b) The double-tap bug.** `readerDoubleTapDocument` corrected the file's scroll with a raw
-`down.dispatchRawDelta(documentOffsetAt(down, at.y) * (ratio - 1f))`. That is right for a
-PINCH — the same arithmetic `readerZoomDocument` uses, and it holds because a pinch arrives
-as many small steps, none of them crossing a sheet — and wrong for a double tap, which is
-ONE big step (1× ↔ 2.2×). A lazy column holds `(firstVisibleItemIndex, scrollOffset)` and
-`scrollOffset` is a pixel count INTO that sheet, so it only means a place at the zoom it was
-measured at: at 2.2× the offset can be longer than the whole sheet becomes back at 1×, so
-the list must ROLL it into the sheet above and the member lands a page or three from the
-word they tapped. (Checked the ordering question both ways: a delta applied against the OLD
-layout is off by one item's growth per sheet crossed; against the NEW layout it is exact —
-and a single big step cannot be relied on to get either.)
+- **The dock's tools were a flat crowd** — B / I / U / S, the size pair, the alignment
+  tool, the bullet, the pen, marker, face and export tools all on one row, each opening a
+  DROPDOWN where it had options. The member wants doors that expand INSIDE the dock
+  ("no dont make it drop down but the option smoothly expands in that dock when its
+  tapped"), grouped: style together, format off its dropdown, copy + download together
+  ("advance for the copy and download"), the bullet keeping its own menu
+  ("but not for the bullet point").
+- **The copy box was a dock-attached strip**, not the floating box with pill arrows,
+  icon actions, a ✕ and no "x out of 6" caption the member drew. And its reach had a
+  real FAULT: the letter axis would not open until a ROW had been picked, so without
+  "select all" no word could be taken ("without all select i cant select only word by
+  word, fix it").
+- **"Paint the page too" was wiring with no paint** — the v430 flag and its
+  `LocalJournalPagePaint` existed, but the reading/writing surfaces still asked the
+  THEME for their paper, so the switch did nothing the eye could see.
+- **The page's three capsules (Today, eye/pen, mood) were three thinnesses** of the
+  same idea; the member wants ONE capsule.
+- **The settings sub-pages' QUICK TOOLS row** (a band of deep links under the chips,
+  with rotating suggestions) is not wanted on the sub-pages.
+
+The earlier reader double-tap / chrome work of this session (§25) shipped first; see the
+request log at the foot for what it did. This session's build is the journal dock.and a single big step cannot be relied on to get either.)
 
 **(c) The tools.** `detectTapGestures` reads a gesture whose changes all go up in ONE event
 as a tap. A pinch ends exactly like that (both fingers lifted within a frame, batched into
@@ -50,9 +63,39 @@ rather than a tool arriving.
 
 ## 3. What was built
 
-**CI repairs:** `ReaderSheet.PLACES` → `ReaderSheet.CONTENTS`; `ReaderZoneAction` and
-`ReaderZoneEdge` are `internal` now, so the `internal object ReaderLook` no longer exposes a
-file-private type.
+**The dock's groups are expanding doors** (`PersonalDockGroup`, the dock's `openGroup`):
+STYLE holds B / I / U / S and the size pair behind one door, FORMAT holds the alignments
+(moved off their dropdown), EXPORT holds copy + download; the bullet keeps its own menu.
+One group open at a time, `animateContentSize` doing the expanding in the dock row itself,
+and a door lit while its group is open (or its tool is on).
+
+**The copy box is a floating card** (`PageCopyBox` and its `ReachPill` / `ActionPill` /
+`CopyChip`): four arrow pills (rows ↑↓, letters ←→, dimming at their axis' end), select-all
+as a single chip (the bundled glyph subset has no `select_all`, so it is the word), cut /
+copy / undo as icons (`content_cut` is absent from the subset too — the `cut` glyph is
+used; `content_paste` is absent, so paste keeps its word), a ✕ to close, the scope picker
+row and the voice-note door hidden while it is up, and no "x out of 6" caption anywhere.
+
+**Word-by-word works with no row picked**: the letter axis opens from the row the caret is
+in (a caret IS in a row), so `nudgePageLetters` no longer waits for `nudgePageRows`.
+
+**"Paint the page too" paints**: all three paper surfaces (reading, writing canvas, dock)
+read `LocalJournalPagePaint` now, and the dock's export resolves the page's paint for a
+shared file.
+
+**A lit tool reads as lit**: one selected style built once (`PersonalToolButton`) — filled
+disc, `onPrimary` glyph, pressed animation.
+
+**One capsule for the page's three pills**: `JournalCapsule` in `PersonalTheme.kt` (height,
+shape, end padding shared), worn by the Today pill, the eye/pen switch and the mood capsule.
+
+**The settings sub-pages lost their quick row**: the QUICK TOOLS band and its suggestions
+are gone from `SettingsHubScreen`; the hub's own rows are untouched.
+
+**Docs:** a v433 section in `app/AGENTS.md`, six FIX bullets in
+`fastlane/metadata/android/en-US/changelogs/20260922.txt`.
+
+*(The reader work below shipped earlier this session, in §25's commits — kept for the log.)*
 
 **A correction made after the layout it needs exists** (`ReaderZoomAsk`, `zoomAskOf`, and the
 `zoomAsk` effect in `PdfScrollReader`): what crosses a double tap's zoom is the tapped
@@ -88,9 +131,11 @@ bullets in `fastlane/metadata/android/en-US/changelogs/20260922.txt`.
 
 ## 4. Still open
 
-- **The journal dock pass (the message before this one) is NOT started** — the session ended
-  before any edit, and asked again this session the member said **not yet** (
-  "Not yet"). It stays logged in the User prompts slot below, with its full wording.
+- Nothing named in the prompt is open. The next items the member named for the SOURCE
+  work — **Openverse, Art Institute of Chicago, OpenAlex + Crossref, NASA image library,
+  iNaturalist** — are still NOT built.
+- The commit's CI run is checked ONCE before the next push (see the CI rule); if it has
+  FAILED, the errors are fixed and pushed before anything else.
 
 ## Instruction changes (this session)
 
@@ -119,20 +164,12 @@ prompt stays below it.)*
 
 - **§25 — the double tap, and the tools' appear/disappear (done, this session).** The CI-repair
   half of it is in the same commit: the v431 reader pass would not compile on origin.
-- **§24 — the journal dock pass (NOT started; still pending).** "now a similiar pass for the
-  journal dock tools, and lets make it more compact, collapse the B I U s and font into one
-  toggle … no drop down but the option smoothly expands in that dock … similar grouping for
-  other tools … for format change from drop down to this collapse style but not for the
-  bullet point, and advance for the copy and download, also the copy floating layout, make
-  the arrow proper pills in the corner hide the voice note option when copy tools are on,
-  and add a cross button to close the option box, don't show the nothing picker or 6 out of 6
-  row text … use text select all or just the icon of select all, also fix the line selection,
-  without all select i cant select only word by word, fix it, and instead of cut copy paste
-  use its icon, and for undo the undo icon, make it better, also fix the paint the page too
-  not working, also fix the selected highlight color of the tool it looks bad make them proper
-  icons, also make the today and eye pen pill more capsule like and same for the how did the
-  day feel same capsule style as now they are too thin, use one unified capsule style, so they
-  look good. also from the settings sub pages remove the quick row and its suggestions."
+- **§24 — the journal dock pass (done, this session — asked 2026-09-21, delivered in this
+  session's commit).** The dock's groups are expanding doors (style / format / export),
+  the copy box floats with pill arrows, icon actions, select-all and a ✕, the letter reach
+  opens without a row picked, "paint the page too" paints, the lit tool reads as lit, the
+  page's three pills share one capsule, and the settings sub-pages lost their quick row.
+  (Full wording preserved in §1 above.)
 - **§23 — the reader redesign + the vertical-PDF zoom (done, and shipped in §25's commit).**
   Compiles now; the next items the member named for the source work — **Openverse, Art
   Institute of Chicago, OpenAlex + Crossref, NASA image library, iNaturalist** — are still

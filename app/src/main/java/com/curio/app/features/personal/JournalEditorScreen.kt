@@ -372,19 +372,23 @@ private fun JournalTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            // v433 — the day's own steppers are the page's capsule minus its
+            // padding, so the three of them (back, the day, on) stand one height
+            // (see [JournalCapsule]).
+            val dayStep = JournalCapsule.Height - 6.dp
             if (editing) Surface(
                 onClick = { onShiftDate(-1L) },
-                shape = CircleShape,
+                shape = JournalCapsule.Shape,
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                modifier = Modifier.size(34.dp)
+                modifier = Modifier.size(dayStep)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronLeft, "Previous day", tint = personalAccentInk(), size = 18.dp)
+                    CurioIcon(CurioIcons.ChevronLeft, "Previous day", tint = personalAccentInk(), size = 19.dp)
                 }
             }
             Surface(
                 onClick = if (editing) onPickDate else ({}),
-                shape = RoundedCornerShape(50),
+                shape = JournalCapsule.Shape,
                 // v394 — THE DAY IS A FILLED PILL (user request: "make some
                 // button solid filled in journal: today date"): the accent's
                 // full colour under the day's own readable ink, the same
@@ -392,11 +396,13 @@ private fun JournalTopBar(
                 color = personalAccent()
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp),
+                    modifier = Modifier
+                        .height(JournalCapsule.Height)
+                        .padding(horizontal = JournalCapsule.Pad),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
-                    CurioIcon(CurioIcons.CalendarToday, null, tint = personalOnAccent(), size = 15.dp)
+                    CurioIcon(CurioIcons.CalendarToday, null, tint = personalOnAccent(), size = 16.dp)
                     // v389 — the day MOVES when it changes (user report: "date
                     // switching isnt smooth"): a later day rises in and an
                     // earlier day drops in, so the arrow the thumb pressed and
@@ -428,12 +434,12 @@ private fun JournalTopBar(
             }
         if (editing) Surface(
                 onClick = { onShiftDate(1L) },
-                shape = CircleShape,
+                shape = JournalCapsule.Shape,
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                modifier = Modifier.size(34.dp)
+                modifier = Modifier.size(dayStep)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronRight, "Next day", tint = personalAccentInk(), size = 18.dp)
+                    CurioIcon(CurioIcons.ChevronRight, "Next day", tint = personalAccentInk(), size = 19.dp)
                 }
             }
         }
@@ -490,7 +496,10 @@ private fun MoodSelector(
     Column(Modifier.fillMaxWidth()) {
         Surface(
             onClick = { open = !open },
-            shape = RoundedCornerShape(50),
+            // v433 — the page's capsule (see [JournalCapsule]): the member asked
+            // for this pill to match the date and the eye/pen switch, and it was
+            // the thinnest of the three.
+            shape = JournalCapsule.Shape,
             // The pill wears the CHOSEN feeling's ink, so the collapsed state
             // and the options below it are visibly the same thing.
             //
@@ -509,7 +518,9 @@ private fun MoodSelector(
             modifier = Modifier
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .height(JournalCapsule.Height)
+                    .padding(horizontal = JournalCapsule.Pad),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
@@ -518,7 +529,7 @@ private fun MoodSelector(
                         personalMoodGlyph(selected),
                         null,
                         tint = personalMoodInk(selected),
-                        size = 17.dp
+                        size = 18.dp
                     )
                 }
                 Text(
@@ -600,16 +611,20 @@ private fun MoodOption(
     val tint = personalMoodInk(mood)
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
+        // v433 — A CAPSULE AT THE PAGE'S OWN CONTROL HEIGHT. These were 14dp
+        // rounded boxes with 9dp of padding — the "too thin" the member named —
+        // so a panel of them read as cards rather than as the pill's own
+        // choices (see [JournalCapsule]).
+        shape = JournalCapsule.Shape,
         // v412 — the picked chip is the mood ink mixed INTO the journal paper,
         // never a translucent tint of it (see the mood pill's own note).
         color = if (on) lerp(journalPaper(), tint, 0.22f)
         // v411 — the journal's own paper and depth (no hairline anywhere).
         else journalPaper(),
-        modifier = modifier
+        modifier = modifier.height(JournalCapsule.Height)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 9.dp),
+            modifier = Modifier.padding(horizontal = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

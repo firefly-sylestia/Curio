@@ -1,11 +1,14 @@
 package com.curio.app.features.personal
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.curio.app.features.settings.settingsAccentInk
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
@@ -106,6 +109,31 @@ internal fun journalPaper(): Color {
         else -> if (isCurioDarkTheme()) 0.10f else 0.05f
     }
     return lerp(warm, tint, strength)
+}
+
+/**
+ * v433 — ONE CAPSULE FOR THE PAGE'S OWN CONTROLS.
+ *
+ * The member: *"make the today and eye pen pill more capsule like and same for
+ * the how did the day feel same capsule style as now they are too thin, use one
+ * unified capsule style, so they look good"*. The date pill, the eye/pen switch
+ * and the mood pill are the three controls that sit ON the page and say what the
+ * page IS — the day, the side you are on, and how it felt — and each had grown
+ * its own height, radius and padding, so a row of them read as three controls
+ * that happened to be near each other. They are ONE capsule now, from this
+ * token, so they cannot drift apart again. The chips the mood pill opens wear the
+ * same shape, which is what makes the panel under it read as the same thing.
+ */
+internal object JournalCapsule {
+    /** The height every page-level capsule shares — a thumb's own size, so the
+     *  three read as controls rather than as labels. */
+    val Height = 46.dp
+
+    /** A real capsule: half the height, everywhere (never a rounded box). */
+    val Shape = RoundedCornerShape(50)
+
+    /** The room a capsule's content gets at either end. */
+    val Pad = 15.dp
 }
 
 /** The journal card's fill where a control needs one step of separation. */

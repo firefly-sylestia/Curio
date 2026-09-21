@@ -83,6 +83,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -720,6 +721,23 @@ internal fun PersonalWritingPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                // ── v433 — AND THE PAGE'S OWN PAPER IS THIS BOX ──────────────
+                //
+                // "Paint the page too" had nothing to paint on: the colour
+                // reached the prints, the mood chips and the export, while the
+                // surface the words actually stand on asked the THEME for its
+                // background — so the switch was on and the page never changed
+                // (member: "fix the paint the page too not working"). The paper
+                // here is [journalPaper], which IS the theme's own parchment
+                // until the page paints itself: an unpainted page is unchanged
+                // to the pixel, and a painted one is painted all the way behind
+                // the words. The head and the dock are deliberately left out —
+                // they are the app's furniture, and they would come out
+                // unreadable over a paper dark enough to be a choice.
+                .background(
+                    if (LocalJournalPagePaint.current.own != null) journalPaper()
+                    else MaterialTheme.colorScheme.background
+                )
                 // The writing area's own top edge, in the window: the line a
                 // heading has to have gone above to be pinned (see
                 // `pinnedSection`).
@@ -889,8 +907,15 @@ internal fun PersonalWritingPage(
             // tested, so the version that rode the dock's top edge looked dead
             // (user report: "tapping it doesnt do anything"). Here it is inside
             // the writing area, above the toolbar, and the whole disc is tappable.
+            // ── v433 — AND THE MIC STEPS ASIDE FOR THE COPY BOX ──────────
+            //
+            // The member: "hide the voice note option when copy tools are on".
+            // The box floats over this same corner of the page, so a mic under
+            // it would be a button half-covered by the thing the member is
+            // using — and a recording started from under a copy box is not a
+            // recording anyone asked for.
             PersonalFloatingLayer(
-                visible = editing && liveVoice == null,
+                visible = editing && liveVoice == null && !editor.pageEditBarOpen,
                 enter = fadeIn(tween(180)) + scaleIn(tween(220), initialScale = 0.80f),
                 exit = fadeOut(tween(120)) + scaleOut(tween(160), targetScale = 0.80f),
                 modifier = Modifier
@@ -940,6 +965,37 @@ internal fun PersonalWritingPage(
         // it"): writing mode is the dock's home — the keyboard going down (to
         // drag a photo, to read back a paragraph, to rest) never pulls the
         // tools with it. It still yields to a recording and to a scroll down.
+        //
+        // ── v433 — AND THE PAGE'S COPY BOX RIDES ABOVE IT ────────────────
+        //
+        // The member: "also the copy floating layout … add a cross button to
+        // close the option box". The box used to TAKE the dock's own row, which
+        // made the page's cut / copy / paste read as five more tools and left
+        // the member no way out of them but a word. It is a floating box of its
+        // own now — over the writing, above the dock, of the journal's own paper
+        // with a real lift — so the dock's tools stay where they were and the
+        // cross on the box is what puts it away (see [PersonalPageEditBar]).
+        AnimatedVisibility(
+            visible = editing && editor.pageEditBarOpen,
+            enter = fadeIn(tween(160)) + slideInVertically(tween(200)) { height -> height / 3 },
+            exit = fadeOut(tween(120)) + slideOutVertically(tween(150)) { height -> height / 3 },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp)
+                    .padding(bottom = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                PersonalPageEditBar(
+                    state = editor,
+                    accent = personalAccentInk(),
+                    ink = journalInk()
+                )
+            }
+        }
+
         AnimatedVisibility(
             visible = editing && liveVoice == null && !dockScrolledAway,
             enter = slideInVertically(tween(220)) { height -> height / 2 } + fadeIn(tween(180)),
@@ -1304,10 +1360,20 @@ internal fun PersonalModeSwitch(
         label = "personal-mode-slide"
     )
     val onInk = personalOnAccent()
-    // The window is 34dp + the 2dp gap: one button each way.
-    val travel = (slide.value * 36f).dp
+    // ── v433 — IT IS THE PAGE'S CAPSULE NOW (see [JournalCapsule]) ─────────
+    //
+    // The member: "make the today and eye pen pill more capsule like … use one
+    // unified capsule style, so they look good". The switch was 40dp tall with
+    // 34dp halves, beside a 36dp date pill: two controls of two heights, both of
+    // them thin next to the page's own type. It is the shared capsule now, and
+    // its two halves are the capsule minus its padding, so the travelling fill
+    // is exactly one half of the thing it travels in.
+    val half = JournalCapsule.Height - 6.dp
+    val gap = 2.dp
+    // The window is one half + the gap: one button each way.
+    val travel = (slide.value * (half + gap).value).dp
     Surface(
-        shape = RoundedCornerShape(50),
+        shape = JournalCapsule.Shape,
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
     ) {
@@ -1320,28 +1386,30 @@ internal fun PersonalModeSwitch(
             Box(
                 modifier = Modifier
                     .offset(x = travel)
-                    .size(34.dp)
-                    .background(color = accent, shape = RoundedCornerShape(50))
+                    .size(half)
+                    .background(color = accent, shape = JournalCapsule.Shape)
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                horizontalArrangement = Arrangement.spacedBy(gap)
             ) {
                 PersonalModeButton(
                     label = "Reading",
+                    size = half,
                     onClick = { onToggleMode(false) }
                 ) {
                     EyeGlyph(tint = lerp(onInk, calm, slide.value))
                 }
                 PersonalModeButton(
                     label = "Writing",
+                    size = half,
                     onClick = { onToggleMode(true) }
                 ) {
                     CurioIcon(
                         CurioIcons.Edit,
                         null,
                         tint = lerp(calm, onInk, slide.value),
-                        size = 17.dp
+                        size = 18.dp
                     )
                 }
             }
@@ -1354,14 +1422,15 @@ internal fun PersonalModeSwitch(
 @Composable
 private fun PersonalModeButton(
     label: String,
+    size: Dp,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(50),
+        shape = JournalCapsule.Shape,
         color = Color.Transparent,
-        modifier = Modifier.size(34.dp)
+        modifier = Modifier.size(size)
     ) {
         Box(
             modifier = Modifier.fillMaxSize().semantics { contentDescription = label },
