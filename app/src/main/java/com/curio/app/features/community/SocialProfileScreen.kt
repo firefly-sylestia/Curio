@@ -603,7 +603,7 @@ private fun SocialProfileHeroBlock(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SocialAvatar(
-                style = person?.avatarStyle ?: 0,
+                seed = blobatarSeed(person?.userId, person?.username),
                 avatarSize = 60.dp,
                 onClick = null,
                 // On the banner the disc's own rim would double the tear's

@@ -101,7 +101,6 @@ import com.curio.app.ui.components.ProfileAvatarImage
 import java.io.File
 import com.curio.app.features.community.SocialConfirmDialog
 import com.curio.app.features.community.SocialModerationHistoryCard
-import com.curio.app.features.settings.SocialAvatarPickerRow
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.CategoryId
@@ -250,10 +249,6 @@ fun ProfileScreen(navController: NavController) {
     // saving. The automatic line derives from the DISPLAY streak.
     var taglineInput by remember { mutableStateOf("") }
     var taglineRevision by remember { mutableIntStateOf(0) }
-    // The Curio portrait chosen in Edit profile. The pref has no observable
-    // twin, so a revision is what makes the picker and the hero re-read it the
-    // moment it changes.
-    var avatarStyleRevision by remember { mutableIntStateOf(0) }
     // Signing out from the editor asks first, like every other irreversible
     // move in this app.
     var confirmingSignOut by remember { mutableStateOf(false) }
@@ -431,18 +426,6 @@ fun ProfileScreen(navController: NavController) {
         onCropDismiss = { cropSource = null },
         taglineInput = taglineInput,
         onTaglineInputChange = { taglineInput = it },
-        avatarStyle = remember(avatarStyleRevision) {
-            AppPreferences.getSocialAvatarStyle(context)
-        },
-        onPickAvatarStyle = { style ->
-            AppPreferences.setSocialAvatarStyle(context, style)
-            avatarStyleRevision++
-            // Mirrored to the account straight away: the portrait is part of
-            // the profile, so a save should not be what makes it visible.
-            OnlineAccount.state.session?.accessToken?.let { active ->
-                scope.launch { SocialApi.updateAvatarStyle(active, style) }
-            }
-        },
         onSignOut = {
             showNameDialog = false
             cropSource = null
@@ -1001,9 +984,6 @@ private fun ProfileDialogs(
     // tagline" button + helper texts are gone).
     taglineInput: String,
     onTaglineInputChange: (String) -> Unit,
-    /** The Curio portrait (the code-drawn identity Social shows). */
-    avatarStyle: Int,
-    onPickAvatarStyle: (Int) -> Unit,
     /** Opens Settings → Privacy from inside the dialog. */
     onOpenPrivacy: () -> Unit,
     /** Signs the account out (confirmed by the caller). */
@@ -1094,10 +1074,17 @@ private fun ProfileDialogs(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                EditSectionLabel(icon = CurioIcons.Person, text = "Profile icon")
+                                EditSectionLabel(icon = CurioIcons.Person, text = "Your photo")
                                 Text(
-                                    "The icon travels with you into Social. The photo stays on " +
-                                        "this device.",
+                                    // v435 — the line used to promise the icon
+                                    // travelled into Social, which was true when
+                                    // a portrait was a thing you picked. Your
+                                    // face is now DERIVED from your handle, so
+                                    // the honest statement is: this photo is
+                                    // local, and Social draws you from your
+                                    // username.
+                                    "This photo stays on this device \u2014 in Social your " +
+                                        "face is drawn from your @username.",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1120,10 +1107,6 @@ private fun ProfileDialogs(
                                 }
                             }
                         }
-                        SocialAvatarPickerRow(
-                            selected = avatarStyle,
-                            onPick = onPickAvatarStyle
-                        )
                     }
 
                     // ── Your name ──
@@ -1160,13 +1143,7 @@ private fun ProfileDialogs(
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         EditSectionLabel(icon = CurioIcons.Person, text = "Curio account")
                         if (account.signedIn) {
-                            // The portrait picker is NOT rendered here: it sits
-                            // with the photo at the top, so the member chooses
-                            // one portrait in one place.
-                            CurioAccountIdentityCard(
-                                email = account.email,
-                                includeAvatarPicker = false
-                            )
+                            CurioAccountIdentityCard(email = account.email)
                         } else {
                             // v3xx60 — signed out, the account is a TOGGLE: one
                             // calm row states the offer and opens the form. It

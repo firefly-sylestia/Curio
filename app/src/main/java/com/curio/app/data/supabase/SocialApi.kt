@@ -16,13 +16,20 @@ const val PROFILE_VISIBILITY_PUBLIC = "public"
 const val PROFILE_VISIBILITY_FRIENDS = "friends"
 
 /**
- * How many code-drawn social avatars exist — the `PORTRAITS` list (20) plus the
- * `ICONS` list (8) in `features/community/SocialAvatar.kt`, in that order.
- * `profiles.avatar_style` is an index into that list, so EVERY read and write
- * clamps against this constant — a style added later must never be truncated by
- * a stale `coerceIn(0, 19)` at a cache or API boundary. `supabase/schema.sql`'s
- * `avatar_style` check must be widened in the same commit (now
- * `between 0 and 27`).
+ * The size of the retired hand-drawn avatar set — the `PORTRAITS` list (20) plus
+ * the `ICONS` list (8) that used to live in `features/community/SocialAvatar.kt`.
+ *
+ * v435 — THE SET IS GONE, AND THIS CONSTANT STAYS ONLY AS A BOUND. A member's
+ * face is now DERIVED from their handle by `BlobatarArt`, so nothing picks a
+ * style any more; but `profiles.avatar_style` is still a real column with a real
+ * `between 0 and 27` check constraint (`supabase/schema.sql`), and every read of
+ * it still clamps against this constant so a legacy row can never be truncated
+ * into an out-of-range value at a cache or API boundary.
+ *
+ * Do NOT widen it with the faces — there are no longer any styles to add, and a
+ * widened constant would be a lie about a column nothing chooses. When the
+ * column is eventually dropped (a schema change, which needs the member's word),
+ * this constant goes with it.
  */
 const val SOCIAL_AVATAR_STYLE_COUNT = 28
 

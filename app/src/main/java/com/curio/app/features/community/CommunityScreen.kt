@@ -1031,7 +1031,10 @@ private fun CommunityCardItem(
                     .clickable(onClick = onAuthor)
                     .padding(vertical = 2.dp)
             ) {
-                SocialAvatar(style = card.authorAvatar, avatarSize = 36.dp)
+                SocialAvatar(
+                    seed = blobatarSeed(card.authorId, card.authorName),
+                    avatarSize = 36.dp
+                )
                 Column(
                     modifier = Modifier
                         .weight(1f)

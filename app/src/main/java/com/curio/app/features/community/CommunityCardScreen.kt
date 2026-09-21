@@ -272,7 +272,10 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                     }
                                 )
                         ) {
-                            SocialAvatar(style = current.authorAvatar, avatarSize = 38.dp)
+                            SocialAvatar(
+                                seed = blobatarSeed(current.authorId, current.authorName),
+                                avatarSize = 38.dp
+                            )
                             Column(
                                 modifier = Modifier.weight(1f).padding(start = 10.dp)
                             ) {

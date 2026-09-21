@@ -318,7 +318,7 @@ internal fun SocialPersonCard(
                 .clickable(onClick = onOpenProfile)
         ) {
             SocialAvatar(
-                style = person.avatarStyle,
+                seed = blobatarSeed(person.userId, person.username),
                 avatarSize = 46.dp,
                 online = person.isActiveNow
             )
@@ -656,7 +656,7 @@ internal fun SocialSidebarRow(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
             SocialAvatar(
-                style = person.avatarStyle,
+                seed = blobatarSeed(person.userId, person.username),
                 avatarSize = 50.dp,
                 online = person.isActiveNow
             )

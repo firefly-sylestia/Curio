@@ -110,7 +110,7 @@ internal object SocialNotifications {
             putExtra(PendingDirectMessageOpen.EXTRA_USER_ID, person.userId)
             putExtra(PendingDirectMessageOpen.EXTRA_HANDLE, person.label)
         }
-        val avatar = NotificationAvatars.of(person.avatarStyle)
+        val avatar = NotificationAvatars.of(blobatarSeed(person.userId, person.username))
         val sender = Person.Builder()
             .setName(person.label)
             .apply { avatar?.let { setIcon(IconCompat.createWithBitmap(it)) } }
@@ -343,38 +343,50 @@ internal object SocialNotifications {
 }
 
 /**
- * THE SHADE'S PORTRAITS — the app's own avatars, rendered once per style.
+ * THE SHADE'S FACES — a member's portrait, rendered once per seed.
  *
  * A notification's large icon is an `android.graphics.Bitmap`, and a
- * notification is posted from a receiver or a coroutine with no composition
- * to draw in — so the character is drawn into an off-screen [ImageBitmap] by
- * the SAME [`drawSocialAvatar`] the app's canvas uses (never a lookalike:
- * a second drawing would drift from the faces the app shows).
+ * notification is posted from a receiver or a coroutine with no composition to
+ * draw in — so the face is drawn into an off-screen [ImageBitmap] by the SAME
+ * [`BlobatarArt`] the app's canvas uses (never a lookalike: a second drawing
+ * would drift from the faces the app shows).
  *
- * 28 styles, each rendered at most once per process and kept in a small map:
- * a notification costs a map lookup, not a drawing.
+ * A derived face is what makes this cheap: the old cast needed 28 pre-baked
+ * bitmaps because each style was 1,300 lines of art, whereas one blobatar is a
+ * hash and a couple of Béziers — so the map is keyed by seed, capped, and a miss
+ * costs a few microseconds rather than a drawing routine.
  */
 private object NotificationAvatars {
 
     /** 192px is the largest a notification icon is ever drawn at. */
     private const val SIZE_PX = 192
 
-    private val cache = HashMap<Int, Bitmap>(32)
+    /**
+     * Bounded because the key is a member's handle and the sender is not ours to
+     * trust: a chatty shade must not grow this map for the life of the process.
+     * Cleared wholesale rather than trimmed — these are cheap to rebuild, and an
+     * LRU would be more bookkeeping than the thing it manages.
+     */
+    private const val CACHE_CAP = 48
 
-    /** The portrait for [style], or null when the canvas could not be drawn. */
+    private val cache = HashMap<String, Bitmap>(32)
+
+    /** The face for [seed], or null when the canvas could not be drawn. */
     @Synchronized
-    fun of(style: Int): Bitmap? {
-        cache[style]?.let { return it }
-        val rendered = render(style) ?: return null
-        cache[style] = rendered
+    fun of(seed: String): Bitmap? {
+        cache[seed]?.let { return it }
+        val rendered = render(seed) ?: return null
+        if (cache.size >= CACHE_CAP) cache.clear()
+        cache[seed] = rendered
         return rendered
     }
 
     /** Must run off the main thread's UI work — it paints, it does not compose. */
-    private fun render(style: Int): Bitmap? = runCatching {
+    private fun render(seed: String): Bitmap? = runCatching {
         val pixels = SIZE_PX.toFloat()
         val image = ImageBitmap(SIZE_PX, SIZE_PX)
         val canvas = Canvas(image)
+        val art = BlobatarArt(seed)
         CanvasDrawScope().draw(
             Density(1f, 1f),
             LayoutDirection.Ltr,
@@ -383,7 +395,7 @@ private object NotificationAvatars {
         ) {
             // No inner rim: against the shade's own background it reads as a
             // hairline that is not in the app's avatar either.
-            drawSocialAvatar(style, ring = false)
+            drawBlobatar(art, ring = false)
         }
         image.asAndroidBitmap()
     }.getOrNull()

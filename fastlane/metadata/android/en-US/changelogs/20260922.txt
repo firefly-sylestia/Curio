@@ -1,3 +1,13 @@
+ADD:
+- Social: a member's portrait is drawn from their own username — one of ten silhouettes, two eyes and a palette from six tones, so no two members share a face and a rename re-faces you.
+- Reading: the reader's search is its own round pill beside the book's name.
+
+FIX:
+- Reading: the reader's head clears the top of the screen instead of sitting on the glass, and the search grows out of its pill while the name steps aside.
+
+REMOVE:
+- Social: the 28 hand-drawn portraits and the portrait picker are gone — your face is derived from your handle now, so there is nothing to choose.
+
 FIX:
 - Reading: a sheet scrolls and shuts on a swipe from anywhere — the reader's sheets wrap their content up to 60% of the screen, the body is the one scroll inside them (a short sheet is no longer half-empty paper), and dragging down anywhere collapses the sheet instead of only the handle doing it.
 - Reading: long-press to select works while a PDF is magnified — the page's own one-finger pan claimed the drag from its first move and cancelled the sweep, so the words under a held finger could report nothing.

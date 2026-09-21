@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -54,9 +52,7 @@ import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioContentFilter
 import com.curio.app.data.supabase.OnlineAccount
-import com.curio.app.data.supabase.SOCIAL_AVATAR_STYLE_COUNT
 import com.curio.app.data.supabase.SocialApi
-import com.curio.app.features.community.AvatarPickerIcon
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -309,18 +305,18 @@ internal fun CurioAuthCard(
 
 /**
  * The signed-in identity card: the username (with its rules stated up front and
- * the server's answer shown), the portrait picker and the Online Mode switch.
+ * the server's answer shown) and the Online Mode switch.
+ *
+ * v435 — THE PORTRAIT PICKER IS GONE from here and from Edit profile (member:
+ * "Remove the picker entirely"). A member's face is derived from their username
+ * rather than chosen, so there is nothing to pick and no `avatarStyle` state to
+ * carry; `includeAvatarPicker` existed only to keep the row from appearing on
+ * two pages, and it went with the row.
  */
 @Composable
 internal fun CurioAccountIdentityCard(
     /** Shown above the fields, e.g. the signed-in email. */
-    email: String? = null,
-    /**
-     * Whether the portrait picker renders here. Edit profile places it beside
-     * the member's photo instead (one portrait, chosen in one place), so this
-     * is the switch that keeps it from appearing twice on the same page.
-     */
-    includeAvatarPicker: Boolean = true
+    email: String? = null
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -332,7 +328,6 @@ internal fun CurioAccountIdentityCard(
     // happens to be in the field.
     var savedName by remember { mutableStateOf(AppPreferences.getUsername(context)) }
     var username by remember { mutableStateOf(savedName) }
-    var avatarStyle by remember { mutableStateOf(AppPreferences.getSocialAvatarStyle(context)) }
     var savingName by remember { mutableStateOf(false) }
     var nameAnswer by remember { mutableStateOf<String?>(null) }
     var nameFailed by remember { mutableStateOf(false) }
@@ -518,53 +513,6 @@ internal fun CurioAccountIdentityCard(
             }
         }
 
-        if (includeAvatarPicker) {
-            Text(
-                text = "Profile icon",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            SocialAvatarPickerRow(
-                selected = avatarStyle,
-                enabled = !savingName,
-                onPick = { style ->
-                    avatarStyle = style
-                    AppPreferences.setSocialAvatarStyle(context, style)
-                    token?.let { active ->
-                        scope.launch {
-                            SocialApi.updateAvatarStyle(active, style).onFailure { failure ->
-                                nameAnswer = failure.message ?: "Couldn't save that icon."
-                                nameFailed = true
-                            }
-                        }
-                    }
-                }
-            )
-        }
-    }
-}
-
-/**
- * The 28 code-drawn avatars (twenty portraits, then eight cozy icons), as one
- * horizontal picker.
- *
- * Shared so the portrait is chosen in exactly one visual language wherever it
- * is offered. The caller owns persistence: this only says which one was
- * tapped, because Online mode and Edit profile save it through the same call.
- */
-@Composable
-internal fun SocialAvatarPickerRow(
-    selected: Int,
-    enabled: Boolean = true,
-    onPick: (Int) -> Unit
-) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items((0 until SOCIAL_AVATAR_STYLE_COUNT).toList()) { style ->
-            AvatarPickerIcon(style, style == selected, enabled = enabled) { onPick(style) }
-        }
     }
 }
 

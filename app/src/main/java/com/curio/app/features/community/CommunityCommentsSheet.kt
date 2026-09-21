@@ -670,7 +670,7 @@ internal fun CommunityReplyRow(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SocialAvatar(
-                        style = reply.authorAvatar,
+                        seed = blobatarSeed(reply.authorId, reply.authorName),
                         avatarSize = 26.dp,
                         onClick = onAuthor
                     )

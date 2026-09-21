@@ -1062,7 +1062,7 @@ onSuccess = {
                             .padding(end = 2.dp)
                     ) {
                         SocialAvatar(
-                            style = person?.avatarStyle ?: 0,
+                            seed = blobatarSeed(person?.userId, person?.username),
                             avatarSize = 38.dp,
                             online = person?.isActiveNow == true
                         )
@@ -1180,7 +1180,7 @@ private fun MessagePeerHeader(
                 .padding(14.dp)
         ) {
             SocialAvatar(
-                style = person?.avatarStyle ?: 0,
+                seed = blobatarSeed(person?.userId, person?.username),
                 avatarSize = 46.dp,
                 // The dot and the presence line under the name are the SAME
                 // fact, so they can never disagree.
@@ -1738,7 +1738,10 @@ private fun TypingBubble(person: CurioPerson?) {
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SocialAvatar(style = person?.avatarStyle ?: 0, avatarSize = 26.dp)
+        SocialAvatar(
+            seed = blobatarSeed(person?.userId, person?.username),
+            avatarSize = 26.dp
+        )
         Spacer(Modifier.width(8.dp))
         Surface(
             shape = RoundedCornerShape(topStart = 7.dp, topEnd = 18.dp, bottomStart = 7.dp, bottomEnd = 18.dp),

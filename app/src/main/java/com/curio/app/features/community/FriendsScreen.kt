@@ -666,7 +666,10 @@ private fun RecentFriendTile(person: CurioPerson, onClick: () -> Unit) {
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp)
     ) {
-        SocialAvatar(style = person.avatarStyle, avatarSize = 44.dp)
+        SocialAvatar(
+            seed = blobatarSeed(person.userId, person.username),
+            avatarSize = 44.dp
+        )
         Spacer(Modifier.height(6.dp))
         Text(
             text = person.label,

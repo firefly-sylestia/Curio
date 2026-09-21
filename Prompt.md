@@ -8,142 +8,124 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> now back to reader buttom sheet the buttom sheet isnt scrollable and its not able to close
-> with swipe so fix these, and then for apperance buttom sheet, use proper pill shapes, instead
-> of toggle use proper 2 opton style with animation, in apperance its missing, the text size or
-> zoom slider, for epub remove the horizontal page toggle, and add more proper apperance
-> settings, and in the 3 dot ui, use proper pill shape grid with just capsulepills in a 6 grid
-> with huge icon and a small text below instead of share a passage just share, reading settings
-> to settings, tap zones to gestures
-> properly understand what the design is then confirm it, its gonna use a similiar design system
-> to samsung less text and toggle but more icon based button style and proper visual consistency
-> also extend this to settings and suggest more settings and also the tap p zone edit let user
-> hide the overlay so they can see what they are doing and only overlay the slider when they
-> adjust and hide the overlay when they use the slider so they can see what they are chnaging
-> and selecting one tap zone should switch its area, nd also the highligh doesnt work like when
-> im zoomed in and i try to ta and hol dto select it doesnt work and the dock that appears after
-> i tap and hold well it doesnt have the tools we had before tfor selections.
-> https://github.com/firefly-sylestia/Curio/commit/2b01fd06e8b3efad773b1861210737622b87b950 before
-> this commit too
+> also remove useless docs node module which not needed, ask me first, and also fix the git
+> files messing look https://github.com/Alain00/blobatar also can we use this profile avatar
+> style for social instead of those bad drawing? read the repo docs etc and how to implement,
+> and then we will go back to the journal dock also the pdf reader the header of the search and
+> back and title floating pill its too much close to the status bar, also separate the search
+> and the back and title pill, search icon is just a circle pill and when opened it merges
+> smoothly with the header for search.
 
-## 2. Findings — the reader as it stands
+Four asks, one of which (the journal dock) is explicitly for a LATER session.
 
-All of this lives in `app/src/main/java/com/curio/app/features/personal/BookReaderScreen.kt`
-(8.3k lines) plus `ReaderSettingsScreen.kt`.
+## 2. Findings before anything was touched
 
-### 2.1 The bottom sheet (`ReaderSheetFrame`, ~4050)
+### 2.1 The root-of-repo clutter
 
-- A hand-rolled sheet: scrim + a `Surface` fixed at `maxHeight * 0.5f`, a handle + title that
-  are the ONLY drag target (`detectVerticalDragGestures` on the header `Column`), and a body
-  `Box.weight(1f)` holding `content()`.
-- The body DOES scroll where the caller wraps it in `verticalScroll` (`ReaderPlacesSheet`,
-  `ReaderAppearanceSheet`) — but `ReaderMenuSheet` is a bare `Column`, so it clips instead of
-  scrolling. Nothing scrolls the SHEET itself and nothing scrolls when the finger is in the
-  body: **swipe-to-close only works from the handle/title strip**, which is the "not able to
-  close with swipe" report.
-- The fixed half-screen height leaves dead space on short content and clips tall content.
+- `node_modules/` at the repo ROOT (876 KB, untracked, ignored by git) holding `iceberg-js`,
+  `jose`, `tslib`.
+- A root `package.json` declaring exactly ONE dependency, `@supabase/server`, which **nothing
+  in the repo imports** — `auth-web/api/*.js` uses plain `fetch`, and `auth-web` has its own
+  `package.json`. Plus BOTH `package-lock.json` and `pnpm-lock.yaml`: two package managers for
+  one unused dependency.
+- In git: `docs/ANALYSIS.md` (a COMMITTED copy of the root `ANALYSIS.md`, which `.gitignore`
+  deliberately keeps out of commits) and `docs/art/svgviewer-output (15).svg` / `(16).svg`
+  (leftover SVG-viewer exports; only `web/`'s `Constellation.tsx` mentions the names in prose).
 
-### 2.2 The appearance sheet (`ReaderAppearanceSheet`, ~4180)
+### 2.2 Summoning the portrait set
 
-- Text size: A− / slider / A+ (only for reflowable text; absent for a PDF — that is the
-  "missing text size / zoom slider").
-- Typeface: three flat pills (Lora / Fraunces / Sans).
-- Page: five 14dp-rounded swatch tiles + a `+` tile (not pill/capsule).
-- Two `Switch` rows: "Auto-rotate" (flips between AUTO and PORTRAIT — a switch cannot say
-  "wide") and "Horizontal pages" (`paged`, i.e. ReaderFlow).
-- `ReaderSettingsScreen` repeats all of it as full-width rows plus a three-way orientation
-  pill row and the tap-zone switch + "Place the zones" row.
+`features/community/SocialAvatar.kt` — 1341 lines: `PORTRAITS` (20 hand-drawn characters) +
+`ICONS` (8 cozy objects), `drawSocialAvatar(style, ring)`, the picker tile
+`AvatarPickerIcon`, and `SocialAvatar(style, …)` called from 11 sites. `profiles.avatar_style`
+is an index into that list, clamped against `SOCIAL_AVATAR_STYLE_COUNT = 28` on every read and
+write. The picker itself appeared in Edit profile (`SocialAvatarPickerRow`) and in
+`CurioAccountIdentityCard` behind `includeAvatarPicker`.
 
-### 2.3 The ⋯ menu (`ReaderMenuSheet`, ~3840)
+### 2.3 The reader's head
 
-- Six full-width rounded-50 rows with a small glyph + text + optional trailing: Notes,
-  Highlights, Dictionary, **Share a passage**, **Tap zones** (trailing ON/OFF, long-press
-  opens the editor), **Reading settings**. The member wants a 6-tile grid of capsule pills —
-  big icon, small label under it — and the labels shortened: Share, Gestures, Settings.
+`ReaderTopPill` is a `Surface(shape = RoundedCornerShape(50))` with `.statusBarsPadding()` and
+8dp of vertical padding — and the reader **hides the status bar** (`WindowInsetsCompat.Type.statusBars()`
+is hidden for as long as it is on screen), so that padding collapses to 0 and the pill settles
+8dp from the very edge of the glass. The search glyph lives INSIDE the same capsule as the back
+button and the title, and opening it swaps the whole row for `ReaderSearchBar` with a plain
+slide-down.
 
-### 2.4 Tap zones (`ReaderTapZoneEditor`, ~6645) + `readerZoneActionAt`
+## 3. Decisions, all confirmed before editing
 
-- The editor draws all four zone washes + rules over the page, four drag handles, and a
-  bottom panel with Reset / Done, an edge chip row, an action chip row, and a always-visible
-  Depth slider. The overlay is always on (no way to see the page), the slider is always up,
-  and a zone is chosen with chips — not by touching the zone on the page.
+Asked four questions (root deletions; which "mess" meant; port vs endpoint for the faces;
+picker + seed). Answers:
 
-### 2.5 Selection / highlight
+1. Remove the root `node_modules/`, the root `package.json` + both lockfiles,
+   `docs/ANALYSIS.md`, and both `docs/art/svgviewer-output (15|16).svg`.
+2. "The git files messing look" = the root manifest clutter.
+3. **Port blobatar's core to Kotlin** (not the HTTP endpoint) — the recommendation, and the
+   only shape that also serves a notification's off-screen bitmap.
+4. **Remove the portrait picker entirely**, and seed a face from **username if set, else the
+   account id**.
 
-- Reflowable text: `ReaderParagraphBlock` uses `detectDragGesturesAfterLongPress` → live
-  `ReaderSelection` → `ReaderSelectionBar` (inks, note, bookmark, dictionary, more, clear).
-- PDF: `PdfPageTextLayer` uses `detectDragGesturesAfterLongPress` in the layer's own space;
-  a press more than 1.5 lines from any type (or on a page with no text layer) falls back to
-  `onLongPress(page)` → the whole-page **Mark this passage** sheet.
-- Presses on the PAGE (not the text layer) also go to `marking` → `ReaderMarkSheet`, which
-  has inks + chapter highlight + note + bookmark + remove, but NOT the selection toolbar
-  (no dictionary, no share, no more). That is the "dock after tap-and-hold has no selection
-  tools".
-- Zoomed PDF: the text layer is inside the page's `graphicsLayer` scale/translation while its
-  gesture reads `liveWidth` (the UNZOOMED fitted width) and container-space offsets, and the
-  outer surface's one-finger pan / double-tap handlers compete for the drag — the reason a
-  hold while zoomed selects nothing.
+## 4. What was built
 
-## 3. Design proposed (to confirm before building)
+### 4.1 `features/community/Blobatar.kt` (new, ~950 lines) — the port
 
-A **Samsung-Notes/Books-style reader chrome**: fewer words, icon-first controls, one capsule
-language everywhere, and animated segmented controls instead of switches.
+A faithful Kotlin port of blobatar gen-2's core: `hash.ts` (normalize → murmur3-fmix seed state
+→ per-key streams), `traits.ts`, `color.ts` (OKLCh ↔ sRGB, WCAG luminance, `ensureContrast`,
+the six authored tones, `FLOORS`), `shape.ts` (superellipse / Catmull-Rom blob / rounded polygon
+/ box / droplet taper, each traced straight into a Compose `Path`), `styles/compose.ts`
+(`faceFit` and the shared body/eyes) and `styles/shapes.ts` + `styles/blob.ts` (the ten weighted
+silhouettes and their band table). `BlobatarArt(seed)` resolves and traces ONE face (built in the
+constructor, so a redraw is two `drawPath`s); `blobatarSeed(userId, username)` is the rule.
 
-1. **Sheet** — keep the reader's own paper/typography, but: body scrolls (wrap every sheet's
-   body in a scroll, and make the drag belong to the sheet: a downward drag anywhere drags
-   the sheet once its content is at the top), swipe-down-anywhere closes, height caps at ~60%
-   instead of a fixed half so short content is not half-empty paper.
-2. **Appearance** — capsule section pills; a **Text size** slider for reflowable books and a
-   **Zoom** slider for a PDF (both present, contextual); typeface as three capsule pills;
-   paper as capsule swatches; the two switches replaced by **animated segmented pills**
-   (2-option for reading mode / book flow, 3-option for how the page stands).
-3. **The ⋯ grid** — a 6-tile grid of capsule tiles, big glyph + small label:
-   Notes · Highlights · Dictionary · Share · Gestures · Settings.
-4. **Gestures editor** — an eye toggle to hide the zone overlay so the page is visible, the
-   depth slider only shown while adjusting (and the overlay hidden while it is used), and a
-   tap inside a zone on the page selects that zone.
-5. **Selection** — long-press-to-sweep must work while a PDF is zoomed, and the long-press
-   dock (the mark sheet) must carry the full selection toolbar (inks, note, bookmark,
-   dictionary, share, more, clear).
-6. **Reading settings** — same capsule/segmented language, plus the extra settings the member
-   asked me to suggest (see the confirmation questions).
+### 4.2 The verification (the part worth repeating)
 
-## 4. Confirmed, then built
+The port could not be compiled by Gradle here, so it was verified directly:
 
-The design was put to the member BEFORE any edit (four questions) and all four answers are in the
-build:
+- blobatar's own modules were run under Node (`--experimental-strip-types`) to dump the
+  reference for 43 seeds — three per silhouette (seeds found by scanning `seed-1…seed-40000`)
+  plus the avalanche and NFC cases.
+- The REAL `Blobatar.kt` was copied verbatim with its package renamed and its androidx imports
+  dropped, compiled with a downloaded `kotlinc` against a small recording stub of the Compose
+  types it touches, and dumped the same values.
+- A comparer diffed **430 values — all match**: hue, tone, silhouette, body geometry, every
+  radius, the face region, petals, the droplet taper, both eyes (position, radii, squareness,
+  lean), the three palette hexes after the contrast walks, and the full traced path geometry
+  (compared to the 2-decimal rounding upstream applies to its SVG strings).
 
-1. **Epub flow** — "keep it as an animated 2-option segment in both places": the `Horizontal
-   pages` switch is gone from the appearance sheet AND the settings page, replaced by an animated
-   `ReaderSegmentRow` (Scrolling / Pages).
-2. **New settings** — all of them: line spacing, page margins, text alignment, paragraph spacing,
-   keep the screen awake, night dim, and **remembering them across restarts**.
-3. **Sheet height** — "wrap content, cap at ~60% of the screen", with the body the one scroll and a
-   swipe from anywhere collapsing it.
-4. **Gesture select** — "tapping a zone on the page selects that edge" (`zoneEdgeAt`).
+This also settled two things by construction: the file **compiles** (so the local functions, the
+visibility and the `min`-shaped names resolve) and the seeds really do avalanche (`alain` vs
+`alaim` are unrelated faces, and NFC-normalised `é` and `e\u0301` agree).
 
-What landed, file by file:
+### 4.3 The rest
 
-- `BookReaderScreen.kt` — `ReaderSheetFrame` (wrap + cap + one body scroll + `NestedScrollConnection`
-  pull + 150ms settle); `ReaderLook`'s six new fields and `ReaderLookStore` (prefs, `reader_look_v434`);
-  the persistence/keep-awake effects and the night-dim wash in the reader body; the rebuilt
-  `ReaderAppearanceSheet` (zoom for a PDF, capsules, segments, the layout rows); the ⋯ menu as a
-  six-tile capsule grid (`ReaderMenuTile`); `ReaderSegmentRow` / `ReaderSliderRow` / `ReaderAlignRow` /
-  `ReaderAlignGlyph` / `ReaderEyeGlyph` / `ReaderSegment`; the rebuilt `ReaderTapZoneEditor` (eye,
-  on-demand depth that hides the washes, tap-to-pick); `ReaderTouch.selecting` + the `zoomed =` gates;
-  the mark dock's dictionary + Share doors (`dictionarySeed`); leading/margins/spacing/alignment applied
-  in `ReaderParagraphBlock`, both text surfaces and `paginateBlocks`/`pagedTextStyle`.
-- `ReaderSettingsScreen.kt` — the complete twin of the appearance sheet, on the same components, with
-  the three-way orientation segment and a Gestures section.
-- `CurioIcons.kt` — `Subject`, `AutoStories`, `Bedtime`, `Nightlight` (each checked against the bundled
-  font's glyph table; `crop_portrait` and every `format_align_*` are NOT in it, which is why the
-  alignment and the eye are drawn).
+- `SocialAvatar.kt` rewritten as a thin wrapper (`SocialAvatar(seed, …)`, the presence dot,
+  `drawBlobatar`); the 28-style cast, `AvatarPickerIcon`, `SocialAvatarPickerRow` and
+  `includeAvatarPicker` deleted.
+- All 11 call sites migrated to `blobatarSeed(...)` (`CommunityScreen`, `CommunityCardScreen`,
+  `ModerationScreen`, `CommunityCommentsSheet`, `SocialProfileScreen`, `SocialComponents` ×2,
+  `FriendsScreen`, `DirectMessageScreen` ×3).
+- `SocialNotifications.NotificationAvatars` re-keyed by seed, capped, painting the same
+  `BlobatarArt`.
+- `SocialApi`'s `SOCIAL_AVATAR_STYLE_COUNT` doc rewritten: it is now a BOUND on a retired
+  column, not a count of styles. `avatar_style` itself is deliberately untouched.
+- Reader: `ReaderChromeTopFloor` (18dp) + `Modifier.readerChromeTopInset()` (display cut-out +
+  that floor), worn by the head, the search bar and the pinned page count; `ReaderTopPill` is a
+  `Row` of the name capsule (`weight(1f)`) and a 50dp `CircleShape` search pill; the two states
+  animate as one move (`expandHorizontally(End)` in as the name `shrinkHorizontally(Start)` out).
+- Docs: a v435 section in `app/AGENTS.md`, ADD/FIX/REMOVE bullets in the current changelog.
 
-## Checks run
+## 5. Checks run
 
 - No Gradle command: this environment forbids compile / build / lint (`AGENTS.md`).
-- Research was read-only: the reader file's sheet frame, chrome pills, ⋯ sheet, appearance
-  sheet, zones editor, selection bar, settings page and both selection gesture paths.
+- **The blobatar port WAS compiled and diffed** — see §4.2. That is stronger than a Gradle
+  compile for this file, because it checks the numbers too.
+- The reader change and the call-site migration were read through by hand; every removed symbol
+  was grepped repo-wide to confirm nothing still references it.
+
+## 6. Still open
+
+- **The journal dock** — the member's own next step ("then we will go back to the journal dock").
+- `SocialApi.updateAvatarStyle` is now unreferenced (dead but harmless); it goes with the
+  column if the member ever wants `avatar_style` dropped, which is a schema change and needs
+  their word.
 
 ## User prompts
 
@@ -151,10 +133,17 @@ What landed, file by file:
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§26 — the reader chrome pass (done, this session).** Sheet scroll + swipe-close from
-  anywhere; appearance as capsule/segmented controls with text size AND a PDF's zoom; the ⋯ menu
-  as a six-capsule grid (Share / Gestures / Settings); the Gestures editor's eye, on-demand depth
-  and tap-a-zone-to-select; zoomed long-press selection; the hold dock carrying the dictionary and
+- **§27 — the portrait port, the root clutter, and the reader's head (done, this session).**
+  Asked permission before every deletion and confirmed the four decisions before editing.
+  Four asks: remove the useless root node modules + manifest/doc clutter (done); use blobatar
+  for the social portraits instead of the hand-drawn set (ported to Kotlin, verified against
+  upstream, picker removed, all call sites migrated); the reader's search/back/title pill too
+  close to the status bar (own top floor); separate search as a circle pill that merges into
+  the header when opened (done). The journal dock is the member's next step, not this one.
+- **§26 — the reader chrome pass (done).** Sheet scroll + swipe-close from anywhere; appearance
+  as capsule/segmented controls with text size AND a PDF's zoom; the ⋯ menu as a six-capsule
+  grid (Share / Gestures / Settings); the Gestures editor's eye, on-demand depth and
+  tap-a-zone-to-select; zoomed long-press selection; the hold dock carrying the dictionary and
   Share; six new look settings, persisted. Design confirmed by four questions before any edit.
 - **§25 — the double tap, and the tools' appear/disappear (done).**
 - **§24 — the journal dock pass (done).**

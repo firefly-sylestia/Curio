@@ -14,7 +14,9 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutVertically
@@ -45,6 +47,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,12 +57,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -222,9 +228,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // over every page of every book, competing with the words for the top of the
     // screen (user request: "hide the system status bar" in the reader). It is
     // hidden for as long as the reader is on screen and comes back on the way
-    // out; and because it is hidden, the chrome's own `statusBarsPadding`
-    // collapses with it, which is exactly right — nothing is drawn under
-    // anything, so there is nothing to pad for.
+    // out. Because it is hidden, `statusBarsPadding()` collapses with it — so
+    // the chrome does NOT ask it for room and states its own floor instead
+    // (v435, `ReaderChromeTopFloor`): the display cut-out plus a real margin,
+    // which is what keeps the head pill off the edge of the glass.
     val view = LocalView.current
     DisposableEffect(view) {
         val window = view.context.findActivity()?.window
@@ -3479,10 +3486,19 @@ private fun ReaderChrome(
         // tools"). Each one now SETTLES IN from the edge it lives on — the head
         // from above, the foot from below — so the reader can see which way the
         // chrome went, and the two never look like they blinked.
+        // v435 — AND IT STEPS ASIDE, rather than blinking out, while the search
+        // takes the row: the head shrinks toward the edge it came from so the
+        // bar reads as growing OUT of it (see the search block below).
         AnimatedVisibility(
             visible = visible && search == null,
             enter = fadeIn(tween(180)) + slideInVertically(tween(240)) { -it / 2 },
-            exit = fadeOut(tween(150)) + slideOutVertically(tween(200)) { -it / 2 },
+            exit = fadeOut(tween(150)) +
+                shrinkHorizontally(
+                    tween(220, easing = FastOutSlowInEasing),
+                    shrinkTowards = Alignment.Start,
+                    clip = false
+                ) +
+                slideOutVertically(tween(200)) { -it / 2 },
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
             ReaderTopPill(title = title, palette = palette, onClose = onClose, onSearch = onSearch)
@@ -3494,10 +3510,28 @@ private fun ReaderChrome(
         // asked for the icon in the TOP RIGHT corner and for the ⋯ menu to stop
         // offering a second one ("add it in the 3dot menu remove the search as
         // search already got the optin in top right").
+        //
+        // v435 — AND IT GROWS OUT OF THE CIRCLE IT CAME FROM.
+        //
+        // The bar used to slide down from above like a second piece of chrome
+        // arriving. It now EXPANDS from the right edge — the corner the search
+        // pill lives in — while the name capsule shrinks away from the left, so
+        // the one action is the search opening rather than two panels swapping
+        // (member: "when opened it merges smoothly with the header for search").
         AnimatedVisibility(
             visible = search != null,
-            enter = fadeIn(tween(160)) + slideInVertically { -it / 2 },
-            exit = fadeOut(tween(140)),
+            enter = fadeIn(tween(160)) +
+                expandHorizontally(
+                    tween(300, easing = FastOutSlowInEasing),
+                    expandFrom = Alignment.End,
+                    clip = false
+                ),
+            exit = fadeOut(tween(140)) +
+                shrinkHorizontally(
+                    tween(220, easing = FastOutSlowInEasing),
+                    shrinkTowards = Alignment.End,
+                    clip = false
+                ),
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
             val run = search
@@ -3552,13 +3586,43 @@ private fun ReaderChrome(
 }
 
 /**
+ * v435 — THE READER'S OWN TOP FLOOR.
+ *
+ * The reader HIDES the system status bar (see the note in the screen), so
+ * `statusBarsPadding()` collapses to zero under it and the head pill used to
+ * settle 8dp from the very edge of the glass — which on a phone with a camera
+ * cut-out put it under the lens (member: "the header of the search and back and
+ * title floating pill its too much close to the status bar").
+ *
+ * So the head does not ask the (hidden) status bar for room; it states its own:
+ * whatever the display cut-out claims, plus this floor. A cut-out device gets
+ * the cut-out's height, everything else gets a real margin, and neither case
+ * depends on insets that are deliberately switched off.
+ */
+private val ReaderChromeTopFloor = 18.dp
+
+private fun Modifier.readerChromeTopInset(): Modifier = this
+    .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
+    .padding(top = ReaderChromeTopFloor)
+
+/**
  * v431 — THE HEAD, AS A FLOATING PILL.
  *
- * Way out, book's name, and the search door at the END of the row — the two
- * controls a reader wants while reading and the one piece of chrome that must
- * never be a wall across the page (see the note in [ReaderChrome]). The name is
- * set in the member's own reading type, so the chrome belongs to the page it
- * floats over rather than to the app's settings family.
+ * Way out, book's name, and the search door — the two controls a reader wants
+ * while reading and the one piece of chrome that must never be a wall across the
+ * page (see the note in [ReaderChrome]). The name is set in the member's own
+ * reading type, so the chrome belongs to the page it floats over rather than to
+ * the app's settings family.
+ *
+ * ── v435 — TWO PILLS, NOT ONE ──────────────────────────────────────────
+ *
+ * The search used to be the last glyph INSIDE the name pill, which made one
+ * wide capsule carry two unrelated jobs. It is its own ROUND pill now, sitting
+ * beside the name capsule with a gap between them (member: "separate the search
+ * and the back and title pill, search icon is just a circle pill"). Same 50dp
+ * height, same lift, same surface — two objects of one language, so the name
+ * keeps the full width of the row and the search is a door you can hit without
+ * aiming.
  */
 @Composable
 private fun ReaderTopPill(
@@ -3567,37 +3631,61 @@ private fun ReaderTopPill(
     onClose: () -> Unit,
     onSearch: () -> Unit
 ) {
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = palette.surface,
-        shadowElevation = 10.dp,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
+            .readerChromeTopInset()
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .height(50.dp)
-                .padding(horizontal = 5.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = palette.surface,
+            shadowElevation = 10.dp,
+            modifier = Modifier.weight(1f)
         ) {
-            ReaderChromeButton(CurioIcons.ArrowBack, "Close the reader", palette) { onClose() }
-            Text(
-                title,
-                style = TextStyle(
-                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = palette.ink
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 2.dp)
-            )
-            ReaderChromeButton(CurioIcons.Search, "Search this book", palette) { onSearch() }
+                    .height(50.dp)
+                    .padding(horizontal = 5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ReaderChromeButton(CurioIcons.ArrowBack, "Close the reader", palette) { onClose() }
+                Text(
+                    title,
+                    style = TextStyle(
+                        fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = palette.ink
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 2.dp)
+                )
+            }
+        }
+
+        // The search, as its own circle: a door beside the name rather than a
+        // second idea inside it.
+        Surface(
+            onClick = onSearch,
+            shape = CircleShape,
+            color = palette.surface,
+            shadowElevation = 10.dp,
+            modifier = Modifier.size(50.dp)
+        ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CurioIcon(
+                    CurioIcons.Search,
+                    "Search this book",
+                    tint = palette.ink.copy(alpha = 0.8f),
+                    size = 21.dp
+                )
+            }
         }
     }
 }
@@ -3758,7 +3846,9 @@ private fun ReaderSearchBar(
         shadowElevation = 10.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
+            // The same floor the head stands on, so the bar lands exactly where
+            // the name capsule was instead of jumping a few dp up.
+            .readerChromeTopInset()
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
@@ -3845,8 +3935,8 @@ private fun ReaderPinnedPage(
         color = palette.surface,
         shadowElevation = 8.dp,
         modifier = Modifier
-            .statusBarsPadding()
-            // Clear of the head pill, which owns the first ~58dp of the screen.
+            .readerChromeTopInset()
+            // Clear of the head row, which owns the first ~76dp below the floor.
             .padding(top = 70.dp, end = 14.dp)
     ) {
         Row(

@@ -870,7 +870,7 @@ private fun ModerationBanRow(
                 horizontalArrangement = Arrangement.spacedBy(11.dp)
             ) {
                 SocialAvatar(
-                    style = ban.avatarStyle,
+                    seed = blobatarSeed(ban.userId, ban.username),
                     avatarSize = 40.dp,
                     onClick = onProfile
                 )
