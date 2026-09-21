@@ -748,3 +748,9 @@ ADD:
 - Writing: a daily writing goal and its own evening nudge — pick a word goal in Settings and the journals head shows today's count against it; switching the goal off disarms the nudge with it.
 - Writing: the journal's door can open today's page (or the last page you were writing) — one switch in Settings, beside the goal.
 - Reading: the progress card says how many pages are left in the chapter, and the night dim can come on at sunset (with your phone's own dark theme) instead of all day.
+- Reading: read a page aloud — a Listen pill beside the motion lock reads what's on the page and follows on, with a speed slider and a picker for which voice does the reading, and a choice between Wiktionary and a second free dictionary for lookups.
+
+FIX:
+- Everything: a page now opens in a quarter of a second instead of half — the slide every plain screen used (the journal, a chapter, a book) was 500ms, which is what made opening the journal feel slow, and the tools that appear under your thumb arrive crisper too.
+- Reading: the PDF renders again in Cooler mode — the low-power pass had told the page renderer to use a bitmap format it refuses, so pages stopped drawing.
+- Writing: a voice note can no longer crash the app while it is being drawn, and the journal page takes your chosen colour again.
