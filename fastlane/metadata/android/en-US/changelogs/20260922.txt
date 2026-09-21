@@ -1,4 +1,15 @@
 ADD:
+- Writing: the marker pens and the bullet styles open INSIDE the dock, like the format, alignment and export tools — one panel at a time, under the row you tapped, instead of a sheet over the page.
+- About Curio: the credit for the member faces, with blobatar's own licence notice.
+
+FIX:
+- Writing: the dock is a proper tool row — bigger targets and a real lift, so it no longer reads as a thin strip under the page.
+- Writing: the heart bullet sits level with its words, and the dash bullet is centred like every other mark.
+
+REMOVE:
+- Writing: the leaf and crystal bullets are gone.
+
+ADD:
 - Social: a member's portrait is drawn from their own username — one of ten silhouettes, two eyes and a palette from six tones, so no two members share a face and a rename re-faces you.
 - Reading: the reader's search is its own round pill beside the book's name.
 

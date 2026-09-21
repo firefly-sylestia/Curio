@@ -225,11 +225,16 @@ enum class PersonalMarker(val key: String, val label: String) {
     DASH("dash", "Dash"),
     STAR("star", "Star"),
     SPARK("spark", "Spark"),
-    CRYSTAL("crystal", "Crystal"),
     ARROW("arrow", "Arrow"),
-    LEAF("leaf", "Leaf"),
     HEART("heart", "Heart"),
     BOLT("bolt", "Bolt");
+
+    // v436 — CRYSTAL AND LEAF ARE GONE (member: "remove leaf and crystal from
+    // the bulletpoints"). They are deleted from the enum rather than hidden from
+    // the menu, so nothing can offer them again — and because [fromKey] resolves
+    // a stored doc's marker by key, a page that was already written with one
+    // falls back to the first marker (DOT) instead of refusing to open. That is
+    // the deliberate cost of a deleted style: the list stays a list.
 
     companion object {
         fun fromKey(key: String?): PersonalMarker? =

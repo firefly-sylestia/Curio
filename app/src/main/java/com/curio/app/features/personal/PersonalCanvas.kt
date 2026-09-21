@@ -564,12 +564,19 @@ internal fun DrawScope.drawPersonalMarker(
             center = Offset(cx, cy),
             style = Stroke(width = size * 0.14f)
         )
-        PersonalMarker.DASH -> drawRoundRect(
-            color = ink,
-            topLeft = Offset(0f, cy - size * 0.055f),
-            size = Size(size * 0.92f, size * 0.11f),
-            cornerRadius = CornerRadius(size * 0.055f)
-        )
+        // v436 — the dash was drawn from x = 0 with a 0.92-wide body, so it sat
+        // 4% of the box to the LEFT of every other marker's centre. It starts at
+        // (size - w) / 2 now, which is the axis the rest of the roster uses.
+        PersonalMarker.DASH -> {
+            val w = size * 0.92f
+            val h = size * 0.11f
+            drawRoundRect(
+                color = ink,
+                topLeft = Offset((size - w) / 2f, cy - h / 2f),
+                size = Size(w, h),
+                cornerRadius = CornerRadius(h / 2f)
+            )
+        }
         PersonalMarker.STAR, PersonalMarker.SPARK -> {
             // A four-point sparkle (SPARK is the same shape with a tighter
             // waist). Straight edges only, so it stays crisp at 18dp.
@@ -587,29 +594,6 @@ internal fun DrawScope.drawPersonalMarker(
             }
             drawPath(path, color = ink)
         }
-        PersonalMarker.CRYSTAL -> {
-            val path = Path().apply {
-                moveTo(cx, cy - r)
-                lineTo(cx + r * 0.76f, cy)
-                lineTo(cx, cy + r)
-                lineTo(cx - r * 0.76f, cy)
-                close()
-            }
-            drawPath(
-                path = path,
-                color = ink,
-                style = Stroke(width = size * 0.135f, join = StrokeJoin.Round)
-            )
-            // The facet: one rule across the middle, so the shape reads as a
-            // cut stone rather than a plain lozenge.
-            drawLine(
-                color = ink,
-                start = Offset(cx - r * 0.5f, cy),
-                end = Offset(cx + r * 0.5f, cy),
-                strokeWidth = size * 0.10f,
-                cap = StrokeCap.Round
-            )
-        }
         PersonalMarker.ARROW -> {
             val path = Path().apply {
                 moveTo(cx - r * 0.40f, cy - r * 0.52f)
@@ -626,26 +610,27 @@ internal fun DrawScope.drawPersonalMarker(
                 )
             )
         }
-        PersonalMarker.LEAF -> {
-            val path = Path().apply {
-                moveTo(cx, cy - r)
-                cubicTo(cx + r * 0.95f, cy - r * 0.35f, cx + r * 0.35f, cy + r * 0.95f, cx, cy + r)
-                cubicTo(cx - r * 0.35f, cy + r * 0.95f, cx - r * 0.95f, cy - r * 0.35f, cx, cy - r)
-                close()
-            }
-            drawPath(path, color = ink)
-        }
         PersonalMarker.HEART -> {
             // Two lobes and a point — circles plus a triangle, so the shape is
             // exact at any size (hand-tuned curves drift the moment the marker
             // is drawn at another scale).
+            //
+            // v436 — AND IT IS CENTRED ON `cy`, which it was not: the lobes sat
+            // at cy − 0.30r and the point reached cy + r, so the shape's own
+            // middle was 0.12r BELOW the line every other marker centres on, and
+            // a heart in a list read as sitting low against its words. Every
+            // offset below is the old one shifted up by 0.12r (the lobes and the
+            // triangle's shoulders move up by more than the point does, which is
+            // exactly what re-centres the outline rather than the anchor).
+            val lift = r * 0.12f
             val lobe = r * 0.46f
-            drawCircle(color = ink, radius = lobe, center = Offset(cx - r * 0.40f, cy - r * 0.30f))
-            drawCircle(color = ink, radius = lobe, center = Offset(cx + r * 0.40f, cy - r * 0.30f))
+            val lobeY = cy - r * 0.30f - lift
+            drawCircle(color = ink, radius = lobe, center = Offset(cx - r * 0.40f, lobeY))
+            drawCircle(color = ink, radius = lobe, center = Offset(cx + r * 0.40f, lobeY))
             val path = Path().apply {
-                moveTo(cx - r * 0.84f, cy - r * 0.22f)
-                lineTo(cx + r * 0.84f, cy - r * 0.22f)
-                lineTo(cx, cy + r)
+                moveTo(cx - r * 0.84f, cy - r * 0.22f - lift)
+                lineTo(cx + r * 0.84f, cy - r * 0.22f - lift)
+                lineTo(cx, cy + r - lift * 2f)
                 close()
             }
             drawPath(path, color = ink)
@@ -5524,7 +5509,19 @@ private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
  * bullet, and the pen is the same colour-picking manner the bullet taught. One
  * panel at a time, and a cross at its end closes it.
  */
-private enum class PersonalDockGroup { FORMAT, ALIGN, EXPORT }
+/**
+ * Which multi-choice subject a dock door has opened, INSIDE the pill (v433).
+ *
+ * v436 — HIGHLIGHT and BULLET joined it. Both were Material `DropdownMenu`s
+ * floating over the page (one sheet of text rows for the marker's four pens, one
+ * for the bullet's styles) in a dock where everything else expands in place, and
+ * the member asked for the same treatment ("make the highlight drop down to that
+ * collapse style as well … also same for bulletpoint too"). They are panels now,
+ * so the dock is one language: a door opens its choices UNDER the row it came
+ * from, and only one panel stands at a time because this state belongs to the
+ * dock rather than to a door.
+ */
+private enum class PersonalDockGroup { FORMAT, ALIGN, EXPORT, HIGHLIGHT, BULLET }
 
 /** The hairline between two halves of a dock panel (v433). */
 @Composable
@@ -5984,10 +5981,23 @@ internal fun PersonalToolDock(
             resetKey = historyLine
         )
     }
+    // ── v436 — THE DOCK WEARS THE READER'S PILL ────────────────────────
+    //
+    // "fix the dock, its too thin and doesnt match the style": 36dp tools with
+    // 7dp of air came to a 50dp strip that read as a thin band under the page,
+    // and the app's other floating tools (the reader's five-tool foot pill) are
+    // a proper lift under a proper row. The tools are 42dp now, the row keeps
+    // 9dp of air so the pill stands ~60dp, and the lift is 12dp like the reader's.
+    //
+    // The radius is 28dp rather than a full capsule deliberately: this pill
+    // GROWS a panel under its row (`animateContentSize`), and a 50% radius on a
+    // two-row pill would be a 50dp arc that clips the first and last tool of the
+    // panel. 28dp is a capsule at the closed height and still leaves the panel's
+    // own row its full width.
     Surface(
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(28.dp),
         color = surface,
-        shadowElevation = 6.dp,
+        shadowElevation = 12.dp,
         modifier = modifier
     ) {
         // ── v401 — WHOSE DOCK IS THIS? ──────────────────────────────────
@@ -6041,7 +6051,7 @@ internal fun PersonalToolDock(
                 // always reachable and nothing is clipped — and it keeps its
                 // place (see [toolScroll]).
                 .horizontalScroll(toolScroll)
-                .padding(horizontal = 8.dp, vertical = 7.dp),
+                .padding(horizontal = 10.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(1.dp)
         ) {
@@ -6127,21 +6137,34 @@ internal fun PersonalToolDock(
             // highlighter colr of the word"). The button WEARS the pen it is
             // about to use, so the dock says which colour before the tap does.
             Box {
-                val penMenu = remember { CurioMenuToggle() }
                 val pen = state.highlightOfFocused()
                 val penOn = pen.isNotEmpty()
                 PersonalToolButton(
                     label = if (penOn) "Marker: ${personalHighlightLabel(pen)}" else "Marker",
-                    active = penOn,
+                    active = penOn || openGroup == PersonalDockGroup.HIGHLIGHT,
                     // A lit marker wears its OWN ink rather than the theme's
-                    // accent — the same reason the menu's swatches are the pens
+                    // accent — the same reason the panel's swatches are the pens
                     // and not the theme: a colour tool that shows the accent
                     // shows the wrong colour.
                     accent = if (penOn) personalHighlightInk(pen) else accentInk,
                     ink = ink,
+                    // ── v436 — THE PALETTE COLLAPSES INTO THE DOCK ──────────
+                    //
+                    // The member: *"make the highlight drop down to that collapse
+                    // style as well"*. This was the last Material `DropdownMenu`
+                    // in the dock: a sheet of text rows over the page, in a dock
+                    // where format, alignment and export all open IN the pill
+                    // (see [PersonalDockGroup]). The pens are that panel now, and
+                    // the ONE thing kept from the old flow is the fast path the
+                    // bullet tool taught the member — with no pen down yet, the
+                    // first tap still puts the first pen down in one tap.
                     onClick = {
-                        if (penOn) penMenu.buttonClick()
-                        else state.applyHighlight(PERSONAL_HIGHLIGHT_KEYS.first())
+                        if (penOn) {
+                            openGroup = if (openGroup == PersonalDockGroup.HIGHLIGHT) null
+                                        else PersonalDockGroup.HIGHLIGHT
+                        } else {
+                            state.applyHighlight(PERSONAL_HIGHLIGHT_KEYS.first())
+                        }
                     }
                 ) {
                     // The FILL says the pen now (a lit tool is a solid disc of it,
@@ -6149,44 +6172,6 @@ internal fun PersonalToolDock(
                     // rather than in the pen's own colour — which would be the
                     // colour of the disc it sits on.
                     MarkerPenGlyph(pen = null)
-                }
-                DropdownMenu(
-                    expanded = penMenu.open,
-                    onDismissRequest = { penMenu.dismissed() },
-                    properties = MenuKeepKeyboardProperties
-                ) {
-                    DropdownMenuItem(
-                        text = { MarkerMenuLabel("Remove marker") },
-                        leadingIcon = {
-                            CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp)
-                        },
-                        trailingIcon = {
-                            if (!penOn) CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
-                        },
-                        onClick = {
-                            // With nothing selected this ARMS the eraser: the
-                            // words typed next come out unmarked, which is the
-                            // only way to write plain text inside a marked
-                            // sentence. With a selection it clears it outright.
-                            state.applyHighlight("")
-                            penMenu.close()
-                        }
-                    )
-                    PERSONAL_HIGHLIGHT_KEYS.forEach { key ->
-                        DropdownMenuItem(
-                            text = { MarkerMenuLabel(personalHighlightLabel(key)) },
-                            leadingIcon = { PenSwatch(personalHighlightInk(key)) },
-                            trailingIcon = {
-                                if (pen == key) {
-                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
-                                }
-                            },
-                            onClick = {
-                                state.applyHighlight(key)
-                                penMenu.close()
-                            }
-                        )
-                    }
                 }
             }
   if (showJournalTools) PersonalToolButton(
@@ -6222,58 +6207,28 @@ internal fun PersonalToolDock(
             // wears the focused line's own marker, so the dock always echoes
             // what the line is wearing.
             Box {
-                val markerMenu = remember { CurioMenuToggle() }
                 val focusedMarker = state.markerOfFocused()
                 val bulletOn = active and FLAG_BULLET != 0
                 PersonalToolButton(
                     label = "Bullet style",
-                    active = bulletOn,
+                    active = bulletOn || openGroup == PersonalDockGroup.BULLET,
                     accent = accentInk, ink = ink,
+                    // v436 — the marker styles are a COLLAPSED PANEL like every
+                    // other multi-choice tool in this dock (the member: *"also
+                    // same for bulletpoint too"* — see the marker door's note).
+                    // The first tap still gives the line a list in one tap; the
+                    // second opens the styles under the row instead of over the
+                    // page.
                     onClick = {
-                        if (bulletOn) markerMenu.buttonClick()
-                        else state.applyMarker(PersonalMarker.entries.first())
+                        if (bulletOn) {
+                            openGroup = if (openGroup == PersonalDockGroup.BULLET) null
+                                        else PersonalDockGroup.BULLET
+                        } else {
+                            state.applyMarker(PersonalMarker.entries.first())
+                        }
                     }
                 ) {
                     MarkerGlyph(focusedMarker)
-                }
-                DropdownMenu(
-                    expanded = markerMenu.open,
-                    onDismissRequest = { markerMenu.dismissed() },
-                    properties = MenuKeepKeyboardProperties
-                ) {
-                    DropdownMenuItem(
-                        text = { MarkerMenuLabel("Remove list") },
-                        leadingIcon = {
-                            CurioIcon(CurioIcons.Close, null, tint = ink, size = 18.dp)
-                        },
-                        trailingIcon = {
-                            if (active and (FLAG_BULLET or FLAG_CHECKBOX) == 0) {
-                                CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
-                            }
-                        },
-                        onClick = {
-                            state.applyMarker(null)
-                            markerMenu.close()
-                        }
-                    )
-                    PersonalMarker.entries.forEach { marker ->
-                        DropdownMenuItem(
-                            text = { MarkerMenuLabel(marker.label) },
-                            leadingIcon = { MarkerGlyph(marker) },
-                            trailingIcon = {
-                                if (
-                                    active and FLAG_BULLET != 0 &&
-                                    focusedMarker == marker
-                                ) {
-                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
-                                }
-                            },
-                            onClick = {
-                                state.applyMarker(marker)
-                                markerMenu.close()
-                            }
-                        )
-                    }
                 }
             }
             if (showJournalTools) PersonalToolButton(
@@ -6295,10 +6250,11 @@ internal fun PersonalToolDock(
             // ── v433 — AND ITS CHOICES OPEN IN THE DOCK, NOT OVER IT ─────
             //
             // The member: *"for format change it from drop down to this collapse
-            // style but NOT for the bullet point"* — so the alignment is the
-            // dock's own panel now, while the bullet and the pen keep the menus
-            // this row taught. It is lit for anything but plain left, so a line
-            // moved off the margin says so in the dock.
+            // style but NOT for the bullet point"* — the second half of which
+            // v436 reversed, by their own later word ("also same for bulletpoint
+            // too"): the bullet and the pen are dock panels like this one now, so
+            // EVERY multi-choice tool in the row opens in place. It is lit for
+            // anything but plain left, so a line moved off the margin says so.
             val focusedAlign = state.alignOfFocused()
             PersonalToolButton(
                 label = "Alignment",
@@ -6381,7 +6337,7 @@ internal fun PersonalToolDock(
                 Row(
                     modifier = Modifier
                         .horizontalScroll(panelScroll)
-                        .padding(horizontal = 8.dp, vertical = 5.dp),
+                        .padding(horizontal = 10.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
@@ -6452,6 +6408,70 @@ internal fun PersonalToolDock(
                                     onClick = { state.setAlign(align) }
                                 ) {
                                     AlignGlyph(align.toAlignKind())
+                                }
+                            }
+                        }
+
+                        PersonalDockGroup.HIGHLIGHT -> {
+                            val pen = state.highlightOfFocused()
+                            PersonalToolButton(
+                                label = "No marker",
+                                // Lit while nothing is down, which is what the
+                                // old menu said with a tick on the eraser row.
+                                active = pen.isEmpty(),
+                                accent = accentInk, ink = ink,
+                                onClick = {
+                                    // With nothing selected this ARMS the eraser:
+                                    // the words typed next come out unmarked,
+                                    // which is the only way to write plain text
+                                    // inside a marked sentence. With a selection
+                                    // it clears the mark outright.
+                                    state.applyHighlight("")
+                                }
+                            ) {
+                                CurioIcon(CurioIcons.Close, null, size = 18.dp)
+                            }
+                            PERSONAL_HIGHLIGHT_KEYS.forEach { key ->
+                                val worn = personalHighlightInk(key)
+                                PersonalToolButton(
+                                    label = "Marker: ${personalHighlightLabel(key)}",
+                                    active = pen == key,
+                                    // The pen is its own colour, exactly as the
+                                    // dock's door is: a colour tool that shows the
+                                    // accent shows the wrong colour.
+                                    accent = worn, ink = ink,
+                                    onClick = { state.applyHighlight(key) }
+                                ) {
+                                    // A subset of one: the swatch IS the colour, so
+                                    // on a lit button (whose fill is that same
+                                    // colour) it would be a mark on its own ink —
+                                    // the brush goes in the knocked-out ink there
+                                    // instead, which is what the door already does.
+                                    if (pen == key) MarkerPenGlyph(pen = null)
+                                    else PenSwatch(worn)
+                                }
+                            }
+                        }
+
+                        PersonalDockGroup.BULLET -> {
+                            val focusedMarker = state.markerOfFocused()
+                            PersonalToolButton(
+                                label = "Remove list",
+                                active = active and (FLAG_BULLET or FLAG_CHECKBOX) == 0,
+                                accent = accentInk, ink = ink,
+                                onClick = { state.applyMarker(null) }
+                            ) {
+                                CurioIcon(CurioIcons.Close, null, size = 18.dp)
+                            }
+                            PersonalMarker.entries.forEach { marker ->
+                                PersonalToolButton(
+                                    label = marker.label,
+                                    active = active and FLAG_BULLET != 0 &&
+                                        focusedMarker == marker,
+                                    accent = accentInk, ink = ink,
+                                    onClick = { state.applyMarker(marker) }
+                                ) {
+                                    MarkerGlyph(marker)
                                 }
                             }
                         }
@@ -6933,17 +6953,6 @@ private fun MarkerGlyph(marker: PersonalMarker) {
     }
 }
 
-/** The marker menu's row label — the writing face, so the menu belongs to the
- *  page it edits. */
-@Composable
-private fun MarkerMenuLabel(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = WritingFontFamily),
-        color = MaterialTheme.colorScheme.onSurface
-    )
-}
-
 /** Which of the four alignments a glyph draws. One enum rather than a
  *  `center: Boolean`, which could never say "right" let alone "justify". */
 internal enum class AlignKind { START, CENTER, END, JUSTIFY }
@@ -7047,7 +7056,11 @@ private fun PersonalToolButton(
         shape = RoundedCornerShape(50),
         color = if (active) accent else Color.Transparent,
         modifier = Modifier
-            .size(36.dp)
+            // v436 — 42dp rather than 36: the dock was called too thin, and a
+            // 36dp target is under the 48dp a thumb wants on the row a member
+            // writes from (see the dock's own note). Every dock in the app shares
+            // this button, so they all thicken together.
+            .size(42.dp)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
