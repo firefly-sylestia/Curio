@@ -1328,6 +1328,16 @@ composable(CurioRoutes.COMMUNITY) {
                     ExperimentsScreen(navController = navController)
                 }
             }
+            // v431 — the reader's own settings (its own paper and ink; see
+            // ReaderSettingsScreen.kt). Wired here for the settings side and
+            // normally reached from the reader's ⋯ menu instead.
+            composable(CurioRoutes.READER_SETTINGS) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    com.curio.app.features.personal.ReaderSettingsRoute(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
             composable(CurioRoutes.USER_EXPERIMENTS) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     UserExperimentsScreen(navController = navController)

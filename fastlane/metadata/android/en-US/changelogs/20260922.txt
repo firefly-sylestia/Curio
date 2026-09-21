@@ -657,3 +657,17 @@ FIX:
 - Appearance: a Settings page is the same card as Profile at night — the card every Settings sub-page draws its rows on asked for a higher, brighter step of the theme's card ladder than the Profile card, which was close enough to pass on the app's own greys and nearly twice as bright under a theme whose ladder carries colour, so those pages read as a lit panel beside Profile's quiet one; both families are one fill now.
 - Appearance: the named themes' glyphs read in the dark — a named theme's hero fill sits in `primary` and a dark tone in `tertiary`, so every icon and mint label that asked those roles as INK came out nearly black on the theme's own dark page (the drawer, Stats, topic history, the reveal, a share card's toggles, the Cabinet's empty states); ink asks the theme's own accent tones now.
 - Journals: a quotation, a link and the day's feeling read at night — a quoted passage and a URL were painted in the light coffee whenever the theme was dark, and the darker mood inks sat at about 2.3:1 on the journal's dark paper; each has its night tone now.
+
+FIX:
+- Reading: zooming a vertically scrolling PDF no longer throws you through the file — a pinch holds the exact point under your fingers, where it used to scroll about ten pages ahead the deeper you were.
+
+ADD:
+- Reading: the reader wears two floating pills — the book name and a search door above, and five buttons at the foot (appearance, contents, pages, bookmarks, more) instead of bars across the words.
+- Reading: appearance is one sheet — text size with A- / A+ and a slider, three typefaces, five page colours with a "+" for tuned papers (mint, rose, amber, slate), and auto-rotate and horizontal pages switches.
+- Reading: the pages button in the middle of the foot pill opens a page scrubber, and holding it pins the page count in the corner while you read.
+- Reading: chapters, bookmarks, notes and highlights each open their own sheet, and every chapter row keeps its bookmark and its progress.
+- Reading: a floating search bar with previous / next arrows that marks every find on the pages and highlights the one you are on.
+- Reading: select one word and the bar offers the dictionary; select more and it is the wide capsule toolbar.
+- Reading: the dictionary looks words up in the app (Wiktionary) from the ⋯ menu or a selected word.
+- Reading: a reading settings page of its own — paper, type, face, orientation and tap zones — from the ⋯ menu.
+- Reading: share a passage from the ⋯ menu.

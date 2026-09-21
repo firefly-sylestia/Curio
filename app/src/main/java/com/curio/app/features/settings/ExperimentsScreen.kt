@@ -128,6 +128,24 @@ fun ExperimentsScreen(navController: NavController) {
             // persisted).
             item { SourceFetchLabSection() }
 
+            // v431 — THE READING SETTINGS, on the Dev page for now. The member
+            // asked for the reader's own settings to be reachable from the
+            // settings side too, and for the door to be wired here first ("wire it
+            // in dev exp for now"). The PAGE is the reader's — its own paper, its
+            // own ink, its own pills, never the settings family's ("dont use
+            // settings style use the reader style ui for it") — so this row is
+            // only a door. See ReaderSettingsScreen.kt.
+            item { SettingsSectionHeading("Reading") }
+            item {
+                SettingsOptionCard {
+                    SettingsOptionRow(
+                        CurioIcons.MenuBook,
+                        "Reading settings",
+                        "Paper, type, face, orientation and the page's tap zones",
+                    ) { navController.navigate(CurioRoutes.READER_SETTINGS) }
+                }
+            }
+
             // v293 — LIQUID GLASS + PILL GLOW moved here from Appearance.
             item { SettingsSectionHeading("Liquid glass") }
             item {

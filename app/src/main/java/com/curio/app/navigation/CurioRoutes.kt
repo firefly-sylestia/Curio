@@ -366,6 +366,15 @@ object CurioRoutes {
     // v3xx — the Book browser: every book as a scrollable line-by-line list
     // (covers, ratings, years) — moved out of the Book covers hub's strip.
     const val SETTINGS_BOOK_BROWSER = "settings/book-browser"
+    /**
+     * v431 — THE READER'S OWN SETTINGS, as a destination of its own.
+     *
+     * The page belongs to the reader (its own paper and ink, not the settings
+     * family's) and is normally opened OVER a book from the reader's ⋯ menu; this
+     * route is the settings side's door to the same composable, wired on the Dev
+     * page for now.
+     */
+    const val READER_SETTINGS = "reader/settings"
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).

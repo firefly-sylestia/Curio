@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -31,6 +32,7 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
@@ -38,12 +40,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -69,11 +71,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -87,6 +92,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -108,6 +115,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -115,9 +123,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
@@ -254,6 +264,12 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // ── The reader's own look and its chrome ───────────────────────────
     var chrome by remember { mutableStateOf(true) }
     var sheet by remember { mutableStateOf<ReaderSheet?>(null) }
+    //
+    // v431 — AND THE READING SETTINGS ARE A PAGE OF THEIR OWN. The member asked
+    // for it ("settings gets its own screen"), and it belongs to the reader rather
+    // than to the app: it opens OVER the book, in the reader's own paper, and
+    // back returns to the page that was being read (see [ReaderSettingsScreen]).
+    var readerSettingsOpen by remember { mutableStateOf(false) }
     var marking by remember { mutableStateOf<ReaderParagraph?>(null) }
     var noteFor by remember { mutableStateOf<ReaderParagraph?>(null) }
     var searching by remember { mutableStateOf<ReaderSearch?>(null) }
@@ -294,15 +310,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
     // ── HOW THIS BOOK FLOWS ──────────────────────────────────────────────
     // The PAGED text flow lays the book out itself, so the page count is the
-    // pager's to report; the bar that shows it is built further down, beside
-    // the PDF pager it also reads (see `pageBar` — it cannot be built here,
-    // because at this point in the body the pager it names does not exist yet).
+    // pager's to report; the count the foot pill wears is built further down,
+    // beside the PDF pager it also reads (see `scrubber` — it cannot be built
+    // here, because at this point in the body the pager it names does not exist
+    // yet, and v431 it also needs the live place every surface reports).
     var textPageCount by remember { mutableIntStateOf(0) }
     val textPager = rememberPagerState { textPageCount }
-    val flowLabel = when (content) {
-        is ReaderContent.Pages -> ReaderLook.pageFlow
-        else -> ReaderLook.textFlow
-    }
+    // v431 — the keyboard goes down with the search bar (see `onCloseSearch`).
+    val focusManager = LocalFocusManager.current
 
     // The two things a jump has to reach: the text list and the page pager.
     // Hoisted HERE, to the screen, because the marks and chapter sheets move
@@ -646,65 +661,107 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     fun printedPageAt(block: Int): String =
         printedPages.lastOrNull { it.block in 0..block }?.title.orEmpty()
 
-    val pageBar: ReaderPageBar? = when (val loaded = content) {
+    // ── v431 — WHERE THE READER IS, AND THE THREE WAYS TO MOVE ────────
+    //
+    // ONE description, built here, read by the foot pill's middle button and by
+    // the sheet that button opens (see [ReaderScrubber]). This is the only place
+    // in the reader that knows what kind of place this book counts in: PAGES for
+    // a PDF whichever flow it is in, the book's own printed pages for a reflowed
+    // book read as pages, and the book's SECTIONS for one read as a scroll — which
+    // is what lets the scrubber drag through a novel that has no pages of its own
+    // yet instead of opening on nothing.
+    val scrubber: ReaderScrubber? = when (val loaded = content) {
         is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
-            ReaderPageBar(
-                label = "Page ${pagerState.currentPage + 1} of ${loaded.pageCount}",
+            val at = pagerState.currentPage.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
+            ReaderScrubber(
+                short = "${at + 1} / ${loaded.pageCount}",
+                label = "Page ${at + 1} of ${loaded.pageCount}",
+                at = at + 1,
+                total = loaded.pageCount,
                 onPrev = {
                     askedByReader = true
-                    scope.launch {
-                        pagerState.animateScrollToPage(
-                            (pagerState.currentPage - 1).coerceAtLeast(0)
-                        )
-                    }
+                    scope.launch { pagerState.animateScrollToPage((at - 1).coerceAtLeast(0)) }
                 },
                 onNext = {
                     askedByReader = true
                     scope.launch {
-                        pagerState.animateScrollToPage(
-                            (pagerState.currentPage + 1).coerceAtMost(loaded.pageCount - 1)
-                        )
+                        pagerState.animateScrollToPage((at + 1).coerceAtMost(loaded.pageCount - 1))
                     }
+                },
+                onScrub = { page ->
+                    turnPageFromBar((page - 1).coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0)))
                 }
             )
         } else {
-            // The scrolling flow used to have NO bar at all, so the one surface
-            // that shows a single page at a time was the one that could not turn
-            // one: the bar names the page the column is showing and asks the
-            // column to go to the next (v399).
+            // The scrolling column has no "current page" of its own, so the place
+            // it names is the sheet under the reader's eye ([shownPage], v399).
             val at = shownPage.coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0))
-            ReaderPageBar(
+            ReaderScrubber(
+                short = "${at + 1} / ${loaded.pageCount}",
                 label = "Page ${at + 1} of ${loaded.pageCount}",
+                at = at + 1,
+                total = loaded.pageCount,
                 onPrev = { turnPageFromBar((at - 1).coerceAtLeast(0)) },
-                onNext = { turnPageFromBar((at + 1).coerceAtMost(loaded.pageCount - 1)) }
+                onNext = { turnPageFromBar((at + 1).coerceAtMost(loaded.pageCount - 1)) },
+                onScrub = { page ->
+                    turnPageFromBar((page - 1).coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0)))
+                }
             )
         }
 
-        is ReaderContent.Text -> if (
-            ReaderLook.textFlow == ReaderFlow.PAGED && textPageCount > 0
-        ) {
-            // v422 — WHAT THE BOOK SAYS, NOT WHAT THE READER COUNTED. See
-            // [printedPageAt]: the label is the book's own printed page, and it
-            // is blank for a book that carries none.
-            ReaderPageBar(
-                label = printedPageAt(liveTextBlock),
-                onPrev = {
-                    askedByReader = true
-                    scope.launch {
-                        textPager.animateScrollToPage((textPager.currentPage - 1).coerceAtLeast(0))
+        is ReaderContent.Text -> {
+            val blocks = loaded.blocks.size
+            if (ReaderLook.textFlow == ReaderFlow.PAGED && textPageCount > 0) {
+                val at = textPager.currentPage.coerceIn(0, (textPageCount - 1).coerceAtLeast(0))
+                // v422 — WHAT THE BOOK SAYS, NOT WHAT THE READER COUNTED. See
+                // [printedPageAt]: the book's own printed page names the place
+                // wherever one covers it, and it is blank for a book that carries
+                // none — a number the reader invented and the file contradicts is
+                // worse than no number at all.
+                val named = printedPageAt(liveTextBlock)
+                ReaderScrubber(
+                    short = "${at + 1} / $textPageCount",
+                    label = named.ifBlank { "Page ${at + 1} of $textPageCount" },
+                    at = at + 1,
+                    total = textPageCount,
+                    onPrev = {
+                        askedByReader = true
+                        scope.launch { textPager.animateScrollToPage((at - 1).coerceAtLeast(0)) }
+                    },
+                    onNext = {
+                        askedByReader = true
+                        scope.launch {
+                            textPager.animateScrollToPage((at + 1).coerceAtMost(textPageCount - 1))
+                        }
+                    },
+                    onScrub = { page ->
+                        askedByReader = true
+                        scope.launch {
+                            textPager.scrollToPage((page - 1).coerceIn(0, textPageCount - 1))
+                        }
                     }
-                },
-                onNext = {
-                    askedByReader = true
-                    scope.launch {
-                        textPager.animateScrollToPage(
-                            (textPager.currentPage + 1).coerceAtMost(textPageCount - 1)
-                        )
-                    }
+                )
+            } else if (blocks > 0) {
+                // A REFLOWED BOOK COUNTS SECTIONS (see the note above).
+                val at = listState.firstVisibleItemIndex.coerceIn(0, blocks - 1)
+                // Inline rather than [jumpToBlock], which is declared further down
+                // this same body: a local declared later cannot be reached here.
+                val put = { place: Int ->
+                    pendingBlock = place.coerceIn(0, blocks - 1)
+                    chrome = false
                 }
-            )
-        } else {
-            null
+                ReaderScrubber(
+                    short = "${at + 1} / $blocks",
+                    label = "Section ${at + 1} of $blocks",
+                    at = at + 1,
+                    total = blocks,
+                    onPrev = { put(at - 1) },
+                    onNext = { put(at + 1) },
+                    onScrub = { place -> put(place - 1) }
+                )
+            } else {
+                null
+            }
         }
 
         null -> null
@@ -814,6 +871,15 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         flowFade.snapTo(0f)
         flowFade.animateTo(1f, tween(durationMillis = 230, easing = FastOutSlowInEasing))
     }
+
+    // ── v431 — WHERE THE FIND BEING STOOD ON IS ─────────────────────
+    //
+    // The bar names it ("3/17") and the pages wash it harder than the rest, so
+    // the two have to agree on which hit is current. One number, read by both.
+    val currentHitIndex = searching?.let { run ->
+        run.hits.getOrNull(run.current)?.index ?: -1
+    } ?: -1
+    val searchQuery = searching?.query.orEmpty()
     // ── v424 — WHERE THE READER'S OWN SURFACE SITS, AND HOW BIG IT IS ──
     //
     // A tap zone belongs to the surface the member sees, and the scrolling PDF's
@@ -938,7 +1004,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     onSelect = { swept ->
                         selection = swept
                         chrome = false
-                    }
+                    },
+                    // v431 — the floating search's words, washed on the pages
+                    // (see [PdfPageTextLayer]).
+                    query = searchQuery,
+                    currentHit = currentHitIndex
                 )
 
                 // `content` is a delegated property, so the null check above
@@ -948,33 +1018,76 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             }
         }
 
+        /**
+         * v431 — ONE FIND, ONE STEP.
+         *
+         * The two arrows of the floating search ask for the next or the previous
+         * hole the words were found in, and the surface that owns the place goes
+         * there — a page for a PDF, a block for a reflowable book — through the
+         * SAME asks every other jump uses (see [pendingPage] and [pendingBlock]),
+         * so a find can never move a surface that is not showing.
+         */
+        fun searchStep(step: Int) {
+            val run = searching ?: return
+            val hits = run.hits
+            if (hits.isEmpty()) {
+                // Nothing found YET: the arrow is "ask again", which is what the
+                // member means before the sweep has finished.
+                run.token += 1
+                return
+            }
+            val size = hits.size
+            val next = (((run.current + step) % size) + size) % size
+            run.current = next
+            val at = hits[next].index
+            when (content) {
+                is ReaderContent.Text -> jumpToBlock(at)
+                is ReaderContent.Pages -> jumpToPage(at)
+                null -> Unit
+            }
+        }
+
         ReaderChrome(
             visible = chrome && !ReaderLook.zonesEditing,
             title = book?.title.orEmpty().ifBlank { "Reader" },
             palette = palette,
-            positionLabel = positionLabel,
-            pageBar = pageBar,
-            flowLabel = flowLabel.label,
-            onToggleFlow = {
-                when (content) {
-                    is ReaderContent.Pages -> ReaderLook.pageFlow = ReaderLook.pageFlow.flipped()
-                    is ReaderContent.Text -> ReaderLook.textFlow = ReaderLook.textFlow.flipped()
-                    null -> Unit
-                }
-            },
-            tapZones = ReaderLook.tapZones,
-            onToggleTapZones = { ReaderLook.tapZones = !ReaderLook.tapZones },
-            onEditTapZones = { ReaderLook.zonesEditing = true },
+            pageLabel = scrubber?.short.orEmpty(),
+            search = searching,
             onClose = { navController.popBackStack() },
             onSearch = {
-                searching = ReaderSearch().also { started ->
-                    started.isPaged = content is ReaderContent.Pages
-                }
-                sheet = ReaderSheet.SEARCH
+                searching = ReaderSearch()
+                // The bar IS the chrome's head, so the head has to be up.
+                chrome = true
             },
-            onInk = { sheet = ReaderSheet.INK },
-            onPlaces = { sheet = ReaderSheet.PLACES }
+            onCloseSearch = {
+                focusManager.clearFocus()
+                searching = null
+            },
+            onSearchQuery = { asked -> searching?.query = asked },
+            onSearchStep = { step -> searchStep(step) },
+            onAppearance = { sheet = ReaderSheet.APPEARANCE },
+            onContents = { sheet = ReaderSheet.CONTENTS },
+            onPages = { sheet = ReaderSheet.SCRUBBER },
+            onPinPages = { ReaderLook.pinnedPage = !ReaderLook.pinnedPage },
+            onBookmarks = { sheet = ReaderSheet.BOOKMARKS },
+            onMenu = { sheet = ReaderSheet.MENU }
         )
+
+        // ── v431 — THE PINNED COUNT, OUTSIDE THE CHROME ─────────────────
+        //
+        // Outside on purpose: a pin that went away with the tools would be a pin
+        // worth nothing (see [ReaderPinnedPage]). It sits under the head pill's
+        // row so it never fights it for the corner.
+        val pinned = scrubber
+        if (ReaderLook.pinnedPage && pinned != null && pinned.short.isNotBlank()) {
+            Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                ReaderPinnedPage(
+                    pageLabel = pinned.short,
+                    palette = palette,
+                    onUnpin = { ReaderLook.pinnedPage = false }
+                )
+            }
+        }
 
         // ── v424 — AND THE ZONES' OWN EDITOR, ON THE PAGE ───────────────
         //
@@ -1042,6 +1155,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                             )
                         }
                     },
+                    onDictionary = {
+                        // The dictionary reads the selection itself (see the sheet
+                        // call), so the bar does not have to hand the word over —
+                        // and the selection stays up behind the sheet, so closing
+                        // it puts the member back on the words they asked about.
+                        sheet = ReaderSheet.DICTIONARY
+                    },
                     onMore = {
                         // The whole-place sheet is still here, one tap away:
                         // selecting words ADDS a way to mark a book up, it does
@@ -1055,11 +1175,26 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
 
+    // -- AND THE SWEEP STARTS WHEN THE TYPING STOPS (v431) ----------------
+    //
+    // The floating bar is typed into, so the sweep is asked for on a pause
+    // rather than on every letter: a PDF's words cost a parse PER PAGE, and a
+    // sweep restarted per keystroke would re-walk the file while the member was
+    // still spelling the word. The ask is a token bump, which is exactly what
+    // the sweep already listens for (Enter and the arrows bump it too).
+    val askedQuery = searching?.query.orEmpty()
+    LaunchedEffect(askedQuery, searching) {
+        val run = searching ?: return@LaunchedEffect
+        if (askedQuery.isBlank()) return@LaunchedEffect
+        delay(320)
+        run.token += 1
+    }
+
     // -- THE SWEEP -------------------------------------------------------
     // Runs while a search is open, in the background, and hands the frame back
     // between pages (a PDF's words cost a parse to read, so a reader that
     // stuttered while it searched would have stopped being a reader). The hits
-    // appear as they are found and the sheet says how far the sweep has got.
+    // appear as they are found and the bar says how far the sweep has got.
     val sweep = searching
     LaunchedEffect(sweep?.token) {
         val run = sweep ?: return@LaunchedEffect
@@ -1080,6 +1215,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 run.hits = found
                 run.total = loaded.blocks.size
                 run.scanned = loaded.blocks.size
+                // v431 — THE FIRST FIND IS WHERE THE MEMBER IS TAKEN. A search
+                // that found seventeen things and moved nothing would make the
+                // arrows the only way in; the first hit is stepped onto the moment
+                // it exists (see [searchStep]).
+                if (run.current < 0 && found.isNotEmpty()) {
+                    run.current = 0
+                    pendingBlock = found[0].index
+                }
             }
 
             is ReaderContent.Pages -> {
@@ -1097,6 +1240,18 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     }
                     run.hits = found.toList()
                     run.scanned = page + 1
+                    // ── AND THE FIRST PAGE FOUND IS TURNED TO AT ONCE ──────
+                    //
+                    // A PDF's sweep is a parse per page, so it can take a while
+                    // on a long file: waiting for the end of it before showing
+                    // the member anything would make the search feel broken. The
+                    // first hit steps onto its page as soon as it is found, and
+                    // the arrows move on from there.
+                    if (run.current < 0 && found.isNotEmpty()) {
+                        run.current = 0
+                        pendingPage = page
+                        askedByReader = true
+                    }
                     kotlinx.coroutines.yield()
                 }
             }
@@ -1105,92 +1260,190 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
 
+    // ── v431 — THE SHEETS: ONE DOOR PER QUESTION ───────────────────────
+    //
+    // The old reader had ONE places sheet (progress + marks + contents) behind
+    // one glyph, which was right while there was one button to hang it on. The
+    // member split it back out ("lets separate the bookmarks again and it will be
+    // 3rd option with bookmarks"), so each question has its own door and every
+    // door opens a half-height sheet in the reader's own paper (see
+    // [ReaderSheetFrame]). The shared callbacks live HERE, once, so the four mark
+    // sheets cannot disagree about what a jump or a delete means.
+    val keptMarks = marks.filter { !it.isPosition }
+    val liveOrStored = marks.firstOrNull { it.isPosition } ?: openedAt
+    val jumpToMarkNow: (ReaderMarkEntity) -> Unit = { mark ->
+        sheet = null
+        scope.launch { jumpToMark(mark.positionIndex) }
+    }
+    val deleteMarkNow: (ReaderMarkEntity) -> Unit = { mark ->
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching { PersonalRepositoryHolder.repo.deleteReaderMark(mark.id) }
+            }
+        }
+    }
+    val pickBlockNow: (Int) -> Unit = { block ->
+        sheet = null
+        if (block >= 0) jumpToBlock(block)
+    }
+    val pickPageNow: (Int) -> Unit = { page ->
+        sheet = null
+        jumpToPage((page - 1).coerceAtLeast(0))
+    }
+    val bookmarkHereNow: (ReaderParagraph) -> Unit = { paragraph ->
+        scope.launch {
+            saveReaderMark(
+                bookId = bookId,
+                document = document,
+                paragraph = paragraph,
+                kind = ReaderMarkKind.BOOKMARK,
+                text = paragraph.text.take(90)
+            )
+        }
+    }
+    val continueAtNow: (Int) -> Unit = { index ->
+        sheet = null
+        scope.launch { jumpToMark(index) }
+    }
+
     when (sheet) {
-        ReaderSheet.INK -> ReaderInkSheet(
+        ReaderSheet.APPEARANCE -> ReaderAppearanceSheet(
             palette = palette,
-            // v406 — the type size is a text book's business: a PDF page is a
-            // picture of a page, and its own size is the pinch's.
+            // v406 — the type size and the face are a text book's business: a PDF
+            // page is a picture of a page, and its own size is the pinch's.
             showType = content is ReaderContent.Text,
-            onPick = { key -> ReaderLook.inkKey = key },
+            paged = when (content) {
+                is ReaderContent.Pages -> ReaderLook.pageFlow == ReaderFlow.PAGED
+                is ReaderContent.Text -> ReaderLook.textFlow == ReaderFlow.PAGED
+                null -> false
+            },
+            onTogglePaged = {
+                when (content) {
+                    is ReaderContent.Pages ->
+                        ReaderLook.pageFlow = ReaderLook.pageFlow.flipped()
+                    is ReaderContent.Text ->
+                        ReaderLook.textFlow = ReaderLook.textFlow.flipped()
+                    null -> Unit
+                }
+            },
             onDismiss = { sheet = null }
         )
 
-        // v394 — ONE SHEET for where you are, what you kept and where you can
-        // go. v395 — and now on ONE PAGE behind ONE door: the progress card,
-        // the marks and the book's own contents are the same scroll, because a
-        // reader's three questions have an order and a chip that hides two of
-        // them is a question of its own.
-        //
-        // The LIVE auto-bookmark is the one to show, not the row read at open:
-        // the reader writes its position as they read, so the marks flow
-        // already knows where they are (the row read at open is only the
-        // fallback for a book whose position has never been written).
-        ReaderSheet.PLACES -> ReaderPlacesSheet(
+        // THE BOOK'S OWN ORDER — the member's 3-line button.
+        ReaderSheet.CONTENTS -> ReaderPlacesSheet(
+            mode = ReaderPlacesMode.CONTENTS,
             marks = marks,
-            position = marks.firstOrNull { it.isPosition } ?: openedAt,
+            position = liveOrStored,
             live = livePlace,
             content = content,
             chapters = chapters,
             pages = printedPages,
             palette = palette,
-            onJump = { mark ->
+            onJump = jumpToMarkNow,
+            onDelete = deleteMarkNow,
+            onPickBlock = pickBlockNow,
+            onPickPage = pickPageNow,
+            onBookmarkHere = bookmarkHereNow,
+            onContinueAt = continueAtNow,
+            onDismiss = { sheet = null }
+        )
+
+        // THE PLACES THE MEMBER KEPT — its own door again (v431).
+        ReaderSheet.BOOKMARKS -> ReaderPlacesSheet(
+            mode = ReaderPlacesMode.BOOKMARKS,
+            marks = marks,
+            position = liveOrStored,
+            live = livePlace,
+            content = content,
+            chapters = chapters,
+            pages = printedPages,
+            palette = palette,
+            onJump = jumpToMarkNow,
+            onDelete = deleteMarkNow,
+            onPickBlock = pickBlockNow,
+            onPickPage = pickPageNow,
+            onBookmarkHere = bookmarkHereNow,
+            onContinueAt = continueAtNow,
+            onDismiss = { sheet = null }
+        )
+
+        ReaderSheet.NOTES -> ReaderPlacesSheet(
+            mode = ReaderPlacesMode.NOTES,
+            marks = marks,
+            position = liveOrStored,
+            live = livePlace,
+            content = content,
+            chapters = chapters,
+            pages = printedPages,
+            palette = palette,
+            onJump = jumpToMarkNow,
+            onDelete = deleteMarkNow,
+            onPickBlock = pickBlockNow,
+            onPickPage = pickPageNow,
+            onBookmarkHere = bookmarkHereNow,
+            onContinueAt = continueAtNow,
+            onDismiss = { sheet = null }
+        )
+
+        ReaderSheet.HIGHLIGHTS -> ReaderPlacesSheet(
+            mode = ReaderPlacesMode.HIGHLIGHTS,
+            marks = marks,
+            position = liveOrStored,
+            live = livePlace,
+            content = content,
+            chapters = chapters,
+            pages = printedPages,
+            palette = palette,
+            onJump = jumpToMarkNow,
+            onDelete = deleteMarkNow,
+            onPickBlock = pickBlockNow,
+            onPickPage = pickPageNow,
+            onBookmarkHere = bookmarkHereNow,
+            onContinueAt = continueAtNow,
+            onDismiss = { sheet = null }
+        )
+
+        // ── THE ⋯ MENU ────────────────────────────────────────────────
+        ReaderSheet.MENU -> ReaderMenuSheet(
+            palette = palette,
+            notes = keptMarks.count { it.isNote },
+            highlights = keptMarks.count { it.markKind == ReaderMarkKind.HIGHLIGHT },
+            tapZones = ReaderLook.tapZones,
+            onToggleTapZones = { ReaderLook.tapZones = !ReaderLook.tapZones },
+            onEditTapZones = {
                 sheet = null
-                scope.launch { jumpToMark(mark.positionIndex) }
+                ReaderLook.zonesEditing = true
             },
-            onDelete = { mark ->
-                scope.launch {
-                    withContext(Dispatchers.IO) {
-                        runCatching { PersonalRepositoryHolder.repo.deleteReaderMark(mark.id) }
-                    }
-                }
-            },
-            onPickBlock = { block ->
+            onNotes = { sheet = ReaderSheet.NOTES },
+            onHighlights = { sheet = ReaderSheet.HIGHLIGHTS },
+            onDictionary = { sheet = ReaderSheet.DICTIONARY },
+            onShare = {
                 sheet = null
-                if (block >= 0) jumpToBlock(block)
+                shareReaderPlace(context, book?.title.orEmpty(), positionLabel, selection?.text.orEmpty())
             },
-            onPickPage = { page ->
+            onSettings = {
                 sheet = null
-                jumpToPage((page - 1).coerceAtLeast(0))
-            },
-            onBookmarkHere = { paragraph ->
-                scope.launch {
-                    saveReaderMark(
-                        bookId = bookId,
-                        document = document,
-                        paragraph = paragraph,
-                        kind = ReaderMarkKind.BOOKMARK,
-                        text = paragraph.text.take(90)
-                    )
-                }
-            },
-            onContinueAt = { index ->
-                sheet = null
-                scope.launch { jumpToMark(index) }
+                readerSettingsOpen = true
             },
             onDismiss = { sheet = null }
         )
 
-        ReaderSheet.SEARCH -> ReaderSearchSheet(
-            search = searching ?: ReaderSearch(),
-            palette = palette,
-            onQuery = { asked -> searching?.query = asked },
-            onSubmit = { searching?.token = (searching?.token ?: 0) + 1 },
-            onPick = { index ->
-                searching?.current = index
-                sheet = null
-                when (content) {
-                    // A block index for a reflowed book: the surface showing it
-                    // decides which page that block is on.
-                    is ReaderContent.Text -> jumpToBlock(index)
-                    is ReaderContent.Pages -> jumpToPage(index)
-
-                    null -> Unit
-                }
-            },
-            onDismiss = {
-                sheet = null
-                searching = null
+        // ── THE SCRUBBER (the foot pill's middle button) ────────
+        ReaderSheet.SCRUBBER -> {
+            val run = scrubber
+            if (run != null) {
+                ReaderScrubberSheet(scrubber = run, palette = palette, onDismiss = { sheet = null })
             }
+        }
+
+        // ── THE DICTIONARY ───────────────────────────────────────────
+        ReaderSheet.DICTIONARY -> ReaderDictionarySheet(
+            palette = palette,
+            // A selection that IS one word arrives ready to look up; anything
+            // else arrives empty and waits for the member to type (see
+            // [ReaderSelectionBar]).
+            initial = selection?.text?.trim()?.takeIf { !it.contains(' ') }.orEmpty(),
+            onDismiss = { sheet = null }
         )
 
         null -> Unit
@@ -1287,6 +1540,46 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 noteFor = null
             },
             onDismiss = { noteFor = null }
+        )
+    }
+
+    // ── v431 — THE READING SETTINGS, OVER THE BOOK ──────────────────
+    //
+    // A full-screen page in the READER's own paper rather than the app's
+    // settings family — the member's own instruction was "dont use settings style
+    // use the reader style ui for it" — and drawn OVER the reading, so the book
+    // stays the thing being set up and back puts the page exactly where it was.
+    AnimatedVisibility(
+        visible = readerSettingsOpen,
+        enter = fadeIn(tween(180)) + slideInVertically { it / 8 },
+        exit = fadeOut(tween(150))
+    ) {
+        ReaderSettingsScreen(
+            palette = palette,
+            showType = content is ReaderContent.Text,
+            paged = when (content) {
+                is ReaderContent.Pages -> ReaderLook.pageFlow == ReaderFlow.PAGED
+                is ReaderContent.Text -> ReaderLook.textFlow == ReaderFlow.PAGED
+                null -> false
+            },
+            onTogglePaged = {
+                when (content) {
+                    is ReaderContent.Pages ->
+                        ReaderLook.pageFlow = ReaderLook.pageFlow.flipped()
+                    is ReaderContent.Text ->
+                        ReaderLook.textFlow = ReaderLook.textFlow.flipped()
+                    null -> Unit
+                }
+            },
+            canPlaceZones = true,
+            // The zones' lines belong on the PAGE, so the page has to be the
+            // thing on screen: the settings step out of the way and the editor
+            // comes up over the words it governs (see [ReaderTapZoneEditor]).
+            onEditTapZones = {
+                readerSettingsOpen = false
+                ReaderLook.zonesEditing = true
+            },
+            onBack = { readerSettingsOpen = false }
         )
     }
 }
@@ -1548,7 +1841,11 @@ private fun PdfScrollReader(
     pendingPage: Int?,
     onPendingPageConsumed: () -> Unit,
     /** Which page the column is showing, so the bar and the marks can name it. */
-    onPageShown: (Int) -> Unit
+    onPageShown: (Int) -> Unit,
+    /** v431 — the floating search's words, washed on every page they were found in. */
+    query: String,
+    /** v431 — the page the find being stood on is in, or -1. */
+    currentHit: Int
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
@@ -1949,6 +2246,8 @@ private fun PdfScrollReader(
                                     container = container,
                                     palette = palette,
                                     highlights = highlightsFor(marks, page),
+                                    query = query,
+                                    queryCurrent = currentHit == page,
                                     selection = selection,
                                     onSelect = onSelect,
                                     onPagePress = { onLongPress(page) }
@@ -2263,27 +2562,29 @@ private fun pagedTextStyle(block: ReaderBlock, scale: Float): TextStyle {
         block.isHeading -> 1
         else -> 0
     }
+    // v431 — ONE FAMILY FOR THE WHOLE PAGE (see the note in [ReaderParagraphBlock]).
+    val family = readerTypeFamily(ReaderLook.typeFace)
     return when (level) {
         1 -> TextStyle(
-            fontFamily = FrauncesFontFamily,
+            fontFamily = family,
             fontSize = (23f * scale).sp,
             lineHeight = (31f * scale).sp,
             fontWeight = FontWeight.SemiBold
         )
         2 -> TextStyle(
-            fontFamily = FrauncesFontFamily,
+            fontFamily = family,
             fontSize = (20f * scale).sp,
             lineHeight = (27f * scale).sp,
             fontWeight = FontWeight.SemiBold
         )
         3 -> TextStyle(
-            fontFamily = LoraFontFamily,
+            fontFamily = family,
             fontSize = (18f * scale).sp,
             lineHeight = (26f * scale).sp,
             fontWeight = FontWeight.Bold
         )
         else -> TextStyle(
-            fontFamily = LoraFontFamily,
+            fontFamily = family,
             fontSize = (17f * scale).sp,
             lineHeight = (29f * scale).sp
         )
@@ -2345,7 +2646,10 @@ private fun PageReader(
     flow: ReaderFlow,
     /** v389c — the live sweep, when it belongs to this page of the file. */
     selection: ReaderSelection?,
-    onSelect: (ReaderSelection) -> Unit
+    onSelect: (ReaderSelection) -> Unit,
+    /** v431 — the floating search: the words to wash, and the find being stood on. */
+    query: String,
+    currentHit: Int
 ) {
     val context = LocalContext.current
 
@@ -2375,7 +2679,9 @@ private fun PageReader(
             onSelect = onSelect,
             pendingPage = pendingPage,
             onPendingPageConsumed = onPendingPageConsumed,
-            onPageShown = onPageShown
+            onPageShown = onPageShown,
+            query = query,
+            currentHit = currentHit
         )
         return
     }
@@ -2648,6 +2954,8 @@ private fun PageReader(
                                 container = container,
                                 palette = palette,
                                 highlights = highlightsFor(marks, page),
+                                query = query,
+                                queryCurrent = currentHit == page,
                                 selection = selection,
                                 onSelect = onSelect,
                                 onPagePress = { onLongPress(page) }
@@ -2725,30 +3033,35 @@ private fun ReaderParagraphBlock(
         block.isHeading -> 1
         else -> 0
     }
+    // v431 — THE TYPE IS THE MEMBER'S, THE SIZE AND THE WEIGHT ARE THE BOOK'S:
+    // the chosen family is applied to every level, so choosing Fraunces or the
+    // writing hand sets the WHOLE page and a heading stays a heading because its
+    // size and weight say so.
+    val family = readerTypeFamily(ReaderLook.typeFace)
     val body = when (level) {
         1 -> TextStyle(
-            fontFamily = FrauncesFontFamily,
+            fontFamily = family,
             fontSize = (23f * scale).sp,
             lineHeight = (31f * scale).sp,
             fontWeight = FontWeight.SemiBold,
             color = palette.ink
         )
         2 -> TextStyle(
-            fontFamily = FrauncesFontFamily,
+            fontFamily = family,
             fontSize = (20f * scale).sp,
             lineHeight = (27f * scale).sp,
             fontWeight = FontWeight.SemiBold,
             color = palette.ink
         )
         3 -> TextStyle(
-            fontFamily = LoraFontFamily,
+            fontFamily = family,
             fontSize = (18f * scale).sp,
             lineHeight = (26f * scale).sp,
             fontWeight = FontWeight.Bold,
             color = palette.ink
         )
         else -> TextStyle(
-            fontFamily = LoraFontFamily,
+            fontFamily = family,
             fontSize = (17f * scale).sp,
             lineHeight = (29f * scale).sp,
             color = palette.ink
@@ -2980,224 +3293,614 @@ private fun ReaderChrome(
     visible: Boolean,
     title: String,
     palette: ReaderPalette,
-    positionLabel: String,
+    /** v431 — the compact count the middle button wears; blank with no pages. */
+    pageLabel: String,
+    /** v431 — while the search bar is up the head hands its row over to it. */
+    search: ReaderSearch?,
     onClose: () -> Unit,
     onSearch: () -> Unit,
-    onInk: () -> Unit,
-    onPlaces: () -> Unit,
-    pageBar: ReaderPageBar?,
-    flowLabel: String,
-    onToggleFlow: () -> Unit,
-    /** v422/v424 — the page's own tap zones, and the switch that governs them. */
-    tapZones: Boolean,
-    onToggleTapZones: () -> Unit,
-    /** v424 — a HOLD on that switch opens the editor of where the zones sit. */
-    onEditTapZones: () -> Unit
+    onCloseSearch: () -> Unit,
+    onSearchQuery: (String) -> Unit,
+    onSearchStep: (Int) -> Unit,
+    onAppearance: () -> Unit,
+    onContents: () -> Unit,
+    onPages: () -> Unit,
+    onPinPages: () -> Unit,
+    onBookmarks: () -> Unit,
+    onMenu: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
-        // The HEAD carries the way out and what is being read — nothing else. A
-        // reader in the middle of a chapter does not need a row of controls over
-        // the words; they are one tap away on the FOOT, where a thumb already is.
+        // ── v431 — THE HEAD IS A FLOATING PILL ─────────────────────────
+        //
+        // The head used to be an opaque band right across the top, which is a
+        // wall over a page the member is reading. It is a PILL now, floating
+        // clear of the paper: the way out, the book's own name, and the one door
+        // a reader reaches without thinking (the member's request — "the upper
+        // back button with the pdf namr of book make it floating pill style that
+        // floating at the top", plus "put the search icon at the top right
+        // corner").
         AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(tween(180)),
-            exit = fadeOut(tween(220)),
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(palette.paper.copy(alpha = 0.94f))
-                    .statusBarsPadding()
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                ReaderChromeButton(CurioIcons.ChevronLeft, "Close the reader", palette) { onClose() }
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        title,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = palette.ink,
-                        maxLines = 1
-                    )
-                }
-            }
-        }
-
-        // THE PAGE BAR, riding just above the foot and going away with it.
-        AnimatedVisibility(
-            visible = visible && pageBar != null,
+            visible = visible && search == null,
             enter = fadeIn(tween(180)),
             exit = fadeOut(tween(160)),
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            if (pageBar != null) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(start = 12.dp, end = 12.dp, bottom = 54.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = palette.paper.copy(alpha = 0.96f),
-                        shadowElevation = 3.dp
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                start = 3.dp,
-                                end = 9.dp,
-                                top = 2.dp,
-                                bottom = 2.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(1.dp)
-                        ) {
-                            // v411 — HOLD TO KEEP GOING (member: "add holding
-                            // the arrow for faster page forward"). A tap still
-                            // turns exactly one page; holding the arrow turns
-                            // them on a cadence until the finger lifts.
-                            ReaderHoldButton(
-                                glyph = CurioIcons.ChevronLeft,
-                                label = "The page before",
-                                palette = palette,
-                                step = pageBar.onPrev
-                            )
-                            // v422 — a bar with no page to name is the two
-                            // arrows and nothing else.
-                            if (pageBar.label.isNotBlank()) {
-                                Text(
-                                    pageBar.label,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    color = palette.ink.copy(alpha = 0.8f)
-                                )
-                            }
-                            ReaderHoldButton(
-                                glyph = CurioIcons.ChevronRight,
-                                label = "The next page",
-                                palette = palette,
-                                step = pageBar.onNext
-                            )
-                        }
-                    }
-                }
+            ReaderTopPill(title = title, palette = palette, onClose = onClose, onSearch = onSearch)
+        }
+
+        // ── v431 — AND THE SEARCH TAKES THAT ROW WHILE IT IS UP ────────
+        //
+        // One search door in the whole reader, and it is this one: the member
+        // asked for the icon in the TOP RIGHT corner and for the ⋯ menu to stop
+        // offering a second one ("add it in the 3dot menu remove the search as
+        // search already got the optin in top right").
+        AnimatedVisibility(
+            visible = search != null,
+            enter = fadeIn(tween(160)) + slideInVertically { -it / 2 },
+            exit = fadeOut(tween(140)),
+            modifier = Modifier.align(Alignment.TopCenter)
+        ) {
+            val run = search
+            if (run != null) {
+                ReaderSearchBar(
+                    run = run,
+                    palette = palette,
+                    onQuery = onSearchQuery,
+                    onStep = onSearchStep,
+                    onClose = onCloseSearch
+                )
             }
         }
 
+        // v431 — THE PAGE BAR IS THE SCRUBBER NOW. The middle button of the
+        // foot pill opens it (a tap) and a HOLD on that button pins the counter,
+        // so the reader's page control lives on the pill the member asked for
+        // and never floats over the words on its own (see [ReaderScrubberSheet]
+        // and [ReaderPinnedPage]).
+
+        // ── v431 — AND THE FOOT IS ONE FLOATING PILL ───────────────────
+        //
+        // The foot used to be an opaque band across the page carrying six
+        // controls and a word for a state. It is the pill the member asked for
+        // now — "a proper pill shape not thin … proper pill with 5 buttons" — and
+        // it floats clear of the paper with a real lift, five glyphs rather than
+        // five sentences:
+        //
+        //   · Appearance — the type, its face, the paper and the two switches;
+        //   · Contents   — the book's own chapters, each with its own bookmark;
+        //   · Pages      — the count (tap for the scrubber, hold to pin it);
+        //   · Bookmarks  — the places the member kept;
+        //   · ⋯          — notes, highlights, the dictionary, share and settings.
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(tween(180)),
             exit = fadeOut(tween(220)),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            Row(
+            ReaderBottomPill(
+                palette = palette,
+                pageLabel = pageLabel,
+                onAppearance = onAppearance,
+                onContents = onContents,
+                onPages = onPages,
+                onPinPages = onPinPages,
+                onBookmarks = onBookmarks,
+                onMenu = onMenu
+            )
+        }
+    }
+}
+
+/**
+ * v431 — THE HEAD, AS A FLOATING PILL.
+ *
+ * Way out, book's name, and the search door at the END of the row — the two
+ * controls a reader wants while reading and the one piece of chrome that must
+ * never be a wall across the page (see the note in [ReaderChrome]). The name is
+ * set in the member's own reading type, so the chrome belongs to the page it
+ * floats over rather than to the app's settings family.
+ */
+@Composable
+private fun ReaderTopPill(
+    title: String,
+    palette: ReaderPalette,
+    onClose: () -> Unit,
+    onSearch: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.surface,
+        shadowElevation = 10.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .height(50.dp)
+                .padding(horizontal = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ReaderChromeButton(CurioIcons.ArrowBack, "Close the reader", palette) { onClose() }
+            Text(
+                title,
+                style = TextStyle(
+                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = palette.ink
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(palette.paper.copy(alpha = 0.94f))
-                    .navigationBarsPadding()
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .weight(1f)
+                    .padding(start = 2.dp)
+            )
+            ReaderChromeButton(CurioIcons.Search, "Search this book", palette) { onSearch() }
+        }
+    }
+}
+
+/**
+ * v431 — THE FOOT, AS ONE PILL WITH FIVE BUTTONS.
+ *
+ * Every control a reader needs on a page, in the order a thumb reaches them,
+ * with the COUNT in the middle where the eye already is. `Surface` with a lift,
+ * not a row on a band: the member asked for a pill that floats ("same for the
+ * buttom tools make it floating, a proper pill shape not thin").
+ */
+@Composable
+private fun ReaderBottomPill(
+    palette: ReaderPalette,
+    pageLabel: String,
+    onAppearance: () -> Unit,
+    onContents: () -> Unit,
+    onPages: () -> Unit,
+    onPinPages: () -> Unit,
+    onBookmarks: () -> Unit,
+    onMenu: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.surface,
+        shadowElevation = 12.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(start = 12.dp, end = 12.dp, bottom = 14.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .height(58.dp)
+                .padding(horizontal = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ReaderPillButton(CurioIcons.FormatText, "Appearance", palette, onAppearance)
+            ReaderPillButton(CurioIcons.Menu, "Contents", palette, onContents)
+            ReaderPagesButton(
+                pageLabel = pageLabel,
+                palette = palette,
+                onTap = onPages,
+                onHold = onPinPages
+            )
+            ReaderPillButton(CurioIcons.Bookmark, "Bookmarks", palette, onBookmarks)
+            ReaderPillButton(CurioIcons.MoreVert, "More", palette, onMenu)
+        }
+    }
+}
+
+/** One glyph of the foot pill. No label on screen — the glyph says it. */
+@Composable
+private fun RowScope.ReaderPillButton(
+    glyph: String,
+    label: String,
+    palette: ReaderPalette,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = Color.Transparent,
+        modifier = Modifier
+            .weight(1f)
+            .height(46.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.8f), size = 21.dp)
+        }
+    }
+}
+
+/**
+ * THE MIDDLE BUTTON: THE COUNT, AND THE TWO THINGS IT CAN DO.
+ *
+ * A TAP opens the scrubber — one long drag from the first page to the last, with
+ * the bar's own hold-to-turn arrows either side of it. A HOLD pins the count as
+ * a small counter in the corner, where it stays while the chrome is away, for a
+ * reader who keeps looking back at which page they are on (the member's request:
+ * "when tapping the pages it opens the page scrubber, and holding the page pins
+ * the page count as a small ounter in the corner").
+ */
+@Composable
+private fun RowScope.ReaderPagesButton(
+    pageLabel: String,
+    palette: ReaderPalette,
+    onTap: () -> Unit,
+    onHold: () -> Unit
+) {
+    val pinned = ReaderLook.pinnedPage
+    Box(
+        modifier = Modifier
+            .weight(1.6f)
+            .height(42.dp)
+            .clip(RoundedCornerShape(50))
+            .background(palette.accent.copy(alpha = if (pinned) 0.26f else 0.15f))
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onTap() },
+                    onLongPress = { onHold() }
+                )
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            CurioIcon(CurioIcons.MenuBook, null, tint = palette.accent, size = 17.dp)
+            if (pageLabel.isNotBlank()) {
+                Text(
+                    pageLabel,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = palette.ink,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+/**
+ * v431 — THE FLOATING SEARCH, AT THE TOP, WITH THE FIND IT IS STANDING ON.
+ *
+ * The member asked for the icon in the top right corner and for a proper bar
+ * under it: the field, how many finds there are and which one you are on, the two
+ * arrows that step through them, and the cross. The finds themselves are drawn ON
+ * the pages for a PDF (see [PdfPageTextLayer]) and washed on the paragraphs for a
+ * reflowable book, so "next" moves the page under the highlight rather than
+ * naming it in a list.
+ */
+@Composable
+private fun ReaderSearchBar(
+    run: ReaderSearch,
+    palette: ReaderPalette,
+    onQuery: (String) -> Unit,
+    onStep: (Int) -> Unit,
+    onClose: () -> Unit
+) {
+    // The keyboard comes up with the bar: a search that needs a second tap before
+    // it can be typed into is not a search. One shot, on the way in.
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    val progress = if (run.hits.isNotEmpty()) {
+        "${run.current + 1}/${run.hits.size}"
+    } else if (!run.done && run.total > 0) {
+        "\u2026"
+    } else {
+        ""
+    }
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.surface,
+        shadowElevation = 10.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .height(50.dp)
+                .padding(horizontal = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CurioIcon(
+                CurioIcons.Search,
+                null,
+                tint = palette.ink.copy(alpha = 0.5f),
+                size = 18.dp,
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+            )
+            BasicTextField(
+                value = run.query,
+                onValueChange = onQuery,
+                singleLine = true,
+                textStyle = TextStyle(
+                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                    fontSize = 15.sp,
+                    color = palette.ink
+                ),
+                cursorBrush = SolidColor(palette.accent),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    imeAction = androidx.compose.ui.text.input.ImeAction.Search
+                ),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                    onSearch = { onStep(1) }
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .focusRequester(focus),
+                decorationBox = { inner ->
+                    Box {
+                        if (run.query.isEmpty()) {
+                            Text(
+                                "Find in this book",
+                                style = TextStyle(fontSize = 15.sp),
+                                color = palette.ink.copy(alpha = 0.35f)
+                            )
+                        }
+                        inner()
+                    }
+                }
+            )
+            if (progress.isNotBlank()) {
+                Text(
+                    progress,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = palette.ink.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(horizontal = 6.dp)
+                )
+            }
+            ReaderChromeButton(CurioIcons.KeyboardArrowUp, "The find before", palette) {
+                onStep(-1)
+            }
+            ReaderChromeButton(CurioIcons.KeyboardArrowDown, "The find after", palette) {
+                onStep(1)
+            }
+            ReaderChromeButton(CurioIcons.Close, "Close the search", palette) { onClose() }
+        }
+    }
+}
+
+/**
+ * v431 — THE PAGE COUNT, PINNED IN THE CORNER (see [ReaderPagesButton]).
+ *
+ * It is drawn OUTSIDE the chrome, so it survives the chrome leaving: that is the
+ * whole point of pinning it. A tap takes the pin back out.
+ */
+@Composable
+private fun ReaderPinnedPage(
+    pageLabel: String,
+    palette: ReaderPalette,
+    onUnpin: () -> Unit
+) {
+    Surface(
+        onClick = onUnpin,
+        shape = RoundedCornerShape(50),
+        color = palette.surface,
+        shadowElevation = 8.dp,
+        modifier = Modifier
+            .statusBarsPadding()
+            // Clear of the head pill, which owns the first ~58dp of the screen.
+            .padding(top = 70.dp, end = 14.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CurioIcon(CurioIcons.Bookmark, null, tint = palette.accent, size = 13.dp)
+            Text(
+                pageLabel,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = palette.ink,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/**
+ * v431 — THE SCRUBBER: ONE DRAG ACROSS THE WHOLE BOOK.
+ *
+ * The old page bar could only step, one page per tap or a held arrow — which is
+ * fine for the next page and hopeless for page 180 of 300. A scrubber is the
+ * other half of the same job, and the two arrows are still here (they are the
+ * hold-to-turn [ReaderHoldButton] the bar always had), so nothing the reader
+ * could do before is gone.
+ */
+@Composable
+private fun ReaderScrubberSheet(
+    scrubber: ReaderScrubber,
+    palette: ReaderPalette,
+    onDismiss: () -> Unit
+) {
+    // The thumb is LOCAL until the drag ends, so the reading surface is asked for
+    // a page once per gesture instead of once per pixel of travel (see
+    // `onValueChangeFinished`).
+    var dragged by remember(scrubber.at) { mutableStateOf(scrubber.at.toFloat()) }
+    val last = scrubber.total.coerceAtLeast(1)
+    ReaderSheetFrame(scrubber.label.ifBlank { "Go to a page" }, palette, onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // A book with one page has nothing to scrub THROUGH, and a slider
+            // whose range is a single value is a divide by zero wearing a thumb
+            // (a one-page PDF is the honest case). The arrows still work.
+            if (last > 1) {
+                Slider(
+                    value = dragged.coerceIn(1f, last.toFloat()),
+                    onValueChange = { next -> dragged = next },
+                    onValueChangeFinished = { scrubber.onScrub(dragged.roundToInt()) },
+                    valueRange = 1f..last.toFloat(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = palette.accent,
+                        activeTrackColor = palette.accent,
+                        inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // HOW THE BOOK FLOWS — the one control that changes the whole
-                // page, so it sits where the thumb already is. v394 — and it is
-                // an ICON now: the button names the OTHER way of reading (a
-                // book while you scroll, a stack of layers while you turn
-                // pages) instead of a word at the foot of the page (user
-                // request: "instead of scrolling and pages text show it as
-                // icon").
-                Surface(
-                    onClick = onToggleFlow,
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    modifier = Modifier.size(38.dp)
-                ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CurioIcon(
-                            if (flowLabel == ReaderFlow.PAGED.label) CurioIcons.Layers
-                            else CurioIcons.MenuBook,
-                            if (flowLabel == ReaderFlow.PAGED.label) "Read as one scroll"
-                            else "Read as pages",
-                            tint = palette.ink.copy(alpha = 0.75f),
-                            size = 19.dp
-                        )
-                    }
-                }
-                // ── v422 — AND THE PAGE'S OWN TAP ZONES ──────────────
-                //
-                // On, a tap near an edge of the screen acts and everything else
-                // brings the chrome back; off, every tap is the one that brings
-                // it back. It wears the accent while it is on, because a switch
-                // whose state cannot be read from the page it governs is a
-                // switch nobody flips (see [readerZoneActionAt]).
-                //
-                // v424 — AND A HOLD OPENS WHERE THEY SIT.
-                //
-                // An edge is a preference — how deep it reaches, and what its
-                // tap asks for — and a preference belongs on the surface it
-                // changes, not three screens away in Settings: holding this
-                // switch puts the zones' own lines on the page to be dragged
-                // (see [ReaderTapZoneEditor]).
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .combinedClickable(
-                            onClick = onToggleTapZones,
-                            onLongClick = onEditTapZones
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CurioIcon(
-                        CurioIcons.Crop,
-                        if (tapZones) "Tap zones on — hold to place them"
-                        else "Tap zones off — hold to place them",
-                        tint = if (tapZones) palette.accent else palette.ink.copy(alpha = 0.75f),
-                        size = 19.dp
-                    )
-                }
-                // WHERE THEY ARE, as a fact about the book rather than a
-                // sentence of advice: a reader does not need to be told to hold
-                // a passage, they need to know which chapter they are in.
-                if (positionLabel.isNotBlank()) {
-                    Text(
-                        positionLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.ink.copy(alpha = 0.75f),
-                        maxLines = 1,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-                Spacer(Modifier.weight(1f))
-                ReaderChromeButton(CurioIcons.Search, "Search this book", palette) { onSearch() }
-                // v394 — THE INK IS A COLOUR, SO IT WEARS THE PALETTE. The old
-                // text_fields glyph read as "Tt" — a type-size tool — and the
-                // member tapped it expecting larger words (user report: "for the
-                // book backgroud color it shows tt as icon which is wrong").
-                ReaderChromeButton(CurioIcons.Palette, "The page's ink", palette) { onInk() }
-                // v395 — ONE DOOR FOR THE BOOK'S PLACES (user request: "they are
-                // not merged in one page and one button"). Where you stopped,
-                // what you kept and where you can go were three answers behind
-                // two glyphs — a bookmark and a menu book — so a reader looking
-                // for "where was I" had to guess which one to open. One glyph,
-                // one sheet, one scroll (see [ReaderPlacesSheet]).
-                ReaderChromeButton(
-                    CurioIcons.Bookmark,
-                    "Bookmarks, progress and contents",
-                    palette
-                ) { onPlaces() }
+                ReaderHoldButton(
+                    glyph = CurioIcons.ChevronLeft,
+                    label = "The page before",
+                    palette = palette,
+                    step = scrubber.onPrev
+                )
+                Text(
+                    "${dragged.roundToInt()} / $last",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = palette.ink.copy(alpha = 0.8f),
+                    modifier = Modifier.weight(1f)
+                )
+                ReaderHoldButton(
+                    glyph = CurioIcons.ChevronRight,
+                    label = "The next page",
+                    palette = palette,
+                    step = scrubber.onNext
+                )
+            }
+        }
+    }
+}
+
+/**
+ * v431 — THE ⋯ MENU: EVERY OTHER DOOR, EACH ITS OWN ROUNDED PILL.
+ *
+ * The member's own list of what belongs behind the three dots — notes,
+ * highlights, the dictionary, share, settings — with the tap-zones switch moved
+ * here out of the foot bar, and with no Search row at all, because the top-right
+ * icon is the reader's one search ("add it in the 3dot menu remove the search as
+ * search already got the optin in top right").
+ */
+@Composable
+private fun ReaderMenuSheet(
+    palette: ReaderPalette,
+    notes: Int,
+    highlights: Int,
+    tapZones: Boolean,
+    onToggleTapZones: () -> Unit,
+    onEditTapZones: () -> Unit,
+    onNotes: () -> Unit,
+    onHighlights: () -> Unit,
+    onDictionary: () -> Unit,
+    onShare: () -> Unit,
+    onSettings: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ReaderSheetFrame("More in this book", palette, onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(9.dp)
+        ) {
+            ReaderMenuRow(
+                glyph = CurioIcons.Note,
+                label = "Notes",
+                palette = palette,
+                trailing = if (notes > 0) "$notes" else "",
+                onClick = onNotes
+            )
+            ReaderMenuRow(
+                glyph = CurioIcons.FormatHighlight,
+                label = "Highlights",
+                palette = palette,
+                trailing = if (highlights > 0) "$highlights" else "",
+                onClick = onHighlights
+            )
+            ReaderMenuRow(
+                glyph = CurioIcons.MenuBook,
+                label = "Dictionary",
+                palette = palette,
+                onClick = onDictionary
+            )
+            ReaderMenuRow(
+                glyph = CurioIcons.Share,
+                label = "Share a passage",
+                palette = palette,
+                onClick = onShare
+            )
+            // The zones' switch, moved off the foot bar: the reading it governs is
+            // the page, and a HOLD opens where the lines sit ([ReaderTapZoneEditor]).
+            ReaderMenuRow(
+                glyph = CurioIcons.Crop,
+                label = "Tap zones",
+                palette = palette,
+                trailing = if (tapZones) "ON" else "OFF",
+                onClick = onToggleTapZones,
+                onLongClick = onEditTapZones
+            )
+            ReaderMenuRow(
+                glyph = CurioIcons.Settings,
+                label = "Reading settings",
+                palette = palette,
+                onClick = onSettings
+            )
+        }
+    }
+}
+
+/** One door of the ⋯ menu, as a rounded pill of its own. */
+@Composable
+private fun ReaderMenuRow(
+    glyph: String,
+    label: String,
+    palette: ReaderPalette,
+    onClick: () -> Unit,
+    trailing: String = "",
+    onLongClick: (() -> Unit)? = null
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.ink.copy(alpha = 0.06f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(50))
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick ?: {}
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            CurioIcon(glyph, null, tint = palette.accent, size = 19.dp)
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                color = palette.ink,
+                maxLines = 1,
+                modifier = Modifier.weight(1f)
+            )
+            if (trailing.isNotBlank()) {
+                Text(
+                    trailing,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 0.8.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = palette.accent
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ReaderChromeButton(
+internal fun ReaderChromeButton(
     glyph: String,
     label: String,
     palette: ReaderPalette,
@@ -3272,8 +3975,26 @@ private fun ReaderHoldButton(
     }
 }
 
-/** A sheet of the reader's own — a plain surface, because the reader is not a
- *  place for the app's chrome. */
+/**
+ * v431 — A READER'S SHEET: STABLE, HALF THE SCREEN, AND DRAGGABLE SHUT.
+ *
+ * The member asked for a real bottom sheet ("make the ui smooth stbale buttom
+ * sheet which smoothly collapse or anything the height stays half of the
+ * screen"). It is built here rather than borrowed from Material 3 on purpose:
+ * the reader runs with the system bars hidden, and a dialog-backed sheet brings
+ * its own window back over the page. So this is the same idea, hand-made —
+ *
+ *  · the height is FIXED at half the screen, whatever is inside it, so a long
+ *    list scrolls inside the sheet instead of growing it and a short one is not
+ *    a sliver;
+ *  · it rises on a tween and the scrim fades with it;
+ *  · the handle and the title are the DRAG TARGET, which is how a sheet is
+ *    closed — the body is left alone so the content can scroll under the finger.
+ *
+ * `appear` and `drag` are read in a deferred `offset`/`graphicsLayer` lambda, so
+ * a drag or an opening animation is a LAYOUT pass and never a recomposition of
+ * everything inside the sheet.
+ */
 @Composable
 private fun ReaderSheetFrame(
     title: String,
@@ -3281,77 +4002,437 @@ private fun ReaderSheetFrame(
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.35f))
-            .pointerInput(Unit) { detectTapGestures(onTap = { onDismiss() }) },
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Surface(
-            shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
-            color = palette.paper,
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    val appear = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        appear.animateTo(1f, tween(durationMillis = 260, easing = FastOutSlowInEasing))
+    }
+    var drag by remember { mutableFloatStateOf(0f) }
+    // The drag that means "shut", in the sheet's own pixels.
+    val dismissPull = remember(density) { with(density) { 108.dp.toPx() } }
+    fun close() {
+        scope.launch {
+            appear.animateTo(0f, tween(durationMillis = 180))
+            onDismiss()
+        }
+    }
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val sheetHeight = maxHeight * 0.5f
+        val sheetHeightPx = with(density) { sheetHeight.toPx() }
+        // THE SCRIM: a wash, not a wall — the page stays legible under it.
+        Box(
             modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { alpha = appear.value }
+                .background(Color.Black.copy(alpha = 0.42f))
+                .pointerInput(Unit) { detectTapGestures { close() } }
+        )
+        Surface(
+            shape = RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp),
+            color = palette.paper,
+            shadowElevation = 16.dp,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                // The sheet's own surface swallows taps, so tapping INSIDE it
-                // does not dismiss it (which is what the scrim above is for).
+                .height(sheetHeight)
+                .offset {
+                    IntOffset(
+                        0,
+                        (drag + (1f - appear.value) * sheetHeightPx).roundToInt()
+                    )
+                }
+                // THE SHEET SWALLOWS A TAP, so tapping INSIDE it never dismisses
+                // it: the scrim below is a sibling, and a tap nothing in the sheet
+                // claims would reach it and shut the sheet the member is using.
+                // A child (a button, a row) still gets the event FIRST and keeps
+                // it, so this only eats the taps on the sheet's own blank paper.
                 .pointerInput(Unit) { detectTapGestures { } }
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 18.dp, vertical = 16.dp)
-            ) {
-                Text(
-                    title,
-                    style = TextStyle(
-                        fontFamily = FrauncesFontFamily,
-                        fontSize = 19.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = palette.ink
+            Column(modifier = Modifier.fillMaxSize()) {
+                // THE HANDLE AND THE TITLE ARE THE DRAG TARGET (see the note
+                // above): the body below belongs to the content's own scroll.
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .pointerInput(Unit) {
+                            detectVerticalDragGestures(
+                                onDragEnd = {
+                                    if (drag > dismissPull) close() else drag = 0f
+                                },
+                                onDragCancel = { drag = 0f },
+                                onVerticalDrag = { _, travel ->
+                                    drag = (drag + travel).coerceAtLeast(0f)
+                                }
+                            )
+                        }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp, bottom = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(38.dp)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(palette.ink.copy(alpha = 0.22f))
+                        )
+                    }
+                    Text(
+                        title,
+                        style = TextStyle(
+                            fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = palette.ink
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 18.dp)
                     )
-                )
+                }
                 Spacer(Modifier.height(12.dp))
-                content()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .navigationBarsPadding()
+                        .padding(horizontal = 18.dp)
+                ) {
+                    content()
+                }
             }
         }
     }
 }
 
+/**
+ * v431 — APPEARANCE: THE TYPE, ITS FACE, THE PAPER, AND THE TWO SWITCHES.
+ *
+ * The member's own list, in their own order ("one with appearncae with A- A+ witha
+ * slider to adjust the text size, below the font option only 3 in a row then
+ * below 5 differnt backgroud color the paper, sepia, night white and 2 more, and
+ * then belo 2 toggle with one auto rotate and another ith the horizontal
+ * option"). Five swatches is what fits a phone at a comfortable tap size; the
+ * sixth tile unfolds the tuned papers instead of crowding them (see
+ * [ReaderSkin.extra]) — so the row the member asked for is the row they get, and
+ * the papers they did not name are one tap further on.
+ *
+ * The type controls are a REFLOWABLE book's business: a PDF page is a picture of
+ * a page, and its own size is the pinch's (v406). They are simply absent for a
+ * PDF rather than present and inert.
+ */
 @Composable
-private fun ReaderSearchSheet(
-    search: ReaderSearch,
+private fun ReaderAppearanceSheet(
     palette: ReaderPalette,
-    onQuery: (String) -> Unit,
-    onSubmit: () -> Unit,
-    onPick: (Int) -> Unit,
+    showType: Boolean,
+    /** v431 — whether this book is being read as PAGES, for the second switch. */
+    paged: Boolean,
+    onTogglePaged: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    ReaderSheetFrame("Search this book", palette, onDismiss) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    var moreInks by remember { mutableStateOf(false) }
+    ReaderSheetFrame("Appearance", palette, onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            if (showType) {
+                ReaderSheetLabel("Text size", palette)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ReaderStepperButton(CurioIcons.TextDecrease, "Smaller type", palette) {
+                        ReaderLook.textScale = (ReaderLook.textScale - 0.08f).coerceIn(0.8f, 2.6f)
+                    }
+                    Slider(
+                        value = ReaderLook.textScale,
+                        onValueChange = { next -> ReaderLook.textScale = next.coerceIn(0.8f, 2.6f) },
+                        valueRange = 0.8f..2.6f,
+                        modifier = Modifier.weight(1f),
+                        colors = SliderDefaults.colors(
+                            thumbColor = palette.accent,
+                            activeTrackColor = palette.accent,
+                            inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
+                        )
+                    )
+                    ReaderStepperButton(CurioIcons.TextIncrease, "Larger type", palette) {
+                        ReaderLook.textScale = (ReaderLook.textScale + 0.08f).coerceIn(0.8f, 2.6f)
+                    }
+                }
+
+                ReaderSheetLabel("Typeface", palette)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ReaderTypeFace.entries.forEach { face ->
+                        val live = ReaderLook.typeFace == face.key
+                        Surface(
+                            onClick = { ReaderLook.typeFace = face.key },
+                            shape = RoundedCornerShape(50),
+                            color = if (live) palette.accent else palette.ink.copy(alpha = 0.07f),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                face.label,
+                                style = TextStyle(
+                                    fontFamily = readerTypeFamily(face.key),
+                                    fontSize = 15.sp,
+                                    fontWeight = if (live) FontWeight.SemiBold else FontWeight.Normal
+                                ),
+                                color = if (live) palette.paper else palette.ink.copy(alpha = 0.8f),
+                                maxLines = 1,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            ReaderSheetLabel("Page", palette)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
+            ) {
+                ReaderSkin.primary.forEach { skin ->
+                    ReaderInkSwatch(skin, palette, Modifier.weight(1f))
+                }
+                ReaderMoreInkTile(palette, open = moreInks, modifier = Modifier.weight(0.8f)) {
+                    moreInks = !moreInks
+                }
+            }
+            if (moreInks) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    ReaderSkin.extra.forEach { skin ->
+                        ReaderInkSwatch(skin, palette, Modifier.weight(1f))
+                    }
+                }
+            }
+
+            ReaderSwitchRow(
+                label = "Auto-rotate",
+                on = ReaderLook.orientation == ReaderOrientation.AUTO,
+                palette = palette,
+                onToggle = {
+                    ReaderLook.orientation =
+                        if (ReaderLook.orientation == ReaderOrientation.AUTO) {
+                            ReaderOrientation.PORTRAIT
+                        } else {
+                            ReaderOrientation.AUTO
+                        }
+                }
+            )
+            ReaderSwitchRow(
+                label = "Horizontal pages",
+                on = paged,
+                palette = palette,
+                onToggle = onTogglePaged
+            )
+        }
+    }
+}
+
+/** A section's name inside a reader sheet. The only furniture a sheet needs. */
+@Composable
+internal fun ReaderSheetLabel(text: String, palette: ReaderPalette) {
+    Text(
+        text.uppercase(Locale.US),
+        style = MaterialTheme.typography.labelSmall.copy(
+            letterSpacing = 1.2.sp,
+            fontWeight = FontWeight.SemiBold
+        ),
+        color = palette.accent
+    )
+}
+
+/** One A−/A+ disc either side of the type slider. */
+@Composable
+internal fun ReaderStepperButton(
+    glyph: String,
+    label: String,
+    palette: ReaderPalette,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = palette.ink.copy(alpha = 0.08f),
+        modifier = Modifier.size(38.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CurioIcon(glyph, label, tint = palette.ink.copy(alpha = 0.8f), size = 19.dp)
+        }
+    }
+}
+
+/** One paper in the row: the skin's own sheet, with its own ink on it. */
+@Composable
+internal fun ReaderInkSwatch(
+    skin: ReaderSkin,
+    palette: ReaderPalette,
+    modifier: Modifier = Modifier
+) {
+    val tone = readerPalette(skin.key)
+    val live = ReaderLook.inkKey == skin.key
+    Surface(
+        onClick = { ReaderLook.inkKey = skin.key },
+        shape = RoundedCornerShape(14.dp),
+        color = tone.paper,
+        border = androidx.compose.foundation.BorderStroke(
+            if (live) 2.dp else 1.dp,
+            if (live) tone.accent else palette.ink.copy(alpha = 0.18f)
+        ),
+        modifier = modifier.height(52.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                "Aa",
+                style = TextStyle(
+                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = tone.ink
+            )
+        }
+    }
+}
+
+/** The `+` that unfolds the tuned papers (see [ReaderSkin.extra]). */
+@Composable
+internal fun ReaderMoreInkTile(
+    palette: ReaderPalette,
+    open: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = palette.ink.copy(alpha = if (open) 0.13f else 0.05f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, palette.ink.copy(alpha = 0.18f)),
+        modifier = modifier.height(52.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CurioIcon(
+                if (open) CurioIcons.Remove else CurioIcons.Add,
+                if (open) "Hide the other papers" else "More papers",
+                tint = palette.ink.copy(alpha = 0.7f),
+                size = 18.dp
+            )
+        }
+    }
+}
+
+/** One of the two switches, on the reader's own paper. */
+@Composable
+internal fun ReaderSwitchRow(
+    label: String,
+    on: Boolean,
+    palette: ReaderPalette,
+    onToggle: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            color = palette.ink,
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = on,
+            onCheckedChange = { onToggle() },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = palette.paper,
+                checkedTrackColor = palette.accent,
+                checkedBorderColor = palette.accent,
+                uncheckedThumbColor = palette.ink.copy(alpha = 0.55f),
+                uncheckedTrackColor = palette.ink.copy(alpha = 0.10f),
+                uncheckedBorderColor = palette.ink.copy(alpha = 0.22f)
+            )
+        )
+    }
+}
+
+/**
+ * v431 — THE DICTIONARY: THE WORD, AND WHAT IT MEANS, WITHOUT LEAVING THE PAGE.
+ *
+ * The member asked for the lookup on the spot ("In app wikitionary"), and for
+ * the selection bar to offer NOTHING ELSE when the sweep landed on one word ("when
+ * user hight one wor only show the dictionarcy icon"), because looking a word up
+ * is the one thing a reader wants from a one-word selection. The lookup itself
+ * lives in [ReaderDictionary]; this is only its door.
+ */
+@Composable
+private fun ReaderDictionarySheet(
+    palette: ReaderPalette,
+    initial: String,
+    onDismiss: () -> Unit
+) {
+    var word by remember { mutableStateOf(initial) }
+    var senses by remember { mutableStateOf<List<ReaderDictionarySense>?>(null) }
+    var looking by remember { mutableStateOf(false) }
+    var asked by remember { mutableStateOf("") }
+    LaunchedEffect(word) {
+        val term = word.trim()
+        if (term.isBlank()) {
+            senses = null
+            asked = ""
+            return@LaunchedEffect
+        }
+        looking = true
+        // The typing pause, not every letter: a definition is a network call.
+        delay(320)
+        val found = withContext(Dispatchers.IO) {
+            runCatching { ReaderDictionary.define(term) }.getOrNull()
+        }
+        senses = found ?: emptyList()
+        asked = term
+        looking = false
+    }
+    ReaderSheetFrame("Dictionary", palette, onDismiss) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Surface(
                 shape = RoundedCornerShape(50),
-                color = palette.surface,
+                color = palette.ink.copy(alpha = 0.06f),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 2.dp),
+                    modifier = Modifier.padding(horizontal = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     CurioIcon(
                         CurioIcons.Search,
                         null,
-                        tint = palette.ink.copy(alpha = 0.75f),
+                        tint = palette.ink.copy(alpha = 0.5f),
                         size = 17.dp
                     )
                     BasicTextField(
-                        value = search.query,
-                        onValueChange = onQuery,
+                        value = word,
+                        onValueChange = { next -> word = next },
                         singleLine = true,
                         textStyle = TextStyle(
-                            fontFamily = LoraFontFamily,
+                            fontFamily = readerTypeFamily(ReaderLook.typeFace),
                             fontSize = 16.sp,
                             color = palette.ink
                         ),
@@ -3359,97 +4440,68 @@ private fun ReaderSearchSheet(
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             imeAction = androidx.compose.ui.text.input.ImeAction.Search
                         ),
-                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(
-                            onSearch = { onSubmit() }
-                        ),
                         decorationBox = { inner ->
                             Box {
-                                if (search.query.isEmpty()) {
+                                if (word.isEmpty()) {
                                     Text(
-                                        "Words to find",
-                                        style = TextStyle(
-                                            fontFamily = LoraFontFamily,
-                                            fontSize = 16.sp,
-                                            color = palette.ink.copy(alpha = 0.35f)
-                                        )
+                                        "A word",
+                                        style = TextStyle(fontSize = 16.sp),
+                                        color = palette.ink.copy(alpha = 0.35f)
                                     )
                                 }
                                 inner()
                             }
                         },
-                        modifier = Modifier.weight(1f).padding(vertical = 12.dp)
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 12.dp)
                     )
-                    if (search.query.isNotEmpty()) {
-                        Surface(
-                            onClick = onSubmit,
-                            shape = RoundedCornerShape(50),
-                            color = palette.accent
-                        ) {
-                            Text(
-                                "Find",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
-                            )
-                        }
-                    }
                 }
             }
+            Spacer(Modifier.height(12.dp))
+            val list = senses
+            when {
+                looking -> Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = palette.accent, modifier = Modifier.size(22.dp))
+                }
 
-            // HOW FAR THE SWEEP HAS GOT. A PDF is read page by page (its words
-            // live in a text layer that costs a parse apiece), so the count is
-            // the honest thing to show rather than a spinner with no meaning.
-            if (search.query.isNotBlank()) {
-                Text(
-                    when {
-                        search.total == 0 -> "Reading the book\u2026"
-                        search.done && search.hits.isEmpty() -> "Nothing found."
-                        search.done -> "${search.hits.size} found"
-                        else -> "${search.hits.size} found \u00b7 read ${search.scanned} of ${search.total}"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.ink.copy(alpha = 0.75f)
-                )
-            }
+                list == null -> Box(Modifier.fillMaxWidth().weight(1f))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 320.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                search.hits.forEachIndexed { index, hit ->
-                    val active = index == search.current
-                    Surface(
-                        onClick = { onPick(hit.index) },
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (active) palette.accent.copy(alpha = 0.22f) else palette.surface,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text(
-                                hit.snippet,
-                                style = TextStyle(
-                                    fontFamily = LoraFontFamily,
-                                    fontSize = 14.sp,
-                                    lineHeight = 20.sp,
-                                    color = palette.ink
-                                ),
-                                maxLines = 2,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                if (search.isPaged) "p ${hit.index + 1}" else "\u00a7 ${hit.index + 1}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = palette.accent
-                            )
+                list.isEmpty() -> Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.TopStart
+                ) {
+                    Text(
+                        "Nothing for \u201C$asked\u201D.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = palette.ink.copy(alpha = 0.7f)
+                    )
+                }
+
+                else -> Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    list.forEach { sense ->
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            ReaderSheetLabel(sense.partOfSpeech.ifBlank { "Entry" }, palette)
+                            sense.definitions.forEach { line ->
+                                Text(
+                                    line,
+                                    style = TextStyle(
+                                        fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                                        fontSize = 15.sp,
+                                        lineHeight = 22.sp,
+                                        color = palette.ink
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -3458,137 +4510,54 @@ private fun ReaderSearchSheet(
     }
 }
 
-@Composable
-private fun ReaderInkSheet(
-    palette: ReaderPalette,
-    /** v406 — whether this book has a type size to set (a reflowable one does). */
-    showType: Boolean,
-    onPick: (String) -> Unit,
-    onDismiss: () -> Unit
+/**
+ * v431 — SHARING A PLACE (or the words selected on it).
+ *
+ * The reader had no share door before, and the member put one in the ⋯ menu. What
+ * it shares is what a reader can actually vouch for: the passage if words are
+ * selected, the book's name, and where in it they are — never a link to a file on
+ * this phone.
+ */
+private fun shareReaderPlace(
+    context: Context,
+    book: String,
+    place: String,
+    passage: String
 ) {
-    ReaderSheetFrame("The page", palette, onDismiss) {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ReaderSkin.entries.forEach { option ->
-                    val active = option.key == ReaderLook.inkKey
-                    val tone = readerPalette(option.key)
-                    Surface(
-                        onClick = { onPick(option.key) },
-                        shape = RoundedCornerShape(12.dp),
-                        color = tone.paper,
-                        border = androidx.compose.foundation.BorderStroke(
-                            if (active) 2.dp else 1.dp,
-                            if (active) tone.accent else tone.ink.copy(alpha = 0.2f)
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(64.dp)
-                    ) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                option.label,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = tone.ink
-                            )
-                        }
-                    }
-                }
-            }
-
-            // ── THE TYPE SIZE, AS A SLIDER (v406) ─────────────────────
-            //
-            // The pinch already sets the words' size, but a pinch is a guess:
-            // the member cannot see the number, and a big change takes several
-            // of them (member's request: "add horizontal mode in pdf and epub
-            // reader with text size slider for epub"). This is the same value
-            // the pinch writes ([ReaderLook.textScale]) said out loud, with a
-            // thumb that can be dragged to it exactly. A book read as pages
-            // re-lays itself out from the same number, so one slider serves
-            // both flows.
-            if (showType) {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "TYPE SIZE",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                letterSpacing = 1.1.sp,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = palette.accent,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            "${(ReaderLook.textScale * 100f).roundToInt()}%",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = palette.ink.copy(alpha = 0.75f)
-                        )
-                    }
-                    Slider(
-                        value = ReaderLook.textScale,
-                        onValueChange = { next ->
-                            ReaderLook.textScale = next.coerceIn(0.8f, 2.6f)
-                        },
-                        valueRange = 0.8f..2.6f,
-                        colors = SliderDefaults.colors(
-                            thumbColor = palette.accent,
-                            activeTrackColor = palette.accent,
-                            inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
-                        )
-                    )
-                }
-            }
-
-            // ── HOW THE PAGE STANDS (v406 → v418) ───────────────────
-            //
-            // A three-way choice now, offered for EVERY book: Auto follows the
-            // phone, Upright and Wide hold the page while the book is open (see
-            // [ReaderLook.orientation]). v406 offered a lone switch and only to
-            // a PDF, which is why the member found no auto-rotation in either
-            // format.
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    "AUTO-ROTATE",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        letterSpacing = 1.1.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = palette.accent
-                )
-                Text(
-                    ReaderLook.orientation.detail,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = palette.ink.copy(alpha = 0.75f)
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ReaderOrientation.entries.forEach { option ->
-                        val active = option == ReaderLook.orientation
-                        Surface(
-                            onClick = { ReaderLook.orientation = option },
-                            shape = RoundedCornerShape(50),
-                            color = if (active) palette.accent else palette.ink.copy(alpha = 0.08f)
-                        ) {
-                            Text(
-                                option.label,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = if (active) palette.paper else palette.ink.copy(alpha = 0.75f),
-                                modifier = Modifier.padding(horizontal = 15.dp, vertical = 8.dp)
-                            )
-                        }
-                    }
-                }
-            }
+    val body = buildString {
+        if (passage.isNotBlank()) {
+            append("\u201C").append(passage.trim()).append("\u201D\n\n")
         }
+        append(book.ifBlank { "A book" })
+        if (place.isNotBlank()) append(" \u00b7 ").append(place)
+    }
+    runCatching {
+        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(android.content.Intent.EXTRA_SUBJECT, book.ifBlank { "A book" })
+            putExtra(android.content.Intent.EXTRA_TEXT, body)
+        }
+        context.startActivity(
+            android.content.Intent.createChooser(send, "Share a passage")
+        )
     }
 }
 
 @Composable
 private fun ReaderPlacesSheet(
+    /**
+     * v431 — WHICH QUESTION THIS OPENING ANSWERS.
+     *
+     * v395 merged the reader's three questions into one scroll and v431 splits
+     * them back out, because the member asked for the doors again: "keep the
+     * bookmark button per chapter with the progress lets separate the bookmarks
+     * again and it will be 3rd option with bookmarks". The shape that satisfies
+     * both is this — ONE composable, ONE layout, and a mode that says which of
+     * its parts an opening is for, so the four sheets can never drift apart and
+     * the contents rows still see every mark (which is how a chapter knows it is
+     * already bookmarked).
+     */
+    mode: ReaderPlacesMode,
     marks: List<ReaderMarkEntity>,
     position: ReaderMarkEntity?,
     /** v406 — where the member is RIGHT NOW, so the card reads live. */
@@ -3606,21 +4575,42 @@ private fun ReaderPlacesSheet(
     onContinueAt: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // ── ONE PAGE, ONE SCROLL, ONE ANSWER (v395) ──────────────────────
+    // ── ONE LAYOUT, FOUR DOORS (v431) ────────────────────────────────
     //
-    // This sheet used to be two HALVES behind two chips — "Bookmarks &
-    // progress" and "Contents" — so half of it was always hidden, the two
-    // chrome doors opened the same surface on a different tab, and a reader had
-    // to guess which door led to "where was I" (user report: "they are not
-    // merged in one page and one button"). A reader's three questions have an
-    // order — where am I, what did I keep, what is left — so the sheet ANSWERS
-    // them in that order and scrolls: the progress card, then the marks, then
-    // the book's own contents. Nothing is behind a chip, and every chapter row
-    // carries its own bookmark (see [ReaderContentsSection]).
+    // A reader's questions have an order — where am I, what did I keep, what is
+    // left — and the sheet answers them IN THAT ORDER: the progress card, then
+    // the marks, then the book's own contents. Every chapter row carries its own
+    // bookmark and its own progress (see [ReaderContentsSection]), which is the
+    // half of the member's request that keeps the contents door worth opening.
     // IN THE BOOK'S OWN ORDER: a reader's marks are an index to the book, so
     // they read the way the book reads — from where it starts to where it ends —
     // and not in whatever order the table happens to hand them over (v399).
     val kept = marks.filter { !it.isPosition }.sortedBy { it.positionIndex }
+    val shown = when (mode) {
+        ReaderPlacesMode.BOOKMARKS -> kept.filter { it.markKind == ReaderMarkKind.BOOKMARK }
+        ReaderPlacesMode.NOTES -> kept.filter { it.isNote }
+        ReaderPlacesMode.HIGHLIGHTS -> kept.filter { it.markKind == ReaderMarkKind.HIGHLIGHT }
+        else -> kept
+    }
+    val title = when (mode) {
+        ReaderPlacesMode.CONTENTS -> "Contents"
+        ReaderPlacesMode.BOOKMARKS -> "Bookmarks"
+        ReaderPlacesMode.NOTES -> "Notes"
+        ReaderPlacesMode.HIGHLIGHTS -> "Highlights"
+        ReaderPlacesMode.ALL -> "Places in this book"
+    }
+    val marksLabel = when (mode) {
+        ReaderPlacesMode.BOOKMARKS -> "BOOKMARKS"
+        ReaderPlacesMode.NOTES -> "NOTES"
+        ReaderPlacesMode.HIGHLIGHTS -> "HIGHLIGHTS"
+        else -> "YOUR MARKS"
+    }
+    // Where the "where am I" card belongs: with the book's order and with the
+    // places kept, never in front of a list of notes or highlights.
+    val withProgress = mode == ReaderPlacesMode.ALL || mode == ReaderPlacesMode.CONTENTS ||
+        mode == ReaderPlacesMode.BOOKMARKS
+    val withMarks = mode != ReaderPlacesMode.CONTENTS
+    val withContents = mode == ReaderPlacesMode.ALL || mode == ReaderPlacesMode.CONTENTS
     // ── LIVE WHERE POSSIBLE (v406) ──
     // The card follows the reading; the stored auto-bookmark is only the
     // fallback for a book no surface has reported a place in yet. `atIndex` is
@@ -3650,77 +4640,83 @@ private fun ReaderPlacesSheet(
             it.positionIndex == index && it.markKind == ReaderMarkKind.BOOKMARK
         }
     }
-    ReaderSheetFrame("Places in this book", palette, onDismiss) {
+    ReaderSheetFrame(title, palette, onDismiss) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 470.dp)
+                .fillMaxHeight()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            ReaderProgressCard(
-                through = through,
-                placeTitle = placeTitle,
-                countLabel = countLabel,
-                hasPlace = atIndex != null,
-                marked = placeMark != null,
-                palette = palette,
-                onContinue = {
-                    val index = live?.index
-                    if (index != null) onContinueAt(index) else position?.let(onJump)
-                },
-                onMarkPlace = {
-                    if (placeMark != null) {
-                        onDelete(placeMark)
-                    } else {
-                        onBookmarkHere(
-                            ReaderParagraph(
-                                positionIndex = atIndex ?: 0,
-                                section = 0,
-                                text = placeTitle.ifBlank { countLabel }.ifBlank { "My place" },
-                                isHeading = true,
-                                isPage = content is ReaderContent.Pages
+            if (withProgress) {
+                ReaderProgressCard(
+                    through = through,
+                    placeTitle = placeTitle,
+                    countLabel = countLabel,
+                    hasPlace = atIndex != null,
+                    marked = placeMark != null,
+                    palette = palette,
+                    onContinue = {
+                        val index = live?.index
+                        if (index != null) onContinueAt(index) else position?.let(onJump)
+                    },
+                    onMarkPlace = {
+                        if (placeMark != null) {
+                            onDelete(placeMark)
+                        } else {
+                            onBookmarkHere(
+                                ReaderParagraph(
+                                    positionIndex = atIndex ?: 0,
+                                    section = 0,
+                                    text = placeTitle.ifBlank { countLabel }.ifBlank { "My place" },
+                                    isHeading = true,
+                                    isPage = content is ReaderContent.Pages
+                                )
                             )
-                        )
+                        }
                     }
-                }
-            )
+                )
+            }
 
-            ReaderPlacesHeader(
-                label = "YOUR MARKS",
-                trailing = if (kept.isEmpty()) "" else "${kept.size}",
-                palette = palette
-            )
-            ReaderMarksSection(
-                marks = kept,
-                content = content,
-                chapters = chapters,
-                palette = palette,
-                onJump = onJump,
-                onDelete = onDelete
-            )
+            if (withMarks) {
+                ReaderPlacesHeader(
+                    label = marksLabel,
+                    trailing = if (shown.isEmpty()) "" else "${shown.size}",
+                    palette = palette
+                )
+                ReaderMarksSection(
+                    marks = shown,
+                    content = content,
+                    chapters = chapters,
+                    palette = palette,
+                    onJump = onJump,
+                    onDelete = onDelete
+                )
+            }
 
             // The auto-bookmark is not one of the marks — it is the progress
             // card above — so the contents only appear when the file has an
             // order to show. A PDF with no outline still gets its pages, and
             // that IS its contents.
-            ReaderPlacesHeader(
-                label = "CONTENTS",
-                trailing = if (chapters.isEmpty()) "" else "${chapters.size}",
-                palette = palette
-            )
-            ReaderContentsSection(
-                content = content,
-                chapters = chapters,
-                pages = pages,
-                marks = kept,
-                palette = palette,
-                atIndex = atIndex,
-                onPickBlock = onPickBlock,
-                onPickPage = onPickPage,
-                onBookmarkHere = onBookmarkHere,
-                onUnbookmark = onDelete
-            )
+            if (withContents) {
+                ReaderPlacesHeader(
+                    label = "CONTENTS",
+                    trailing = if (chapters.isEmpty()) "" else "${chapters.size}",
+                    palette = palette
+                )
+                ReaderContentsSection(
+                    content = content,
+                    chapters = chapters,
+                    pages = pages,
+                    marks = kept,
+                    palette = palette,
+                    atIndex = atIndex,
+                    onPickBlock = onPickBlock,
+                    onPickPage = onPickPage,
+                    onBookmarkHere = onBookmarkHere,
+                    onUnbookmark = onDelete
+                )
+            }
         }
     }
 }
@@ -4743,6 +5739,10 @@ private fun PdfPageTextLayer(
     container: IntSize,
     palette: ReaderPalette,
     highlights: List<ReaderPassage>,
+    /** v431 — the floating search's own words, washed where they were found. */
+    query: String,
+    /** v431 — whether THIS page holds the find the reader is standing on. */
+    queryCurrent: Boolean,
     selection: ReaderSelection?,
     onSelect: (ReaderSelection) -> Unit,
     onPagePress: () -> Unit
@@ -4851,6 +5851,38 @@ private fun PdfPageTextLayer(
     ) {
         val words = text ?: return@Canvas
         val scale = if (words.pageWidthPt > 0f) size.width / words.pageWidthPt else 1f
+        // ── v431 — THE FIND, WASHED ONTO THE WORDS IT WAS FOUND IN ─────────
+        //
+        // A search that only jumped the file and named a page in a list would
+        // leave the member hunting the words with their eyes. Every occurrence on
+        // every visible page is washed, and the one the member is STANDING ON is
+        // washed harder, so the bar's arrows move a mark the eye can follow (the
+        // member asked for the search to highlight the results ON the pdf).
+        // Drawn before the highlights, so a passage the member marked themselves
+        // still reads as theirs.
+        if (query.isNotBlank()) {
+            val wash = if (queryCurrent) {
+                palette.accent.copy(alpha = 0.48f)
+            } else {
+                palette.accent.copy(alpha = 0.24f)
+            }
+            var from = 0
+            var guard = 0
+            // A bound on the walk: a one-letter query in a dense page can hit
+            // hundreds of times, and a wash per hit is a wash nobody can read.
+            while (guard < 240) {
+                val at = words.text.indexOf(query, from, ignoreCase = true)
+                if (at < 0) break
+                drawPdfPassage(
+                    text = words,
+                    range = words.glyphRange(at, query.length),
+                    color = wash,
+                    scale = scale
+                )
+                from = at + query.length.coerceAtLeast(1)
+                guard += 1
+            }
+        }
         highlights.forEach { passage ->
             if (passage.text.isBlank()) return@forEach
             val at = words.text.indexOf(passage.text)
@@ -4978,35 +6010,52 @@ private fun ReaderSelectionBar(
     onHighlight: (ReaderHighlighter) -> Unit,
     onNote: () -> Unit,
     onBookmark: () -> Unit,
+    /** v431 — the dictionary, which is what a ONE-WORD selection is for. */
+    onDictionary: () -> Unit,
     onMore: () -> Unit,
     onClear: () -> Unit
 ) {
+    // ── v431 — ONE WORD IS A LOOKUP, NOT A MARK-UP ───────────────────
+    //
+    // The member's rule, in their own words: "when user hight one wor only show
+    // the dictionarcy icon". A sweep that landed on a single word has exactly one
+    // thing the member wants from it — what it means — and offering five inks and
+    // a bookmark beside it made the one useful door the smallest thing on the bar.
+    // So a single word gets that door and nothing else (a tap on the page clears
+    // the selection; see [tapPage]).
+    //
+    // ── AND THE BAR IS A WIDE FLOATING CAPSULE ───────────────────────
+    //
+    // It used to be a two-row panel with the passage quoted in it — a card where
+    // the member asked for the toolbar every phone has ("use similiar capsule
+    // style wide floating ui for selected text too, current one is too small so
+    // similiar to what samsung uses"). One row, a full-radius capsule, one lift,
+    // icons only, and `animateContentSize` so going from a word to a sentence is a
+    // resize rather than a swap.
+    val singleWord = selection.text.trim().let { it.isNotEmpty() && !it.contains(' ') }
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(50),
         color = palette.surface,
-        shadowElevation = 8.dp,
-        modifier = Modifier.fillMaxWidth()
+        shadowElevation = 10.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
-        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp)) {
-            // The words themselves, so the member knows what they are about to
-            // mark before they mark it (a selection handle off the edge of a
-            // screen can leave the passage itself out of sight).
-            Text(
-                "\u201C${selection.text.take(140)}\u201D",
-                style = TextStyle(
-                    fontFamily = LoraFontFamily,
-                    fontSize = 13.sp,
-                    lineHeight = 17.sp,
-                    color = palette.ink.copy(alpha = 0.8f)
-                ),
-                maxLines = 2,
-                modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.horizontalScroll(rememberScrollState())
-            ) {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            if (singleWord) {
+                SelectionBarAction(
+                    CurioIcons.MenuBook,
+                    "Look this word up",
+                    palette,
+                    onDictionary
+                )
+            } else {
                 ReaderHighlighter.entries.forEach { ink ->
                     Surface(
                         onClick = { onHighlight(ink) },
@@ -5027,9 +6076,25 @@ private fun ReaderSelectionBar(
                 }
                 Spacer(Modifier.width(2.dp))
                 SelectionBarAction(CurioIcons.Note, "Write a note on this passage", palette, onNote)
-                SelectionBarAction(CurioIcons.Bookmark, "Bookmark this passage", palette, onBookmark)
-                SelectionBarAction(CurioIcons.MoreHoriz, "More about this passage", palette, onMore)
-                Spacer(Modifier.weight(1f))
+                SelectionBarAction(
+                    CurioIcons.Bookmark,
+                    "Bookmark this passage",
+                    palette,
+                    onBookmark
+                )
+                SelectionBarAction(
+                    CurioIcons.MenuBook,
+                    "Look a word up",
+                    palette,
+                    onDictionary
+                )
+                SelectionBarAction(
+                    CurioIcons.MoreHoriz,
+                    "More about this passage",
+                    palette,
+                    onMore
+                )
+                Spacer(Modifier.width(2.dp))
                 SelectionBarAction(CurioIcons.Close, "Clear the selection", palette, onClear)
             }
         }
@@ -5060,15 +6125,60 @@ private fun SelectionBarAction(
     }
 }
 
-private enum class ReaderSkin(val key: String, val label: String) {
+internal enum class ReaderSkin(val key: String, val label: String) {
     PAPER("paper", "Paper"),
     SEPIA("sepia", "Sepia"),
     NIGHT("night", "Night"),
-    WHITE("white", "White");
+    WHITE("white", "White"),
+    GRAY("gray", "Gray"),
+    MINT("mint", "Mint"),
+    ROSE("rose", "Rose"),
+    AMBER("amber", "Amber"),
+    SLATE("slate", "Slate");
 
     companion object {
         val inks: List<ReaderSkin> get() = entries
+
+        /**
+         * v431 — THE FIVE THAT FIT IN A ROW, and the rest behind the `+`.
+         *
+         * Five swatches is what a phone can show at a comfortable tap size, and
+         * the fifth one is the member's own addition ("5 differnt backgroud color
+         * the paper, sepia, night white and 2 more" → Gray, plus the `+` tile that
+         * unfolds the tuned papers a reader reaches for at night or in the sun:
+         * mint, rose, amber and slate).
+         */
+        val primary: List<ReaderSkin> get() = listOf(PAPER, SEPIA, NIGHT, WHITE, GRAY)
+        val extra: List<ReaderSkin> get() = listOf(MINT, ROSE, AMBER, SLATE)
     }
+}
+
+/**
+ * v431 — THE READER'S THREE TYPEFACES.
+ *
+ * The member asked for three and no more. They are the app's own three text
+ * families, so a reader's page is set in the same type the rest of Curio writes
+ * in: Lora (the editorial serif a novel expects), Fraunces (the display serif
+ * Curio uses for headlines) and the app's writing hand for a page read aloud.
+ * The choice follows the member through the process, like the ink, and it is the
+ * FAMILY ONLY — every heading still keeps its level, its size and its weight.
+ */
+internal enum class ReaderTypeFace(val key: String, val label: String) {
+    LORA("lora", "Lora"),
+    FRAUNCES("fraunces", "Fraunces"),
+    WRITING("writing", "Sans");
+
+    companion object {
+        fun of(key: String?): ReaderTypeFace =
+            entries.firstOrNull { it.key == key } ?: LORA
+    }
+}
+
+/** The font family a reader's page is set in, for one typeface key. */
+internal fun readerTypeFamily(key: String?): FontFamily = when (ReaderTypeFace.of(key)) {
+    ReaderTypeFace.LORA -> LoraFontFamily
+    ReaderTypeFace.FRAUNCES -> FrauncesFontFamily
+    ReaderTypeFace.WRITING -> WritingFontFamily
 }
 
 /**
@@ -5078,8 +6188,26 @@ private enum class ReaderSkin(val key: String, val label: String) {
  * choosing one repaints immediately; a plain object rather than a stored
  * preference because it costs nothing to choose again.
  */
-private object ReaderLook {
+internal object ReaderLook {
     var inkKey by mutableStateOf(ReaderSkin.PAPER.key)
+
+    /**
+     * v431 — THE READER'S TYPEFACE (see [ReaderTypeFace]). It follows the member
+     * through the process exactly like the ink, and it is READ BY THE PAGE, never
+     * written per book: a reader picks the type they read in, not the type for
+     * one novel.
+     */
+    var typeFace by mutableStateOf(ReaderTypeFace.LORA.key)
+
+    /**
+     * v431 — THE PAGE COUNT, PINNED IN THE CORNER.
+     *
+     * A HOLD on the foot pill's Pages button pins a small counter in the corner,
+     * where it stays while the chrome is away and while the member reads — the
+     * answer to "which page is this" for a reader who keeps looking back at it.
+     * A tap on the counter takes the pin out again (see [ReaderPinnedPage]).
+     */
+    var pinnedPage by mutableStateOf(false)
 
     /**
      * v389 — HOW BIG THE WORDS ARE, for the PROCESS like the ink: a member who
@@ -5184,7 +6312,7 @@ private object ReaderLook {
 }
 
 /** v418 — the reader's orientation choice (see [ReaderLook.orientation]). */
-private enum class ReaderOrientation(val label: String, val detail: String) {
+internal enum class ReaderOrientation(val label: String, val detail: String) {
     AUTO("Auto", "The page turns with your phone."),
     PORTRAIT("Upright", "The page stands up while this book is open."),
     LANDSCAPE("Wide", "The page stays wide while this book is open.");
@@ -5197,7 +6325,7 @@ private enum class ReaderOrientation(val label: String, val detail: String) {
 }
 
 /** The two ways a book can be laid out on screen. */
-private enum class ReaderFlow(val label: String) {
+internal enum class ReaderFlow(val label: String) {
     SCROLL("Scrolling"),
     PAGED("Pages");
 
@@ -5221,7 +6349,7 @@ private data class ReaderLivePlace(val index: Int, val total: Int) {
 }
 
 /** What the reader draws with, for one ink. */
-private data class ReaderPalette(
+internal data class ReaderPalette(
     val paper: Color,
     val ink: Color,
     val accent: Color,
@@ -5254,6 +6382,17 @@ private fun readerPdfFilter(key: String): ColorFilter? = when (key) {
     ReaderSkin.WHITE.key -> null
     ReaderSkin.SEPIA.key -> pdfTint(0.95f, 0.87f, 0.74f, 0f, 0f, 0f)
     ReaderSkin.NIGHT.key -> pdfTint(-0.86f, -0.86f, -0.86f, 236f, 231f, 214f)
+    // ── v431 — THE TUNED PAPERS, AS A REAL PAPER MAP ────────────────
+    //
+    // `out = a · in + ink`, with `a = (paper - ink) / 255`, which is the honest
+    // way to move a rendered page onto a different sheet: WHITE paper lands on
+    // the skin's paper colour and BLACK type lands on the skin's ink, so the page
+    // keeps its own contrast instead of being washed by a flat scale.
+    ReaderSkin.GRAY.key -> pdfTint(0.960f, 0.960f, 0.960f, 10f, 10f, 10f)
+    ReaderSkin.MINT.key -> pdfTint(0.816f, 0.827f, 0.824f, 26f, 32f, 26f)
+    ReaderSkin.ROSE.key -> pdfTint(0.804f, 0.796f, 0.792f, 42f, 32f, 34f)
+    ReaderSkin.AMBER.key -> pdfTint(0.769f, 0.769f, 0.745f, 54f, 42f, 24f)
+    ReaderSkin.SLATE.key -> pdfTint(-0.674f, -0.706f, -0.722f, 198f, 210f, 220f)
     else -> pdfTint(0.97f, 0.94f, 0.88f, 0f, 0f, 0f)
 }
 
@@ -5897,61 +7036,71 @@ private fun readerDrawnPage(box: IntSize, aspect: Float): Size {
  * entirely to them, which is what [Offset.Zero] means: nothing taken, so the
  * column owns the gesture and the page still turns on a swipe.
  *
- * ── v430 — AND THE ANCHOR IS READ FROM THE COLUMN'S OWN LAYOUT ───────────
+ * ── v430/v431 — AND THE ANCHOR IS READ FROM THE COLUMN'S OWN LAYOUT ──────
  *
  * The rule is the same one every zoom needs — the file grows about the point the
- * fingers grabbed, not about the top of anything:
+ * fingers grabbed, not about the top of anything — and the amount owed is the
+ * finger's distance below the first visible sheet's top edge:
  *
- *   the fingers sit at  Y = T(under) - scroll + (focus.y - under.offset)
- *   so holding that point still needs  scroll' - scroll = D·(r-1)
+ *   the fingers sit at  focus.y = anchor.offset + <that distance>
+ *   so holding that point still needs  scroll' - scroll = distance·(ratio - 1)
  *
- * where `D` is [documentOffsetAt]: how far the finger is from the TOP OF THE
- * FILE, measured in the document's own pixels at the CURRENT zoom. That number
- * is exactly why it is read from the list rather than from the page: the padding
- * and the 16dp gaps between sheets do not scale with the zoom and therefore
- * CANCEL in the difference, which is the one thing a page-shaped calculation
- * kept getting wrong. `under` is the visible item the finger is actually over
- * (an item's `offset` is where it starts in the viewport, per the list itself),
- * so a pinch in the AIR between two sheets — the place the old per-sheet
- * handler answered nothing at all — is anchored on the nearest sheet instead.
+ * which is what [documentOffsetAt] answers. The padding and the 16dp gaps between
+ * sheets do not scale with the zoom and therefore CANCEL in that difference, and
+ * a SHEET'S INDEX must not appear in it at all: the list already preserves the
+ * scroll position across the relayout, so an index-proportional term lands on top
+ * of a move that has happened — the whole of the "it scrolls ten pages" report
+ * (see the note on [documentOffsetAt]). The anchor is the first visible item, so
+ * a pinch in the AIR between two sheets — the place the old per-sheet handler
+ * answered nothing at all — is anchored exactly like one on the words.
  *
  * The horizontal axis needs none of this: there is one sheet across, so its left
  * edge never moves and the fingers' own x is the whole of the anchor (`focus.x`
  * is said in the column's space, which rides the sideways pan, so [across]'s own
  * value comes off it first).
- */
-/**
- * v430 — HOW FAR DOWN THE FILE A POINT ON SCREEN IS, in the document's own pixels
- * at the zoom it is currently laid out at.
  *
- * This is the whole anchor, and it is read from the LIST rather than computed
- * from a page number. [viewportY] is a point in the viewport (the surface's own
- * y, which is what a lazy item's `offset` is measured against: where the item
- * starts, in the viewport). The sheet under the finger is the visible item that
- * contains it; a point in the AIR — the 16dp gap between two sheets, the margin
- * above the first — belongs to the nearest one, which is what makes a pinch
- * anywhere on the screen the document's.
+ * ── v431 — AND THE ANCHOR IS MEASURED FROM THE SHEET, NOT FROM THE FILE ──
  *
- * The answer is `index · <one sheet> + <how far into this one>`, and the constant
- * parts of the column (its padding and the gaps between sheets) are deliberately
- * NOT in it: they do not scale with the zoom, so they cancel in the difference
- * this feeds ([readerZoomDocument] multiplies it by `ratio - 1`). That is what a
- * page-shaped calculation never got right — a stale `page · height` term drifts
- * by every gap above the fingers as the file grows.
+ * `documentOffsetAt` used to answer `index · sheetHeight + into` — how far the
+ * finger is from the TOP OF THE FILE — and that number was the bug the member
+ * reported ("it scroll so fast when i try zoom that like 10 pages it scrolls
+ * by"). A lazy column PRESERVES `(firstVisibleItemIndex, scrollOffset)` across a
+ * relayout, and every sheet grows by `ratio`, so the relayout ALREADY carries the
+ * viewport forward by `index · sheetHeight · (ratio - 1)` in document space. The
+ * compensation was therefore applied ON TOP of a move that had already happened:
+ * it doubled the jump, and it was proportional to how deep into the book the
+ * member was — which is exactly why ten pages went by.
  *
- * Sheets in a scrollable PDF are the same shape almost always, so the height of
- * the sheet UNDER the finger is the honest measure of the ones above it; for a
- * document with mixed page sizes this is an estimate, and it is still read live
- * from what is on screen rather than from the frame the gesture was armed in.
+ * What the difference actually needs is the finger's distance BELOW THE ONE
+ * LANDMARK THE RELAYOUT KEEPS STILL — the top edge of the FIRST VISIBLE item,
+ * because the scroll position is anchored on it (`firstVisibleItemIndex` plus an
+ * offset in pixels into that item, which is a number the relayout keeps). In
+ * document terms:
+ *
+ *   before:  finger =  i0 · s      + o0 + y        (s = sheet height, o0 = how
+ *                                                   much of i0 is off the top)
+ *   after:   finger =  i0 · s · r  + (o0 + y) · r
+ *   and the viewport top after the relayout is already  i0 · s · r + o0
+ *   so the shift that is still owed is  (r - 1) · (o0 + y)
+ *
+ * The column's own padding and the 16dp gaps between sheets do not scale with
+ * the zoom, so they cancel in that difference — which is why the SHEET'S INDEX
+ * must not appear in it, and why the measure is taken in the anchor's frame and
+ * not in the frame of whichever sheet happens to be under the hand.
+ *
+ * [viewportY] is a point in the viewport, which is the space an item's own
+ * `offset` is said in (where the item starts in the viewport). A pinch in the AIR
+ * — the 16dp gap between two sheets, the margin above the first — is measured
+ * from the same landmark, so it is anchored exactly like one on the words.
  */
 private fun documentOffsetAt(state: LazyListState, viewportY: Float): Float {
     val visible = state.layoutInfo.visibleItemsInfo
     if (visible.isEmpty()) return viewportY
-    val under = visible.firstOrNull { viewportY >= it.offset && viewportY < it.offset + it.size }
-        ?: visible.minByOrNull { abs(it.offset + it.size / 2f - viewportY) }
-        ?: return viewportY
-    val into = (viewportY - under.offset).coerceIn(0f, under.size.toFloat())
-    return under.index * under.size + into
+    // The anchor: the lowest visible index, which is the item the scroll position
+    // is held on (the list reports its visible items in index order, and this
+    // asks for the lowest rather than trusting that order).
+    val anchor = visible.minByOrNull { it.index } ?: return viewportY
+    return (viewportY - anchor.offset).coerceAtLeast(0f)
 }
 
 private fun readerZoomDocument(
@@ -6176,7 +7325,7 @@ private fun readerZoomedPan(
 // @Composable because the default ink asks [isCurioDarkTheme] what the app is
 // wearing — one reader, two themes.
 @Composable
-private fun readerPalette(key: String): ReaderPalette = when (key) {
+internal fun readerPalette(key: String): ReaderPalette = when (key) {
     "sepia" -> ReaderPalette(
         paper = Color(0xFFF3E7D3),
         ink = Color(0xFF4A3A28),
@@ -6197,6 +7346,44 @@ private fun readerPalette(key: String): ReaderPalette = when (key) {
         accent = Color(0xFF8A5A33),
         surface = Color(0xFFF5F5F5),
         inkKey = "white"
+    )
+    // ── v431 — THE TUNED PAPERS (the `+` row) ─────────────────────
+    "gray" -> ReaderPalette(
+        paper = Color(0xFFECECEC),
+        ink = Color(0xFF2B2B2B),
+        accent = Color(0xFF6B6B6B),
+        surface = Color(0xFFF4F4F4),
+        inkKey = "gray"
+    )
+    "mint" -> ReaderPalette(
+        paper = Color(0xFFEAF3EC),
+        ink = Color(0xFF1A201A),
+        accent = Color(0xFF3F6B4C),
+        surface = Color(0xFFF1F8F3),
+        inkKey = "mint"
+    )
+    "rose" -> ReaderPalette(
+        paper = Color(0xFFF7EBEC),
+        ink = Color(0xFF2A2022),
+        accent = Color(0xFF8E5560),
+        surface = Color(0xFFFBF3F4),
+        inkKey = "rose"
+    )
+    "amber" -> ReaderPalette(
+        paper = Color(0xFFFAEED6),
+        ink = Color(0xFF362A18),
+        accent = Color(0xFF8A6234),
+        surface = Color(0xFFFDF5E6),
+        inkKey = "amber"
+    )
+    // A DARK page at the end of the extras row, so the `+` row has a night for
+    // the readers who want the ink to actually invert ("Slate").
+    "slate" -> ReaderPalette(
+        paper = Color(0xFF1A1E24),
+        ink = Color(0xFFC6D2DC),
+        accent = Color(0xFF7FA3C4),
+        surface = Color(0xFF232931),
+        inkKey = "slate"
     )
     else -> if (isCurioDarkTheme()) {
         ReaderPalette(
@@ -6332,7 +7519,34 @@ private data class ReaderParagraph(
     val isPage: Boolean = false
 )
 
-private enum class ReaderSheet { INK, PLACES, SEARCH }
+/**
+ * v431 — THE READER'S SHEETS, ONE PER DOOR ON THE FOOT PILL.
+ *
+ * `INK`/`PLACES`/`SEARCH` is gone with the old chrome: the ink is half of the
+ * Appearance sheet (the pill's first button), the places split back into the
+ * three lists the member asked for, the ⋯ menu is a door of its own, the page
+ * scrubber is the middle button, and the Dictionary is the in-app Wiktionary
+ * lookup a selected word opens.
+ */
+private enum class ReaderSheet {
+    APPEARANCE,
+    CONTENTS,
+    BOOKMARKS,
+    NOTES,
+    HIGHLIGHTS,
+    MENU,
+    SCRUBBER,
+    DICTIONARY
+}
+
+/**
+ * v431 — WHICH OF THE BOOK'S PLACES A SHEET IS SHOWING (see [ReaderPlacesSheet]).
+ *
+ * `ALL` is the old merged sheet — kept because it is the one shape that proves
+ * the four doors are views of ONE layout, and because a future surface (the
+ * book's own page) can still ask for everything at once.
+ */
+private enum class ReaderPlacesMode { ALL, CONTENTS, BOOKMARKS, NOTES, HIGHLIGHTS }
 
 /**
  * v389 — A SEARCH RUNNING OVER THE BOOK.
@@ -6353,8 +7567,6 @@ private class ReaderSearch {
     var total by mutableIntStateOf(0)
     var hits by mutableStateOf<List<ReaderSearchHit>>(emptyList())
     var current by mutableIntStateOf(-1)
-    /** True when the book is a PDF, so a find is named by its PAGE. */
-    var isPaged by mutableStateOf(false)
 
     val done: Boolean get() = total > 0 && scanned >= total
 }
@@ -6369,18 +7581,28 @@ private fun String.aroundSnippet(at: Int, length: Int): String {
 }
 
 /**
- * v389 — THE PAGE BAR.
+ * v431 — WHERE THE READER IS, AND THE THREE WAYS TO MOVE.
  *
- * A paged book needs one thing neither the head nor the foot can give it: which
- * page of how many, and the two arrows that move one. It lives in the CHROME, so
- * the same tap that puts the tools away takes it away too and a reader with the
- * chrome gone has nothing over the words at all (user request: "a floating page
- * chnaging bar in the tool bar which again hides with the tool barm").
+ * The v389 page bar named a page and offered two arrows; the member's own
+ * request made it a SCRUBBER as well ("the pages in the middle of the doc pill
+ * when tapping the pages it opens the page scrubber"). One description now
+ * carries both: what the foot pill wears ([short]), what the sheet calls itself
+ * ([label]), where the reader is ([at] of [total]), and the three ways to move —
+ * back, on, and straight to a place ([onScrub]). It is a class rather than four
+ * parameters because it is built in ONE place (the reader body, which is the only
+ * code that knows whether this book has pages, sections or neither) and read in
+ * two (the pill and the sheet).
  */
-private class ReaderPageBar(
+private class ReaderScrubber(
+    /** The compact count the foot pill wears, e.g. "12 / 300"; blank for no pages. */
+    val short: String,
+    /** The long name of the place, for the scrubber sheet's own header. */
     val label: String,
+    val at: Int,
+    val total: Int,
     val onPrev: () -> Unit,
-    val onNext: () -> Unit
+    val onNext: () -> Unit,
+    val onScrub: (Int) -> Unit
 )
 
 private data class ReaderSearchHit(
