@@ -472,7 +472,10 @@ fun TextHistoryBrowser(
                     )
                     Text(
                         when {
-                            entries.isEmpty() -> "No snapshots yet — edits you type or paste are kept here"
+                            // v439 — a bare list under the panel's own "Text
+                            // history" title says nothing but a dash (see
+                            // [CurioEmptyLine]).
+                            entries.isEmpty() -> "\u2014"
                             isFiltering -> "${filteredEntries.size} of ${entries.size} snapshot${if (entries.size == 1) "" else "s"} · restoring into “$activeField”"
                             else -> "${entries.size} snapshot${if (entries.size == 1) "" else "s"} · restoring into “$activeField”"
                         },

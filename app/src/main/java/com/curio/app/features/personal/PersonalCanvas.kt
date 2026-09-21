@@ -142,6 +142,7 @@ import com.curio.app.data.PersonalMarker
 import com.curio.app.data.newBlockId
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.GeomFontFamily
 import com.curio.app.ui.theme.SpaceMonoFontFamily
@@ -5677,9 +5678,33 @@ internal fun PersonalPageEditBar(
     val clipboard = LocalClipboardManager.current
     val hasReach = state.pageSelectionCount > 0 || state.pageLettersPicked
     val lineHere = state.pageSelectionCount > 0
+    // ── v439 — THE REACH HAS A DOOR, AND THE DOOR SAYS WHAT IS IN HAND ────
+    //
+    // The member: *"the copy paste tool bar two row ui is bad and not like that
+    // dock ui"*. The dock this box now speaks is ONE row whose options open
+    // INSIDE its own pill (see [PersonalDockGroup]), and the box's reach — how
+    // much of the page is in hand — is exactly the kind of thing that belongs
+    // behind a door rather than permanently occupying a row. The door is
+    // LABELLED with the quantity, because a reach has no glyph of its own and
+    // "3 rows" is the one word a member needs before they cut.
+    var reachOpen by remember { mutableStateOf(false) }
+    val reachLabel = when {
+        state.pageLettersPicked -> {
+            val letters = state.pageLetterCount
+            if (letters == 1) "1 letter" else "$letters letters"
+        }
+        state.pageSelectionCount == 1 -> "Line"
+        state.pageSelectionCount > 1 -> "${state.pageSelectionCount} rows"
+        else -> "Select"
+    }
     // Cut and Copy with an empty reach OFFER the whole page first — the
-    // member's two-tap flow: the first tap says how much, the second acts.
-    val offerReach: () -> Unit = { state.selectWholePage() }
+    // member's two-tap flow: the first tap says how much, the second acts. And
+    // the door OPENS with it, so the quantity the offer just chose is on screen
+    // to be adjusted rather than applied invisibly.
+    val offerReach: () -> Unit = {
+        state.selectWholePage()
+        reachOpen = true
+    }
     Surface(
         // v433 — THE PAGE'S CAPSULE (see [JournalCapsule]): the box is 46dp of
         // the journal's own raised paper, one real capsule, like the date pill
@@ -5690,65 +5715,55 @@ internal fun PersonalPageEditBar(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        // ── v437 — TWO ROWS, AND NOTHING TO SCROLL ──────────────────────────
+        // ── v437 SUPERSEDED BY v439 — ONE ROW, AND THE REACH BEHIND A DOOR ──────────────────────────
         //
-        // The member: *"for the copy tools i will have to scroll to see all
-        // options so fix that"*, and their answer for how: **"two row"**. Every
-        // option was in ONE row that scrolled sideways, so the last of them — cut,
-        // copy, paste, undo, the cross — were off-screen on a phone and reachable
-        // only by a horizontal swipe inside a box that is itself only 46dp tall.
+        // v437's own fix for *"for the copy tools i will have to scroll to see all
+        // options so fix that"* was TWO STACKED ROWS, which answered the scrolling
+        // and created a worse problem: a box holding two toolbars read as a second
+        // toolbar rather than as this journal's dock (member: *"the copy paste tool
+        // bar two row ui is bad and not like that dock ui"*).
         //
-        // The split follows what the two halves of the box ARE: HOW MUCH of the
-        // page is in hand (the four reach arrows, Select all, Line) reads along
-        // the top, and WHAT TO DO with it (cut, copy, paste, undo, close) along
-        // the bottom. Nothing scrolls, so nothing can be off-screen, and the box
-        // grows DOWN into the air it already floated in rather than sideways past
-        // the page's own edge.
+        // v439 puts it in the dock's language instead — ONE row of controls with
+        // the reach's options growing INSIDE the pill behind their own door (see
+        // [PersonalDockGroup], the `animateContentSize` on the Column below, and
+        // the panel under the row). Nothing scrolls, so nothing can be off-screen
+        // (the original complaint), and nothing is stacked, so the box is one
+        // toolbar — the shape every other tool surface in this journal already has.
         Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
+            // v439 — `animateContentSize` is what lets the pill GROW for the
+            // reach's panel rather than jump to a new height (see
+            // [PersonalDockGroup]): without it the box would snap and the page
+            // above it would twitch.
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 7.dp)
+                .animateContentSize(),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // ── THE REACH: FOUR ARROWS, AS PILLS ───────────────────────────
+            // ── v439 — THE ONE ROW: THE REACH'S DOOR, THEN THE ACTIONS ────
             //
-            // ↑ ↓ are the rows and ← → the letters, in that order, and each is
-            // a pill of the box's own ink rather than a bare glyph: a control
-            // the thumb presses again and again has to LOOK like something to
-            // press (the member: "make the arrow proper pills in the corner").
-            // A dead one dims to a hairline of itself, which is the whole of
-            // what tells a member it has nowhere left to go.
+            // The member: *"the copy paste tool bar two row ui is bad and not
+            // like that dock ui"*. This is the dock's own shape: one row of
+            // controls, and the options of the door at its left open INSIDE the
+            // same pill (see the panel below and `animateContentSize` on the
+            // Column). The actions stay OUT here because they are what the box is
+            // FOR — a member who has to open a door to reach Cut has been given an
+            // extra tap for the commonest thing they came to do.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(3.dp)
             ) {
-            ReachPill(
-                icon = CurioIcons.ArrowUpward,
-                label = "More rows up",
-                accent = accent,
-                ink = ink,
-                enabled = state.canNudgePageRows(up = true)
-            ) { state.nudgePageRows(up = true) }
-            ReachPill(
-                icon = CurioIcons.ArrowDownward,
-                label = "More rows down",
-                accent = accent,
-                ink = ink,
-                enabled = state.canNudgePageRows(up = false)
-            ) { state.nudgePageRows(up = false) }
-            ReachPill(
-                icon = CurioIcons.ArrowBack,
-                label = "Fewer letters",
-                accent = accent,
-                ink = ink,
-                enabled = state.canNudgePageLetters(more = false)
-            ) { state.nudgePageLetters(more = false) }
-            ReachPill(
-                icon = CurioIcons.ArrowForward,
-                label = "One more letter",
-                accent = accent,
-                ink = ink,
-                enabled = state.canNudgePageLetters(more = true)
-            ) { state.nudgePageLetters(more = true) }
+            // THE DOOR, AND WHAT IT SAYS. A WORD rather than a glyph on purpose:
+            // the bundled Material Symbols subset has no `select_all` (measured —
+            // see [safeGlyphName]), and the reach is a QUANTITY — the one thing a
+            // member needs told before they cut, and the one thing no single icon
+            // of this set can say. Lit while there is something in hand, in the
+            // chips' own manner (see [CopyChip]).
+            CopyChip(
+                label = reachLabel,
+                accent = if (hasReach) accent else ink,
+                enabled = true
+            ) { reachOpen = !reachOpen }
             Box(
                 modifier = Modifier
                     .padding(horizontal = 3.dp)
@@ -5756,29 +5771,12 @@ internal fun PersonalPageEditBar(
                     .height(22.dp)
                     .background(ink.copy(alpha = 0.12f))
             )
-            // Select all is a WORD on purpose: the bundled Material Symbols
-            // subset has no `select_all` (measured — see [safeGlyphName]), and
-            // a word the member already knows beats a glyph standing in for it
-            // (member's own two options: "use text select all or just the icon
-            // of select all"). Line takes the words of the row the reach begins
-            // at, which is the reach's own unit when the member wants the line
-            // rather than a clause out of it.
-            CopyChip("Select all", accent = ink) { state.selectWholePage() }
-            CopyChip("Line", enabled = lineHere, accent = ink) {
-                state.selectPageLineLetters()
-            }
-            }
             // ── AND THE ACTIONS, AS ICONS ────────────────────────────────
             //
             // The member: "instead of cut copy paste use its icon, and for undo
             // the undo icon". Cut and Copy keep the reach's manner: with nothing
             // picked they OFFER the page first, so the second tap is the one
             // that acts.
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
             ActionPill(
                 label = "Cut",
                 accent = accent,
@@ -5844,6 +5842,76 @@ internal fun PersonalPageEditBar(
                 onClick = { state.closePageEditBar() }
             ) {
                 CurioIcon(CurioIcons.Close, null, size = 18.dp)
+            }
+            }
+
+            // ── AND THE REACH'S OWN PANEL, INSIDE THE SAME PILL ────────────
+            //
+            // The four arrows, Select all and Line — the whole of v437's first
+            // row, moved here behind the door. ↑ ↓ are the rows and ← → the
+            // letters, and each is a pill of the box's own ink rather than a bare
+            // glyph: a control the thumb presses again and again has to LOOK like
+            // something to press (the member: "make the arrow proper pills in the
+            // corner"). A dead one dims to a hairline of itself, which is the
+            // whole of what tells a member it has nowhere left to go.
+            //
+            // "Select all" and "Line" are WORDS for the same reason the door's
+            // label is: no `select_all` glyph exists in this subset. Line takes
+            // the words of the row the reach begins at, which is the reach's own
+            // unit when the member wants the line rather than a clause out of it.
+            //
+            // `pillArrive`/`pillLeave` and the Column's `animateContentSize` are
+            // what make the pill GROW to hold the panel instead of jumping —
+            // exactly how the dock's own groups open (see [PersonalDockGroup]).
+            AnimatedVisibility(
+                visible = reachOpen,
+                enter = CurioMotion.pillArrive(),
+                exit = CurioMotion.pillLeave()
+            ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+            ReachPill(
+                icon = CurioIcons.ArrowUpward,
+                label = "More rows up",
+                accent = accent,
+                ink = ink,
+                enabled = state.canNudgePageRows(up = true)
+            ) { state.nudgePageRows(up = true) }
+            ReachPill(
+                icon = CurioIcons.ArrowDownward,
+                label = "More rows down",
+                accent = accent,
+                ink = ink,
+                enabled = state.canNudgePageRows(up = false)
+            ) { state.nudgePageRows(up = false) }
+            ReachPill(
+                icon = CurioIcons.ArrowBack,
+                label = "Fewer letters",
+                accent = accent,
+                ink = ink,
+                enabled = state.canNudgePageLetters(more = false)
+            ) { state.nudgePageLetters(more = false) }
+            ReachPill(
+                icon = CurioIcons.ArrowForward,
+                label = "One more letter",
+                accent = accent,
+                ink = ink,
+                enabled = state.canNudgePageLetters(more = true)
+            ) { state.nudgePageLetters(more = true) }
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 3.dp)
+                    .width(1.dp)
+                    .height(22.dp)
+                    .background(ink.copy(alpha = 0.12f))
+            )
+            CopyChip("Select all", accent = ink) { state.selectWholePage() }
+            CopyChip("Line", enabled = lineHere, accent = ink) {
+                state.selectPageLineLetters()
+            }
             }
             }
         }

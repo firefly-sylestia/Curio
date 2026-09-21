@@ -66,6 +66,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioEmptyLine
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.ShareCardAspect
@@ -634,11 +635,9 @@ private fun CommunityInlineReplies(
             }
 
             if (replies.isEmpty() && !loading && error == null) {
-                Text(
-                    text = "No replies yet. Say something.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                // v439 — a bare list under a surface that has already named itself
+                // says nothing but a dash (see [CurioEmptyLine]).
+                CurioEmptyLine()
             }
             // ONE ordered pass over the render list (see [branchRenderList]):
             // a reply and the door that unfolds its OWN answers stay together,

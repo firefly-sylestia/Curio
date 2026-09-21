@@ -232,6 +232,23 @@ A small press-squish on the controls that have none: the reader's chrome buttons
 journal dock's tools already have it (`expressiveCardPress`-style) — find the one
 helper the journal uses and reuse it rather than writing a second.
 
+**STATUS (v439 final): 7.4 DONE (the copy box), 7.5 DONE (bounded, see below), and the
+two zoomed-gesture bugs from §7.7 FIXED.**
+
+- **7.4** — the copy box is one row with the reach behind a labelled door that grows
+  inside the same pill (the dock's own pattern). See the v439 section in
+  `app/AGENTS.md`.
+- **7.5** — `CurioEmptyLine` (an em dash) is the one bare-list empty state. **Bounded
+  on purpose:** an empty SCREEN keeps its headline/subtext/door and a message that
+  tells the member how to fix the emptiness stays, because both are content rather
+  than a state. Converted: the comments sheet, the card screen's replies, the text
+  history panel.
+- **§7.7's two gesture bugs** — root cause found by inspection, NOT another flag: the
+  page consumed a tap's own wobble as a pan, which cancels `detectTapGestures` (both
+  the tap and a pending long press). `pinchToZoom` now wears in at the touch slop.
+  **Note the drift this exposed:** `readerZoomThisPage`'s doc already promised the slop
+  rule and nothing implemented it.
+
 ### 7.4 One pill/dock language
 
 One capsule spec shared by the journal's dock, the copy box, the reader's foot pill

@@ -59,6 +59,7 @@ import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.CommunityReportReasons
 import com.curio.app.data.supabase.ModerationReasons
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.ui.components.CurioEmptyLine
 import com.curio.app.data.supabase.RealtimeWatch
 import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.ui.theme.CurioIcon
@@ -280,11 +281,9 @@ internal fun CommunityCommentsSheet(
             ) {
                 if (replies.isEmpty() && !loading && error == null) {
                     item(key = "empty") {
-                        Text(
-                            text = "No replies yet.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        // v439 — a bare list under a surface that has already named
+                        // itself says nothing but a dash (see [CurioEmptyLine]).
+                        CurioEmptyLine()
                     }
                 }
                 // ONE pass over the whole render list, in render order. A

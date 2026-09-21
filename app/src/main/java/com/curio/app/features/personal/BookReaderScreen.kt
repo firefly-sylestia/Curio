@@ -8413,6 +8413,10 @@ private fun Modifier.pinchToZoom(
         // the drag down at its edge. Both are per-gesture on purpose (v406).
         var ownsTheDrag = false
         var declined = false
+        // ── v439 — HOW FAR THIS GESTURE HAS TRAVELLED, AND WHETHER THE PAGE
+        // HAS CLAIMED IT YET (see the wear-in below). Both per-gesture.
+        var travelled = 0f
+        var claimedPan = false
         do {
             val event = awaitPointerEvent()
             val pressed = event.changes.filter { it.pressed }
@@ -8444,6 +8448,10 @@ private fun Modifier.pinchToZoom(
                 ReaderTouch.multi = true
                 ownsTheDrag = true
                 declined = false
+                // v439 — two fingers are already a claim: there is no tap to
+                // protect from a second finger (see the wear-in below).
+                claimedPan = true
+                travelled = 0f
                 val zoom = event.calculateZoom()
                 val pan = event.calculatePan()
                 // The centroid the fingers HELD during this delta (not where
@@ -8488,7 +8496,35 @@ private fun Modifier.pinchToZoom(
                 // ("it should page change only when it reaches the page end and
                 // then on another swipe it does").
                 val delta = if (previous != null) position - previous else Offset.Zero
-                if (!declined) {
+                // ── v439 — AND A TAP'S OWN WOBBLE IS NOT A DRAG ──────────────
+                //
+                // The member, twice: *"when im zoomed in and i try to tap and
+                // hold to select it doesnt work"* and *"when zoomed in the tools
+                // doesnt appear when i tap once"*. Both were THIS line's fault,
+                // and neither was a broken detector: a finger that taps or holds
+                // still is not perfectly still, and the page panned (and
+                // CONSUMED) those few pixels from its first event. Consuming a
+                // single move is enough to cancel `detectTapGestures` — it drops a
+                // tap the moment a change it is tracking is consumed, and it does
+                // the same to a pending long press — so on a magnified page a tap
+                // could not bring the tools back and a hold could never reach the
+                // sweep. Worse, the sweep's own flag (v434's `ReaderTouch.selecting`,
+                // which makes the pan stand down) is only set ONCE THE LONG PRESS
+                // FIRES — and it never fired.
+                //
+                // So the page now WEARS IN like every other scrollable surface:
+                // it takes nothing until the finger has actually travelled the
+                // touch slop. A tap and a hold are left alone (their wobble is
+                // under the slop), and a real drag crosses the slop on the same
+                // event the pager's own slop wait would have used — where the
+                // child wins, because a descendant's handler sees the event first
+                // and its consumption is what cancels the parent's wait. That is
+                // v403's guarantee (the page keeps the drag rather than handing it
+                // to the pager mid-slide) with the tap left intact, and it is the
+                // threshold AppKit and Android both use for the same reason.
+                travelled += delta.getDistance()
+                if (travelled >= viewConfiguration.touchSlop) claimedPan = true
+                if (!declined && claimedPan) {
                     val taken = if (delta == Offset.Zero) Offset.Zero
                     else onZoom(1f, delta, position)
                     if (taken != Offset.Zero) {
@@ -8497,10 +8533,12 @@ private fun Modifier.pinchToZoom(
                         declined = true
                     }
                 }
-                if (ownsTheDrag) pressed.forEach { it.consume() }
+                if (ownsTheDrag && claimedPan) pressed.forEach { it.consume() }
             } else {
                 ownsTheDrag = false
                 declined = false
+                travelled = 0f
+                claimedPan = false
                 last = null
             }
         } while (event.changes.any { it.pressed })
