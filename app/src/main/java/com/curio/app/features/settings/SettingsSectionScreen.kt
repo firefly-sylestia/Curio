@@ -871,6 +871,13 @@ private fun PreferencesSection(highlightKey: String? = null) {
     var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
     var reminderMinute by remember { mutableStateOf(AppPreferences.getReminderMinute(context)) }
     var showReminderTimePicker by remember { mutableStateOf(false) }
+    // v440 — the journal's own daily goal, and its own nudge beside it.
+    var journalGoal by remember { mutableStateOf(AppPreferences.getJournalGoal(context)) }
+    var journalGoalReminder by remember {
+        mutableStateOf(AppPreferences.isJournalGoalReminderEnabled(context))
+    }
+    // v440 — where the journal's own door lands (see `isJournalOpenToday`).
+    var journalOpenToday by remember { mutableStateOf(AppPreferences.isJournalOpenToday(context)) }
     var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
     // v3xx54 — messages + community notifications (default ON).
     var socialNotificationsEnabled by remember {
@@ -1030,6 +1037,112 @@ private fun PreferencesSection(highlightKey: String? = null) {
         SettingsRowPulse(highlightKey == "pref-reminder") {
             CompactSwitchRow(CurioIcons.Notifications, "Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatReminderTime(AppPreferences.getReminderHour(context), AppPreferences.getReminderMinute(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
                 if (enabled) enableNotifications { AppPreferences.setReminderEnabled(context, true) } else AppPreferences.setReminderEnabled(context, false)
+            }
+        }
+
+        // ── v440 — WHERE THE JOURNAL'S OWN DOOR LANDS ───────────────
+        //
+        // The member's own pick from the settings list: *"'First page of the day'
+        // preference (today's page vs the last one you opened)"*. One switch rather
+        // than a two-option row because there are exactly two answers and one of
+        // them is the default the app has always had — and the subtitle names BOTH
+        // states, so the row says where the door goes whichever way it is set.
+        SettingsOptionDivider()
+        SettingsRowPulse(highlightKey == "pref-journal-open") {
+            CompactSwitchRow(
+                CurioIcons.CalendarToday,
+                "Open today's page",
+                if (journalOpenToday) "Today, or a new page if the day is blank"
+                else "The last page you were writing",
+                journalOpenToday
+            ) { enabled ->
+                journalOpenToday = enabled
+                AppPreferences.setJournalOpenToday(context, enabled)
+            }
+        }
+
+        // ── v440 — THE JOURNAL'S OWN TWO: A GOAL, AND A NUDGE ────────
+        //
+        // The member's own pick from the settings list: *"Word count goal with a
+        // daily reminder"*. They sit with the shuffle reminder because they are the
+        // same KIND of setting (a number, and a time to be reminded of it) — and
+        // the goal leads, because the nudge is meaningless without one: switching
+        // the goal off disarms the nudge with it, and the switch's own subtitle
+        // says so rather than leaving a toggle that appears to work.
+        SettingsOptionDivider()
+        SettingsRowPulse(highlightKey == "pref-journal-goal") {
+            CompactSwitchRow(
+                CurioIcons.Note,
+                "Writing goal",
+                if (journalGoal > 0) "$journalGoal words a day" else "Off",
+                journalGoal > 0
+            ) { enabled ->
+                // Turning it on has to choose a number: 300 is a page of writing
+                // on a phone, which is the unit the member already thinks in (see
+                // the length filters in the journals list).
+                val next = if (enabled) DEFAULT_JOURNAL_GOAL else 0
+                journalGoal = next
+                AppPreferences.setJournalGoal(context, next)
+                if (next == 0 && journalGoalReminder) {
+                    journalGoalReminder = false
+                    AppPreferences.setJournalGoalReminderEnabled(context, false)
+                }
+            }
+        }
+        if (journalGoal > 0) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 6.dp)
+            ) {
+                JOURNAL_GOAL_CHOICES.forEach { words ->
+                    val live = journalGoal == words
+                    Surface(
+                        onClick = {
+                            journalGoal = words
+                            AppPreferences.setJournalGoal(context, words)
+                            if (journalGoalReminder) {
+                                val (hour, minute) = AppPreferences.getJournalGoalTime()
+                                com.curio.app.data.JournalGoalReminderScheduler
+                                    .schedule(context, hour, minute)
+                            }
+                        },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                        color = if (live) settingsRoseAccent()
+                        else MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = if (live) Color.White else settingsRoseAccent()
+                    ) {
+                        Text(
+                            "$words",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                }
+            }
+            SettingsRowPulse(highlightKey == "pref-journal-goal-nudge") {
+                CompactSwitchRow(
+                    CurioIcons.Schedule,
+                    "Writing goal reminder",
+                    if (journalGoalReminder) {
+                        val (hour, minute) = AppPreferences.getJournalGoalTime()
+                        "Every day at ${formatReminderTime(hour, minute)}"
+                    } else "Off",
+                    journalGoalReminder
+                ) { enabled ->
+                    // The preference is written WITH the permission, never before
+                    // it: a nudge whose alarm was armed by a member who then
+                    // declined notifications would be a setting that cannot work
+                    // (the same rule the shuffle reminder follows).
+                    if (enabled) {
+                        enableNotifications {
+                            journalGoalReminder = true
+                            AppPreferences.setJournalGoalReminderEnabled(context, true)
+                        }
+                    } else {
+                        journalGoalReminder = false
+                        AppPreferences.setJournalGoalReminderEnabled(context, false)
+                    }
+                }
             }
         }
         if (AppPreferences.reminderEnabledState) {
@@ -1242,6 +1355,20 @@ private fun ReminderTimeSheet(
 
 /** "6:30 PM" — the reminder's exact time (the bare-hour formatter for the
  *  preset chips stays [formatHour]). */
+/**
+ * v440 — WHAT A WRITING GOAL CAN BE.
+ *
+ * Four numbers rather than a free field: a daily writing goal is a habit, and a
+ * habit is picked in the same spirit as the shuffle reminder's hour presets — one
+ * tap, no keyboard, and a set that spans "a paragraph" to "a proper session"
+ * (see the length filters in the journals list, which use the same three
+ * hundred-word page as their unit).
+ */
+private val JOURNAL_GOAL_CHOICES = listOf(100, 300, 500, 1000)
+
+/** The goal a member gets when they first switch the row on — a page of writing. */
+private const val DEFAULT_JOURNAL_GOAL = 300
+
 private fun formatReminderTime(hour: Int, minute: Int): String {
     if (minute <= 0) return formatHour(hour)
     val h = hour.coerceIn(0, 23)

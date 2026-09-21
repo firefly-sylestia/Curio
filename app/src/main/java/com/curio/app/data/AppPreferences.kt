@@ -175,6 +175,13 @@ object AppPreferences {
     private const val KEY_HERO_BLEND_GRADIENT = "hero_blend_gradient"
     private const val KEY_3D_BUTTON_GRADIENT = "3d_button_gradient"
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"
+    // ── v440 — THE JOURNAL'S OWN DAILY GOAL AND NUDGE ───────────────
+    private const val KEY_JOURNAL_GOAL = "journal_goal_words"
+    private const val KEY_JOURNAL_GOAL_REMINDER = "journal_goal_reminder"
+    private const val KEY_JOURNAL_OPEN_TODAY = "journal_open_today"
+    private const val KEY_LAST_JOURNAL_ID = "journal_last_id"
+    private const val JOURNAL_GOAL_HOUR = 20
+    private const val JOURNAL_GOAL_MINUTE = 30
     private const val KEY_REMINDER_HOUR = "reminder_hour"
     // v3xx51 — the reminder's MINUTE (the clock picker can set any time, not
     // just the preset hours). Defaults to 0 = on the hour.
@@ -3321,6 +3328,86 @@ object AppPreferences {
     fun setCustomReactionLinesEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_CUSTOM_REACTION_LINES, enabled).apply()
         customReactionLinesState = enabled
+    }
+
+    // ── v440 — THE JOURNAL'S DAILY GOAL ────────────────────────────
+    //
+    // The member's own pick from the settings list (*"Word count goal with a
+    // daily reminder"*). The goal is a number of WORDS FOR A DAY, and **0 means
+    // no goal** — the honest default for a journal nobody has asked anything of,
+    // exactly as a page's colour defaults to the theme (see `accentArgb`).
+    //
+    // It is a preference rather than a column on a page because it is a fact
+    // about the WRITER, not about one day: the pages it judges are stored exactly
+    // as they always were, and "N of your M words today" is computed when a
+    // surface asks (see the journals list). Nothing here is a migration.
+    fun getJournalGoal(context: Context): Int =
+        prefs(context).getInt(KEY_JOURNAL_GOAL, 0).coerceIn(0, 10_000)
+
+    fun setJournalGoal(context: Context, words: Int) {
+        prefs(context).edit().putInt(KEY_JOURNAL_GOAL, words.coerceIn(0, 10_000)).apply()
+    }
+
+    /**
+     * Whether the goal gets its own daily nudge.
+     *
+     * Arm the alarm WITH the preference, never one without the other: an enabled
+     * nudge with no alarm behind it is a setting that silently does nothing (the
+     * same rule the shuffle reminder follows), and a disarmed nudge leaves the
+     * goal in the app where it belongs.
+     */
+    fun isJournalGoalReminderEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_JOURNAL_GOAL_REMINDER, false) &&
+            getJournalGoal(context) > 0
+
+    fun setJournalGoalReminderEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_JOURNAL_GOAL_REMINDER, enabled).apply()
+        if (enabled && getJournalGoal(context) > 0) {
+            JournalGoalReminderScheduler.schedule(context, JOURNAL_GOAL_HOUR, JOURNAL_GOAL_MINUTE)
+        } else {
+            JournalGoalReminderScheduler.cancel(context)
+        }
+    }
+
+    /**
+     * When the goal's nudge arrives.
+     *
+     * An evening hour, because a writing goal is judged at the end of a day: the
+     * nudge is for the member who has not written yet, and one that arrives at
+     * nine in the morning is for a member who has all day to ignore it.
+     */
+    fun getJournalGoalTime(): Pair<Int, Int> = JOURNAL_GOAL_HOUR to JOURNAL_GOAL_MINUTE
+
+    // ── v440 — WHERE A JOURNAL DOOR LANDS ───────────────────────────
+    //
+    // The member's own pick (*"'First page of the day' preference (today's page vs
+    // the last one you opened)"*). A journal is a habit with two honest reading
+    // positions — the day in hand, or the page you left half-written — and which
+    // one a member wants depends on whether they write every day or return to the
+    // same piece. **The default is TODAY**: that is what the door has always done
+    // (a fresh page dated today), so nobody's habit changes under them.
+    fun isJournalOpenToday(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_JOURNAL_OPEN_TODAY, true)
+
+    fun setJournalOpenToday(context: Context, today: Boolean) {
+        prefs(context).edit().putBoolean(KEY_JOURNAL_OPEN_TODAY, today).apply()
+    }
+
+    /**
+     * The last journal page opened, for the other half of the choice above.
+     *
+     * Written by the editor as a page loads — never by a page being CREATED, which
+     * has no id until it is saved and would leave the door pointing at a page that
+     * was never written. An id that no longer exists (the page was binned) is the
+     * door's problem, not this store's: it falls back to today's page.
+     */
+    fun getLastJournalId(context: Context): String =
+        prefs(context).getString(KEY_LAST_JOURNAL_ID, "").orEmpty()
+
+    fun setLastJournalId(context: Context, id: String) {
+        if (id.isNotBlank()) {
+            prefs(context).edit().putString(KEY_LAST_JOURNAL_ID, id).apply()
+        }
     }
 
     // ── Daily reminder ───────────────────────────────────────────────

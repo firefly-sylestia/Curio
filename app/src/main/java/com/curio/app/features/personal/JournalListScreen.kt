@@ -50,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -58,12 +59,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalMood
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
@@ -76,6 +79,7 @@ import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -132,6 +136,34 @@ fun JournalListScreen(navController: NavController) {
     // is counted ONCE, off the main thread, and only while a length is actually
     // being filtered for (`lengths` below). Counting every page on every keystroke
     // is exactly the kind of thing that makes a long list stutter (see [answers]).
+    //
+    // ── v440 — AND TODAY'S OWN COUNT, WHEN A GOAL EXISTS ─────────────
+    //
+    // The other half of the member's *"Word count goal with a daily reminder"*: a
+    // goal the member can only see in Settings is a goal they have to remember to
+    // go and check, so the collection shows today's progress where the day's pages
+    // are. **Only the day's own pages are counted** (usually one), and only while a
+    // goal is set — a word count means decoding a document, so counting the whole
+    // collection the way the length filter does would be paying for an answer to a
+    // question nobody asked.
+    val context = LocalContext.current
+    val journalGoal = remember { AppPreferences.getJournalGoal(context) }
+    val todayWords by produceState(0, journals, journalGoal) {
+        value = if (journalGoal <= 0) 0
+        else {
+            val today = startOfToday()
+            withContext(Dispatchers.Default) {
+                journals.filter { it.dateMillis == today }
+                    .sumOf { page -> page.doc.wordCount() }
+            }
+        }
+    }
+    // ── v440 — WHERE THIS LIST'S OWN DOOR LANDS ─────────────────────
+    //
+    // The member's own pick (*"'First page of the day' preference (today's page vs
+    // the last one you opened)"*), resolved in one place so the floating "+" and
+    // the empty state's own action can never disagree about it.
+    val journalDoor = rememberJournalDoor(navController)
     var moodFilter by remember { mutableStateOf<PersonalMood?>(null) }
     var colourFilter by remember { mutableIntStateOf(JOURNAL_ANY_COLOUR) }
     var lengthFilter by remember { mutableStateOf(JournalLength.ANY) }
@@ -228,6 +260,48 @@ fun JournalListScreen(navController: NavController) {
             filtersActive = filtersOn
         )
 
+        // ── v440 — TODAY, AGAINST THE GOAL ──────────────────────────────
+        //
+        // One line, under the find row, and only when a goal is set: the count,
+        // the goal, and a rail that fills — the same rail the reader's progress
+        // card uses, so "how much of this have I done" reads the same way in both
+        // halves of the app. It turns the accent the moment the goal is met, which
+        // is the whole reward a writing goal gives.
+        if (journalGoal > 0) {
+            val met = todayWords >= journalGoal
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    if (met) "Today: $todayWords words \u00b7 goal met"
+                    else "Today: $todayWords of $journalGoal words",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = if (met) personalAccentInk()
+                    else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.10f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(
+                                (todayWords.toFloat() / journalGoal.toFloat()).coerceIn(0f, 1f)
+                            )
+                            .height(5.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(personalAccent())
+                    )
+                }
+            }
+        }
+
         // ── v440 — THE FILTER PANEL ─────────────────────────────────────
         //
         // Three rows of capsules, one question each: how it felt, what colour the
@@ -308,12 +382,7 @@ fun JournalListScreen(navController: NavController) {
                 title = "Nothing written yet",
                 body = "A journal page is a day you decided to keep: how it felt, " +
                     "what happened, what you want to remember.",
-                actionLabel = "Write today's page",
-                onAction = {
-                    navController.navigate(
-                        CurioRoutes.journalEditor(CurioRoutes.PERSONAL_NEW)
-                    ) { launchSingleTop = true }
-                }
+                actionLabel = "Write today's page",                        onAction = journalDoor
             )
         } else if (ordered.isEmpty()) {
             // ── v440 — A SEARCH THAT FOUND NOTHING ──────────────────────
@@ -380,11 +449,7 @@ fun JournalListScreen(navController: NavController) {
         }
         PersonalCreateLauncher(
             visible = true,
-            onClick = {
-                navController.navigate(CurioRoutes.journalEditor(CurioRoutes.PERSONAL_NEW)) {
-                    launchSingleTop = true
-                }
-            },
+            onClick = journalDoor,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .navigationBarsPadding()
@@ -759,6 +824,54 @@ private fun JournalSearchPill(
             }
         }
     }
+}
+
+/**
+ * v440 — WHERE A JOURNAL DOOR LANDS (see `AppPreferences.isJournalOpenToday`).
+ *
+ * Two honest positions for the same door. **Today's page** (the default, and what
+ * the door has always done) opens the day already written if there is one — so a
+ * member who taps "+" to add a line to this morning's page gets THIS MORNING'S
+ * PAGE rather than a second page for the same day — and writes a new one when the
+ * day is still blank. **The last page you opened** returns to the piece you left
+ * half-written.
+ *
+ * The lookup is the query the list itself already collects (`observeJournals`), so
+ * nothing new reads the database and no column was added. It runs in the door's
+ * own coroutine — the door is an onClick, which is NOT a composable scope, so the
+ * context is hoisted above it (the v439 rule) and the work is dispatched off the
+ * main thread.
+ */
+@Composable
+internal fun rememberJournalDoor(navController: NavController): () -> Unit {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    return remember(navController) {
+        {
+            if (AppPreferences.isJournalOpenToday(context)) {
+                scope.launch {
+                    val today = startOfToday()
+                    val page = runCatching {
+                        PersonalRepositoryHolder.repo.observeJournals().first()
+                            .firstOrNull { entry ->
+                                entry.dateMillis == today && !entry.isTodo && !entry.hasTopic
+                            }
+                    }.getOrNull()
+                    openJournal(navController, page?.id ?: CurioRoutes.PERSONAL_NEW)
+                }
+            } else {
+                openJournal(
+                    navController,
+                    AppPreferences.getLastJournalId(context).ifBlank { CurioRoutes.PERSONAL_NEW }
+                )
+            }
+        }
+    }
+}
+
+/** One way in, so both halves of the door push the same route. */
+private fun openJournal(navController: NavController, entryId: String) {
+    navController.navigate(CurioRoutes.journalEditor(entryId)) { launchSingleTop = true }
 }
 
 /**

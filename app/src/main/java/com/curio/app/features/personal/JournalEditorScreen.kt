@@ -32,6 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerDefaults
@@ -67,6 +68,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PAGE_KIND_JOURNAL
 import com.curio.app.data.PersonalDoc
 import com.curio.app.data.PersonalMood
@@ -147,6 +149,11 @@ fun JournalEditorScreen(
      * the greeting happens once and never again on the flips that follow.
      */
     val isNewPage = entryIdArg == CurioRoutes.PERSONAL_NEW
+    // v440 — the last page the member OPENED, remembered for the journal's other
+    // door position (see `AppPreferences.isJournalOpenToday`). Hoisted HERE rather
+    // than read inside `onLoaded`: a lambda is not a composable scope and
+    // `LocalContext.current` cannot be called from one (the v439 rule).
+    val context = LocalContext.current
     /** Whether this page has already been introduced (see `aboveCanvas`). */
     var greetedNewPage by remember { mutableStateOf(false) }
 
@@ -188,6 +195,11 @@ fun JournalEditorScreen(
             mood = existing.moodEnum
             accentArgb = existing.accentArgb
             if (existing.dateMillis > 0L) dateMillis = existing.dateMillis
+            // v440 — AND THIS IS NOW THE PAGE THE JOURNAL'S DOOR RETURNS TO, when
+            // the member asked for "the last one you opened". Written only for a
+            // page that EXISTS: a page being made has no id until it is saved, and
+            // a door pointing at an id nobody has written would open nothing.
+            AppPreferences.setLastJournalId(context, existing.id)
         },
         header = { editing, saving, onEditing, _ ->
             // A journal day's bar has no back button of its own (the date pill

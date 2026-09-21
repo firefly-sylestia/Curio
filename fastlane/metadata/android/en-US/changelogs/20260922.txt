@@ -744,3 +744,7 @@ ADD:
 - Writing: a journal row says the time it was written beside its word count, and that time is the moment the page was made — editing it later never moves it.
 - Writing: tap the date in the journals head to read the collection from its other end, newest or oldest, with the arrow in the pill saying which one it is.
 - Reading: the gestures box can get out of the way — it steps off the page while you are placing an edge, and a small door puts it away entirely and leaves a "Gestures" pill in the corner to bring it back.
+- Writing: filter the journals — by how the day felt, by the colour you gave the page, and by how much you wrote, with the count of what answered.
+- Writing: a daily writing goal and its own evening nudge — pick a word goal in Settings and the journals head shows today's count against it; switching the goal off disarms the nudge with it.
+- Writing: the journal's door can open today's page (or the last page you were writing) — one switch in Settings, beside the goal.
+- Reading: the progress card says how many pages are left in the chapter, and the night dim can come on at sunset (with your phone's own dark theme) instead of all day.

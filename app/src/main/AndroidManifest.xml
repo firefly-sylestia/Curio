@@ -69,6 +69,12 @@
             android:name=".infrastructure.DailyReminderReceiver"
             android:exported="false" />
 
+        <!-- v440 — the writing goal's own evening nudge, on its own alarm and
+             its own channel (see [JournalGoalReminderReceiver]). -->
+        <receiver
+            android:name=".infrastructure.JournalGoalReminderReceiver"
+            android:exported="false" />
+
         <receiver
             android:name=".infrastructure.DailyReminderBootReceiver"
             android:exported="false">
