@@ -580,6 +580,44 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
      */
     var sectionPagesLeft by remember(bookId, document) { mutableStateOf<Int?>(null) }
 
+    // ── v441 — THE STEP THAT IS ALREADY ON ITS WAY ────────────────────
+    //
+    // Every arrow and zone used to work its target out from a place that is only
+    // true once the turn has FINISHED — `pagerState.currentPage`, `shownPage`,
+    // `listState.firstVisibleItemIndex`, `textPager.currentPage`. Rapid taps
+    // therefore all computed the SAME next page, each asked for the turn the one
+    // before it had already started, and the slider answered one page for four
+    // taps and then went dead while it settled (the member: "next and previous
+    // button doesnt work on rapid click only goes 1 and stops working").
+    //
+    // So the ask is remembered for as long as it is still an ask. [stepLedger]
+    // holds the settled place the last step was taken FROM and the place it was
+    // sent TO; the next tap steps from the destination whenever the reader is
+    // still standing on either end of that hop — settled (the turn finished) or
+    // not (the turn is in flight). The moment the reader is anywhere else — a
+    // scrub, a chapter, a mark, their own scroll — neither end matches and the
+    // ledger is ignored, so a stale hop can never send the arrows somewhere the
+    // member is not. A plain IntArray: nothing in composition reads it, so it
+    // must not invalidate anything.
+    //
+    // It is declared HERE, above both readers of it ([stepPage] below and the
+    // page slider's own arrows much further down), because a local function in
+    // Kotlin cannot reach a local declared later in the same body.
+    val stepLedger = remember(bookId, document) { intArrayOf(-1, -1) }
+
+    fun stepFrom(from: Int, step: Int, last: Int): Int {
+        val asked = stepLedger[1]
+        val base = if (asked in 0..last && (from == stepLedger[0] || from == asked)) {
+            asked
+        } else {
+            from
+        }
+        val target = (base + step).coerceIn(0, last)
+        stepLedger[0] = from
+        stepLedger[1] = target
+        return target
+    }
+
     // ── v422 — ONE STEP, FOR A TAP (see [ReaderLook.tapZones]) ────────
     //
     // A tap inside a zone asks for the next thing rather than for the chrome: a
@@ -591,19 +629,18 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         when (val loaded = content) {
             is ReaderContent.Pages -> if (ReaderLook.pageFlow == ReaderFlow.PAGED) {
                 val last = (loaded.pageCount - 1).coerceAtLeast(0)
-                scope.launch {
-                    pagerState.animateScrollToPage((pagerState.currentPage + step).coerceIn(0, last))
-                }
+                val from = pagerState.currentPage.coerceIn(0, last)
+                scope.launch { pagerState.animateScrollToPage(stepFrom(from, step, last)) }
             } else {
                 val last = (loaded.pageCount - 1).coerceAtLeast(0)
-                turnPageFromBar((shownPage + step).coerceIn(0, last))
+                val from = shownPage.coerceIn(0, last)
+                turnPageFromBar(stepFrom(from, step, last))
             }
 
             is ReaderContent.Text -> if (ReaderLook.textFlow == ReaderFlow.PAGED) {
                 val last = (textPageCount - 1).coerceAtLeast(0)
-                scope.launch {
-                    textPager.animateScrollToPage((textPager.currentPage + step).coerceIn(0, last))
-                }
+                val from = textPager.currentPage.coerceIn(0, last)
+                scope.launch { textPager.animateScrollToPage(stepFrom(from, step, last)) }
             } else {
                 // A SCREENFUL, measured on the list itself and a little short of
                 // one, so the line the member was reading is still above the new
@@ -803,12 +840,18 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 total = loaded.pageCount,
                 onPrev = {
                     askedByReader = true
-                    scope.launch { pagerState.animateScrollToPage((at - 1).coerceAtLeast(0)) }
+                    scope.launch {
+                        pagerState.animateScrollToPage(
+                            stepFrom(at, -1, loaded.pageCount - 1)
+                        )
+                    }
                 },
                 onNext = {
                     askedByReader = true
                     scope.launch {
-                        pagerState.animateScrollToPage((at + 1).coerceAtMost(loaded.pageCount - 1))
+                        pagerState.animateScrollToPage(
+                            stepFrom(at, 1, loaded.pageCount - 1)
+                        )
                     }
                 },
                 onScrub = { page ->
@@ -824,8 +867,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 label = "Page ${at + 1} of ${loaded.pageCount}",
                 at = at + 1,
                 total = loaded.pageCount,
-                onPrev = { turnPageFromBar((at - 1).coerceAtLeast(0)) },
-                onNext = { turnPageFromBar((at + 1).coerceAtMost(loaded.pageCount - 1)) },
+                onPrev = { turnPageFromBar(stepFrom(at, -1, loaded.pageCount - 1)) },
+                onNext = { turnPageFromBar(stepFrom(at, 1, loaded.pageCount - 1)) },
                 onScrub = { page ->
                     turnPageFromBar((page - 1).coerceIn(0, (loaded.pageCount - 1).coerceAtLeast(0)))
                 }
@@ -849,12 +892,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     total = textPageCount,
                     onPrev = {
                         askedByReader = true
-                        scope.launch { textPager.animateScrollToPage((at - 1).coerceAtLeast(0)) }
+                        scope.launch {
+                            textPager.animateScrollToPage(stepFrom(at, -1, textPageCount - 1))
+                        }
                     },
                     onNext = {
                         askedByReader = true
                         scope.launch {
-                            textPager.animateScrollToPage((at + 1).coerceAtMost(textPageCount - 1))
+                            textPager.animateScrollToPage(stepFrom(at, 1, textPageCount - 1))
                         }
                     },
                     onScrub = { page ->
@@ -878,8 +923,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     label = "Section ${at + 1} of $blocks",
                     at = at + 1,
                     total = blocks,
-                    onPrev = { put(at - 1) },
-                    onNext = { put(at + 1) },
+                    onPrev = { put(stepFrom(at, -1, blocks - 1)) },
+                    onNext = { put(stepFrom(at, 1, blocks - 1)) },
                     onScrub = { place -> put(place - 1) }
                 )
             } else {
@@ -4548,15 +4593,34 @@ private fun ReaderScrubPill(
     // `onValueChangeFinished`).
     var dragged by remember(scrubber.at) { mutableIntStateOf(scrubber.at) }
     val last = scrubber.total.coerceAtLeast(1)
+    // ── v441 — A PILL, NOT A SHADOW ─────────────────────────────────────────
+    //
+    // The member: *"page slider ui is bad with tha weird shadow"*. It was the
+    // palette's `surface` (F5F0E8) floating over its `paper` (FBF6EC) — two
+    // colours about two per cent apart — so the only part of the capsule the eye
+    // could actually see was its shadow, spread over pale paper on every side: a
+    // floating smudge with a slider in it rather than a pill standing on the
+    // page. Three changes, all in the language the rest of the reader's pills
+    // already speak:
+    //
+    //  · the fill is a real, OPAQUE blend of the surface toward the ink, edged
+    //    with a hairline, so the capsule has a body of its own wherever the
+    //    shadow falls (and, being opaque, the shadow cannot bleed through it —
+    //    see the shadow rules in app/AGENTS.md);
+    //  · the lift is the PINNED PAGE's 8dp, not the largest number in the reader;
+    //  · `animateContentSize` is gone. The pill is full width and its height
+    //    never changes, so it animated nothing — it only asked for a layout pass
+    //    on every frame of every arrival.
+    val body = lerp(palette.surface, palette.ink, 0.06f)
+    val edge = lerp(palette.surface, palette.ink, 0.16f)
     Surface(
         // 28dp, the dock's own radius: it is a capsule at this height and it
         // never arcs a slider thumb out of its track.
         shape = RoundedCornerShape(28.dp),
-        color = palette.surface,
-        shadowElevation = 12.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize()
+        color = body,
+        shadowElevation = 8.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, edge),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
@@ -4582,28 +4646,36 @@ private fun ReaderScrubPill(
                     colors = SliderDefaults.colors(
                         thumbColor = palette.accent,
                         activeTrackColor = palette.accent,
-                        inactiveTrackColor = palette.ink.copy(alpha = 0.15f)
+                        inactiveTrackColor = lerp(body, palette.ink, 0.18f)
                     )
                 )
             } else {
                 Spacer(Modifier.weight(1f))
             }
-            // The count follows the THUMB, not the settled page: a scrubber that
-            // named the old page while the finger was elsewhere would be the one
-            // thing on it that is not the answer to the question asked.
-            Text(
-                "$dragged / $last",
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = palette.ink.copy(alpha = 0.8f),
-                maxLines = 1
-            )
             ReaderHoldButton(
                 glyph = CurioIcons.ChevronRight,
                 label = "The next page",
                 palette = palette,
                 step = scrubber.onNext
+            )
+            // The count follows the THUMB, not the settled page: a scrubber that
+            // named the old page while the finger was elsewhere would be the one
+            // thing on it that is not the answer to the question asked.
+            //
+            // And it is a FIXED slot, right-aligned (v441). It used to be
+            // whatever width its own digits needed, in a row beside a slider that
+            // had the weight — so every time the number gained a digit the track
+            // next to it got narrower, the thumb moved with it, and the page
+            // under the member's own finger changed for no reason they could see.
+            Text(
+                "$dragged / $last",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = palette.ink.copy(alpha = 0.75f),
+                maxLines = 1,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(72.dp)
             )
             Surface(
                 onClick = onDismiss,
@@ -4843,6 +4915,15 @@ private fun ReaderHoldButton(
     // Plain flag (not Compose state): nothing in composition reads it, it only
     // tells the trailing tap whether the hold already did the work.
     val held = remember { booleanArrayOf(false) }
+    // ── v441 — THE ARROW MUST ASK THE PAGE IT IS ON ────────────────────
+    //
+    // The handler is built once (key `Unit`) so a press-and-hold is never
+    // cancelled by a recomposition — which also means the `step` it was built
+    // with is the one it would keep calling forever: a closure that still
+    // believed the reader was on the page the arrow was FIRST built at. The
+    // standard remedy, and one this file already uses elsewhere: read the ask
+    // through state that composition keeps current, not through the closure.
+    val liveStep = rememberUpdatedState(step)
     Surface(
         shape = CircleShape,
         color = Color.Transparent,
@@ -4856,7 +4937,7 @@ private fun ReaderHoldButton(
                             delay(PageTurnHoldDelayMs)
                             held[0] = true
                             while (true) {
-                                step()
+                                liveStep.value()
                                 delay(PageTurnHoldRepeatMs)
                             }
                         }
@@ -4865,7 +4946,7 @@ private fun ReaderHoldButton(
                         tryAwaitRelease()
                         job.cancel()
                     },
-                    onTap = { if (!held[0]) step() }
+                    onTap = { if (!held[0]) liveStep.value() }
                 )
             }
     ) {

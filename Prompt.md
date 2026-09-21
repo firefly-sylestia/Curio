@@ -309,6 +309,41 @@ the drawing. A tap must still turn the page.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§36 — the journal's open animation, and the page slider's arrows + shadow (DONE, v441, pushed as `03bd2e44` and the v441 commit).**
+  1. **"the animation open nimation of journal is clanky and the pass u did for motion i
+     think that also cause this" — the member was right about the second half and right
+     for the wrong reason about the first.** The journal was NOT the cause: every plain
+     forward navigation (the journal editor, a chapter, a book, a profile) falls into the
+     nav host's generic branch, which glided the new page in over `Durations.Deliberate`
+     — **500ms** — with the outgoing page drifting for the same half second. That branch
+     has its own token now (`Durations.Push` 260ms / `.Pop` 220ms), the travel untouched
+     (1/6 in, 1/8 out), and `Deliberate` goes back to what it was written for. The part
+     the member was right about: v439's pill clock was 220/140 where the furniture it
+     replaced was 180/120 — **slower by 40ms** — so it is 190/130 now. One clock, one
+     tempo set, no second clock for the journal.
+  2. **"page slider ui is bad with tha weird shadow — and next and previous button doesnt
+     work on rapid click only goes 1 and stops working" — one root, two symptoms.**
+     (a) **The arrows (`stepFrom`, `stepLedger`):** every arrow and zone computed its
+     target from a place that is only true once the turn has FINISHED
+     (`pagerState.currentPage`, `shownPage`, `listState.firstVisibleItemIndex`,
+     `textPager.currentPage`), so four quick taps all computed the SAME next page and
+     re-asked for the turn already in flight — one page, then dead until it settled.
+     `stepLedger` remembers the hop; a tap steps from the destination while the reader is
+     still on either END of it. **The two-end match is the safety property, not an
+     oversight — a step hop is one page, so no integer lies strictly between its ends,**
+     while a range rule would let a chapter or mark jump that lands inside an old run of
+     taps resume from the run's end. Declared ABOVE `stepPage` (a local function cannot
+     reach a local declared later in its own body — the file says so twice already).
+     (b) **The same defect one layer up:** `ReaderHoldButton` is built once with
+     `pointerInput(Unit)`, so it would have kept calling the closure it was first built
+     with forever; its `step` is read through `rememberUpdatedState` now.
+     (c) **The shadow:** the pill's fill was `surface` F5F0E8 over `paper` FBF6EC — two per
+     cent apart — so the only visible part of the capsule WAS its shadow. Opaque
+     `lerp(surface, ink, 0.06f)` fill + hairline edge + the pinned page's 8dp lift,
+     `animateContentSize` deleted (it animated nothing and cost a layout pass per frame),
+     and the count in a **fixed 72dp right-aligned slot** so the track never resizes under
+     the member's finger while they drag.
+  3. **No SQL change and no migration anywhere in §36** (UI, gesture and motion tokens only).
 - **§35 — the four bugs from the crash report, the journal's page colour, and read-aloud (DONE, pushed as `1fcc1d00`/`621c7207`).**
   1. **THE CRASH, FOUND IN THE CODE (`drawVoicePulse`, `MIN_WAVE_HEIGHT_PX`).** The
      report — *"Cannot coerce value to an empty range: maximum -0.9 is less than minimum

@@ -1,3 +1,7 @@
+FIX:
+- Reading: the page slider's arrows keep up with a fast hand — a tap stepped from the page the last turn had already been sent to instead of the page it had left behind, so four quick taps earned one page and then nothing until the turn settled.
+- Reading: the page slider is a pill, not a shadow — its fill was almost the same colour as the page it floated over, so the only part of it you could see was its shadow; it is a true capsule now, with the count in a fixed slot so the track never changes size under your finger.
+
 ADD:
 - Writing: the marker pens and the bullet styles open INSIDE the dock, like the format, alignment and export tools — one panel at a time, under the row you tapped, instead of a sheet over the page.
 - About Curio: the credit for the member faces, with blobatar's own licence notice.
