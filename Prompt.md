@@ -309,6 +309,37 @@ the drawing. A tap must still turn the page.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§35 — the four bugs from the crash report, the journal's page colour, and read-aloud (DONE, pushed as `1fcc1d00`/`621c7207`).**
+  1. **THE CRASH, FOUND IN THE CODE (`drawVoicePulse`, `MIN_WAVE_HEIGHT_PX`).** The
+     report — *"Cannot coerce value to an empty range: maximum -0.9 is less than minimum
+     0.9"*, thrown during `dispatchDraw` — is the voice note's WAVE: the stroke is floored
+     at 1.8dp so `bandTop` is exactly 0.9, and `bandBottom` is `size.height - halfStroke -
+     depthDrop`, so on a canvas with no height the band CLOSES AND INVERTS and
+     `coerceIn(bandTop, bandBottom)` throws on the empty range. A row that has not been
+     measured yet reports exactly that size for a frame. Two guards now: a canvas under
+     12px is left alone, and the band can never close.
+  2. **THE PDF IS BACK IN COOLER (`renderPdfPage`).** v439 rendered pages into `RGB_565`
+     to save the alpha channel — **`PdfRenderer.Page.render` accepts nothing but
+     ARGB_8888** — so "Cooler" stopped rendering pages at all (member: *"pdf isnt loading
+     now in cooler"*). ARGB_8888 always now; the savings that are real (the 1.5× upscale
+     cap and `beyondViewportPageCount = 0`) stay. Never make that config conditional again.
+  3. **THE JOURNAL OPENS ON THE TAP (`rememberJournalDoor`, `todayEntryId`).** v440's door
+     awaited a database query before navigating (*"journal opening is clanky too"*). The
+     list already holds every journal it draws, so today's page is handed in from memory.
+  4. **THE SHEETS ARE PANELS AGAIN, AND THEIR SCRIM IS DRAWN (`ReaderSheetFrame`).** Every
+     reader sheet keeps 45% of the screen (the ⋯ grid and the dictionary were the two
+     named), and the scrim no longer fades through `graphicsLayer` — a full-screen
+     offscreen layer re-blended every frame of every arrival and departure, which is a
+     real part of "clunky and not smooth". **No motion restriction was added anywhere:**
+     the only animator-scale check in the app is the blob faces obeying the phone's own
+     "remove animations" switch, which cannot touch app motion.
+  5. **THE JOURNAL PAGE TAKES ITS COLOUR AGAIN.** `git revert` of `147a2516` (the v439
+     withdrawal), resolved by hand in `PersonalPage.kt` — the page paints itself as it did
+     at `e869bac5`, and the "Paint the page too" switch is back in the colour sheet.
+  6. **READ-ALOUD, FINISHED (`ReaderSpeaker`, the speak pill, `speakSpeed`/`speakVoice`).**
+     Reads the visible page and follows on (blocks for a reflowed book, page text for a
+     PDF), with a speed slider and a voice picker in reading settings. The engine is
+     prepared on the first tap and released when the reader closes.
 - **§34 — "do the reder, journal additions and also for journal ad time note too its only note date, and in journals view dont update the time if its edited again late, and add search for journals and also sorting by date by tapping the date in journals date" (THE THREE JOURNAL ITEMS ARE DONE; THE "READER, JOURNAL ADDITIONS" GROUPS ARE AWAITING ONE ANSWER).**
   **Built and committed (unpushed, per the member's "dont push anything now") — v440:**
   1. **A row names the moment the page was WRITTEN.** `PersonalNoteEntity.writtenAtMillis()`
